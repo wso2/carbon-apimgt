@@ -18,7 +18,7 @@
  * /
  */
 
-package org.wso2.carbon.apimgt.jms.listener;
+package org.wso2.carbon.apimgt.impl.jms.listener;
 
 /**
  * JMS Listener will start shutting down when this service is called. This service can be used by an external

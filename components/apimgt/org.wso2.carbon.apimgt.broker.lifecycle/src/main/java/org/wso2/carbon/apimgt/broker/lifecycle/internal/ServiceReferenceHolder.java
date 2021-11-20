@@ -22,7 +22,10 @@ package org.wso2.carbon.apimgt.broker.lifecycle.internal;
 
 
 import org.wso2.carbon.andes.service.QpidService;
-import org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class ServiceReferenceHolder {
 
@@ -30,7 +33,7 @@ public class ServiceReferenceHolder {
     private boolean shutDownStatus = false;
 
     private QpidService qpidService;
-    private JMSListenerShutDownService listenerShutdownService;
+    private Set<JMSListenerShutDownService> listenerShutdownServiceSet = new HashSet<>();
 
     private ServiceReferenceHolder(){
 
@@ -56,11 +59,15 @@ public class ServiceReferenceHolder {
         this.qpidService = qpidService;
     }
 
-    public JMSListenerShutDownService getListenerShutdownService() {
-        return listenerShutdownService;
+    public void addListenerShutdownService(JMSListenerShutDownService shutDownService) {
+        this.listenerShutdownServiceSet.add(shutDownService);
     }
 
-    public void setListenerShutdownService(JMSListenerShutDownService listenerShutdownService) {
-        this.listenerShutdownService = listenerShutdownService;
+    public void removeListenerShutdownService(JMSListenerShutDownService shutDownService) {
+        this.listenerShutdownServiceSet.remove(shutDownService);
+    }
+
+    public Set<JMSListenerShutDownService> getListenerShutdownServices() {
+        return  this.listenerShutdownServiceSet;
     }
 }

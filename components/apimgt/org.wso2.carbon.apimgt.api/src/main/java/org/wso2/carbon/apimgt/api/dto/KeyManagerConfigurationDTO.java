@@ -36,6 +36,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String description;
     private String organization;
     private Map<String,Object> additionalProperties = new HashMap();
+    private Map<String,String> endpoints = new HashMap<>();
     private String type;
     private boolean enabled;
     private String tokenType;
@@ -58,6 +59,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.enabled = keyManagerConfigurationDTO.isEnabled();
         this.tokenType = keyManagerConfigurationDTO.getTokenType();
         this.externalReferenceId = keyManagerConfigurationDTO.getExternalReferenceId();
+        this.endpoints = keyManagerConfigurationDTO.getEndpoints();
     }
     public String getName() {
 
@@ -171,5 +173,15 @@ public class KeyManagerConfigurationDTO implements Serializable {
     }
     public void removeProperty(String key){
         additionalProperties.remove(key);
+    }
+
+    public Map<String, String> getEndpoints() {
+
+        return endpoints;
+    }
+
+    public void setEndpoints(Map<String, String> endpoints) {
+
+        this.endpoints = endpoints;
     }
 }

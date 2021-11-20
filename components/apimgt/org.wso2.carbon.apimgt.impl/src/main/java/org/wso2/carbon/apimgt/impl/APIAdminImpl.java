@@ -17,21 +17,17 @@
  */
 package org.wso2.carbon.apimgt.impl;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -376,7 +372,9 @@ public class APIAdminImpl implements APIAdmin {
 
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
+            getKeyManagerEndpoints(keyManagerConfigurationDTO);
         }
+
         setIdentityProviderRelatedInformation(keyManagerConfigurationsByTenant, organization);
         return keyManagerConfigurationsByTenant;
     }
@@ -386,6 +384,8 @@ public class APIAdminImpl implements APIAdmin {
 
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByOrganization) {
             if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfigurationDTO.getTokenType()) ||
+                    StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
                     keyManagerConfigurationDTO.getTokenType())) {
                 try {
                     if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
@@ -409,6 +409,8 @@ public class APIAdminImpl implements APIAdmin {
                                                      String tenantDomain) throws APIManagementException {
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfigurationDTO.getTokenType()) ||
+                    StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
                     keyManagerConfigurationDTO.getTokenType())) {
                 if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
                     IdentityProvider identityProvider;
@@ -468,6 +470,8 @@ public class APIAdminImpl implements APIAdmin {
             maskValues(keyManagerConfigurationDTO);
         }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                keyManagerConfigurationDTO.getTokenType()) ||
+                StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
                 keyManagerConfigurationDTO.getTokenType())) {
             try {
                 if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
@@ -481,7 +485,7 @@ public class APIAdminImpl implements APIAdmin {
                         ExceptionCodes.IDP_RETRIEVAL_FAILED);
             }
         }
-
+        getKeyManagerEndpoints(keyManagerConfigurationDTO);
         return keyManagerConfigurationDTO;
     }
 
@@ -514,8 +518,11 @@ public class APIAdminImpl implements APIAdmin {
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+            validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
         }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                keyManagerConfigurationDTO.getTokenType()) ||
+                StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
                 keyManagerConfigurationDTO.getTokenType())) {
             keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
             try {
@@ -539,6 +546,34 @@ public class APIAdminImpl implements APIAdmin {
         new KeyMgtNotificationSender()
                 .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
         return keyManagerConfigurationDTO;
+    }
+
+    private void validateKeyManagerEndpointConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                    .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
+            if (keyManagerConnectorConfiguration != null) {
+                List<String> missingRequiredConfigurations = new ArrayList<>();
+                for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
+                        .getEndpointConfigurations()) {
+                    if (configurationDto.isRequired()) {
+                        if (!keyManagerConfigurationDTO.getEndpoints().containsKey(configurationDto.getName())) {
+                            if (StringUtils.isNotEmpty(configurationDto.getDefaultValue())) {
+                                keyManagerConfigurationDTO.getEndpoints().put(configurationDto.getName(),
+                                        configurationDto.getDefaultValue());
+                            }
+                            missingRequiredConfigurations.add(configurationDto.getName());
+                        }
+                    }
+                }
+                if (!missingRequiredConfigurations.isEmpty()) {
+                    throw new APIManagementException("Key Manager Endpoint Configuration value for " + String.join(",",
+                            missingRequiredConfigurations) + " is/are required",
+                            ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
+                }
+            }
+        }
     }
 
     private void encryptKeyManagerConfigurationValues(KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO,
@@ -638,12 +673,15 @@ public class APIAdminImpl implements APIAdmin {
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+            validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
         }
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getOrganization(),
                         keyManagerConfigurationDTO.getUuid());
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                keyManagerConfigurationDTO.getTokenType())) {
+                keyManagerConfigurationDTO.getTokenType()) ||
+                StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
+                        keyManagerConfigurationDTO.getTokenType())) {
             IdentityProvider identityProvider = null;
             try {
                 identityProvider = IdentityProviderManager.getInstance()
@@ -671,7 +709,9 @@ public class APIAdminImpl implements APIAdmin {
             throws APIManagementException {
         if (kmConfig != null) {
             if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                    kmConfig.getTokenType())) {
+                    kmConfig.getTokenType()) ||
+                    StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
+                            kmConfig.getTokenType())) {
                 try {
                     if (kmConfig.getExternalReferenceId() != null) {
                         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -717,6 +757,7 @@ public class APIAdminImpl implements APIAdmin {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
         }
         maskValues(keyManagerConfiguration);
+        getKeyManagerEndpoints(keyManagerConfiguration);
         return keyManagerConfiguration;
     }
 
@@ -1133,12 +1174,19 @@ public class APIAdminImpl implements APIAdmin {
                 APIUtil.validateRestAPIScopes(config);
                 ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(organization, config);
             } catch (ValidationException | JSONException e) {
-                throw new APIManagementException("tenant-config validation failure", e, ExceptionCodes.INVALID_TENANT_CONFIG);
+                throw new APIManagementException("tenant-config validation failure",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_TENANT_CONFIG, e.getMessage()));
             }
         } else {
             throw new APIManagementException("tenant-config validation failure", ExceptionCodes.INTERNAL_ERROR);
         }
     }
+
+    @Override
+    public String getTenantConfigSchema(String organization) throws APIManagementException {
+        return APIUtil.retrieveTenantConfigJsonSchema().toString();
+    }
+
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         IdentityProvider identityProvider = new IdentityProvider();
@@ -1269,5 +1317,24 @@ public class APIAdminImpl implements APIAdmin {
             claimArray.add(claimMappingEntryDTO);
         }
         keyManagerDTO.addProperty(APIConstants.KeyManager.CLAIM_MAPPING, claimArray);
+    }
+    private void getKeyManagerEndpoints(KeyManagerConfigurationDTO keyManagerConfigurationDTO){
+
+        Map<String, String> endpointConfigurationsMap = new HashMap<>();
+        keyManagerConfigurationDTO.setEndpoints(endpointConfigurationsMap);
+        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                    .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
+            List<ConfigurationDto> endpointConfigurations =
+                    keyManagerConnectorConfiguration.getEndpointConfigurations();
+            if (endpointConfigurations != null) {
+                for (ConfigurationDto endpointConfiguration : endpointConfigurations) {
+                    Object endpointValue = keyManagerConfigurationDTO.getProperty(endpointConfiguration.getName());
+                    if (endpointValue instanceof String && StringUtils.isNotEmpty((String) endpointValue)) {
+                        endpointConfigurationsMap.put(endpointConfiguration.getName(), (String) endpointValue);
+                    }
+                }
+            }
+        }
     }
 }
