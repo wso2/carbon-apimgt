@@ -9900,7 +9900,6 @@ components:
     Environment:
       title: Environment
       required:
-        - endpoints
         - id
         - name
         - serverUrl
