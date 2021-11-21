@@ -9714,7 +9714,7 @@ components:
           type: object
           properties:
             policyId:
-              type: int
+              type: integer
               description: Id of policy
               example: 1
             uuid:
@@ -9742,7 +9742,7 @@ components:
               description: Indicates whether the policy is deployed successfully or not.
               default: false
             tenantId:
-              type: int
+              type: integer
               description: Throttling policy tenant domain id
               example: -1234
             tenantDomain:
