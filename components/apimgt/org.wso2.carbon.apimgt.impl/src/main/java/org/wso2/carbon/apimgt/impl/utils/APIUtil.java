@@ -158,6 +158,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIType;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -11349,5 +11350,23 @@ public final class APIUtil {
     public static Map<String, Environment> getReadOnlyGatewayEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiGatewayEnvironments();
+    }
+
+    /**
+     * Get external environments registered with the given name
+     *
+     * @return the external environments
+     */
+    public static ExternalEnvironment getExternalEnvironment(String providerName) {
+        return ServiceReferenceHolder.getInstance().getExternalEnvironment(providerName);
+    }
+
+    /**
+     * Get registered API Definition Parsers as a Map
+     *
+     * @return Map of Registered API Definition Parsers
+     */
+    public static Map<String, org.wso2.carbon.apimgt.api.APIDefinition> getApiDefinitionParsersMap() {
+        return ServiceReferenceHolder.getInstance().getApiDefinitionMap();
     }
 }

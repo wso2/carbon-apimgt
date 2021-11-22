@@ -1900,8 +1900,7 @@ public class APIMappingUtil {
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 infoDTO.setProtocol(model.getProtocol());
 
-                Map<String, APIDefinition> apiDefinitionMap = ServiceReferenceHolder.getInstance().
-                        getApiDefinitionMap();
+                Map<String, APIDefinition> apiDefinitionMap = APIUtil.getApiDefinitionParsersMap();
                 apiDefinitionMap.remove(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
                 if (!apiDefinitionMap.isEmpty()) {
                     for (Map.Entry<String, APIDefinition> apiDefinitionEntry : apiDefinitionMap.entrySet()) {

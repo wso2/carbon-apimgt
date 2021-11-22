@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.model.AsyncProtocolEndpoint;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
@@ -63,8 +63,7 @@ public class EnvironmentMappingUtil {
         environmentDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (environment.getAdditionalProperties()));
 
-        ExternalEnvironment parser = ServiceReferenceHolder.getInstance().getExternalEnvironment(environment.
-                getProvider());
+        ExternalEnvironment parser = APIUtil.getExternalEnvironment(environment.getProvider());
         if (parser != null) {
             List<GatewayEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
             List<AsyncProtocolEndpoint> endpointUrlsList = parser.getExternalEndpointURLs(environment);
