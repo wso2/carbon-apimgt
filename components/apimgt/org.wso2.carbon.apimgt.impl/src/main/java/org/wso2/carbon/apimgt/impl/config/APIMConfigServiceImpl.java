@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.SystemConfigurationsDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -33,7 +33,6 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -48,10 +47,10 @@ import java.nio.charset.Charset;
 public class APIMConfigServiceImpl implements APIMConfigService {
 
     private static final Log log = LogFactory.getLog(APIMConfigServiceImpl.class);
-    protected ApiMgtDAO apiMgtDAO;
+    protected SystemConfigurationsDAO systemConfigurationsDAO;
 
     public APIMConfigServiceImpl() {
-        apiMgtDAO = ApiMgtDAO.getInstance();
+        systemConfigurationsDAO = SystemConfigurationsDAO.getInstance();
     }
 
     @Override
@@ -161,7 +160,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        apiMgtDAO.addSystemConfig(organization, ConfigType.TENANT.toString(), tenantConfig);
+        systemConfigurationsDAO.addSystemConfig(organization, ConfigType.TENANT.toString(), tenantConfig);
     }
 
     @Override
@@ -170,7 +169,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        return apiMgtDAO.getSystemConfig(organization, ConfigType.TENANT.toString());
+        return systemConfigurationsDAO.getSystemConfig(organization, ConfigType.TENANT.toString());
     }
 
     @Override
@@ -179,7 +178,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        apiMgtDAO.updateSystemConfig(organization, ConfigType.TENANT.toString(), tenantConfig);
+        systemConfigurationsDAO.updateSystemConfig(organization, ConfigType.TENANT.toString(), tenantConfig);
     }
 
     @Override
