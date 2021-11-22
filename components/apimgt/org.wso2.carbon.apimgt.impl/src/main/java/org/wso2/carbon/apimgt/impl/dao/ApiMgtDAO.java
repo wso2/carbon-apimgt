@@ -14147,6 +14147,11 @@ public class ApiMgtDAO {
             }
 
             addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
+            String tenantUserName = MultitenantUtils
+                    .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            recordAPILifeCycleEvent(productId, null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
+                    connection);
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding API product " + identifier.getName() + " of provider "
