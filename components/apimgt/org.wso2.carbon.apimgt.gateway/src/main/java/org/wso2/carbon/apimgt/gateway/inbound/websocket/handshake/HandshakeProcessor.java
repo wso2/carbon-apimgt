@@ -49,7 +49,7 @@ public class HandshakeProcessor {
      */
     public InboundProcessorResponseDTO processHandshake(InboundMessageContext inboundMessageContext) {
 
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Processing handshake message for inbound websocket context: "
                     + inboundMessageContext.getApiContext());
         }
@@ -69,7 +69,7 @@ public class HandshakeProcessor {
                     e.getMessage());
         }
         if (isOAuthHeaderValid) {
-            if(log.isDebugEnabled()) {
+            if (log.isDebugEnabled()) {
                 log.debug("Handshake authentication success for inbound websocket context: "
                         + inboundMessageContext.getApiContext() + " Setting ResourceInfoDTOs of elected API "
                         + "to inbound message context");
