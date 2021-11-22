@@ -43,7 +43,7 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("id")
   @NotNull
@@ -229,6 +229,7 @@ public class EnvironmentDTO   {
         Objects.equals(displayName, environment.displayName) &&
         Objects.equals(type, environment.type) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
+        Objects.equals(provider, environment.provider) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
         Objects.equals(vhosts, environment.vhosts) &&
         Objects.equals(endpointURIs, environment.endpointURIs) &&
