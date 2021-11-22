@@ -2,10 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -27,11 +23,13 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SolaceTopicsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.solace.dtos.SolaceDeployedEnvironmentDTO;
+import org.wso2.carbon.apimgt.solace.dtos.SolaceTopicsObjectDTO;
+import org.wso2.carbon.apimgt.solace.dtos.SolaceURLsDTO;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
+import org.wso2.carbon.apimgt.solace.utils.SolaceStoreUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -122,111 +120,81 @@ public class AdditionalSubscriptionInfoMappingUtil {
 
             Map<String, Environment> gatewayEnvironmentMap = APIUtil.getReadOnlyGatewayEnvironments();
             Environment solaceEnvironment = null;
-            for (Map.Entry<String,Environment> entry: gatewayEnvironmentMap.entrySet()) {
+            for (Map.Entry<String, Environment> entry : gatewayEnvironmentMap.entrySet()) {
                 if (SolaceConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                     solaceEnvironment = entry.getValue();
                 }
             }
 
             if (solaceEnvironment != null) {
-                // Create solace admin APIs instance
-                SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(),
-                        solaceEnvironment.getUserName(), solaceEnvironment.getPassword(),
-                        solaceEnvironment.getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
-                HttpResponse response = solaceAdminApis.applicationGet(additionalSubscriptionInfoDTO.
-                        getSolaceOrganization(), application.getUUID(), "default");
+                List<SolaceDeployedEnvironmentDTO> solaceDeployedEnvironmentsDTOS = SolaceStoreUtils.
+                        getSolaceDeployedEnvsInfo(solaceEnvironment, additionalSubscriptionInfoDTO.
+                                getSolaceOrganization(), application.getUUID());
                 List<AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO> solaceEnvironments = new ArrayList<>();
-                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    try {
-                        String responseString = EntityUtils.toString(response.getEntity());
-                        org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
-                        // Get solace environments attached with the Solace application
-                        if (jsonObject.getJSONArray("environments") != null) {
-                            JSONArray environmentsArray = jsonObject.getJSONArray("environments");
-                            for (int i = 0; i < environmentsArray.length(); i++) {
-                                AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO solaceDeployedEnvironmentsDTO =
-                                        new AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO();
-                                org.json.JSONObject environmentObject = environmentsArray.getJSONObject(i);
-                                // Get details of Solace environment attached to the solace application
-                                if (environmentObject.getString("name") != null) {
-                                    String environmentName = environmentObject.getString("name");
-                                    Environment gatewayEnvironment = gatewayEnvironmentMap.get(environmentName);
-                                    if (gatewayEnvironment != null) {
-                                        // Set Solace environment details
-                                        solaceDeployedEnvironmentsDTO.setEnvironmentName(gatewayEnvironment.getName());
-                                        solaceDeployedEnvironmentsDTO.setEnvironmentDisplayName(gatewayEnvironment.
-                                                getDisplayName());
-                                        solaceDeployedEnvironmentsDTO.setOrganizationName(gatewayEnvironment.
-                                                getAdditionalProperties().get(SolaceConstants.
-                                                        SOLACE_ENVIRONMENT_ORGANIZATION));
 
-                                        boolean containsMQTTProtocol = false;
-                                        // Get messaging protocols from the response body
-                                        if (environmentObject.getJSONArray("messagingProtocols") != null) {
-                                            List<AdditionalSubscriptionInfoSolaceURLsDTO> endpointUrls = new
-                                                    ArrayList<>();
-                                            JSONArray protocolsArray = environmentObject.
-                                                    getJSONArray("messagingProtocols");
-                                            for (int j = 0; j < protocolsArray.length(); j++) {
-                                                AdditionalSubscriptionInfoSolaceURLsDTO solaceURLsDTO = new
-                                                        AdditionalSubscriptionInfoSolaceURLsDTO();
-                                                String protocol = protocolsArray.getJSONObject(j).getJSONObject
-                                                        ("protocol").getString("name");
-                                                if (SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME.
-                                                        equalsIgnoreCase(protocol)) {
-                                                    containsMQTTProtocol = true;
-                                                }
-                                                String uri = protocolsArray.getJSONObject(j).getString("uri");
-                                                solaceURLsDTO.setProtocol(protocol);
-                                                solaceURLsDTO.setEndpointURL(uri);
-                                                endpointUrls.add(solaceURLsDTO);
-                                            }
-                                            solaceDeployedEnvironmentsDTO.setSolaceURLs(endpointUrls);
-                                        }
-                                        // Get topic permissions from the solace application response body
-                                        if (environmentObject.getJSONObject("permissions") != null) {
-                                            org.json.JSONObject permissionsObject = environmentObject.getJSONObject
-                                                    ("permissions");
-                                            AdditionalSubscriptionInfoSolaceTopicsObjectDTO solaceTopicsObjectDTO =
-                                                    new AdditionalSubscriptionInfoSolaceTopicsObjectDTO();
-                                            populateSolaceTopics(solaceTopicsObjectDTO, permissionsObject,
-                                                    "default");
-                                            // Handle the special case of MQTT protocol
-                                            if (containsMQTTProtocol) {
-                                                HttpResponse responseForMqtt = solaceAdminApis.applicationGet
-                                                        (additionalSubscriptionInfoDTO.getSolaceOrganization(),
-                                                                application.getUUID(), SolaceConstants.
-                                                                        MQTT_TRANSPORT_PROTOCOL_NAME.toUpperCase());
+                for (SolaceDeployedEnvironmentDTO solaceDeployedEnvironmentEntry : solaceDeployedEnvironmentsDTOS) {
+                    // Set Solace environment details
+                    AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO solaceDeployedEnvironmentsDTO =
+                            new AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO();
+                    solaceDeployedEnvironmentsDTO.setEnvironmentName(solaceDeployedEnvironmentEntry.
+                            getEnvironmentName());
+                    solaceDeployedEnvironmentsDTO.setEnvironmentDisplayName(solaceDeployedEnvironmentEntry.
+                            getEnvironmentDisplayName());
+                    solaceDeployedEnvironmentsDTO.setOrganizationName(solaceDeployedEnvironmentEntry.
+                            getOrganizationName());
 
-                                                org.json.JSONObject permissionsObjectForMqtt =
-                                                        extractPermissionsFromSolaceApplicationGetResponse(
-                                                        responseForMqtt, i, gatewayEnvironmentMap);
-
-                                                if (permissionsObjectForMqtt != null) {
-                                                    populateSolaceTopics(solaceTopicsObjectDTO,
-                                                            permissionsObjectForMqtt,
-                                                            SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME.toUpperCase());
-                                                }
-                                            }
-                                            solaceDeployedEnvironmentsDTO.setSolaceTopicsObject(solaceTopicsObjectDTO);
-                                        }
-                                    }
-                                }
-                                solaceEnvironments.add(solaceDeployedEnvironmentsDTO);
-                            }
-                        }
-                    } catch (IOException e) {
-                        log.error(e.getMessage());
+                    //Set Solace URLs
+                    List<AdditionalSubscriptionInfoSolaceURLsDTO> endpointUrls = new
+                            ArrayList<>();
+                    List<SolaceURLsDTO> solaceURLsDTOS = solaceDeployedEnvironmentEntry.getSolaceURLs();
+                    for (SolaceURLsDTO entry : solaceURLsDTOS) {
+                        AdditionalSubscriptionInfoSolaceURLsDTO solaceURLsDTO = new
+                                AdditionalSubscriptionInfoSolaceURLsDTO();
+                        solaceURLsDTO.setProtocol(entry.getProtocol());
+                        solaceURLsDTO.setEndpointURL(entry.getEndpointURL());
+                        endpointUrls.add(solaceURLsDTO);
                     }
-                    additionalSubscriptionInfoDTO.setSolaceDeployedEnvironments(solaceEnvironments);
-                } else {
-                    throw new APIManagementException("Solace Environment configurations are not provided properly");
+                    solaceDeployedEnvironmentsDTO.setSolaceURLs(endpointUrls);
+
+                    // Set Solace Topic Objects
+                    solaceDeployedEnvironmentsDTO.setSolaceTopicsObject(mapSolaceTopicObjects(solaceDeployedEnvironmentEntry.
+                            getSolaceTopicsObject()));
+
+                    solaceEnvironments.add(solaceDeployedEnvironmentsDTO);
                 }
-            } else {
-                throw new APIManagementException("Solace broker Environment is not provided");
+                additionalSubscriptionInfoDTO.setSolaceDeployedEnvironments(solaceEnvironments);
+
+
             }
         }
         return additionalSubscriptionInfoDTO;
+    }
+
+    /**
+     * Map SolaceTopicsObjectDTO details from Solace package to DevPortal DTOs
+     *
+     * @param solaceTopicsObject SolaceTopicsObjectDTO object from Solace package
+     * @return AdditionalSubscriptionInfoSolaceTopicsObjectDTO object
+     */
+    private static AdditionalSubscriptionInfoSolaceTopicsObjectDTO mapSolaceTopicObjects(SolaceTopicsObjectDTO
+                                                                                                 solaceTopicsObject) {
+        AdditionalSubscriptionInfoSolaceTopicsObjectDTO solaceTopicsObjectDTO =
+                new AdditionalSubscriptionInfoSolaceTopicsObjectDTO();
+        // Set default syntax object
+        org.wso2.carbon.apimgt.solace.dtos.SolaceTopicsDTO defaultSyntaxObject = solaceTopicsObject.getDefaultSyntax();
+        SolaceTopicsDTO storeDefaultSolaceTopicObject = new SolaceTopicsDTO();
+        storeDefaultSolaceTopicObject.setPublishTopics(defaultSyntaxObject.getPublishTopics());
+        storeDefaultSolaceTopicObject.setSubscribeTopics(defaultSyntaxObject.getSubscribeTopics());
+        solaceTopicsObjectDTO.setDefaultSyntax(storeDefaultSolaceTopicObject);
+
+        // Set mqtt syntax object
+        org.wso2.carbon.apimgt.solace.dtos.SolaceTopicsDTO mqttSyntaxObject = solaceTopicsObject.getMqttSyntax();
+        SolaceTopicsDTO storeMQTTSolaceTopicObject = new SolaceTopicsDTO();
+        storeMQTTSolaceTopicObject.setPublishTopics(mqttSyntaxObject.getPublishTopics());
+        storeMQTTSolaceTopicObject.setSubscribeTopics(mqttSyntaxObject.getSubscribeTopics());
+        solaceTopicsObjectDTO.setMqttSyntax(storeMQTTSolaceTopicObject);
+
+        return solaceTopicsObjectDTO;
     }
 
     /**
@@ -263,7 +231,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
                                     get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION));
 
                             // Get Solace endpoint URLs for provided protocols
-                            solaceEnvironmentDTO.setSolaceURLs(getSolaceURLs(environment.
+                            solaceEnvironmentDTO.setSolaceURLs(mapSolaceURLsToStoreDTO(environment.
                                     getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION),
                                     environment.getName(), apidto.getAsyncTransportProtocols()));
                             solaceEndpointURLsList.add(solaceEnvironmentDTO);
@@ -302,6 +270,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
         }
         return urlsStringList;
     }
+
     /**
      * Sets the Endpoint URLs For Solace API according to the protocols
      *
@@ -311,116 +280,33 @@ public class AdditionalSubscriptionInfoMappingUtil {
      * @return List containing AdditionalSubscriptionInfoSolaceURLsDTO
      * @throws APIManagementException if error occurred when retrieving protocols URLs from Solace broker
      */
-    private static List<AdditionalSubscriptionInfoSolaceURLsDTO> getSolaceURLs(String organizationName,
-                   String environmentName, List<String> availableProtocols) throws APIManagementException {
+    private static List<AdditionalSubscriptionInfoSolaceURLsDTO> mapSolaceURLsToStoreDTO(String organizationName,
+               String environmentName, List<String> availableProtocols) throws APIManagementException {
 
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         Environment solaceEnvironment = null;
         // Get Solace broker environment details
-        for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
+        for (Map.Entry<String, Environment> entry : gatewayEnvironments.entrySet()) {
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                 solaceEnvironment = entry.getValue();
             }
         }
 
         if (solaceEnvironment != null) {
-            // Create solace admin APIs instance
-            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
-                    getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
-                    get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
+            List<SolaceURLsDTO> solaceURLsDTOEntries = SolaceStoreUtils.getSolaceURLsInfo(solaceEnvironment, organizationName,
+                    environmentName, availableProtocols);
             List<AdditionalSubscriptionInfoSolaceURLsDTO> solaceURLsDTOs = new ArrayList<>();
-            HttpResponse response = solaceAdminApis.environmentGET(organizationName, environmentName);
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                String responseString = null;
-                try {
-                    responseString = EntityUtils.toString(response.getEntity());
-                    org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
-                    JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
-                    for (int i = 0; i < protocols.length(); i++) {
-                        org.json.JSONObject protocolDetails = protocols.getJSONObject(i);
-                        String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
-                        // Get solace protocol URLs for available protocols
-                        if (availableProtocols.contains(protocolName)) {
-                            String endpointURI = protocolDetails.getString("uri");
-                            AdditionalSubscriptionInfoSolaceURLsDTO subscriptionInfoSolaceProtocolURLsDTO =
-                                    new AdditionalSubscriptionInfoSolaceURLsDTO();
-                            subscriptionInfoSolaceProtocolURLsDTO.setProtocol(protocolName);
-                            subscriptionInfoSolaceProtocolURLsDTO.setEndpointURL(endpointURI);
-                            solaceURLsDTOs.add(subscriptionInfoSolaceProtocolURLsDTO);
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new APIManagementException("Error occurred when retrieving protocols URLs from Solace " +
-                            "admin apis");
-                }
+
+            for (SolaceURLsDTO entry : solaceURLsDTOEntries) {
+                AdditionalSubscriptionInfoSolaceURLsDTO subscriptionInfoSolaceProtocolURLsDTO =
+                        new AdditionalSubscriptionInfoSolaceURLsDTO();
+                subscriptionInfoSolaceProtocolURLsDTO.setProtocol(entry.getProtocol());
+                subscriptionInfoSolaceProtocolURLsDTO.setEndpointURL(entry.getEndpointURL());
+                solaceURLsDTOs.add(subscriptionInfoSolaceProtocolURLsDTO);
             }
             return solaceURLsDTOs;
         } else {
             throw new APIManagementException("Solace Environment configurations are not provided properly");
-        }
-    }
-
-    private static org.json.JSONObject extractPermissionsFromSolaceApplicationGetResponse
-            (HttpResponse response, int environmentIndex, Map<String, Environment> gatewayEnvironmentMap)
-            throws IOException {
-
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            String responseString = EntityUtils.toString(response.getEntity());
-            org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
-            if (jsonObject.getJSONArray("environments") != null) {
-                JSONArray environmentsArray = jsonObject.getJSONArray("environments");
-                org.json.JSONObject environmentObject = environmentsArray.getJSONObject(environmentIndex);
-                if (environmentObject.getString("name") != null) {
-                    String environmentName = environmentObject.getString("name");
-                    Environment gatewayEnvironment = gatewayEnvironmentMap.get(environmentName);
-                    if (gatewayEnvironment != null) {
-                        if (environmentObject.getJSONObject("permissions") != null) {
-                            return environmentObject.getJSONObject("permissions");
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private static void populateSolaceTopics
-            (AdditionalSubscriptionInfoSolaceTopicsObjectDTO subscriptionInfoSolaceTopicsObjectDTO,
-             org.json.JSONObject permissionsObject, String syntax) {
-
-        SolaceTopicsDTO topicsDTO = new SolaceTopicsDTO();
-        if (permissionsObject.getJSONArray("publish") != null) {
-            List<String> publishTopics = new ArrayList<>();
-            for (int j = 0; j < permissionsObject.getJSONArray("publish").length(); j++) {
-                org.json.JSONObject channelObject = permissionsObject.getJSONArray("publish").getJSONObject(j);
-                for (Object x : channelObject.keySet()) {
-                    org.json.JSONObject channel = channelObject.getJSONObject(x.toString());
-                    JSONArray channelPermissions = channel.getJSONArray("permissions");
-                    for (int k = 0; k < channelPermissions.length(); k++) {
-                        publishTopics.add(channelPermissions.getString(k));
-                    }
-                }
-            }
-            topicsDTO.setPublishTopics(publishTopics);
-        }
-        if (permissionsObject.getJSONArray("subscribe") != null) {
-            List<String> subscribeTopics = new ArrayList<>();
-            for (int j = 0; j < permissionsObject.getJSONArray("subscribe").length(); j++) {
-                org.json.JSONObject channelObject = permissionsObject.getJSONArray("subscribe").getJSONObject(j);
-                for (Object x : channelObject.keySet()) {
-                    org.json.JSONObject channel = channelObject.getJSONObject(x.toString());
-                    JSONArray channelPermissions = channel.getJSONArray("permissions");
-                    for (int k = 0; k < channelPermissions.length(); k++) {
-                        subscribeTopics.add(channelPermissions.getString(k));
-                    }
-                }
-            }
-            topicsDTO.setSubscribeTopics(subscribeTopics);
-        }
-        if (SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME.equalsIgnoreCase(syntax)) {
-            subscriptionInfoSolaceTopicsObjectDTO.setMqttSyntax(topicsDTO);
-        } else {
-            subscriptionInfoSolaceTopicsObjectDTO.setDefaultSyntax(topicsDTO);
         }
     }
 
