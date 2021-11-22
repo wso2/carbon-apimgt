@@ -30,6 +30,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
@@ -49,6 +50,7 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -784,7 +786,37 @@ public class APIManagerComponent {
 
     protected void removeExternalGatewayDeployers(ExternalGatewayDeployer deployer) {
 
-        ServiceReferenceHolder.getInstance().getNotifiersMap().remove(deployer.getType());
+        ServiceReferenceHolder.getInstance().removeExternalGatewayDeployer(deployer.getType());
+    }
+
+    @Reference(
+            name = "externalEnvironment.component",
+            service = ExternalEnvironment.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeExternalEnvironments")
+    protected void addExternalEnvironmentParser(ExternalEnvironment externalEnvironment) {
+        ServiceReferenceHolder.getInstance().addExternalEnvironment(externalEnvironment.getType(),
+                externalEnvironment);
+    }
+
+    protected void removeExternalEnvironments(ExternalEnvironment externalEnvironment) {
+
+        ServiceReferenceHolder.getInstance().removeExternalEnvironments(externalEnvironment.getType());
+    }
+
+    @Reference(
+            name = "apiDefinitionParser.component",
+            service = APIDefinition.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeAPIDefinitionParsers")
+    protected void addAPIDefinitionParser(APIDefinition apiDefinitionParser) {
+        ServiceReferenceHolder.getInstance().addAPIDefinitionParser(apiDefinitionParser.getType(), apiDefinitionParser);
+    }
+
+    protected void removeAPIDefinitionParsers(APIDefinition apiDefinitionParser) {
+        ServiceReferenceHolder.getInstance().removeAPIDefinitionParser(apiDefinitionParser.getType());
     }
 
     @Reference(

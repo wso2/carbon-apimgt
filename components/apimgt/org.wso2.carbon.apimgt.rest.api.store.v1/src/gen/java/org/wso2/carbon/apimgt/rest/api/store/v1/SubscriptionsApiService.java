@@ -10,6 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SubscriptionsApiService {
+      public Response getAdditionalInfoOfAPISubscriptions(String apiId, String groupId, String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsGet(String apiId, String applicationId, String groupId, String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsMultiplePost(List<SubscriptionDTO> subscriptionDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsPost(SubscriptionDTO subscriptionDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
