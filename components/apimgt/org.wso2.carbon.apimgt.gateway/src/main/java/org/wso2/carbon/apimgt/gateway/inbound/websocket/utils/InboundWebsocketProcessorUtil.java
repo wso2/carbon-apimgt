@@ -251,7 +251,8 @@ public class InboundWebsocketProcessorUtil {
 
         APIKeyValidationInfoDTO infoDTO = inboundMessageContext.getInfoDTO();
         String applicationLevelTier = infoDTO.getApplicationTier();
-        String apiLevelTier = infoDTO.getApiTier();
+        String apiLevelTier = infoDTO.getApiTier() == null && verbInfoDTO == null ? APIConstants.UNLIMITED_TIER
+                : infoDTO.getApiTier();
         String subscriptionLevelTier = infoDTO.getTier();
         String resourceLevelTier;
         String authorizedUser;
