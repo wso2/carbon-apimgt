@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -394,15 +393,14 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
         // Advanced Level Throttling Related Properties
         String apiTier = api.getApiTier();
-        String subscriberUserId = sub.getSubscriptionId();
         String subscriberTenant = MultitenantUtils.getTenantDomain(app.getSubName());
 
         ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
-                tenantId);
+                APIUtil.getTenantIdFromTenantDomain(app.getOrganization()));
         if (appPolicy == null) {
             try {
                 appPolicy = new SubscriptionDataLoaderImpl()
-                        .getApplicationPolicy(app.getPolicy(), apiTenantDomain);
+                        .getApplicationPolicy(app.getPolicy(), app.getOrganization());
                 datastore.addOrUpdateApplicationPolicy(appPolicy);
             } catch (DataLoadingException e) {
                 log.error("Error while loading ApplicationPolicy");

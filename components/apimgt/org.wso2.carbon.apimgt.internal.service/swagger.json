@@ -1201,6 +1201,10 @@
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "organization" : {
+          "type" : "string",
+          "description" : "organization of application."
         }
       }
     },

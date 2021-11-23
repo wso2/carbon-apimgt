@@ -128,6 +128,7 @@ public class SubscriptionValidationDAO {
                     application.setSubName(resultSet.getString("SUB_NAME"));
                     application.setName(resultSet.getString("APS_NAME"));
                     application.setTokenType(resultSet.getString("TOKEN_TYPE"));
+                    application.setOrganization(resultSet.getString("ORGANIZATION"));
                     temp.put(appId, application);
                 }
                 String attributeName = resultSet.getString("ATTRIBUTE_NAME");

@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
@@ -231,35 +232,6 @@ public interface APIConsumer extends APIManager {
     void cleanUpApplicationRegistrationByApplicationId(int applicationId, String tokenType) throws APIManagementException;
 
     /**
-     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
-     *
-     * @param subscriber Subscriber
-     * @param applicationName Application needed to find subscriptions
-     * @param startSubIndex Starting index of subscriptions to be listed
-     * @param endSubIndex Ending index of Subscriptions to be listed
-     * @param groupingId the group id of the application
-     * @param organization organization of the API
-     * @return
-     * @throws APIManagementException
-     */
-    Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex,
-                                                  int endSubIndex, String groupingId, String organization) throws APIManagementException;
-
-    /**
-     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
-     *
-     * @param subscriber Subscriber
-     * @param applicationId Application needed to find subscriptions
-     * @param startSubIndex Starting index of subscriptions to be listed
-     * @param endSubIndex Ending index of Subscriptions to be listed
-     * @param groupingId the group id of the application
-     * @return
-     * @throws APIManagementException
-     */
-    Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, int applicationId, int startSubIndex, int endSubIndex, String groupingId)
-            throws APIManagementException;
-
-    /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier
@@ -289,17 +261,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to count the number of subscriptions.
      */
     Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId) throws APIManagementException;
-
-    /**
-     * Returns the number of subscriptions for the given subscriber and app.
-     *
-     * @param subscriber Subscriber
-     * @param applicationId Application id
-     * @return The number of subscriptions
-     * @throws APIManagementException if failed to count the number of subscriptions.
-     */
-    Integer getSubscriptionCountByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
-            throws APIManagementException;
 
     /**
      * Add new Subscriber
@@ -472,14 +433,6 @@ public interface APIConsumer extends APIManager {
      */
     void removeApplication(Application application, String username) throws APIManagementException;
 
-    /** get the status of the Application creation process given the application Id
-     *
-     * @param applicationId Id of the Application
-     * @return
-     * @throws APIManagementException
-     */
-    String getApplicationStatusById(int applicationId) throws APIManagementException;
-
     /**
      * Creates a request for getting Approval for Application Registration.
      *
@@ -559,14 +512,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns a list of applications created by the given user
-     * @param userId
-     * @return
-     * @throws APIManagementException
-     */
-    Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException;
-
-    /**
      * Updates the application owner of a given application
      * @param newUserId the new user ID which will be updated
      * @param application the application which should be updated
@@ -574,17 +519,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     boolean updateApplicationOwner(String newUserId , String organization, Application application ) throws APIManagementException;
-
-
-    /**
-     * Returns a list of applications for a given subscriber without application keys for the Rest API.
-     *
-     * @param subscriber Subscriber
-     * @param groupingId the groupId to which the applications must belong.
-     * @return Applications
-     * @throws APIManagementException if failed to applications for given subscriber
-     */
-    Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber
@@ -602,17 +536,6 @@ public interface APIConsumer extends APIManager {
     Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset,
                                                 String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException;
-
-
-    /**
-     * This will return APIM application by giving name and subscriber
-     * @param userId APIM subscriber ID.
-     * @param ApplicationName APIM application name.
-     * @param groupId Group id.
-     * @return it will return Application.
-     * @throws APIManagementException
-     */
-    Application getApplicationsByName(String userId , String ApplicationName , String groupId) throws APIManagementException;
 
     /**
      * Returns the corresponding application given the Id
@@ -989,4 +912,11 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
     List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
+
+    Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset, Integer limit
+            , String organization) throws APIManagementException;
+
+    List<Tier> getThrottlePolicies(int tierApiType, String organization) throws APIManagementException;
+
+    Tier getThrottlePolicyByName(String policyId, int policyType, String organization) throws APIManagementException;
 }

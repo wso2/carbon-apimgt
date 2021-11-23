@@ -334,19 +334,12 @@ public class APIMappingUtil {
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
         List<APITiersDTO> tiersToReturn = new ArrayList<>();
 
-        int tenantId = 0;
-        if (!StringUtils.isBlank(organization)) {
-            tenantId = APIUtil.getInternalOrganizationId(organization);
-        }
-
         //set the monetization status of this API (enabled or disabled)
         APIMonetizationInfoDTO monetizationInfoDTO = new APIMonetizationInfoDTO();
         monetizationInfoDTO.enabled(model.getMonetizationStatus());
         dto.setMonetization(monetizationInfoDTO);
 
-        Set<String> deniedTiers = apiConsumer.getDeniedTiers(tenantId);
         for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
-            if (!deniedTiers.contains(currentTier.getName())) {
                 APITiersDTO apiTiersDTO = new APITiersDTO();
                 apiTiersDTO.setTierName(currentTier.getName());
                 apiTiersDTO.setTierPlan(currentTier.getTierPlan());
@@ -374,7 +367,6 @@ public class APIMappingUtil {
                     apiTiersDTO.setMonetizationAttributes(monetizationAttributesDTO);
                 }
                 tiersToReturn.add(apiTiersDTO);
-            }
         }
         dto.setTiers(tiersToReturn);
 

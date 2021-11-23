@@ -444,12 +444,12 @@ public class SQLConstants {
     public static final String GET_SUBSCRIPTION_COUNT_BY_APP_ID_SQL =
             " SELECT COUNT(*) AS SUB_COUNT " +
                     " FROM " +
-                    "   AM_SUBSCRIPTION SUBS, AM_APPLICATION APP, AM_SUBSCRIBER SUB " +
+                    "   AM_SUBSCRIPTION SUBS, AM_APPLICATION APP,AM_API API " +
                     " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
-                    "   AND APP.APPLICATION_ID=?" +
-                    "   AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID" +
-                    "   AND SUB.TENANT_ID=?";
+                    "   AND API.API_ID = SUBS.API_ID" +
+                    "   AND APP.APPLICATION_ID = ?" +
+                    "   AND API.ORGANIZATION = ?";
 
     public static final String GET_SUBSCRIPTION_COUNT_CASE_INSENSITIVE_SQL =
             " SELECT COUNT(*) AS SUB_COUNT " +
@@ -500,34 +500,34 @@ public class SQLConstants {
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
             "   AND API.API_ID=SUBS.API_ID" +
             "   AND APP.NAME= ? " +
-            "   AND APP.ORGANIZATION = ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL =
             " SELECT " +
                     "   SUBS.SUBSCRIPTION_ID, " +
                     "   API.API_PROVIDER AS API_PROVIDER, " +
                     "   API.API_NAME AS API_NAME, " +
+                    "   API.API_TYPE AS TYPE, " +
                     "   API.API_VERSION AS API_VERSION, " +
                     "   SUBS.TIER_ID AS TIER_ID, " +
                     "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
                     "   APP.APPLICATION_ID AS APP_ID, " +
                     "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+                    "   SUBS.UUID AS SUB_UUID, " +
                     "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-                    "   APP.NAME AS APP_NAME, " +
-                    "   APP.CALLBACK_URL AS CALLBACK_URL " +
+                    "   APP.NAME AS APP_NAME " +
                     " FROM " +
-                    "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIPTION SUBS, " +
                     "   AM_API API " +
                     " WHERE " +
-                    "   SUB.TENANT_ID = ? " +
-                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
-                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
                     "   AND API.API_ID=SUBS.API_ID " +
-                    "   AND APP.APPLICATION_ID= ? " +
-                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+                    "   AND APP.APPLICATION_ID = ? " +
+                    "   AND API.ORGANIZATION = ?"+
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    " ORDER BY API_NAME ASC";
 
     public static final String GET_SUBSCRIBED_APIS_OF_SUBSCRIBER_SQL =
             " SELECT " +
@@ -1564,6 +1564,7 @@ public class SQLConstants {
             "   APP.UUID," +
             "   APP.TOKEN_TYPE," +
             "   APP.CREATED_BY," +
+            "   APP.ORGANIZATION ORGANIZATION,"+
             "   SUB.USER_ID " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +

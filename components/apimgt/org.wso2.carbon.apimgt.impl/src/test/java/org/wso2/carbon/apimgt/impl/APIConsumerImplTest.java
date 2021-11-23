@@ -840,13 +840,6 @@ public class APIConsumerImplTest {
         assertEquals(application, apiConsumer.getApplicationById(1111));
     }
 
-    @Test
-    public void testGetApplicationStatusById() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getApplicationStatusById(1111)).
-                thenReturn("testStatus");
-        assertEquals("testStatus", apiConsumer.getApplicationStatusById(1111));
-    }
 
 
 
@@ -1247,36 +1240,7 @@ public class APIConsumerImplTest {
         }
     }
 
-    @Test
-    public void testGetPaginatedSubscribedAPIs() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Subscriber subscriber = new Subscriber("sub1");
-        Application application = new Application("app1", subscriber);
-        application.setId(1);
-        SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber,
-                new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
-        subscribedAPI.setUUID(UUID.randomUUID().toString());
-        subscribedAPI.setApplication(application);
-        subscribedAPI.setTier(new Tier("Silver"));
-        Set<SubscribedAPI> subscribedAPIs = new HashSet<SubscribedAPI>();
-        subscribedAPIs.add(subscribedAPI);
-        PowerMockito.mockStatic(APIUtil.class);
-        Map<String, Tier> tierMap = new HashMap<String, Tier>();
-        tierMap.put("tier1", new Tier("Platinum"));
-        PowerMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenThrow(APIManagementException.class)
-                .thenReturn(tierMap);
-        Mockito.when(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", "testorg"))
-                .thenReturn(subscribedAPIs, null, subscribedAPIs);
-        try {
-            apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", "testorg");
-            Assert.fail("API Management exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get APIs of"));
-        }
-        Assert.assertNull(apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", "testorg"));
-        Assert.assertEquals(1, apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", "testorg").size());
 
-    }
 
     @Test
     public void testMapExistingOAuthClient() throws APIManagementException {

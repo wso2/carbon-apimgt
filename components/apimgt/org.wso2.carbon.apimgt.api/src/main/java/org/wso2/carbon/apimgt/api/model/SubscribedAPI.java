@@ -59,6 +59,17 @@ public class SubscribedAPI {
         this.uuid = uuid;
     }
 
+
+    public SubscribedAPI(Application application, APIProductIdentifier identifier) {
+        this.application = application;
+        this.productId = identifier;
+    }
+
+    public SubscribedAPI(Application application, APIIdentifier identifier) {
+        this.application = application;
+        this.apiId = identifier;
+    }
+
     public void setApplication(Application application) {
         this.application = application;
     }
