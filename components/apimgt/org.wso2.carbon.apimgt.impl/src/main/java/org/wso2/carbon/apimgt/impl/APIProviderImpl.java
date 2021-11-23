@@ -6962,19 +6962,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         if (StringUtils.isEmpty(provider) ||
-        StringUtils.isEmpty(name) ||
-        StringUtils.isEmpty(org)) {
+                StringUtils.isEmpty(name) ||
+                StringUtils.isEmpty(org)) {
             throw new APIManagementException("Invalid API information, name=" + name + " provider=" + provider +
                     " organization=" + org);
         }
         TreeMap<String, API> apiSortedMap = new TreeMap<>();
-
         List<API> apiList = getAPIVersionsByProviderAndName(provider,
                 name, org);
         for (API mappedAPI : apiList) {
             apiSortedMap.put(mappedAPI.getVersionTimestamp(), mappedAPI);
         }
-
         APIVersionStringComparator comparator = new APIVersionStringComparator();
         String latestVersion = version;
         long previousTimestamp = 0L;
@@ -6985,9 +6983,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 break;
             } else {
                 previousTimestamp = Long.valueOf(tempAPI.getVersionTimestamp());
-
             }
-
         }
         if (StringUtils.isEmpty(latestTimestamp)) {
             latestTimestamp = String.valueOf(System.currentTimeMillis());
