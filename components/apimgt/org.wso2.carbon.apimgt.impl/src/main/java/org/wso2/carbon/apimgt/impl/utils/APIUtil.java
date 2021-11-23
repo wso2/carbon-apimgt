@@ -9252,6 +9252,7 @@ public final class APIUtil {
         return allEnvironments;
     }
 
+    // Take organization as a parameter
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
         // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(organization).stream()
