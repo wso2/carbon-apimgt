@@ -280,6 +280,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_NAME = "overview_name";
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
+    public static final String API_OVERVIEW_VERSION_TIMESTAMP = "overview_versionTimestamp";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
@@ -2723,6 +2724,7 @@ public final class APIConstants {
     public static final String PROXY_SERVICE_NAME_SUFFIX = "_proxy";
 
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
+    public static final String ALLOW_MULTIPLE_VERSIONS = "allowMultipleVersions";
 
     public static class ServiceCatalogConstants {
         public static final String SERVICE_UUID = "UUID";

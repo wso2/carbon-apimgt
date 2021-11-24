@@ -179,7 +179,7 @@ public interface APIPersistence {
      */
     DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
                                     UserContext ctx) throws APIPersistenceException;
-    
+
     /**
      * Search based on content to display on publisher
      *

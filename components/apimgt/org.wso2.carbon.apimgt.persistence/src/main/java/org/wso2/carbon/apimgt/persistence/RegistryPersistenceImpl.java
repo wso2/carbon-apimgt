@@ -19,6 +19,8 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -163,11 +165,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
     protected RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-        
+
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         boolean transactionCommitted = false;
         boolean tenantFlowStarted = false;
@@ -191,6 +193,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
+            genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, api.getVersionTimestamp());
+
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
             //Attach the API lifecycle
@@ -258,7 +262,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, resourcePath);
             }
-            
+
             //Set permissions to doc path
             String docLocation = RegistryPersistenceDocUtil.getDocumentPath(api.getId().getProviderName(),
                     api.getId().getApiName(), api.getId().getVersion());
@@ -266,7 +270,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                     visibleRoles, docLocation);
-            
+
             registry.commitTransaction();
             api.setUuid(artifact.getId());
             transactionCommitted = true;
@@ -1011,7 +1015,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             isTenantFlowStarted = holder.isTenantFlowStarted();
             log.debug("Requested query for devportal search: " + searchQuery);
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
-                    isAllowDisplayAPIsWithMultipleStatus());
+                    isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayAPIsWithMultipleVersions());
             log.debug("Modified query for devportal search: " + modifiedQuery);
 
             String userNameLocal;
@@ -1353,6 +1357,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     private boolean isAllowDisplayAPIsWithMultipleStatus() {
         if (properties != null) {
             return (boolean) properties.get(APIConstants.ALLOW_MULTIPLE_STATUS);
+        }
+        return false;
+    }
+
+    private boolean isAllowDisplayAPIsWithMultipleVersions() {
+        if (properties != null) {
+            return (boolean) properties.get(APIConstants.ALLOW_MULTIPLE_VERSIONS);
         }
         return false;
     }

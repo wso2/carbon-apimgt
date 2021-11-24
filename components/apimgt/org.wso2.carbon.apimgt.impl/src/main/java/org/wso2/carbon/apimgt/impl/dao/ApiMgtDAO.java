@@ -5558,6 +5558,7 @@ public class ApiMgtDAO {
             prepStmt.setString(10, api.getUUID());
             prepStmt.setString(11, APIConstants.CREATED);
             prepStmt.setString(12, organization);
+            prepStmt.setString(13, api.getVersionTimestamp());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -14285,6 +14286,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(9, apiProduct.getUuid());
             prepStmtAddAPIProduct.setString(10, apiProduct.getState());
             prepStmtAddAPIProduct.setString(11, organization);
+            prepStmtAddAPIProduct.setString(12, apiProduct.getVersionTimestamp());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -15924,23 +15926,38 @@ public class ApiMgtDAO {
      * @return set ids
      * @throws APIManagementException
      */
-    public Set<String> getUUIDsOfAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+    public List<API> getAllAPIVersions(String apiName, String apiProvider) throws APIManagementException {
 
-        Set<String> versions = new HashSet<String>();
+        List<API> apiVersions = new ArrayList<API>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS_UUID)) {
             statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
             statement.setString(2, apiName);
             ResultSet resultSet = statement.executeQuery();
+
             while (resultSet.next()) {
-                versions.add(resultSet.getString("API_UUID"));
+                String version = resultSet.getString("API_VERSION");
+                String status = resultSet.getString("STATUS");
+                String versionTimestamp = resultSet.getString("VERSION_TIMESTAMP");
+
+                String uuid = resultSet.getString("API_UUID");
+                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                    // skip api products
+                    continue;
+                }
+                API api = new API(new APIIdentifier(apiProvider, apiName,
+                        version));
+                api.setUuid(uuid);
+                api.setStatus(status);
+                api.setVersionTimestamp(versionTimestamp);
+                apiVersions.add(api);
             }
         } catch (SQLException e) {
             handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
                     e);
         }
-        return versions;
+        return apiVersions;
     }
 
     /**

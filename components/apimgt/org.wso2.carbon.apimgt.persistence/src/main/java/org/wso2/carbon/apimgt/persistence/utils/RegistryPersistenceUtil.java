@@ -658,6 +658,7 @@ public class RegistryPersistenceUtil {
 
             api.setWsUriMapping(getWsUriMappingFromArtifact(artifact));
             api.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
+            api.setVersionTimestamp(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP));
 
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
@@ -1483,6 +1484,9 @@ public class RegistryPersistenceUtil {
                     artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
                 }
             }
+
+            //set version timestamp
+            artifact.addAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, apiProduct.getVersionTimestamp());
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -1628,5 +1632,4 @@ public class RegistryPersistenceUtil {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
-
 }

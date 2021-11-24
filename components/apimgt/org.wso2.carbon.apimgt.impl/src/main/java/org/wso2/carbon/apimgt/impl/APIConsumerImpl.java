@@ -5644,10 +5644,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        if (APIUtil.isAllowDisplayMultipleVersions()) {
-            return result;
-        }
-        return filterMultipleVersionedAPIs(result);
+        return result;
     }
 
     @Override

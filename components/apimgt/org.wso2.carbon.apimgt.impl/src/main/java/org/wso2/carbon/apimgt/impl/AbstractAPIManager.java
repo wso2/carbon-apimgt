@@ -256,6 +256,7 @@ public abstract class AbstractAPIManager implements APIManager {
         
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
+        properties.put(APIConstants.ALLOW_MULTIPLE_VERSIONS, APIUtil.isAllowDisplayMultipleVersions());
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance(configMap, properties);
 
     }
