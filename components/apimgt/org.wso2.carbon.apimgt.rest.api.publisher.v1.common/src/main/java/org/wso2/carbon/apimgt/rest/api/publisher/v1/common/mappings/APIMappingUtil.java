@@ -2184,6 +2184,7 @@ public class APIMappingUtil {
         productDto.setDescription(product.getDescription());
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
+        productDto.setGatewayVendor(product.getGatewayVendor());
 
         Set<String> apiTags = product.getTags();
         List<String> tagsToReturn = new ArrayList<>(apiTags);
@@ -2478,6 +2479,8 @@ public class APIMappingUtil {
         product.setAvailableTiers(apiTiers);
 
         product.setProductLevelPolicy(dto.getApiThrottlingPolicy());
+
+        product.setGatewayVendor(dto.getGatewayVendor());
 
         if (dto.getSubscriptionAvailability() != null) {
             product.setSubscriptionAvailability(

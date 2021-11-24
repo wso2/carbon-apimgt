@@ -1616,6 +1616,11 @@ public class PublisherCommonUtils {
                             "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
         }
 
+        // Set default gatewayVendor
+        if (apiProductDTO.getGatewayVendor() == null) {
+            apiProductDTO.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        }
+
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
         productToBeAdded.setOrganization(organization);
 
