@@ -93,6 +93,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
     private static final String GRANT_TYPE_VALUE = "client_credentials";
+    private static final String ENCODE_CONSUMER_KEY = "encodeConsumerKey";
 
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
@@ -424,6 +425,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
+            String isConsumerKeyEncoded = System.getProperty(ENCODE_CONSUMER_KEY, "false");
+            if (isConsumerKeyEncoded.equalsIgnoreCase("true")) {
+                consumerKey = Base64.getEncoder().encodeToString(consumerKey.getBytes(StandardCharsets.UTF_8));
+            }
             ClientInfo clientInfo = dcrClient.getApplication(consumerKey);
             return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
