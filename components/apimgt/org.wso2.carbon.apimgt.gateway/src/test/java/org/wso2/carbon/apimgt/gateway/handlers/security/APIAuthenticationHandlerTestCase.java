@@ -76,6 +76,7 @@ public class APIAuthenticationHandlerTestCase {
         axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(axis2MsgCntxt.getIncomingTransportName()).thenReturn("http");
 
         PowerMockito.mockStatic(Timer.Context.class);
         context = Mockito.mock(Timer.Context.class);
@@ -159,6 +160,27 @@ public class APIAuthenticationHandlerTestCase {
 
         Assert.assertTrue(apiAuthenticationHandler.isAnalyticsEnabled());
 
+    }
+
+    /**
+     * This methsod will test request flow when "isGraphqlSubscriptionRequest" property is set in axis2 message context
+     * when incoming transport is websocket. This occurs during Graphql Subscription request flow.
+     */
+    @Test
+    public void testHandleRequestForGraphQLSubscriptions() {
+
+        APIAuthenticationHandler apiAuthenticationHandler = createAPIAuthenticationHandler();
+        apiAuthenticationHandler.init(synapseEnvironment);
+        Mockito.when(axis2MsgCntxt.getIncomingTransportName()).thenReturn("ws");
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(true);
+        Assert.assertTrue(apiAuthenticationHandler.handleRequest(messageContext));
+
+        Mockito.when(axis2MsgCntxt.getIncomingTransportName()).thenReturn("wss");
+        Assert.assertTrue(apiAuthenticationHandler.handleRequest(messageContext));
+
+        // clean up message context
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MsgCntxt.getIncomingTransportName()).thenReturn("http");
     }
 
     /*

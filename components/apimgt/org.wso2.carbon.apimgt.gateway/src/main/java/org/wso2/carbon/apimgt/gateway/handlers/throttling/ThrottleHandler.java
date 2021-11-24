@@ -522,6 +522,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 //            return true;
 //        }
 
+        if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping GraphQL subscription handshake request.");
+            }
+            return true;
+        }
+
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
             log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
                     "has not been initialised");

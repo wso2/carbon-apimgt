@@ -3942,6 +3942,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
+
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
 

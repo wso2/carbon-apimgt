@@ -43,6 +43,10 @@
             <version>4.5.2</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

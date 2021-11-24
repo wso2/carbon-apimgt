@@ -145,6 +145,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                     context.put("signatureHeader", api.getWebsubSubscriptionConfiguration().getSignatureHeader());
                     context.put("isSecurityEnabled", !StringUtils.isEmpty(api.getWebsubSubscriptionConfiguration().
                             getSecret()));
+                } else if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                    boolean isSubscriptionAvailable = false;
+                    if (api.getWebSocketTopicMappingConfiguration() != null) {
+                        isSubscriptionAvailable = true;
+                        context.put(APIConstants.VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS,
+                                this.api.getWebSocketTopicMappingConfiguration().getMappings());
+                    }
+                    context.put(APIConstants.VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE, isSubscriptionAvailable);
                 }
             } else {
                 t = velocityengine.getTemplate(getApiProductTemplatePath());

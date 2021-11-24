@@ -379,6 +379,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         long endTime;
         long difference;
 
+        if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping GraphQL subscription handshake request.");
+            }
+            return true;
+        }
+
         try {
             if (isAnalyticsEnabled()) {
                 long currentTime = System.currentTimeMillis();
@@ -386,7 +393,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
-
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
                 if (!isAuthenticatorsInitialized) {
                     initializeAuthenticators();

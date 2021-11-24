@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -44,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -597,6 +600,7 @@ public class TemplateBuilderUtil {
         gatewayAPIDTO.setTenantDomain(tenantDomain);
 
         String definition;
+        boolean isGraphQLSubscriptionAPI = false;
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
             //Build schema with additional info
@@ -608,6 +612,7 @@ public class TemplateBuilderUtil {
                     api.getGraphQLSchema() + "]]>" + "</localEntry>");
             gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(graphqlLocalEntry,
                     gatewayAPIDTO.getLocalEntriesToBeAdd()));
+            gatewayAPIDTO.setGraphQLSchema(api.getGraphQLSchema());
             Set<URITemplate> uriTemplates = new HashSet<>();
             URITemplate template = new URITemplate();
             template.setAuthType("Any");
@@ -616,6 +621,18 @@ public class TemplateBuilderUtil {
             template.setUriTemplate("/*");
             uriTemplates.add(template);
             api.setUriTemplates(uriTemplates);
+
+            GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+            if (graphql.isSubscriptionAvailable(api.getGraphQLSchema())) {
+                isGraphQLSubscriptionAPI = true;
+                // if subscriptions are available add new URI template with wild card resource without http verb.
+                template = new URITemplate();
+                template.setUriTemplate("/*");
+                uriTemplates.add(template);
+                api.setUriTemplates(uriTemplates);
+                api.setEndpointConfig(populateSubscriptionEndpointConfig(api.getEndpointConfig()));
+                addGqlWebSocketTopicMappings(api);
+            }
         } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
                 || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
@@ -682,7 +699,8 @@ public class TemplateBuilderUtil {
                     .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
                 if (!isWsApi) {
                     addEndpoints(api, builder, gatewayAPIDTO);
-                } else {
+                }
+                if (isWsApi || isGraphQLSubscriptionAPI) {
                     addWebSocketResourceEndpoints(api, builder, gatewayAPIDTO);
                 }
             }
@@ -718,6 +736,35 @@ public class TemplateBuilderUtil {
         addWebsocketTopicResourceKeys(api);
     }
 
+    /**
+     * This method is used to add websocket topic mappings for GraphQL subscription. Here both production and sandbox
+     * endpoint urls are added under single wild card resource.
+     *
+     * @param api GraphQL API
+     */
+    public static void addGqlWebSocketTopicMappings(API api) {
+
+        org.json.JSONObject endpointConfiguration =
+                new org.json.JSONObject(api.getEndpointConfig()).getJSONObject(APIConstants.WS_PROTOCOL);
+        String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString(
+                        APIConstants.ENDPOINT_URL) : null;
+        String productionEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
+                        .getString(APIConstants.ENDPOINT_URL) : null;
+
+        Map<String, String> endpoints = new HashMap<>();
+        if (sandboxEndpointUrl != null) {
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEndpointUrl);
+        }
+        if (productionEndpointUrl != null) {
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl);
+        }
+        Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
+        perTopicMappings.put("/*", endpoints);
+        api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(perTopicMappings));
+        addWebsocketTopicResourceKeys(api);
+    }
     private static void setCustomSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
                                                     APIDTO apidto) throws APIManagementException {
 
@@ -794,6 +841,22 @@ public class TemplateBuilderUtil {
         }
     }
 
+    /**
+     * This method is used to merge the list of GatewayContentDTO with the existing array of GatewayContentDTOs.
+     *
+     * @param gatewayContentDTOList List of GatewayContentDTOs to add
+     * @param gatewayContents       Array of gateway contents to add
+     * @return An array of GatewayContentDTOs
+     */
+    private static GatewayContentDTO[] addGatewayContentsToList(List<GatewayContentDTO> gatewayContentDTOList,
+                                                                GatewayContentDTO[] gatewayContents) {
+
+        if (gatewayContents != null) {
+            Collections.addAll(gatewayContentDTOList, gatewayContents);
+        }
+        return gatewayContentDTOList.toArray(new GatewayContentDTO[gatewayContentDTOList.size()]);
+    }
+
     private static void addEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
             throws APITemplateException, XMLStreamException {
 
@@ -830,7 +893,7 @@ public class TemplateBuilderUtil {
                 .replaceAll("\\*", "wildcard");
     }
 
-    private static void addWebSocketResourceEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
+    public static void addWebSocketResourceEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
             throws APITemplateException, XMLStreamException {
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
@@ -855,8 +918,14 @@ public class TemplateBuilderUtil {
                     endpointsToAdd.add(endpoint);
                 }
             }
+            // Graphql APIs with subscriptions has only one wild card resource mapping to WS endpoints. Hence, iterating
+            // once through resources is enough.
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                break;
+            }
         }
-        gatewayAPIDTO.setEndpointEntriesToBeAdd(endpointsToAdd.toArray(new GatewayContentDTO[endpointsToAdd.size()]));
+        gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentsToList(endpointsToAdd,
+                gatewayAPIDTO.getEndpointEntriesToBeAdd()));
     }
 
     /**
@@ -1238,7 +1307,7 @@ public class TemplateBuilderUtil {
         }
         return "";
     }
-    
+
     public static JSONObject getModifiedProperties(JSONObject originalProperties) {
         JSONObject modifiedProperties = new JSONObject();
         if (originalProperties.size() > 0) {
@@ -1252,6 +1321,100 @@ public class TemplateBuilderUtil {
             }
         }
         return modifiedProperties;
+    }
+
+    /**
+     * This method is update the existing GraphQL API endpoint config with ws endpoint config and
+     * existing http endpoint config.
+     *
+     * @param endpointConfig Current endpoint config
+     * @return Updated endpoint config
+     * @throws APIManagementException if an error occurs
+     */
+    public static String populateSubscriptionEndpointConfig(String endpointConfig) throws APIManagementException {
+
+        try {
+            JSONObject newEndpointConfigJson = new JSONObject();
+            newEndpointConfigJson.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE,
+                    APIConstants.ENDPOINT_TYPE_GRAPHQL);
+            JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
+            newEndpointConfigJson.put(APIConstants.ENDPOINT_TYPE_HTTP, oldEndpointConfigJson);
+            JSONObject wsEndpointConfig = new JSONObject();
+            wsEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, APIConstants.WS_PROTOCOL);
+            // If production_endpoints exists
+            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
+                JSONObject prodWSEndpointConfig;
+                String prodWsEndpoint = "";
+                // If load_balanced endpoints get the first prod endpoint url from the list
+                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equals(
+                        oldEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    // get first load balanced endpoint
+                    prodWsEndpoint = (String) ((JSONObject) ((org.json.simple.JSONArray) oldEndpointConfigJson
+                            .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)).get(0)).get(APIConstants.ENDPOINT_URL);
+
+                } else if (((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
+                        .get(APIConstants.ENDPOINT_URL) != null) {
+                    prodWsEndpoint = (String)
+                            ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
+                                    .get(APIConstants.ENDPOINT_URL);
+                }
+                //Replace https:// prefix with wss:// and http:// with ws://. Skip for default endpoints
+                if (prodWsEndpoint.indexOf(APIConstants.HTTP_PROTOCOL_URL_PREFIX) == 0) {
+                    prodWsEndpoint = prodWsEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX,
+                            APIConstants.WS_PROTOCOL_URL_PREFIX);
+                } else if (prodWsEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
+                    prodWsEndpoint = prodWsEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
+                            APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equals(prodWsEndpoint)) {
+                    // supported uri schemes for url are https://, http:// or default
+                    throw new APIManagementException("Unsupported URI scheme present for Production endpoint: "
+                            + prodWsEndpoint);
+                }
+                prodWSEndpointConfig = new JSONObject();
+                prodWSEndpointConfig.put(APIConstants.ENDPOINT_URL, prodWsEndpoint);
+                wsEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, prodWSEndpointConfig);
+            }
+            // If sandbox_endpoints exists
+            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null) {
+                JSONObject sandboxWSEndpointConfig;
+                String sandboxWsEndpoint = "";
+                // If load_balanced endpoints get the first sandbox endpoint url from the list
+                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equals(
+                        oldEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    // get first load balanced endpoint
+                    sandboxWsEndpoint = (String) ((JSONObject) ((org.json.simple.JSONArray) oldEndpointConfigJson
+                            .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)).get(0)).get(APIConstants.ENDPOINT_URL);
+
+                } else if (((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
+                        .get(APIConstants.ENDPOINT_URL) != null) {
+                    sandboxWsEndpoint = (String)
+                            ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
+                                    .get(APIConstants.ENDPOINT_URL);
+                }
+                if (sandboxWsEndpoint.indexOf(APIConstants.HTTP_PROTOCOL_URL_PREFIX) == 0) {
+                    sandboxWsEndpoint = sandboxWsEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX,
+                            APIConstants.WS_PROTOCOL_URL_PREFIX);
+                } else if (sandboxWsEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
+                    sandboxWsEndpoint = sandboxWsEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
+                            APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equals(sandboxWsEndpoint)) {
+                    throw new APIManagementException("Unsupported URI scheme present for Sandbox endpoint: "
+                            + sandboxWsEndpoint);
+                }
+                sandboxWSEndpointConfig = new JSONObject();
+                sandboxWSEndpointConfig.put(APIConstants.ENDPOINT_URL, sandboxWsEndpoint);
+                wsEndpointConfig.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, sandboxWSEndpointConfig);
+            }
+            newEndpointConfigJson.put(APIConstants.WS_PROTOCOL, wsEndpointConfig);
+            if (log.isDebugEnabled()) {
+                log.debug("Derived endpoint config for GraphQL API with subscriptions: "
+                        + newEndpointConfigJson.toJSONString());
+            }
+            return newEndpointConfigJson.toJSONString();
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while deriving subscription endpoint from GraphQL API endpoint "
+                    + "config: " + endpointConfig, e);
+        }
     }
 
 }

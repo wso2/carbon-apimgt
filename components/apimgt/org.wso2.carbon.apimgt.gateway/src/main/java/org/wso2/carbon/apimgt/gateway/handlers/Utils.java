@@ -633,4 +633,18 @@ public class Utils {
             return o2.length() - o1.length();
         }
     }
+
+    /**
+     * Evaluate current request transport and message context to check if its a GraphQL subscription execution path.
+     *
+     * @param messageContext MessageContext
+     * @return true if graphql subscription request execution path
+     */
+    public static boolean isGraphQLSubscriptionRequest(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        return (APIConstants.WS_PROTOCOL.equals(axis2MC.getIncomingTransportName()) ||
+                APIConstants.WSS_PROTOCOL.equals(axis2MC.getIncomingTransportName())
+                        && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST));
+    }
 }
