@@ -404,7 +404,7 @@ public class RegistrySearchUtil {
                 statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                         APIConstants.DEPRECATED };
             }
-            if ("".equals(searchQuery)) { // normal listing
+            if (StringUtils.isEmpty(searchQuery)) { // normal listing
                 String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
                 if (isAllowDisplayMultipleVersions) {
                     modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
