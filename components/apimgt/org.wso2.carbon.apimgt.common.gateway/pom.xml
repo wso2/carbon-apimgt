@@ -56,7 +56,6 @@
         <dependency>
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
-            <version>${graphql.java.version}</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
@@ -65,7 +64,6 @@
         <dependency>
             <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
