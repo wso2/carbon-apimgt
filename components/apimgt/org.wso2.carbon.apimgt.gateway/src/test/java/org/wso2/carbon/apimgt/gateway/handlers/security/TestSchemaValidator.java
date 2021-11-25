@@ -47,6 +47,7 @@ import javax.xml.stream.XMLStreamException;
 public class TestSchemaValidator {
     private static final Log log = LogFactory.getLog(TestSchemaValidator.class);
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String CONTENT_TYPE_HEADER_LOWERCASE = "content-type";
     private static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
     private static final String RESOURCE_TAG = "api.ut.resource";
     private MessageContext messageContext;
@@ -164,6 +165,24 @@ public class TestSchemaValidator {
                 "<status>available</status>" +
                 "</jsonObject>");
         assertBadRequest();
+    }
+
+    @Test
+    public void testLowercaseContentType() throws IOException, XMLStreamException {
+        // lowercase content-type header
+        Map<String, String> headers = new HashMap<>();
+        String contentType = "application/json";
+        headers.put(CONTENT_TYPE_HEADER_LOWERCASE, contentType);
+        Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
+        setMockedRequest("POST", "/pet", "<jsonObject>" +
+                "<id>1</id><name>Doggie</name>" +
+                "<photoUrls>https://mydog_1.jpg</photoUrls><photoUrls>https://mydog_2.jpg</photoUrls>" +
+                "<category><id>2</id><name>dog</name></category>" +
+                "<tags><id>12</id><name>Black</name></tags><tags><id>43</id><name>German Shepherd</name></tags>" +
+                "<status>available</status>" +
+                "</jsonObject>");
+
+        assertValidRequest();
     }
 
     private void assertValidRequest() {
