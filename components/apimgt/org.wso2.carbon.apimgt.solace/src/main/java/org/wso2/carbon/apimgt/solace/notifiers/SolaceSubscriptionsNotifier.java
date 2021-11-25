@@ -88,7 +88,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
-            Application application = apiProvider.getApplicationByUUID(applicationUUID);
+            Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
 
             //Check whether the subscription is belongs to an API deployed in Solace
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {

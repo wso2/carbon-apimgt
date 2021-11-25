@@ -1260,6 +1260,7 @@ public class ApiMgtDAO {
             while (result.next()) {
                 APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                         ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
+                apiIdentifier.setUuid(result.getString("API_UUID"));
 
                 SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
                 subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));

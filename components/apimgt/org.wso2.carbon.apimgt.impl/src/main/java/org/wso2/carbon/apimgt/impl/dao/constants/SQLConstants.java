@@ -378,6 +378,7 @@ public class SQLConstants {
     public static final String GET_SUBSCRIBED_APIS_SQL =
             " SELECT " +
             "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
+            "   API.API_UUID AS API_UUID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +

@@ -21,14 +21,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
@@ -38,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
-import org.wso2.carbon.context.CarbonContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,12 +170,9 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
 
         // get list of subscribed APIs in the application
         Subscriber subscriber = new Subscriber(event.getSubscriber());
-        APIProvider apiProvider;
 
         try {
-            apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            Application application = apiProvider.getApplicationByUUID(event.getUuid());
+            Application application = apiMgtDAO.getApplicationByUUID(event.getUuid());
             Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber, event.getApplicationName(),
                     event.getGroupId());
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
@@ -187,8 +181,8 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
             labelOne:
             //Check whether the application needs to be updated has a Solace API subscription
             for (SubscribedAPI api : subscriptions) {
-                List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiProvider.
-                        getLightweightAPI(api.getApiId()).getUuid());
+                List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(api.
+                        getIdentifier().getUUID());
                 for (APIRevisionDeployment deployment : deployments) {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
                         if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
