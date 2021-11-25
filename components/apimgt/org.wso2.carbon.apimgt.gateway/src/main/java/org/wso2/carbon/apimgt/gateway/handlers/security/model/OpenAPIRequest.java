@@ -87,14 +87,11 @@ public class OpenAPIRequest implements Request {
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> Collections.singleton(entry.getValue())));
         //Set transport headers
-        List<String> possibleContentTypeHeaders = new ArrayList();
-        possibleContentTypeHeaders.add("Content-Type");
-        possibleContentTypeHeaders.add("content-type");
-        possibleContentTypeHeaders.add("CONTENT-TYPE");
+        String contentTypeHeader = "content-type";
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
             String headerKey = header.getKey();
             String value =  header.getValue().iterator().next();
-            headerKey = possibleContentTypeHeaders.contains(headerKey) ? "Content-Type" : headerKey;
+            headerKey = headerKey.toLowerCase().equals(contentTypeHeader) ? "Content-Type" : headerKey;
             headers.put(headerKey, value);
         }
         String apiResource = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString();
