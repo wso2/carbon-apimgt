@@ -2070,6 +2070,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                             .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
 
+                    if (APIConstants.RETIRED.equals(newStatus)) {
+                        cleanUpPendingSubscriptionCreationProcessesByAPI(apiProduct.getUuid());
+                        apiMgtDAO.removeAllSubscriptions(apiProduct.getUuid());
+                    }
                     PublisherAPIProduct publisherAPIProduct =  APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
                     try {
                         apiPersistenceInstance.updateAPIProduct(new Organization(apiProduct.getOrganization()),
@@ -2126,6 +2130,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     api.setAsPublishedDefaultVersion(api.getId().getVersion()
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
+                    if (APIConstants.RETIRED.equals(newStatus)) {
+                        cleanUpPendingSubscriptionCreationProcessesByAPI(api.getUuid());
+                        apiMgtDAO.removeAllSubscriptions(api.getUuid());
+                    }
 
                     //updateApiArtifactNew(api, false, false);
                     PublisherAPI publisherAPI =  APIMapper.INSTANCE.toPublisherApi(api);
@@ -4931,6 +4939,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!WorkflowStatus.CREATED.equals(apiWFState)) {
                 response = executeStateChangeWorkflow(wfDTO, currentStatus, action, apiName, apiContext, apiType,
                         apiVersion, providerName, apiOrApiProductId, uuid);
+                // get the workflow state once the executor is executed.
+                wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
+                        WorkflowConstants.WF_TYPE_AM_API_STATE);
+                if (wfDTO != null) {
+                    apiWFState = wfDTO.getStatus();
+                    response.setStateChangeStatus(apiWFState.toString());
+                } else {
+                    response.setStateChangeStatus(WorkflowStatus.APPROVED.toString());
+                }
             }
 
             // only change the lifecycle if approved
@@ -5006,15 +5023,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             response.setWorkflowResponse(workflowResponse);
         } catch (WorkflowException e) {
             handleException("Failed to execute workflow for life cycle status change : " + e.getMessage(), e);
-        }
-
-        // get the workflow state once the executor is executed.
-        wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
-         WorkflowConstants.WF_TYPE_AM_API_STATE);
-        if (wfDTO != null) {
-            response.setStateChangeStatus(wfDTO.getStatus().toString());
-        } else {
-            response.setStateChangeStatus(WorkflowStatus.APPROVED.toString());
         }
         return response;
     }
@@ -8131,8 +8139,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion(), uuid));
                 checkAccessControlPermission(userNameWithoutChange, product.getAccessControl(),
                         product.getAccessControlRoles());
-                populateAPIProductInformation(uuid, organization, product);
                 populateRevisionInformation(product, uuid);
+                populateAPIProductInformation(uuid, organization, product);
                 populateAPIStatus(product);
                 populateAPITier(product);
                 return product;
