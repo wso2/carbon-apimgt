@@ -110,8 +110,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
 
+            boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.equals(apiProduct.getState()) ||
+                    APIStatus.DEPRECATED.equals(apiProduct.getState());
             List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
-            if (apiUsages != null && apiUsages.size() > 0) {
+            if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
             }
 
@@ -1130,6 +1132,25 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                         " " + "id : " + apiProductId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Response deleteAPIProductLifecycleStatePendingTasks(String apiProductId, MessageContext messageContext)
+            throws APIManagementException {
+
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiProductId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with UUID: " + apiProductId, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, apiProductId));
+            }
+            apiProvider.deleteWorkflowTask(apiProductId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting task ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
