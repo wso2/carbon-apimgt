@@ -1,0 +1,441 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.t
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.wso2.carbon.apimgt.gateway.inbound.websocket.request;
+
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
+import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.GraphQLProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+
+import java.io.File;
+
+/**
+ * Test class for GraphQLRequestProcessor.
+ */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({InboundWebsocketProcessorUtil.class})
+public class GraphQLRequestProcessorTest {
+
+    @Test
+    public void testHandleRequestSuccess() throws Exception {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "liftStatusChange {\\n    id\\n    name\\n    }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        // Get schema and parse
+        String graphqlDirPath = "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
+        String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        PowerMockito.when(InboundWebsocketProcessorUtil
+                .validateScopes(inboundMessageContext, "liftStatusChange", "1")).thenReturn(responseDTO);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("liftStatusChange", inboundMessageContext))
+                .thenReturn(verbInfoDTO);
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
+        infoDTO.setGraphQLMaxComplexity(4);
+        infoDTO.setGraphQLMaxDepth(3);
+        inboundMessageContext.setInfoDTO(infoDTO);
+
+        PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
+                inboundMessageContext, "1")).thenReturn(responseDTO);
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isError());
+        Assert.assertNull(processorResponseDTO.getErrorMessage());
+        Assert.assertEquals(inboundMessageContext.getVerbInfoForGraphQLMsgId("1").getOperation(), "liftStatusChange");
+        Assert.assertEquals(inboundMessageContext.getVerbInfoForGraphQLMsgId("1").getVerbInfoDTO().getHttpVerb(),
+                "SUBSCRIPTION");
+        Assert.assertEquals(inboundMessageContext.getVerbInfoForGraphQLMsgId("1").getVerbInfoDTO().getThrottling(),
+                "Unlimited");
+    }
+
+    @Test
+    public void testHandleRequestNonSubscribeMessage() {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"type\":\"connection_init\",\"payload\":{}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isError());
+        Assert.assertNull(processorResponseDTO.getErrorMessage());
+        Assert.assertFalse(processorResponseDTO.isCloseConnection());
+    }
+
+    @Test
+    public void testHandleRequestAuthError() {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"type\":\"connection_init\",\"payload\":{}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        responseDTO.setError(true);
+        responseDTO.setErrorMessage("Invalid authentication");
+        responseDTO.setCloseConnection(true);
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertTrue(processorResponseDTO.isError());
+        Assert.assertEquals(processorResponseDTO.getErrorMessage(), "Invalid authentication");
+        Assert.assertTrue(responseDTO.isCloseConnection());
+    }
+
+    @Test
+    public void testHandleRequestInvalidPayload() throws Exception {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+        GraphQLProcessorResponseDTO inboundProcessorResponseDTO = new GraphQLProcessorResponseDTO();
+        inboundProcessorResponseDTO.setError(true);
+        inboundProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST);
+        inboundProcessorResponseDTO.setErrorMessage("Invalid operation payload");
+        inboundProcessorResponseDTO.setId("1");
+        PowerMockito.when(InboundWebsocketProcessorUtil
+                        .getBadRequestGraphQLFrameErrorDTO("Invalid operation payload", "1"))
+                .thenReturn(inboundProcessorResponseDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isCloseConnection());
+        Assert.assertTrue(processorResponseDTO.isError());
+        Assert.assertEquals(processorResponseDTO.getErrorMessage(), "Invalid operation payload");
+        Assert.assertEquals(processorResponseDTO.getErrorCode(), WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST);
+        Assert.assertNotNull(processorResponseDTO.getErrorResponseString());
+        JSONParser jsonParser = new JSONParser();
+        JSONObject errorJson = (JSONObject) jsonParser.parse(processorResponseDTO.getErrorResponseString());
+        Assert.assertTrue(errorJson.containsKey(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE));
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
+        Assert.assertTrue(errorJson.containsKey(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID));
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
+        Assert.assertTrue(errorJson.containsKey(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD));
+        JSONObject payload = (JSONObject) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        Assert.assertTrue(payload.containsKey(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE));
+        Assert.assertTrue(payload.containsKey(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE));
+        Assert.assertEquals(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE),
+                "Invalid operation payload");
+        Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
+                String.valueOf(WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST));
+
+        msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"mutation {\\n  "
+                + "changeLiftStatusChange {\\n    id\\n    name\\n    }\\n}\\n\"}}";
+        inboundProcessorResponseDTO = new GraphQLProcessorResponseDTO();
+        inboundProcessorResponseDTO.setError(true);
+        inboundProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST);
+        inboundProcessorResponseDTO.setErrorMessage("Invalid operation. Only allowed Subscription type operations");
+        inboundProcessorResponseDTO.setId("1");
+        PowerMockito.when(InboundWebsocketProcessorUtil.getBadRequestGraphQLFrameErrorDTO(
+                        "Invalid operation. Only allowed Subscription type operations", "1"))
+                .thenReturn(inboundProcessorResponseDTO);
+        processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isCloseConnection());
+        Assert.assertTrue(processorResponseDTO.isError());
+        Assert.assertEquals(processorResponseDTO.getErrorMessage(),
+                "Invalid operation. Only allowed Subscription type operations");
+        Assert.assertEquals(processorResponseDTO.getErrorCode(), WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST);
+        Assert.assertNotNull(processorResponseDTO.getErrorResponseString());
+        errorJson = (JSONObject) jsonParser.parse(processorResponseDTO.getErrorResponseString());
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
+        payload = (JSONObject) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        Assert.assertEquals(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE),
+                "Invalid operation. Only allowed Subscription type operations");
+        Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
+                String.valueOf(WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST));
+    }
+
+    @Test
+    public void testHandleRequestInvalidQueryPayload() throws Exception {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "liftStatusChange {\\n    id\\n    name\\n invalidField\\n }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        // Get schema and parse
+        String graphqlDirPath = "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
+        String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertTrue(processorResponseDTO.isError());
+        Assert.assertTrue(processorResponseDTO.getErrorMessage()
+                .contains(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY_MESSAGE));
+        Assert.assertEquals(processorResponseDTO.getErrorCode(),
+                WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY);
+        Assert.assertNotNull(processorResponseDTO.getErrorResponseString());
+        JSONParser jsonParser = new JSONParser();
+        JSONObject errorJson = (JSONObject) jsonParser.parse(processorResponseDTO.getErrorResponseString());
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
+        JSONObject payload = (JSONObject) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        Assert.assertTrue(((String) payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE))
+                .contains(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY_MESSAGE));
+        Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
+                String.valueOf(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY));
+        Assert.assertFalse(processorResponseDTO.isCloseConnection());
+    }
+
+    @Test
+    public void testHandleRequestInvalidScope() throws Exception  {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "liftStatusChange {\\n    id\\n    name\\n }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        // Get schema and parse
+        String graphqlDirPath = "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
+        String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        GraphQLProcessorResponseDTO graphQLProcessorResponseDTO = new GraphQLProcessorResponseDTO();
+        graphQLProcessorResponseDTO.setError(true);
+        graphQLProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR);
+        graphQLProcessorResponseDTO.setErrorMessage("User is NOT authorized to access the Resource");
+        graphQLProcessorResponseDTO.setCloseConnection(false);
+        graphQLProcessorResponseDTO.setId("1");
+        PowerMockito.when(InboundWebsocketProcessorUtil.validateScopes(inboundMessageContext, "liftStatusChange", "1"))
+                .thenReturn(graphQLProcessorResponseDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertTrue(processorResponseDTO.isError());
+        Assert.assertEquals(processorResponseDTO.getErrorMessage(), "User is NOT authorized to access the Resource");
+        Assert.assertEquals(processorResponseDTO.getErrorCode(),
+                WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR);
+        Assert.assertNotNull(processorResponseDTO.getErrorResponseString());
+        JSONParser jsonParser = new JSONParser();
+        JSONObject errorJson = (JSONObject) jsonParser.parse(processorResponseDTO.getErrorResponseString());
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
+        JSONObject payload = (JSONObject) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        Assert.assertEquals(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE),
+                "User is NOT authorized to access the Resource");
+        Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
+                String.valueOf(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR));
+        Assert.assertFalse(processorResponseDTO.isCloseConnection());
+    }
+
+    @Test
+    public void testHandleRequestTooDeep() throws Exception {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "liftStatusChange {\\n    id\\n    name\\n    }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        // Get schema and parse
+        String graphqlDirPath = "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
+        String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        PowerMockito.when(InboundWebsocketProcessorUtil
+                .validateScopes(inboundMessageContext, "liftStatusChange", "1")).thenReturn(responseDTO);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("liftStatusChange", inboundMessageContext))
+                .thenReturn(verbInfoDTO);
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
+        infoDTO.setGraphQLMaxComplexity(4);
+        infoDTO.setGraphQLMaxDepth(1);
+        inboundMessageContext.setInfoDTO(infoDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertTrue(processorResponseDTO.isError());
+        Assert.assertTrue(processorResponseDTO.getErrorMessage().contains(
+                WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE));
+        Assert.assertEquals(processorResponseDTO.getErrorCode(),
+                WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP);
+        Assert.assertNotNull(processorResponseDTO.getErrorResponseString());
+        JSONParser jsonParser = new JSONParser();
+        JSONObject errorJson = (JSONObject) jsonParser.parse(processorResponseDTO.getErrorResponseString());
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
+        JSONObject payload = (JSONObject) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        Assert.assertTrue(((String) payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE))
+                .contains(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE));
+        Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
+                String.valueOf(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP));
+        Assert.assertFalse(processorResponseDTO.isCloseConnection());
+    }
+
+    @Test
+    public void testHandleRequestThrottle() throws Exception {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "liftStatusChange {\\n    id\\n    name\\n    }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        // Get schema and parse
+        String graphqlDirPath = "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
+        String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        PowerMockito.when(InboundWebsocketProcessorUtil
+                .validateScopes(inboundMessageContext, "liftStatusChange", "1")).thenReturn(responseDTO);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("liftStatusChange", inboundMessageContext))
+                .thenReturn(verbInfoDTO);
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
+        infoDTO.setGraphQLMaxComplexity(4);
+        infoDTO.setGraphQLMaxDepth(3);
+        inboundMessageContext.setInfoDTO(infoDTO);
+
+        GraphQLProcessorResponseDTO throttleResponseDTO = new GraphQLProcessorResponseDTO();
+        throttleResponseDTO.setError(true);
+        throttleResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR);
+        throttleResponseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR_MESSAGE);
+        throttleResponseDTO.setId("1");
+
+        PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
+                inboundMessageContext, "1")).thenReturn(throttleResponseDTO);
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertTrue(processorResponseDTO.isError());
+        Assert.assertTrue(processorResponseDTO.getErrorMessage().contains(
+                WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR_MESSAGE));
+        Assert.assertEquals(processorResponseDTO.getErrorCode(),
+                WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR);
+        Assert.assertNotNull(processorResponseDTO.getErrorResponseString());
+        JSONParser jsonParser = new JSONParser();
+        JSONObject errorJson = (JSONObject) jsonParser.parse(processorResponseDTO.getErrorResponseString());
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
+        Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
+        JSONObject payload = (JSONObject) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        Assert.assertTrue(((String) payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE))
+                .contains(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR_MESSAGE));
+        Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
+                String.valueOf(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR));
+        Assert.assertFalse(processorResponseDTO.isCloseConnection());
+    }
+}

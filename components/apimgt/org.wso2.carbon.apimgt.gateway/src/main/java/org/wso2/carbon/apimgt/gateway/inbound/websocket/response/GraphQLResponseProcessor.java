@@ -47,7 +47,8 @@ public class GraphQLResponseProcessor extends ResponseProcessor {
                 InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
         JSONObject graphQLMsg = new JSONObject(msgText);
         if (!responseDTO.isError() && checkIfSubscribeMessageResponse(graphQLMsg)) {
-            if (graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID) != null) {
+            if (graphQLMsg.has(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID)
+                    && graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID) != null) {
                 String operationId = graphQLMsg.getString(
                         GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID);
                 GraphQLOperationDTO graphQLOperationDTO =
