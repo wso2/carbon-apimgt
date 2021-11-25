@@ -153,6 +153,8 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         return graphQLMsg.has(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD)
                 && graphQLMsg.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD) != null
                 && ((JSONObject) graphQLMsg.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD))
+                .has(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_QUERY)
+                && ((JSONObject) graphQLMsg.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD))
                 .get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_QUERY) != null;
     }
 
@@ -204,7 +206,8 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         String validationErrorMessage = queryValidator.validatePayload(
                 inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema(), document);
         if (validationErrorMessage != null) {
-            String error = WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY_MESSAGE + " : " + validationErrorMessage;
+            String error = WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY_MESSAGE + " : "
+                    + validationErrorMessage;
             log.error(error);
             responseDTO.setError(true);
             responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY);
