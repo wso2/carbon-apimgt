@@ -9067,6 +9067,10 @@ components:
           enum:
             - CREATED
             - PUBLISHED
+            - DEPRECATED
+            - RETIRED
+            - BLOCKED
+            - PROTOTYPED
         securityScheme:
           type: array
           description: |
@@ -9324,6 +9328,9 @@ components:
           example: []
           items:
             type: string
+        workflowStatus:
+          type: string
+          example: APPROVED
     ProductAPI:
       title: ProductAPI
       required:
