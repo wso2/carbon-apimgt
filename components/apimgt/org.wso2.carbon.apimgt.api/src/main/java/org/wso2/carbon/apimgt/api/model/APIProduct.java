@@ -126,6 +126,11 @@ public class APIProduct {
      */
     private int revisionId;
 
+    /**
+     * Used to set the workflow status in lifecycle state change workflow
+     */
+    private String workflowStatus = null;
+
     public APIProduct(){}
 
     public APIProduct(APIProductIdentifier id) {
@@ -641,5 +646,15 @@ public class APIProduct {
     public void setVersionTimestamp(String versionTimestamp) {
 
         this.versionTimestamp = versionTimestamp;
+    }
+
+    public String getWorkflowStatus() {
+
+        return workflowStatus;
+    }
+
+    public void setWorkflowStatus(String workflowStatus) {
+
+        this.workflowStatus = workflowStatus;
     }
 }

@@ -3210,7 +3210,13 @@ public abstract class AbstractAPIManager implements APIManager {
 
             GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiProductArtifact != null) {
-                return getApiProduct(registry, apiProductArtifact);
+                APIProduct apiProduct = getApiProduct(registry, apiProductArtifact);
+                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(apiProduct.getUuid(), WF_TYPE_AM_API_STATE);
+                if (workflowDTO != null) {
+                    WorkflowStatus status = workflowDTO.getStatus();
+                    apiProduct.setWorkflowStatus(status.toString());
+                }
+                return apiProduct;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
@@ -3879,6 +3885,19 @@ public abstract class AbstractAPIManager implements APIManager {
             environmentString = String.join(",", apiProduct.getEnvironments());
         }
         apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+
+        // workflow status
+        APIProductIdentifier productIdentifier = apiProduct.getId();
+        WorkflowDTO workflow;
+        String currentApiProductUuid = uuid;
+        if (apiProduct.isRevision() && apiProduct.getRevisionedApiProductId() != null) {
+            currentApiProductUuid = apiProduct.getRevisionedApiProductId();
+        }
+        workflow = APIUtil.getAPIWorkflowStatus(currentApiProductUuid, WF_TYPE_AM_API_STATE);
+        if (workflow != null) {
+            WorkflowStatus status = workflow.getStatus();
+            apiProduct.setWorkflowStatus(status.toString());
+        }
 
         // available tier
         String tiers = null;

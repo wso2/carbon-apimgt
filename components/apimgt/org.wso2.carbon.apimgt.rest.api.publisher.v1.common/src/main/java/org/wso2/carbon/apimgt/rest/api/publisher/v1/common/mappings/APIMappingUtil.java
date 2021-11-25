@@ -2194,6 +2194,7 @@ public class APIMappingUtil {
         productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
+        productDto.setWorkflowStatus(product.getWorkflowStatus());
 
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
