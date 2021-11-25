@@ -28,9 +28,9 @@ public interface DCRClient {
     ClientInfo createApplication(ClientInfo clientInfo)
             throws KeyManagerClientException;
 
-    @RequestLine("GET /{clientId}")
+    @RequestLine("GET /{clientId}?decodeKey={decodeKey}")
     @Headers("Content-Type: application/json")
-    ClientInfo getApplication(@Param("clientId") String clientId)
+    ClientInfo getApplication(@Param("clientId") String clientId, @Param("decodeKey") Boolean decodeKey)
             throws KeyManagerClientException;
 
     @RequestLine("PUT /{clientId}")
