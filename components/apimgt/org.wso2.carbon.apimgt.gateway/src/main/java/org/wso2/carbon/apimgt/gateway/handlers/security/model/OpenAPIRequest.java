@@ -91,7 +91,7 @@ public class OpenAPIRequest implements Request {
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
             String headerKey = header.getKey();
             String value =  header.getValue().iterator().next();
-            headerKey = headerKey.toLowerCase().equals(contentTypeHeader) ? "Content-Type" : headerKey;
+            headerKey = headerKey.equalsIgnoreCase(contentTypeHeader) ? "Content-Type" : headerKey;
             headers.put(headerKey, value);
         }
         String apiResource = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString();
