@@ -53,7 +53,7 @@ public class KeyManagerInfoDTO   {
                     return b;
                 }
             }
-            return null;
+return null;
         }
     }
     private TokenTypeEnum tokenType = TokenTypeEnum.ORIGINAL;

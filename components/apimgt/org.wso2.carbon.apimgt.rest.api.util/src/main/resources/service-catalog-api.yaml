@@ -115,6 +115,7 @@ paths:
       security:
         - OAuth2Security:
             - service_catalog:service_view
+            - apim:api_view
       tags:
         - Services
       parameters:
@@ -247,6 +248,7 @@ paths:
       security:
         - OAuth2Security:
             - service_catalog:service_view
+            - apim:api_view
       operationId: getServiceById
       tags:
         - Services
@@ -361,6 +363,7 @@ paths:
       security:
         - OAuth2Security:
             - service_catalog:service_view
+            - apim:api_view
       operationId: getServiceDefinition
       tags:
         - Services
@@ -402,6 +405,7 @@ paths:
       security:
         - OAuth2Security:
             - service_catalog:service_view
+            - apim:api_view
       operationId: getServiceUsage
       tags:
         - Services
