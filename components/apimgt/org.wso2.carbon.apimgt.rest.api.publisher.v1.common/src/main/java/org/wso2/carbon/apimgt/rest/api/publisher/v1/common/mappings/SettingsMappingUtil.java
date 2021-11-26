@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,9 +50,9 @@ public class SettingsMappingUtil {
      *
      * @param isUserAvailable check if user is logged in
      * @return SettingsDTO
-     * @throws APIManagementException
+     * @throws APIManagementException,IOException
      */
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException {
+    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException, IOException {
 
         SettingsDTO settingsDTO = new SettingsDTO();
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
@@ -80,6 +81,7 @@ public class SettingsMappingUtil {
                     APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
+            Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
             String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
                     APIConstants.AUTHORIZATION_HEADER);
 

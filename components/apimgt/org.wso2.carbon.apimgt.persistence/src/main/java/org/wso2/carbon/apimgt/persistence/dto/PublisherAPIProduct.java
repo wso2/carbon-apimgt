@@ -60,6 +60,8 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private String accessControl; // publisher accessControl : 'restricted', 'all'
     private Set<String> accessControlRoles; // reg has a just String
     private Map<String, String> additionalProperties;
+    private String gatewayVendor;
+
     private String versionTimestamp;
 
     public String getDescription() {
@@ -247,6 +249,14 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
         this.additionalProperties = additionalProperties;
     }
 
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
     public String getVersionTimestamp() {
 
         return versionTimestamp;
@@ -256,7 +266,7 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
 
         this.versionTimestamp = versionTimestamp;
     }
-    
+
     /*
     private String inSequence;
     private String outSequence;

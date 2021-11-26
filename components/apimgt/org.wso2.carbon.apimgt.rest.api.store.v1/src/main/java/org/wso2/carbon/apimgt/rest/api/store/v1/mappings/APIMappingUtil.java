@@ -24,6 +24,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -63,8 +67,11 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
+import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -75,9 +82,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class APIMappingUtil {
 
@@ -264,6 +269,16 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNamesList);
         dto.setKeyManagers(model.getKeyManagers());
+
+        if (model.getGatewayVendor() != null) {
+            dto.setGatewayVendor(model.getGatewayVendor());
+        } else {
+            dto.setGatewayVendor("wso2");
+        }
+        
+        if (model.getAsyncTransportProtocols() != null) {
+            dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
+        }
 
         return dto;
     }
@@ -459,8 +474,15 @@ public class APIMappingUtil {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
             apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, organization));
         }
+
+        // Set Async protocols of API based on the gateway vendor
+        if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
+            apidto.setAsyncTransportProtocols(AdditionalSubscriptionInfoMappingUtil.setEndpointURLsForApiDto(
+                    model.getApi(), organization));
+        }
         return apidto;
     }
+
 
     private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization) throws APIManagementException {
         APIDTO apidto;

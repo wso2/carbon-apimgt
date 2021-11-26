@@ -1991,4 +1991,13 @@ public class OAS3Parser extends APIDefinition {
         return Json.pretty(openAPI);
     }
 
+    @Override
+    public String getVendorFromExtension(String swaggerContent) {
+        return null;
+    }
+
+    @Override
+    public String getType() {
+        return null;
+    }
 }

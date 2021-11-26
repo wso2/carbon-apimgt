@@ -1102,6 +1102,11 @@ public class PublisherCommonUtils {
         } else {
             throw new APIManagementException("KeyManagers value need to be an array");
         }
+
+        // Set default gatewayVendor
+        if (body.getGatewayVendor() == null) {
+            apiToAdd.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        }
         apiToAdd.setOrganization(organization);
         return apiToAdd;
     }
@@ -1139,8 +1144,9 @@ public class PublisherCommonUtils {
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         // Set uri templates
-        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(
-                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()));
+        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
+                API_TYPE_WS.equals(existingAPI.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals
+                (existingAPI.getGatewayVendor()));
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
@@ -1150,6 +1156,7 @@ public class PublisherCommonUtils {
         existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
 
         //updating APi with the new AsyncAPI definition
+        existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
@@ -1607,6 +1614,11 @@ public class PublisherCommonUtils {
             throw new APIManagementException(
                     "Error occurred while adding API Product. API Product with the context " + context + " already " +
                             "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
+        }
+
+        // Set default gatewayVendor
+        if (apiProductDTO.getGatewayVendor() == null) {
+            apiProductDTO.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         }
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);

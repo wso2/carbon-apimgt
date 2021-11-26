@@ -20,15 +20,21 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.wso2.carbon.apimgt.api.model.AsyncProtocolEndpoint;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -51,8 +57,27 @@ public class EnvironmentMappingUtil {
         environmentDTO.setType(environment.getType());
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
+        environmentDTO.setProvider(environment.getProvider());
         environmentDTO.setVhosts(environment.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
+        environmentDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
+                (environment.getAdditionalProperties()));
+
+        ExternalEnvironment parser = APIUtil.getExternalEnvironment(environment.getProvider());
+        if (parser != null) {
+            List<GatewayEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
+            List<AsyncProtocolEndpoint> endpointUrlsList = parser.getExternalEndpointURLs(environment);
+            if (endpointUrlsList != null || endpointUrlsList.size() > 0) {
+                for (AsyncProtocolEndpoint asyncProtocolEndpoint : endpointUrlsList) {
+                    GatewayEnvironmentProtocolURIDTO gatewayEnvironmentProtocolURIDTO =
+                            new GatewayEnvironmentProtocolURIDTO();
+                    gatewayEnvironmentProtocolURIDTO.setProtocol(asyncProtocolEndpoint.getProtocol());
+                    gatewayEnvironmentProtocolURIDTO.setEndpointURI(asyncProtocolEndpoint.getProtocolUrl());
+                    endpointsList.add(gatewayEnvironmentProtocolURIDTO);
+                }
+                environmentDTO.setEndpointURIs(endpointsList);
+            }
+        }
         return environmentDTO;
     }
 
@@ -96,6 +121,24 @@ public class EnvironmentMappingUtil {
         vHostDTO.setWebsubHttpPort(vHost.getWebsubHttpPort());
         vHostDTO.setWebsubHttpsPort(vHost.getWebsubHttpsPort());
         return vHostDTO;
+    }
+
+    /**
+     * Converts AdditionalProperties into a AdditionalPropertiesDTO.
+     *
+     * @param additionalProperties Set of additional properties
+     * @return List<AdditionalPropertyDTO>
+     */
+    public static List<AdditionalPropertyDTO> fromAdditionalPropertiesToAdditionalPropertiesDTO(Map<String,
+            String> additionalProperties) {
+        List<AdditionalPropertyDTO> additionalPropertyDTOList = new ArrayList<>();
+        for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+            AdditionalPropertyDTO additionalPropertyDTO = new AdditionalPropertyDTO();
+            additionalPropertyDTO.setKey(entry.getKey());
+            additionalPropertyDTO.setValue(entry.getValue());
+            additionalPropertyDTOList.add(additionalPropertyDTO);
+        }
+        return additionalPropertyDTOList;
     }
 
     /**

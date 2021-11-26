@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
@@ -26,9 +28,12 @@ public class EnvironmentDTO   {
     private String id = null;
     private String name = null;
     private String displayName = null;
+    private String provider = null;
     private String description = null;
     private Boolean isReadOnly = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
+    private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
+    private List<AdditionalPropertyDTO> additionalProperties = new ArrayList<AdditionalPropertyDTO>();
 
   /**
    **/
@@ -84,6 +89,23 @@ public class EnvironmentDTO   {
 
   /**
    **/
+  public EnvironmentDTO provider(String provider) {
+    this.provider = provider;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2", value = "")
+  @JsonProperty("provider")
+  public String getProvider() {
+    return provider;
+  }
+  public void setProvider(String provider) {
+    this.provider = provider;
+  }
+
+  /**
+   **/
   public EnvironmentDTO description(String description) {
     this.description = description;
     return this;
@@ -135,6 +157,42 @@ public class EnvironmentDTO   {
     this.vhosts = vhosts;
   }
 
+  /**
+   **/
+  public EnvironmentDTO endpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
+    this.endpointURIs = endpointURIs;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("endpointURIs")
+  public List<GatewayEnvironmentProtocolURIDTO> getEndpointURIs() {
+    return endpointURIs;
+  }
+  public void setEndpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
+    this.endpointURIs = endpointURIs;
+  }
+
+  /**
+   **/
+  public EnvironmentDTO additionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalProperties")
+  public List<AdditionalPropertyDTO> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -148,14 +206,17 @@ public class EnvironmentDTO   {
     return Objects.equals(id, environment.id) &&
         Objects.equals(name, environment.name) &&
         Objects.equals(displayName, environment.displayName) &&
+        Objects.equals(provider, environment.provider) &&
         Objects.equals(description, environment.description) &&
         Objects.equals(isReadOnly, environment.isReadOnly) &&
-        Objects.equals(vhosts, environment.vhosts);
+        Objects.equals(vhosts, environment.vhosts) &&
+        Objects.equals(endpointURIs, environment.endpointURIs) &&
+        Objects.equals(additionalProperties, environment.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, isReadOnly, vhosts);
+    return Objects.hash(id, name, displayName, provider, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override
@@ -166,9 +227,12 @@ public class EnvironmentDTO   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
+    sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isReadOnly: ").append(toIndentedString(isReadOnly)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
+    sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

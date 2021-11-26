@@ -307,9 +307,9 @@ public final class APIConstants {
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
-    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_OVERVIEW_TAG = "tags";
     public static final String API_TAG = "Tag";
     public static final String API_STATUS = "STATUS";
@@ -2804,4 +2804,30 @@ public final class APIConstants {
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
+
+    public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
+
+    // Protocol variables
+    public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
+    public static final String HTTPS_TRANSPORT_PROTOCOL_NAME = "https";
+    public static final String WS_TRANSPORT_PROTOCOL_NAME = "ws";
+    public static final String KAFKA_TRANSPORT_PROTOCOL_NAME = "kafka";
+    public static final String AMQP_TRANSPORT_PROTOCOL_NAME = "amqp";
+    public static final String AMQPS_TRANSPORT_PROTOCOL_NAME = "amqps";
+    public static final String AMQP1_TRANSPORT_PROTOCOL_NAME = "amqp1";
+    public static final String MQTT_TRANSPORT_PROTOCOL_NAME = "mqtt";
+    public static final String SECURE_MQTT_TRANSPORT_PROTOCOL_NAME = "secure-mqtt";
+    public static final String WS_MQTT_TRANSPORT_PROTOCOL_NAME = "ws-mqtt";
+    public static final String WSS_MQTT_TRANSPORT_PROTOCOL_NAME = "wss-mqtt";
+    public static final String MQTT5_TRANSPORT_PROTOCOL_NAME = "mqtt5";
+    public static final String NATS_TRANSPORT_PROTOCOL_NAME = "nats";
+    public static final String JMS_TRANSPORT_PROTOCOL_NAME = "jms";
+    public static final String SNS_TRANSPORT_PROTOCOL_NAME = "sns";
+    public static final String SQS_TRANSPORT_PROTOCOL_NAME = "sqs";
+    public static final String STOMP_TRANSPORT_PROTOCOL_NAME = "stomp";
+    public static final String REDIS_TRANSPORT_PROTOCOL_NAME = "redis";
+    public static final String SMF_TRANSPORT_PROTOCOL_NAME = "smf";
+    public static final String SMF_TRANSPORT_PROTOCOL_VERSION = "smf";
+    public static final String SMFS_TRANSPORT_PROTOCOL_NAME = "smfs";
+    public static final String SMFS_TRANSPORT_PROTOCOL_VERSION = "smfs";
 }

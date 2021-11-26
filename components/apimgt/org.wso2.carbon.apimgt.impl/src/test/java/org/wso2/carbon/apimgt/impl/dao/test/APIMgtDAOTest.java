@@ -811,6 +811,24 @@ public class APIMgtDAOTest {
     }
 
     @Test
+    public void testGetAPIGatewayVendorByUUID() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIGatewayVendorByApiUUID",
+                "getAPIGatewayVendorByApiUUID", "1.0.0");
+        API api = new API(apiId);
+        api.setContext("/getAPIGatewayVendorByApiUUID");
+        api.setContextTemplate("/getAPIGatewayVendorByApiUUID/{version}");
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        api.setGatewayVendor("testGatewayVendor");
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+        String gatewayVendor = apiMgtDAO
+                .getGatewayVendorByAPIUUID(apiUUID);
+        assertNotNull(gatewayVendor);
+        assertTrue(gatewayVendor.equals("testGatewayVendor"));
+        apiMgtDAO.deleteAPI(api.getUuid());
+    }
+
+    @Test
     public void testCreateApplicationRegistrationEntry() throws Exception {
         Subscriber subscriber = new Subscriber("testCreateApplicationRegistrationEntry");
         subscriber.setTenantId(-1234);

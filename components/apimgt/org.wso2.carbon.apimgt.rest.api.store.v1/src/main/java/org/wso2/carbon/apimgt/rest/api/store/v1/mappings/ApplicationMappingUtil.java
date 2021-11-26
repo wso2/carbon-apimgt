@@ -42,7 +42,7 @@ import java.util.Set;
 
 public class ApplicationMappingUtil {
 
-    public static ApplicationDTO fromApplicationtoDTO (Application application) {
+    public static ApplicationDTO fromApplicationtoDTO(Application application) throws APIManagementException {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getUUID());
         applicationDTO.setThrottlingPolicy(application.getTier());
