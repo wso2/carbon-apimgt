@@ -102,7 +102,7 @@ public class APIAuthenticationAdminClient {
     private void publishEvent(Object[] objectData) {
 
         EventPublisherEvent cacheInvalidationEvent = new EventPublisherEvent(APIConstants.CACHE_INVALIDATION_STREAM_ID,
-                System.currentTimeMillis(), null, null, objectData);
+                                                                             System.currentTimeMillis(), objectData);
         APIUtil.publishEvent(EventPublisherType.CACHE_INVALIDATION, cacheInvalidationEvent,
                 cacheInvalidationEvent.toString());
     }

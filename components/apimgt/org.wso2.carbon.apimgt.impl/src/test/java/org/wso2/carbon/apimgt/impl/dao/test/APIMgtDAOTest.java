@@ -388,6 +388,7 @@ public class APIMgtDAOTest {
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
         api.setContextTemplate("/context1/{version}");
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
         api.setUUID(UUID.randomUUID().toString());
         api.getId().setId(apiMgtDAO.addAPI(api, -1234, "testOrg"));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
@@ -413,6 +414,7 @@ public class APIMgtDAOTest {
         API api = new API(apiId1);
         api.setContext("/subForward");
         api.setContextTemplate("/subForward/{version}");
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
         api.getId().setId(apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID, "testOrg"));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         // Add a subscription and update state to BLOCKED
@@ -786,6 +788,8 @@ public class APIMgtDAOTest {
         api.setContext("/getAPIVersionsMatchingApiNameAndOrganization");
         api.setContextTemplate("/getAPIVersionsMatchingApiNameAndOrganization/{version}");
         api.setUUID(UUID.randomUUID().toString());
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+
         apiMgtDAO.addAPI(api, -1234, "testOrg");
         APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiNameAndOrganization",
                 "getAPIVersionsMatchingApiNameAndOrganization", "2.0.0");
@@ -793,6 +797,8 @@ public class APIMgtDAOTest {
         api2.setContext("/getAPIVersionsMatchingApiNameAndOrganization");
         api2.setContextTemplate("/getAPIVersionsMatchingApiNameAndOrganization/{version}");
         api2.setUUID(UUID.randomUUID().toString());
+        api2.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+
         apiMgtDAO.addAPI(api2, -1234, "testOrg");
         List<String> versionList = apiMgtDAO
                 .getAPIVersionsMatchingApiNameAndOrganization("getAPIVersionsMatchingApiNameAndOrganization",
@@ -802,6 +808,24 @@ public class APIMgtDAOTest {
         assertTrue(versionList.contains("2.0.0"));
         apiMgtDAO.deleteAPI(api.getUuid());
         apiMgtDAO.deleteAPI(api2.getUuid());
+    }
+
+    @Test
+    public void testGetAPIGatewayVendorByUUID() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIGatewayVendorByApiUUID",
+                "getAPIGatewayVendorByApiUUID", "1.0.0");
+        API api = new API(apiId);
+        api.setContext("/getAPIGatewayVendorByApiUUID");
+        api.setContextTemplate("/getAPIGatewayVendorByApiUUID/{version}");
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        api.setGatewayVendor("testGatewayVendor");
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+        String gatewayVendor = apiMgtDAO
+                .getGatewayVendorByAPIUUID(apiUUID);
+        assertNotNull(gatewayVendor);
+        assertTrue(gatewayVendor.equals("testGatewayVendor"));
+        apiMgtDAO.deleteAPI(api.getUuid());
     }
 
     @Test
@@ -841,6 +865,7 @@ public class APIMgtDAOTest {
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         api.setUUID(UUID.randomUUID().toString());
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
         int internalAPIID2 = apiMgtDAO.addAPI(api, -1234, "org1");
         api.getId().setId(internalAPIID2);
         api.setOrganization("org1");
@@ -917,6 +942,7 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
         api.setApiLevelPolicy(apiPolicy.getPolicyName());
         api.setUUID(UUID.randomUUID().toString());
@@ -1092,6 +1118,7 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/testAddUpdateDeleteBlockCondition");
         api.setContextTemplate("/testAddUpdateDeleteBlockCondition/{version}");
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
         api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234, "testOrg");
         BlockConditionsDTO apiBlockConditionDto = new BlockConditionsDTO();
@@ -1164,6 +1191,7 @@ public class APIMgtDAOTest {
         api.setUriTemplates(getUriTemplateSet());
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
         api.setAsDefaultVersion(true);
         api.setUUID(UUID.randomUUID().toString());
         int apiID = apiMgtDAO.addAPI(api, -1234, "testOrg");
@@ -1198,6 +1226,7 @@ public class APIMgtDAOTest {
         api.setUriTemplates(uriTemplates);
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
         api.setAsDefaultVersion(true);
         api.setUUID(UUID.randomUUID().toString());
         int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");

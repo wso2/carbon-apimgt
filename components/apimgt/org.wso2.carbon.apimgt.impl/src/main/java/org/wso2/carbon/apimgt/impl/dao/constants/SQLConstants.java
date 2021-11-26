@@ -378,6 +378,7 @@ public class SQLConstants {
     public static final String GET_SUBSCRIBED_APIS_SQL =
             " SELECT " +
             "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
+            "   API.API_UUID AS API_UUID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
@@ -1421,8 +1422,8 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS, ORGANIZATION)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_TIMESTAMP)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1634,11 +1635,14 @@ public class SQLConstants {
                     "   UPDATED_BY = ?," +
                     "   UPDATED_TIME = ?, " +
                     "   API_TIER = ?, " +
-                    "   API_TYPE = ? " +
+                    "   API_TYPE = ?, " +
+                    "   GATEWAY_VENDOR = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
     public static final String GET_ORGANIZATION_BY_API_ID = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID = ?";
+
+    public static final String GET_GATEWAY_VENDOR_BY_API_ID = "SELECT GATEWAY_VENDOR FROM AM_API WHERE API_UUID = ?";
 
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
@@ -2627,7 +2631,8 @@ public class SQLConstants {
             " SET" +
             "   API_TIER=?," +
             "   UPDATED_BY=?," +
-            "   UPDATED_TIME=?" +
+            "   UPDATED_TIME=?," +
+            "   GATEWAY_VENDOR=?" +
             " WHERE" +
             "   API_NAME=? AND API_PROVIDER=? AND API_VERSION=? AND API_TYPE='" + APIConstants.API_PRODUCT +"'";
 
@@ -2647,8 +2652,8 @@ public class SQLConstants {
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
-            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, ORGANIZATION) VALUES (?,?,?,?,?,?,?,?,?"
-                    + ",?,?)";
+            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, ORGANIZATION, GATEWAY_VENDOR, VERSION_TIMESTAMP) VALUES (?,?,?,?,?,?,?,?,?"
+                    + ",?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
@@ -3387,8 +3392,8 @@ public class SQLConstants {
     public static final String GET_API_VERSIONS =
             "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND ORGANIZATION = ?";
     public static final String GET_API_VERSIONS_UUID =
-            "SELECT API.API_UUID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
-
+            "SELECT API.API_UUID, API.STATUS, API.API_VERSION, API.API_TYPE, API.VERSION_TIMESTAMP FROM AM_API API WHERE " +
+                    "API.API_PROVIDER = ? AND API.API_NAME = ? ";
     public static class APIRevisionSqlConstants {
         public static final String ADD_API_REVISION =
                 " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY, CREATED_TIME)" +
@@ -3431,7 +3436,9 @@ public class SQLConstants {
         public static final String GET_EARLIEST_REVISION_ID = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? " +
                 "ORDER BY ID ASC LIMIT 1";
         public static final String GET_MOST_RECENT_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE " +
-                "API_UUID = ? ORDER BY ID DESC LIMIT 1";
+                "API_UUID = ? ORDER BY ID DESC FETCH NEXT 1 ROWS ONLY";
+        public static final String GET_MOST_RECENT_REVISION_UUID_MSSQL = "SELECT TOP 1 REVISION_UUID FROM AM_REVISION WHERE " +
+                "API_UUID = ? ORDER BY ID DESC";
         public static final String GET_REVISION_APIID_BY_REVISION_UUID = "SELECT API_UUID, ID FROM AM_REVISION WHERE REVISION_UUID = ?";
         public static final String GET_REVISIONS_BY_API_UUID = "SELECT ID, REVISION_UUID, DESCRIPTION, CREATED_TIME, " +
                 "CREATED_BY FROM AM_REVISION WHERE API_UUID = ? ORDER BY ID";

@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -175,6 +176,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Registry registry;
     protected UserRegistry configRegistry;
     protected ApiMgtDAO apiMgtDAO;
+    protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
@@ -196,6 +198,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
+        environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
+
         try {
             if (username == null) {
 
@@ -252,6 +256,7 @@ public abstract class AbstractAPIManager implements APIManager {
         
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
+        properties.put(APIConstants.ALLOW_MULTIPLE_VERSIONS, APIUtil.isAllowDisplayMultipleVersions());
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance(configMap, properties);
 
     }

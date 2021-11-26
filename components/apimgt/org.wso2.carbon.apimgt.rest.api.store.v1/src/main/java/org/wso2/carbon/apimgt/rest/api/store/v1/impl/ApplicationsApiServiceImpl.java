@@ -472,12 +472,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             applicationDto.setAttributes(applicationAttributes);
         }
 
-        //we do not honor tokenType sent in the body and all the applications are considered of 'JWT' token type
-        //unless the current application is already of 'OAUTH' type
-        if (!ApplicationDTO.TokenTypeEnum.OAUTH.toString().equals(oldApplication.getTokenType())) {
-            applicationDto.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
-        }
-
         //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
 

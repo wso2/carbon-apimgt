@@ -1260,6 +1260,7 @@ public class ApiMgtDAO {
             while (result.next()) {
                 APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                         ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
+                apiIdentifier.setUuid(result.getString("API_UUID"));
 
                 SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
                 subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
@@ -5558,6 +5559,8 @@ public class ApiMgtDAO {
             prepStmt.setString(10, api.getUUID());
             prepStmt.setString(11, APIConstants.CREATED);
             prepStmt.setString(12, organization);
+            prepStmt.setString(13, api.getGatewayVendor());
+            prepStmt.setString(14, api.getVersionTimestamp());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -6913,7 +6916,8 @@ public class ApiMgtDAO {
             prepStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(6, api.getApiLevelPolicy());
             prepStmt.setString(7, api.getType());
-            prepStmt.setString(8, api.getUuid());
+            prepStmt.setString(8, api.getGatewayVendor());
+            prepStmt.setString(9, api.getUuid());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
@@ -8141,6 +8145,37 @@ public class ApiMgtDAO {
             handleException("Error occurred while fetching organization", e);
         }
         return organization;
+    }
+
+    /**
+     * Retrieve the gateway vendor of an API by providing the UUID
+     *
+     * @param apiId UUID of the API
+     * @return gatewayVendor of the API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String getGatewayVendorByAPIUUID(String apiId) throws APIManagementException {
+        String gatewayVendor = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_GATEWAY_VENDOR_BY_API_ID)) {
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiId);
+                result = ps.executeQuery();
+
+                while (result.next()) {
+                    gatewayVendor = result.getString("GATEWAY_VENDOR");
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching gateway vendor" +
+                        " of the API", e);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching gateway vendor of the API with ID " + apiId, e);
+        }
+        return gatewayVendor;
     }
 
     /**
@@ -14285,6 +14320,8 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(9, apiProduct.getUuid());
             prepStmtAddAPIProduct.setString(10, apiProduct.getState());
             prepStmtAddAPIProduct.setString(11, organization);
+            prepStmtAddAPIProduct.setString(12, apiProduct.getGatewayVendor());
+            prepStmtAddAPIProduct.setString(13, apiProduct.getVersionTimestamp());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -14616,10 +14653,11 @@ public class ApiMgtDAO {
             ps.setString(1, product.getProductLevelPolicy());
             ps.setString(2, username);
             ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setString(4, product.getGatewayVendor());
             APIProductIdentifier identifier = product.getId();
-            ps.setString(4, identifier.getName());
-            ps.setString(5, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(6, identifier.getVersion());
+            ps.setString(5, identifier.getName());
+            ps.setString(6, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            ps.setString(7, identifier.getVersion());
             ps.executeUpdate();
 
             int productId = getAPIID(product.getUuid(), conn);
@@ -15924,23 +15962,38 @@ public class ApiMgtDAO {
      * @return set ids
      * @throws APIManagementException
      */
-    public Set<String> getUUIDsOfAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+    public List<API> getAllAPIVersions(String apiName, String apiProvider) throws APIManagementException {
 
-        Set<String> versions = new HashSet<String>();
+        List<API> apiVersions = new ArrayList<API>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS_UUID)) {
             statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
             statement.setString(2, apiName);
             ResultSet resultSet = statement.executeQuery();
+
             while (resultSet.next()) {
-                versions.add(resultSet.getString("API_UUID"));
+                String version = resultSet.getString("API_VERSION");
+                String status = resultSet.getString("STATUS");
+                String versionTimestamp = resultSet.getString("VERSION_TIMESTAMP");
+
+                String uuid = resultSet.getString("API_UUID");
+                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                    // skip api products
+                    continue;
+                }
+                API api = new API(new APIIdentifier(apiProvider, apiName,
+                        version));
+                api.setUuid(uuid);
+                api.setStatus(status);
+                api.setVersionTimestamp(versionTimestamp);
+                apiVersions.add(api);
             }
         } catch (SQLException e) {
             handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
                     e);
         }
-        return versions;
+        return apiVersions;
     }
 
     /**
@@ -16002,8 +16055,9 @@ public class ApiMgtDAO {
 
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID)) {
+             PreparedStatement statement = (connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData().getDriverName().contains("Microsoft") ? connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID_MSSQL) : connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID))) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {

@@ -7908,7 +7908,69 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
-
+  /apis/{apiId}/environments/{envId}/keys:
+    get:
+      tags:
+        - APIs
+      summary: get environment specific API properties
+      description: |
+        This operation can be used to retrieve environment specific API properties from an existing API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/envId'
+      responses:
+        '200':
+          description: |
+            OK.
+            Successful response with environment specific API properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentProperties'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+    put:
+      tags:
+        - APIs
+      summary: Update environment specific API properties
+      description: |
+        This operation can be used to update the environment specific API properties of an existing API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/envId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentProperties'
+        required: true
+      responses:
+        '200':
+          description: |
+            OK.
+            Successful response with environment specific API properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentProperties'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
 components:
   schemas:
     Comment:
@@ -8091,7 +8153,9 @@ components:
         updatedTime:
           type: string
           example : 2021-02-11 09:57:25
-
+        gatewayVendor:
+          type: string
+          example: wso2
     Topic:
       title: Topic object
       required:
@@ -8580,6 +8644,20 @@ components:
               example: false
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
+        gatewayVendor:
+          title: field to identify gateway vendor
+          type: string
+          example:
+            wso2
+        asyncTransportProtocols:
+          type: array
+          description: |
+            Supported transports for the async API (http and/or https).
+          example:
+            - http
+            - https
+          items:
+            type: string
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -8769,6 +8847,9 @@ components:
             - oauth2
           items:
             type: string
+        gatewayVendor:
+          type: string
+          example: wso2
     APIProduct:
       title: API Product object
       required:
@@ -8973,6 +9054,11 @@ components:
           type: string
         lastUpdatedTime:
           type: string
+        gatewayVendor:
+          title: field to identify gateway vendor
+          type: string
+          example:
+            wso2
         apis:
           type: array
           description: |
@@ -9681,7 +9767,7 @@ components:
           type: object
           properties:
             policyId:
-              type: int
+              type: integer
               description: Id of policy
               example: 1
             uuid:
@@ -9709,7 +9795,7 @@ components:
               description: Indicates whether the policy is deployed successfully or not.
               default: false
             tenantId:
-              type: int
+              type: integer
               description: Throttling policy tenant domain id
               example: -1234
             tenantDomain:
@@ -9867,13 +9953,15 @@ components:
     Environment:
       title: Environment
       required:
-        - endpoints
+        - id
         - name
         - serverUrl
         - showInApiConsole
         - type
       type: object
       properties:
+        id:
+          type: string
         name:
           type: string
           example: default
@@ -9886,6 +9974,9 @@ components:
         serverUrl:
           type: string
           example: https://localhost:9443/services/
+        provider:
+          type: string
+          example: wso2
         showInApiConsole:
           type: boolean
           example: true
@@ -9893,6 +9984,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VHost'
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayEnvironmentProtocolURI'
+        additionalProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalProperty'
     EnvironmentList:
       title: Environment List
       type: object
@@ -9906,6 +10005,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    AdditionalProperty:
+      title: Additional Gateway Properties
+      type: object
+      properties:
+        key:
+          type: string
+          example: Organization
+        value:
+          type: string
+          example: wso2
     VHost:
       title: Virtual Host
       type: object
@@ -11195,6 +11304,14 @@ components:
           type: integer
           format: int32
           example: 3600
+    EnvironmentProperties:
+      title: Envionment specific API properties request body
+      type: object
+      additionalProperties:
+        type: string
+      example:
+        productionEndpoint: https://localhost:9443/pizzashack/v1/api/
+        sandboxEndpoint: https://localhost:9443/pizzashack/v1/api/
     AsyncAPISpecificationValidationResponse:
       title: AsyncAPI Specification Validation Response
       required:
@@ -11238,6 +11355,15 @@ components:
               items:
                 type: string
                 example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            gatewayVendor:
+              type: string
+              example: wso2
+            asyncTransportProtocols:
+              type: array
+              description: contains available transports for an async API
+              items:
+                type: string
+                example: http
           description:
             API definition information
         errors:
@@ -11247,6 +11373,19 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
+    GatewayEnvironmentProtocolURI:
+      title: Gateway Environment protocols and URIs
+      required:
+        - protocol
+        - endpointURI
+      type: object
+      properties:
+        protocol:
+          type: string
+          example: default
+        endpointURI:
+          type: string
+          example: default
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -11753,6 +11892,14 @@ components:
       name: tierQuotaType
       description: Filter the subscription base on tier quota type
       in: query
+      schema:
+        type: string
+    envId:
+      name: envId
+      in: path
+      description: |
+        **Env ID** consisting of the **UUID** of the gateway environment.
+      required: true
       schema:
         type: string
   requestBodies:

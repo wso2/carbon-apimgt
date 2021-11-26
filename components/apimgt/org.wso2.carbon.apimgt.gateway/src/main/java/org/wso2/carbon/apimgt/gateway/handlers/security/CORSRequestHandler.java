@@ -132,6 +132,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             CORSRequestHandlerSpan =
                     Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
         }
+        if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping GraphQL subscription handshake request.");
+            }
+            return true;
+        }
         try {
             if (!initializeHeaderValues) {
                 initializeHeaders();

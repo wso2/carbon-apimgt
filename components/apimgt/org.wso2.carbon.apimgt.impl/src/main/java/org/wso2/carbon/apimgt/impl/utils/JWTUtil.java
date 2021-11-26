@@ -79,7 +79,7 @@ public class JWTUtil {
 
         JWSAlgorithm algorithm = jwt.getHeader().getAlgorithm();
         if ((JWSAlgorithm.RS256.equals(algorithm) || JWSAlgorithm.RS512.equals(algorithm) ||
-                JWSAlgorithm.RS384.equals(algorithm))) {
+                JWSAlgorithm.RS384.equals(algorithm)) || JWSAlgorithm.PS256.equals(algorithm)) {
             try {
                 JWSVerifier jwsVerifier = new RSASSAVerifier(publicKey);
                 return jwt.verify(jwsVerifier);

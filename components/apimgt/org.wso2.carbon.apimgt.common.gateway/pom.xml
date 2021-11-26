@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.0.392-SNAPSHOT</version>
+        <version>9.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -53,6 +53,19 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io.wso2</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -82,6 +95,8 @@
                             com.google.gson.annotations.*,
                             org.apache.commons.logging.*,
                             org.wso2.am.analytics.publisher.*;version="${analytics.event.publisher.client.version.range}",
+                            graphql.*; version="${graphql.java.version}",
+                            org.json.simple.*,
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

@@ -158,6 +158,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIType;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -1225,6 +1226,7 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, api.getVersionTimestamp());
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
@@ -8793,6 +8795,17 @@ public final class APIUtil {
         return null;
     }
 
+    public static String getMediationConfigurationFromAPIMConfig(String property) {
+        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        String mediatorConfiguration = apimConfig.getFirstProperty(APIConstants.MEDIATOR_CONFIG + property);
+        if (!StringUtils.isBlank(mediatorConfiguration)) {
+            return mediatorConfiguration;
+        }
+        return null;
+    }
+
     public static List<ConditionDto> extractConditionDto(String base64EncodedString) throws ParseException {
 
         List<ConditionDto> conditionDtoList = new ArrayList<>();
@@ -11337,5 +11350,23 @@ public final class APIUtil {
     public static Map<String, Environment> getReadOnlyGatewayEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiGatewayEnvironments();
+    }
+
+    /**
+     * Get external environments registered with the given name
+     *
+     * @return the external environments
+     */
+    public static ExternalEnvironment getExternalEnvironment(String providerName) {
+        return ServiceReferenceHolder.getInstance().getExternalEnvironment(providerName);
+    }
+
+    /**
+     * Get registered API Definition Parsers as a Map
+     *
+     * @return Map of Registered API Definition Parsers
+     */
+    public static Map<String, org.wso2.carbon.apimgt.api.APIDefinition> getApiDefinitionParsersMap() {
+        return ServiceReferenceHolder.getInstance().getApiDefinitionMap();
     }
 }

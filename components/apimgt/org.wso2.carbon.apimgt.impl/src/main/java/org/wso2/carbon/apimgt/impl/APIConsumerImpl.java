@@ -3593,6 +3593,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "A duplicate application already exists by the name - " + application.getName());
         }
 
+        // Retain the 'DEFAULT' token type of migrated applications unless the token type is changed to 'JWT'.
+        if (APIConstants.DEFAULT_TOKEN_TYPE.equals(existingApp.getTokenType()) &&
+                APIConstants.TOKEN_TYPE_OAUTH.equals(application.getTokenType())) {
+            application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
+        }
+
+        // Prevent the change of token type of applications having 'JWT' token type.
+        if (APIConstants.TOKEN_TYPE_JWT.equals(existingApp.getTokenType()) &&
+                !APIConstants.TOKEN_TYPE_JWT.equals(application.getTokenType())) {
+            throw new APIManagementException(
+                    "Cannot change application token type from " + APIConstants.TOKEN_TYPE_JWT + " to " +
+                            application.getTokenType());
+        }
+
         Subscriber subscriber = application.getSubscriber();
 
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(subscriber.getName());
@@ -5630,10 +5644,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        if (APIUtil.isAllowDisplayMultipleVersions()) {
-            return result;
-        }
-        return filterMultipleVersionedAPIs(result);
+        return result;
     }
 
     @Override

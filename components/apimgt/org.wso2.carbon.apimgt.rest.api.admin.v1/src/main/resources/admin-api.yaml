@@ -2972,6 +2972,45 @@ paths:
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
            "https://127.0.0.1:9443/api/am/admin/v2/tenant-config"'
 
+  ######################################################
+  # The Tenant config schema resource APIs
+  ######################################################
+  /tenant-config-schema:
+    get:
+      tags:
+        - Tenant Config Schema
+      summary: Export a tenant-Config-Schema.
+      description: |
+        This operation can be used to export a tenant-config-schema.json used in deployment.
+      operationId: exportTenantConfigSchema
+      responses:
+        200:
+          description: |
+            OK.
+            Tenant config schema exported successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v2/tenant-config-schema" > tenant-config-schema.json'
 
   ######################################################
   # The "Key Manager Collection" resource API
@@ -3920,8 +3959,7 @@ components:
         subscriptionScopes:
           type: array
           items:
-            $ref: '#/definitions/ScopeInfo'
-          example: []
+            $ref: '#/components/schemas/ScopeInfo'
         owner:
           description: |
             Application created user
@@ -3997,6 +4035,9 @@ components:
           minLength: 1
           type: string
           example: US Region
+        provider:
+          type: string
+          example: wso2
         description:
           maxLength: 1023
           type: string
@@ -4010,6 +4051,14 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/VHost'
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayEnvironmentProtocolURI'
+        additionalProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalProperty'
     EnvironmentList:
       title: Environment List
       type: object
@@ -4055,6 +4104,29 @@ components:
         wssPort:
           type: integer
           example: 8099
+    AdditionalProperty:
+      title: Additional Gateway Properties
+      type: object
+      properties:
+        key:
+          type: string
+          example: Organization
+        value:
+          type: string
+          example: wso2
+    GatewayEnvironmentProtocolURI:
+      title: Gateway Environment protocols and URIs
+      required:
+        - protocol
+        - endpointURI
+      type: object
+      properties:
+        protocol:
+          type: string
+          example: default
+        endpointURI:
+          type: string
+          example: default
     PublishStatus:
       title: Usage publish status
       type: object
@@ -4223,6 +4295,10 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/KeyManagerConfiguration'
+              endpointConfigurations:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyManagerConfiguration'
         analyticsEnabled:
           type: boolean
           description: To determine whether analytics is enabled or not
@@ -4318,27 +4394,39 @@ components:
         introspectionEndpoint:
           type: string
           example: https://localhost:9444/oauth2/introspect
+          deprecated: true
         clientRegistrationEndpoint:
           type: string
           example: https://localhost:9444/keymanager-operations/dcr/register
+          deprecated: true
         tokenEndpoint:
           type: string
           example: https://localhost:9444/oauth2/token
+          deprecated: true
         displayTokenEndpoint:
           type: string
           example: https://localhost:9444/oauth2/token
+          deprecated: true
         revokeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/revoke
+          deprecated: true
         displayRevokeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/revoke
+          deprecated: true
         userInfoEndpoint:
           type: string
           example: https://localhost:9444/oauth2/userinfo?schema=openid
+          deprecated: true
         authorizeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/authorize
+          deprecated: true
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyManagerEndpoint'
         certificates:
           type: object
           properties:
@@ -4361,6 +4449,7 @@ components:
         scopeManagementEndpoint:
           type: string
           example: https://wso2is.com:9444/api/identity/oauth2/v1.0/scopes
+          deprecated: true
         availableGrantTypes:
           type: array
           items:
@@ -4416,12 +4505,27 @@ components:
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
-            Accepted values are EXCHANGED and ORIGINAL.
+            Accepted values are EXCHANGED, DIRECT and BOTH.
           example: EXCHANGED
-          default: ORIGINAL
+          default: DIRECT
           enum:
             - EXCHANGED
-            - ORIGINAL
+            - DIRECT
+            - BOTH
+
+    KeyManagerEndpoint:
+      title: Key Manager Endpoint.
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'token_endpoint'
+        value:
+          type: string
+          example: 'https://localhost:9443/oauth2/token'
     KeyManagerInfo:
       title: Key Manager Info
       required:
@@ -4447,12 +4551,13 @@ components:
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
-             Accepted values are EXCHANGED and ORIGINAL.
+            Accepted values are EXCHANGED, DIRECT and BOTH.
           example: EXCHANGED
-          default: ORIGINAL
+          default: DIRECT
           enum:
             - EXCHANGED
-            - ORIGINAL
+            - DIRECT
+            - BOTH
     KeyManagerConfiguration:
       title: Key Manager Configuration
       type: object

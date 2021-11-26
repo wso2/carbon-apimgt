@@ -19,6 +19,8 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,7 +41,6 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +56,6 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.api.model.Tag;
@@ -108,7 +108,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.TermData;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -163,11 +162,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
     protected RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-        
+
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         boolean transactionCommitted = false;
         boolean tenantFlowStarted = false;
@@ -191,6 +190,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
+            genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, api.getVersionTimestamp());
+
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
             //Attach the API lifecycle
@@ -258,7 +259,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, resourcePath);
             }
-            
+
             //Set permissions to doc path
             String docLocation = RegistryPersistenceDocUtil.getDocumentPath(api.getId().getProviderName(),
                     api.getId().getApiName(), api.getId().getVersion());
@@ -266,7 +267,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                     visibleRoles, docLocation);
-            
+
             registry.commitTransaction();
             api.setUuid(artifact.getId());
             transactionCommitted = true;
@@ -681,17 +682,30 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String apiSourcePath = apiPath.substring(0, prependIndex );
                 String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+                String asyncApiDefinitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
 
                 if (registry.resourceExists(definitionPath)) {
                     Resource apiDocResource = registry.get(definitionPath);
                     String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
                     api.setSwaggerDefinition(apiDocContent);
                 }
-                
+
                 if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                     List<SOAPToRestSequence> list = getSoapToRestSequences(registry, api, Direction.IN);
                     list.addAll(getSoapToRestSequences(registry, api, Direction.OUT));
                     api.setSoapToRestSequences(list);
+                } else if (APIConstants.API_TYPE_WEBSUB.equals(api.getType()) ||
+                        APIConstants.API_TYPE_WS.equals(api.getType()) ||
+                        APIConstants.API_TYPE_SSE.equals(api.getType()) ||
+                        APIConstants.API_TYPE_WEBHOOK.equals(api.getType())) {
+                    if (asyncApiDefinitionPath != null) {
+                        if (registry.resourceExists(asyncApiDefinitionPath)) {
+                            Resource apiDocResource = registry.get(asyncApiDefinitionPath);
+                            String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                            api.setAsyncApiDefinition(apiDocContent);
+                        }
+                    }
                 }
 
                 PublisherAPI pubApi = APIMapper.INSTANCE.toPublisherApi(api) ; 
@@ -974,6 +988,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
                 apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
                 apiInfo.setUpdatedTime(apiResource.getLastModified());
+                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                 publisherAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1011,7 +1026,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             isTenantFlowStarted = holder.isTenantFlowStarted();
             log.debug("Requested query for devportal search: " + searchQuery);
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
-                    isAllowDisplayAPIsWithMultipleStatus());
+                    isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayAPIsWithMultipleVersions());
             log.debug("Modified query for devportal search: " + modifiedQuery);
 
             String userNameLocal;
@@ -1324,6 +1339,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                                 apiInfo.setCreatedTime(String.valueOf(resource.getCreatedTime().getTime()));
                                 apiInfo.setUpdatedTime(resource.getLastModified());
+                                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                                 //apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                                 publisherAPIInfoList.add(apiInfo);
@@ -1353,6 +1369,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     private boolean isAllowDisplayAPIsWithMultipleStatus() {
         if (properties != null) {
             return (boolean) properties.get(APIConstants.ALLOW_MULTIPLE_STATUS);
+        }
+        return false;
+    }
+
+    private boolean isAllowDisplayAPIsWithMultipleVersions() {
+        if (properties != null) {
+            return (boolean) properties.get(APIConstants.ALLOW_MULTIPLE_VERSIONS);
         }
         return false;
     }

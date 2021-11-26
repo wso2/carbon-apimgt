@@ -61,6 +61,7 @@ return null;
     }
     private StateEnum state = null;
     private List<String> securityScheme = new ArrayList<String>();
+    private String gatewayVendor = null;
 
   /**
    * UUID of the api product 
@@ -204,6 +205,23 @@ return null;
     this.securityScheme = securityScheme;
   }
 
+  /**
+   **/
+  public APIProductInfoDTO gatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2", value = "")
+  @JsonProperty("gatewayVendor")
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -221,12 +239,13 @@ return null;
         Objects.equals(provider, apIProductInfo.provider) &&
         Objects.equals(hasThumbnail, apIProductInfo.hasThumbnail) &&
         Objects.equals(state, apIProductInfo.state) &&
-        Objects.equals(securityScheme, apIProductInfo.securityScheme);
+        Objects.equals(securityScheme, apIProductInfo.securityScheme) &&
+        Objects.equals(gatewayVendor, apIProductInfo.gatewayVendor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, securityScheme);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, securityScheme, gatewayVendor);
   }
 
   @Override
@@ -242,6 +261,7 @@ return null;
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("}");
     return sb.toString();
   }
