@@ -15793,6 +15793,8 @@ public class ApiMgtDAO {
                 String version = resultSet.getString("API_VERSION");
                 String status = resultSet.getString("STATUS");
                 String versionTimestamp = resultSet.getString("VERSION_TIMESTAMP");
+                String context = resultSet.getString("CONTEXT");
+                String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
                 String uuid = resultSet.getString("API_UUID");
                 if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
@@ -15800,10 +15802,12 @@ public class ApiMgtDAO {
                     continue;
                 }
                 API api = new API(new APIIdentifier(apiProvider, apiName,
-                        version));
+                        version, uuid));
                 api.setUuid(uuid);
                 api.setStatus(status);
                 api.setVersionTimestamp(versionTimestamp);
+                api.setContext(context);
+                api.setContextTemplate(contextTemplate);
                 apiVersions.add(api);
             }
         } catch (SQLException e) {
