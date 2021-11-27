@@ -8394,6 +8394,8 @@ public class ApiMgtDAO {
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 application = new Application(rs.getString("NAME"), subscriber);
                 application.setId(rs.getInt("APPLICATION_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setTokenType(rs.getString("APP_TYPE"));
                 application.setApplicationWorkFlowStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setDescription(rs.getString("DESCRIPTION"));
@@ -8414,6 +8416,8 @@ public class ApiMgtDAO {
                                     .getString("TOKEN_SCOPE"),
                             rs.getString("INPUTS"), application.getTokenType(),
                             keyManagerConfigurationByUUID.getOrganization(), keyManagerConfigurationByUUID.getName());
+                    request.setMappingId(workflowDTO.getWorkflowReference());
+                    request.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
                     workflowDTO.setAppInfoDTO(request);
                 } else {
                     throw new APIManagementException("Error occured while finding the KeyManager from uuid "
