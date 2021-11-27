@@ -2043,13 +2043,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Update API Product in registry for lifecycle state change
+     *
+     * @param apiProduct    API Product Object
+     * @param currentStatus Current state of API Product
+     * @param newStatus     New state of API Product
+     * @return boolean indicates success or failure
+     * @throws APIManagementException if there is an error when updating API Product for lifecycle state
+     * @throws FaultGatewaysException if there is an error when updating API Product for lifecycle state
+     */
     public boolean updateAPIProductForStateChange(APIProduct apiProduct, String currentStatus, String newStatus)
             throws APIManagementException, FaultGatewaysException {
-        boolean isSuccess = false;
-        String provider = apiProduct.getId().getProviderName();
-        String name = apiProduct.getId().getName();
-        String version = apiProduct.getId().getVersion();
 
+        boolean isSuccess;
+        String provider = apiProduct.getId().getProviderName();
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
@@ -2059,33 +2067,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
-            if (apiProduct != null) {
-
-                if (!currentStatus.equals(newStatus)) {
-                    apiProduct.setState(newStatus);
-
-                    // If API status changed to publish we should add it to recently added APIs list
-                    // this should happen in store-publisher cluster domain if deployment is distributed
-                    // IF new API published we will add it to recently added APIs
-                    Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                            .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
-
-                    if (APIConstants.RETIRED.equals(newStatus)) {
-                        cleanUpPendingSubscriptionCreationProcessesByAPI(apiProduct.getUuid());
-                        apiMgtDAO.removeAllSubscriptions(apiProduct.getUuid());
-                    }
-                    PublisherAPIProduct publisherAPIProduct =  APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
-                    try {
-                        apiPersistenceInstance.updateAPIProduct(new Organization(apiProduct.getOrganization()),
-                                publisherAPIProduct);
-                    } catch (APIPersistenceException e) {
-                        handleException("Error while persisting the updated API Product", e);
-                    }
+            if (!currentStatus.equals(newStatus)) {
+                apiProduct.setState(newStatus);
+                // If API status changed to publish we should add it to recently added APIs list
+                // this should happen in store-publisher cluster domain if deployment is distributed
+                // IF new API published we will add it to recently added APIs
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                        .RECENTLY_ADDED_API_CACHE_NAME).removeAll();
+                if (APIConstants.RETIRED.equals(newStatus)) {
+                    cleanUpPendingSubscriptionCreationProcessesByAPI(apiProduct.getUuid());
+                    apiMgtDAO.removeAllSubscriptions(apiProduct.getUuid());
                 }
-                isSuccess = true;
-            } else {
-                handleException("Couldn't find an API Product with the name - " + name + " and version  " + version);
+                PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
+                try {
+                    apiPersistenceInstance.updateAPIProduct(new Organization(apiProduct.getOrganization()),
+                            publisherAPIProduct);
+                } catch (APIPersistenceException e) {
+                    handleException("Error while persisting the updated API Product", e);
+                }
             }
+            isSuccess = true;
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -3230,6 +3231,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier, String organization)
             throws APIManagementException {
+
         return apiMgtDAO.getLifeCycleEvents(identifier, organization);
     }
 
@@ -4919,6 +4921,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
             } else {
                 API api = apiTypeWrapper.getApi();
+                API api1 = getLightweightAPIByUUID(uuid, orgId);
+                log.info("api" + api1.getId());
                 providerName = api.getId().getProviderName();
                 apiName = api.getId().getApiName();
                 apiContext = api.getContext();
@@ -4960,7 +4964,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.setOrganization(orgId);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     //Sending Notifications to existing subscribers
-                    sendEmailNotification(api);
+                    if (APIConstants.PUBLISHED.equals(targetStatus)) {
+                        sendEmailNotification(api);
+                    }
                     // if retired Delete Existing Gateway Deployments.
                     deleteApiOrApiProductRevisions(uuid, targetStatus, orgId, false);
                 } else {
