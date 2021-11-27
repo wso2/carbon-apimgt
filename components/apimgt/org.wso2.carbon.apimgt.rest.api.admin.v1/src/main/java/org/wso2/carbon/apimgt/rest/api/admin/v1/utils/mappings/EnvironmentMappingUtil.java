@@ -59,6 +59,7 @@ public class EnvironmentMappingUtil {
         envDTO.setId(env.getUuid());
         envDTO.setName(env.getName());
         envDTO.setDisplayName(env.getDisplayName());
+        envDTO.setDescription(env.getDescription());
         envDTO.setProvider(env.getProvider());
         envDTO.setIsReadOnly(env.isReadOnly());
         envDTO.setVhosts(env.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
