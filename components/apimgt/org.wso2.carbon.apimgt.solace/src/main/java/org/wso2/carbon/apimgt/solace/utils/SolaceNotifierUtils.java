@@ -583,4 +583,17 @@ public class SolaceNotifierUtils {
         }
     }
 
+    /**
+     * Check whether there are solace environments registered
+     */
+    public static boolean isSolaceEnvironmentDefined() {
+
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+        for (Environment environment : gatewayEnvironments.values()) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(environment.getProvider())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

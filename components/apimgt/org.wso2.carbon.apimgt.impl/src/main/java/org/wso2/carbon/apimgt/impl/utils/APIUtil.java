@@ -11369,4 +11369,18 @@ public final class APIUtil {
     public static Map<String, org.wso2.carbon.apimgt.api.APIDefinition> getApiDefinitionParsersMap() {
         return ServiceReferenceHolder.getInstance().getApiDefinitionMap();
     }
+
+    /**
+     * Check whether there are external environments registered
+     */
+    public static boolean isAnyExternalGateWayProviderExists() {
+
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+        for (Environment environment : gatewayEnvironments.values()) {
+            if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
