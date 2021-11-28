@@ -53,8 +53,10 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-        apiMgtDAO = ApiMgtDAO.getInstance();
-        process(event);
+        if (SolaceNotifierUtils.isSolaceEnvironmentDefined()) {
+            apiMgtDAO = ApiMgtDAO.getInstance();
+            process(event);
+        }
         return true;
     }
 
