@@ -4921,8 +4921,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
             } else {
                 API api = apiTypeWrapper.getApi();
-                API api1 = getLightweightAPIByUUID(uuid, orgId);
-                log.info("api" + api1.getId());
                 providerName = api.getId().getProviderName();
                 apiName = api.getId().getApiName();
                 apiContext = api.getContext();
