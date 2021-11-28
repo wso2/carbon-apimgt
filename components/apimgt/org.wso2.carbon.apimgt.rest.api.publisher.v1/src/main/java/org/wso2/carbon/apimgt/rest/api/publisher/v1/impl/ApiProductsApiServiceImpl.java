@@ -110,8 +110,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
 
-            boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.equals(apiProduct.getState()) ||
-                    APIStatus.DEPRECATED.equals(apiProduct.getState());
+            boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatus().equals(apiProduct.getState()) ||
+                    APIStatus.DEPRECATED.getStatus().equals(apiProduct.getState());
             List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
             if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
