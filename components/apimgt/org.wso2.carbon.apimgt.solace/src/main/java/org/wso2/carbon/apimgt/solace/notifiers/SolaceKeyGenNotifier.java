@@ -59,11 +59,14 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
      * @throws NotifierException if error occurs when casting event
      */
     private void process(Event event) throws NotifierException {
-        ApplicationRegistrationEvent applicationRegistrationEvent;
-        applicationRegistrationEvent = (ApplicationRegistrationEvent) event;
 
-        if (APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name().equals(event.getType())) {
-            syncSolaceApplicationClientId(applicationRegistrationEvent);
+        if (SolaceNotifierUtils.isSolaceEnvironmentDefined()) {
+            ApplicationRegistrationEvent applicationRegistrationEvent;
+            applicationRegistrationEvent = (ApplicationRegistrationEvent) event;
+
+            if (APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name().equals(event.getType())) {
+                syncSolaceApplicationClientId(applicationRegistrationEvent);
+            }
         }
     }
 

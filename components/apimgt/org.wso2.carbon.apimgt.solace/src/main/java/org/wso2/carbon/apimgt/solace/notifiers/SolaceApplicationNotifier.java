@@ -65,13 +65,16 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
      * @throws NotifierException if error occurs when casting event
      */
     private void process(Event event) throws NotifierException {
-        ApplicationEvent applicationEvent;
-        applicationEvent = (ApplicationEvent) event;
 
-        if (APIConstants.EventType.APPLICATION_DELETE.name().equals(event.getType())) {
-            removeSolaceApplication(applicationEvent);
-        } else if (APIConstants.EventType.APPLICATION_UPDATE.name().equals(event.getType())) {
-            renameSolaceApplication(applicationEvent);
+        if (SolaceNotifierUtils.isSolaceEnvironmentDefined()) {
+            ApplicationEvent applicationEvent;
+            applicationEvent = (ApplicationEvent) event;
+
+            if (APIConstants.EventType.APPLICATION_DELETE.name().equals(event.getType())) {
+                removeSolaceApplication(applicationEvent);
+            } else if (APIConstants.EventType.APPLICATION_UPDATE.name().equals(event.getType())) {
+                renameSolaceApplication(applicationEvent);
+            }
         }
     }
 

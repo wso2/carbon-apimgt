@@ -583,4 +583,17 @@ public class SolaceNotifierUtils {
         }
     }
 
+    public static boolean isSolaceEnvironmentDefined() {
+
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+        boolean isSolaceEnvironmentIncluded = false;
+        for (Map.Entry<String, Environment> entry : gatewayEnvironments.entrySet()) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+                isSolaceEnvironmentIncluded = true;
+                break;
+            }
+        }
+        return isSolaceEnvironmentIncluded;
+    }
+
 }

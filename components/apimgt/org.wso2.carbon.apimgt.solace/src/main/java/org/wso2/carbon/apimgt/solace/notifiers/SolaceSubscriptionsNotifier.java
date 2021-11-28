@@ -60,16 +60,18 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @throws NotifierException if error occurs when casting event
      */
     private void process(Event event) throws NotifierException {
-        SubscriptionEvent subscriptionEvent;
-        subscriptionEvent = (SubscriptionEvent) event;
 
+        if (SolaceNotifierUtils.isSolaceEnvironmentDefined()) {
+            SubscriptionEvent subscriptionEvent;
+            subscriptionEvent = (SubscriptionEvent) event;
 
-        if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
-            crateSubscription(subscriptionEvent);
-        } else if (APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name().equals(event.getType())) {
-            updateSubscription(subscriptionEvent);
-        } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
-            removeSubscription(subscriptionEvent);
+            if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
+                crateSubscription(subscriptionEvent);
+            } else if (APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name().equals(event.getType())) {
+                updateSubscription(subscriptionEvent);
+            } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
+                removeSubscription(subscriptionEvent);
+            }
         }
     }
 
