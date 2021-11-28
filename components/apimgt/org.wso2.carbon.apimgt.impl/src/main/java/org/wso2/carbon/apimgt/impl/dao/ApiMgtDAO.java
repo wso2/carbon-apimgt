@@ -7861,39 +7861,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get API or API Product Identifier by passing the UUID
-     *
-     * @param uuid - Unique UUID of API or API Product
-     * @return Instance of API Identifier or API Product Identifier
-     * @throws APIManagementException If an error occurred when retrieving the identifier
-     */
-    public Identifier getApiOrApiProductIdentifierFromUUID(String uuid) throws APIManagementException {
-
-        Identifier identifier = null;
-        String sql = SQLConstants.GET_API_OR_API_PRODUCT_IDENTIFIER_BY_UUID_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection(); PreparedStatement preparedStatement =
-                connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, uuid);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    String provider = resultSet.getString("API_PROVIDER");
-                    String name = resultSet.getString("API_NAME");
-                    String version = resultSet.getString("API_VERSION");
-                    String type = resultSet.getString("API_TYPE");
-                    if (APIConstants.API_PRODUCT.equals(type)) {
-                        identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-                    } else {
-                        identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve the API or API Product Identifier details for UUID : " + uuid, e);
-        }
-        return identifier;
-    }
-
-    /**
      * Get API Product Identifier by the product's UUID.
      *
      * @param uuid uuid of the API
