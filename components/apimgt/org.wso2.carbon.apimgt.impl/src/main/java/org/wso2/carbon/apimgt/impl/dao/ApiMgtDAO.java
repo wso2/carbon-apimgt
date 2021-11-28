@@ -965,25 +965,25 @@ public class ApiMgtDAO {
             resultSet = ps.executeQuery();
             SubscribedAPI subscribedAPI = null;
             if (resultSet.next()) {
-
-                int applicationId = resultSet.getInt("APPLICATION_ID");
-                Application application = getLightweightApplicationById(conn, applicationId);
+                Identifier identifier;
 
                 if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
-                    APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
+                    identifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
-                    apiProductIdentifier.setProductId(resultSet.getInt("API_ID"));
-                    apiProductIdentifier.setUUID(resultSet.getString("API_UUID"));
-                    subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 } else {
-                    APIIdentifier apiIdentifier = new APIIdentifier(
+                    identifier = new APIIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
-                    apiIdentifier.setId(resultSet.getInt("API_ID"));
-                    apiIdentifier.setUuid(resultSet.getString("API_UUID"));
-                    subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
+                identifier.setId(resultSet.getInt("API_ID"));
+                identifier.setUuid(resultSet.getString("API_UUID"));
+                identifier.setOrganization(resultSet.getString("ORGANIZATION"));
+                int applicationId = resultSet.getInt("APPLICATION_ID");
+                Application application = getLightweightApplicationById(conn, applicationId);
+                application.setSubscriptionCount(getSubscriptionCountByApplicationId(conn, application,
+                        identifier.getOrganization()));
+                subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
 
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));

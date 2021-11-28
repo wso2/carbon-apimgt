@@ -913,10 +913,36 @@ public interface APIConsumer extends APIManager {
      */
     List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
 
+    /**
+     * Retrieve Subscribed APIS by Application.
+     *
+     * @param application The Application Object that represents the Application.
+     * @param offset starting index.
+     * @param limit no of entries to retrieve.
+     * @param organization organization to retrieve.
+     * @return SubscribedAPI set of application.
+     * @throws APIManagementException if failed to retrieve Subscriptions of Application.
+     */
     Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset, Integer limit
             , String organization) throws APIManagementException;
 
-    List<Tier> getThrottlePolicies(int tierApiType, String organization) throws APIManagementException;
+    /**
+     *Retrieves the ThrottlePolicies From organization.
+     *
+     * @param policyType type of Policies to retrieve
+     * @param organization organization to retrieve.
+     * @return List of {@link Tier}
+     * @throws APIManagementException if failed to Retrieve throttling Policies.
+     */
+    List<Tier> getThrottlePolicies(int policyType, String organization) throws APIManagementException;
 
-    Tier getThrottlePolicyByName(String policyId, int policyType, String organization) throws APIManagementException;
+    /**
+     * Retrieve the Policy by Id,type and organization.
+     * @param name name of policy.
+     * @param policyType type of Policy.
+     * @param organization organization organization to retrieve.
+     * @return Tier.
+     * @throws APIManagementException if failed to retrieve policy.
+     */
+    Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
 }

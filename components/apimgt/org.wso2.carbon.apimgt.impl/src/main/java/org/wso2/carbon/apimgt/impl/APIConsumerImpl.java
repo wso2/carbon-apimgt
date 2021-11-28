@@ -3330,7 +3330,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleApplicationNameContainSpacesException("Application name " +
                                                             "cannot contain leading or trailing white spaces");
         }
-        validateApplicationPolicy(application,organization);
+        validateApplicationPolicy(application, organization);
 
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
@@ -5946,8 +5946,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     Tier tier = tiers.get(subscribedApi.getTier().getName());
                     subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi
                             .getTier().getName());
-                    // We do not need to add the modified object again.
-                    // subscribedAPIs.add(subscribedApi);
                 }
             }
         } catch (APIManagementException e) {
@@ -5958,9 +5956,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public List<Tier> getThrottlePolicies(int tierLevel, String organization) throws APIManagementException {
+
         List<Tier> tierList = new ArrayList<>();
         Map<String, Tier> tiers = null;
-        if (tierLevel == APIConstants.TIER_API_TYPE){
+        if (tierLevel == APIConstants.TIER_API_TYPE) {
             tiers = APIUtil.getTiers(tierLevel, organization);
             Set<TierPermission> tierPermissions = getTierPermissions();
             for (TierPermission tierPermission : tierPermissions) {
@@ -5976,13 +5975,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             for (String tierName : deniedTiers) {
                 tiers.remove(tierName);
             }
-        }else if (tierLevel == APIConstants.TIER_APPLICATION_TYPE){
-            if (APIUtil.isOnPremResolver()){
+        } else if (tierLevel == APIConstants.TIER_APPLICATION_TYPE) {
+            if (APIUtil.isOnPremResolver()) {
                 organization = tenantDomain;
             }
             tiers = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, organization);
         }
-        if (tiers!= null){
+        if (tiers != null) {
             tierList.addAll(tiers.values());
         }
         return tierList;

@@ -7934,7 +7934,6 @@ public final class APIUtil {
                 }
 
                 if (limit instanceof RequestCountLimit) {
-
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
                     tier.setRequestCount(countLimit.getRequestCount());

@@ -34,6 +34,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -96,6 +97,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -767,12 +769,39 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Application application = Mockito.mock(Application.class);
         Mockito.when(application.getName()).thenReturn("app");
+        Mockito.when(application.getTier()).thenReturn("tier1");
         PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
-        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "org1")).
+        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "testorg")).
                 thenReturn(false);
+        Map<String,Tier> tierMap = new HashMap<>();
+        tierMap.put("tier1",new Tier("tier1"));
+        PowerMockito.when(APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, "testorg")).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.findTier(tierMap.values(), "tier1")).thenReturn(new Tier("tier1"));
         Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
         assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
+    }
+    @Test
+    public void testAddApplicationInvalidTier() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        Application application = Mockito.mock(Application.class);
+        Mockito.when(application.getName()).thenReturn("app");
+        Mockito.when(application.getTier()).thenReturn("tier1");
+        PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
+        PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
+        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "testorg")).
+                thenReturn(false);
+        Map<String,Tier> tierMap = new HashMap<>();
+        tierMap.put("tier2",new Tier("tier2"));
+        PowerMockito.when(APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, "testorg")).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.findTier(tierMap.values(), "tier1")).thenReturn(null);
+        Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
+        try{
+            apiConsumer.addApplication(application, "userID", "testorg");
+            Assert.fail();
+        }catch (APIManagementException e){
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.TIER_NAME_INVALID);
+        }
     }
 
     @Test
@@ -781,9 +810,14 @@ public class APIConsumerImplTest {
         String appName = "ÅÄÖÅÄÖ";
         Application application = Mockito.mock(Application.class);
         Mockito.when(application.getName()).thenReturn(appName);
+        Mockito.when(application.getTier()).thenReturn("tier1");
+        Map<String,Tier> tierMap = new HashMap<>();
+        tierMap.put("tier1",new Tier("tier1"));
+        PowerMockito.when(APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, "testorg")).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.findTier(tierMap.values(), "tier1")).thenReturn(new Tier("tier1"));
         PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
-        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "org1")).thenReturn(false);
+        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "testorg")).thenReturn(false);
         Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
         assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
     }
@@ -1075,10 +1109,19 @@ public class APIConsumerImplTest {
     public void testTokenTypeChangeWhenUpdatingApplications() throws APIManagementException {
 
         Application oldApplication = new Application("app1", new Subscriber("sub1"));
+        oldApplication.setTier("tier1");
+        oldApplication.setOrganization("testorg");
         Application newApplication = new Application("app1", new Subscriber("sub1"));
+        newApplication.setOrganization("testorg");
+        newApplication.setTier("tier2");
         Mockito.when(apiMgtDAO.getApplicationById(Mockito.anyInt())).thenReturn(oldApplication);
         Mockito.when(apiMgtDAO.getApplicationByUUID(Mockito.anyString())).thenReturn(oldApplication);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        Map<String,Tier> tierMap = new HashMap<>();
+        tierMap.put("tier1",new Tier("tier1"));
+        tierMap.put("tier2",new Tier("tier2"));
+        PowerMockito.when(APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, "testorg")).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.findTier(tierMap.values(), "tier2")).thenReturn(new Tier("tier2"));
 
         // When token type of existing application is 'JWT' and request body contains 'OAUTH' as the token type.
         oldApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
@@ -1220,9 +1263,14 @@ public class APIConsumerImplTest {
     @Test
     public void testAddSubscription() throws APIManagementException {
         API api  = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
         Application application = new Application(1);
         api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("tier1"));
+        api.setAvailableTiers(tiers);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("tier1");
         Mockito.when(apiMgtDAO.addSubscription(Mockito.eq(apiTypeWrapper), Mockito.eq(application), Mockito.anyString(),
                 Mockito.anyString())).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
@@ -1240,6 +1288,31 @@ public class APIConsumerImplTest {
         }
     }
 
+    @Test
+    public void testAddSubscriptionInvalidTier() throws APIManagementException {
+        API api  = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
+        api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+        Application application = new Application(1);
+        api.setStatus(APIConstants.PUBLISHED);
+        Set<Tier> tiers = new HashSet<>();
+        tiers.add(new Tier("tier1"));
+        api.setAvailableTiers(tiers);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiTypeWrapper.setTier("tier2");
+        Mockito.when(apiMgtDAO.addSubscription(Mockito.eq(apiTypeWrapper), Mockito.eq(application), Mockito.anyString(),
+                Mockito.anyString())).thenReturn(1);
+        SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
+        Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
+        try {
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", application);
+            Assert.fail("Invalid Tier error not thrown.");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(),
+                    ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED.getErrorCode());
+        }
+    }
 
 
     @Test

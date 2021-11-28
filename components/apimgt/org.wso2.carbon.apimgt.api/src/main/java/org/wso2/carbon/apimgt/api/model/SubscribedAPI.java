@@ -59,7 +59,6 @@ public class SubscribedAPI {
         this.uuid = uuid;
     }
 
-
     public SubscribedAPI(Application application, APIProductIdentifier identifier) {
         this.application = application;
         this.productId = identifier;
@@ -68,6 +67,16 @@ public class SubscribedAPI {
     public SubscribedAPI(Application application, APIIdentifier identifier) {
         this.application = application;
         this.apiId = identifier;
+    }
+
+    public SubscribedAPI(Subscriber subscriber, Identifier identifier) {
+
+        if (identifier instanceof APIIdentifier) {
+            this.apiId = (APIIdentifier) identifier;
+        } else if (identifier instanceof APIProductIdentifier) {
+            this.productId = (APIProductIdentifier) identifier;
+        }
+        this.subscriber = subscriber;
     }
 
     public void setApplication(Application application) {
@@ -151,7 +160,7 @@ public class SubscribedAPI {
     public String getUUID() {
         return uuid;
     }
-    
+
     public APIProductIdentifier getProductId() {
         return productId;
     }
@@ -209,7 +218,7 @@ public class SubscribedAPI {
     public void setRequestedTier(Tier requestedTier) {
         this.requestedTier = requestedTier;
     }
-    
+
     public Identifier getIdentifier() {
         if (apiId != null) {
             return apiId;

@@ -310,6 +310,7 @@ public class SQLConstants {
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   API.API_TYPE AS API_TYPE, " +
+            "   API.ORGANIZATION AS ORGANIZATION, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
@@ -332,6 +333,7 @@ public class SQLConstants {
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   API.API_TYPE AS API_TYPE, " +
+            "   API.ORGANIZATION AS ORGANIZATION, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
