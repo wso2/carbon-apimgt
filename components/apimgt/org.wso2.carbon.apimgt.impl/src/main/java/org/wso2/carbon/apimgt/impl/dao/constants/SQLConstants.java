@@ -1906,6 +1906,8 @@ public class SQLConstants {
     public static final String GET_APPLICATION_REGISTRATION_ENTRY_BY_SUBSCRIBER_SQL =
             "SELECT " +
             "   APP.APPLICATION_ID," +
+            "   APP.UUID," +
+            "   APP.TOKEN_TYPE AS APP_TYPE," +
             "   APP.NAME," +
             "   APP.SUBSCRIBER_ID," +
             "   APP.APPLICATION_TIER," +
