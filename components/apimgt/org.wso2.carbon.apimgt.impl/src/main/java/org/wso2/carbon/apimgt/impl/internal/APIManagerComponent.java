@@ -305,11 +305,10 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
-
-        } catch (APIManagementException e) {
-            log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
             log.fatal("Error while Creating the database", e);
+        } catch (Exception e) {
+            log.fatal("Error while initializing the API manager component", e);
         }
     }
 
