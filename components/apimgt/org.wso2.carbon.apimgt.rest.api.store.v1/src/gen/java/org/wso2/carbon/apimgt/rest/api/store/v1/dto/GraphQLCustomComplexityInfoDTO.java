@@ -18,10 +18,6 @@ import javax.validation.Valid;
 
 
 
-/**
- * A particular 'field' under a 'type' of a GraphQL schema can take any custom complexity value.
- * This is the DTO that will be used for storing such information.
- */
 public class GraphQLCustomComplexityInfoDTO   {
   
     private String type = null;
