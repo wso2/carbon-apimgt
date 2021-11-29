@@ -20,6 +20,10 @@ import javax.validation.Valid;
 
 
 
+/**
+ * This is the DTO that will be used for storing GraphQL schema related type information.
+ * It will store a type and the list of fields under that particular type.
+ */
 public class GraphQLSchemaTypeDTO   {
   
     private String type = null;

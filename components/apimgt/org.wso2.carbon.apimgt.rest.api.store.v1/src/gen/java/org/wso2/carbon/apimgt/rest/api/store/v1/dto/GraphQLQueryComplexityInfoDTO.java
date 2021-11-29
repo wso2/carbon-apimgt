@@ -21,6 +21,10 @@ import javax.validation.Valid;
 
 
 
+/**
+ * This is the DTO that will be used for storing the query complexity related information. It will store a list of
+ * custom complexities which are associated with a GraphQL schema.
+ */
 public class GraphQLQueryComplexityInfoDTO   {
   
     private List<GraphQLCustomComplexityInfoDTO> list = new ArrayList<GraphQLCustomComplexityInfoDTO>();
