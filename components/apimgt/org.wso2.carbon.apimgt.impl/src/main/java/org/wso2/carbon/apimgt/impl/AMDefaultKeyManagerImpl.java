@@ -426,10 +426,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            encoded = false;
-            String isConsumerKeyEncoded = System.getProperty(ENCODE_CONSUMER_KEY, "false");
-            if (isConsumerKeyEncoded.equalsIgnoreCase("true")) {
-                encoded = true;
+            encoded = Boolean.parseBoolean(System.getProperty(ENCODE_CONSUMER_KEY, "false"));
+            if (encoded == true) {
                 consumerKey = Base64.getUrlEncoder().encodeToString(consumerKey.getBytes(StandardCharsets.UTF_8));
             }
             ClientInfo clientInfo = dcrClient.getApplication(consumerKey, encoded);
@@ -573,10 +571,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
         ClientInfo clientInfo;
         try {
-            encoded = false;
-            String isConsumerKeyEncoded = System.getProperty(ENCODE_CONSUMER_KEY, "false");
-            if (isConsumerKeyEncoded.equalsIgnoreCase("true")) {
-                encoded = true;
+            encoded = Boolean.parseBoolean(System.getProperty(ENCODE_CONSUMER_KEY, "false"));
+
+            if (encoded == true) {
                 consumerKey = Base64.getUrlEncoder().encodeToString(consumerKey.getBytes(StandardCharsets.UTF_8));
             }
             clientInfo = dcrClient.getApplication(consumerKey, encoded);
