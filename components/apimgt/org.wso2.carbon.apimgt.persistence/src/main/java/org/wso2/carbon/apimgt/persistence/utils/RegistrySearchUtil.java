@@ -65,7 +65,7 @@ public class RegistrySearchUtil {
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
-    public static final String CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX = "contextTemplate";
+    private static final String CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX = "contextTemplate";
     public static final String API_DESCRIPTION = "Description";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
     public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
