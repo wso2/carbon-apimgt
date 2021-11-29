@@ -4907,7 +4907,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String apiType;
             String apiVersion;
             String currentStatus;
-            String uuid = apiTypeWrapper.getId().getUUID();
+            String uuid;
             int apiOrApiProductId;
 
             if (apiTypeWrapper.isAPIProduct()) {
@@ -4918,6 +4918,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiType = apiProduct.getType();
                 apiVersion = apiProduct.getId().getVersion();
                 currentStatus = apiProduct.getState();
+                uuid = apiProduct.getUuid();
                 apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
             } else {
                 API api = apiTypeWrapper.getApi();
@@ -4927,7 +4928,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiType = api.getType();
                 apiVersion = api.getId().getVersion();
                 currentStatus = api.getStatus();
-                apiOrApiProductId = apiMgtDAO.getAPIID(api.getId().getUUID());
+                uuid = api.getUuid();
+                apiOrApiProductId = apiMgtDAO.getAPIID(uuid);
             }
 
             WorkflowStatus apiWFState = null;
