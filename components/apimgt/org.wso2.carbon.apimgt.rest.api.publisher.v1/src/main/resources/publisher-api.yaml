@@ -8007,8 +8007,7 @@ paths:
               - Retire
         - name: lifecycleChecklist
           in: query
-          description: |2
-
+          description: |
             Supported checklist items are as follows.
             1. **Deprecate old versions after publishing the API**: Setting this to true will deprecate older versions of a particular API Product when it is promoted to Published state from Created state.
             2. **Requires re-subscription when publishing the API**: If you set this to true, users need to re subscribe to the API Products although they may have subscribed to an older version.
@@ -8024,38 +8023,20 @@ paths:
           description: |
             OK.
             Lifecycle changed successfully.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the changed API. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the API lifecycle has been modified the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkflowResponse'
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         409:
           $ref: '#/components/responses/Conflict'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_publish
@@ -8082,29 +8063,16 @@ paths:
           description: |
             OK.
             Lifecycle state change history returned successfully.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LifecycleHistory'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_publish
@@ -8130,36 +8098,16 @@ paths:
           description: |
             OK.
             Lifecycle state data returned successfully.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LifecycleState'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_publish
@@ -8186,10 +8134,12 @@ paths:
             OK.
             Lifecycle state change pending task removed successfully.
           content: {}
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_publish

@@ -842,7 +842,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("gatewayVendor")
   public String getGatewayVendor() {
@@ -914,7 +914,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "APPROVED", value = "")
   @JsonProperty("workflowStatus")
   public String getWorkflowStatus() {
