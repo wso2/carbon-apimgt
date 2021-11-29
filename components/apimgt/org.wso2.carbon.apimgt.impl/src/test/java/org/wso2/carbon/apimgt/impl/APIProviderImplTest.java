@@ -3102,8 +3102,7 @@ public class APIProviderImplTest {
 
         Mockito.when(apiPersistenceInstance.updateAPIProduct(organization, publisherAPIProduct))
                 .thenReturn(publisherAPIProduct);
-        Assert.assertTrue(apiProvider.updateAPIProductForStateChange(apiProduct, APIConstants.CREATED,
-                APIConstants.PUBLISHED));
+        apiProvider.updateAPIProductForStateChange(apiProduct, APIConstants.CREATED, APIConstants.PUBLISHED);
     }
 
     private void prepareForLCStateChangeOfAPIProduct(APIProviderImplWrapper apiProvider, APIProduct apiProduct)

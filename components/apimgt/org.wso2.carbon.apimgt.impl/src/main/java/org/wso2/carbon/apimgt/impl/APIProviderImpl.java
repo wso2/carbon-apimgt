@@ -2053,10 +2053,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if there is an error when updating API Product for lifecycle state
      * @throws FaultGatewaysException if there is an error when updating API Product for lifecycle state
      */
-    public boolean updateAPIProductForStateChange(APIProduct apiProduct, String currentStatus, String newStatus)
+    public void updateAPIProductForStateChange(APIProduct apiProduct, String currentStatus, String newStatus)
             throws APIManagementException, FaultGatewaysException {
 
-        boolean isSuccess;
         String provider = apiProduct.getId().getProviderName();
         boolean isTenantFlowStarted = false;
         try {
@@ -2086,13 +2085,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     handleException("Error while persisting the updated API Product", e);
                 }
             }
-            isSuccess = true;
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return isSuccess;
     }
 
     public boolean updateAPIforStateChange(API api, String currentStatus, String newStatus)
@@ -4899,7 +4896,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
-            //GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
             String targetStatus;
             String providerName;
             String apiName;
@@ -4909,8 +4905,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String currentStatus;
             String uuid;
             int apiOrApiProductId;
+            boolean isApiProduct = apiTypeWrapper.isAPIProduct();
 
-            if (apiTypeWrapper.isAPIProduct()) {
+            if (isApiProduct) {
                 APIProduct apiProduct = apiTypeWrapper.getApiProduct();
                 providerName = apiProduct.getId().getProviderName();
                 apiName = apiProduct.getId().getName();
@@ -4931,6 +4928,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 uuid = api.getUuid();
                 apiOrApiProductId = apiMgtDAO.getAPIID(uuid);
             }
+            String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
 
             WorkflowStatus apiWFState = null;
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
@@ -4941,8 +4939,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // if the workflow has started, then executor should not fire again
             if (!WorkflowStatus.CREATED.equals(apiWFState)) {
-                response = executeStateChangeWorkflow(wfDTO, currentStatus, action, apiName, apiContext, apiType,
-                        apiVersion, providerName, apiOrApiProductId, uuid);
+                response = executeStateChangeWorkflow(currentStatus, action, apiName, apiContext, apiType,
+                        apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor);
                 // get the workflow state once the executor is executed.
                 wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
                         WorkflowConstants.WF_TYPE_AM_API_STATE);
@@ -4959,7 +4957,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                 targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
                 apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
-                if (!apiTypeWrapper.isAPIProduct()) {
+                if (!isApiProduct) {
                     API api = apiTypeWrapper.getApi();
                     api.setOrganization(orgId);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
@@ -4967,15 +4965,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (APIConstants.PUBLISHED.equals(targetStatus)) {
                         sendEmailNotification(api);
                     }
-                    // if retired Delete Existing Gateway Deployments.
-                    deleteApiOrApiProductRevisions(uuid, targetStatus, orgId, false);
                 } else {
                     APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+                    apiProduct.setOrganization(orgId);
                     changeLifecycle(apiProduct, currentStatus, targetStatus);
-                    // if retired Delete Existing Gateway Deployments.
-                    deleteApiOrApiProductRevisions(uuid, targetStatus, orgId, true);
                 }
-
+                // if retired Delete Existing Gateway Deployments.
+                deleteApiOrApiProductRevisions(uuid, targetStatus, orgId, isApiProduct);
                 recordLCStateChange(currentStatus, targetStatus, uuid);
                 if (log.isDebugEnabled()) {
                     String logMessage = "LC Status changed successfully for artifact with name: " + apiName
@@ -5000,7 +4996,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Execute state change workflow
      *
-     * @param wfDTO             Workflow DTO Object
      * @param currentStatus     Current Status of the API or API Product
      * @param action            LC state change action
      * @param apiName           Name of API or API Product
@@ -5013,10 +5008,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return  APIStateChangeResponse
      * @throws APIManagementException Error when executing the state change workflow
      */
-    private APIStateChangeResponse executeStateChangeWorkflow(WorkflowDTO wfDTO, String currentStatus, String action,
-                                                              String apiName, String apiContext, String apiType,
-                                                              String apiVersion, String providerName,
-                                                              int apiOrApiProductId, String uuid)
+    private APIStateChangeResponse executeStateChangeWorkflow(String currentStatus, String action, String apiName,
+                                                              String apiContext, String apiType, String apiVersion,
+                                                              String providerName, int apiOrApiProductId, String uuid,
+                                                              String gatewayVendor)
             throws APIManagementException {
 
         APIStateChangeResponse response = new APIStateChangeResponse();
@@ -5024,7 +5019,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             WorkflowExecutor apiStateWFExecutor =
              WorkflowExecutorFactory.getInstance().getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
             APIStateWorkflowDTO apiStateWorkflow = setAPIStateWorkflowDTOParameters(currentStatus, action, apiName,
-             apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, apiStateWFExecutor);
+             apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, apiStateWFExecutor);
             WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
             response.setWorkflowResponse(workflowResponse);
         } catch (WorkflowException e) {
@@ -5051,7 +5046,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private APIStateWorkflowDTO setAPIStateWorkflowDTOParameters(String currentStatus, String action, String name,
                                                                  String context, String apiType, String version,
                                                                  String providerName, int apiOrApiProductId,
-                                                                 String uuid, WorkflowExecutor apiStateWFExecutor) {
+                                                                 String uuid, String gatewayVendor,
+                                                                 WorkflowExecutor apiStateWFExecutor) {
 
         WorkflowProperties workflowProperties = getAPIManagerConfiguration().getWorkflowProperties();
         APIStateWorkflowDTO stateWorkflowDTO = new APIStateWorkflowDTO();
@@ -5062,6 +5058,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         stateWorkflowDTO.setApiType(apiType);
         stateWorkflowDTO.setApiVersion(version);
         stateWorkflowDTO.setApiProvider(providerName);
+        stateWorkflowDTO.setGatewayVendor(gatewayVendor);
         stateWorkflowDTO.setCallbackUrl(workflowProperties.getWorkflowCallbackAPI());
         stateWorkflowDTO.setExternalWorkflowReference(apiStateWFExecutor.generateUUID());
         stateWorkflowDTO.setTenantId(tenantId);
@@ -5114,15 +5111,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     *
-     * @param apiName
-     * @param apiType
-     * @param apiContext
-     * @param apiVersion
-     * @param targetStatus
-     * @param provider
-     * @param apiOrApiProductId
-     * @param uuid
+     * @param apiName           Name of the API
+     * @param apiType           API Type
+     * @param apiContext        API or Product context
+     * @param apiVersion        API or Product version
+     * @param targetStatus      Target Lifecycle status
+     * @param provider          Provider of the API or Product
+     * @param apiOrApiProductId unique ID of API or API product
+     * @param uuid              unique UUID of API or API Product
      */
     private void sendLCStateChangeNotification(String apiName, String apiType, String apiContext, String apiVersion,
                                                String targetStatus, String provider, int apiOrApiProductId,
