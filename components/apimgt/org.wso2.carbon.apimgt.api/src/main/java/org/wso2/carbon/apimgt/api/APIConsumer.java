@@ -616,7 +616,17 @@ public interface APIConsumer extends APIManager {
      * @return Set<String>
      * @throws APIManagementException if failed to get the tiers
      */
+    @Deprecated
     Set<String> getDeniedTiers(int providerTenantId) throws APIManagementException;
+
+    /**
+     * Returns a list of Tiers denied based on restrictions defined for API provider tenant domain
+     *
+     * @param organization organization of API provider
+     * @return Set<String>
+     * @throws APIManagementException if failed to get the tiers
+     */
+    Set<String> getDeniedTiers(String organization) throws APIManagementException;
 
     /**
      * Returns a list of TierPermissions

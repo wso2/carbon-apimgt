@@ -224,7 +224,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
-                    apiTypeWrapper);
+                    apiTypeWrapper, organization);
             WorkflowResponse workflowResponse = subscriptionResponse.getWorkflowResponse();
             if (workflowResponse instanceof HttpWorkflowResponse) {
                 String payload = workflowResponse.getJSONPayload();

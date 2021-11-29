@@ -4356,6 +4356,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public Set<String> getDeniedTiers(String organization) throws APIManagementException {
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
+        return getDeniedTiers(tenantId);
+    }
+
+    @Override
     public Set<TierPermission> getTierPermissions() throws APIManagementException {
 
         Set<TierPermission> tierPermissions = new HashSet<TierPermission>();
@@ -5789,19 +5795,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid );
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
-
-                /// populate relavant external info
-                /*
-                // environment
-                String environmentString = null;
-                if (api.getEnvironments() != null) {
-                    environmentString = String.join(",", api.getEnvironments());
-                }
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
-                //CORS . if null is returned, set default config from the configuration
-                if(api.getCorsConfiguration() == null) {
-                    api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
-                }*/
+                api.setOrganization(orgId);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";

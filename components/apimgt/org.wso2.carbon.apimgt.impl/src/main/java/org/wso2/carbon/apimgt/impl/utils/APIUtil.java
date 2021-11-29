@@ -6434,7 +6434,7 @@ public final class APIUtil {
         }
 
         boolean isPaid = false;
-        Tier tier = getTierFromCache(tierName, tenantDomain);
+        Tier tier = getPolicyByName(PolicyConstants.POLICY_LEVEL_SUB, tierName, tenantDomain);
 
         if (tier != null) {
             final Map<String, Object> tierAttributes = tier.getTierAttributes();
@@ -6468,18 +6468,15 @@ public final class APIUtil {
         return false;
     }
 
-    public static Tier getTierFromCache(String tierName, String tenantDomain) throws APIManagementException {
+    public static Map<String, Tier> getTiers(String organization) throws APIManagementException {
 
-        Map<String, Tier> tierMap = null;
-
-        int requestedTenantId = getInternalOrganizationId(tenantDomain);
+        int requestedTenantId = getInternalOrganizationId(organization);
 
         if (requestedTenantId == 0) {
-            tierMap = APIUtil.getAdvancedSubsriptionTiers();
+            return APIUtil.getAdvancedSubsriptionTiers();
         } else {
-            tierMap = APIUtil.getAdvancedSubsriptionTiers(requestedTenantId);
+            return APIUtil.getAdvancedSubsriptionTiers(requestedTenantId);
         }
-        return tierMap.get(tierName);
     }
 
     public static void clearTiersCache(String tenantDomain) {

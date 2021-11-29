@@ -104,7 +104,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, organization);
             //Add pagination section in the response
             Object totalLength = allMatchedApisMap.get("length");
             Integer totalAvailableAPis = 0;
