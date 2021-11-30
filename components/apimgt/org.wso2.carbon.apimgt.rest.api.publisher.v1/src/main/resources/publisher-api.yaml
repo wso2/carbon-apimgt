@@ -1332,6 +1332,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -1387,6 +1388,7 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_create
             - apim:api_manage
@@ -1459,6 +1461,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -1542,6 +1545,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -1615,6 +1619,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -1887,6 +1892,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
             - apim:comment_manage
       x-code-samples:
@@ -2012,6 +2018,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
             - apim:comment_manage
       x-code-samples:
@@ -2178,6 +2185,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
             - apim:comment_manage
       x-code-samples:
@@ -2908,6 +2916,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -2958,6 +2967,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -3993,6 +4003,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -4064,6 +4075,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -4384,6 +4396,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_create
             - apim:api_import_export
@@ -4515,6 +4528,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -4574,6 +4588,7 @@ paths:
                 $ref: '#/components/schemas/Error'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -4604,6 +4619,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -5855,6 +5871,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6008,6 +6025,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6131,6 +6149,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6187,6 +6206,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       operationId: getIsAPIProductOutdated
@@ -6235,6 +6255,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6349,6 +6370,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6521,6 +6543,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6638,6 +6661,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
@@ -6720,6 +6744,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
@@ -6792,6 +6817,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
@@ -7060,6 +7086,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
@@ -7251,6 +7278,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:publisher_settings
       x-code-samples:
         - lang: Curl
@@ -7638,6 +7666,7 @@ paths:
                 $ref: '#/components/schemas/KeyManagerList'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
       x-code-samples:
