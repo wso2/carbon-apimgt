@@ -3270,9 +3270,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             //provider ------provides----> APIProduct
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
 
-            // Make the LC status of the API Product created by default
-            String apiProductStatus = apiProduct.getState() != null ? apiProduct.getState().toUpperCase()
-                    : APIStatus.CREATED.getStatus();
+            String apiProductStatus = apiProduct.getState();
             saveAPIStatus(registry, artifactPath, apiProductStatus);
 
             Set<String> tagSet = apiProduct.getTags();

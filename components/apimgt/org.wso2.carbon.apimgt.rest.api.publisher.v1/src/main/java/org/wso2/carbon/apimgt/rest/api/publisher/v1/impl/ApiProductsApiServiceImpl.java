@@ -768,7 +768,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         String provider = body.getProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
-            validateLCStateOfApiProduct(body);
             APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body,
                     RestApiCommonUtil.getLoggedInUsername(), organization);
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
@@ -797,15 +796,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(UN_AUTHORIZED_ERROR_MESSAGE);
-    }
-
-    private void validateLCStateOfApiProduct(APIProductDTO productDTO) {
-
-        if (productDTO.getState() != null && APIStatus.PUBLISHED.getStatus().equals(productDTO.getState().value()) &&
-                productDTO.getPolicies().isEmpty()) {
-            RestApiUtil.handleBadRequest("Unable to publish the API Product " + productDTO.getId()
-                    + " as the subscription policies are not selected", log);
-        }
     }
 
     @Override
@@ -1114,12 +1104,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private LifecycleStateDTO getLifecycleState(String apiProductId, String organization) {
 
         try {
-            APIProductIdentifier productIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiProductId) != null) {
-                productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
-            } else {
-                productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
-            }
+            APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId,
+                    organization);
             return PublisherCommonUtils.getLifecycleStateInformation(productIdentifier, organization);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -1142,9 +1128,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiProductId);
-            if (apiIdentifierFromTable == null) {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with UUID: " + apiProductId, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, apiProductId));
+            APIProductIdentifier productIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+            if (productIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with UUID: "
+                        + apiProductId, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, apiProductId));
             }
             apiProvider.deleteWorkflowTask(apiProductId);
             return Response.ok().build();

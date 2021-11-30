@@ -1527,17 +1527,8 @@ public class PublisherCommonUtils {
             }
         }
 
-        //only publish api product if tiers are defined
-        if (APIProductDTO.StateEnum.PUBLISHED.equals(apiProductDtoToUpdate.getState())) {
-            //if the already created API product does not have tiers defined and the update request also doesn't
-            //have tiers defined, then the product should not moved to PUBLISHED state.
-            if (originalAPIProduct.getAvailableTiers() == null && apiProductDtoToUpdate.getPolicies() == null) {
-                throw new APIManagementException("Policy needs to be defined before publishing the API Product",
-                        ExceptionCodes.THROTTLING_POLICY_CANNOT_BE_NULL);
-            }
-        }
-
         APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToUpdate, username);
+        product.setState(originalAPIProduct.getState());
         //We do not allow to modify provider,name,version  and uuid. Set the origial value
         APIProductIdentifier productIdentifier = originalAPIProduct.getId();
         product.setID(productIdentifier);
@@ -1633,6 +1624,9 @@ public class PublisherCommonUtils {
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
         productToBeAdded.setOrganization(organization);
+        if (!APIConstants.PROTOTYPED.equals(productToBeAdded.getState())) {
+            productToBeAdded.setState(APIConstants.CREATED);
+        }
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
