@@ -100,7 +100,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private AuthClient authClient;
     private ScopeClient scopeClient;
     private UserClient userClient;
-    private Boolean encoded;
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -426,11 +425,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            encoded = Boolean.parseBoolean(System.getProperty(ENCODE_CONSUMER_KEY, "false"));
-            if (encoded == true) {
-                consumerKey = Base64.getUrlEncoder().encodeToString(consumerKey.getBytes(StandardCharsets.UTF_8));
-            }
-            ClientInfo clientInfo = dcrClient.getApplication(consumerKey, encoded);
+            ClientInfo clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
+                    consumerKey.getBytes(StandardCharsets.UTF_8)));
             return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             if (e.getStatusCode() == 404) {
@@ -571,12 +567,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
         ClientInfo clientInfo;
         try {
-            encoded = Boolean.parseBoolean(System.getProperty(ENCODE_CONSUMER_KEY, "false"));
-
-            if (encoded == true) {
-                consumerKey = Base64.getUrlEncoder().encodeToString(consumerKey.getBytes(StandardCharsets.UTF_8));
-            }
-            clientInfo = dcrClient.getApplication(consumerKey, encoded);
+            clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
+                    consumerKey.getBytes(StandardCharsets.UTF_8)));
             buildDTOFromClientInfo(clientInfo, oAuthApplicationInfo);
         } catch (KeyManagerClientException e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
