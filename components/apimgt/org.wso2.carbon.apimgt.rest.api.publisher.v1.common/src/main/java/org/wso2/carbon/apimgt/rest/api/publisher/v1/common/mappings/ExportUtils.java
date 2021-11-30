@@ -662,6 +662,8 @@ public class ExportUtils {
 
         List<String> productionEndpoints;
         List<String> sandboxEndpoints;
+        List<String> productionFailovers;
+        List<String> sandboxFailovers;
         Set<String> uniqueEndpointURLs = new HashSet<>();
         JsonArray endpointCertificatesDetails = new JsonArray();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -684,8 +686,14 @@ public class ExportUtils {
                     apiDto.getName());
             sandboxEndpoints = getEndpointURLs(endpointConfig, API_DATA_SANDBOX_ENDPOINTS,
                     apiDto.getName());
+            productionFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS,
+                    apiDto.getName());
+            sandboxFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_SANDBOX_FAILOVERS,
+                    apiDto.getName());
             uniqueEndpointURLs.addAll(productionEndpoints); // Remove duplicate and append result
             uniqueEndpointURLs.addAll(sandboxEndpoints);
+            uniqueEndpointURLs.addAll(productionFailovers);
+            uniqueEndpointURLs.addAll(sandboxFailovers);
 
             for (String url : uniqueEndpointURLs) {
                 JsonArray certificateListOfUrl = getEndpointCertificateContentAndMetaData(tenantId, url,
