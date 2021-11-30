@@ -13787,6 +13787,7 @@ public class ApiMgtDAO {
                     String name = rs.getString("NAME");
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
+                    String provider = rs.getString("PROVIDER");
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -13794,6 +13795,7 @@ public class ApiMgtDAO {
                     env.setName(name);
                     env.setDisplayName(displayName);
                     env.setDescription(description);
+                    env.setProvider(provider);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }
@@ -13825,6 +13827,7 @@ public class ApiMgtDAO {
                     String name = rs.getString("NAME");
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
+                    String provider = rs.getString("PROVIDER");
 
                     env = new Environment();
                     env.setId(id);
@@ -13832,6 +13835,7 @@ public class ApiMgtDAO {
                     env.setName(name);
                     env.setDisplayName(displayName);
                     env.setDescription(description);
+                    env.setProvider(provider);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                 }
             }
@@ -13864,6 +13868,7 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, tenantDomain);
                 prepStmt.setString(4, environment.getDisplayName());
                 prepStmt.setString(5, environment.getDescription());
+                prepStmt.setString(6, environment.getProvider());
                 prepStmt.executeUpdate();
 
                 ResultSet rs = prepStmt.getGeneratedKeys();
