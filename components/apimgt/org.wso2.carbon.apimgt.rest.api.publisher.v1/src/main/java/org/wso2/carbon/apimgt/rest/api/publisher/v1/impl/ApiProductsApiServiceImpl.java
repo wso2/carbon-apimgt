@@ -1075,8 +1075,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             } else {
                 productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             }
-            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(productIdentifier, organization))
-                    .build();
+            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(productIdentifier)).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);

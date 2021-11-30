@@ -2101,8 +2101,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
-            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(apiIdentifier, organization))
-                    .build();
+            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(apiIdentifier)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

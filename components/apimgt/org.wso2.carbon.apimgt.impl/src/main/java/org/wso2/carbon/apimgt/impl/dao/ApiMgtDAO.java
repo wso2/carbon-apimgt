@@ -4947,37 +4947,19 @@ public class ApiMgtDAO {
         }
     }
 
-    public List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier, String organization)
-            throws APIManagementException {
+    public List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_LIFECYCLE_EVENT_SQL;
-        String name;
-        String version;
-        String provider;
-
-        if (identifier instanceof APIProductIdentifier) {
-            APIProductIdentifier productIdentifier = (APIProductIdentifier) identifier;
-            name = productIdentifier.getName();
-            version = productIdentifier.getVersion();
-            provider = productIdentifier.getProviderName();
-        } else {
-            APIIdentifier apiIdentifier = (APIIdentifier) identifier;
-            name = apiIdentifier.getName();
-            version = apiIdentifier.getVersion();
-            provider = apiIdentifier.getProviderName();
-        }
+        int apiOrApiProductId = getAPIID(identifier.getUUID());
 
         List<LifeCycleEvent> events = new ArrayList<LifeCycleEvent>();
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
-            prepStmt.setString(2, name);
-            prepStmt.setString(3, version);
-            prepStmt.setString(4, organization);
+            prepStmt.setInt(1, apiOrApiProductId);
             rs = prepStmt.executeQuery();
 
             while (rs.next()) {
@@ -4985,7 +4967,7 @@ public class ApiMgtDAO {
                 event.setApiOrApiProductIdentifier(identifier);
                 String oldState = rs.getString("PREVIOUS_STATE");
                 //event.setOldStatus(oldState != null ? APIStatus.valueOf(oldState) : null);
-                event.setOldStatus(oldState != null ? oldState : null);
+                event.setOldStatus(oldState);
                 //event.setNewStatus(APIStatus.valueOf(rs.getString("NEW_STATE")));
                 event.setNewStatus(rs.getString("NEW_STATE"));
                 event.setUserId(rs.getString("USER_ID"));
