@@ -2076,6 +2076,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (APIConstants.RETIRED.equals(newStatus)) {
                     cleanUpPendingSubscriptionCreationProcessesByAPI(apiProduct.getUuid());
                     apiMgtDAO.removeAllSubscriptions(apiProduct.getUuid());
+                    deleteAPIProductRevisions(apiProduct.getUuid(), tenantDomain);
                 }
                 PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
                 try {
@@ -2131,6 +2132,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (APIConstants.RETIRED.equals(newStatus)) {
                         cleanUpPendingSubscriptionCreationProcessesByAPI(api.getUuid());
                         apiMgtDAO.removeAllSubscriptions(api.getUuid());
+                        deleteAPIRevisions(api.getUuid(), tenantDomain);
                     }
 
                     //updateApiArtifactNew(api, false, false);
@@ -4970,9 +4972,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiProduct.setOrganization(orgId);
                     changeLifecycle(apiProduct, currentStatus, targetStatus);
                 }
-                // if retired Delete Existing Gateway Deployments.
-                deleteApiOrApiProductRevisions(uuid, targetStatus, orgId, isApiProduct);
-                recordLCStateChange(currentStatus, targetStatus, uuid);
+                addLCStateChangeInDatabase(currentStatus, targetStatus, uuid);
                 if (log.isDebugEnabled()) {
                     String logMessage = "LC Status changed successfully for artifact with name: " + apiName
                             + ", version " + apiVersion + ", New Status : " + targetStatus;
@@ -5102,7 +5102,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param uuid              Unique UUID of the artifact
      * @throws APIManagementException   Exception if there are any errors when updating LC state change in database
      */
-    private void recordLCStateChange(String currentStatus, String targetStatus, String uuid)
+    private void addLCStateChangeInDatabase(String currentStatus, String targetStatus, String uuid)
             throws APIManagementException {
         if (!currentStatus.equalsIgnoreCase(targetStatus)) {
             apiMgtDAO.recordAPILifeCycleEvent(uuid, currentStatus.toUpperCase(),
@@ -5140,6 +5140,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Update the lifecycle of API Product in registry
+     *
+     * @param apiProduct API Product object
+     * @param currentState Current state of the API Product
+     * @param targetState Target state of the API Product
+     * @throws APIManagementException Exception when updating the lc state of API Product
+     * @throws FaultGatewaysException Exception when updating the lc state of API Product
+     */
     private void changeLifecycle(APIProduct apiProduct, String currentState, String targetState)
             throws APIManagementException, FaultGatewaysException {
 
