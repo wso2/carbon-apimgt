@@ -104,7 +104,13 @@ public class ServiceEntryMappingUtil {
             if (file.isDirectory()) {
                 ServiceEntry serviceInfo = new ServiceEntry();
                 File metadataFile = getServiceFile(APIConstants.METADATA_FILE, file);
-                File definitionFile = getServiceFile(APIConstants.DEFINITION_FILE, file);
+                File definitionFile;
+                if (file.getName().contains(APIConstants.PROXY_SERVICE_NAME_SUFFIX)
+                        && new File(file.getAbsoluteFile(), APIConstants.DEFINITION_WSDL_FILE).exists()) {
+                    definitionFile = getServiceFile(APIConstants.DEFINITION_WSDL_FILE, file);
+                } else {
+                    definitionFile = getServiceFile(APIConstants.DEFINITION_FILE, file);
+                }
                 String key = null;
                 try {
                     serviceInfo = fromFileToServiceEntry(metadataFile, serviceInfo);

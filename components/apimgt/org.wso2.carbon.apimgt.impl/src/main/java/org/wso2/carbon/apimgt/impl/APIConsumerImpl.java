@@ -150,6 +150,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserAdmin;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
@@ -1268,7 +1269,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
                 if (keyManagerConfiguration == null) {
                     throw new APIManagementException("Key Manager " + keyManagerName + " couldn't found.",
-                            ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                            ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 }
             }
             if (keyManagerConfiguration.isEnabled()) {
@@ -2450,7 +2451,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
             throw new APIManagementException(
                     "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
@@ -2464,7 +2465,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (keyManager == null) {
             throw new APIManagementException(
                     "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
 
         //Get application ID
@@ -3578,6 +3579,34 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "cannot contain leading or trailing white spaces");
         }
 
+        String processedIds;
+
+        if (!existingApp.getName().equals(application.getName())) {
+            processedIds = application.getGroupId();
+        } else {
+            processedIds = getUpdatedGroupIds(existingApp.getGroupId(), application.getGroupId());
+        }
+
+        if (application.getGroupId() != null && APIUtil.isApplicationGroupCombinationExist(
+                application.getSubscriber().getName(), application.getName(), processedIds)) {
+            handleResourceAlreadyExistsException(
+                    "A duplicate application already exists by the name - " + application.getName());
+        }
+
+        // Retain the 'DEFAULT' token type of migrated applications unless the token type is changed to 'JWT'.
+        if (APIConstants.DEFAULT_TOKEN_TYPE.equals(existingApp.getTokenType()) &&
+                APIConstants.TOKEN_TYPE_OAUTH.equals(application.getTokenType())) {
+            application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
+        }
+
+        // Prevent the change of token type of applications having 'JWT' token type.
+        if (APIConstants.TOKEN_TYPE_JWT.equals(existingApp.getTokenType()) &&
+                !APIConstants.TOKEN_TYPE_JWT.equals(application.getTokenType())) {
+            throw new APIManagementException(
+                    "Cannot change application token type from " + APIConstants.TOKEN_TYPE_JWT + " to " +
+                            application.getTokenType());
+        }
+
         Subscriber subscriber = application.getSubscriber();
 
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(subscriber.getName());
@@ -3676,6 +3705,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 application.getTier(), application.getGroupId(), application.getApplicationAttributes(),
                 existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+    }
+
+    /**
+     * Function to find newly added group Ids
+     * 
+     * @param existingGroupIds existing GroupIds
+     * @param updatedGroupIds updated GroupIds
+     * @return
+     */
+    private String getUpdatedGroupIds(String existingGroupIds, String updatedGroupIds) {
+        if (StringUtils.isEmpty(updatedGroupIds)) {
+            return updatedGroupIds;
+        }
+        Set<String> existingGroupIdSet = new HashSet<>();
+        if (existingGroupIds != null && !existingGroupIds.isEmpty()) {
+            existingGroupIdSet.addAll(Arrays.asList(existingGroupIds.split(",")));
+        }
+        Set<String> updatedGroupIdSet = new HashSet<>();
+        updatedGroupIdSet.addAll(Arrays.asList(updatedGroupIds.split(",")));
+        updatedGroupIdSet.removeAll(existingGroupIdSet);
+        updatedGroupIds = String.join(",", updatedGroupIdSet);
+        return updatedGroupIds;
     }
 
     /**
@@ -3947,7 +3998,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException(
                         "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                        ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             }
             Object enableOauthAppCreation =
                     keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
@@ -4563,7 +4614,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerID);
                 if (keyManagerConfiguration == null) {
                     throw new APIManagementException("Key Manager " + keyManagerID + " couldn't found.",
-                            ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                            ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 } else {
                     keyManagerName = keyManagerID;
                     keyManagerID = keyManagerConfiguration.getUuid();
@@ -4629,45 +4680,58 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribeValid;
     }
 
-    public boolean updateApplicationOwner(String userId, Application application) throws APIManagementException {
+    public boolean updateApplicationOwner(String userId, String organization, Application application) throws APIManagementException {
         boolean isAppUpdated;
         String consumerKey;
         String oldUserName = application.getSubscriber().getName();
         String oldTenantDomain = MultitenantUtils.getTenantDomain(oldUserName);
         String newTenantDomain = MultitenantUtils.getTenantDomain(userId);
         if (oldTenantDomain.equals(newTenantDomain)) {
-            if (isSubscriberValid(userId)) {
-                String applicationName = application.getName();
-                if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName)) {
-                    for (APIKey apiKey : application.getKeys()) {
-                        KeyManager keyManager =
-                                KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
-                             /* retrieving OAuth application information for specific consumer key */
-                        consumerKey = apiKey.getConsumerKey();
-                        OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                        if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
-                            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
-                                            getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
-                                    oAuthApplicationInfo.getCallBackURL(), null,
-                                    null, application.getTokenType(), this.tenantDomain, apiKey.getKeyManager());
-                            oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
-                            oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
-                             /* updating the owner of the OAuth application with userId */
-                            OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
-                                    oldUserName);
-                            isAppUpdated = true;
-                            audit.info("Successfully updated the owner of application " + application.getName() +
-                                    " from " + oldUserName + " to " + userId + ".");
-                        } else {
-                            throw new APIManagementException("Unable to retrieve OAuth application information.");
+            if (!isSubscriberValid(userId)) {
+                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+                try {
+                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(newTenantDomain);
+                    UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+                    if (userStoreManager.isExistingUser(userId)) {
+                        if (apiMgtDAO.getSubscriber(userId) == null){
+                            addSubscriber(userId, "");
                         }
+                    } else {
+                        throw new APIManagementException("User " + userId + " doesn't exist in user store");
                     }
-                } else {
-                    throw new APIManagementException("Unable to update application owner to " + userId +
-                            " as this user has an application with the same name. Update owner to another user.");
+                } catch (UserStoreException e) {
+                    throw new APIManagementException("Error while adding user " + userId + " as a subscriber");
+                }
+            }
+            String applicationName = application.getName();
+            if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName, organization)) {
+                for (APIKey apiKey : application.getKeys()) {
+                    KeyManager keyManager =
+                            KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
+                    /* retrieving OAuth application information for specific consumer key */
+                    consumerKey = apiKey.getConsumerKey();
+                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
+                        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
+                                        getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
+                                oAuthApplicationInfo.getCallBackURL(), null,
+                                null, application.getTokenType(), this.tenantDomain, apiKey.getKeyManager());
+                        oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
+                        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
+                        /* updating the owner of the OAuth application with userId */
+                        OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
+                                userId);
+                        isAppUpdated = true;
+                        audit.info("Successfully updated the owner of application " + application.getName() +
+                                " from " + oldUserName + " to " + userId + ".");
+                    } else {
+                        throw new APIManagementException("Unable to retrieve OAuth application information.");
+                    }
                 }
             } else {
-                throw new APIManagementException(userId + " is not a subscriber");
+                throw new APIManagementException("Unable to update application owner to " + userId +
+                        " as this user has an application with the same name. Update owner to another user.");
             }
         } else {
             throw new APIManagementException("Unable to update application owner to " +
@@ -5581,10 +5645,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        if (APIUtil.isAllowDisplayMultipleVersions()) {
-            return result;
-        }
-        return filterMultipleVersionedAPIs(result);
+        return result;
     }
 
     @Override

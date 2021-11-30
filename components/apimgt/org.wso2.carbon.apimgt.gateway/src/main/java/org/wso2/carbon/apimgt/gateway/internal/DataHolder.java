@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +30,9 @@ public class DataHolder {
     private static final DataHolder Instance = new DataHolder();
     private Map<String, List<String>> apiToCertificatesMap = new HashMap();
     private Map<String,String> googleAnalyticsConfigMap = new HashMap<>();
+    private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
+    private boolean isAllApisDeployed = false;
+
     private DataHolder() {
 
     }
@@ -67,5 +72,25 @@ public class DataHolder {
     }
     public String getGoogleAnalyticsConfig(String tenantDomain){
         return googleAnalyticsConfigMap.get(tenantDomain);
+    }
+
+    public Map<String, GraphQLSchemaDTO> getApiToGraphQLSchemaDTOMap() {
+        return apiToGraphQLSchemaDTOMap;
+    }
+
+    public GraphQLSchemaDTO getGraphQLSchemaDTOForAPI(String apiId) {
+        return apiToGraphQLSchemaDTOMap.get(apiId);
+    }
+
+    public void addApiToGraphQLSchemaDTO(String apiId, GraphQLSchemaDTO graphQLSchemaDTO) {
+        apiToGraphQLSchemaDTOMap.put(apiId, graphQLSchemaDTO);
+    }
+
+    public boolean isAllApisDeployed() {
+        return isAllApisDeployed;
+    }
+
+    public void setAllApisDeployed(boolean allApisDeployed) {
+        isAllApisDeployed = allApisDeployed;
     }
 }

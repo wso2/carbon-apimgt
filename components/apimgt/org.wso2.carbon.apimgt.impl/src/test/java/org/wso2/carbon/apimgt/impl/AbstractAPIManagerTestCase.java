@@ -971,8 +971,8 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.getInternalOrganizationId(organization)).thenReturn(-1234);
-        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample", "carbon.super"));
-        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample1", "carbon.super"));
+        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(SAMPLE_API_NAME, "sample", "carbon.super"));
+        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(SAMPLE_API_NAME, "sample1", "carbon.super"));
     }
 
     @Test
@@ -1841,5 +1841,22 @@ public class AbstractAPIManagerTestCase {
 
     private APIProductIdentifier getAPIProductIdentifier(String apiProductName, String provider, String version) {
         return new APIProductIdentifier(provider, apiProductName, version);
+    }
+
+
+    @Test
+    public void testGetAsyncApiDefinition() throws Exception {
+        Organization org = Mockito.mock(Organization.class);
+        PowerMockito.whenNew(Organization.class).withArguments(SAMPLE_TENANT_DOMAIN, null).thenReturn(org);
+
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiPersistenceInstance);
+        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        identifier.setUuid(SAMPLE_RESOURCE_ID);
+        PowerMockito.mockStatic(OASParserUtil.class);
+        String asyncDefinition = "Sample Async Definition";
+        PowerMockito.when(apiPersistenceInstance.getAsyncDefinition(org ,
+                SAMPLE_RESOURCE_ID)).thenReturn(asyncDefinition);
+
+        Assert.assertEquals(abstractAPIManager.getAsyncAPIDefinition(SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN), asyncDefinition);
     }
 }

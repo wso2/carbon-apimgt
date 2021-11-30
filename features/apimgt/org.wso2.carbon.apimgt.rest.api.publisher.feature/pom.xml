@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.0.349-SNAPSHOT</version>
+        <version>9.5.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -136,6 +136,10 @@
            <artifactId>commons-validator</artifactId>
            <version>${commons-validator.version}</version>
        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
+        </dependency>
     </dependencies>
     <reporting>
         <plugins>
@@ -235,6 +239,7 @@
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.solace</bundleDef>
                                 <bundleDef>
                                     org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}
                                 </bundleDef>
@@ -299,6 +304,12 @@
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp:${okhttp.wso2.version}</bundleDef>
                                 <bundleDef>
                                     org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${fasterxml.jackson.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    software.amazon.ion:ion-java:${software.amazon.ion.version}
                                 </bundleDef>
                                 <bundleDef>com.damnhandy.wso2:handy-uri-templates</bundleDef>
                                 <bundleDef>commons-validator:commons-validator:${commons-validator.version}</bundleDef>

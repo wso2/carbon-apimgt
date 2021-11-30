@@ -195,7 +195,7 @@ public final class ImportExportConstants {
 
     public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
 
-    public static final String APIM_VERSION = "v4.0.0";
+    public static final String APIM_VERSION = "v4.1.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
@@ -230,8 +230,8 @@ public final class ImportExportConstants {
 
     //Default values for Endpoints
     public static final String ENDPOINT_URL = "url";
-    public static final String DEFAULT_PRODUCTION_ENDPOINT_URL = "localhost";
-    public static final String DEFAULT_SANDBOX_ENDPOINT_URL = "localhost";
+    public static final String DEFAULT_PRODUCTION_ENDPOINT_URL = "https://localhost";
+    public static final String DEFAULT_SANDBOX_ENDPOINT_URL = "https://localhost";
     public static final String DEFAULT_DYNAMIC_ENDPOINT_URL = "default";
     public static final String DEFAULT_ALGORITHM_CLASS = "org.apache.synapse.endpoints.algorithms.RoundRobin";
     public static final String SOAP_ENDPOINT_TYPE_FOR_JSON = "address";

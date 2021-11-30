@@ -34,12 +34,10 @@ public abstract class AbstractNotifier implements Notifier {
     protected void publishEventToEventHub(Event event) {
         byte[] bytesEncoded = Base64.encodeBase64(new Gson().toJson(event).getBytes());
         Object[] objects = new Object[]{event.getType(), event.getTimeStamp(), new String(bytesEncoded)};
-        org.wso2.carbon.databridge.commons.Event payload = new org.wso2.carbon.databridge.commons.Event(
-                APIConstants.NOTIFICATION_STREAM_ID, System.currentTimeMillis(),
-                null, null, objects);
-        APIUtil.publishEventToEventHub(null, payload);
+        //Decoded event string to be logged in the case of failures and debugging
+        String loggingEvent = event.toString();
         EventPublisherEvent notificationEvent = new EventPublisherEvent(APIConstants.NOTIFICATION_STREAM_ID,
-                System.currentTimeMillis(), null, null, objects);
-        APIUtil.publishEvent(EventPublisherType.NOTIFICATION, notificationEvent, event.toString());
+                System.currentTimeMillis(), objects, loggingEvent);
+        APIUtil.publishEvent(EventPublisherType.NOTIFICATION, notificationEvent, loggingEvent);
     }
 }

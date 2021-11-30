@@ -24,6 +24,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -63,8 +67,11 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
+import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -263,6 +270,16 @@ public class APIMappingUtil {
         dto.setCategories(categoryNamesList);
         dto.setKeyManagers(model.getKeyManagers());
 
+        if (model.getGatewayVendor() != null) {
+            dto.setGatewayVendor(model.getGatewayVendor());
+        } else {
+            dto.setGatewayVendor("wso2");
+        }
+        
+        if (model.getAsyncTransportProtocols() != null) {
+            dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
+        }
+
         return dto;
     }
 
@@ -457,8 +474,15 @@ public class APIMappingUtil {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
             apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, organization));
         }
+
+        // Set Async protocols of API based on the gateway vendor
+        if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
+            apidto.setAsyncTransportProtocols(AdditionalSubscriptionInfoMappingUtil.setEndpointURLsForApiDto(
+                    model.getApi(), organization));
+        }
         return apidto;
     }
+
 
     private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization) throws APIManagementException {
         APIDTO apidto;
@@ -537,6 +561,8 @@ public class APIMappingUtil {
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
         boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
+        boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
+                && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
             if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
                 apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
@@ -544,7 +570,8 @@ public class APIMappingUtil {
             if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
                 apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
             }
-        } else {
+        }
+        if (isWs || isGQLSubscription) {
             apiurLsDTO.setWs(vHost.getWsUrl() + context);
             apiurLsDTO.setWss(vHost.getWssUrl() + context);
         }
@@ -560,7 +587,8 @@ public class APIMappingUtil {
                 if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
                     apiDefaultVersionURLsDTO.setHttps(vHost.getHttpsUrl() + defaultContext);
                 }
-            } else {
+            }
+            if (isWs || isGQLSubscription) {
                 apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
                 apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
             }
@@ -568,6 +596,20 @@ public class APIMappingUtil {
         apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
 
         return apiEndpointURLsDTO;
+    }
+
+    /**
+     * Check if GraphQL API has at least one of SUBSCRIPTION type operations.
+     *
+     * @param apidto GraphQL APIDTO
+     * @return true if subscriptions exists
+     */
+    private static boolean isGraphQLSubscriptionsAvailable(APIDTO apidto) {
+
+        return apidto.getOperations().stream()
+                .filter(apiOperationsDTO -> APIConstants.GRAPHQL_SUBSCRIPTION.equalsIgnoreCase(
+                        apiOperationsDTO.getVerb()))
+                .findAny().orElse(null) != null;
     }
 
     /**

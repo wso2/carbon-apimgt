@@ -50,7 +50,7 @@ jobs:
           - id: 2
             segment: apim-email-secondary-userstore-tests,apim-CORS-tests,apim-publisher-tests
           - id: 3
-            segment: apim-integration-tests-samples,apim-store-tests,apim-integration-tests-graphql,admin-rest-api-tests,rest-api-tests,apim-mediation-tests,apim-integration-tests-without-restarts,apim-integration-tests-without-advance-throttling,apim-urlsafe-JWT-integration-tests
+            segment: apim-integration-tests-samples,apim-store-tests,apim-grant-type-token-tests,apim-integration-tests-graphql,admin-rest-api-tests,rest-api-tests,apim-mediation-tests,apim-integration-tests-without-restarts,apim-integration-tests-without-advance-throttling,apim-urlsafe-JWT-integration-tests
           - id: 4
             segment: apim-streaming-api-tests,apim-JWT-integration-tests,apim-integration-tests-external-idp,apim-integration-tests-workflow
           - id: 5

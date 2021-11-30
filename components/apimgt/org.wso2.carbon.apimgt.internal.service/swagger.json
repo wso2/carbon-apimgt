@@ -1236,9 +1236,9 @@
         "tokenType" : {
           "type" : "string",
           "example" : "EXCHANGED",
-          "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.",
-          "enum" : [ "EXCHANGED", "ORIGINAL" ],
-          "default" : "ORIGINAL"
+          "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
+          "default" : "DIRECT"
         }
       }
     },

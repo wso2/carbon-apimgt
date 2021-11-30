@@ -1079,6 +1079,84 @@ public class APIConsumerImplTest {
     }
 
     @Test
+    public void testTokenTypeChangeWhenUpdatingApplications() throws APIManagementException {
+
+        Application oldApplication = new Application("app1", new Subscriber("sub1"));
+        Application newApplication = new Application("app1", new Subscriber("sub1"));
+        Mockito.when(apiMgtDAO.getApplicationById(Mockito.anyInt())).thenReturn(oldApplication);
+        Mockito.when(apiMgtDAO.getApplicationByUUID(Mockito.anyString())).thenReturn(oldApplication);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+
+        // When token type of existing application is 'JWT' and request body contains 'OAUTH' as the token type.
+        oldApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        newApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+        try {
+            // An exception will be thrown during this operation.
+            apiConsumer.updateApplication(newApplication);
+            Assert.fail("API management exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains(
+                    "Cannot change application token type from " + APIConstants.TOKEN_TYPE_JWT + " to " +
+                            newApplication.getTokenType()));
+        }
+
+        // When token type of existing application is 'JWT' and request body contains 'JWT' as the token type.
+        oldApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        newApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        try {
+            // Token type of newApplication will not change during this operation.
+            apiConsumer.updateApplication(newApplication);
+            Assert.assertEquals(APIConstants.TOKEN_TYPE_JWT, newApplication.getTokenType());
+        } catch (APIManagementException e) {
+            Assert.fail("API management exception is thrown due to an error");
+        }
+
+        // When token type of existing application is 'OAUTH' and request body contains 'OAUTH' as the token type.
+        oldApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+        newApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+        try {
+            // Token type of newApplication will not change during this operation.
+            apiConsumer.updateApplication(newApplication);
+            Assert.assertEquals(APIConstants.TOKEN_TYPE_OAUTH, newApplication.getTokenType());
+        } catch (APIManagementException e) {
+            Assert.fail("API management exception is thrown due to an error");
+        }
+
+        // When token type of existing application is 'OAUTH' and request body contains 'JWT' as the token type.
+        oldApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+        newApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        try {
+            // Token type of newApplication will not change during this operation.
+            apiConsumer.updateApplication(newApplication);
+            Assert.assertEquals(APIConstants.TOKEN_TYPE_JWT, newApplication.getTokenType());
+        } catch (APIManagementException e) {
+            Assert.fail("API management exception is thrown due to an error");
+        }
+
+        // When token type of existing application is 'DEFAULT' and request body contains 'OAUTH' as the token type.
+        oldApplication.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
+        newApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+        try {
+            // Token type of newApplication will change to 'DEFAULT' during this operation.
+            apiConsumer.updateApplication(newApplication);
+            Assert.assertEquals(APIConstants.DEFAULT_TOKEN_TYPE, newApplication.getTokenType());
+        } catch (APIManagementException e) {
+            Assert.fail("API management exception is thrown due to an error");
+        }
+
+        // When token type of existing application is 'DEFAULT' and request body contains 'JWT' as the token type.
+        oldApplication.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
+        newApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        try {
+            // Token type of newApplication will not change during this operation.
+            apiConsumer.updateApplication(newApplication);
+            Assert.assertEquals(APIConstants.TOKEN_TYPE_JWT, newApplication.getTokenType());
+        } catch (APIManagementException e) {
+            Assert.fail("API management exception is thrown due to an error");
+        }
+    }
+
+    @Test
     public void testGetComments() throws APIManagementException {
         Comment comment = new Comment();
         Comment[] comments = new Comment[] { comment };

@@ -33,6 +33,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -582,7 +583,6 @@ public class PublisherCommonUtils {
     public static String validateUserRoles(List<String> inputRoles) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String[] tenantRoleList = APIUtil.getRoleNames(userName);
         boolean isMatched = false;
         String[] userRoleList = null;
 
@@ -592,18 +592,19 @@ public class PublisherCommonUtils {
             userRoleList = APIUtil.getListOfRoles(userName);
         }
         if (inputRoles != null && !inputRoles.isEmpty()) {
-            if (tenantRoleList != null || userRoleList != null) {
+            if (!isMatched && userRoleList != null) {
                 for (String inputRole : inputRoles) {
-                    if (!isMatched && userRoleList != null && APIUtil.compareRoleList(userRoleList, inputRole)) {
+                    if (APIUtil.compareRoleList(userRoleList, inputRole)) {
                         isMatched = true;
-                    }
-                    if (tenantRoleList != null && !APIUtil.compareRoleList(tenantRoleList, inputRole)) {
-                        return "Invalid user roles found in accessControlRole list";
+                        break;
                     }
                 }
                 return isMatched ? "" : "This user does not have at least one role specified in API access control.";
-            } else {
-                return "Invalid user roles found";
+            }
+
+            String roleString = String.join(",", inputRoles);
+            if (!APIUtil.isRoleNameExist(userName, roleString)) {
+                return "Invalid user roles found in accessControlRole list";
             }
         }
         return "";
@@ -689,7 +690,7 @@ public class PublisherCommonUtils {
                 // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
                 // other scope attributes (description, role bindings) in the request payload, replace them with
                 // already defined values for the existing shared scope.
-                if (apiProvider.isScopeKeyAssignedLocally(api.getUuid(), scopeName, api.getOrganization())) {
+                if (apiProvider.isScopeKeyAssignedLocally(api.getId().getApiName(), scopeName, api.getOrganization())) {
                     throw new APIManagementException(
                             "Scope " + scopeName + " is already assigned locally by another API",
                             ExceptionCodes.SCOPE_ALREADY_ASSIGNED);
@@ -867,17 +868,42 @@ public class PublisherCommonUtils {
         ArrayList<String> endpoints = new ArrayList<>();
         org.json.JSONObject endpointConfiguration = new org.json.JSONObject((Map) apiDto.getEndpointConfig());
 
-        // extract sandbox endpoint URL
-        if (!endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-            endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
-                    .getString(APIConstants.API_DATA_URL));
+        if (!endpointConfiguration.isNull(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) && StringUtils.equals(
+                endpointConfiguration.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).toString(),
+                APIConstants.ENDPOINT_TYPE_DEFAULT)) {
+            // if the endpoint type is dynamic, then the validation should be skipped
+            return true;
         }
-        // extract production endpoint URL
-        if (!endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-            endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
-                    .getString(APIConstants.API_DATA_URL));
-        }
+
+        // extract sandbox endpoint URL(s)
+        extractURLsFromEndpointConfig(endpointConfiguration, APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpoints);
+
+        // extract production endpoint URL(s)
+        extractURLsFromEndpointConfig(endpointConfiguration, APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpoints);
+
         return APIUtil.validateEndpointURLs(endpoints);
+    }
+
+    /**
+     * Extract sandbox or production endpoint URLs from endpoint config object.
+     *
+     * @param endpointConfigObj Endpoint config JSON object
+     * @param endpointType      Indicating whether Sandbox or Production endpoints are to be extracted
+     * @param endpoints         List of URLs. Extracted URL(s), if any, are added to this list.
+     */
+    private static void extractURLsFromEndpointConfig(org.json.JSONObject endpointConfigObj, String endpointType,
+            ArrayList<String> endpoints) {
+        if (!endpointConfigObj.isNull(endpointType)) {
+            org.json.JSONObject endpointObj = endpointConfigObj.optJSONObject(endpointType);
+            if (endpointObj != null) {
+                endpoints.add(endpointConfigObj.getJSONObject(endpointType).getString(APIConstants.API_DATA_URL));
+            } else {
+                JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
+                for (int i = 0; i < endpointArray.length(); i++) {
+                    endpoints.add((String) endpointArray.getJSONObject(i).get(APIConstants.API_DATA_URL));
+                }
+            }
+        }
     }
 
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
@@ -1076,6 +1102,11 @@ public class PublisherCommonUtils {
         } else {
             throw new APIManagementException("KeyManagers value need to be an array");
         }
+
+        // Set default gatewayVendor
+        if (body.getGatewayVendor() == null) {
+            apiToAdd.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        }
         apiToAdd.setOrganization(organization);
         return apiToAdd;
     }
@@ -1113,8 +1144,9 @@ public class PublisherCommonUtils {
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         // Set uri templates
-        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(
-                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()));
+        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
+                API_TYPE_WS.equals(existingAPI.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals
+                (existingAPI.getGatewayVendor()));
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
@@ -1124,6 +1156,7 @@ public class PublisherCommonUtils {
         existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
 
         //updating APi with the new AsyncAPI definition
+        existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
@@ -1288,7 +1321,7 @@ public class PublisherCommonUtils {
                     validationResponse.setIsValid(Boolean.TRUE);
                     GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
                     GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
-                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema, null);
+                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(typeRegistry, null);
                     List<APIOperationsDTO> operationArray = APIMappingUtil
                             .fromURITemplateListToOprationList(operationList);
                     graphQLInfo.setOperations(operationArray);
@@ -1581,6 +1614,11 @@ public class PublisherCommonUtils {
             throw new APIManagementException(
                     "Error occurred while adding API Product. API Product with the context " + context + " already " +
                             "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
+        }
+
+        // Set default gatewayVendor
+        if (apiProductDTO.getGatewayVendor() == null) {
+            apiProductDTO.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         }
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);

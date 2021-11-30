@@ -50,7 +50,7 @@ public class SettingsMappingUtil {
      *
      * @param isUserAvailable check if user is logged in
      * @return SettingsDTO
-     * @throws APIManagementException
+     * @throws APIManagementException,IOException
      */
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, String organization) throws APIManagementException,
             IOException {
@@ -82,6 +82,14 @@ public class SettingsMappingUtil {
                     APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
+            Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+            String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
+                    APIConstants.AUTHORIZATION_HEADER);
+
+            if (authorizationHeader == null) {
+                authorizationHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
+            }
+            settingsDTO.setAuthorizationHeader(authorizationHeader);
         }
         return settingsDTO;
     }

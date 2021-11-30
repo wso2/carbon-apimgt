@@ -50,6 +50,7 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -58,6 +59,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -78,7 +80,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -529,6 +530,7 @@ public class GatewayUtils {
         authContext.setAuthenticated(true);
         authContext.setApiKey(jti);
         authContext.setUsername(getEndUserFromJWTValidationInfo(jwtValidationInfo, apiKeyValidationInfoDTO));
+        authContext.setRequestTokenScopes(jwtValidationInfo.getScopes());
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
@@ -547,6 +549,8 @@ public class GatewayUtils {
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
+            authContext.setGraphQLMaxDepth(apiKeyValidationInfoDTO.getGraphQLMaxDepth());
+            authContext.setGraphQLMaxComplexity(apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());
@@ -984,10 +988,17 @@ public class GatewayUtils {
         if (jwtInfoDto.getJwtValidationInfo() != null) {
             jwtInfoDto.setEndUser(getEndUserFromJWTValidationInfo(jwtInfoDto.getJwtValidationInfo(),
                     apiKeyValidationInfoDTO));
-            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null
-                    && jwtInfoDto.getJwtValidationInfo().getClaims().get("sub") != null) {
-                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get("sub");
-                jwtInfoDto.setSub(MultitenantUtils.getTenantAwareUsername(sub));
+            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
+                Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+                if (claims.get(JWTConstants.SUB) != null) {
+                    String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(JWTConstants.SUB);
+                    jwtInfoDto.setSub(sub);
+                }
+                if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
+                    String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().
+                            get(JWTConstants.ORGANIZATIONS);
+                    jwtInfoDto.setOrganizations(organizations);
+                }
             }
         }
 
@@ -1377,5 +1388,9 @@ public class GatewayUtils {
 
     public static TracingTracer getTracingTracer() {
         return ServiceReferenceHolder.getInstance().getTracer();
+    }
+
+    public static boolean isAllApisDeployed () {
+        return DataHolder.getInstance().isAllApisDeployed();
     }
 }

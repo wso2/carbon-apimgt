@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -175,6 +176,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Registry registry;
     protected UserRegistry configRegistry;
     protected ApiMgtDAO apiMgtDAO;
+    protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
@@ -196,6 +198,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
+        environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
+
         try {
             if (username == null) {
 
@@ -252,6 +256,7 @@ public abstract class AbstractAPIManager implements APIManager {
         
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
+        properties.put(APIConstants.ALLOW_MULTIPLE_VERSIONS, APIUtil.isAllowDisplayMultipleVersions());
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance(configMap, properties);
 
     }
@@ -1674,13 +1679,13 @@ public abstract class AbstractAPIManager implements APIManager {
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
      * The different versions of the same API will not be take into consideration.
      *
-     * @param uuid API UUID
+     * @param apiName API name
      * @param scopeKey      candidate scope key
      * @param organization   organization
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */
-    public boolean isScopeKeyAssignedLocally(String uuid, String scopeKey, String organization)
+    public boolean isScopeKeyAssignedLocally(String apiName, String scopeKey, String organization)
             throws APIManagementException {
 
         if (log.isDebugEnabled()) {
@@ -1688,7 +1693,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     + " in organization: " + organization);
         }
         int tenantId = APIUtil.getInternalOrganizationId(organization);
-        return apiMgtDAO.isScopeKeyAssignedLocally(uuid, scopeKey, tenantId, organization);
+        return apiMgtDAO.isScopeKeyAssignedLocally(apiName, scopeKey, tenantId, organization);
     }
 
     public boolean isApiNameExist(String apiName) throws APIManagementException {

@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
@@ -238,6 +239,44 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response apisApiIdAsyncapiPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "apiDefinition", required = false)  String apiDefinition, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) throws APIManagementException{
         return delegate.apisApiIdAsyncapiPut(apiId, ifMatch, apiDefinition, url, fileInputStream, fileDetail, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/environments/{envId}/keys")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "get environment specific API properties", notes = "This operation can be used to retrieve environment specific API properties from an existing API. ", response = String.class, responseContainer = "Map", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with environment specific API properties ", response = Map.class, responseContainer = "Map"),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response apisApiIdEnvironmentsEnvIdKeysGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId) throws APIManagementException{
+        return delegate.apisApiIdEnvironmentsEnvIdKeysGet(apiId, envId, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/environments/{envId}/keys")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update environment specific API properties", notes = "This operation can be used to update the environment specific API properties of an existing API. ", response = String.class, responseContainer = "Map", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with environment specific API properties ", response = Map.class, responseContainer = "Map"),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response apisApiIdEnvironmentsEnvIdKeysPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId, @ApiParam(value = "" ,required=true) Map<String, String> requestBody) throws APIManagementException{
+        return delegate.apisApiIdEnvironmentsEnvIdKeysPut(apiId, envId, requestBody, securityContext);
     }
 
     @POST

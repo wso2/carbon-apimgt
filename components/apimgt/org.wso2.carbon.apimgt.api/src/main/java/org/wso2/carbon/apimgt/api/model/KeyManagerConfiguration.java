@@ -35,14 +35,10 @@ public class KeyManagerConfiguration {
     private String tenantDomain;
 
     public enum TokenType {
-        EXCHANGED, ORIGINAL
+        EXCHANGED, DIRECT, BOTH
     }
 
-    public enum IdpTypeOfExchangedTokens {
-        Okta, KeyCloak, Auth0, PingFederate, ForgeRock, Microsoft
-    }
-
-    private TokenType tokenType = TokenType.ORIGINAL;
+    private TokenType tokenType = TokenType.DIRECT;
 
     private Map<String, Object> configuration = new HashMap<>();
 

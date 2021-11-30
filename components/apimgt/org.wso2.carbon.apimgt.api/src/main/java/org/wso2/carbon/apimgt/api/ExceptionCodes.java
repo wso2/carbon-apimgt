@@ -110,6 +110,8 @@ public enum ExceptionCodes implements ErrorHandler {
     DEPLOYMENT_ID_NOT_FOUND(900355, "Deployment Id Not Found", 400, "Deployment Id Not Found"),
     EXISTING_DEPLOYMENT_NOT_FOUND(900356, "Existing Deployment Not Found", 404, "Deployment with %s not found"),
     ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
+    INVALID_ENV_API_PROP_CONFIG(900358, "Invalid environment specific api property config", 400,
+            "Environment specific api property config is not valid. %s", false),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -391,7 +393,8 @@ public enum ExceptionCodes implements ErrorHandler {
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
             "required configuration"),
     KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exists", 409, "Key Manager Already Exists"),
-    KEY_MANAGER_NOT_FOUND(901403, "Key Manager not found", 400, "Key Manager not found"),
+    KEY_MANAGER_NOT_REGISTERED(901403, "Key Manager not Registered", 400, "Key Manager not Registered"),
+    KEY_MANAGER_NOT_FOUND(901411, "Key Manager not Found", 404, "Key Manager not found"),
     KEY_MANAGER_NAME_EMPTY(901404,
             "Key Manager name cannot be empty", 400,"Key Manager name cannot be empty"),
     KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901405, "Key Manager doesn't support generating OAuth applications", 400,

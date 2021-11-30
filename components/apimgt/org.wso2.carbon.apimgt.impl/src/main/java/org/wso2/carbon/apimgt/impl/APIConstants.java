@@ -280,6 +280,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_NAME = "overview_name";
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
+    public static final String API_OVERVIEW_VERSION_TIMESTAMP = "overview_versionTimestamp";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
@@ -306,6 +307,7 @@ public final class APIConstants {
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
     public static final String API_OVERVIEW_TAG = "tags";
@@ -440,6 +442,7 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
     public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + ".ConvertClaimsToConsumerDialect";
 
+    public static final String MEDIATOR_CONFIG = "MediatorConfigs.";
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
     public static final String API_SECURITY = "APISecurity";
@@ -555,6 +558,7 @@ public final class APIConstants {
     public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
     public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
+    public static final String TOKEN_TYPE_OAUTH = "OAUTH";
     public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
@@ -596,6 +600,7 @@ public final class APIConstants {
     // Constants for for api quota limit feature
     public static final String API_QUOTA_LIMIT = "ResourceQuotaLimit.";
     public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "EnableAPIQuotaLimit";
+    public static final String JWKS_URI = "jwksUri";
 
     public static class TokenStatus {
 
@@ -686,6 +691,10 @@ public final class APIConstants {
     public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT = "WebSubHttpsEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
+    public static final String API_GATEWAY_PROVIDER = "Provider";
+    public static final String API_GATEWAY_ADDITIONAL_PROPERTIES = "Properties";
+    public static final String API_GATEWAY_ADDITIONAL_PROPERTY = "Property";
+
 
     public static final String CACHE_CONFIGS = "CacheConfigurations.";
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
@@ -1244,6 +1253,7 @@ public final class APIConstants {
     public static final String API_TYPE = "API_TYPE";
     public static final String HTTP_VERB = "HTTP_VERB";
     public static final String GRAPHQL_API = "GRAPHQL";
+    public static final String GRAPHQL_SUBSCRIPTION_REQUEST = "isGraphqlSubscriptionRequest";
     public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
     public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
     public static final String GRAPHQL_API_OPERATION_VERB_INFO_DTO = "OPERATION_VERB_INFO_DTO";
@@ -1273,6 +1283,9 @@ public final class APIConstants {
     public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
     public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
+
+    public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";
+    public static final String VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS = "topicMappings";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1348,11 +1361,13 @@ public final class APIConstants {
         public static final String PASSWORD_GRANT_TYPE = "grant_type=password";
         public static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
 
+        public static final String OAUTH_MEDIATION_CONFIG = "OAuth.";
         public static final String ACCESS_TOKEN = "access_token";
         public static final String REFRESH_TOKEN = "refresh_token";
         public static final String SCOPE = "scope";
         public static final String TOKEN_TYPE = "token_type";
         public static final String EXPIRES_IN = "expires_in";
+        public static final String EXPIRES_IN_CONFIG = "ExpiresIn";
 
         // Properties in Endpoint Config
         public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
@@ -1368,23 +1383,25 @@ public final class APIConstants {
     }
 
     // For Redis Configuration
-    public static final String REDIS_CONFIG = "RedisConfig.";
-    public static final String CONFIG_REDIS_HOST = REDIS_CONFIG + "RedisHost";
-    public static final String CONFIG_REDIS_PORT = REDIS_CONFIG + "RedisPort";
-    public static final String CONFIG_REDIS_USER = REDIS_CONFIG + "RedisUser";
-    public static final String CONFIG_REDIS_PASSWORD = REDIS_CONFIG + "RedisPassword";
-    public static final String CONFIG_REDIS_DATABASE_ID = REDIS_CONFIG + "RedisDatabaseId";
-    public static final String CONFIG_REDIS_CONNECTION_TIMEOUT = REDIS_CONFIG + "RedisConnectionTimeout";
-    public static final String CONFIG_REDIS_IS_SSL_ENABLED = REDIS_CONFIG + "RedisIsSslEnabled";
-
-    public static final String IS_REDIS_ENABLED = "isRedisEnabled";
-    public static final String REDIS_HOST = "redisHost";
-    public static final String REDIS_PORT = "redisPort";
-    public static final String REDIS_USER = "redisUser";
-    public static final String REDIS_PASSWORD = "redisPassword";
-    public static final String REDIS_DATABASE_ID = "redisDatabaseId";
-    public static final String REDIS_CONNECTION_TIMEOUT = "redisConnectionTimeout";
-    public static final String REDIS_IS_SSL_ENABLED = "redisIsSslEnabled";
+    public static final String REDIS_CONFIG = "RedisConfig";
+    public static final String CONFIG_REDIS_HOST = "RedisHost";
+    public static final String CONFIG_REDIS_PORT =  "RedisPort";
+    public static final String CONFIG_REDIS_USER =  "RedisUser";
+    public static final String CONFIG_REDIS_PASSWORD =  "RedisPassword";
+    public static final String CONFIG_REDIS_DATABASE_ID =  "RedisDatabaseId";
+    public static final String CONFIG_REDIS_CONNECTION_TIMEOUT =  "RedisConnectionTimeout";
+    public static final String CONFIG_REDIS_IS_SSL_ENABLED =  "RedisIsSslEnabled";
+    public static final String CONFIG_REDIS_PROPERTIES = "Properties";
+    public static final String CONFIG_REDIS_MAX_TOTAL = "maxTotal";
+    public static final String CONFIG_REDIS_MAX_IDLE = "maxIdle";
+    public static final String CONFIG_REDIS_MIN_IDLE = "minIdle";
+    public static final String CONFIG_REDIS_TEST_ON_BORROW = "testOnBorrow";
+    public static final String CONFIG_REDIS_TEST_ON_RETURN = "testOnReturn";
+    public static final String CONFIG_REDIS_TEST_WHILE_IDLE = "testWhileIdle";
+    public static final String CONFIG_REDIS_BLOCK_WHEN_EXHAUSTED = "blockWhenExhausted";
+    public static final String CONFIG_REDIS_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS = "minEvictableIdleTimeMillis";
+    public static final String CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "timeBetweenEvictionRunsMillis";
+    public static final String CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS = "numTestsPerEvictionRun";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
@@ -1635,6 +1652,7 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_CLIENT_ID = "clientId";
     public static final String ENDPOINT_SECURITY_CLIENT_SECRET = "clientSecret";
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+    public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
@@ -2682,10 +2700,6 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
 
-    public static class APPLICATION {
-        public static final String OVERRIDE_SP_NAME = "override.sp.name";
-    }
-
     public class SkipListConstants {
 
         public static final String SKIP_LIST_CONFIG = "SkipList";
@@ -2706,13 +2720,16 @@ public final class APIConstants {
     public static final String METADATA_FILE_NAME = "metadata";
     public static final String METADATA_FILE = "metadata.yaml";
     public static final String DEFINITION_FILE = "definition.yaml";
+    public static final String DEFINITION_WSDL_FILE = "definition.wsdl";
     public static final String KEY_SEPARATOR = "-";
     public static final String MAP_KEY_ACCEPTED_NEW_SERVICE = "accepted";
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
     public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
     public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
+    public static final String PROXY_SERVICE_NAME_SUFFIX = "_proxy";
 
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
+    public static final String ALLOW_MULTIPLE_VERSIONS = "allowMultipleVersions";
 
     public static class ServiceCatalogConstants {
         public static final String SERVICE_UUID = "UUID";
@@ -2757,6 +2774,8 @@ public final class APIConstants {
     public static class GatewayArtifactConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
+        public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE = "env_properties";
+        public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME = "apis";
     }
 
     public static class OrganizationDeletion {
@@ -2785,4 +2804,30 @@ public final class APIConstants {
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
+
+    public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
+
+    // Protocol variables
+    public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
+    public static final String HTTPS_TRANSPORT_PROTOCOL_NAME = "https";
+    public static final String WS_TRANSPORT_PROTOCOL_NAME = "ws";
+    public static final String KAFKA_TRANSPORT_PROTOCOL_NAME = "kafka";
+    public static final String AMQP_TRANSPORT_PROTOCOL_NAME = "amqp";
+    public static final String AMQPS_TRANSPORT_PROTOCOL_NAME = "amqps";
+    public static final String AMQP1_TRANSPORT_PROTOCOL_NAME = "amqp1";
+    public static final String MQTT_TRANSPORT_PROTOCOL_NAME = "mqtt";
+    public static final String SECURE_MQTT_TRANSPORT_PROTOCOL_NAME = "secure-mqtt";
+    public static final String WS_MQTT_TRANSPORT_PROTOCOL_NAME = "ws-mqtt";
+    public static final String WSS_MQTT_TRANSPORT_PROTOCOL_NAME = "wss-mqtt";
+    public static final String MQTT5_TRANSPORT_PROTOCOL_NAME = "mqtt5";
+    public static final String NATS_TRANSPORT_PROTOCOL_NAME = "nats";
+    public static final String JMS_TRANSPORT_PROTOCOL_NAME = "jms";
+    public static final String SNS_TRANSPORT_PROTOCOL_NAME = "sns";
+    public static final String SQS_TRANSPORT_PROTOCOL_NAME = "sqs";
+    public static final String STOMP_TRANSPORT_PROTOCOL_NAME = "stomp";
+    public static final String REDIS_TRANSPORT_PROTOCOL_NAME = "redis";
+    public static final String SMF_TRANSPORT_PROTOCOL_NAME = "smf";
+    public static final String SMF_TRANSPORT_PROTOCOL_VERSION = "smf";
+    public static final String SMFS_TRANSPORT_PROTOCOL_NAME = "smfs";
+    public static final String SMFS_TRANSPORT_PROTOCOL_VERSION = "smfs";
 }

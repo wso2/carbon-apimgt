@@ -30,6 +30,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
@@ -49,6 +50,8 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
@@ -67,6 +70,8 @@ import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
@@ -198,6 +203,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
@@ -768,6 +775,51 @@ public class APIManagerComponent {
     }
 
     @Reference(
+            name = "externalGatewayDeployer.component",
+            service = ExternalGatewayDeployer.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeExternalGatewayDeployers")
+    protected void addExternalGatewayDeployer(ExternalGatewayDeployer deployer) {
+        ServiceReferenceHolder.getInstance().addExternalGatewayDeployer(deployer.getType(), deployer);
+    }
+
+    protected void removeExternalGatewayDeployers(ExternalGatewayDeployer deployer) {
+
+        ServiceReferenceHolder.getInstance().removeExternalGatewayDeployer(deployer.getType());
+    }
+
+    @Reference(
+            name = "externalEnvironment.component",
+            service = ExternalEnvironment.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeExternalEnvironments")
+    protected void addExternalEnvironmentParser(ExternalEnvironment externalEnvironment) {
+        ServiceReferenceHolder.getInstance().addExternalEnvironment(externalEnvironment.getType(),
+                externalEnvironment);
+    }
+
+    protected void removeExternalEnvironments(ExternalEnvironment externalEnvironment) {
+
+        ServiceReferenceHolder.getInstance().removeExternalEnvironments(externalEnvironment.getType());
+    }
+
+    @Reference(
+            name = "apiDefinitionParser.component",
+            service = APIDefinition.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeAPIDefinitionParsers")
+    protected void addAPIDefinitionParser(APIDefinition apiDefinitionParser) {
+        ServiceReferenceHolder.getInstance().addAPIDefinitionParser(apiDefinitionParser.getType(), apiDefinitionParser);
+    }
+
+    protected void removeAPIDefinitionParsers(APIDefinition apiDefinitionParser) {
+        ServiceReferenceHolder.getInstance().removeAPIDefinitionParser(apiDefinitionParser.getType());
+    }
+
+    @Reference(
             name = "gateway.artifact.saver",
             service = ArtifactSaver.class,
             cardinality = ReferenceCardinality.OPTIONAL,
@@ -808,15 +860,7 @@ public class APIManagerComponent {
      */
     private void configureNotificationEventPublisher() throws APIManagementException {
 
-        // TODO: (binod)
-        //  - replace adapter configuration code with EventPublisherFactory configuration code
-        //  - remove feature flag check
-        //  - change var name adapterParameters to factoryConfig
-        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER);
-        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
-        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-        Map<String, String> adapterParameters = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
             APIManagerConfiguration configuration =
                     ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -826,31 +870,21 @@ public class APIManagerComponent {
                 EventHubConfigurationDto eventHubConfigurationDto = configuration.getEventHubConfigurationDto();
                 EventHubConfigurationDto.EventHubPublisherConfiguration eventHubPublisherConfiguration =
                         eventHubConfigurationDto.getEventHubPublisherConfiguration();
-                adapterParameters.put(APIConstants.RECEIVER_URL, eventHubPublisherConfiguration.getReceiverUrlGroup());
-                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, eventHubPublisherConfiguration.getAuthUrlGroup());
-                adapterParameters.put(APIConstants.USERNAME, eventHubConfigurationDto.getUsername());
-                adapterParameters.put(APIConstants.PASSWORD, eventHubConfigurationDto.getPassword());
-                adapterParameters.put(APIConstants.PROTOCOL, eventHubPublisherConfiguration.getType());
-                adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
-                adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
-                adapterConfiguration.setStaticProperties(adapterParameters);
-                if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-                    for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
-                        adapterParameters.put(key, eventHubPublisherConfiguration.getProperties().get(key));
-                    }
-                    adapterParameters.put("is_enabled",
-                            Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
-                    try {
-                        ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(adapterParameters);
-                    } catch (EventPublisherException e) {
-                        throw new APIManagementException(e);
-                    }
+                properties.put(APIConstants.RECEIVER_URL, eventHubPublisherConfiguration.getReceiverUrlGroup());
+                properties.put(APIConstants.AUTHENTICATOR_URL, eventHubPublisherConfiguration.getAuthUrlGroup());
+                properties.put(APIConstants.USERNAME, eventHubConfigurationDto.getUsername());
+                properties.put(APIConstants.PASSWORD, eventHubConfigurationDto.getPassword());
+                properties.put(APIConstants.PROTOCOL, eventHubPublisherConfiguration.getType());
+                properties.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+                properties.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+                for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
+                    properties.put(key, eventHubPublisherConfiguration.getProperties().get(key));
                 }
+                properties.put("is_enabled", Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
                 try {
-                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
-                } catch (OutputEventAdapterException e) {
-                    log.warn("Exception occurred while creating WSO2 Event Adapter. Event notification may not work "
-                            + "properly", e);
+                    ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(properties);
+                } catch (EventPublisherException e) {
+                    throw new APIManagementException(e);
                 }
             } else {
                 log.info("Wso2Event Publisher not enabled.");

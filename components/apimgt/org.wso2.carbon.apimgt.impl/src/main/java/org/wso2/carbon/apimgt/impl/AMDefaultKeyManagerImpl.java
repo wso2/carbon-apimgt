@@ -77,7 +77,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -186,12 +188,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             clientInfo.setRedirectUris(Arrays.asList(callbackURLs));
         }
 
-        String overrideSpName = System.getProperty(APIConstants.APPLICATION.OVERRIDE_SP_NAME);
-        if (StringUtils.isNotEmpty(overrideSpName) && !Boolean.parseBoolean(overrideSpName)) {
-            clientInfo.setClientName(info.getClientName());
-        } else {
-            clientInfo.setClientName(oauthClientName);
-        }
+        clientInfo.setClientName(oauthClientName);
 
         //todo: run tests by commenting the type
         if (StringUtils.isEmpty(info.getTokenType())) {
@@ -461,14 +458,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         TokenInfo tokenResponse;
 
         try {
-            if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(tokenRequest.getGrantType())) {
-                tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
-                        tokenRequest.getGrantType(), scopes, (String) tokenRequest.getRequestParam(APIConstants
-                                .OAuthConstants.SUBJECT_TOKEN), APIConstants.OAuthConstants.JWT_TOKEN_TYPE);
-            } else {
-                tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
-                        GRANT_TYPE_VALUE, scopes);
-            }
+            String credentials = tokenRequest.getClientId() + ':' + tokenRequest.getClientSecret();
+            String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+            tokenResponse = authClient.generate(authToken, GRANT_TYPE_VALUE, scopes);
         } catch (KeyManagerClientException e) {
             throw new APIManagementException("Error occurred while calling token endpoint - " + e.getReason(), e);
         }

@@ -226,6 +226,18 @@ public class APIMWSDLReader {
     }
 
     /**
+     * Extract the WSDL file and validates it
+     *
+     * @param wsdlContent file content as a byte array
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
+    public static WSDLValidationResponse validateWSDLFile(byte[] wsdlContent) throws  APIManagementException {
+        WSDLProcessor processor = getWSDLProcessor(wsdlContent);
+        return getWsdlValidationResponse(processor);
+    }
+
+    /**
      * Gets WSDL processor WSDL 1.1/WSDL 2.0 based on the content {@code content}.
      *
      * @param content WSDL content

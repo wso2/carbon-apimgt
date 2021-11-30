@@ -159,7 +159,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + backendFailureSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator +
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
-                                backEndFailureSequence + ".xml"));
+                                backendFailureSequenceName + ".xml"));
             }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);

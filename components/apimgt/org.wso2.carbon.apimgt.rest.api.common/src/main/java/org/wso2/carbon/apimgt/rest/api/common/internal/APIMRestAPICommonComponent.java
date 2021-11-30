@@ -19,16 +19,15 @@ package org.wso2.carbon.apimgt.rest.api.common.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
-
+import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +40,7 @@ import java.util.Map;
 public class APIMRestAPICommonComponent {
 
     private static final Log log = LogFactory.getLog(APIMRestAPICommonComponent.class);
+    private ServiceRegistration serviceRegistration = null;
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -53,6 +53,13 @@ public class APIMRestAPICommonComponent {
             jwtValidatorMap.put(issuer, jwtValidator);
         });
         ServiceReferenceHolder.getInstance().setJwtValidatorMap(jwtValidatorMap);
+    }
+
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+        if (serviceRegistration != null) {
+            serviceRegistration.unregister();
+        }
     }
 
     @Reference(
@@ -71,5 +78,20 @@ public class APIMRestAPICommonComponent {
 
         log.debug("Setting APIM Configuration Service");
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
+    }
+
+    @Reference(
+            name = "rest.api.authentication.service",
+            cardinality = ReferenceCardinality.MULTIPLE,
+            service = RestAPIAuthenticator.class,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeRestAPIAuthenticationService"
+    )
+    protected void addRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
+        ServiceReferenceHolder.getInstance().addAuthenticator(authenticator);
+    }
+
+    protected void removeRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
+        ServiceReferenceHolder.getInstance().removeAuthenticator(authenticator);
     }
 }

@@ -81,6 +81,8 @@ import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.xerces.util.SecurityManager;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -150,11 +152,13 @@ import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIType;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -370,6 +374,12 @@ public final class APIUtil {
     private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
+    private static Schema tenantConfigJsonSchema;
+
+    private APIUtil() {
+
+    }
+
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
         tenantIdleTimeMillis =
@@ -377,6 +387,12 @@ public final class APIUtil {
                         org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_IDLE_TIME,
                         String.valueOf(DEFAULT_TENANT_IDLE_MINS)))
                         * 60 * 1000;
+        try (InputStream inputStream = APIAdminImpl.class.getResourceAsStream("/tenant/tenant-config-schema.json")) {
+            org.json.JSONObject tenantConfigSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
+            tenantConfigJsonSchema = SchemaLoader.load(tenantConfigSchema);
+        } catch (IOException e) {
+            log.error("Error occurred while reading tenant-config-schema.json", e);
+        }
     }
 
     private static String hostAddress = null;
@@ -404,23 +420,21 @@ public final class APIUtil {
                 .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
         isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
-        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-            try {
-                eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
-                eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.ASYNC_WEBHOOKS));
-                eventPublishers.putIfAbsent(EventPublisherType.CACHE_INVALIDATION,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.CACHE_INVALIDATION));
-                eventPublishers.putIfAbsent(EventPublisherType.GLOBAL_CACHE_INVALIDATION,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.GLOBAL_CACHE_INVALIDATION));
-                eventPublishers.putIfAbsent(EventPublisherType.NOTIFICATION,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
-                eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
-            } catch (EventPublisherException e) {
-                log.error("Could not initialize the event publishers. Events might not be published properly.");
-                throw new APIManagementException(e);
-            }
+        try {
+            eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
+            eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.ASYNC_WEBHOOKS));
+            eventPublishers.putIfAbsent(EventPublisherType.CACHE_INVALIDATION,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.CACHE_INVALIDATION));
+            eventPublishers.putIfAbsent(EventPublisherType.GLOBAL_CACHE_INVALIDATION,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.GLOBAL_CACHE_INVALIDATION));
+            eventPublishers.putIfAbsent(EventPublisherType.NOTIFICATION,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
+            eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+        } catch (EventPublisherException e) {
+            log.error("Could not initialize the event publishers. Events might not be published properly.");
+            throw new APIManagementException(e);
         }
     }
 
@@ -1212,6 +1226,7 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, api.getVersionTimestamp());
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
@@ -6284,6 +6299,20 @@ public final class APIUtil {
     }
 
     /**
+     * Check whether given application , group combination exists
+     *
+     * @param subscriber      subscriber name
+     * @param applicationName application name
+     * @param groupId         group of the subscriber
+     * @return true if application group combination exist
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationGroupCombinationExist(String subscriber, String applicationName, String groupId)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().isApplicationGroupCombinationExists(applicationName, subscriber, groupId);
+    }
+
+    /**
      * Check whether the new user has an application
      *
      * @param subscriber      subscriber name
@@ -6291,10 +6320,10 @@ public final class APIUtil {
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
-    public static boolean isApplicationOwnedBySubscriber(String subscriber, String applicationName)
+    public static boolean isApplicationOwnedBySubscriber(String subscriber, String applicationName, String organization)
             throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().isApplicationOwnedBySubscriber(applicationName, subscriber);
+        return ApiMgtDAO.getInstance().isApplicationOwnedBySubscriber(applicationName, subscriber, organization);
     }
 
     public static String getHostAddress() {
@@ -8033,7 +8062,7 @@ public final class APIUtil {
         return false;
     }
 
-    public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
+    public static String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
 
         return CommonUtil.getLifecycleConfiguration(APIConstants.API_LIFE_CYCLE, registry);
 
@@ -8773,6 +8802,17 @@ public final class APIUtil {
         ApplicationPolicy policy = apiMgtDAO.getApplicationPolicy(policyName, tenantId);
         if (policy != null) {
             return policy.getDefaultQuotaPolicy().getType();
+        }
+        return null;
+    }
+
+    public static String getMediationConfigurationFromAPIMConfig(String property) {
+        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        String mediatorConfiguration = apimConfig.getFirstProperty(APIConstants.MEDIATOR_CONFIG + property);
+        if (!StringUtils.isBlank(mediatorConfiguration)) {
+            return mediatorConfiguration;
         }
         return null;
     }
@@ -10446,16 +10486,14 @@ public final class APIUtil {
     }
 
     public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String eventString) {
-        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-            try {
-                if (eventPublishers.get(type) != null) {
-                    eventPublishers.get(type).publish(event);
-                } else {
-                    log.error("Error occurred while trying to retrieve the event publisher for type: " + type);
-                }
-            } catch (EventPublisherException e) {
-                log.error("Error occurred while trying to publish event.\n" + eventString, e);
+        try {
+            if (eventPublishers.get(type) != null) {
+                eventPublishers.get(type).publish(event);
+            } else {
+                log.error("Error occurred while trying to retrieve the event publisher for type: " + type);
             }
+        } catch (EventPublisherException e) {
+            log.error("Error occurred while trying to publish event.\n" + eventString, e);
         }
     }
 
@@ -10493,23 +10531,6 @@ public final class APIUtil {
             }
         }
 
-    }
-
-    public static void publishEventToEventHub(Map dynamicProperties, Event event) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER, dynamicProperties, event);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
     }
 
     /**
@@ -11339,5 +11360,50 @@ public final class APIUtil {
             }
         }
         return scopes;
+    }
+    public static Schema retrieveTenantConfigJsonSchema(){
+        return tenantConfigJsonSchema;
+    }
+
+    /**
+     * Get gateway environments defined in the configuration: api-manager.xml
+     *
+     * @return map of configured gateway environments against the environment name
+     */
+    public static Map<String, Environment> getReadOnlyGatewayEnvironments() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getApiGatewayEnvironments();
+    }
+
+    /**
+     * Get external environments registered with the given name
+     *
+     * @return the external environments
+     */
+    public static ExternalEnvironment getExternalEnvironment(String providerName) {
+        return ServiceReferenceHolder.getInstance().getExternalEnvironment(providerName);
+    }
+
+    /**
+     * Get registered API Definition Parsers as a Map
+     *
+     * @return Map of Registered API Definition Parsers
+     */
+    public static Map<String, org.wso2.carbon.apimgt.api.APIDefinition> getApiDefinitionParsersMap() {
+        return ServiceReferenceHolder.getInstance().getApiDefinitionMap();
+    }
+
+    /**
+     * Check whether there are external environments registered
+     */
+    public static boolean isAnyExternalGateWayProviderExists() {
+
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+        for (Environment environment : gatewayEnvironments.values()) {
+            if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

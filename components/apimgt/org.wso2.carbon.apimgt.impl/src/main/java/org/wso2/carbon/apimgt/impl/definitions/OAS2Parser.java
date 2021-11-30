@@ -1725,4 +1725,13 @@ public class OAS2Parser extends APIDefinition {
         return getSwaggerJsonString(swagger);
     }
 
+    @Override
+    public String getVendorFromExtension(String swaggerContent) {
+        return null;
+    }
+
+    @Override
+    public String getType() {
+        return null;
+    }
 }

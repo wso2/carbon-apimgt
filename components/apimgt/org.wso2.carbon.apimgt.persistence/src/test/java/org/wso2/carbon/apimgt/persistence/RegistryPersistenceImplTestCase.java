@@ -19,6 +19,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +31,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -580,16 +584,21 @@ public class RegistryPersistenceImplTestCase {
         GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
         PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
                 .thenReturn(manager);
-
+        //add 1 year old timestamp since it is not the latest
+        LocalDateTime now = LocalDateTime.now().minusDays(365);
+        Timestamp timestamp = Timestamp.valueOf(now);
         PowerMockito.when(RegistryPersistenceUtil.createAPIArtifactContent(any(GenericArtifact.class), any(API.class)))
                 .thenReturn(artifact);
-        
+
         GenericArtifact newArtifact = Mockito.mock(GenericArtifact.class);
+        publisherAPI.setVersionTimestamp(timestamp.getTime() + "");
         Mockito.when(manager.newGovernanceArtifact(new QName(api.getId().getApiName()))).thenReturn(newArtifact );
         
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
-        apiPersistenceInstance.addAPI(org, publisherAPI);
+        PublisherAPI returnAPI = apiPersistenceInstance.addAPI(org, publisherAPI);
+        Assert.assertEquals(returnAPI.getVersionTimestamp(), String.valueOf(timestamp.getTime()));
+
     }
     @Test
     public void testUpdateAPI() throws APIPersistenceException, RegistryException, APIManagementException {

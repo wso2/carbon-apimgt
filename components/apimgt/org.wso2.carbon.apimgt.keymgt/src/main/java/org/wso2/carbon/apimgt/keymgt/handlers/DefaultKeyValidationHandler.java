@@ -232,8 +232,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                     if (keyManagerDto != null && (validationContext.getKeyManagers()
                             .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                             validationContext.getKeyManagers().contains(keyManagerDto.getName()))) {
-                        keyManagerInstance = keyManagerDto.getKeyManager();
-                        electedKeyManager = entry.getKey();
+                        if (keyManagerDto.getKeyManager() != null
+                                && keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                            keyManagerInstance = keyManagerDto.getKeyManager();
+                            electedKeyManager = entry.getKey();
+                        }
                     }
                 }
             } else if (tenantKeyManagers.values().size() > 1) {
@@ -267,7 +270,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 CacheProvider.getGatewayIntrospectCache().put(validationContext.getAccessToken(), tokenInfo);
                 return tokenInfo;
             } else {
+                AccessTokenInfo tokenInfo = new AccessTokenInfo();
+                tokenInfo.setTokenValid(false);
+                tokenInfo.setErrorcode(900901);
                 log.debug("KeyManager not available to authorize token.");
+                return tokenInfo;
             }
         }
         return null;
