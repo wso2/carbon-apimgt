@@ -1896,6 +1896,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
                 application.addKey(key);
             }
+            int subscriptionCount = apiMgtDAO.getSubscriptionCountByApplicationId(application, tenantDomain);
+            application.setSubscriptionCount(subscriptionCount);
+
         }
         return application;
     }
@@ -3663,7 +3666,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getAvailableTiers() != null) {
             tiers = String.join("||", tierNameSet);
         }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getInternalOrganizationId(organization));
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
         api.setAvailableTiers(availableTier);
 
@@ -3812,7 +3815,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getAvailableTiers() != null) {
             tiers = String.join("||", tierNameSet);
         }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getInternalOrganizationId(organization));
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
         api.setAvailableTiers(availableTier);
 

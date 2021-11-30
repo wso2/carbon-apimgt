@@ -346,6 +346,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         application.setPolicy(event.getApplicationPolicy());
         application.setTokenType(event.getTokenType());
         application.setUUID(event.getUuid());
+        application.setOrganization(event.getTenantDomain());
         event.getAttributes().forEach(application::addAttribute);
         application.setSubName(event.getSubscriber());
         if (log.isDebugEnabled()) {

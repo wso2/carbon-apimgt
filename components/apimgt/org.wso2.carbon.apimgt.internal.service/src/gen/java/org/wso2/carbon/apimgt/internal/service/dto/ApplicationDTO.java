@@ -29,6 +29,7 @@ public class ApplicationDTO   {
     private String tokenType = null;
     private List<GroupIdDTO> groupIds = new ArrayList<>();
     private Map<String, String> attributes = new HashMap<>();
+    private String organization = null;
 
   /**
    **/
@@ -169,6 +170,24 @@ public class ApplicationDTO   {
     this.attributes = attributes;
   }
 
+  /**
+   * organization of application.
+   **/
+  public ApplicationDTO organization(String organization) {
+    this.organization = organization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "organization of application.")
+  @JsonProperty("organization")
+  public String getOrganization() {
+    return organization;
+  }
+  public void setOrganization(String organization) {
+    this.organization = organization;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -186,12 +205,13 @@ public class ApplicationDTO   {
         Objects.equals(policy, application.policy) &&
         Objects.equals(tokenType, application.tokenType) &&
         Objects.equals(groupIds, application.groupIds) &&
-        Objects.equals(attributes, application.attributes);
+        Objects.equals(attributes, application.attributes) &&
+        Objects.equals(organization, application.organization);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, id, name, subName, policy, tokenType, groupIds, attributes);
+    return Objects.hash(uuid, id, name, subName, policy, tokenType, groupIds, attributes, organization);
   }
 
   @Override
@@ -207,6 +227,7 @@ public class ApplicationDTO   {
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("    groupIds: ").append(toIndentedString(groupIds)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
+    sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("}");
     return sb.toString();
   }

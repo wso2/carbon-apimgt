@@ -281,7 +281,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return 201 response if successful
      */
     @Override
-    public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
+    public Response applicationsPost(ApplicationDTO body, MessageContext messageContext) throws APIManagementException {
+
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -292,7 +293,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     createdApplicationDTO.getApplicationId());
             return Response.created(location).entity(createdApplicationDTO).build();
-        } catch (APIManagementException | URISyntaxException e) {
+        } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
                 RestApiUtil.handleResourceAlreadyExistsError(
                         "An application already exists with name " + body.getName(), e,
@@ -302,9 +303,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
                 RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
-                        e, log);
+                throw e;
             }
+        } catch (URISyntaxException e) {
+            RestApiUtil.handleInternalServerError(e.getLocalizedMessage(), log);
         }
         return null;
     }
@@ -325,11 +327,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String tierName = applicationDto.getThrottlingPolicy();
         if (tierName == null) {
             RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
-        }
-
-        Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, organization);
-        if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
-            RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
         }
 
         Object applicationAttributesFromUser = applicationDto.getAttributes();

@@ -965,25 +965,25 @@ public class ApiMgtDAO {
             resultSet = ps.executeQuery();
             SubscribedAPI subscribedAPI = null;
             if (resultSet.next()) {
-
-                int applicationId = resultSet.getInt("APPLICATION_ID");
-                Application application = getLightweightApplicationById(conn, applicationId);
+                Identifier identifier;
 
                 if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
-                    APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
+                    identifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
-                    apiProductIdentifier.setProductId(resultSet.getInt("API_ID"));
-                    apiProductIdentifier.setUUID(resultSet.getString("API_UUID"));
-                    subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 } else {
-                    APIIdentifier apiIdentifier = new APIIdentifier(
+                    identifier = new APIIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
-                    apiIdentifier.setId(resultSet.getInt("API_ID"));
-                    apiIdentifier.setUuid(resultSet.getString("API_UUID"));
-                    subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
+                identifier.setId(resultSet.getInt("API_ID"));
+                identifier.setUuid(resultSet.getString("API_UUID"));
+                identifier.setOrganization(resultSet.getString("ORGANIZATION"));
+                int applicationId = resultSet.getInt("APPLICATION_ID");
+                Application application = getLightweightApplicationById(conn, applicationId);
+                application.setSubscriptionCount(getSubscriptionCountByApplicationId(conn, application,
+                        identifier.getOrganization()));
+                subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
 
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
@@ -1408,129 +1408,38 @@ public class ApiMgtDAO {
         return subscriptionCount;
     }
 
-    public Integer getSubscriptionCountByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
+    public Integer getSubscriptionCountByApplicationId(Application application, String organization)
             throws APIManagementException {
 
-        Integer subscriptionCount = 0;
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
-        int tenantId = APIUtil.getTenantId(subscriber.getName());
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            String sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_BY_APP_ID_SQL;
-            if (forceCaseInsensitiveComparisons) {
-                sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_BY_APP_ID_CASE_INSENSITIVE_SQL;
-            }
-            String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR "
-                    + "((APP.GROUP_ID = '' OR APP.GROUP_ID IS NULL) AND SUB.USER_ID = ?)) ";
-            String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                    "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ?" +
-                    " ))";
-            String whereClauseWithUserId = " AND SUB.USER_ID = ? ";
-            String whereClauseCaseSensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
-            String appIdentifier;
-            boolean hasGrouping = false;
-            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    sqlQuery += whereClauseWithMultiGroupId;
-                    String[] groupIdArr = groupingId.split(",");
-                    ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
-                    ps.setInt(1, applicationId);
-                    ps.setInt(2, tenantId);
-                    int paramIndex = groupIdArr.length + 2;
-                    ps.setString(++paramIndex, tenantDomain);
-                    ps.setString(++paramIndex, subscriber.getName());
-                } else {
-                    sqlQuery += whereClauseWithGroupId;
-                    ps = connection.prepareStatement(sqlQuery);
-                    ps.setInt(1, applicationId);
-                    ps.setInt(2, tenantId);
-                    ps.setString(3, groupingId);
-                    ps.setString(4, subscriber.getName());
-                }
-            } else {
-                if (forceCaseInsensitiveComparisons) {
-                    sqlQuery += whereClauseCaseSensitive;
-                } else {
-                    sqlQuery += whereClauseWithUserId;
-                }
-                ps = connection.prepareStatement(sqlQuery);
-                ps.setInt(1, applicationId);
-                ps.setInt(2, tenantId);
-                ps.setString(3, subscriber.getName());
-            }
-            result = ps.executeQuery();
-            while (result.next()) {
-                subscriptionCount = result.getInt("SUB_COUNT");
-            }
+        int subscriptionCount = 0;
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getSubscriptionCountByApplicationId(connection, application, organization);
         } catch (SQLException e) {
-            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+            handleException("Failed to get SubscribedAPI of : application " + application.getName() + " in " +
+                    "organization " + organization, e);
         }
         return subscriptionCount;
     }
 
-    /**
-     * Gets the subscribed API's, by the group for the application.
-     *
-     * @param subscriber      the subscriber subscribing for the api
-     * @param applicationName the application to which the api's are subscribed
-     * @param startSubIndex   the start index for pagination
-     * @param endSubIndex     end index for pagination
-     * @param groupingId      the group id of the application
-     * @param organization    the organization
-     * @return the set of subscribed API's.
-     * @throws APIManagementException
-     */
-    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
-                                                         int startSubIndex, int endSubIndex, String groupingId,
-                                                         String organization) throws APIManagementException {
+    private Integer getSubscriptionCountByApplicationId(Connection connection, Application application,
+                                                        String organization) throws SQLException {
 
-        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
-        String sqlQuery =
-                appendSubscriptionQueryWhereClause(groupingId, SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_SQL);
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sqlQuery);
-             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, applicationName, organization, ps)) {
-            int index = 0;
-            while (result.next()) {
-                if (index >= startSubIndex && index < endSubIndex) {
-                    String apiType = result.getString("TYPE");
-
-                    if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
-                        APIProductIdentifier identifier = new APIProductIdentifier(
-                                APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
-                                result.getString("API_NAME"), result.getString("API_VERSION"));
-
-                        SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
-                        initSubscribedAPI(subscribedAPI, subscriber, result);
-                        subscribedAPIs.add(subscribedAPI);
-                    } else {
-                        APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
-                                ("API_PROVIDER")), result.getString("API_NAME"),
-                                result.getString("API_VERSION"));
-
-                        SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
-                        initSubscribedAPI(subscribedAPI, subscriber, result);
-                        subscribedAPIs.add(subscribedAPI);
-                    }
-
-                    if (index == endSubIndex - 1) {
-                        break;
-                    }
+        int subscriptionCount = 0;
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_BY_APP_ID_SQL;
+        try (PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+            ps.setInt(1, application.getId());
+            ps.setString(2, organization);
+            try (ResultSet result = ps.executeQuery()) {
+                while (result.next()) {
+                    subscriptionCount = result.getInt("SUB_COUNT");
                 }
-                index++;
             }
-        } catch (SQLException e) {
-            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
         }
 
-        return subscribedAPIs;
+        return subscriptionCount;
     }
+
 
     private String appendSubscriptionQueryWhereClause(final String groupingId, String sqlQuery) {
 
@@ -1607,7 +1516,7 @@ public class ApiMgtDAO {
         return statement.executeQuery();
     }
 
-    private void initSubscribedAPI(SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet resultSet)
+    private void initSubscribedAPI(SubscribedAPI subscribedAPI, ResultSet resultSet)
             throws SQLException {
 
         subscribedAPI.setUUID(resultSet.getString("SUB_UUID"));
@@ -1615,111 +1524,6 @@ public class ApiMgtDAO {
         subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
         subscribedAPI.setTier(new Tier(resultSet.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
         subscribedAPI.setRequestedTier(new Tier(resultSet.getString("TIER_ID_PENDING")));
-
-        Application application = new Application(resultSet.getString("APP_NAME"), subscriber);
-        application.setUUID(resultSet.getString("APP_UUID"));
-        subscribedAPI.setApplication(application);
-    }
-
-    /**
-     * Gets the subscribed API's, by the group for the application.
-     *
-     * @param subscriber    the subscriber subscribing for the api
-     * @param applicationId the application to which the api's are subscribed
-     * @param startSubIndex the start index for pagination
-     * @param endSubIndex   end index for pagination
-     * @param groupingId    the group id of the application
-     * @return the set of subscribed API's.
-     * @throws APIManagementException
-     */
-    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, int applicationId,
-                                                         int startSubIndex, int endSubIndex, String groupingId)
-            throws APIManagementException {
-
-        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
-        String sqlQuery = SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL;
-        String whereClause = " AND  SUB.USER_ID = ? ";
-        String whereClauseForceCaseInsensitiveComp = " AND LOWER(SUB.USER_ID) = LOWER(?)  ";
-        String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
-                + " AND SUB.USER_ID = ?))";
-        String whereClauseWithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ?"
-                + " OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?)))";
-        String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
-        String whereClauseWithMultiGroupIdCaseInsensitive = " AND  ( (APP.APPLICATION_ID IN  (SELECT APPLICATION_ID " +
-                "FROM AM_APPLICATION_GROUP_MAPPING  WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( LOWER(SUB" +
-                ".USER_ID) = LOWER" +
-                "(?) ))";
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            int tenantId = APIUtil.getTenantId(subscriber.getName());
-            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithMultiGroupIdCaseInsensitive;
-                    } else {
-                        sqlQuery += whereClauseWithMultiGroupId;
-                    }
-                    String groupIDArray[] = groupingId.split(",");
-                    ps = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
-                    ps.setInt(1, tenantId);
-                    ps.setInt(2, applicationId);
-                    // dynamically seeting the parameter index
-                    int paramIndex = groupIDArray.length + 2;
-                    ps.setString(++paramIndex, tenantDomain);
-                    ps.setString(++paramIndex, subscriber.getName());
-                } else {
-                    if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithGroupIdorceCaseInsensitiveComp;
-                    } else {
-                        sqlQuery += whereClauseWithGroupId;
-                    }
-                    ps = connection.prepareStatement(sqlQuery);
-                    ps.setInt(1, tenantId);
-                    ps.setInt(2, applicationId);
-                    ps.setString(3, groupingId);
-                    ps.setString(4, subscriber.getName());
-                }
-            } else {
-                if (forceCaseInsensitiveComparisons) {
-                    sqlQuery += whereClauseForceCaseInsensitiveComp;
-                } else {
-                    sqlQuery += whereClause;
-                }
-                ps = connection.prepareStatement(sqlQuery);
-                ps.setInt(1, tenantId);
-                ps.setInt(2, applicationId);
-                ps.setString(3, subscriber.getName());
-            }
-            result = ps.executeQuery();
-            int index = 0;
-            while (result.next()) {
-                if (index >= startSubIndex && index < endSubIndex) {
-                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
-                            ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
-                    SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
-                    subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
-                    subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
-                    subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
-                    Application application = new Application(result.getString("APP_NAME"), subscriber);
-                    subscribedAPI.setApplication(application);
-                    subscribedAPIs.add(subscribedAPI);
-                    if (index == endSubIndex - 1) {
-                        break;
-                    }
-                }
-                index++;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
-        }
-        return subscribedAPIs;
     }
 
     /**
@@ -4176,53 +3980,6 @@ public class ApiMgtDAO {
     /**
      * Returns all applications created by given user Id
      *
-     * @param userId
-     * @return
-     * @throws APIManagementException
-     */
-    public Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        Application[] applications = null;
-
-        String sqlQuery = SQLConstants.GET_APPLICATIONS_BY_OWNER;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, userId);
-            prepStmt.setInt(2, offset);
-            prepStmt.setInt(3, limit);
-            rs = prepStmt.executeQuery();
-
-            ArrayList<Application> applicationsList = new ArrayList<Application>();
-            Application application;
-            while (rs.next()) {
-                application = new Application(rs.getString("UUID"));
-                application.setName(rs.getString("NAME"));
-                application.setOwner(rs.getString("CREATED_BY"));
-                application.setStatus(rs.getString("APPLICATION_STATUS"));
-                application.setGroupId(rs.getString("GROUP_ID"));
-
-                if (multiGroupAppSharingEnabled) {
-                    application.setGroupId(getGroupId(connection, rs.getInt("APPLICATION_ID")));
-                }
-                applicationsList.add(application);
-            }
-            applications = applicationsList.toArray(new Application[applicationsList.size()]);
-        } catch (SQLException e) {
-            handleException("Error when getting the application name for id " + userId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return applications;
-    }
-
-    /**
-     * Returns all applications created by given user Id
-     *
      * @param userName
      * @return
      * @throws APIManagementException
@@ -4387,7 +4144,7 @@ public class ApiMgtDAO {
                 }
 
                 //setting subscription count
-                int subscriptionCount = getSubscriptionCountByApplicationId(subscriber, applicationId, groupingId);
+                int subscriptionCount = getSubscriptionCountByApplicationId(connection,application, organization);
                 application.setSubscriptionCount(subscriptionCount);
 
                 applicationsList.add(application);
@@ -6461,17 +6218,13 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                application.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
                         application.setGroupId(getGroupId(connection, application.getId()));
                     }
                 }
-
-                int subscriptionCount = getSubscriptionCountByApplicationId(subscriber, applicationId,
-                        application.getGroupId());
-                application.setSubscriptionCount(subscriptionCount);
 
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
                 application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
@@ -17747,6 +17500,59 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return null;
+    }
+
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset,
+                                                                      Integer limit, String organization)
+            throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL)) {
+            ps.setInt(1, application.getId());
+            ps.setString(2, organization);
+            try (ResultSet result = ps.executeQuery()) {
+                int index = 0;
+                while (result.next()) {
+                    if (index >= offset && index < limit) {
+                        String apiType = result.getString("TYPE");
+
+                        if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                            APIProductIdentifier identifier = new APIProductIdentifier(
+                                    APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                                    result.getString("API_NAME"), result.getString("API_VERSION"));
+
+                            SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                            subscribedAPI.setApplication(application);
+                            initSubscribedAPI(subscribedAPI, result);
+                            subscribedAPIs.add(subscribedAPI);
+                        } else {
+                            APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                    ("API_PROVIDER")), result.getString("API_NAME"),
+                                    result.getString("API_VERSION"));
+
+                            SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
+                            subscribedAPI.setApplication(application);
+                            initSubscribedAPI(subscribedAPI, result);
+                            subscribedAPIs.add(subscribedAPI);
+                        }
+
+                        if (index == limit - 1) {
+                            break;
+                        }
+                    }
+                    index++;
+
+            }
+        }
+
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPI of application :" + application.getName(), e);
+        }
+
+        return subscribedAPIs;
+
     }
 
     private class SubscriptionInfo {
