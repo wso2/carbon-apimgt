@@ -55,41 +55,35 @@ public class QueryAnalyzer {
             log.debug("Analyzing query depth for " + payload + " and max query depth:" + maxQueryDepth);
         }
         QueryAnalyzerResponseDTO queryAnalyzerResponseDTO = new QueryAnalyzerResponseDTO();
+
+        // If maxQueryDepth is a positive value, perform the depth limitation check. Otherwise, bypass the check.
         if (maxQueryDepth > 0) {
             MaxQueryDepthInstrumentation maxQueryDepthInstrumentation =
                     new MaxQueryDepthInstrumentation(maxQueryDepth);
             GraphQL runtime = GraphQL.newGraphQL(schema).instrumentation(maxQueryDepthInstrumentation).build();
 
-            try {
-                ExecutionResult executionResult = runtime.execute(payload);
-                List<GraphQLError> errors = executionResult.getErrors();
-                if (errors.size() > 0) {
-                    for (GraphQLError error : errors) {
-                        queryAnalyzerResponseDTO.addErrorToList((error.getMessage()));
+            ExecutionResult executionResult = runtime.execute(payload);
+            List<GraphQLError> errors = executionResult.getErrors();
+            if (errors.size() > 0) {
+                for (GraphQLError error : errors) {
+                    queryAnalyzerResponseDTO.addErrorToList((error.getMessage()));
+                }
+                // TODO: https://github.com/wso2/carbon-apimgt/issues/8147
+                queryAnalyzerResponseDTO.getErrorList().removeIf(s -> s.contains("non-nullable"));
+                if (queryAnalyzerResponseDTO.getErrorList().size() == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Maximum query depth of " + maxQueryDepth + " was not exceeded");
                     }
-                    // TODO: https://github.com/wso2/carbon-apimgt/issues/8147
-                    queryAnalyzerResponseDTO.getErrorList().removeIf(s -> s.contains("non-nullable"));
-                    if (queryAnalyzerResponseDTO.getErrorList().size() == 0) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Maximum query depth of " + maxQueryDepth + " was not exceeded");
-                        }
-                        queryAnalyzerResponseDTO.setSuccess(true);
-                        return queryAnalyzerResponseDTO;
-                    }
-                    log.error(queryAnalyzerResponseDTO.getErrorList().toString());
-                    queryAnalyzerResponseDTO.setSuccess(false);
+                    queryAnalyzerResponseDTO.setSuccess(true);
                     return queryAnalyzerResponseDTO;
                 }
-                queryAnalyzerResponseDTO.setSuccess(true);
+                log.error(queryAnalyzerResponseDTO.getErrorList().toString());
+                queryAnalyzerResponseDTO.setSuccess(false);
                 return queryAnalyzerResponseDTO;
-            } catch (Throwable e) {
-                log.error(e);
             }
-        } else {
-            queryAnalyzerResponseDTO.setSuccess(true); // No depth limitation check
-            return queryAnalyzerResponseDTO;
         }
-        queryAnalyzerResponseDTO.setSuccess(false);
+
+        queryAnalyzerResponseDTO.setSuccess(true);
         return queryAnalyzerResponseDTO;
     }
 
@@ -108,43 +102,38 @@ public class QueryAnalyzer {
             log.debug("Analyzing query complexity for " + payload + " and max complexity: " + maxQueryComplexity);
         }
         QueryAnalyzerResponseDTO queryAnalyzerResponseDTO = new QueryAnalyzerResponseDTO();
+
+        // If maxQueryComplexity is a positive value, perform the complexity limitation check.
+        // Otherwise, bypass the check.
         if (maxQueryComplexity > 0) {
             MaxQueryComplexityInstrumentation maxQueryComplexityInstrumentation =
                     new MaxQueryComplexityInstrumentation(maxQueryComplexity, fieldComplexityCalculator);
             GraphQL runtime = GraphQL.newGraphQL(schema).instrumentation(maxQueryComplexityInstrumentation).build();
 
-            try {
-                ExecutionResult executionResult = runtime.execute(payload);
-                List<GraphQLError> errors = executionResult.getErrors();
-                if (errors.size() > 0) {
-                    for (GraphQLError error : errors) {
-                        queryAnalyzerResponseDTO.addErrorToList((error.getMessage()));
-                    }
-                    // TODO: https://github.com/wso2/carbon-apimgt/issues/8147
-                    queryAnalyzerResponseDTO.getErrorList().removeIf(s -> s.contains("non-nullable"));
-                    if (queryAnalyzerResponseDTO.getErrorList().size() == 0) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Maximum query complexity was not exceeded");
-                        }
-                        queryAnalyzerResponseDTO.setSuccess(true);
-                    } else {
-                        log.error(queryAnalyzerResponseDTO.getErrorList());
-                        queryAnalyzerResponseDTO.getErrorList().clear();
-                        queryAnalyzerResponseDTO.addErrorToList("maximum query complexity exceeded");
-                    }
-                    queryAnalyzerResponseDTO.setSuccess(false);
-                    return queryAnalyzerResponseDTO;
+            ExecutionResult executionResult = runtime.execute(payload);
+            List<GraphQLError> errors = executionResult.getErrors();
+            if (errors.size() > 0) {
+                for (GraphQLError error : errors) {
+                    queryAnalyzerResponseDTO.addErrorToList((error.getMessage()));
                 }
-                queryAnalyzerResponseDTO.setSuccess(true);
+                // TODO: https://github.com/wso2/carbon-apimgt/issues/8147
+                queryAnalyzerResponseDTO.getErrorList().removeIf(s -> s.contains("non-nullable"));
+                if (queryAnalyzerResponseDTO.getErrorList().size() == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Maximum query complexity was not exceeded");
+                    }
+                    queryAnalyzerResponseDTO.setSuccess(true);
+                } else {
+                    log.error(queryAnalyzerResponseDTO.getErrorList());
+                    queryAnalyzerResponseDTO.getErrorList().clear();
+                    queryAnalyzerResponseDTO.addErrorToList("maximum query complexity exceeded");
+                }
+                queryAnalyzerResponseDTO.setSuccess(false);
                 return queryAnalyzerResponseDTO;
-            } catch (Throwable e) {
-                log.error(e);
             }
-        } else {
-            queryAnalyzerResponseDTO.setSuccess(true); // No complexity limitation check
-            return queryAnalyzerResponseDTO;
         }
-        queryAnalyzerResponseDTO.setSuccess(false);
+
+        queryAnalyzerResponseDTO.setSuccess(true);
         return queryAnalyzerResponseDTO;
     }
 
