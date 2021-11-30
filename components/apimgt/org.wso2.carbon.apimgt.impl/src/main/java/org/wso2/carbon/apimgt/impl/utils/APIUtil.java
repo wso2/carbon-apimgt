@@ -9892,9 +9892,7 @@ public final class APIUtil {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         int apiId = apiMgtDAO.getAPIID(uuid);
-        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                WorkflowConstants.WF_TYPE_AM_API_STATE);
-        return wfDTO;
+        return apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId), workflowType);
     }
 
     /**

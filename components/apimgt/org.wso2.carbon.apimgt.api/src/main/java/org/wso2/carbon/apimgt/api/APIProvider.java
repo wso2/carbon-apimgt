@@ -1381,7 +1381,7 @@ public interface APIProvider extends APIManager {
      * @param uuid unique uuid of api or api product
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    void deleteWorkflowTask(String uuid) throws APIManagementException;
+    void deleteWorkflowTask(String uuid, boolean isAPIProduct) throws APIManagementException;
 
     /**
      * This method returns the security audit properties

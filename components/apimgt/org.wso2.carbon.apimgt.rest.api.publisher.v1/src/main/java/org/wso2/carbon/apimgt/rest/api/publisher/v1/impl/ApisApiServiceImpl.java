@@ -2172,7 +2172,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: " + apiId,
                         ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
             }
-            apiProvider.deleteWorkflowTask(apiId);
+            apiProvider.deleteWorkflowTask(apiId, false);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting task ";

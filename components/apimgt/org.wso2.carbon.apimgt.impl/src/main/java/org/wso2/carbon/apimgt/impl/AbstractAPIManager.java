@@ -163,6 +163,7 @@ import java.util.UUID;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
 import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_STATE;
 
 /**
@@ -3211,7 +3212,8 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiProductArtifact != null) {
                 APIProduct apiProduct = getApiProduct(registry, apiProductArtifact);
-                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(apiProduct.getUuid(), WF_TYPE_AM_API_STATE);
+                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(apiProduct.getUuid(),
+                        WF_TYPE_AM_API_PRODUCT_STATE);
                 if (workflowDTO != null) {
                     WorkflowStatus status = workflowDTO.getStatus();
                     apiProduct.setWorkflowStatus(status.toString());
@@ -3893,7 +3895,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiProduct.isRevision() && apiProduct.getRevisionedApiProductId() != null) {
             currentApiProductUuid = apiProduct.getRevisionedApiProductId();
         }
-        workflow = APIUtil.getAPIWorkflowStatus(currentApiProductUuid, WF_TYPE_AM_API_STATE);
+        workflow = APIUtil.getAPIWorkflowStatus(currentApiProductUuid, WF_TYPE_AM_API_PRODUCT_STATE);
         if (workflow != null) {
             WorkflowStatus status = workflow.getStatus();
             apiProduct.setWorkflowStatus(status.toString());

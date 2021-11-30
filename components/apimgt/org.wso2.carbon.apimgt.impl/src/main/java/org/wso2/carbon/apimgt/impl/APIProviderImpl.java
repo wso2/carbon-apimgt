@@ -3379,7 +3379,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (apiId != -1) {
             try {
-                cleanUpPendingAPIStateChangeTask(apiId);
+                cleanUpPendingAPIStateChangeTask(apiId, false);
             } catch (WorkflowException | APIManagementException e) {
                 log.error("Error while executing API delete operation on cleanup workflow tasks for API "
                         + apiUuid + " on organization " + organization, e);
@@ -4906,6 +4906,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String uuid;
             int apiOrApiProductId;
             boolean isApiProduct = apiTypeWrapper.isAPIProduct();
+            String workflowType;
 
             if (isApiProduct) {
                 APIProduct apiProduct = apiTypeWrapper.getApiProduct();
@@ -4917,6 +4918,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 currentStatus = apiProduct.getState();
                 uuid = apiProduct.getUuid();
                 apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
+                workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
             } else {
                 API api = apiTypeWrapper.getApi();
                 providerName = api.getId().getProviderName();
@@ -4927,12 +4929,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 currentStatus = api.getStatus();
                 uuid = api.getUuid();
                 apiOrApiProductId = apiMgtDAO.getAPIID(uuid);
+                workflowType = WorkflowConstants.WF_TYPE_AM_API_STATE;
             }
             String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
 
             WorkflowStatus apiWFState = null;
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
-                    WorkflowConstants.WF_TYPE_AM_API_STATE);
+                    workflowType);
             if (wfDTO != null) {
                 apiWFState = wfDTO.getStatus();
             }
@@ -4940,10 +4943,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // if the workflow has started, then executor should not fire again
             if (!WorkflowStatus.CREATED.equals(apiWFState)) {
                 response = executeStateChangeWorkflow(currentStatus, action, apiName, apiContext, apiType,
-                        apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor);
+                        apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType);
                 // get the workflow state once the executor is executed.
                 wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
-                        WorkflowConstants.WF_TYPE_AM_API_STATE);
+                        workflowType);
                 if (wfDTO != null) {
                     apiWFState = wfDTO.getStatus();
                     response.setStateChangeStatus(apiWFState.toString());
@@ -5003,21 +5006,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param providerName      Provider of API or API Product
      * @param apiOrApiProductId Unique ID API or API Product
      * @param uuid              UUID of the API or API Product
+     * @param gatewayVendor     Gateway vendor
+     * @param workflowType      Workflow Type
      * @return  APIStateChangeResponse
      * @throws APIManagementException Error when executing the state change workflow
      */
     private APIStateChangeResponse executeStateChangeWorkflow(String currentStatus, String action, String apiName,
                                                               String apiContext, String apiType, String apiVersion,
                                                               String providerName, int apiOrApiProductId, String uuid,
-                                                              String gatewayVendor)
+                                                              String gatewayVendor, String workflowType)
             throws APIManagementException {
 
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             WorkflowExecutor apiStateWFExecutor =
-             WorkflowExecutorFactory.getInstance().getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+             WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
             APIStateWorkflowDTO apiStateWorkflow = setAPIStateWorkflowDTOParameters(currentStatus, action, apiName,
-             apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, apiStateWFExecutor);
+             apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType,
+                    apiStateWFExecutor);
             WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
             response.setWorkflowResponse(workflowResponse);
         } catch (WorkflowException e) {
@@ -5038,13 +5044,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param providerName  Owner of the API or API Product
      * @param apiOrApiProductId Unique ID of the API or API Product
      * @param uuid              Unique UUID of the API or API Product
+     * @param gatewayVendor     Gateway Vendor
+     * @param workflowType      Workflow Type
      * @param apiStateWFExecutor    WorkflowExecutor
      * @return APIStateWorkflowDTO Object
      */
     private APIStateWorkflowDTO setAPIStateWorkflowDTOParameters(String currentStatus, String action, String name,
                                                                  String context, String apiType, String version,
                                                                  String providerName, int apiOrApiProductId,
-                                                                 String uuid, String gatewayVendor,
+                                                                 String uuid, String gatewayVendor, String workflowType,
                                                                  WorkflowExecutor apiStateWFExecutor) {
 
         WorkflowProperties workflowProperties = getAPIManagerConfiguration().getWorkflowProperties();
@@ -5061,7 +5069,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         stateWorkflowDTO.setExternalWorkflowReference(apiStateWFExecutor.generateUUID());
         stateWorkflowDTO.setTenantId(tenantId);
         stateWorkflowDTO.setTenantDomain(this.tenantDomain);
-        stateWorkflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
+        stateWorkflowDTO.setWorkflowType(workflowType);
         stateWorkflowDTO.setStatus(WorkflowStatus.CREATED);
         stateWorkflowDTO.setCreatedTime(System.currentTimeMillis());
         stateWorkflowDTO.setWorkflowReference(Integer.toString(apiOrApiProductId));
@@ -6580,22 +6588,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteWorkflowTask(String uuid) throws APIManagementException {
+    public void deleteWorkflowTask(String uuid, boolean isAPIProduct) throws APIManagementException {
         int apiId;
         try {
             apiId = apiMgtDAO.getAPIID(uuid);
-            cleanUpPendingAPIStateChangeTask(apiId);
+            cleanUpPendingAPIStateChangeTask(apiId, isAPIProduct);
         } catch (APIManagementException | WorkflowException e) {
             handleException("Error while deleting the workflow task.", e);
         }
     }
 
-    private void cleanUpPendingAPIStateChangeTask(int apiId) throws WorkflowException, APIManagementException {
+    private void cleanUpPendingAPIStateChangeTask(int apiId, boolean isAPIProduct) throws WorkflowException,
+            APIManagementException {
         //Run cleanup task for workflow
-        WorkflowExecutor apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+        WorkflowExecutor apiStateChangeWFExecutor;
+        WorkflowDTO wfDTO;
 
-        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                WorkflowConstants.WF_TYPE_AM_API_STATE);
+        if (isAPIProduct) {
+            apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE);
+            wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                    WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE);
+        } else {
+            apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+            wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                    WorkflowConstants.WF_TYPE_AM_API_STATE);
+        }
         if (wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()) {
             apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
         }

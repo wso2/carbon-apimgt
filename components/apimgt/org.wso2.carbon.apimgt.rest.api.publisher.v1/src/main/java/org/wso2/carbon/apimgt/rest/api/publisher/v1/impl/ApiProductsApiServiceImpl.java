@@ -1132,7 +1132,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with UUID: "
                         + apiProductId, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, apiProductId));
             }
-            apiProvider.deleteWorkflowTask(apiProductId);
+            apiProvider.deleteWorkflowTask(apiProductId, true);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting task ";

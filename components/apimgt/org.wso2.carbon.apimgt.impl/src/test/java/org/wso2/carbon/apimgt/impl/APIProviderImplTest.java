@@ -1114,7 +1114,7 @@ public class APIProviderImplTest {
         WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
         Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1111),
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(workflowDTO);
-        apiProvider.deleteWorkflowTask(apiUUID);
+        apiProvider.deleteWorkflowTask(apiUUID, false);
         Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiUUID);
     }
 
@@ -4027,7 +4027,7 @@ public class APIProviderImplTest {
         WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
         Mockito.when(workflowDTO.getStatus()).thenReturn(WorkflowStatus.CREATED);
         Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1),
-                WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(workflowDTO);
+                WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE)).thenReturn(workflowDTO);
 
         APIStateChangeResponse response = apiProvider.changeLifeCycleStatus("carbon.super",
                 new ApiTypeWrapper(product), "Publish", null);
