@@ -90,7 +90,7 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                             int maxRetries = 15;
                             if (retryCount < maxRetries) {
                                 retry = true;
-                                long retryTimeout = 15l;
+                                long retryTimeout = (long) Math.min(Math.pow(2, retryCount), 300);
                                 log.warn("Failed retrieving Key Manager Configurations from remote " +
                                         "endpoint: " + ex.getMessage()
                                         + ". Retrying after " + retryTimeout + " seconds...");
@@ -108,8 +108,6 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
     }
 
     public void startLoadKeyManagerConfigurations() {
-
-        new Timer().schedule(this, 5);
-
+        new Timer().schedule(this, ((int) (Math.random() * 60) + 900) * 1000);
     }
 }
