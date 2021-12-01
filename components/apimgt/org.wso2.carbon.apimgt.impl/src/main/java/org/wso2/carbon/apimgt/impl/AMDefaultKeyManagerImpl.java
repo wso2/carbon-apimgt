@@ -93,7 +93,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
     private static final String GRANT_TYPE_VALUE = "client_credentials";
-    private static final String ENCODE_CONSUMER_KEY = "encodeConsumerKey";
 
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
