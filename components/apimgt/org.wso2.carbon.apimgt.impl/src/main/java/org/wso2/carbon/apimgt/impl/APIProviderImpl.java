@@ -3223,13 +3223,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Returns the details of all the life-cycle changes done per API or API Product
      *
-     * @param identifier     Identifier of the API or API Product
+     * @param      uuid Unique UUID of the API or API Product
      * @return List of lifecycle events per given API or API Product
      * @throws APIManagementException if failed to copy docs
      */
-    public List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier) throws APIManagementException {
+    public List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException {
 
-        return apiMgtDAO.getLifeCycleEvents(identifier);
+        return apiMgtDAO.getLifeCycleEvents(uuid);
     }
 
     /**
@@ -7184,6 +7184,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             apiPersistenceInstance.deleteAPIProduct(new Organization(apiProduct.getOrganization()), apiProduct.getUuid());
             apiMgtDAO.deleteAPIProduct(identifier);
+            cleanUpPendingAPIStateChangeTask(apiProduct.getProductId(), true);
             if (log.isDebugEnabled()) {
                 String logMessage =
                         "API Product Name: " + identifier.getName() + ", API Product Version " + identifier.getVersion()
@@ -7203,8 +7204,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         } catch (APIPersistenceException e) {
             handleException("Failed to remove the API product", e);
+        } catch (WorkflowException e) {
+            handleException("Error while removing the pending workflows of API Product", e);
         }
-
     }
 
     @Override

@@ -1067,15 +1067,16 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                                   MessageContext messageContext) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProductIdentifier productIdentifier;
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIProduct product;
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiProductId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID(),
-                        organization);
+                product = apiProvider.getAPIProductbyUUID(apiRevision.getApiUUID(), organization);
             } else {
-                productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
+                product = apiProvider.getAPIProductbyUUID(apiProductId, organization);
             }
-            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(productIdentifier)).build();
+            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(product.getUuid(), apiProvider))
+                    .build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);

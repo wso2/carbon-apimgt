@@ -1832,15 +1832,14 @@ public class PublisherCommonUtils {
     /**
      * Retrieve lifecycle history of API or API Product by Identifier
      *
-     * @param identifier    Unique identifier of API or API Product
+     * @param uuid    Unique UUID of API or API Product
      * @return LifecycleHistoryDTO object
      * @throws APIManagementException exception if there is an error when retrieving the LC history
      */
-    public static LifecycleHistoryDTO getLifecycleHistoryDTO(Identifier identifier)
+    public static LifecycleHistoryDTO getLifecycleHistoryDTO(String uuid, APIProvider apiProvider)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(identifier);
+        List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(uuid);
         return APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
     }
 

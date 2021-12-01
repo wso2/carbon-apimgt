@@ -4947,13 +4947,13 @@ public class ApiMgtDAO {
         }
     }
 
-    public List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier) throws APIManagementException {
+    public List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_LIFECYCLE_EVENT_SQL;
-        int apiOrApiProductId = getAPIID(identifier.getUUID());
+        int apiOrApiProductId = getAPIID(uuid);
 
         List<LifeCycleEvent> events = new ArrayList<LifeCycleEvent>();
         try {
@@ -4964,7 +4964,6 @@ public class ApiMgtDAO {
 
             while (rs.next()) {
                 LifeCycleEvent event = new LifeCycleEvent();
-                event.setApiOrApiProductIdentifier(identifier);
                 String oldState = rs.getString("PREVIOUS_STATE");
                 //event.setOldStatus(oldState != null ? APIStatus.valueOf(oldState) : null);
                 event.setOldStatus(oldState);

@@ -519,11 +519,11 @@ public interface APIProvider extends APIManager {
     /**
      * Returns the details of all the life-cycle changes done per API or API Product
      *
-     * @param identifier     Identifier of the API or API Product
+     * @param uuid     Unique UUID of the API or API Product
      * @return List of life-cycle events per given API or API Product
      * @throws APIManagementException if failed to copy docs
      */
-    List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier) throws APIManagementException;
+    List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException;
 
     /**
      * Search API
