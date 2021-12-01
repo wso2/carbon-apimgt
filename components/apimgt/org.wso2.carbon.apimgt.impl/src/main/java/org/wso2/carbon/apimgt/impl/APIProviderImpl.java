@@ -5081,26 +5081,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Delete API or API Product revisions
-     *
-     * @param uuid          Unique UUID of the API or API Product
-     * @param targetStatus  Target LC state
-     * @param orgId         Organization ID of the logged-in user
-     * @param isProduct     Boolean represents if it's an API Products
-     * @throws APIManagementException error when deleting the revisions
-     */
-    private void deleteApiOrApiProductRevisions(String uuid, String targetStatus, String orgId, boolean isProduct)
-            throws APIManagementException {
-        if (APIConstants.RETIRED.equals(targetStatus)){
-            if (isProduct) {
-                deleteAPIProductRevisions(uuid, orgId);
-            } else {
-                deleteAPIRevisions(uuid, orgId);
-            }
-        }
-    }
-
-    /**
      * Record LC state change to database
      *
      * @param currentStatus     Current state of the artifact
