@@ -1557,7 +1557,7 @@ public class ApiMgtDAO {
                     APIProductIdentifier identifier =
                             new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-
+                    identifier.setUUID(result.getString("API_UUID"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
                     initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
@@ -1566,6 +1566,7 @@ public class ApiMgtDAO {
                     APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                             ("API_PROVIDER")), result.getString("API_NAME"),
                             result.getString("API_VERSION"));
+                    identifier.setUuid(result.getString("API_UUID"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
                     initSubscribedAPIDetailed(connection,subscribedAPI, subscriber, result);
@@ -17522,7 +17523,7 @@ public class ApiMgtDAO {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-
+                            identifier.setUUID(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
                             initSubscribedAPI(subscribedAPI, result);
@@ -17531,7 +17532,7 @@ public class ApiMgtDAO {
                             APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                                     ("API_PROVIDER")), result.getString("API_NAME"),
                                     result.getString("API_VERSION"));
-
+                            identifier.setUuid(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
                             initSubscribedAPI(subscribedAPI, result);

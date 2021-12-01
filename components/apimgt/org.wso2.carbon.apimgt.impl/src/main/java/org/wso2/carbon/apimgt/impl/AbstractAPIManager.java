@@ -620,49 +620,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return APIUtil.getAPIInformation(apiArtifact, registry);
     }
 
-    /**
-     * Get minimal details of API by API identifier
-     *
-     * @param identifier APIIdentifier object
-     * @return API of the provided APIIdentifier
-     * @throws APIManagementException
-     */
-    public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
-
-        String apiPath = APIUtil.getAPIPath(identifier);
-
-        boolean tenantFlowStarted = false;
-
-        try {
-            String tenantDomain = getTenantDomain(identifier);
-
-            startTenantFlow(tenantDomain);
-            tenantFlowStarted = true;
-
-            Registry registry = getRegistry(identifier, apiPath);
-            if (registry != null) {
-                Resource apiResource = registry.get(apiPath);
-                String artifactId = apiResource.getUUID();
-                if (artifactId == null) {
-                    throw new APIManagementException("artifact id is null for : " + apiPath);
-                }
-                GenericArtifactManager artifactManager = getAPIGenericArtifactManager(identifier, registry);
-                GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-                return getApiInformation(registry, apiArtifact);
-            } else {
-                String msg = "Failed to get registry from api identifier: " + identifier;
-                throw new APIManagementException(msg);
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (tenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-    }
-
     protected void endTenantFlow() {
 
         PrivilegedCarbonContext.endTenantFlow();
@@ -672,52 +629,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-    }
-
-    private GenericArtifactManager getAPIGenericArtifactManager(APIIdentifier identifier, Registry registry)
-            throws APIManagementException {
-
-        String tenantDomain = getTenantDomain(identifier);
-        GenericArtifactManager manager = genericArtifactCache.get(tenantDomain);
-        if (manager != null) {
-            return manager;
-        }
-        manager = getAPIGenericArtifactManagerFromUtil(registry, APIConstants.API_KEY);
-        genericArtifactCache.put(tenantDomain, manager);
-        return manager;
-    }
-
-    private Registry getRegistry(APIIdentifier identifier, String apiPath)
-            throws APIManagementException {
-
-        Registry passRegistry;
-        try {
-            String tenantDomain = getTenantDomain(identifier);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                int id = getTenantManager()
-                        .getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(id);
-                passRegistry = getRegistryService()
-                        .getGovernanceSystemRegistry(id);
-            } else {
-                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
-                    // explicitly load the tenant's registry
-                    APIUtil.loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
-                    passRegistry = getRegistryService().getGovernanceUserRegistry(
-                            identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
-                } else {
-                    passRegistry = this.registry;
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from registry on path of : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API from registry on path of : " + apiPath;
-            throw new APIManagementException(msg, e);
-        }
-        return passRegistry;
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier, String organization) throws APIManagementException {

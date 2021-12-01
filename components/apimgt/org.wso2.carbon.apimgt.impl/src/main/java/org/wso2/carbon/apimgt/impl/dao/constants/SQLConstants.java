@@ -509,6 +509,7 @@ public class SQLConstants {
             " SELECT " +
                     "   SUBS.SUBSCRIPTION_ID, " +
                     "   API.API_PROVIDER AS API_PROVIDER, " +
+                    "   API.API_UUID AS API_UUID, " +
                     "   API.API_NAME AS API_NAME, " +
                     "   API.API_TYPE AS TYPE, " +
                     "   API.API_VERSION AS API_VERSION, " +
@@ -537,6 +538,7 @@ public class SQLConstants {
             "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
+            "   API.API_UUID AS API_UUID, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +

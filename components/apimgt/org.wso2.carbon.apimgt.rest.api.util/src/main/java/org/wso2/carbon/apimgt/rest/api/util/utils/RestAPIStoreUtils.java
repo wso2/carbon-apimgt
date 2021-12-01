@@ -21,35 +21,21 @@ package org.wso2.carbon.apimgt.rest.api.util.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This class contains REST API Store related utility operations
@@ -122,50 +108,6 @@ public class RestAPIStoreUtils {
             return (StringUtils.isNotEmpty(comparisonConfig) && Boolean.valueOf(comparisonConfig));
         }
 
-        return false;
-    }
-
-    /**
-     * check whether current logged in user has access to the specified subscription
-     *
-     * @param subscribedAPI SubscribedAPI object
-     * @return true if current logged in user has access to the specified subscription
-     */
-    public static boolean isUserAccessAllowedForSubscription(SubscribedAPI subscribedAPI)
-            throws APIManagementException {
-        String username = RestApiCommonUtil.getLoggedInUsername();
-        Application application = subscribedAPI.getApplication();
-        APIIdentifier apiIdentifier = subscribedAPI.getApiId();
-        APIProductIdentifier productIdentifier = subscribedAPI.getProductId();
-        if (apiIdentifier != null && application != null) {
-            try {
-                if (!isUserAccessAllowedForAPI(apiIdentifier)) {
-                    return false;
-                }
-            } catch (APIManagementException e) {
-                String message =
-                        "Failed to retrieve the API " + apiIdentifier.toString() + " to check user " + username
-                                + " has access to the subscription " + subscribedAPI.getUUID();
-                throw new APIManagementException(message, e);
-            }
-            if (isUserAccessAllowedForApplication(application)) {
-                return true;
-            }
-        }
-
-        if (productIdentifier != null && application != null) {
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            APIProduct product = apiConsumer.getAPIProduct(productIdentifier);
-            if(!isUserAllowedForSubscription(product, username) || !isUserAccessAllowedForAPIProduct(product)) {
-                return false;
-            }
-
-            if (isUserAccessAllowedForApplication(application)) {
-                return true;
-            }
-        }
-
-        //user don't have access
         return false;
     }
 
@@ -261,35 +203,5 @@ public class RestAPIStoreUtils {
         }
         return false;
     }
-    
-    public static boolean isUserAllowedForSubscription(APIProduct product, String user) {
-        String subscriptionAvailability = product.getSubscriptionAvailability();
-        String subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (log.isDebugEnabled()) {
-            log.debug("isUserAllowedForSubscription():- productId: " + product.getUuid()
-                    + ", subscriptionAvailability: " + subscriptionAvailability + " subscriptionAllowedTenants: "
-                    + subscriptionAllowedTenants + " username:" + user + " tenantDomain:" + tenantDomain);
-        }
-        boolean subscriptionAllowed = false;
-        if (!tenantDomain.equals(product.getTenantDomain())) {
-            if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
-                subscriptionAllowed = true;
-            } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
-                if (subscriptionAllowedTenants != null) {
-                    String[] allowedTenants = subscriptionAllowedTenants.split(",");
-                    for (String tenant : allowedTenants) {
-                        if (tenant != null && tenantDomain.equals(tenant.trim())) {
-                            subscriptionAllowed = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            subscriptionAllowed = true;
-        }
-        
-        return subscriptionAllowed;
-    }
+
 }
