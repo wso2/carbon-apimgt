@@ -1379,7 +1379,7 @@ public class SQLConstants {
             "   LC.USER_ID AS USER_ID," +
             "   LC.EVENT_DATE AS EVENT_DATE " +
             " FROM" +
-            "   AM_API_LC_EVENT LC, " +
+            "   AM_API_LC_EVENT LC " +
             " WHERE" +
             "   LC.API_ID = ?";
 
