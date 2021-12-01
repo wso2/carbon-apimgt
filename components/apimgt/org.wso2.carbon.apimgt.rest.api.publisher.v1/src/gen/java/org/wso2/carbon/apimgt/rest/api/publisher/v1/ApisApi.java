@@ -209,7 +209,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get AsyncAPI definition", notes = "This operation can be used to retrieve the AsyncAPI definition of an API. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_view_definition", description = "View, Retrieve API definition")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1016,7 +1017,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get Swagger Definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_view_definition", description = "View, Retrieve API definition")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1076,7 +1078,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:api_view_list", description = "View, Retrieve API list")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 

@@ -188,6 +188,7 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_import_export
+            - apim:api_view_list
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -575,6 +576,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:api_view_definition
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7810,6 +7812,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:api_view_definition
 
     put:
       tags:
@@ -11861,3 +11864,5 @@ components:
             apim:comment_manage: Read and Write comments
             apim:tier_view: View throttling policies
             apim:tier_manage: View, update and delete throttling policies
+            apim:api_view_list: View, Retrieve API list
+            apim:api_view_definition: View, Retrieve API definition
