@@ -22,30 +22,33 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * API Product identifier. 
- *
+ * API Product identifier.
  */
 public class APIProductIdentifier implements Serializable, Identifier {
 
     private static final long serialVersionUID = 1L;
-    
+
     private final String providerName;
     private final String apiProductName;
-    //In this initial api product implementation versioning is not supported, we are setting a default version to all api products
+    //In this initial api product implementation versioning is not supported, we are setting a default version to all
+    // api products
     //however we will create these models in such a way so that versioning can be easily introduced later.
     private final String version;
     private String tier;
     private String applicationId;
     private String uuid;
     private int productId;
-    
-    public APIProductIdentifier(String providerName, String apiProductName, String version){
+    private String organization;
+
+    public APIProductIdentifier(String providerName, String apiProductName, String version) {
+
         this.apiProductName = apiProductName;
         this.providerName = providerName;
         this.version = "1.0.0";
     }
 
     public APIProductIdentifier(String providerName, String apiProductName, String version, String uuid) {
+
         this.apiProductName = apiProductName;
         this.providerName = providerName;
         this.version = "1.0.0";
@@ -53,35 +56,55 @@ public class APIProductIdentifier implements Serializable, Identifier {
     }
 
     public String getTier() {
+
         return tier;
     }
 
     public void setTier(String tier) {
+
         this.tier = tier;
     }
 
     public String getApplicationId() {
+
         return applicationId;
     }
 
     public void setApplicationId(String applicationId) {
+
         this.applicationId = applicationId;
     }
 
     public void setUUID(String uuid) {
+
         this.uuid = uuid;
     }
-    
+
+    @Override
+    public void setId(int id) {
+
+        setProductId(id);
+    }
+
+    @Override
+    public void setOrganization(String organization) {
+
+        this.organization = organization;
+    }
+
     public int getProductId() {
+
         return productId;
     }
 
     public void setProductId(int productId) {
+
         this.productId = productId;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) return true;
 
         if (!(o instanceof APIProductIdentifier)) {
@@ -97,11 +120,13 @@ public class APIProductIdentifier implements Serializable, Identifier {
 
     @Override
     public int hashCode() {
+
         return Objects.hash(providerName, apiProductName, version);
     }
-    
+
     @Override
     public String toString() {
+
         return this.getProviderName() + '-' + this.getName();
     }
 
@@ -113,21 +138,37 @@ public class APIProductIdentifier implements Serializable, Identifier {
 
     @Override
     public String getVersion() {
+
         return version;
     }
 
     @Override
     public String getUUID() {
+
         return uuid;
     }
 
     @Override
     public String getProviderName() {
+
         return providerName;
     }
-    
+
     @Override
     public int getId() {
+
         return productId;
+    }
+
+    @Override
+    public void setUuid(String uuid) {
+
+        setUUID(uuid);
+    }
+
+    @Override
+    public String getOrganization() {
+
+        return this.organization;
     }
 }

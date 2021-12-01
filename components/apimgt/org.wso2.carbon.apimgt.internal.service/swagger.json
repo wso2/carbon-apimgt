@@ -1201,6 +1201,10 @@
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "organization" : {
+          "type" : "string",
+          "description" : "organization of application."
         }
       }
     },
@@ -1236,9 +1240,9 @@
         "tokenType" : {
           "type" : "string",
           "example" : "EXCHANGED",
-          "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.",
-          "default" : "ORIGINAL",
-          "enum" : [ "EXCHANGED", "ORIGINAL" ]
+          "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
+          "default" : "DIRECT"
         }
       }
     },

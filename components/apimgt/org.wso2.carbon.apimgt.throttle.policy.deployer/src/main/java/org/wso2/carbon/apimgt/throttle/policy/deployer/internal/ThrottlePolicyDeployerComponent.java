@@ -30,6 +30,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.utils.ThrottlePolicyStartupListener;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -64,6 +65,8 @@ public class ThrottlePolicyDeployerComponent {
                     .registerService(ServerStartupObserver.class, throttlePolicyStartupListener, null);
             registration = context.getBundleContext()
                     .registerService(ServerShutdownHandler.class, throttlePolicyStartupListener, null);
+            registration = context.getBundleContext()
+                    .registerService(JMSListenerShutDownService.class, throttlePolicyStartupListener, null);
         }
     }
 

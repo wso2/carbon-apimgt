@@ -52,6 +52,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -867,4 +868,146 @@ public class JWTValidatorTest {
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(1)).get(originalToken.getJWTClaimsSet().getJWTID());
     }
 
+
+    @Test
+    public void testAuthenticateForGraphQLSubscription() throws Exception {
+
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("carbon.super");
+        SignedJWT signedJWT = SignedJWT.parse("eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFp" +
+                "UQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0" +
+                "dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyW" +
+                "kdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhZG1pbiIsImF1dCI6IkFQUExJQ0FUSU9OIiwiYXVkIjoidT" +
+                "ljaTNDRmRRUDZJNG9DNU84VFcwZklBRXRnYSIsIm5iZiI6MTYzNjkxNTk4OCwiYXpwIjoidTljaTNDRmRRUDZJNG9DNU84VFc" +
+                "wZklBRXRnYSIsInNjb3BlIjoic2NvcGUxIiwiaXNzIjoiaHR0cHM6XC9cL2xvY2FsaG9zdDo5NDQzXC9vYXV0aDJcL3Rva2Vu" +
+                "IiwiZXhwIjoxNjM2OTE5NTg4LCJpYXQiOjE2MzY5MTU5ODgsImp0aSI6IjJiM2FmYTkxLTBjNDItNGUzNC1iYTliLTc3ZmVkND" +
+                "dkMGNmZCJ9.J8VkCSDUMCUNdJrpbRJy_cj5YazIrdRyNKTJ-9Lv1EabUgwENX1XQcUioSqF686ESI_PvUxYZIwViybVIIGVRuxM" +
+                "Tp9vCMQDWhxXPCuehahul7Ebn0mQtrM7K2fwL0DpyKpI0ER_UYH-PgNvnHS0f3zmJdUBNao2QwuWorXMuwzSw3oPcdHcYmF9" +
+                "Jn024J8Dv3ipHtzEgSc26ULVRaO9bDzJZochzQzqdkxjLMDMBYmKizXOCXEcXJYrEnQpTRHQGOuRN9stXePvO9_gFGVTenun" +
+                "9pBT7Yw7D3Sd-qg-r_AnExOjQu8QwZRjTh_l09YwBYIrMdhSbtXpeAy0GNrc0w");
+        SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
+                signedJWT.getJWTClaimsSet());
+        String apiContext = "/graphql";
+        String apiVersion = "1.0.0";
+
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
+        JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
+        APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
+        Cache gatewayTokenCache = Mockito.mock(Cache.class);
+        Cache invalidTokenCache = Mockito.mock(Cache.class);
+        Cache gatewayKeyCache = Mockito.mock(Cache.class);
+        Cache gatewayJWTTokenCache = Mockito.mock(Cache.class);
+        JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+        jwtValidationInfo.setValid(true);
+        jwtValidationInfo.setIssuer("https://localhost");
+        jwtValidationInfo.setRawPayload(signedJWT.getParsedString());
+        jwtValidationInfo.setJti(UUID.randomUUID().toString());
+        jwtValidationInfo.setIssuedTime(System.currentTimeMillis());
+        jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5000L);
+        jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
+        jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Resident Key Manager");
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        apiKeyValidationInfoDTO.setApiName("GraphQLAPI");
+        apiKeyValidationInfoDTO.setApiPublisher("admin");
+        apiKeyValidationInfoDTO.setApiTier("Unlimited");
+        apiKeyValidationInfoDTO.setAuthorized(true);
+        apiKeyValidationInfoDTO.setGraphQLMaxDepth(3);
+        apiKeyValidationInfoDTO.setGraphQLMaxComplexity(4);
+        // testing happy path
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
+        JWTValidatorWrapper jwtValidator
+                = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
+                jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
+        Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+        AuthenticationContext authenticate = jwtValidator
+                .authenticateForGraphQLSubscription(signedJWTInfo, apiContext, apiVersion);
+        Assert.assertNotNull(authenticate);
+        Assert.assertEquals(authenticate.getApiName(), "GraphQLAPI");
+        Assert.assertEquals(authenticate.getApiPublisher(), "admin");
+        Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
+        Assert.assertEquals(authenticate.getRequestTokenScopes(), jwtValidationInfo.getScopes());
+        Assert.assertEquals(authenticate.getGraphQLMaxComplexity(), apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
+        Assert.assertEquals(authenticate.getGraphQLMaxDepth(), apiKeyValidationInfoDTO.getGraphQLMaxDepth());
+        //testing token validation failure
+        jwtValidationInfo.setValid(false);
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
+        APISecurityException apiSecurityException = null;
+        try {
+            jwtValidator.authenticateForGraphQLSubscription(signedJWTInfo, apiContext, apiVersion);
+        } catch (APISecurityException exception) {
+            apiSecurityException = exception;
+            Assert.assertEquals(exception.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+            Assert.assertEquals(exception.getMessage(), "Invalid JWT token");
+        }
+        if (apiSecurityException == null) {
+            Assert.fail();
+        }
+        //testing subscription validation failure
+        jwtValidationInfo.setValid(true);
+        apiKeyValidationInfoDTO.setAuthorized(false);
+        apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
+        try {
+            jwtValidator.authenticateForGraphQLSubscription(signedJWTInfo, apiContext, apiVersion);
+        } catch (APISecurityException exception) {
+            Assert.assertEquals(exception.getErrorCode(), apiKeyValidationInfoDTO.getValidationStatus());
+            Assert.assertEquals(exception.getMessage(),
+                    "User is NOT authorized to access the Resource. API Subscription validation failed.");
+        }
+    }
+
+    @Test
+    public void testValidateScopesForGraphQLSubscriptions() throws ParseException {
+        String apiContext = "/graphql";
+        String apiVersion = "1.0.0";
+        String matchingResource = "/subresource";
+        SignedJWT signedJWT = SignedJWT.parse("eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFp" +
+                "UQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0" +
+                "dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyW" +
+                "kdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhZG1pbiIsImF1dCI6IkFQUExJQ0FUSU9OIiwiYXVkIjoidT" +
+                "ljaTNDRmRRUDZJNG9DNU84VFcwZklBRXRnYSIsIm5iZiI6MTYzNjkxNTk4OCwiYXpwIjoidTljaTNDRmRRUDZJNG9DNU84VFc" +
+                "wZklBRXRnYSIsInNjb3BlIjoic2NvcGUxIiwiaXNzIjoiaHR0cHM6XC9cL2xvY2FsaG9zdDo5NDQzXC9vYXV0aDJcL3Rva2Vu" +
+                "IiwiZXhwIjoxNjM2OTE5NTg4LCJpYXQiOjE2MzY5MTU5ODgsImp0aSI6IjJiM2FmYTkxLTBjNDItNGUzNC1iYTliLTc3ZmVkND" +
+                "dkMGNmZCJ9.J8VkCSDUMCUNdJrpbRJy_cj5YazIrdRyNKTJ-9Lv1EabUgwENX1XQcUioSqF686ESI_PvUxYZIwViybVIIGVRuxM" +
+                "Tp9vCMQDWhxXPCuehahul7Ebn0mQtrM7K2fwL0DpyKpI0ER_UYH-PgNvnHS0f3zmJdUBNao2QwuWorXMuwzSw3oPcdHcYmF9" +
+                "Jn024J8Dv3ipHtzEgSc26ULVRaO9bDzJZochzQzqdkxjLMDMBYmKizXOCXEcXJYrEnQpTRHQGOuRN9stXePvO9_gFGVTenun" +
+                "9pBT7Yw7D3Sd-qg-r_AnExOjQu8QwZRjTh_l09YwBYIrMdhSbtXpeAy0GNrc0w");
+        SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
+                signedJWT.getJWTClaimsSet());
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+        authenticationContext.setRequestTokenScopes(new ArrayList<String>() {
+            {
+                add("scope1");
+            }
+        });
+        APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
+        JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
+        Cache gatewayTokenCache = Mockito.mock(Cache.class);
+        Cache invalidTokenCache = Mockito.mock(Cache.class);
+        Cache gatewayKeyCache = Mockito.mock(Cache.class);
+        Cache gatewayJWTTokenCache = Mockito.mock(Cache.class);
+        JWTValidatorWrapper jwtValidator
+                = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
+                jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
+        try {
+            Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class),
+                    Mockito.anyString())).thenReturn(true);
+            jwtValidator.validateScopesForGraphQLSubscriptions(apiContext, apiVersion, matchingResource,
+                    signedJWTInfo, authenticationContext);
+        } catch (APISecurityException e) {
+            Assert.fail();
+        }
+        try {
+            Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class),
+                    Mockito.anyString())).thenReturn(false);
+            jwtValidator.validateScopesForGraphQLSubscriptions(apiContext, apiVersion, matchingResource,
+                    signedJWTInfo, authenticationContext);
+        } catch (APISecurityException e) {
+            Assert.assertEquals(e.getErrorCode(), APISecurityConstants.INVALID_SCOPE);
+            String message = "User is NOT authorized to access the Resource: " + matchingResource
+                    + ". Scope validation failed.";
+            Assert.assertEquals(e.getMessage(), message);
+        }
+    }
 }

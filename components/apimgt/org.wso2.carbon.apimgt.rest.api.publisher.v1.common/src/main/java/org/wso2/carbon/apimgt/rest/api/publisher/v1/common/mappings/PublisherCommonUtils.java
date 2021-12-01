@@ -583,7 +583,6 @@ public class PublisherCommonUtils {
     public static String validateUserRoles(List<String> inputRoles) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String[] tenantRoleList = APIUtil.getRoleNames(userName);
         boolean isMatched = false;
         String[] userRoleList = null;
 
@@ -593,18 +592,19 @@ public class PublisherCommonUtils {
             userRoleList = APIUtil.getListOfRoles(userName);
         }
         if (inputRoles != null && !inputRoles.isEmpty()) {
-            if (tenantRoleList != null || userRoleList != null) {
+            if (!isMatched && userRoleList != null) {
                 for (String inputRole : inputRoles) {
-                    if (!isMatched && userRoleList != null && APIUtil.compareRoleList(userRoleList, inputRole)) {
+                    if (APIUtil.compareRoleList(userRoleList, inputRole)) {
                         isMatched = true;
-                    }
-                    if (tenantRoleList != null && !APIUtil.compareRoleList(tenantRoleList, inputRole)) {
-                        return "Invalid user roles found in accessControlRole list";
+                        break;
                     }
                 }
                 return isMatched ? "" : "This user does not have at least one role specified in API access control.";
-            } else {
-                return "Invalid user roles found";
+            }
+
+            String roleString = String.join(",", inputRoles);
+            if (!APIUtil.isRoleNameExist(userName, roleString)) {
+                return "Invalid user roles found in accessControlRole list";
             }
         }
         return "";
@@ -1102,6 +1102,11 @@ public class PublisherCommonUtils {
         } else {
             throw new APIManagementException("KeyManagers value need to be an array");
         }
+
+        // Set default gatewayVendor
+        if (body.getGatewayVendor() == null) {
+            apiToAdd.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        }
         apiToAdd.setOrganization(organization);
         return apiToAdd;
     }
@@ -1139,8 +1144,9 @@ public class PublisherCommonUtils {
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         // Set uri templates
-        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(
-                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()));
+        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
+                API_TYPE_WS.equals(existingAPI.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals
+                (existingAPI.getGatewayVendor()));
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
@@ -1150,6 +1156,7 @@ public class PublisherCommonUtils {
         existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
 
         //updating APi with the new AsyncAPI definition
+        existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
@@ -1314,7 +1321,7 @@ public class PublisherCommonUtils {
                     validationResponse.setIsValid(Boolean.TRUE);
                     GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
                     GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
-                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema, null);
+                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(typeRegistry, null);
                     List<APIOperationsDTO> operationArray = APIMappingUtil
                             .fromURITemplateListToOprationList(operationList);
                     graphQLInfo.setOperations(operationArray);
@@ -1607,6 +1614,11 @@ public class PublisherCommonUtils {
             throw new APIManagementException(
                     "Error occurred while adding API Product. API Product with the context " + context + " already " +
                             "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
+        }
+
+        // Set default gatewayVendor
+        if (apiProductDTO.getGatewayVendor() == null) {
+            apiProductDTO.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         }
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);

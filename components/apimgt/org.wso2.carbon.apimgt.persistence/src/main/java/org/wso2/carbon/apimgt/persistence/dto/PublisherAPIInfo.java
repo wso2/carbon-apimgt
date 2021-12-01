@@ -40,6 +40,7 @@ public class PublisherAPIInfo {
     private String audience;
     private Map<String, String> additionalProperties;
     private String description;
+    private String gatewayVendor;
 
     public String getAudience() {
         return audience;
@@ -127,6 +128,14 @@ public class PublisherAPIInfo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
     }
 
     @Override

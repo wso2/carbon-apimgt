@@ -110,6 +110,8 @@ public enum ExceptionCodes implements ErrorHandler {
     DEPLOYMENT_ID_NOT_FOUND(900355, "Deployment Id Not Found", 400, "Deployment Id Not Found"),
     EXISTING_DEPLOYMENT_NOT_FOUND(900356, "Existing Deployment Not Found", 404, "Deployment with %s not found"),
     ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
+    INVALID_ENV_API_PROP_CONFIG(900358, "Invalid environment specific api property config", 400,
+            "Environment specific api property config is not valid. %s", false),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -482,7 +484,9 @@ public enum ExceptionCodes implements ErrorHandler {
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
-    INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false);
+    INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
+    SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
+            " not allowed for user %s ", false);
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
@@ -93,6 +94,7 @@ public class APIHandlerServiceComponent {
         bundleContext.registerService(ServerStartupObserver.class.getName(), gatewayStartupListener, null);
         bundleContext.registerService(ServerShutdownHandler.class, gatewayStartupListener, null);
         bundleContext.registerService(Axis2ConfigurationContextObserver.class, gatewayStartupListener, null);
+        bundleContext.registerService(JMSListenerShutDownService.class, gatewayStartupListener, null);
         // Register Tenant service creator to deploy tenant specific common synapse configurations
         TenantServiceCreator listener = new TenantServiceCreator();
         bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);

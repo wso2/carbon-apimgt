@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
@@ -238,6 +239,44 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response apisApiIdAsyncapiPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "apiDefinition", required = false)  String apiDefinition, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) throws APIManagementException{
         return delegate.apisApiIdAsyncapiPut(apiId, ifMatch, apiDefinition, url, fileInputStream, fileDetail, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/environments/{envId}/keys")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "get environment specific API properties", notes = "This operation can be used to retrieve environment specific API properties from an existing API. ", response = String.class, responseContainer = "Map", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with environment specific API properties ", response = Map.class, responseContainer = "Map"),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response apisApiIdEnvironmentsEnvIdKeysGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId) throws APIManagementException{
+        return delegate.apisApiIdEnvironmentsEnvIdKeysGet(apiId, envId, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/environments/{envId}/keys")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update environment specific API properties", notes = "This operation can be used to update the environment specific API properties of an existing API. ", response = String.class, responseContainer = "Map", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with environment specific API properties ", response = Map.class, responseContainer = "Map"),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response apisApiIdEnvironmentsEnvIdKeysPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId, @ApiParam(value = "" ,required=true) Map<String, String> requestBody) throws APIManagementException{
+        return delegate.apisApiIdEnvironmentsEnvIdKeysPut(apiId, envId, requestBody, securityContext);
     }
 
     @POST
@@ -506,6 +545,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
@@ -726,6 +766,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Lifecycle State Change History of the API.", notes = "This operation can be used to retrieve Lifecycle state change history of the API. ", response = LifecycleHistoryDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
@@ -744,6 +785,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Lifecycle State Data of the API.", notes = "This operation can be used to retrieve Lifecycle state data of the API. ", response = LifecycleStateDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
@@ -807,6 +849,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Monetization Status for each Tier in a Given API", notes = "This operation can be used to get monetization status for each tier in a given API ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
@@ -884,6 +927,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Total Revenue Details of a Given Monetized API with Meterd Billing", notes = "This operation can be used to get details of total revenue details of a given monetized API with meterd billing. ", response = APIRevenueDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
@@ -902,6 +946,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Revision", notes = "Retrieve a revision of an API ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
@@ -920,6 +965,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "List Deployments", notes = "List available deployed revision deployment details of an API ", response = APIRevisionDeploymentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
@@ -938,6 +984,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "List Revisions", notes = "List available revisions of an API ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
@@ -1054,6 +1101,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve API Comments", notes = "Get a list of Comments that are already added to APIs ", response = CommentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments"),
             @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
         })
@@ -1124,6 +1172,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of an API Comment", notes = "Get the individual comment given by a username for a certain API. ", response = CommentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments"),
             @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
         })
@@ -1163,6 +1212,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Complexity Related Details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = GraphQLQueryComplexityInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
@@ -1181,6 +1231,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Types and Fields of a GraphQL Schema", notes = "This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id. ", response = GraphQLSchemaTypeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
@@ -1199,6 +1250,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get replies of a comment", notes = "Get replies of a comment ", response = CommentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments"),
             @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
         })

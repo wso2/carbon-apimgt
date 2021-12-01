@@ -280,6 +280,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_NAME = "overview_name";
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
+    public static final String API_OVERVIEW_VERSION_TIMESTAMP = "overview_versionTimestamp";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
@@ -306,9 +307,9 @@ public final class APIConstants {
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
-    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_OVERVIEW_TAG = "tags";
     public static final String API_TAG = "Tag";
     public static final String API_STATUS = "STATUS";
@@ -441,6 +442,7 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
     public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + ".ConvertClaimsToConsumerDialect";
 
+    public static final String MEDIATOR_CONFIG = "MediatorConfigs.";
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
     public static final String API_SECURITY = "APISecurity";
@@ -556,6 +558,7 @@ public final class APIConstants {
     public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
     public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
+    public static final String TOKEN_TYPE_OAUTH = "OAUTH";
     public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
@@ -1250,6 +1253,7 @@ public final class APIConstants {
     public static final String API_TYPE = "API_TYPE";
     public static final String HTTP_VERB = "HTTP_VERB";
     public static final String GRAPHQL_API = "GRAPHQL";
+    public static final String GRAPHQL_SUBSCRIPTION_REQUEST = "isGraphqlSubscriptionRequest";
     public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
     public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
     public static final String GRAPHQL_API_OPERATION_VERB_INFO_DTO = "OPERATION_VERB_INFO_DTO";
@@ -1279,6 +1283,9 @@ public final class APIConstants {
     public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
     public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
+
+    public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";
+    public static final String VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS = "topicMappings";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1354,11 +1361,13 @@ public final class APIConstants {
         public static final String PASSWORD_GRANT_TYPE = "grant_type=password";
         public static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
 
+        public static final String OAUTH_MEDIATION_CONFIG = "OAuth.";
         public static final String ACCESS_TOKEN = "access_token";
         public static final String REFRESH_TOKEN = "refresh_token";
         public static final String SCOPE = "scope";
         public static final String TOKEN_TYPE = "token_type";
         public static final String EXPIRES_IN = "expires_in";
+        public static final String EXPIRES_IN_CONFIG = "ExpiresIn";
 
         // Properties in Endpoint Config
         public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
@@ -1643,6 +1652,9 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_CLIENT_ID = "clientId";
     public static final String ENDPOINT_SECURITY_CLIENT_SECRET = "clientSecret";
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+    public static final String ENDPOINT_SPECIFIC_CONFIG = "config";
+    public static final String ENDPOINT_CONFIG_ACTION_DURATION = "actionDuration";
+    public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
@@ -2719,6 +2731,7 @@ public final class APIConstants {
     public static final String PROXY_SERVICE_NAME_SUFFIX = "_proxy";
 
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
+    public static final String ALLOW_MULTIPLE_VERSIONS = "allowMultipleVersions";
 
     public static class ServiceCatalogConstants {
         public static final String SERVICE_UUID = "UUID";
@@ -2763,6 +2776,8 @@ public final class APIConstants {
     public static class GatewayArtifactConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
+        public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE = "env_properties";
+        public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME = "apis";
     }
 
     public static class OrganizationDeletion {
@@ -2791,4 +2806,30 @@ public final class APIConstants {
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
+
+    public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
+
+    // Protocol variables
+    public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
+    public static final String HTTPS_TRANSPORT_PROTOCOL_NAME = "https";
+    public static final String WS_TRANSPORT_PROTOCOL_NAME = "ws";
+    public static final String KAFKA_TRANSPORT_PROTOCOL_NAME = "kafka";
+    public static final String AMQP_TRANSPORT_PROTOCOL_NAME = "amqp";
+    public static final String AMQPS_TRANSPORT_PROTOCOL_NAME = "amqps";
+    public static final String AMQP1_TRANSPORT_PROTOCOL_NAME = "amqp1";
+    public static final String MQTT_TRANSPORT_PROTOCOL_NAME = "mqtt";
+    public static final String SECURE_MQTT_TRANSPORT_PROTOCOL_NAME = "secure-mqtt";
+    public static final String WS_MQTT_TRANSPORT_PROTOCOL_NAME = "ws-mqtt";
+    public static final String WSS_MQTT_TRANSPORT_PROTOCOL_NAME = "wss-mqtt";
+    public static final String MQTT5_TRANSPORT_PROTOCOL_NAME = "mqtt5";
+    public static final String NATS_TRANSPORT_PROTOCOL_NAME = "nats";
+    public static final String JMS_TRANSPORT_PROTOCOL_NAME = "jms";
+    public static final String SNS_TRANSPORT_PROTOCOL_NAME = "sns";
+    public static final String SQS_TRANSPORT_PROTOCOL_NAME = "sqs";
+    public static final String STOMP_TRANSPORT_PROTOCOL_NAME = "stomp";
+    public static final String REDIS_TRANSPORT_PROTOCOL_NAME = "redis";
+    public static final String SMF_TRANSPORT_PROTOCOL_NAME = "smf";
+    public static final String SMF_TRANSPORT_PROTOCOL_VERSION = "smf";
+    public static final String SMFS_TRANSPORT_PROTOCOL_NAME = "smfs";
+    public static final String SMFS_TRANSPORT_PROTOCOL_VERSION = "smfs";
 }

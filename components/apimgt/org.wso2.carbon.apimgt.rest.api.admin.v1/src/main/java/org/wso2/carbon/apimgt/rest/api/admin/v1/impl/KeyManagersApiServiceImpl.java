@@ -118,7 +118,6 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
-            validateIdpTypeFromTokenType(keyManagerConfigurationDTO);
             keyManagerConfigurationDTO.setUuid(keyManagerId);
             KeyManagerConfigurationDTO oldKeyManagerConfigurationDTO =
                     apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
@@ -151,7 +150,6 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
-            validateIdpTypeFromTokenType(keyManagerConfigurationDTO);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
@@ -165,24 +163,4 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             throw new APIManagementException(error, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
-
-    private void validateIdpTypeFromTokenType(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
-            throws APIManagementException {
-
-        String tokenType = keyManagerConfigurationDTO.getTokenType();
-        String keyManagerType = keyManagerConfigurationDTO.getType();
-        if (StringUtils.equalsIgnoreCase(tokenType, KeyManagerConfiguration.TokenType.EXCHANGED.toString())) {
-            Stream<KeyManagerConfiguration.IdpTypeOfExchangedTokens> streamIdpType = Stream
-                    .of(KeyManagerConfiguration.IdpTypeOfExchangedTokens.values());
-            boolean isAllowedIdP = streamIdpType
-                    .anyMatch(idpType -> StringUtils.equalsIgnoreCase(idpType.toString(), keyManagerType));
-            if (!isAllowedIdP) {
-                String errMsg = "Identity Provider type: " + keyManagerType + " not allowed for the token type "
-                        + KeyManagerConfiguration.TokenType.EXCHANGED + ". Should be a value from " + Arrays
-                        .asList(KeyManagerConfiguration.IdpTypeOfExchangedTokens.values());
-                throw new APIManagementException(errMsg, ExceptionCodes.from(ExceptionCodes.INVALID_IDP_TYPE, errMsg));
-            }
-        }
-    }
-
 }

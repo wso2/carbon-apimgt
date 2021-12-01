@@ -612,4 +612,30 @@ public class ThrottleHandlerTest {
         Assert.assertTrue(throttleHandler.handleRequest(messageContext));
     }
 
+    /**
+     * This method will test request flow when "isGraphqlSubscriptionRequest" property is set in axis2 message context
+     * when incoming transport is websocket. This occurs during Graphql Subscription request flow.
+     */
+    @Test
+    public void testHandleRequestForGraphQLSubscriptions() {
+
+        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, new ThrottleDataHolder(),
+                throttleEvaluator, accessInformation);
+        Axis2MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(messageContext.
+                getAxis2MessageContext()).thenReturn(axis2MessageContext);
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("ws");
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(true);
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("wss");
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+
+        // clean up message context
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("http");
+    }
+
 }

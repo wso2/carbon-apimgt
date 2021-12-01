@@ -18,38 +18,33 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
-import graphql.language.Field;
-import graphql.language.FragmentSpread;
-import graphql.language.Selection;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
  * Unit test cases related GraphQLAPIHandler.
  */
 public class GraphQLAPIHandlerTest {
 
+    /**
+     * This method will test request flow when "isGraphqlSubscriptionRequest" property is set in axis2 message context
+     * when incoming transport is websocket. This occurs during Graphql Subscription request flow.
+     */
     @Test
-    public void testGetNestedLevelOperations() throws Exception {
+    public void testHandleRequestForGraphQLSubscriptions() {
+        Axis2MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(messageContext.getAxis2MessageContext()).thenReturn(axis2MessageContext);
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("ws");
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(true);
         GraphQLAPIHandler graphQLAPIHandler = new GraphQLAPIHandler();
-        ArrayList<String> operationArray = new ArrayList<>();
-        ArrayList<String> supportedFields = new ArrayList<>();
-        supportedFields.add("search");
-        supportedFields.add("addItem");
-        List<Selection> selectionList = new ArrayList<>();
-        Selection searchField = new Field("search");
-        Selection addItemField = new Field("addItem");
-        FragmentSpread newSearchField = new FragmentSpread("customFragment");
-        selectionList.add(searchField);
-        selectionList.add(addItemField);
-        selectionList.add(newSearchField);
+        Assert.assertTrue(graphQLAPIHandler.handleRequest(messageContext));
 
-        graphQLAPIHandler.getNestedLevelOperations(selectionList, supportedFields, operationArray);
-        Assert.assertEquals("Different no of operations are found", 2, operationArray.size());
-        Assert.assertFalse("Fragment should not in the operation list",
-                operationArray.contains(newSearchField.getName()));
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("wss");
+        Assert.assertTrue(graphQLAPIHandler.handleRequest(messageContext));
     }
 }

@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -76,6 +77,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -239,6 +241,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -648,10 +651,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
+        String apiName = api.getId().getApiName();
+        String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
 
         if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
-            String errorMessage = "Empty password is given for endpointSecurity when creating API "
-                    + api.getId().getApiName();
+            String errorMessage = "Empty password is given for endpointSecurity when creating API " + apiName;
             throw new APIManagementException(errorMessage);
         }
         //Validate Transports
@@ -683,6 +687,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (XMLStreamException e) {
             handleException("Error occurred while adding default API LifeCycle.", e);
         }
+        //Set version timestamp to the API
+        String latestTimestamp = calculateVersionTimestamp(provider, apiName,
+                api.getId().getVersion(), api.getOrganization());
+        api.setVersionTimestamp(latestTimestamp);
 
         try {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
@@ -1358,6 +1366,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
+        api.setVersionTimestamp(existingAPI.getVersionTimestamp());
         updateEndpointSecurity(existingAPI, api);
 
         if (!existingAPI.getContext().equals(api.getContext())) {
@@ -2604,6 +2613,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
         String existingContext = existingAPI.getContext();
+        String existingVersionTimestamp = existingAPI.getVersionTimestamp();
 
         APIIdentifier newApiId = new APIIdentifier(existingAPI.getId().getProviderName(),
                 existingAPI.getId().getApiName(), newVersion);
@@ -2611,12 +2621,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setId(newApiId);
         existingAPI.setStatus(APIConstants.CREATED);
         existingAPI.setDefaultVersion(isDefaultVersion);
+        existingAPI.setVersionTimestamp("");
 
         // We need to change the context by setting the new version
         // This is a change that is coming with the context version strategy
         String existingAPIContextTemplate = existingAPI.getContextTemplate();
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
-
 
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
@@ -2671,8 +2681,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
         existingAPI.setCreatedTime(existingAPICreatedTime);
-        // update existing api with setLatest to false
-        existingAPI.setLatest(false);
+        // update existing api with the original timestamp
+        existingAPI.setVersionTimestamp(existingVersionTimestamp);
         if (isDefaultVersion) {
             existingAPI.setDefaultVersion(false);
         } else {
@@ -4751,6 +4761,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String currentStatus = apiArtifact.getLifecycleState();
                 String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, organization);
+                String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
                 int apiId = apiMgtDAO.getAPIID(uuid);
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
@@ -4774,6 +4785,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setApiType(apiType);
                         apiStateWorkflow.setApiVersion(apiVersion);
                         apiStateWorkflow.setApiProvider(providerName);
+                        apiStateWorkflow.setGatewayVendor(gatewayVendor);
                         apiStateWorkflow.setCallbackUrl(workflowProperties.getWorkflowCallbackAPI());
                         apiStateWorkflow.setExternalWorkflowReference(apiStateWFExecutor.generateUUID());
                         apiStateWorkflow.setTenantId(tenantId);
@@ -5106,27 +5118,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private List<API> getAPIVersionsByProviderAndName(String provider, String apiName, String organization)
             throws APIManagementException {
-        Set<String> list = apiMgtDAO.getUUIDsOfAPIVersions(apiName, provider);
-        List<API> apiVersions = new ArrayList<API>();
-        for (String uuid : list) {
-            try {
-                PublisherAPI publisherAPI = apiPersistenceInstance
-                        .getPublisherAPI(new Organization(organization), uuid);
-                if (APIConstants.API_PRODUCT.equals(publisherAPI.getType())) {
-                    // skip api products
-                    continue;
-                }
-                API api = new API(new APIIdentifier(publisherAPI.getProviderName(), publisherAPI.getApiName(),
-                        publisherAPI.getVersion()));
-
-                api.setUuid(uuid);
-                api.setStatus(publisherAPI.getStatus());
-                apiVersions.add(api);
-            } catch (APIPersistenceException e) {
-                throw new APIManagementException("Error while retrieving the api ", e);
-            }
-        }
-        return apiVersions;
+        return apiMgtDAO.getAllAPIVersions(apiName, provider);
     }
     /**
      * To get the API artifact from the registry
@@ -6954,6 +6946,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //set the valid resources only
         product.setProductResources(validResources);
         //now we have validated APIs and it's resources inside the API product. Add it to database
+        String provider = APIUtil.replaceEmailDomain(product.getId().getProviderName());
+        // Set version timestamp
+        product.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
 
         // Create registry artifact
         String apiProductUUID = createAPIProduct(product);
@@ -6965,6 +6960,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiToProductResourceMapping;
     }
 
+    private String calculateVersionTimestamp(String provider, String name, String version, String org)
+            throws APIManagementException {
+
+        if (StringUtils.isEmpty(provider) ||
+                StringUtils.isEmpty(name) ||
+                StringUtils.isEmpty(org)) {
+            throw new APIManagementException("Invalid API information, name=" + name + " provider=" + provider +
+                    " organization=" + org);
+        }
+        TreeMap<String, API> apiSortedMap = new TreeMap<>();
+        List<API> apiList = getAPIVersionsByProviderAndName(provider,
+                name, org);
+        for (API mappedAPI : apiList) {
+            apiSortedMap.put(mappedAPI.getVersionTimestamp(), mappedAPI);
+        }
+        APIVersionStringComparator comparator = new APIVersionStringComparator();
+        String latestVersion = version;
+        long previousTimestamp = 0L;
+        String latestTimestamp = "";
+        for (API tempAPI : apiSortedMap.values()) {
+            if (comparator.compare(tempAPI.getId().getVersion(), latestVersion) > 0) {
+                latestTimestamp = String.valueOf((previousTimestamp + Long.valueOf(tempAPI.getVersionTimestamp())) / 2);
+                break;
+            } else {
+                previousTimestamp = Long.valueOf(tempAPI.getVersionTimestamp());
+            }
+        }
+        if (StringUtils.isEmpty(latestTimestamp)) {
+            latestTimestamp = String.valueOf(System.currentTimeMillis());
+        }
+        return latestTimestamp;
+    }
 
     @Override
     public void saveToGateway(APIProduct product) throws APIManagementException {
@@ -9135,5 +9162,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
+    }
+
+    @Override
+    public void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
+            EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException {
+        String content = new Gson().toJson(environmentPropertyDTO);
+        environmentSpecificAPIPropertyDAO.addOrUpdateEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
+    }
+
+    @Override
+    public EnvironmentPropertiesDTO getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid)
+            throws APIManagementException {
+        String content = environmentSpecificAPIPropertyDAO.getEnvironmentSpecificAPIProperties(apiUuid, envUuid);
+        if (StringUtils.isBlank(content)) {
+            return new EnvironmentPropertiesDTO();
+        }
+        return new Gson().fromJson(content, EnvironmentPropertiesDTO.class);
+    }
+
+    @Override
+    public Environment getEnvironment(String organization, String uuid) throws APIManagementException {
+        // priority for configured environments over dynamic environments
+        // name is the UUID of environments configured in api-manager.xml
+        Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
+        if (env == null) {
+            env = apiMgtDAO.getEnvironment(organization, uuid);
+            if (env == null) {
+                String errorMessage =
+                        String.format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);
+                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
+                        .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid)));
+            }
+        }
+        return env;
     }
 }

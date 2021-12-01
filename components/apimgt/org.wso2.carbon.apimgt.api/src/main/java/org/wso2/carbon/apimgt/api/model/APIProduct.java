@@ -63,6 +63,7 @@ public class APIProduct {
 
     private JSONObject monetizationProperties = new JSONObject();
     private boolean isMonetizationEnabled = false;
+    private String versionTimestamp;
 
     /**
      * API security at the gateway level.
@@ -617,5 +618,28 @@ public class APIProduct {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    /**
+     * Property to indicate the gateway vendor to deploy API Product
+     */
+    private String gatewayVendor;
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getVersionTimestamp() {
+
+        return versionTimestamp;
+    }
+
+    public void setVersionTimestamp(String versionTimestamp) {
+
+        this.versionTimestamp = versionTimestamp;
     }
 }

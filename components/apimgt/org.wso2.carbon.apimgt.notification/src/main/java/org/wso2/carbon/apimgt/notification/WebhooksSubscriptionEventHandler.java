@@ -117,7 +117,7 @@ public class WebhooksSubscriptionEventHandler implements EventHandler {
                 event.getSubscriberName(), event.getApplicationTier(), event.getTier(), event.getApiTier(),
                 !isSuccess};
         EventPublisherEvent asyncWebhooksEvent = new EventPublisherEvent(
-                APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID, System.currentTimeMillis(), null, null, objects);
+                APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID, System.currentTimeMillis(), objects);
         APIUtil.publishEvent(EventPublisherType.ASYNC_WEBHOOKS, asyncWebhooksEvent, asyncWebhooksEvent.toString());
     }
 

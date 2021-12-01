@@ -80,5 +80,6 @@ public class PublisherAPIProductInfo {
     public void setApiSecurity(String apiSecurity) {
         this.apiSecurity = apiSecurity;
     }
+    private String gatewayVendor;
     
 }
