@@ -97,18 +97,21 @@ public class LogsHandler extends AbstractSynapseHandler {
             try {
                 requestSize = getContentLength(messageContext);
                 Map headers = LogUtils.getTransportHeaders(messageContext);
-                Set<String> key = headers.keySet();
-                String authHeader = LogUtils.getAuthorizationHeader(headers);
-                String orgIdHeader = LogUtils.getOrganizationIdHeader(headers);
-                String SrcIdHeader = LogUtils.getSourceIdHeader(headers);
-                String applIdHeader = LogUtils.getApplicationIdHeader(headers);
-                String uuIdHeader = LogUtils.getUuidHeader(headers);
-                String correlationIdHeader = LogUtils.getCorrelationHeader(headers);
-                messageContext.setProperty(AUTH_HEADER, authHeader);
-                messageContext.setProperty(ORG_ID_HEADER, orgIdHeader);
-                messageContext.setProperty(SRC_ID_HEADER, SrcIdHeader);
-                messageContext.setProperty(APP_ID_HEADER, applIdHeader);
-                messageContext.setProperty(UUID_HEADER, uuIdHeader);
+                String correlationIdHeader = null;
+                if (headers != null) {
+                    Set<String> key = headers.keySet();
+                    String authHeader = LogUtils.getAuthorizationHeader(headers);
+                    String orgIdHeader = LogUtils.getOrganizationIdHeader(headers);
+                    String SrcIdHeader = LogUtils.getSourceIdHeader(headers);
+                    String applIdHeader = LogUtils.getApplicationIdHeader(headers);
+                    String uuIdHeader = LogUtils.getUuidHeader(headers);
+                    correlationIdHeader = LogUtils.getCorrelationHeader(headers);
+                    messageContext.setProperty(AUTH_HEADER, authHeader);
+                    messageContext.setProperty(ORG_ID_HEADER, orgIdHeader);
+                    messageContext.setProperty(SRC_ID_HEADER, SrcIdHeader);
+                    messageContext.setProperty(APP_ID_HEADER, applIdHeader);
+                    messageContext.setProperty(UUID_HEADER, uuIdHeader);
+                }
 
                 if (MDC.get(APIConstants.CORRELATION_ID) != null) {
                     correlationIdHeader = (String) MDC.get(APIConstants.CORRELATION_ID);
@@ -225,7 +228,10 @@ public class LogsHandler extends AbstractSynapseHandler {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
+        String contentLength = null;
+        if (headers != null) {
+            contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
+        }
         if (contentLength != null) {
             requestSize = Integer.parseInt(contentLength);
             // request size is left as -1 if chunking is enabled. this is to avoid building the message
