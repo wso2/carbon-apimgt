@@ -49,6 +49,7 @@ import java.util.Set;
 public class JWTUtil {
 
     private static final Log log = LogFactory.getLog(JWTUtil.class);
+    private static final String ENV_ORG_BASED_TOKEN_FEATURE = "FEATURE_FLAG_ORG_BASED_TOKEN_ENABLED";
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -70,9 +71,21 @@ public class JWTUtil {
         if (scopeClaim != null) {
             String orgId = (String) message.get(RestApiConstants.ORG_ID);
             String[] scopes = scopeClaim.split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
-            scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
-                    .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
-                    .toArray(size -> new String[size]);
+            if (isOrgBasedTokenFeatureEnabled()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("$" + ENV_ORG_BASED_TOKEN_FEATURE + " is enabled.");
+                }
+                // check organization claim and orgId
+                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
+                if (!orgId.equals(orgClaim)) {
+                    log.error("OrgId and organization claim mismatch!");
+                    return false;
+                }
+            } else {
+                scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
+                        .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
+                        .toArray(size -> new String[size]);
+            }
             oauthTokenInfo.setScopes(scopes);
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
@@ -196,4 +209,11 @@ public class JWTUtil {
         return false;
     }
 
+    private static boolean isOrgBasedTokenFeatureEnabled() {
+        String featureEnabled = System.getenv(ENV_ORG_BASED_TOKEN_FEATURE);
+        if (featureEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(featureEnabled);
+    }
 }
