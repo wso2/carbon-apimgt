@@ -2660,8 +2660,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // copy wsdl 
-        if (existingAPI.getWsdlUrl() != null) {
+        // copy wsdl
+        if (!APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType()) && existingAPI.getWsdlUrl() != null) {
             ResourceFile wsdl = getWSDL(existingApiId, organization);
             if (wsdl != null) {
                 addWSDLResource(newAPIId, wsdl, null, organization);

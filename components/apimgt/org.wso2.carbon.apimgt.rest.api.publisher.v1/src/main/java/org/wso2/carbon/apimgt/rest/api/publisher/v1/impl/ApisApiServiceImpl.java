@@ -3621,15 +3621,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
 
-            if (StringUtils.isNotBlank(url)) {
-                createdApi.setWsdlUrl(url);
-                apiProvider.addWSDLResource(createdApi.getUuid(), null, url, tenantDomain);
-            } else if (fileDetail != null && fileInputStream != null) {
-                PublisherCommonUtils
-                        .addWsdl(fileDetail.getContentType().toString(), fileInputStream, createdApi, apiProvider,
-                                tenantDomain);
-            }
-
             String swaggerStr = "";
             if (StringUtils.isNotBlank(url)) {
                 swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(url);
