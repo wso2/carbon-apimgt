@@ -105,15 +105,6 @@ public interface APIManager {
     API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException;
 
     /**
-     * Get minimal details of API by API identifier
-     *
-     * @param identifier APIIdentifier object
-     * @return API of the provided APIIdentifier
-     * @throws APIManagementException
-     */
-    API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
-
-    /**
      * Checks the Availability of given APIIdentifier
      *
      * @param identifier APIIdentifier

@@ -130,12 +130,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getLightweightAPI(identifier);
-    }
-
-    @Override
     public String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getOpenAPIDefinition(apiId, organization);
