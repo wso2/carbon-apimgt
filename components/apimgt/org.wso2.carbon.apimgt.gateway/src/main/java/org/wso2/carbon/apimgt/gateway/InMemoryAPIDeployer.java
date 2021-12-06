@@ -97,6 +97,7 @@ public class InMemoryAPIDeployer {
                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
                 addDeployedGraphqlQLToAPI(gatewayAPIDTO);
+                DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
                 if (debugEnabled) {
                     log.debug("API with " + apiId + " is deployed in gateway with the labels " + String.join(",",
                             gatewayLabels));
@@ -180,6 +181,8 @@ public class InMemoryAPIDeployer {
                                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
                                 addDeployedGraphqlQLToAPI(gatewayAPIDTO);
+                                DataHolder.getInstance().addKeyManagerToAPIMapping(gatewayAPIDTO.getApiId(),
+                                        gatewayAPIDTO.getKeyManagers());
                             }
                         } catch (AxisFault axisFault) {
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
@@ -259,6 +262,7 @@ public class InMemoryAPIDeployer {
                                 .addStringToList(gatewayEvent.getUuid(), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
                 DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
+                DataHolder.getInstance().removeKeyManagerToAPIMapping(gatewayAPIDTO.getApiId());
             }
     }
 

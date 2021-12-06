@@ -363,7 +363,7 @@ public class JWTValidator {
 
         String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-        String jti = jwtClaimsSet.getJWTID();
+        String jti = getJWTTokenIdentifier(signedJWTInfo);
         JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, tokenSignature, jti);
 
         if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {

@@ -538,6 +538,7 @@ public class TemplateBuilderUtil {
         productAPIDto.setName(id.getName());
         productAPIDto.setVersion(id.getVersion());
         productAPIDto.setTenantDomain(tenantDomain);
+        productAPIDto.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         String definition = apiProduct.getDefinition();
         productAPIDto.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(apiProduct.getUuid(),
                 productAPIDto.getLocalEntriesToBeRemove()));
@@ -598,6 +599,7 @@ public class TemplateBuilderUtil {
         gatewayAPIDTO.setProvider(api.getId().getProviderName());
         gatewayAPIDTO.setApiId(api.getUUID());
         gatewayAPIDTO.setTenantDomain(tenantDomain);
+        gatewayAPIDTO.setKeyManagers(api.getKeyManagers());
 
         String definition;
         boolean isGraphQLSubscriptionAPI = false;
