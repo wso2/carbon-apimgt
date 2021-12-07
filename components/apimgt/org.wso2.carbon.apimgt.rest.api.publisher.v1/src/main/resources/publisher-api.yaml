@@ -8041,7 +8041,7 @@ paths:
         - OAuth2Security:
             - apim:api_publish
             - apim:api_manage
-            - apim:api_import_export
+            - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
