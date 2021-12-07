@@ -291,6 +291,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -6444,7 +6445,7 @@ public final class APIUtil {
         }
 
         boolean isPaid = false;
-        Tier tier = getTierFromCache(tierName, tenantDomain);
+        Tier tier = getPolicyByName(PolicyConstants.POLICY_LEVEL_SUB, tierName, tenantDomain);
 
         if (tier != null) {
             final Map<String, Object> tierAttributes = tier.getTierAttributes();
@@ -6478,31 +6479,15 @@ public final class APIUtil {
         return false;
     }
 
-    public static Tier getTierFromCache(String tierName, String tenantDomain) throws APIManagementException {
+    public static Map<String, Tier> getTiers(String organization) throws APIManagementException {
 
-        Map<String, Tier> tierMap = null;
+        int requestedTenantId = getInternalOrganizationId(organization);
 
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-            if (getTiersCache().containsKey(tierName)) {
-                tierMap = (Map<String, Tier>) getTiersCache().get(tierName);
-            } else {
-                int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-
-                if (requestedTenantId == 0) {
-                    tierMap = APIUtil.getAdvancedSubsriptionTiers();
-                } else {
-                    tierMap = APIUtil.getAdvancedSubsriptionTiers(requestedTenantId);
-                }
-                getTiersCache().put(tierName, tierMap);
-            }
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+        if (requestedTenantId == 0) {
+            return APIUtil.getAdvancedSubsriptionTiers();
+        } else {
+            return APIUtil.getAdvancedSubsriptionTiers(requestedTenantId);
         }
-
-        return tierMap.get(tierName);
     }
 
     public static void clearTiersCache(String tenantDomain) {
@@ -7919,6 +7904,80 @@ public final class APIUtil {
         }
         return tierMap;
     }
+
+    public static Tier getPolicyByName(String policyLevel, String policyName, String organization)
+            throws APIManagementException {
+
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        Policy policy;
+        if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+            policy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
+            policy = apiMgtDAO.getAPIPolicy(policyName, tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
+            policy = apiMgtDAO.getApplicationPolicy(policyName, tenantId);
+        } else {
+            throw new APIManagementException("No such a policy type : " + policyLevel);
+        }
+        if (policy != null) {
+            if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
+                Tier tier = new Tier(policy.getPolicyName());
+                tier.setDescription(policy.getDescription());
+                tier.setDisplayName(policy.getDisplayName());
+                Limit limit = policy.getDefaultQuotaPolicy().getLimit();
+                tier.setTimeUnit(limit.getTimeUnit());
+                tier.setUnitTime(limit.getUnitTime());
+                tier.setQuotaPolicyType(policy.getDefaultQuotaPolicy().getType());
+
+                //If the policy is a subscription policy
+                if (policy instanceof SubscriptionPolicy) {
+                    SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
+                    tier.setRateLimitCount(subscriptionPolicy.getRateLimitCount());
+                    tier.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
+                    setBillingPlanAndCustomAttributesToTier(subscriptionPolicy, tier);
+                    if (StringUtils.equals(subscriptionPolicy.getBillingPlan(), APIConstants.COMMERCIAL_TIER_PLAN)) {
+                        tier.setMonetizationAttributes(subscriptionPolicy.getMonetizationPlanProperties());
+                    }
+                }
+
+                if (limit instanceof RequestCountLimit) {
+                    RequestCountLimit countLimit = (RequestCountLimit) limit;
+                    tier.setRequestsPerMin(countLimit.getRequestCount());
+                    tier.setRequestCount(countLimit.getRequestCount());
+                } else if (limit instanceof BandwidthLimit) {
+                    BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
+                    tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
+                    tier.setRequestCount(bandwidthLimit.getDataAmount());
+                    tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else {
+                    EventCountLimit eventCountLimit = (EventCountLimit) limit;
+                    tier.setRequestCount(eventCountLimit.getEventCount());
+                    tier.setRequestsPerMin(eventCountLimit.getEventCount());
+                }
+                if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+                    tier.setTierPlan(((SubscriptionPolicy) policy).getBillingPlan());
+                }
+                return tier;
+            } else {
+                if (APIUtil.isEnabledUnlimitedTier()) {
+                    Tier tier = new Tier(policy.getPolicyName());
+                    tier.setDescription(policy.getDescription());
+                    tier.setDisplayName(policy.getDisplayName());
+                    tier.setRequestsPerMin(Integer.MAX_VALUE);
+                    tier.setRequestCount(Integer.MAX_VALUE);
+                    if (isUnlimitedTierPaid(getTenantDomainFromTenantId(tenantId))) {
+                        tier.setTierPlan(APIConstants.COMMERCIAL_TIER_PLAN);
+                    } else {
+                        tier.setTierPlan(APIConstants.BILLING_PLAN_FREE);
+                    }
+                    return tier;
+                }
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Extract custom attributes and billing plan from subscription policy and set to tier.
@@ -11405,5 +11464,13 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+    public static Tier findTier(Collection<Tier> tiers, String tierName) {
+        for (Tier tier : tiers) {
+            if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
+                return tier;
+            }
+        }
+        return null;
     }
 }

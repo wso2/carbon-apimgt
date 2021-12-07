@@ -771,15 +771,6 @@ public interface APIProvider extends APIManager {
     void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException;
 
     /**
-     * This method updates Swagger 2.0 resources in the registry
-     *
-     * @param apiId    id of the APIProductIdentifier
-     * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException
-     */
-    void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException;
-
-    /**
      * This method updates the swagger definition in registry
      *
      * @param api           API

@@ -36,6 +36,7 @@ public class Application {
     private Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
     private List<APIKey> keys = new ArrayList<APIKey>();
     private Map<String, Map<String,OAuthApplicationInfo>> keyManagerWiseOAuthApp = new HashMap<>();
+    private String organization;
 
     public Map<String, Map<String, OAuthApplicationInfo>> getKeyManagerWiseOAuthApp() {
 
@@ -308,5 +309,15 @@ public class Application {
     public void setKeyManager(String keyManager) {
 
         this.keyManager = keyManager;
+    }
+
+    public String getOrganization() {
+
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+
+        this.organization = organization;
     }
 }

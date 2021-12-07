@@ -37,6 +37,7 @@ public class Application implements CacheableEntity<Integer> {
     private String subName = null;
     private String policy = null;
     private String tokenType = null;
+    private String organization;
     private List<String> groupIds = new ArrayList<>();
     private Map<String, String> attributes = new ConcurrentHashMap<>();
 
@@ -138,6 +139,16 @@ public class Application implements CacheableEntity<Integer> {
     public void setUUID(String uuid) {
 
         this.uuid = uuid;
+    }
+
+    public String getOrganization() {
+
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+
+        this.organization = organization;
     }
 
     @Override

@@ -2842,9 +2842,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ThrottlingPolicyList'
+                $ref: '#/components/schemas/ThrottlingPolicyList'
         304:
           description: |
             Not Modified.
