@@ -25,7 +25,7 @@ public class LogsHandlerTestCase {
         PowerMockito.mockStatic(LogUtils.class);
         PowerMockito.mockStatic(MDC.class);
         PowerMockito.mockStatic(System.class);
-        PowerMockito.when(System.getProperty("enableCorrelationLogs")).thenReturn("true");
+        System.setProperty(APIConstants.ENABLE_CORRELATION_LOGS, "true");
     }
 
     @Test
