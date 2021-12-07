@@ -164,6 +164,13 @@ public class CacheProvider {
     }
 
     /**
+     * @return Product REST API scope cache
+     */
+    public static Cache getRESTAPIScopeCache() {
+        return getCache(APIConstants.SystemScopeConstants.REST_API_SCOPE_CACHE);
+    }
+
+    /**
      * @return Recommendations cache
      */
     public static Cache getRecommendationsCache() {
