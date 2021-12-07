@@ -1114,7 +1114,27 @@ public class APIProviderImplTest {
         WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
         Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1111),
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(workflowDTO);
-        apiProvider.deleteWorkflowTask(apiUUID, false);
+        APIIdentifier identifier = new APIIdentifier("admin", "API1", "1.0.0", apiUUID);
+        apiProvider.deleteWorkflowTask(identifier);
+        Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiUUID);
+    }
+
+    @Test
+    public void testDeleteAPIProductWorkflowTask() throws APIManagementException, WorkflowException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1111);
+        WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
+        Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
+        WorkflowExecutor productStateChangeWorkflowExecutor = Mockito.mock(WorkflowExecutor.class);
+        Mockito.when(wfe.getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE))
+                .thenReturn(productStateChangeWorkflowExecutor);
+        WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
+        Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1111),
+                WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE)).thenReturn(workflowDTO);
+        APIProductIdentifier identifier = new APIProductIdentifier("admin", "APIProduct", "1.0.0",
+                apiUUID);
+        apiProvider.deleteWorkflowTask(identifier);
         Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiUUID);
     }
 

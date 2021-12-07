@@ -7860,7 +7860,7 @@ public class ApiMgtDAO {
                     String provider = resultSet.getString(1);
                     String name = resultSet.getString(2);
                     String version = resultSet.getString(3);
-                    identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                    identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version, uuid);
                 }
             }
         } catch (SQLException e) {

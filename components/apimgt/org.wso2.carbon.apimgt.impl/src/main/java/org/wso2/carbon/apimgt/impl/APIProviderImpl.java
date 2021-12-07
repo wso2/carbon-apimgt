@@ -6568,11 +6568,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteWorkflowTask(String uuid, boolean isAPIProduct) throws APIManagementException {
+    public void deleteWorkflowTask(Identifier identifier) throws APIManagementException {
         int apiId;
         try {
-            apiId = apiMgtDAO.getAPIID(uuid);
-            cleanUpPendingAPIStateChangeTask(apiId, isAPIProduct);
+            apiId = apiMgtDAO.getAPIID(identifier.getUUID());
+            cleanUpPendingAPIStateChangeTask(apiId, identifier instanceof APIProductIdentifier);
         } catch (APIManagementException | WorkflowException e) {
             handleException("Error while deleting the workflow task.", e);
         }

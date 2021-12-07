@@ -1378,10 +1378,10 @@ public interface APIProvider extends APIManager {
     /**
      * Remove pending lifecycle state change task for the given api or api product.
      *
-     * @param uuid unique uuid of api or api product
+     * @param  identifier Identifier object of api or api product
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    void deleteWorkflowTask(String uuid, boolean isAPIProduct) throws APIManagementException;
+    void deleteWorkflowTask(Identifier identifier) throws APIManagementException;
 
     /**
      * This method returns the security audit properties
