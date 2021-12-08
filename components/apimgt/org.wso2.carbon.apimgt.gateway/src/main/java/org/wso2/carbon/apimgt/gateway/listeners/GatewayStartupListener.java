@@ -109,9 +109,10 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         } catch (CertificateManagementException e) {
             log.error("Error while Backup Truststore", e);
         }
-        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SubscriptionDataHolder.getInstance().initializeSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         cleanDeployment(CarbonUtils.getCarbonRepository());
     }
 
