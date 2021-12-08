@@ -338,6 +338,7 @@ public class TemplateBuilderUtil {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
                     , corsProperties);
         }
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
 
         Map<String, String> clientCertificateObject = null;
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();

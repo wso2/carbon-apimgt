@@ -730,6 +730,7 @@ public final class APIUtil {
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
+            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
             if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
                     .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
                 api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
@@ -9376,7 +9377,7 @@ public final class APIUtil {
             apiProduct.setUuid(artifact.getId());
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
-            apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setState(getLcStateFromArtifact(artifact));
             apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             apiProduct.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -9398,6 +9399,7 @@ public final class APIUtil {
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
             apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            apiProduct.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             apiProduct.setTenantDomain(tenantDomainName);
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -9890,9 +9892,7 @@ public final class APIUtil {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         int apiId = apiMgtDAO.getAPIID(uuid);
-        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                WorkflowConstants.WF_TYPE_AM_API_STATE);
-        return wfDTO;
+        return apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId), workflowType);
     }
 
     /**

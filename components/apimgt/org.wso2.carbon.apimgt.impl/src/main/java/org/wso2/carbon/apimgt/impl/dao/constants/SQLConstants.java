@@ -1379,14 +1379,9 @@ public class SQLConstants {
             "   LC.USER_ID AS USER_ID," +
             "   LC.EVENT_DATE AS EVENT_DATE " +
             " FROM" +
-            "   AM_API_LC_EVENT LC, " +
-            "   AM_API API " +
+            "   AM_API_LC_EVENT LC " +
             " WHERE" +
-            "   API.API_PROVIDER = ?" +
-            "   AND API.API_NAME = ?" +
-            "   AND API.API_VERSION = ?" +
-            "   AND API.ORGANIZATION = ?" +
-            "   AND API.API_ID = LC.API_ID";
+            "   LC.API_ID = ?";
 
     public static final String GET_SUBSCRIPTION_DATA_SQL =
             " SELECT" +
@@ -1894,6 +1889,8 @@ public class SQLConstants {
 
     public static final String GET_API_IDENTIFIER_BY_UUID_SQL =
             "SELECT API_PROVIDER, API_NAME, API_VERSION FROM AM_API WHERE API_UUID = ?";
+    public static final String GET_API_OR_API_PRODUCT_IDENTIFIER_BY_UUID_SQL =
+            "SELECT API_PROVIDER, API_NAME, API_VERSION, API_TYPE FROM AM_API WHERE API_UUID = ?";
     public static final String GET_UUID_BY_IDENTIFIER_SQL =
             "SELECT API_UUID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ?";
     public static final String GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL = "SELECT API_UUID FROM AM_API"
@@ -3399,8 +3396,8 @@ public class SQLConstants {
     public static final String GET_API_VERSIONS =
             "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND ORGANIZATION = ?";
     public static final String GET_API_VERSIONS_UUID =
-            "SELECT API.API_UUID, API.STATUS, API.API_VERSION, API.API_TYPE, API.VERSION_TIMESTAMP FROM AM_API API WHERE " +
-                    "API.API_PROVIDER = ? AND API.API_NAME = ? ";
+            "SELECT API.API_UUID, API.STATUS, API.API_VERSION, API.API_TYPE, API.VERSION_TIMESTAMP, API.CONTEXT, "
+                    + "API.CONTEXT_TEMPLATE FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
     public static class APIRevisionSqlConstants {
         public static final String ADD_API_REVISION =
                 " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY, CREATED_TIME)" +

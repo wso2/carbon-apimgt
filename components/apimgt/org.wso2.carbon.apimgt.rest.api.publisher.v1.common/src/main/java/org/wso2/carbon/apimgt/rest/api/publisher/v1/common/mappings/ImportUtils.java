@@ -309,7 +309,7 @@ public class ImportUtils {
                     apiProvider.changeAPILCCheckListItems(importedApi.getId(),
                             ImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
                 }
-                apiProvider.changeLifeCycleStatus(currentTenantDomain, importedApi.getUuid(), lifecycleAction,
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, new ApiTypeWrapper(importedApi), lifecycleAction,
                         new HashMap<>());
             }
             importedApi.setStatus(targetStatus);

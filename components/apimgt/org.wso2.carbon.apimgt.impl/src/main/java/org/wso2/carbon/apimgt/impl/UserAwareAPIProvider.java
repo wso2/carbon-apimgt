@@ -173,9 +173,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getLifeCycleEvents(apiId, organization);
+    public List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException {
+
+        return super.getLifeCycleEvents(uuid);
     }
 
     @Override
@@ -430,7 +430,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void deleteWorkflowTask(String uuid) throws APIManagementException {
-        super.deleteWorkflowTask(uuid);
+    public void deleteWorkflowTask(Identifier identifier) throws APIManagementException {
+        super.deleteWorkflowTask(identifier);
     }
 }
