@@ -133,6 +133,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.removeUnDeployedAPIRevision(unDeployedAPIRevisionDTO.getApiUUID(), unDeployedAPIRevisionDTO.getRevisionUUID(),
                 unDeployedAPIRevisionDTO.getEnvironment());
-        return null;
+        return Response.ok().build();
     }
 }
