@@ -1557,7 +1557,7 @@ public class ApiMgtDAO {
                     APIProductIdentifier identifier =
                             new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-
+                    identifier.setUUID(result.getString("API_UUID"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
                     initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
@@ -1566,6 +1566,7 @@ public class ApiMgtDAO {
                     APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                             ("API_PROVIDER")), result.getString("API_NAME"),
                             result.getString("API_VERSION"));
+                    identifier.setUuid(result.getString("API_UUID"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
                     initSubscribedAPIDetailed(connection,subscribedAPI, subscriber, result);
@@ -4946,29 +4947,26 @@ public class ApiMgtDAO {
         }
     }
 
-    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException {
+    public List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_LIFECYCLE_EVENT_SQL;
+        int apiOrApiProductId = getAPIID(uuid);
 
         List<LifeCycleEvent> events = new ArrayList<LifeCycleEvent>();
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            prepStmt.setString(2, apiId.getApiName());
-            prepStmt.setString(3, apiId.getVersion());
-            prepStmt.setString(4, organization);
+            prepStmt.setInt(1, apiOrApiProductId);
             rs = prepStmt.executeQuery();
 
             while (rs.next()) {
                 LifeCycleEvent event = new LifeCycleEvent();
-                event.setApi(apiId);
                 String oldState = rs.getString("PREVIOUS_STATE");
                 //event.setOldStatus(oldState != null ? APIStatus.valueOf(oldState) : null);
-                event.setOldStatus(oldState != null ? oldState : null);
+                event.setOldStatus(oldState);
                 //event.setNewStatus(APIStatus.valueOf(rs.getString("NEW_STATE")));
                 event.setNewStatus(rs.getString("NEW_STATE"));
                 event.setUserId(rs.getString("USER_ID"));
@@ -6769,7 +6767,7 @@ public class ApiMgtDAO {
                     String msg = "Unable to find the API Product : " + apiProductIdentifier.getName() + "-" +
                             APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()) + "-" +
                             apiProductIdentifier.getVersion() + " in the database";
-                    throw new APIManagementException(msg);
+                    throw new APIMgtResourceNotFoundException(msg);
                 }
             }
         } catch (SQLException e) {
@@ -7834,7 +7832,7 @@ public class ApiMgtDAO {
                     String provider = resultSet.getString(1);
                     String name = resultSet.getString(2);
                     String version = resultSet.getString(3);
-                    identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                    identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version, uuid);
                 }
             }
         } catch (SQLException e) {
@@ -7862,7 +7860,7 @@ public class ApiMgtDAO {
                     String provider = resultSet.getString(1);
                     String name = resultSet.getString(2);
                     String version = resultSet.getString(3);
-                    identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                    identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version, uuid);
                 }
             }
         } catch (SQLException e) {
@@ -14097,6 +14095,11 @@ public class ApiMgtDAO {
             }
 
             addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
+            String tenantUserName = MultitenantUtils
+                    .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            recordAPILifeCycleEvent(productId, null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
+                    connection);
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding API product " + identifier.getName() + " of provider "
@@ -15738,6 +15741,8 @@ public class ApiMgtDAO {
                 String version = resultSet.getString("API_VERSION");
                 String status = resultSet.getString("STATUS");
                 String versionTimestamp = resultSet.getString("VERSION_TIMESTAMP");
+                String context = resultSet.getString("CONTEXT");
+                String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
                 String uuid = resultSet.getString("API_UUID");
                 if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
@@ -15745,10 +15750,12 @@ public class ApiMgtDAO {
                     continue;
                 }
                 API api = new API(new APIIdentifier(apiProvider, apiName,
-                        version));
+                        version, uuid));
                 api.setUuid(uuid);
                 api.setStatus(status);
                 api.setVersionTimestamp(versionTimestamp);
+                api.setContext(context);
+                api.setContextTemplate(contextTemplate);
                 apiVersions.add(api);
             }
         } catch (SQLException e) {
@@ -17527,7 +17534,7 @@ public class ApiMgtDAO {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-
+                            identifier.setUUID(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
                             initSubscribedAPI(subscribedAPI, result);
@@ -17536,7 +17543,7 @@ public class ApiMgtDAO {
                             APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                                     ("API_PROVIDER")), result.getString("API_NAME"),
                                     result.getString("API_VERSION"));
-
+                            identifier.setUuid(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
                             initSubscribedAPI(subscribedAPI, result);

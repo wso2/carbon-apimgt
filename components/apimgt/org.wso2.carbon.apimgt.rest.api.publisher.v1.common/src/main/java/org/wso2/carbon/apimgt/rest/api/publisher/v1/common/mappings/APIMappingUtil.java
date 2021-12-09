@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -489,26 +488,6 @@ public class APIMappingUtil {
         return apiMonetizationInfoDTO;
     }
 
-    public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIProductIdentifier apiProductIdentifier)
-            throws APIManagementException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
-        //set the information related to monetization to the DTO
-        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
-        Map<String, String> monetizationPropertiesMap = new HashMap<>();
-        if (apiProduct.getMonetizationProperties() != null) {
-            JSONObject monetizationProperties = apiProduct.getMonetizationProperties();
-            for (Object propertyKey : monetizationProperties.keySet()) {
-                String key = (String) propertyKey;
-                monetizationPropertiesMap.put(key, (String) monetizationProperties.get(key));
-            }
-        }
-        apiMonetizationInfoDTO.setProperties(monetizationPropertiesMap);
-        return apiMonetizationInfoDTO;
-    }
-
     /**
      * Get map of monetized policies to plan mapping.
      *
@@ -526,18 +505,6 @@ public class APIMappingUtil {
         API api = apiProvider.getLightweightAPIByUUID(uuid, organization);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
-        apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
-        return apiMonetizationInfoDTO;
-    }
-
-    public static APIMonetizationInfoDTO getMonetizedTiersDTO(APIProductIdentifier apiProductIdentifier,
-                                                              Map<String, String> monetizedPoliciesToPlanMapping)
-            throws APIManagementException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
-        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
         apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
         return apiMonetizationInfoDTO;
     }
@@ -2226,6 +2193,7 @@ public class APIMappingUtil {
         productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
+        productDto.setWorkflowStatus(product.getWorkflowStatus());
 
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
@@ -2448,7 +2416,6 @@ public class APIMappingUtil {
             product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
-        product.setState(APIStatus.PUBLISHED.toString());
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
 

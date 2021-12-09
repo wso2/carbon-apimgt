@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.GraphQLProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -59,7 +60,6 @@ import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Cache;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.cache.Cache;
 
 /**
  * The util class to handle inbound websocket processor execution.
@@ -403,6 +404,8 @@ public class InboundWebsocketProcessorUtil {
             String authorizationHeader = inboundMessageContext.getRequestHeaders().get(HttpHeaders.AUTHORIZATION);
             inboundMessageContext.getRequestHeaders().put(HttpHeaders.AUTHORIZATION, authorizationHeader);
             String[] auth = authorizationHeader.split(StringUtils.SPACE);
+            List<String> keyManagerList =
+                    DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
             if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
                 String cacheKey;
                 boolean isJwtToken = false;
@@ -424,7 +427,22 @@ public class InboundWebsocketProcessorUtil {
                         String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                                 .getKeyManagerNameIfJwtValidatorExist(inboundMessageContext.getSignedJWTInfo());
                         if (StringUtils.isNotEmpty(keyManager)) {
-                            isJwtToken = true;
+                            if (log.isDebugEnabled()){
+                                log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(apiKey));
+                            }
+                            if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                                    keyManagerList.contains(keyManager)) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
+                                }
+                                isJwtToken = true;
+                            } else {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
+                                }
+                                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                        "Invalid JWT token");
+                            }
                         }
                     } catch (ParseException e) {
                         log.debug("Not a JWT token. Failed to decode the token header.", e);
@@ -456,7 +474,7 @@ public class InboundWebsocketProcessorUtil {
                         }
                     }
                     info = getApiKeyDataForWSClient(apiKey, inboundMessageContext.getTenantDomain(),
-                            inboundMessageContext.getApiContext(), inboundMessageContext.getVersion());
+                            inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(), keyManagerList);
                     if (info == null || !info.isAuthorized()) {
                         return false;
                     }
@@ -520,9 +538,10 @@ public class InboundWebsocketProcessorUtil {
      * @throws APISecurityException if validation fails
      */
     private static APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
-                                                                    String apiVersion) throws APISecurityException {
+                                                                    String apiVersion, List<String> keyManagers)
+            throws APISecurityException {
 
-        return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain);
+        return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain, keyManagers);
     }
 
     /**

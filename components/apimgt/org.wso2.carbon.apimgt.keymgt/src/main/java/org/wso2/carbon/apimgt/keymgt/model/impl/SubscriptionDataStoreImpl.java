@@ -677,6 +677,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
+    public void destroy() {
+        executorService.shutdown();
+    }
+
+    @Override
     public void addOrUpdateScope(Scope scope) {
 
         scopesMap.put(scope.getCacheKey(), scope);

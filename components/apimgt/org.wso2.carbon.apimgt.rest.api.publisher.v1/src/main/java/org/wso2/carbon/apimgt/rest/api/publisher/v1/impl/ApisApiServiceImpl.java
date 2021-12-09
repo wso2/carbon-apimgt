@@ -37,7 +37,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,7 +88,6 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -162,7 +160,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
@@ -2096,26 +2093,25 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPILifecycleHistory(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIIdentifier apiIdentifier;
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            API api;
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+                api = apiProvider.getAPIbyUUID(apiRevision.getApiUUID(), organization);
             } else {
-                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+                api = apiProvider.getAPIbyUUID(apiId, organization);
             }
-            List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(apiIdentifier, organization);
-            LifecycleHistoryDTO historyDTO = APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
-            return Response.ok().entity(historyDTO).build();
+            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(api.getUuid(), apiProvider)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the lifecycle " +
+                        "events of API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while deleting API : " + apiId;
+                String errorMessage = "Error while retrieving the lifecycle events of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -2131,7 +2127,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPILifecycleState(String apiId, String ifNoneMatch, MessageContext messageContext)
-            throws APIManagementException{
+            throws APIManagementException {
+
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId, organization);
         return Response.ok().entity(lifecycleStateDTO).build();
@@ -2145,34 +2142,15 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Lifecycle state information
      */
     private LifecycleStateDTO getLifecycleState(String apiId, String organization) {
+
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier;
             if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
                 apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId, organization).getId();
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
-            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId, organization);
-            if (apiLCData == null) {
-                String errorMessage = "Error while getting lifecycle state for API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, log);
-            }
-
-            boolean apiOlderVersionExist = false;
-            // check whether other versions of the current API exists
-            APIVersionStringComparator comparator = new APIVersionStringComparator();
-            Set<String> versions = apiProvider.getAPIVersions(
-                    APIUtil.replaceEmailDomain(apiIdentifier.getProviderName()), apiIdentifier.getName(), organization);
-
-            for (String tempVersion : versions) {
-                if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
-                    apiOlderVersionExist = true;
-                    break;
-                }
-            }
-
-            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
+            return PublisherCommonUtils.getLifecycleStateInformation(apiIdentifier, organization);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -2196,7 +2174,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: " + apiId,
                         ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
             }
-            apiProvider.deleteWorkflowTask(apiId);
+            apiProvider.deleteWorkflowTask(apiIdentifierFromTable);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting task ";
@@ -3722,42 +3700,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist,
                                             String ifMatch, MessageContext messageContext) {
-        //pre-processing
-        String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                        apiId));
-            }
-            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId, organization);
-            String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
-            if (!ArrayUtils.contains(nextAllowedStates, action)) {
-                RestApiUtil.handleBadRequest(
-                        "Action '" + action + "' is not allowed. Allowed actions are " + Arrays
-                                .toString(nextAllowedStates), log);
-            }
-
-            //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
-            Map<String, Boolean> lcMap = new HashMap<String, Boolean>();
-            for (String checkListItem : checkListItems) {
-                String[] attributeValPair = checkListItem.split(":");
-                if (attributeValPair.length == 2) {
-                    String checkListItemName = attributeValPair[0].trim();
-                    boolean checkListItemValue = Boolean.valueOf(attributeValPair[1].trim());
-                    lcMap.put(checkListItemName, checkListItemValue);
-                    //apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
-                }
-            }
-
-            //todo: check if API's tiers are properly set before Publishing
-            //APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action.toString());
-            APIStateChangeResponse stateChangeResponse = apiProvider
-                    .changeLifeCycleStatus(organization, apiId, action.toString(), lcMap);
+            APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
+                    apiId, lifecycleChecklist, organization);
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call
@@ -3775,9 +3722,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
             }
-        } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating the API in Gateway " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

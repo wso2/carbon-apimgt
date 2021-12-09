@@ -275,8 +275,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             String currentThrottlingPolicy = body.getThrottlingPolicy();
             String requestedThrottlingPolicy = body.getRequestedThrottlingPolicy();
 
-            SubscribedAPI subscribedAPI = ApiMgtDAO.getInstance()
-                    .getSubscriptionByUUID(subscriptionId);
+            SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
             //Check whether the subscription status is not empty and also not blocked
             if (body.getStatus() != null && subscribedAPI != null) {
                 if ("BLOCKED".equals(body.getStatus().value()) || "ON_HOLD".equals(body.getStatus().value())

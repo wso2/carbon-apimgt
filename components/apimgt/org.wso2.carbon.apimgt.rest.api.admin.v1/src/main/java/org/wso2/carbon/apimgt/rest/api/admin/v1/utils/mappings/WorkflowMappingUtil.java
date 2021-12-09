@@ -74,6 +74,8 @@ public class WorkflowMappingUtil {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_REGISTRATION_SANDBOX);
         } else if (workflow.getWorkflowType().equals("AM_API_STATE")) {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_STATE);
+        } else if (workflow.getWorkflowType().equals("AM_API_PRODUCT_STATE")) {
+            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_PRODUCT_STATE);
         }
         workflowInfoDTO.setWorkflowStatus(WorkflowInfoDTO.WorkflowStatusEnum.valueOf(workflow.getStatus().toString()));
         workflowInfoDTO.setCreatedTime(workflow.getCreatedTime());
