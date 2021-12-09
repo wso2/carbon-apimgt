@@ -6109,7 +6109,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         }
 
-        String apiTenantDomain = apiTypeWrapper.getOrganization();
+        String apiTenantDomain = "carbon.super";
 
         //Tenant based validation for subscription
         boolean subscriptionAllowed = false;
