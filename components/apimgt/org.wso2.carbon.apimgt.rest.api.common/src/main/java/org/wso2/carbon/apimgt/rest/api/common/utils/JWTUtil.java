@@ -36,6 +36,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,16 +76,13 @@ public class JWTUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("$" + ENV_ORG_BASED_TOKEN_FEATURE + " is enabled.");
                 }
-                // check organization claim and orgId
-                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
-                if (!orgId.equals(orgClaim)) {
-                    log.error("OrgId and organization claim mismatch!");
-                    return false;
-                }
             } else {
                 scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                         .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                         .toArray(size -> new String[size]);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Scopes received from JWT: $" + Arrays.toString(scopes));
             }
             oauthTokenInfo.setScopes(scopes);
             if (validateScopes(message, oauthTokenInfo)) {
