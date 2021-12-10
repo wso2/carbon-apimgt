@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.utils.JWTUtil;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -49,6 +50,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +66,6 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     private static final Log log = LogFactory.getLog(OAuthJwtAuthenticatorImpl.class);
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-    private static final String ENV_ORG_BASED_TOKEN_FEATURE = "FEATURE_FLAG_ORG_BASED_TOKEN_ENABLED";
     private boolean isRESTApiTokenCacheEnabled;
     private Map<String, TokenIssuerDto> tokenIssuers;
     private java.util.Map<String, List<String>> audiencesMap;
@@ -142,20 +143,17 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
             String[] scopes = scopeClaim.split(JwtTokenConstants.SCOPE_DELIMITER);
-            if (isOrgBasedTokenFeatureEnabled()) {
+            if (!JWTUtil.isOrgIdAppendedInScopes(scopes, orgId)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("$" + ENV_ORG_BASED_TOKEN_FEATURE + " is enabled.");
-                }
-                // check organization claim and orgId
-                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
-                if (!orgId.equals(orgClaim)) {
-                    log.error("OrgId and organization claim mismatch!");
-                    return false;
+                    log.debug("Org ID: $" + orgId + " not appended in scopes.");
                 }
             } else {
                 scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                         .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                         .toArray(size -> new String[size]);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Scopes received in JWT: $" + Arrays.toString(scopes));
             }
             oauthTokenInfo.setScopes(scopes);
 
@@ -201,14 +199,6 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         }
         log.error("scopes validation failed for the token" + maskedToken);
         return false;
-    }
-
-    private static boolean isOrgBasedTokenFeatureEnabled() {
-        String featureEnabled = System.getenv(ENV_ORG_BASED_TOKEN_FEATURE);
-        if (featureEnabled == null) {
-            return false;
-        }
-        return Boolean.parseBoolean(featureEnabled);
     }
 
     /**

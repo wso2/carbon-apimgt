@@ -36,6 +36,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,6 @@ import java.util.Set;
 public class JWTUtil {
 
     private static final Log log = LogFactory.getLog(JWTUtil.class);
-    private static final String ENV_ORG_BASED_TOKEN_FEATURE = "FEATURE_FLAG_ORG_BASED_TOKEN_ENABLED";
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -71,20 +71,17 @@ public class JWTUtil {
         if (scopeClaim != null) {
             String orgId = (String) message.get(RestApiConstants.ORG_ID);
             String[] scopes = scopeClaim.split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
-            if (isOrgBasedTokenFeatureEnabled()) {
+            if (!isOrgIdAppendedInScopes(scopes, orgId)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("$" + ENV_ORG_BASED_TOKEN_FEATURE + " is enabled.");
-                }
-                // check organization claim and orgId
-                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
-                if (!orgId.equals(orgClaim)) {
-                    log.error("OrgId and organization claim mismatch!");
-                    return false;
+                    log.debug("Org ID: $" + orgId + " not appended in scopes.");
                 }
             } else {
                 scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                         .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                         .toArray(size -> new String[size]);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Scopes received from JWT: $" + Arrays.toString(scopes));
             }
             oauthTokenInfo.setScopes(scopes);
             if (validateScopes(message, oauthTokenInfo)) {
@@ -209,11 +206,13 @@ public class JWTUtil {
         return false;
     }
 
-    private static boolean isOrgBasedTokenFeatureEnabled() {
-        String featureEnabled = System.getenv(ENV_ORG_BASED_TOKEN_FEATURE);
-        if (featureEnabled == null) {
-            return false;
+    public static boolean isOrgIdAppendedInScopes(String[] scopes, String orgId) {
+        boolean containsOrgId = false;
+        for (String scope : scopes) {
+            if (scope.contains(APIConstants.URN_CHOREO + orgId)) {
+                containsOrgId = true;
+            }
         }
-        return Boolean.parseBoolean(featureEnabled);
+        return containsOrgId;
     }
 }
