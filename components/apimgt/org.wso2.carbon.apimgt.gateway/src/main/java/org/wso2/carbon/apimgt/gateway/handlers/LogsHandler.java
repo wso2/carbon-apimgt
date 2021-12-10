@@ -44,18 +44,7 @@ public class LogsHandler extends AbstractSynapseHandler {
     private static final Log log = LogFactory.getLog(APIConstants.CORRELATION_LOGGER);
     private static boolean isEnabled = false;
     private static boolean isSet = false;
-    private String apiName = null;
-    private String apiCTX = null;
-    private String apiMethod = null;
     private String apiTo = null;
-    private long requestSize = 0;
-    private String apiElectedRsrc = null;
-    private String apiRestReqFullPath = null;
-    private String apiResponseSC = null;
-    private String apiMsgUUID = null;
-    private String apiRsrcCacheKey = null;
-    private String applicationName = null;
-    private String apiConsumerKey = null;
 
     private static final String AUTH_HEADER = "AUTH_HEADER";
     private static final String ORG_ID_HEADER = "ORG_ID_HEADER";
@@ -95,7 +84,6 @@ public class LogsHandler extends AbstractSynapseHandler {
     public boolean handleRequestOutFlow(MessageContext messageContext) {
         if (isEnabled()) {
             try {
-                requestSize = getContentLength(messageContext);
                 Map headers = LogUtils.getTransportHeaders(messageContext);
                 String correlationIdHeader = null;
                 if (headers != null) {
@@ -117,14 +105,7 @@ public class LogsHandler extends AbstractSynapseHandler {
                     correlationIdHeader = (String) MDC.get(APIConstants.CORRELATION_ID);
                 }
                 messageContext.setProperty(CORRELATION_ID_HEADER, correlationIdHeader);
-                apiName = LogUtils.getAPIName(messageContext);
-                apiCTX = LogUtils.getAPICtx(messageContext);
-                apiMethod = LogUtils.getRestMethod(messageContext);
                 // apiTo = LogUtils.getTo(messageContext);
-                apiElectedRsrc = LogUtils.getElectedResource(messageContext);
-                apiRestReqFullPath = LogUtils.getRestReqFullPath(messageContext);
-                apiMsgUUID = (String) messageContext.getMessageID();
-                apiRsrcCacheKey = LogUtils.getResourceCacheKey(messageContext);
             } catch (Exception e) {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
                 return false;
@@ -144,9 +125,6 @@ public class LogsHandler extends AbstractSynapseHandler {
                     long responseTime = getResponseTime(messageContext);
                     long beTotalLatency = getBackendLatency(messageContext);
                     long responseSize = getContentLength(messageContext);
-                    apiResponseSC = LogUtils.getRestHttpResponseStatusCode(messageContext);
-                    applicationName = LogUtils.getApplicationName(messageContext);
-                    apiConsumerKey = LogUtils.getConsumerKey(messageContext);
                     String authHeader = (String) messageContext.getProperty(AUTH_HEADER);
                     String orgIdHeader = (String) messageContext.getProperty(ORG_ID_HEADER);
                     String SrcIdHeader = (String) messageContext.getProperty(SRC_ID_HEADER);
@@ -154,11 +132,14 @@ public class LogsHandler extends AbstractSynapseHandler {
                     String uuIdHeader = (String) messageContext.getProperty(UUID_HEADER);
                     String correlationIdHeader = (String) messageContext.getProperty(CORRELATION_ID_HEADER);
                     MDC.put(APIConstants.CORRELATION_ID, correlationIdHeader);
-                    log.info(beTotalLatency + "|HTTP|" + apiName + "|" + apiMethod + "|" + apiCTX + apiElectedRsrc
-                            + "|" + apiTo + "|" + authHeader + "|" + orgIdHeader + "|" + SrcIdHeader
-                            + "|" + applIdHeader + "|" + uuIdHeader + "|" + requestSize
-                            + "|" + responseSize + "|" + apiResponseSC + "|"
-                            + applicationName + "|" + apiConsumerKey + "|" + responseTime);
+                    log.info(beTotalLatency + "|HTTP|" + LogUtils.getAPIName(messageContext) + "|"
+                            + LogUtils.getRestMethod(messageContext) + "|" + LogUtils.getAPICtx(messageContext)
+                            + LogUtils.getElectedResource(messageContext) + "|" + apiTo + "|" + authHeader + "|"
+                            + orgIdHeader + "|" + SrcIdHeader + "|" + applIdHeader + "|" + uuIdHeader + "|"
+                            + getContentLength(messageContext) + "|" + responseSize + "|"
+                            + LogUtils.getRestHttpResponseStatusCode(messageContext) + "|"
+                            + LogUtils.getApplicationName(messageContext) + "|"
+                            + LogUtils.getConsumerKey(messageContext) + "|" + responseTime);
                 } catch (Exception e) {
                     log.error(RESPONSE_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
                     return false;
