@@ -50,7 +50,6 @@ import java.util.Set;
 public class JWTUtil {
 
     private static final Log log = LogFactory.getLog(JWTUtil.class);
-    private static final String ENV_ORG_BASED_TOKEN_FEATURE = "FEATURE_FLAG_ORG_BASED_TOKEN_ENABLED";
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -72,9 +71,9 @@ public class JWTUtil {
         if (scopeClaim != null) {
             String orgId = (String) message.get(RestApiConstants.ORG_ID);
             String[] scopes = scopeClaim.split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
-            if (isOrgBasedTokenFeatureEnabled()) {
+            if (!isOrgIdAppendedInScopes(scopes, orgId)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("$" + ENV_ORG_BASED_TOKEN_FEATURE + " is enabled.");
+                    log.debug("Org ID: $" + orgId + " not appended in scopes.");
                 }
             } else {
                 scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
@@ -207,11 +206,13 @@ public class JWTUtil {
         return false;
     }
 
-    private static boolean isOrgBasedTokenFeatureEnabled() {
-        String featureEnabled = System.getenv(ENV_ORG_BASED_TOKEN_FEATURE);
-        if (featureEnabled == null) {
-            return false;
+    public static boolean isOrgIdAppendedInScopes(String[] scopes, String orgId) {
+        boolean containsOrgId = false;
+        for (String scope : scopes) {
+            if (scope.contains(APIConstants.URN_CHOREO + orgId)) {
+                containsOrgId = true;
+            }
         }
-        return Boolean.parseBoolean(featureEnabled);
+        return containsOrgId;
     }
 }
