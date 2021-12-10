@@ -584,14 +584,14 @@ paths:
         default:
           $ref: '#/definitions/Error'
   #--------------------------------------------
-  # Un-Deployed revision information
+  # UnDeployed revision information
   #--------------------------------------------
-  /apis/un-deploy-revision:
+  /apis/undeployed-revision:
     post:
       tags:
-        - Un-Deployed API Revisions
-      summary: Un-deploy Revision
-      description: Un-deploy a revision
+        - UnDeployed API Revision
+      summary: Remove undeployed revision
+      description: Remove undeployed Revision entry from the database
       operationId: unDeployedAPIRevision
       parameters:
         - name: unDeployedAPIRevisionDTO
@@ -852,7 +852,7 @@ definitions:
         items:
           $ref: '#/definitions/DeployedEnvInfo'
   UnDeployedAPIRevision:
-    title: Un-Deployed revision information
+    title: UnDeployed revision information
     properties:
       apiUUID:
         maxLength: 255
@@ -868,7 +868,7 @@ definitions:
         maxLength: 255
         minLength: 0
         type: string
-        example: default
+        example: Default
   DeployedEnvInfo:
     title: Environment information
     properties:

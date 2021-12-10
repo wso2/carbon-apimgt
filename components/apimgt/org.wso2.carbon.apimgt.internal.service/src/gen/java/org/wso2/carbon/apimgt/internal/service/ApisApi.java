@@ -64,10 +64,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
-    @Path("/un-deploy-revision")
+    @Path("/undeployed-revision")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Un-deploy Revision", notes = "Un-deploy a revision", response = Void.class, tags={ "Un-Deployed API Revisions" })
+    @ApiOperation(value = "Remove undeployed revision", notes = "Remove undeployed Revision entry from the database", response = Void.class, tags={ "UnDeployed API Revision" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Fetch un-deployed revision", response = Void.class),
         @ApiResponse(code = 200, message = "", response = Void.class) })
