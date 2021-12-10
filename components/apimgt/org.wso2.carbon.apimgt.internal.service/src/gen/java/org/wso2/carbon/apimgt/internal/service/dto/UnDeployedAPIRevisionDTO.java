@@ -62,7 +62,7 @@ public class UnDeployedAPIRevisionDTO   {
   }
 
   
-  @ApiModelProperty(example = "default", value = "")
+  @ApiModelProperty(example = "Default", value = "")
   @JsonProperty("environment")
  @Size(min=0,max=255)  public String getEnvironment() {
     return environment;

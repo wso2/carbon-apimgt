@@ -1694,7 +1694,7 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId API UUID
      * @param apiRevisionUUID API Revision UUID
-     * @param environment -
+     * @param environment - Un-deployed environment
      * @throws APIManagementException if failed to add APIRevision
      */
     void removeUnDeployedAPIRevision(String apiId, String apiRevisionUUID, String environment) throws APIManagementException;
