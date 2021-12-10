@@ -30,6 +30,7 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +41,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -50,8 +52,12 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -67,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -79,6 +86,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -89,6 +98,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1517,17 +1527,8 @@ public class PublisherCommonUtils {
             }
         }
 
-        //only publish api product if tiers are defined
-        if (APIProductDTO.StateEnum.PUBLISHED.equals(apiProductDtoToUpdate.getState())) {
-            //if the already created API product does not have tiers defined and the update request also doesn't
-            //have tiers defined, then the product should not moved to PUBLISHED state.
-            if (originalAPIProduct.getAvailableTiers() == null && apiProductDtoToUpdate.getPolicies() == null) {
-                throw new APIManagementException("Policy needs to be defined before publishing the API Product",
-                        ExceptionCodes.THROTTLING_POLICY_CANNOT_BE_NULL);
-            }
-        }
-
         APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToUpdate, username);
+        product.setState(originalAPIProduct.getState());
         //We do not allow to modify provider,name,version  and uuid. Set the origial value
         APIProductIdentifier productIdentifier = originalAPIProduct.getId();
         product.setID(productIdentifier);
@@ -1623,6 +1624,9 @@ public class PublisherCommonUtils {
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
         productToBeAdded.setOrganization(organization);
+        if (!APIConstants.PROTOTYPED.equals(productToBeAdded.getState())) {
+            productToBeAdded.setState(APIConstants.CREATED);
+        }
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
@@ -1772,5 +1776,111 @@ public class PublisherCommonUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Change the lifecycle state of an API or API Product identified by UUID
+     *
+     * @param action       LC state change action
+     * @param uuid         UUID of API or API Product
+     * @param lcChecklist  LC state change check list
+     * @param organization Organization of logged-in user
+     * @return APIStateChangeResponse
+     * @throws APIManagementException Exception if there is an error when changing the LC state of API or API Product
+     */
+    public static APIStateChangeResponse changeApiOrApiProductLifecycle(String action, String uuid,
+                                                                        String lcChecklist, String organization)
+            throws APIManagementException {
+
+        String[] checkListItems = lcChecklist != null ? lcChecklist.split(APIConstants.DELEM_COMMA) : new String[0];
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(uuid, organization);
+
+        if (apiTypeWrapper == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API or API Product with UUID: "
+                    + uuid, ExceptionCodes.from(ExceptionCodes.API_OR_API_PRODUCT_NOT_FOUND, uuid));
+        }
+
+        Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(uuid, organization);
+
+        String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
+        if (!ArrayUtils.contains(nextAllowedStates, action)) {
+            throw new APIManagementException("Action '" + action + "' is not allowed. Allowed actions are "
+                    + Arrays.toString(nextAllowedStates), ExceptionCodes.from(ExceptionCodes
+                    .UNSUPPORTED_LIFECYCLE_ACTION, action));
+        }
+
+        //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
+        Map<String, Boolean> lcMap = new HashMap<>();
+        for (String checkListItem : checkListItems) {
+            String[] attributeValPair = checkListItem.split(APIConstants.DELEM_COLON);
+            if (attributeValPair.length == 2) {
+                String checkListItemName = attributeValPair[0].trim();
+                boolean checkListItemValue = Boolean.parseBoolean(attributeValPair[1].trim());
+                lcMap.put(checkListItemName, checkListItemValue);
+            }
+        }
+
+        try {
+            return apiProvider.changeLifeCycleStatus(organization, apiTypeWrapper, action, lcMap);
+        } catch (FaultGatewaysException e) {
+            throw new APIManagementException("Error while change the state of artifact with name - "
+                    + apiTypeWrapper.getName(), e);
+        }
+    }
+
+    /**
+     * Retrieve lifecycle history of API or API Product by Identifier
+     *
+     * @param uuid    Unique UUID of API or API Product
+     * @return LifecycleHistoryDTO object
+     * @throws APIManagementException exception if there is an error when retrieving the LC history
+     */
+    public static LifecycleHistoryDTO getLifecycleHistoryDTO(String uuid, APIProvider apiProvider)
+            throws APIManagementException {
+
+        List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(uuid);
+        return APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
+    }
+
+    /**
+     * Get lifecycle state information of API or API Product
+     *
+     * @param identifier   Unique identifier of API or API Product
+     * @param organization Organization of logged-in user
+     * @return LifecycleStateDTO object
+     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     */
+    public static LifecycleStateDTO getLifecycleStateInformation(Identifier identifier, String organization)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(identifier.getUUID(), organization);
+        if (apiLCData == null) {
+            String type;
+            if (identifier instanceof APIProductIdentifier) {
+                type = APIConstants.API_PRODUCT;
+            } else {
+                type = APIConstants.API_IDENTIFIER_TYPE;
+            }
+            throw new APIManagementException("Error while getting lifecycle state for " + type + " with ID "
+                    + identifier, ExceptionCodes.from(ExceptionCodes.LIFECYCLE_STATE_INFORMATION_NOT_FOUND, type,
+                    identifier.getUUID()));
+        } else {
+            boolean apiOlderVersionExist = false;
+            // check whether other versions of the current API exists
+            APIVersionStringComparator comparator = new APIVersionStringComparator();
+            Set<String> versions =
+                    apiProvider.getAPIVersions(APIUtil.replaceEmailDomain(identifier.getProviderName()),
+                            identifier.getName(), organization);
+
+            for (String tempVersion : versions) {
+                if (comparator.compare(tempVersion, identifier.getVersion()) < 0) {
+                    apiOlderVersionExist = true;
+                    break;
+                }
+            }
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
+        }
     }
 }

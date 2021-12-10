@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -66,47 +67,32 @@ public class SubscriptionMappingUtil {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
-        APIIdentifier apiId = subscription.getApiId();
-        APIProductIdentifier apiProdId = subscription.getProductId();
-        APIInfoDTO apiInfo = null;
-
-        if (apiId != null) {
-            API api;
-            try {
-                api = apiConsumer.getLightweightAPI(apiId, organization);
-                subscriptionDTO.setApiId(api.getUUID());
-                Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
-                Map<String, Tier> tierMap = APIUtil.getTiers(organization);
-                apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
-                APIMappingUtil.setThrottlePoliciesAndMonetization(api, apiInfo, deniedTiers, tierMap);
-                subscriptionDTO.setApiInfo(apiInfo);
-            } catch (APIManagementException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User :" + username + " does not have access to the API " + apiId);
-                }
-                apiInfo = new APIInfoDTO();
-                apiInfo.setName(apiId.getName());
-                apiInfo.setVersion(apiId.getVersion());
-                subscriptionDTO.setApiInfo(apiInfo);
+        APIInfoDTO apiInfo;
+        Identifier apiId = subscription.getIdentifier();
+        ApiTypeWrapper apiTypeWrapper;
+        try {
+            apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(subscription.getIdentifier().getUUID(), organization);
+            subscriptionDTO.setApiId(subscription.getIdentifier().getUUID());
+            Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
+            Map<String, Tier> tierMap = APIUtil.getTiers(organization);
+            if (apiTypeWrapper.isAPIProduct()) {
+                apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiTypeWrapper.getApiProduct(), organization);
+                APIMappingUtil.setThrottlePoliciesAndMonetization(apiTypeWrapper.getApiProduct(), apiInfo,
+                        deniedTiers, tierMap);
+            } else {
+                apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiTypeWrapper.getApi());
+                APIMappingUtil.setThrottlePoliciesAndMonetization(apiTypeWrapper.getApi(), apiInfo, deniedTiers,
+                        tierMap);
             }
-        }
-        if (apiProdId != null) {
-            APIProduct apiProduct = null;
-
-            try {
-                apiProduct = apiConsumer.getAPIProduct(apiProdId);
-                subscriptionDTO.setApiId(apiProduct.getUuid());
-                apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct, organization);
-                subscriptionDTO.setApiInfo(apiInfo);
-            } catch (APIManagementException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User :" + username + " does not have access to the API Product " + apiId);
-                }
-                apiInfo = new APIInfoDTO();
-                apiInfo.setName(apiProdId.getName());
-                apiInfo.setVersion(apiProdId.getVersion());
-                subscriptionDTO.setApiInfo(apiInfo);
+            subscriptionDTO.setApiInfo(apiInfo);
+        } catch (APIManagementException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("User :" + username + " does not have access to the API " + apiId);
             }
+            apiInfo = new APIInfoDTO();
+            apiInfo.setName(apiId.getName());
+            apiInfo.setVersion(apiId.getVersion());
+            subscriptionDTO.setApiInfo(apiInfo);
         }
         Application application = subscription.getApplication();
         application = apiConsumer.getLightweightApplicationByUUID(application.getUUID());
@@ -114,10 +100,8 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
         subscriptionDTO.setRequestedThrottlingPolicy(subscription.getRequestedTier().getName());
-
         ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);
         subscriptionDTO.setApplicationInfo(applicationInfoDTO);
-
         return subscriptionDTO;
     }
 

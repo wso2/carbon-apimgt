@@ -509,6 +509,7 @@ public class SQLConstants {
             " SELECT " +
                     "   SUBS.SUBSCRIPTION_ID, " +
                     "   API.API_PROVIDER AS API_PROVIDER, " +
+                    "   API.API_UUID AS API_UUID, " +
                     "   API.API_NAME AS API_NAME, " +
                     "   API.API_TYPE AS TYPE, " +
                     "   API.API_VERSION AS API_VERSION, " +
@@ -537,6 +538,7 @@ public class SQLConstants {
             "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
+            "   API.API_UUID AS API_UUID, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
@@ -1377,14 +1379,9 @@ public class SQLConstants {
             "   LC.USER_ID AS USER_ID," +
             "   LC.EVENT_DATE AS EVENT_DATE " +
             " FROM" +
-            "   AM_API_LC_EVENT LC, " +
-            "   AM_API API " +
+            "   AM_API_LC_EVENT LC " +
             " WHERE" +
-            "   API.API_PROVIDER = ?" +
-            "   AND API.API_NAME = ?" +
-            "   AND API.API_VERSION = ?" +
-            "   AND API.ORGANIZATION = ?" +
-            "   AND API.API_ID = LC.API_ID";
+            "   LC.API_ID = ?";
 
     public static final String GET_SUBSCRIPTION_DATA_SQL =
             " SELECT" +
@@ -1892,6 +1889,8 @@ public class SQLConstants {
 
     public static final String GET_API_IDENTIFIER_BY_UUID_SQL =
             "SELECT API_PROVIDER, API_NAME, API_VERSION FROM AM_API WHERE API_UUID = ?";
+    public static final String GET_API_OR_API_PRODUCT_IDENTIFIER_BY_UUID_SQL =
+            "SELECT API_PROVIDER, API_NAME, API_VERSION, API_TYPE FROM AM_API WHERE API_UUID = ?";
     public static final String GET_UUID_BY_IDENTIFIER_SQL =
             "SELECT API_UUID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ?";
     public static final String GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL = "SELECT API_UUID FROM AM_API"
@@ -2598,18 +2597,18 @@ public class SQLConstants {
     /** Environment related constants **/
 
     public static final String GET_ENVIRONMENT_BY_TENANT_SQL =
-            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION " +
+            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION, PROVIDER " +
             "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE TENANT_DOMAIN = ?";
 
     public static final String GET_ENVIRONMENT_BY_TENANT_AND_UUID_SQL =
-            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION " +
+            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION, PROVIDER " +
             "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE TENANT_DOMAIN = ? AND UUID = ?";
 
     public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
-            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION) " +
-            "VALUES (?,?,?,?,?)";
+            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION, PROVIDER) " +
+            "VALUES (?,?,?,?,?, ?)";
 
     public static final String INSERT_GATEWAY_VHOSTS_SQL = "INSERT INTO " +
             "AM_GW_VHOST (GATEWAY_ENV_ID, HOST, HTTP_CONTEXT, HTTP_PORT, HTTPS_PORT, WS_PORT, WSS_PORT) " +
@@ -3397,8 +3396,8 @@ public class SQLConstants {
     public static final String GET_API_VERSIONS =
             "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND ORGANIZATION = ?";
     public static final String GET_API_VERSIONS_UUID =
-            "SELECT API.API_UUID, API.STATUS, API.API_VERSION, API.API_TYPE, API.VERSION_TIMESTAMP FROM AM_API API WHERE " +
-                    "API.API_PROVIDER = ? AND API.API_NAME = ? ";
+            "SELECT API.API_UUID, API.STATUS, API.API_VERSION, API.API_TYPE, API.VERSION_TIMESTAMP, API.CONTEXT, "
+                    + "API.CONTEXT_TEMPLATE FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
     public static class APIRevisionSqlConstants {
         public static final String ADD_API_REVISION =
                 " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY, CREATED_TIME)" +

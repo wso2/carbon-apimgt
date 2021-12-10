@@ -96,8 +96,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
 
         if (apiId != null) {
             try {
-                api = apiConsumer.getLightweightAPI(apiId,organization);
-                api = apiConsumer.getAPIbyUUID(api.getUuid(), organization);
+                api = apiConsumer.getLightweightAPIByUUID(apiId.getUUID(), organization);
             } catch (APIManagementException e) {
                 String msg = "User :" + username + " does not have access to the API " + apiId;
                 RestApiUtil.handleInternalServerError(msg, e, log);

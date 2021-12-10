@@ -119,7 +119,8 @@ public class WorkflowExecutorFactory {
         }else if(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)){
             workflowDTO = new WorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType)){
+        } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equals(wfType)) {
             workflowDTO = new APIStateWorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
         }

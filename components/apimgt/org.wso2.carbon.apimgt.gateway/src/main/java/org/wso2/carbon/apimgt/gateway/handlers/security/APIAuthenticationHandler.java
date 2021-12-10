@@ -17,10 +17,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -102,7 +98,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
     private OpenAPI openAPI;
     private String keyManagers;
-    private List<String> keyManagersList = new ArrayList<>();
     private final String type = ExtensionType.AUTHENTICATION.toString();
     private String securityContextHeader;
     protected APIKeyValidator keyValidator;
@@ -180,11 +175,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             log.debug("Initializing API authentication handler instance");
         }
         initializeAuthenticators();
-        if (StringUtils.isNotEmpty(keyManagers)) {
-            Collections.addAll(keyManagersList, keyManagers.split(","));
-        } else {
-            keyManagersList.add(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
-        }
         if (getApiManagerConfigurationService() != null) {
             initOAuthParams();
         }
@@ -331,7 +321,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
         if (isOAuthProtected) {
             Authenticator authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
-                    removeOAuthHeadersFromOutMessage, keyManagersList);
+                    removeOAuthHeadersFromOutMessage);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
