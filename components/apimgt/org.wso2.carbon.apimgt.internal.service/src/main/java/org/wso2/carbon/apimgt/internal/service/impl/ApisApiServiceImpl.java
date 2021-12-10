@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -124,6 +125,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
 
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response unDeployedAPIRevision(UnDeployedAPIRevisionDTO unDeployedAPIRevisionDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.removeUnDeployedAPIRevision(unDeployedAPIRevisionDTO.getApiUUID(), unDeployedAPIRevisionDTO.getRevisionUUID(),
+                unDeployedAPIRevisionDTO.getEnvironment());
         return Response.ok().build();
     }
 }
