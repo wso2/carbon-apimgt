@@ -49,6 +49,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -146,16 +147,13 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 if (log.isDebugEnabled()) {
                     log.debug("$" + ENV_ORG_BASED_TOKEN_FEATURE + " is enabled.");
                 }
-                // check organization claim and orgId
-                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
-                if (!orgId.equals(orgClaim)) {
-                    log.error("OrgId and organization claim mismatch!");
-                    return false;
-                }
             } else {
                 scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                         .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                         .toArray(size -> new String[size]);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Scopes received in JWT: $" + Arrays.toString(scopes));
             }
             oauthTokenInfo.setScopes(scopes);
 
