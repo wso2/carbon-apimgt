@@ -140,7 +140,8 @@ public class PublisherCommonUtils {
         boolean isAsyncAPI = originalAPI.getType() != null
                 && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType()));
+                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -755,7 +756,7 @@ public class PublisherCommonUtils {
         boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
         boolean isAsyncAPI =
                 isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
-                        APIDTO.TypeEnum.SSE.equals(apiDto.getType());
+                        APIDTO.TypeEnum.SSE.equals(apiDto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apiDto.getType());
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -1642,7 +1643,7 @@ public class PublisherCommonUtils {
     public static boolean isStreamingAPI(APIDTO apidto) {
 
         return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
-                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
+                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apidto.getType());
     }
 
     /**
