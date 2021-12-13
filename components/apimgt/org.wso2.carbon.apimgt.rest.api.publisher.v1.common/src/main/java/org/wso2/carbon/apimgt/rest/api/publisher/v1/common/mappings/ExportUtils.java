@@ -271,12 +271,15 @@ public class ExportUtils {
             addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider);
             addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
                     APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
-
+        }
+        // Set API Product status to created if the status is not preserved
+        if (!preserveStatus) {
+            apiProductDtoToReturn.setState(APIProductDTO.StateEnum.CREATED);
         }
         addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
         addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                preserveStatus, preserveDocs, preserveCredentials, organization);
+                Boolean.TRUE, preserveDocs, preserveCredentials, organization);
 
         // Export mTLS authentication related certificates
         if (log.isDebugEnabled()) {
