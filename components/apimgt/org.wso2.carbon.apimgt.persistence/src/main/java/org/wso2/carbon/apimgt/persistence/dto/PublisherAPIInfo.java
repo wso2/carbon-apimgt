@@ -41,6 +41,10 @@ public class PublisherAPIInfo {
     private Map<String, String> additionalProperties;
     private String description;
     private String gatewayVendor;
+    private boolean advertiseOnly;
+    private String redirectURL;
+    private String apiOwner;
+    private String vendor;
 
     public String getAudience() {
         return audience;
@@ -138,11 +142,44 @@ public class PublisherAPIInfo {
         this.gatewayVendor = gatewayVendor;
     }
 
+    public boolean isAdvertiseOnly() {
+        return advertiseOnly;
+    }
+
+    public void setAdvertiseOnly(boolean advertiseOnly) {
+        this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getRedirectURL() {
+        return redirectURL;
+    }
+
+    public void setRedirectURL(String redirectURL) {
+        this.redirectURL = redirectURL;
+    }
+
+    public String getApiOwner() {
+        return apiOwner;
+    }
+
+    public void setApiOwner(String apiOwner) {
+        this.apiOwner = apiOwner;
+    }
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(String vendor) {
+        this.vendor = vendor;
+    }
+
     @Override
     public String toString() {
         return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version=" +
                 version + ", providerName=" + providerName + ", context=" + context + ", status=" + status + ", type="
-                + type + ", thumbnail=" + thumbnail + "]";
+                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly + ", originalDevportalURL"
+                + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor + "]";
     }
 
     public Map<String, String> getAdditionalProperties() {
