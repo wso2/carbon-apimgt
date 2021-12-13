@@ -42,6 +42,8 @@ public class PublisherAPIInfo {
     private String description;
     private String gatewayVendor;
     private boolean advertiseOnly;
+    private String apiExternalProductionEndpoint;
+    private String apiExternalSandboxEndpoint;
     private String redirectURL;
     private String apiOwner;
     private String vendor;
@@ -150,6 +152,22 @@ public class PublisherAPIInfo {
         this.advertiseOnly = advertiseOnly;
     }
 
+    public String getApiExternalProductionEndpoint() {
+        return apiExternalProductionEndpoint;
+    }
+
+    public void setApiExternalProductionEndpoint(String apiExternalProductionEndpoint) {
+        this.apiExternalProductionEndpoint = apiExternalProductionEndpoint;
+    }
+
+    public String getApiExternalSandboxEndpoint() {
+        return apiExternalSandboxEndpoint;
+    }
+
+    public void setApiExternalSandboxEndpoint(String apiExternalSandboxEndpoint) {
+        this.apiExternalSandboxEndpoint = apiExternalSandboxEndpoint;
+    }
+
     public String getRedirectURL() {
         return redirectURL;
     }
@@ -178,8 +196,10 @@ public class PublisherAPIInfo {
     public String toString() {
         return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version=" +
                 version + ", providerName=" + providerName + ", context=" + context + ", status=" + status + ", type="
-                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly + ", originalDevportalURL"
-                + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor + "]";
+                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly
+                + ",apiExternalProductionEndpoint=" + apiExternalProductionEndpoint + ",apiExternalSandboxEndpoint="
+                + apiExternalSandboxEndpoint + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner
+                + ", vendor" + vendor + "]";
     }
 
     public Map<String, String> getAdditionalProperties() {

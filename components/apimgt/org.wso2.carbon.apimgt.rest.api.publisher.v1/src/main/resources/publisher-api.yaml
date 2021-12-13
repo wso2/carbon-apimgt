@@ -11405,6 +11405,12 @@ components:
         advertised:
           type: boolean
           example: true
+        apiExternalProductionEndpoint:
+          type: string
+          example: https://localhost:9443/devportal
+        apiExternalSandboxEndpoint:
+          type: string
+          example: https://localhost:9443/devportal
         originalDevPortalUrl:
           type: string
           example: https://localhost:9443/devportal
