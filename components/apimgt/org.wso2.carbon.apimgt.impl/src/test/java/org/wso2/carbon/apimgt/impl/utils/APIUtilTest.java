@@ -1784,6 +1784,8 @@ public class APIUtilTest {
         api.setFaultSequence(UUID.randomUUID().toString());
         api.setDescription(UUID.randomUUID().toString());
         api.setRedirectURL(UUID.randomUUID().toString());
+        api.setApiExternalProductionEndpoint(UUID.randomUUID().toString());
+        api.setApiExternalSandboxEndpoint(UUID.randomUUID().toString());
         api.setBusinessOwner(UUID.randomUUID().toString());
         api.setApiOwner(UUID.randomUUID().toString());
         api.setAdvertiseOnly(true);
