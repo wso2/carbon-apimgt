@@ -8676,7 +8676,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String addAPIRevision(APIRevision apiRevision, String organization) throws APIManagementException {
         int revisionCountPerAPI = apiMgtDAO.getRevisionCountByAPI(apiRevision.getApiUUID());
-        if (revisionCountPerAPI > 4) {
+        int maxRevisionCount = getMaxRevisionCount(organization);
+        if (revisionCountPerAPI >= maxRevisionCount) {
             String errorMessage = "Maximum number of revisions per API has reached. " +
                     "Need to remove stale revision to create a new Revision for API with API UUID:"
                     + apiRevision.getApiUUID();
@@ -8731,6 +8732,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return revisionUUID;
+    }
+
+    /**
+     * Util method to read and return the max revision count per API, using the tenant configs
+     *
+     * @param organization organization name
+     * @return max revision count per API
+     * @throws APIManagementException
+     */
+    private int getMaxRevisionCount(String organization) throws APIManagementException {
+        JSONObject jsonObject = APIUtil.getTenantConfig(organization);
+        if (jsonObject.containsKey(APIConstants.API_MAX_REVISION_COUNT_PROPERTY_NAME)){
+            return Integer.valueOf(jsonObject.get(APIConstants.API_MAX_REVISION_COUNT_PROPERTY_NAME).toString());
+        } else {
+            return 5;
+        }
     }
 
     /**
