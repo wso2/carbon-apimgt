@@ -245,7 +245,7 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
-     * This methods loads the monetization implementation class
+     * These methods load the monetization implementation class
      *
      * @return monetization implementation class
      * @throws APIManagementException if failed to load monetization implementation class
@@ -316,7 +316,7 @@ public class APIAdminImpl implements APIAdmin {
         SimpleDateFormat formatter = new SimpleDateFormat(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT);
         formatter.setTimeZone(TimeZone.getTimeZone(APIConstants.Monetization.USAGE_PUBLISH_TIME_ZONE));
         long time = 0;
-        Date parsedDate = null;
+        Date parsedDate;
         try {
             parsedDate = formatter.parse(date);
             time = parsedDate.getTime();
@@ -398,7 +398,7 @@ public class APIAdminImpl implements APIAdmin {
                         keyManagerConfigurationDTO.setEnabled(identityProvider.isEnable());
                     }
                 } catch (IdentityProviderManagementException e) {
-                    // handled in this way in order to not to break other key managers.
+                    // handled in this way in order to not break other key managers.
                     log.error("IdP retrieval failed. ", e);
                 }
             }
@@ -486,7 +486,10 @@ public class APIAdminImpl implements APIAdmin {
                         ExceptionCodes.IDP_RETRIEVAL_FAILED);
             }
         }
-        getKeyManagerEndpoints(keyManagerConfigurationDTO);
+        if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                keyManagerConfigurationDTO.getTokenType())) {
+            getKeyManagerEndpoints(keyManagerConfigurationDTO);
+        }
         return keyManagerConfigurationDTO;
     }
 
@@ -840,8 +843,10 @@ public class APIAdminImpl implements APIAdmin {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
         }
         maskValues(keyManagerConfiguration);
-        getKeyManagerEndpoints(keyManagerConfiguration);
-        return keyManagerConfiguration;
+        if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                keyManagerConfiguration.getTokenType())) {
+            getKeyManagerEndpoints(keyManagerConfiguration);
+        }        return keyManagerConfiguration;
     }
 
     @Override
@@ -1125,7 +1130,7 @@ public class APIAdminImpl implements APIAdmin {
      * @param externelWorkflowRef External Workflow Reference of workflow pending request
      * @param status              Workflow status of workflow pending request
      * @param tenantDomain        tenant domain of user
-     * @return Workflow           Workflow pending request
+     * @return Workflow pending request
      * @throws APIManagementException
      */
     public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
