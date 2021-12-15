@@ -1865,4 +1865,26 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     Set<URITemplate> getURITemplatesOfAPI(String uuid) throws APIManagementException;
+
+    /**
+     * upload operational policy definition to api
+     * @param apiUUID           UUID of the API
+     * @param operationPolicyDefinition   Operation Policy
+     * @param organization      Identifier of an organization
+     * @return added policy
+     * @throws APIManagementException
+     */
+    boolean addApiSpecificOperationalPolicyDefinition(String apiUUID, OperationPolicyDefinition operationPolicyDefinition, String organization)
+            throws APIManagementException;
+
+
+    /**
+     * upload operational policy definition to api
+     * @param operationPolicyDefinition   Operation Policy
+     * @param organization      Identifier of an organization
+     * @return added policy
+     * @throws APIManagementException
+     */
+    boolean addOperationalPolicyTemplate(OperationPolicyDefinition operationPolicyDefinition, String organization)
+            throws APIManagementException;
 }

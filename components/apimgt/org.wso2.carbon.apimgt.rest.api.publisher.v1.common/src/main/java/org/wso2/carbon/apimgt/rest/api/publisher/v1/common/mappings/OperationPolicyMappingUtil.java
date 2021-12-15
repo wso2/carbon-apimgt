@@ -27,15 +27,18 @@ public class OperationPolicyMappingUtil {
 
     public static OperationPolicy fromDTOToOperationPolicy(OperationPolicyDTO operationPolicyDTO) {
         OperationPolicy operationPolicy = new OperationPolicy();
-        operationPolicy
-                .setPolicyType(OperationPolicy.PolicyType.valueOf(operationPolicyDTO.getPolicyType().toString()));
+        operationPolicy.setPolicyName(operationPolicyDTO.getPolicyName());
+        operationPolicy.setTemplateName(operationPolicyDTO.getTemplateName());
+        operationPolicy.setOrder((operationPolicyDTO.getOrder()) != null ? operationPolicyDTO.getOrder() : 1);
         operationPolicy.setParameters(operationPolicyDTO.getParameters());
         return  operationPolicy;
     }
 
     public static OperationPolicyDTO fromOperationPolicyToDTO(OperationPolicy operationPolicy) {
         OperationPolicyDTO dto = new OperationPolicyDTO();
-        dto.setPolicyType(OperationPolicyDTO.PolicyTypeEnum.fromValue(operationPolicy.getPolicyType().toString()));
+        dto.setPolicyName(operationPolicy.getPolicyName());
+        dto.setTemplateName(operationPolicy.getTemplateName());
+        dto.setOrder(operationPolicy.getOrder());
         dto.setParameters(operationPolicy.getParameters());
         return dto;
     }
@@ -50,6 +53,8 @@ public class OperationPolicyMappingUtil {
             if (APIConstants.OPERATION_SEQUENCE_TYPE_IN.equals(op.getDirection())) {
                 in.add(policyDTO);
             } else if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(op.getDirection())) {
+                out.add(policyDTO);
+            } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(op.getDirection())) {
                 out.add(policyDTO);
             }
         }
@@ -66,6 +71,7 @@ public class OperationPolicyMappingUtil {
         if (apiOperationPoliciesDTO != null) {
             List<OperationPolicyDTO> in = apiOperationPoliciesDTO.getIn();
             List<OperationPolicyDTO> out = apiOperationPoliciesDTO.getOut();
+            List<OperationPolicyDTO> fault = apiOperationPoliciesDTO.getFault();
             for (OperationPolicyDTO op : in) {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
                 operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_IN);
@@ -75,6 +81,12 @@ public class OperationPolicyMappingUtil {
             for (OperationPolicyDTO op : out) {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
                 operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_OUT);
+                operationPoliciesList.add(operationPolicy);
+            }
+
+            for (OperationPolicyDTO op : fault) {
+                OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
+                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
                 operationPoliciesList.add(operationPolicy);
             }
         }

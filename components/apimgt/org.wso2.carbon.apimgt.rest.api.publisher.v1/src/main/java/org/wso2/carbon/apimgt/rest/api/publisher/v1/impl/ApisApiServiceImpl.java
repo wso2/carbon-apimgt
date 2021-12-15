@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
@@ -89,6 +90,8 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -116,9 +119,9 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
@@ -163,55 +166,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CommentMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStoreMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDefinitionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
@@ -2268,6 +2223,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response getAllAPISpecificOperationPolicyDefinitions(String apiId, Integer limit, Integer offset,
+                                                                  String query, MessageContext messageContext)
+            throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
     public Response deleteAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId,
             String ifMatch, MessageContext messageContext) {
         try {
@@ -2711,6 +2674,103 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return Response.serverError().build();
     }
+
+    @Override
+    public Response addAPISpecificOperationPolicyDefinition(String apiId, InputStream policySpecFileInputStream,
+                                                              Attachment policySpecFileDetail,
+                                                              InputStream policyTemplateFileInputStream,
+                                                              Attachment policyTemplateFileDetail, String policyName,
+                                                              String flow, MessageContext messageContext)
+            throws APIManagementException {
+
+        String fileName = "";
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+            //validate if api exists
+            APIInfo apiInfo = validateAPIExistence(apiId);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String policySpec = "";
+            String jsonContent = "";
+            String policyTemplate = "";
+            OperationPolicySpecification policySpecification;
+            if (policySpecFileInputStream != null) {
+                policySpec = readInputStream(policySpecFileInputStream, policySpecFileDetail);
+                jsonContent = CommonUtil.yamlToJson(policySpec);
+                policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
+            } else {
+                // This flow will execute if a policy specification is not found.
+                policySpecification = new OperationPolicySpecification();
+                policySpecification.setPolicyName(policyName);
+                List<String> policyFlow = new ArrayList<String>(Arrays.asList(flow.split(",")));
+                policySpecification.setFlow(policyFlow);
+            }
+
+            if (policyTemplateFileInputStream != null) {
+                policyTemplate = readInputStream(policyTemplateFileInputStream, policyTemplateFileDetail);
+            }
+
+            OperationPolicyDefinition operationPolicyDefinition = new OperationPolicyDefinition();
+            operationPolicyDefinition.setSpecification(policySpecification);
+            operationPolicyDefinition.setDefinition(policyTemplate);
+            operationPolicyDefinition.setName(policyName);
+            operationPolicyDefinition.setFlow(flow);
+            apiProvider.addApiSpecificOperationalPolicyDefinition(apiId, operationPolicyDefinition, organization);
+
+
+            if (operationPolicyDefinition != null) {
+                String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
+                        .replace(RestApiConstants.APIID_PARAM, apiId)  + "/" + "operational-policy";
+                URI uri = new URI(uriString);
+                OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
+                createdPolicy.setName(operationPolicyDefinition.getName());
+                return Response.created(uri).entity(createdPolicy).build();
+            }
+
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) { //this is due to access control restriction.
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while adding operational policy for the API " + apiId, e, log);
+            } else {
+                throw e;
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while getting location header for created " +
+                    "operational policy " + fileName;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while adding operational policy", e, log);
+        }
+        return null;
+    }
+
+    public String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws IOException {
+
+        String content = null;
+        if (fileInputStream != null) {
+            String fileName = fileDetail.getDataHandler().getName();
+
+            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+
+            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+                fileContentType = fileDetail.getContentType().toString();
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            IOUtils.copy(fileInputStream, outputStream);
+            byte[] sequenceBytes = outputStream.toByteArray();
+            InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+            content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+        }
+        return content;
+    }
+
 
     /**
      * Publish API to given external stores.

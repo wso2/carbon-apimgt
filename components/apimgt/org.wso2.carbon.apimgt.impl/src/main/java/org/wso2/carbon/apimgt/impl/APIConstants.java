@@ -2861,6 +2861,7 @@ public final class APIConstants {
     //Constants related to Operation Mediation Policies
     public static final String OPERATION_SEQUENCE_TYPE_IN = "in";
     public static final String OPERATION_SEQUENCE_TYPE_OUT = "out";
+    public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
     public static final String HEADER_NAME_PARAM = "headerName";
     public static final String HEADER_VALUE_PARAM = "headerValue";
     public static final String HTTP_METHOD_PARAM = "httpMethod";

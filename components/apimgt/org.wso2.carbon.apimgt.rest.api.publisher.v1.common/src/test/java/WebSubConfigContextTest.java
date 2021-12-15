@@ -63,7 +63,7 @@ public class WebSubConfigContextTest {
                 File.separator + "resources" + File.separator;
         System.setProperty("carbon.home", templatePath);
 
-        APITemplateBuilderImpl apiTemplateBuilder = new APITemplateBuilderImpl(api, null, null, null);
+        APITemplateBuilderImpl apiTemplateBuilder = new APITemplateBuilderImpl(api, null, null);
         String updatedTemplate = apiTemplateBuilder.getConfigStringForTemplate(environment);
         Assert.assertFalse("The websub velocity template is not updated correctly",
                 updatedTemplate.contains("generated_signature"));
@@ -93,7 +93,7 @@ public class WebSubConfigContextTest {
                 File.separator + "resources" + File.separator;
         System.setProperty("carbon.home", templatePath);
 
-        APITemplateBuilderImpl apiTemplateBuilder = new APITemplateBuilderImpl(api, null, null, null);
+        APITemplateBuilderImpl apiTemplateBuilder = new APITemplateBuilderImpl(api, null, null);
         String updatedTemplate = apiTemplateBuilder.getConfigStringForTemplate(environment);
         Assert.assertTrue("The websub velocity template is not updated correctly",
                 updatedTemplate.contains("generated_signature"));

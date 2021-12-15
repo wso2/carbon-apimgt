@@ -23,61 +23,61 @@ import javax.validation.Valid;
 
 public class OperationPolicyDTO   {
   
-
-    @XmlType(name="PolicyTypeEnum")
-    @XmlEnum(String.class)
-    public enum PolicyTypeEnum {
-        SET_HEADER("SET_HEADER"),
-        REMOVE_HEADER("REMOVE_HEADER"),
-        REWRITE_HTTP_METHOD("REWRITE_HTTP_METHOD"),
-        REWRITE_RESOURCE_PATH("REWRITE_RESOURCE_PATH"),
-        ADD_QUERY_PARAM("ADD_QUERY_PARAM"),
-        REMOVE_QUERY_PARAM("REMOVE_QUERY_PARAM"),
-        CALL_INTERCEPTOR_SERVICE("CALL_INTERCEPTOR_SERVICE");
-        private String value;
-
-        PolicyTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static PolicyTypeEnum fromValue(String v) {
-            for (PolicyTypeEnum b : PolicyTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private PolicyTypeEnum policyType = null;
+    private String policyName = null;
+    private String templateName = null;
+    private Integer order = null;
     private Map<String, Object> parameters = new HashMap<String, Object>();
 
   /**
    **/
-  public OperationPolicyDTO policyType(PolicyTypeEnum policyType) {
-    this.policyType = policyType;
+  public OperationPolicyDTO policyName(String policyName) {
+    this.policyName = policyName;
     return this;
   }
 
   
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("policyType")
+  @JsonProperty("policyName")
   @NotNull
-  public PolicyTypeEnum getPolicyType() {
-    return policyType;
+  public String getPolicyName() {
+    return policyName;
   }
-  public void setPolicyType(PolicyTypeEnum policyType) {
-    this.policyType = policyType;
+  public void setPolicyName(String policyName) {
+    this.policyName = policyName;
+  }
+
+  /**
+   **/
+  public OperationPolicyDTO templateName(String templateName) {
+    this.templateName = templateName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("templateName")
+  public String getTemplateName() {
+    return templateName;
+  }
+  public void setTemplateName(String templateName) {
+    this.templateName = templateName;
+  }
+
+  /**
+   **/
+  public OperationPolicyDTO order(Integer order) {
+    this.order = order;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("order")
+  public Integer getOrder() {
+    return order;
+  }
+  public void setOrder(Integer order) {
+    this.order = order;
   }
 
   /**
@@ -107,13 +107,15 @@ return null;
       return false;
     }
     OperationPolicyDTO operationPolicy = (OperationPolicyDTO) o;
-    return Objects.equals(policyType, operationPolicy.policyType) &&
+    return Objects.equals(policyName, operationPolicy.policyName) &&
+        Objects.equals(templateName, operationPolicy.templateName) &&
+        Objects.equals(order, operationPolicy.order) &&
         Objects.equals(parameters, operationPolicy.parameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyType, parameters);
+    return Objects.hash(policyName, templateName, order, parameters);
   }
 
   @Override
@@ -121,7 +123,9 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class OperationPolicyDTO {\n");
     
-    sb.append("    policyType: ").append(toIndentedString(policyType)).append("\n");
+    sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
+    sb.append("    templateName: ").append(toIndentedString(templateName)).append("\n");
+    sb.append("    order: ").append(toIndentedString(order)).append("\n");
     sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("}");
     return sb.toString();
