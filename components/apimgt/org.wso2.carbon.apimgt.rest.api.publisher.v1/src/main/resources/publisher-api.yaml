@@ -7971,7 +7971,247 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+  /apis/{apiId}/operation-policy-definition:
+    get:
+      tags:
+        - API Operation Policies
+      summary: |
+        Get all applicabale operation policy definitions for an API
+      description: |
+        This operation provides you a list of all applicabale operation policy definitions for an API
+      operationId: getAllAPISpecificOperationPolicyDefinitions
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          description: -Not supported yet-
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying policies is returned.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyDefinitionsList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy-definition"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
 
+    post:
+      tags:
+        - API Operation Policies
+      summary: Add an API specific operation policy definition
+      description: |
+        This operation can be used to add an API specifc operation policy definition.
+      operationId: addAPISpecificOperationPolicyDefinition
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - type
+              properties:
+                policySpecFile:
+                  type: string
+                  description: Policy specification to upload
+                  format: binary
+                policyDefinitionFile:
+                  type: string
+                  description: Policy definition to upload
+                  format: binary
+                policyName:
+                  type: string
+                  description: Name of the policy
+                flow:
+                  type: string
+                  description: Flow of the sequence
+        required: true
+      responses:
+        201:
+          description: |
+            OK.
+            Operation policy uploaded
+          headers:
+            Location:
+              description: |
+                The URL of the uploaded operation policy of the API.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyDefinition'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
+            - apim:api_manage
+            - apim:mediation_policy_create
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -H "Content-Type: multipart/form-data" -F mediationPolicyFile=@TokenExchange.xml
+            -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy-definition"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
+  /operation-policy-templates:
+    get:
+      tags:
+        - API Operation Policies
+      summary: |
+        Get all operation policy templates
+      description: |
+        This operation provides you a list of all operation policy templates
+      operationId: getAllOperationPolicyTemplates
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          description: -Not supported yet-
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying policies is returned.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyDefinitionsList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy-templates"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
+
+    post:
+      tags:
+        - API Operation Policies
+      summary: Add a new operation policy template
+      description: |
+        This operation can be used to add a new operation policy template.
+      operationId: addOperationPolicyTemplate
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - type
+              properties:
+                templateSpecFile:
+                  type: string
+                  description: Policy template specification to upload
+                  format: binary
+                policyDefinitionFile:
+                  type: string
+                  description: Policy template definition to upload
+                  format: binary
+                policyName:
+                  type: string
+                  description: Name of the policy template
+                flow:
+                  type: string
+                  description: Applicable flows of the template
+        required: true
+      responses:
+        201:
+          description: |
+            OK.
+            Operation policy template uploaded
+          headers:
+            Location:
+              description: |
+                The URL of the uploaded mediation policy of the API.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyDefinition'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
+            - apim:api_manage
+            - apim:mediation_policy_create
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -H "Content-Type: multipart/form-data" -F mediationPolicyFile=@TokenExchange.xml
+            -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy-templates"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
   /api-products/change-lifecycle:
     post:
       tags:
@@ -8149,205 +8389,6 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
-
-  /apis/{apiId}/resource-endpoints:
-    post:
-      tags:
-        - Resource Endpoints
-      summary: Add Resource Endpoint
-      operationId: addResourceEndpoint
-      description: |
-        This operation can be used to add resource endpoints for an API.
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-      requestBody:
-        description: Resource Endpoint Object that needs to be added
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourceEndpoint'
-        required: true
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created Resource Endpoint object in the body.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceEndpoint'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        415:
-          $ref: '#/components/responses/UnsupportedMediaType'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints"'
-
-    get:
-      tags:
-        - Resource Endpoints
-      summary: Get All Available Resource Endpoints of an API
-      description: |
-        This operation can be used to get all the available resource endpoints of an API.
-      operationId: getResourceEndpoints
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
-      responses:
-        200:
-          description: |
-            OK.
-            Resource Endpoints list is returned.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceEndpointList'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints"'
-
-  /apis/{apiId}/resource-endpoints/{endpointId}:
-    get:
-      tags:
-        - Resource Endpoints
-      summary: Get Resource Endpoint
-      description: |
-        This operation can be used to get a resource endpoint by id.
-      operationId: getResourceEndpoint
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/endpointId'
-      responses:
-        200:
-          description: |
-            OK.
-            Resource Endpoints is returned.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceEndpoint'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints/01234567-0123-0123-0123-012345678901"'
-
-    put:
-      tags:
-        - Resource Endpoints
-      summary: Update Resource Endpoint
-      description: |
-        This operation can be used to update a resource endpoint.
-      operationId: updateResourceEndpoint
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/endpointId'
-      requestBody:
-        description: Resource Endpoint object with updated details
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourceEndpoint'
-      responses:
-        200:
-          description: |
-            OK.
-            Updated Resource Endpoints is returned.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceEndpoint'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        415:
-          $ref: '#/components/responses/UnsupportedMediaType'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints/01234567-0123-0123-0123-012345678901"'
-
-
-    delete:
-      tags:
-        - Resource Endpoints
-      summary: Delete Resource Endpoint
-      description: |
-        This operation can be used to delete a resource endpoint.
-      operationId: deleteResourceEndpoint
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/endpointId'
-      responses:
-        200:
-          description: |
-            OK.
-            Updated Resource Endpoints is returned.
-          content: {}
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints/01234567-0123-0123-0123-012345678901"'
-
-
 components:
   schemas:
     Comment:
@@ -11781,18 +11822,14 @@ components:
       title: API Operation Policy
       type: object
       required:
-        - policyType
+        - policyName
       properties:
-        policyType:
+        policyName:
           type: string
-          enum:
-            - SET_HEADER
-            - REMOVE_HEADER
-            - REWRITE_HTTP_METHOD
-            - REWRITE_RESOURCE_PATH
-            - ADD_QUERY_PARAM
-            - REMOVE_QUERY_PARAM
-            - CALL_INTERCEPTOR_SERVICE
+        templateName:
+          type: string
+        order:
+          type: int
         parameters:
           type: object
           additionalProperties:
@@ -11805,6 +11842,10 @@ components:
           items:
             $ref: '#/components/schemas/OperationPolicy'
         out:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        fault:
           type: array
           items:
             $ref: '#/components/schemas/OperationPolicy'
@@ -11821,58 +11862,39 @@ components:
         endpointURI:
           type: string
           example: default
-    ResourceEndpoint:
-      title: Resource Endpoints
-      required:
-        - name
-        - endpointType
-        - url
-      properties:
-        id:
-          type: string
-          readOnly: true
-        name:
-          type: string
-          example: EP1
-        endpointType:
-          type: string
-          enum:
-            - HTTP
-            - ADDRESS
-          example: HTTP
-        url:
-          type: string
-          example: http://localhost:8080/example
-        securityConfig:
-          type: object
-          additionalProperties:
-            type: string
-        generalConfig:
-          type: object
-          additionalProperties:
-            type: string
-        usageCount:
-          type: integer
-          description: |
-            Usage count of Resource Endpoint
-          default: 0
-          example: 1
-          readOnly: true
-    ResourceEndpointList:
-      title: Resource Endpoints List
+    OperationPolicyDefinitionsList:
+      title: Operation policy definitions List
       type: object
       properties:
         count:
           type: integer
           description: |
-            Number of Resource Endpoints returned.
+            Number of operation policy definitions returned.
           example: 1
         list:
           type: array
           items:
-            $ref: '#/components/schemas/ResourceEndpoint'
+            $ref: '#/components/schemas/OperationPolicyDefinition'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    OperationPolicyDefinition:
+      title: OperationPolicyDefinition
+      type: object
+      properties:
+        name:
+          type: string
+          example: removeHeaderPolicy
+        apiId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        flows:
+          type: array
+          items:
+            type: string
+            example: in
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -12399,25 +12421,6 @@ components:
       required: true
       schema:
         type: string
-    direction:
-      name: direction
-      description: Operation policy direction(in/out)
-      in: query
-      schema:
-        type: string
-    resourcePath:
-      name: resourcePath
-      description: Resource path
-      in: query
-      schema:
-        type: string
-    httpVerb:
-      name: httpVerb
-      description: HTTP verb
-      in: query
-      schema:
-        type: string
-
   requestBodies:
     threatProtectionPolicy:
       description: |
