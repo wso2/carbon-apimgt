@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
@@ -2455,6 +2456,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
                     ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
+        if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
+            throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                    " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
+        }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
                         tenantDomain, keyManagerName);
@@ -3958,6 +3963,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
                         ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             }
+            if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
+                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                        " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
+            }
             Object enableOauthAppCreation =
                     keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
             if (enableOauthAppCreation != null && !(Boolean) enableOauthAppCreation) {
@@ -4557,6 +4566,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (!keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException("Key Manager " + keyManagerName + " not activated in the requested " +
                         "Tenant", ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
+            }
+            if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
+                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                        " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
             }
             //Create OauthAppRequest object by passing json String.
             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(application.getName(), null,

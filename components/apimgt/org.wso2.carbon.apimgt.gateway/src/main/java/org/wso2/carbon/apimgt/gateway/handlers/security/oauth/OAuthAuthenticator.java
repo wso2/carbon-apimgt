@@ -240,13 +240,26 @@ public class OAuthAuthenticator implements Authenticator {
                     String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
                     if (StringUtils.isNotEmpty(keyManager)) {
+                        if (log.isDebugEnabled()){
+                            log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
+                        }
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
+                            }
                             isJwtToken = true;
                         } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
+                            }
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                        }
+                    }else{
+                        if (log.isDebugEnabled()) {
+                            log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
                         }
                     }
                 } catch ( ParseException | IllegalArgumentException e) {

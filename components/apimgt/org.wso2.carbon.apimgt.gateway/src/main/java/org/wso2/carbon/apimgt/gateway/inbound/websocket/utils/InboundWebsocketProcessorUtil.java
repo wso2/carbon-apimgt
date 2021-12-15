@@ -443,6 +443,10 @@ public class InboundWebsocketProcessorUtil {
                                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                         "Invalid JWT token");
                             }
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(apiKey));
+                            }
                         }
                     } catch (ParseException e) {
                         log.debug("Not a JWT token. Failed to decode the token header.", e);

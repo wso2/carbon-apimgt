@@ -8906,7 +8906,8 @@ public class ApiMgtDAO {
                 preparedStatement.setBoolean(6, keyManagerConfigurationDTO.isEnabled());
                 preparedStatement.setString(7, keyManagerConfigurationDTO.getDisplayName());
                 preparedStatement.setString(8, keyManagerConfigurationDTO.getTokenType());
-                preparedStatement.setString(9, keyManagerConfigurationDTO.getUuid());
+                preparedStatement.setString(9, keyManagerConfigurationDTO.getExternalReferenceId());
+                preparedStatement.setString(10, keyManagerConfigurationDTO.getUuid());
                 preparedStatement.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {
