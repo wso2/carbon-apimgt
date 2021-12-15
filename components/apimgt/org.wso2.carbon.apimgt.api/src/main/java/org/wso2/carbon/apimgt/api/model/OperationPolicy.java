@@ -5,27 +5,19 @@ import java.util.Objects;
 
 public class OperationPolicy {
 
-    public enum PolicyType {
-        SET_HEADER,
-        REMOVE_HEADER,
-        REWRITE_HTTP_METHOD,
-        CALL_INTERCEPTOR_SERVICE,
-        REWRITE_RESOURCE_PATH,
-        ADD_QUERY_PARAM,
-        REMOVE_QUERY_PARAM,
-    };
-
-    private PolicyType policyType = null;
+    private String policyName = "";
+    private String templateName = "";
     private String direction;
     private Map<String, Object> parameters;
     private int id;
+    private int order = 1;
 
-    public PolicyType getPolicyType() {
-        return policyType;
+    public String getPolicyName() {
+        return policyName;
     }
 
-    public void setPolicyType(PolicyType policyType) {
-        this.policyType = policyType;
+    public void setPolicyName(String policyName) {
+        this.policyName = policyName;
     }
 
     public Map<String, Object> getParameters() {
@@ -52,17 +44,37 @@ public class OperationPolicy {
         return id;
     }
 
+    public int getOrder() {
+
+        return order;
+    }
+
+    public void setOrder(int order) {
+
+        this.order = order;
+    }
+
+    public String getTemplateName() {
+
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+
+        this.templateName = templateName;
+    }
+
     @Override public boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
         OperationPolicy that = (OperationPolicy) o;
-        return id == that.id && policyType == that.policyType && direction.equals(that.direction) && parameters
+        return id == that.id && policyName == that.policyName && direction.equals(that.direction) && parameters
                 .equals(that.parameters);
     }
 
     @Override public int hashCode() {
-        return Objects.hash(policyType, direction, parameters, id);
+        return Objects.hash(policyName, direction, parameters, id);
     }
 }

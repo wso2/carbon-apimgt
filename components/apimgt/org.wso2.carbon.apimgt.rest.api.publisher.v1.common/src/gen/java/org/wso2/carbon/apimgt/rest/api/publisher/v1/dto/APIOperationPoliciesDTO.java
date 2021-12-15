@@ -25,6 +25,7 @@ public class APIOperationPoliciesDTO   {
   
     private List<OperationPolicyDTO> in = new ArrayList<OperationPolicyDTO>();
     private List<OperationPolicyDTO> out = new ArrayList<OperationPolicyDTO>();
+    private List<OperationPolicyDTO> fault = new ArrayList<OperationPolicyDTO>();
 
   /**
    **/
@@ -62,6 +63,24 @@ public class APIOperationPoliciesDTO   {
     this.out = out;
   }
 
+  /**
+   **/
+  public APIOperationPoliciesDTO fault(List<OperationPolicyDTO> fault) {
+    this.fault = fault;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("fault")
+  public List<OperationPolicyDTO> getFault() {
+    return fault;
+  }
+  public void setFault(List<OperationPolicyDTO> fault) {
+    this.fault = fault;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -73,12 +92,13 @@ public class APIOperationPoliciesDTO   {
     }
     APIOperationPoliciesDTO apIOperationPolicies = (APIOperationPoliciesDTO) o;
     return Objects.equals(in, apIOperationPolicies.in) &&
-        Objects.equals(out, apIOperationPolicies.out);
+        Objects.equals(out, apIOperationPolicies.out) &&
+        Objects.equals(fault, apIOperationPolicies.fault);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(in, out);
+    return Objects.hash(in, out, fault);
   }
 
   @Override
@@ -88,6 +108,7 @@ public class APIOperationPoliciesDTO   {
     
     sb.append("    in: ").append(toIndentedString(in)).append("\n");
     sb.append("    out: ").append(toIndentedString(out)).append("\n");
+    sb.append("    fault: ").append(toIndentedString(fault)).append("\n");
     sb.append("}");
     return sb.toString();
   }
