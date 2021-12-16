@@ -691,8 +691,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return applicationKeyMappings;
     }
 
-    @Override public void destroy() {
-
+    @Override
+    public void destroy() {
+        executorService.shutdown();
     }
 
     @Override
