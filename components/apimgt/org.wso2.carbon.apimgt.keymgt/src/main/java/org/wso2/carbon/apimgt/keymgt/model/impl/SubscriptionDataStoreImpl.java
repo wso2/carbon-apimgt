@@ -49,6 +49,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -72,7 +74,20 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private boolean apisInitialized;
     private boolean apiPoliciesInitialized;
     private String tenantDomain;
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
+    private ScheduledExecutorService executorService = Executors
+            .newScheduledThreadPool(LOADING_POOL_SIZE, new ThreadFactory() {
+                final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
+                final AtomicInteger threadNumber = new AtomicInteger(1);
+                final SecurityManager securityManager = System.getSecurityManager();
+                final ThreadGroup group = (securityManager != null) ?
+                        securityManager.getThreadGroup() :
+                        Thread.currentThread().getThreadGroup();
+                final String namePrefix = "SubscriptionDataStore-pool-" + POOL_NUMBER.getAndIncrement() + "-thread-";
+
+                @Override public Thread newThread(Runnable r) {
+                    return new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+                }
+            });
 
     public SubscriptionDataStoreImpl(String tenantDomain) {
 
@@ -674,6 +689,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
         }
         return applicationKeyMappings;
+    }
+
+    @Override public void destroy() {
+
     }
 
     @Override
