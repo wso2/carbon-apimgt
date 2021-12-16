@@ -1275,14 +1275,14 @@ public class OASParserUtil {
         }
 
         ArrayNode endpointsArray = objectMapper.createArrayNode();
+        if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
+            endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
+        }
         if (endpointsURLs != null) {
             for (int i = 0; i < endpointsURLs.length(); i++) {
                 JSONObject obj = endpointsURLs.getJSONObject(i);
                 endpointsArray.add(obj.getString(APIConstants.ENDPOINT_URL));
             }
-        }
-        if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
-            endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
         }
         if (endpointsArray.size() < 1) {
             return null;
