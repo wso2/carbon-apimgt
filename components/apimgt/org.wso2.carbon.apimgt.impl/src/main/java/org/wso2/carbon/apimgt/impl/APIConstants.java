@@ -2805,6 +2805,31 @@ public final class APIConstants {
         public static final String KM_ORGANIZATION_EXIST = "IDPOrganizationExist";
     }
 
+    public static class SystemScopeConstants {
+        public static final String CHECK_ROLES_FROM_SAML_ASSERTION = "checkRolesFromSamlAssertion";
+        public static final String SAML2_ASSERTION = "SAML2Assertion";
+        public static final String SAML2_SSO_AUTHENTICATOR_NAME = "SAML2SSOAuthenticator";
+        public static final String ROLE_CLAIM_ATTRIBUTE = "RoleClaimAttribute";
+        public static final String ATTRIBUTE_VALUE_SEPARATOR = "AttributeValueSeparator";
+        public static final String ROLE_ATTRIBUTE_NAME = "http://wso2.org/claims/role";
+        public static final String ATTRIBUTE_VALUE_SEPERATER = ",";
+        public static final String
+                RETRIEVE_ROLES_FROM_USERSTORE_FOR_SCOPE_VALIDATION = "retrieveRolesFromUserStoreForScopeValidation";
+        public static final String ROLE_CLAIM = "ROLE_CLAIM";
+        public static final String OAUTH2_DEFAULT_SCOPE = "default";
+        public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
+        public static final String EXTENTIONS_CACHE_MANAGER = "EXTENTIONS_CACHE_MANAGER";
+        public static final String TENANT_CONFIG_CACHE_NAME = "tenantConfigCache";
+        public static final String REST_API_SCOPE = "Scope";
+        public static final String REST_API_SCOPE_NAME = "Name";
+        public static final String REST_API_SCOPE_ROLE = "Roles";
+        public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
+        public static final String REST_API_ROLE_MAPPINGS_CONFIG = "RoleMappings";
+
+        public static final String OAUTH_JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+        public static final String OAUTH_JWT_ASSERTION = "assertion";
+    }
+
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
