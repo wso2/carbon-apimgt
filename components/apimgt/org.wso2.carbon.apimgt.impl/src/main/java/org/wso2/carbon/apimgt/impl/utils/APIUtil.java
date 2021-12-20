@@ -3750,8 +3750,11 @@ public final class APIUtil {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonElement jsonElement = getFileBaseTenantConfig();
-            ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
-                    gson.toJson(jsonElement));
+            String currentConfig = ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+            if (currentConfig == null) {
+                ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
+                        gson.toJson(jsonElement));
+            }
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
         }

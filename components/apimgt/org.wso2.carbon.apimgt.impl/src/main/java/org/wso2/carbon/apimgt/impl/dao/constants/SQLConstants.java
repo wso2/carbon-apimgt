@@ -3631,4 +3631,17 @@ public class SQLConstants {
                 "   UUID = ? AND TENANT_ID = ?";
 
     }
+
+    /**
+     * Static class to hold database queries related to AM_SYSTEM_CONFIGS table
+     */
+    public static class SystemConfigsConstants {
+        public static final String ADD_SYSTEM_CONFIG_SQL = "INSERT INTO AM_SYSTEM_CONFIGS "
+                + "(ORGANIZATION,CONFIG_TYPE,CONFIGURATION) VALUES (?,?,?)";
+        public static final String GET_SYSTEM_CONFIG_SQL = "SELECT CONFIGURATION FROM AM_SYSTEM_CONFIGS "
+                + "WHERE ORGANIZATION = ? AND CONFIG_TYPE = ?";
+        public static final String UPDATE_SYSTEM_CONFIG_SQL = "UPDATE AM_SYSTEM_CONFIGS "
+                + "SET CONFIGURATION = ? WHERE ORGANIZATION = ? AND CONFIG_TYPE = ?";
+    }
+
 }
