@@ -1681,6 +1681,16 @@ public interface APIProvider extends APIManager {
             deployedAPIRevisions) throws APIManagementException;
 
     /**
+     * Adds a new DeployedAPIRevision to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionUUID API Revision UUID
+     * @param environment - Un-deployed environment
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void removeUnDeployedAPIRevision(String apiId, String apiRevisionUUID, String environment) throws APIManagementException;
+
+    /**
      * Update the displayOnDevportal field in an existing deployments of an API
      *
      * @param apiId API UUID

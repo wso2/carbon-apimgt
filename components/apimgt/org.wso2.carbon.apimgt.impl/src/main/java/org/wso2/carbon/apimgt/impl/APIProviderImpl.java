@@ -8930,6 +8930,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public void removeUnDeployedAPIRevision(String apiId, String apiRevisionUUID,
+                                            String environment)
+            throws APIManagementException {
+        Set<DeployedAPIRevision> environmentsToRemove = new HashSet<>();
+        environmentsToRemove.add(new DeployedAPIRevision(apiRevisionUUID, environment));
+        apiMgtDAO.removeDeployedAPIRevision(apiId, environmentsToRemove);
+    }
+
+    @Override
     public void updateAPIDisplayOnDevportal(String apiId, String apiRevisionId, APIRevisionDeployment apiRevisionDeployment)
             throws APIManagementException {
 
