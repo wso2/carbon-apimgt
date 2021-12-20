@@ -273,9 +273,7 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}
                                 </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
+
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.output.adapter.http:${carbon.apimgt.version}
                                 </bundleDef>

@@ -239,10 +239,7 @@
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.tier.cache.stub</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
@@ -632,7 +629,6 @@
                             org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.gateway.stub.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.tier.cache.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.dto.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
