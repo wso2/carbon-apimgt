@@ -243,8 +243,9 @@ public class PublisherCommonUtils {
         String originalStatus = originalAPI.getStatus();
         if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
                 .contains(APIConstants.API_SECURITY_API_KEY)) {
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty() && !(APIConstants.CREATED.equals(originalStatus)
-                    || APIConstants.PROTOTYPED.equals(originalStatus))) {
+            if ((tiersFromDTO == null || tiersFromDTO.isEmpty() && !(APIConstants.CREATED.equals(originalStatus)
+                    || APIConstants.PROTOTYPED.equals(originalStatus)))
+                    && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised()) {
                 throw new APIManagementException(
                         "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
                         ExceptionCodes.TIER_CANNOT_BE_NULL);
