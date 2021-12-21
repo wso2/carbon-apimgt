@@ -5171,8 +5171,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiSecurity = api.getApiSecurity();
                 boolean isOauthProtected = apiSecurity == null
                         || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-                if (APIConstants.API_TYPE_WEBSUB.equals(api.getType()) || endPoint != null && endPoint.trim().length() > 0) {
-                    if (isOauthProtected && (tiers == null || tiers.size() <= 0)) {
+                if (APIConstants.API_TYPE_WEBSUB.equals(api.getType())
+                        || endPoint != null && endPoint.trim().length() > 0
+                        || api.isAdvertiseOnly() && (api.getApiExternalProductionEndpoint() != null
+                        || api.getApiExternalSandboxEndpoint() != null)) {
+                    if ((isOauthProtected && (tiers == null || tiers.size() <= 0)) && !api.isAdvertiseOnly()) {
                         throw new APIManagementException("Failed to publish service to API store while executing "
                                 + "APIExecutor. No Tiers selected");
                     }
