@@ -972,20 +972,42 @@ public class TemplateBuilderUtil {
                         getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
 
         if (isSecureVaultEnabled) {
+            // Handle migrated APIs
+            if (api.isEndpointSecured()) {
+                String secureVaultAlias =
+                        api.getId().getProviderName() + "--" + api.getId().getApiName() + api.getId().getVersion();
+
+                CredentialDto credentialDto = new CredentialDto();
+                credentialDto.setAlias(secureVaultAlias);
+                credentialDto.setPassword(api.getEndpointUTPassword());
+                gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
+                        gatewayAPIDTO.getCredentialsToBeAdd()));
+                if (log.isDebugEnabled()) {
+                    log.debug("SecureVault alias " + secureVaultAlias + " is created for " + api.getId()
+                            .getApiName());
+                }
+            }
             org.json.JSONObject endpointConfig = new org.json.JSONObject(api.getEndpointConfig());
 
             if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
+                org.json.JSONObject productionEndpointSecurity = null;
+                org.json.JSONObject sandboxEndpointSecurity = null;
+                boolean isProductionEndpointSecured = false;
+                boolean isSandboxEndpointSecured = false;
                 org.json.JSONObject endpoints =
                         (org.json.JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-                org.json.JSONObject productionEndpointSecurity = (org.json.JSONObject)
-                        endpoints.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                org.json.JSONObject sandboxEndpointSecurity =
-                        (org.json.JSONObject) endpoints.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
-
-                boolean isProductionEndpointSecured = (boolean)
-                        productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-                boolean isSandboxEndpointSecured = (boolean)
-                        sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
+                if (!endpoints.isNull(APIConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+                    productionEndpointSecurity = (org.json.JSONObject) endpoints
+                            .get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    isProductionEndpointSecured =
+                            (boolean) productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
+                }
+                if (!endpoints.isNull(APIConstants.ENDPOINT_SECURITY_SANDBOX)) {
+                    sandboxEndpointSecurity = (org.json.JSONObject) endpoints
+                            .get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    isSandboxEndpointSecured =
+                            (boolean) sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
+                }
                 //for production endpoints
                 if (isProductionEndpointSecured) {
                     addCredentialsToList(prefix, api, gatewayAPIDTO, productionEndpointSecurity,
