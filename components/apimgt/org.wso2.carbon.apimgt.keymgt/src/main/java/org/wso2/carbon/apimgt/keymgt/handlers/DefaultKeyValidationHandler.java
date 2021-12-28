@@ -291,7 +291,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             } else {
                 AccessTokenInfo tokenInfo = new AccessTokenInfo();
                 tokenInfo.setTokenValid(false);
-                tokenInfo.setErrorcode(900901);
+                tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 log.debug("KeyManager not available to authorize token.");
                 return tokenInfo;
             }
