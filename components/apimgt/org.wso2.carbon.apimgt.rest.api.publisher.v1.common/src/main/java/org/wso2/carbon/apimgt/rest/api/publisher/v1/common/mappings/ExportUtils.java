@@ -49,7 +49,10 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
@@ -198,7 +201,7 @@ public class ExportUtils {
         if (!preserveStatus) {
             apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
         }
-
+        addOperationalPoliciesToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider, api);
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
@@ -719,6 +722,54 @@ public class ExportUtils {
             throw new APIImportExportException(
                     "Error while retrieving saving endpoint certificate details for API: " + apiDto.getName()
                             + " as YAML", e);
+        }
+    }
+
+    /**
+     * Retrieve the deployed gateway environments and store those in the archive directory.
+     *
+     * @param archivePath  File path to export the endpoint certificates
+     * @param apiID        UUID of the API/ API Product
+     * @param exportFormat Export format of file
+     * @param apiProvider  API Provider
+     * @throws APIImportExportException If an error occurs while exporting gateway environments
+     */
+    public static void addOperationalPoliciesToArchive(String archivePath, String apiID,
+                                                       ExportFormat exportFormat, APIProvider apiProvider, API api)
+            throws APIManagementException, APIImportExportException {
+
+        CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
+
+        try {
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            for (URITemplate uriTemplate : uriTemplates) {
+                List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+                if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    for (OperationPolicy policy : operationPolicies) {
+                        OperationPolicyDefinition policyDefinition =  apiProvider
+                                .getAPISpecificPolicyDefinitionForPolicyName(api.getUuid(), policy.getPolicyName());
+                        if (policyDefinition != null) {
+                            String policyName = archivePath  + File.separator
+                                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
+                                            policyDefinition.getName();
+                            if (policyDefinition.getSpecification() != null) {
+                                CommonUtil.writeDtoToFile(policyName, exportFormat,
+                                        ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                                        policyDefinition.getSpecification());
+                            }
+                            if (policyDefinition.getDefinition() != null) {
+                                CommonUtil.writeFile(policyName + ".toml", policyDefinition.getDefinition());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(
+                    "Error in converting deployment environment details to JSON object in API: " + apiID, e);
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Error while saving deployment environment details for API: " + apiID + " as YAML", e);
         }
     }
 

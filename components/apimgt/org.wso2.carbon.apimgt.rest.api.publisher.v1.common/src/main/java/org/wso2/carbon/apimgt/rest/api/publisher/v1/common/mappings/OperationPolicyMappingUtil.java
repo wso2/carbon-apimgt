@@ -47,6 +47,7 @@ public class OperationPolicyMappingUtil {
         APIOperationPoliciesDTO dto = new APIOperationPoliciesDTO();
         List<OperationPolicyDTO> in = new ArrayList<>();
         List<OperationPolicyDTO> out = new ArrayList<>();
+        List<OperationPolicyDTO> fault = new ArrayList<>();
 
         for (OperationPolicy op : operationPolicyList) {
             OperationPolicyDTO policyDTO = fromOperationPolicyToDTO(op);
@@ -55,12 +56,12 @@ public class OperationPolicyMappingUtil {
             } else if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(op.getDirection())) {
                 out.add(policyDTO);
             } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(op.getDirection())) {
-                out.add(policyDTO);
+                fault.add(policyDTO);
             }
         }
         dto.setIn(in);
         dto.setOut(out);
-
+        dto.setFault(fault);
         return dto;
     }
 
