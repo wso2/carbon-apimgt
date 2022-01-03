@@ -1874,7 +1874,7 @@ public interface APIProvider extends APIManager {
      * @return added policy
      * @throws APIManagementException
      */
-    boolean addApiSpecificOperationalPolicyDefinition(String apiUUID, OperationPolicyDefinition operationPolicyDefinition, String organization)
+    int addApiSpecificOperationalPolicyDefinition(String apiUUID, OperationPolicyDefinition operationPolicyDefinition, String organization)
             throws APIManagementException;
 
 

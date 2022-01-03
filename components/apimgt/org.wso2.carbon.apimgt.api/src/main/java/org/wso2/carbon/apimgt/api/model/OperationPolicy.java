@@ -9,7 +9,7 @@ public class OperationPolicy {
     private String templateName = "";
     private String direction;
     private Map<String, Object> parameters;
-    private int id;
+    private int policyId;
     private int order = 1;
 
     public String getPolicyName() {
@@ -36,12 +36,12 @@ public class OperationPolicy {
         return direction;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setPolicyId(int policyId) {
+        this.policyId = policyId;
     }
 
-    public int getId() {
-        return id;
+    public int getPolicyId() {
+        return policyId;
     }
 
     public int getOrder() {
@@ -70,11 +70,11 @@ public class OperationPolicy {
         if (o == null || getClass() != o.getClass())
             return false;
         OperationPolicy that = (OperationPolicy) o;
-        return id == that.id && policyName == that.policyName && direction.equals(that.direction) && parameters
+        return policyId == that.policyId && policyName == that.policyName && direction.equals(that.direction) && parameters
                 .equals(that.parameters);
     }
 
     @Override public int hashCode() {
-        return Objects.hash(policyName, direction, parameters, id);
+        return Objects.hash(policyName, direction, parameters, policyId);
     }
 }
