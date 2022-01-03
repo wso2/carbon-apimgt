@@ -2502,6 +2502,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         for (URITemplate uriTemplate : uriTemplates) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+            List<OperationPolicy> validatedPolicies = new ArrayList<>();
             if (operationPolicies != null && !operationPolicies.isEmpty()) {
                 for (OperationPolicy policy : operationPolicies) {
                     String policyNameFromURI = policy.getPolicyName();
@@ -2527,6 +2528,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             }
                         }
                         policy.setPolicyId(policyDefinition.getPolicyId());
+                        validatedPolicies.add(policy);
                     } else {
                         if (log.isDebugEnabled()){
                             log.debug("Operation policy is not found for API. Checking templates");
@@ -2563,16 +2565,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 policyTemplate.setName(policyNameFromURI);
                                 int policyId = addApiSpecificOperationalPolicyDefinition(api.getUuid(), policyTemplate, null);
                                 policy.setPolicyId(policyId);
+                                validatedPolicies.add(policy);
                             } else {
-                                log.error("Required policy " + policyNameFromURI + "is not found");
+                                log.error("Required policy " + policyNameFromURI + " is not found. Hence dropped.");
                             }
                         } else {
-                            log.error("Required policy is not found " + policyNameFromURI);
+                            log.error("Required policy " + policyNameFromURI + "is not found. Hence dropped.");
                         }
                     }
                 }
             }
-            uriTemplate.setOperationPolicies(operationPolicies);
+            uriTemplate.setOperationPolicies(validatedPolicies);
         }
     }
 
