@@ -885,7 +885,8 @@ public class APIManagerComponent {
                 for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
                     properties.put(key, eventHubPublisherConfiguration.getProperties().get(key));
                 }
-                properties.put("is_enabled", Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
+                properties.put(APIConstants.IS_ENABLED,
+                        Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
                 try {
                     ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(properties);
                 } catch (EventPublisherException e) {
