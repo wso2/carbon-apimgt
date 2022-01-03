@@ -59,6 +59,9 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -252,6 +255,8 @@ public class ImportUtils {
                                 importedApiDTO.getProvider(), organization);
             }
 
+            importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath));
+
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
             lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
 
@@ -394,6 +399,78 @@ public class ImportUtils {
             }
             throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
         }
+    }
+
+    public static Set<URITemplate> validateOperationPolicies(API api, APIProvider provider,
+                                                             String extractedFolderPath) {
+
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        for (URITemplate uriTemplate : uriTemplates) {
+            List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+            List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
+            if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                for (OperationPolicy policy : operationPolicies) {
+                    try {
+                        OperationPolicySpecification policySpec =
+                                getOperationPolicySpecificationFromFile(extractedFolderPath, policy.getPolicyName());
+                        String policyDefinition =
+                                getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName());
+
+                        OperationPolicyDefinition operationPolicyDefinition = new OperationPolicyDefinition();
+                        operationPolicyDefinition.setName(policy.getPolicyName());
+                        operationPolicyDefinition.setFlow(policy.getDirection());
+                        operationPolicyDefinition.setDefinition(policyDefinition);
+                        operationPolicyDefinition.setSpecification(policySpec);
+                        provider.addApiSpecificOperationalPolicyDefinition(api.getUuid(), operationPolicyDefinition,
+                                null);
+                        validatedOperationPolicies.add(policy);
+                    } catch (APIManagementException e) {
+                        log.error(e);
+                    }
+                }
+            }
+            uriTemplate.setOperationPolicies(validatedOperationPolicies);
+        }
+        return uriTemplates;
+    }
+
+    public static OperationPolicySpecification getOperationPolicySpecificationFromFile(String extractedFolderPath,
+                                                                                       String policyName)
+            throws APIManagementException {
+        try {
+            String jsonContent =  getFileContentAsJson(extractedFolderPath + File.separator
+                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator + policyName);
+            if (jsonContent == null) {
+                return null;
+            }
+            // Retrieving the field "data" in deployment_environments.yaml
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            return new Gson().fromJson(configElement, OperationPolicySpecification.class);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading policy specification info from path: "
+                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
+        }
+    }
+
+    public static String getOperationPolicyDefinitionFromFile(String extractedFolderPath, String policyName)
+            throws APIManagementException {
+        String yamlContent = null;
+        try {
+            String fileName = extractedFolderPath + File.separator
+                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator + policyName + ".toml";
+
+            if (CommonUtil.checkFileExistence(fileName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found policy definition file " + fileName);
+                }
+                yamlContent = FileUtils.readFileToString(new File(fileName));
+
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading policy specification info from path: "
+                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return yamlContent;
     }
 
     /**

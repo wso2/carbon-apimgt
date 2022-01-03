@@ -6841,6 +6841,7 @@ public class ApiMgtDAO {
         String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL_BY_UUID;
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
+        String deleteOperationPolicyQuery = SQLConstants.OperationPolicyConstants.REMOVE_FROM_AM_API_OPERATION_POLICY_DEFINITIONS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -6894,6 +6895,10 @@ public class ApiMgtDAO {
             // Delete URL Templates (delete the resource scope mappings on delete cascade)
             prepStmt = connection.prepareStatement(deleteURLTemplateQuery);
             prepStmt.setInt(1, id);
+            prepStmt.execute();
+
+            prepStmt = connection.prepareStatement(deleteOperationPolicyQuery);
+            prepStmt.setString(1, uuid);
             prepStmt.execute();
 
             prepStmt = connection.prepareStatement(deleteAPIQuery);
