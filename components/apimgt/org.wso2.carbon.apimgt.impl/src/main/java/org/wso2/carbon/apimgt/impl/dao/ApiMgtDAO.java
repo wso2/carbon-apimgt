@@ -7261,7 +7261,7 @@ public class ApiMgtDAO {
                     OperationPolicy policy = new OperationPolicy();
                     policy.setPolicyName(rs.getString("POLICY_NAME"));
                     policy.setDirection(rs.getString("DIRECTION"));
-                    policy.setOrder(rs.getInt("ORDER"));
+                    policy.setOrder(rs.getInt("POLICY_ORDER"));
                     policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                     operationPolicies.add(policy);
                 }
@@ -7308,7 +7308,7 @@ public class ApiMgtDAO {
                     if (uriTemplate != null) {
                         OperationPolicy policy = new OperationPolicy();
                         policy.setPolicyName(rs.getString("POLICY_NAME"));
-                        policy.setOrder(rs.getInt("ORDER"));
+                        policy.setOrder(rs.getInt("POLICY_ORDER"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
                         uriTemplate.addOperationPolicy(policy);
@@ -7355,7 +7355,7 @@ public class ApiMgtDAO {
                     if (uriTemplate != null) {
                         OperationPolicy policy = new OperationPolicy();
                         policy.setPolicyName(rs.getString("POLICY_NAME"));
-                        policy.setOrder(rs.getInt("ORDER"));
+                        policy.setOrder(rs.getInt("POLICY_ORDER"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
                         uriTemplate.addOperationPolicy(policy);
@@ -7387,7 +7387,7 @@ public class ApiMgtDAO {
                     if (uriTemplate != null) {
                         OperationPolicy policy = new OperationPolicy();
                         policy.setPolicyName(rs.getString("POLICY_NAME"));
-                        policy.setOrder(rs.getInt("ORDER"));
+                        policy.setOrder(rs.getInt("POLICY_ORDER"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
                         uriTemplate.addOperationPolicy(policy);
@@ -14719,7 +14719,7 @@ public class ApiMgtDAO {
                                     while (policiesResult.next()) {
                                         OperationPolicy policy = new OperationPolicy();
                                         policy.setPolicyName(policiesResult.getString("POLICY_NAME"));
-                                        policy.setOrder(policiesResult.getInt("ORDER"));
+                                        policy.setOrder(policiesResult.getInt("POLICY_ORDER"));
                                         policy.setDirection(policiesResult.getString("DIRECTION"));
                                         policy.setParameters(APIMgtDBUtil
                                                 .convertJSONStringToMap(policiesResult.getString("PARAMETERS")));
@@ -14780,7 +14780,7 @@ public class ApiMgtDAO {
                                     while (policiesResult.next()) {
                                         OperationPolicy policy = new OperationPolicy();
                                         policy.setPolicyName(policiesResult.getString("POLICY_NAME"));
-                                        policy.setOrder(policiesResult.getInt("ORDER"));
+                                        policy.setOrder(policiesResult.getInt("POLICY_ORDER"));
                                         policy.setDirection(policiesResult.getString("DIRECTION"));
                                         policy.setParameters(APIMgtDBUtil
                                                 .convertJSONStringToMap(policiesResult.getString("PARAMETERS")));
@@ -17813,7 +17813,7 @@ public class ApiMgtDAO {
                     }
                     OperationPolicy operationPolicy = new OperationPolicy();
                     operationPolicy.setPolicyName(rs.getString("POLICY_NAME"));
-                    operationPolicy.setOrder(rs.getInt("ORDER"));
+                    operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
                     operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                     operationPolicy.setDirection(rs.getString("DIRECTION"));
                     uriTemplate.addOperationPolicy(operationPolicy);
