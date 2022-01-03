@@ -5763,7 +5763,7 @@ public class ApiMgtDAO {
                             String paramJSON = gson.toJson(policy.getParameters());
 
                             operationPolicyMappingPrepStmt.setInt(1, uriMappingId);
-                            operationPolicyMappingPrepStmt.setString(2, policy.getPolicyName());
+                            operationPolicyMappingPrepStmt.setInt(2, policy.getPolicyId());
                             operationPolicyMappingPrepStmt.setString(3, policy.getDirection());
                             operationPolicyMappingPrepStmt.setString(4, paramJSON);
                             operationPolicyMappingPrepStmt.setInt(5, policy.getOrder());
@@ -14449,7 +14449,7 @@ public class ApiMgtDAO {
                                 String paramJSON = gson.toJson(policy.getParameters());
 
                                 insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                insertOperationPolicyMappingStatement.setString(2, policy.getPolicyName());
+                                insertOperationPolicyMappingStatement.setInt(2, policy.getPolicyId());
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                 insertOperationPolicyMappingStatement.setString(4, paramJSON);
                                 insertOperationPolicyMappingStatement.executeUpdate();
@@ -16221,7 +16221,7 @@ public class ApiMgtDAO {
                                     String paramJSON = gson.toJson(policy.getParameters());
 
                                     insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                    insertOperationPolicyMappingStatement.setString(2, policy.getPolicyName());
+                                    insertOperationPolicyMappingStatement.setInt(2, policy.getPolicyId());
                                     insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                     insertOperationPolicyMappingStatement.setString(4, paramJSON);
                                     insertOperationPolicyMappingStatement.addBatch();
@@ -16998,7 +16998,7 @@ public class ApiMgtDAO {
                                     String paramJSON = gson.toJson(policy.getParameters());
                                     insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
                                     insertOperationPolicyMappingStatement
-                                            .setString(2, policy.getPolicyName());
+                                            .setInt(2, policy.getPolicyId());
                                     insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                     insertOperationPolicyMappingStatement.setString(4, paramJSON);
                                     insertOperationPolicyMappingStatement.addBatch();
@@ -17295,7 +17295,7 @@ public class ApiMgtDAO {
                                 String paramJSON = gson.toJson(policy.getParameters());
 
                                 insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                insertOperationPolicyMappingStatement.setString(2, policy.getPolicyName());
+                                insertOperationPolicyMappingStatement.setInt(2, policy.getPolicyId());
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                 insertOperationPolicyMappingStatement.setString(4, paramJSON);
                                 insertOperationPolicyMappingStatement.executeUpdate();
@@ -17499,7 +17499,7 @@ public class ApiMgtDAO {
                                     String paramJSON = gson.toJson(policy.getParameters());
 
                                     addOperationPolicyStatement.setInt(1, rs.getInt(1));
-                                    addOperationPolicyStatement.setString(2, policy.getPolicyName());
+                                    addOperationPolicyStatement.setInt(2, policy.getPolicyId());
                                     addOperationPolicyStatement.setString(3, policy.getDirection());
                                     addOperationPolicyStatement.setString(4, paramJSON);
                                     addOperationPolicyStatement.executeUpdate();
@@ -17825,7 +17825,7 @@ public class ApiMgtDAO {
             String paramJSON = gson.toJson(policy.getParameters());
 
             prepStmt.setInt(1, urlMappingId);
-            prepStmt.setString(2, policy.getPolicyName());
+            prepStmt.setInt(2, policy.getPolicyId());
             prepStmt.setString(3, policy.getDirection());
             prepStmt.setString(4, paramJSON);
             prepStmt.execute();
@@ -18088,7 +18088,7 @@ public class ApiMgtDAO {
         return result;
     }
 
-    public boolean addAPISpecificOperationPolicyDefinition(String apiUUID, OperationPolicyDefinition policyDefinition)
+    public int addAPISpecificOperationPolicyDefinition(String apiUUID, OperationPolicyDefinition policyDefinition)
             throws APIManagementException {
         String dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_POLICY_DEFINITION;
         try (Connection connection = APIMgtDBUtil.getConnection()){
@@ -18113,11 +18113,29 @@ public class ApiMgtDAO {
                     connection.commit();
                 }
             }
-            return result;
         } catch (SQLException | APIManagementException e) {
             handleException("Failed to add operation policy of API " + apiUUID + " for policy " + policyDefinition.getName(), e);
         }
-        return true;
+
+        return getPolicyId(apiUUID, policyDefinition.getName());
+    }
+
+    public int getPolicyId(String apiUUID, String policyName) throws APIManagementException {
+        int policyId = -1;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, apiUUID);
+            statement.setString(2, policyName);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    policyId = resultSet.getInt("POLICY_ID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get operation policy status of API " + apiUUID + " for policy " + policyName, e);
+        }
+        return policyId;
     }
 
     public OperationPolicyDefinition getAPISpecificOperationPolicyDefinition(String apiUUID, String policyName)
