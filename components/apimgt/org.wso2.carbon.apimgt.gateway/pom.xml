@@ -172,10 +172,7 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.wso2.carbon.metrics</groupId>
             <artifactId>org.wso2.carbon.metrics.manager</artifactId>
@@ -412,7 +409,6 @@
                             !javax.servlet,
                             !javax.servlet.http,
                             !org.wso2.carbon.apimgt.gateway.internal,
-                            !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
                             org.wso2.throttle.*
                         </Export-Package>

@@ -521,23 +521,9 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.tier.cache.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
+
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -837,18 +823,9 @@
                 <version>${carbon.multitenancy.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
 
 
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
+
 
             <dependency>
                 <groupId>org.apache.axis2</groupId>
@@ -1656,11 +1633,6 @@
                 <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.localentry</artifactId>
                 <version>${carbon.mediation.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.localentry.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.json.wso2</groupId>

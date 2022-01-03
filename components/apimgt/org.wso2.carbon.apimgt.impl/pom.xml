@@ -160,10 +160,6 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
         </dependency>
@@ -190,10 +186,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
@@ -224,10 +216,7 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
@@ -242,14 +231,7 @@
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.tier.cache.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
@@ -342,10 +324,6 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.localentry.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -582,7 +560,6 @@
                             org.wso2.carbon.registry.ws.client.*,
                             org.apache.woden.*,
                             org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.model.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
@@ -634,9 +611,6 @@
                             org.wso2.carbon.identity.recovery.*;version="${carbon.identity.recovery.pkg.version}",
                             org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.statsupdate.stub.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.gateway.stub.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.tier.cache.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.dto.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
@@ -650,7 +624,6 @@
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
                             org.xml.sax,
                             org.wso2.carbon.um.ws.api.stub,
-                            org.wso2.carbon.apimgt.localentry.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
                             io.fabric8.kubernetes.client.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
