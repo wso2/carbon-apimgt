@@ -2518,7 +2518,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     //            attribute.getAttributeType() +
                                     //            " but received " + policyAttribute.getClass().getName());
                                     //}
-                                    return;
                                 } else {
                                     log.error("Required policy attribute is not found" + attribute.getAttributeName());
                                     throw new APIManagementException("Required" + attribute.getAttributeName() + " parameter for " + policy.getPolicyName()
@@ -2527,6 +2526,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 }
                             }
                         }
+                        policy.setPolicyId(policyDefinition.getPolicyId());
                     } else {
                         if (log.isDebugEnabled()){
                             log.debug("Operation policy is not found for API. Checking templates");
@@ -2561,8 +2561,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     }
                                 }
                                 policyTemplate.setName(policyNameFromURI);
-                                addApiSpecificOperationalPolicyDefinition(api.getUuid(), policyTemplate, null);
-                                return;
+                                int policyId = addApiSpecificOperationalPolicyDefinition(api.getUuid(), policyTemplate, null);
+                                policy.setPolicyId(policyId);
                             } else {
                                 log.error("Required policy " + policyNameFromURI + "is not found");
                             }
@@ -2572,6 +2572,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
+            uriTemplate.setOperationPolicies(operationPolicies);
         }
     }
 
@@ -9524,7 +9525,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public boolean addApiSpecificOperationalPolicyDefinition(String apiUUID,
+    public int addApiSpecificOperationalPolicyDefinition(String apiUUID,
                                                              OperationPolicyDefinition operationPolicyDefinition,
                                                              String organization)
             throws APIManagementException {
