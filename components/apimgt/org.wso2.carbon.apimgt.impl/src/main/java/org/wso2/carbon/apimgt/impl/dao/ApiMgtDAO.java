@@ -7314,6 +7314,7 @@ public class ApiMgtDAO {
                         policy.setOrder(rs.getInt("POLICY_ORDER"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
+                        policy.setTemplateName(rs.getString("TEMPLATE_NAME"));
                         uriTemplate.addOperationPolicy(policy);
                     }
                 }
@@ -7361,6 +7362,7 @@ public class ApiMgtDAO {
                         policy.setOrder(rs.getInt("POLICY_ORDER"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
+                        policy.setTemplateName(rs.getString("TEMPLATE_NAME"));
                         uriTemplate.addOperationPolicy(policy);
                     }
                 }
@@ -17797,6 +17799,7 @@ public class ApiMgtDAO {
                     operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
                     operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                     operationPolicy.setDirection(rs.getString("DIRECTION"));
+                    operationPolicy.setTemplateName(rs.getString("TEMPLATE_NAME"));
                     uriTemplate.addOperationPolicy(operationPolicy);
                     uriTemplate.setHTTPVerb(httpMethod);
                     uriTemplate.setUriTemplate(urlPattern);
@@ -18173,6 +18176,15 @@ public class ApiMgtDAO {
                 }
                 policySpecification.setPolicyAttributes(policySpecAttributes);
                 policyDefinition.setSpecification(policySpecification);
+
+                try (InputStream policyDefinitionStream = rs.getBinaryStream("POLICY_DEFINITION")) {
+                    String policyDefinitionString = IOUtils.toString(policyDefinitionStream);
+                    policyDefinition.setDefinition(policyDefinitionString);
+
+                } catch (IOException e) {
+                    log.error("Error while retreiving policy definition for API " + apiUUID + " and policy " + policyName, e);
+                }
+
                 return policyDefinition;
             }
         } catch (SQLException e) {

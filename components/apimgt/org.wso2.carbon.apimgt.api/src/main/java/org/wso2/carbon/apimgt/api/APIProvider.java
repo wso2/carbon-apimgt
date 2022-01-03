@@ -1877,6 +1877,9 @@ public interface APIProvider extends APIManager {
     int addApiSpecificOperationalPolicyDefinition(String apiUUID, OperationPolicyDefinition operationPolicyDefinition, String organization)
             throws APIManagementException;
 
+    OperationPolicyDefinition getAPISpecificPolicyDefinitionForPolicyName(String apiUUID, String policyName)
+            throws APIManagementException;
+
 
     /**
      * upload operational policy definition to api
