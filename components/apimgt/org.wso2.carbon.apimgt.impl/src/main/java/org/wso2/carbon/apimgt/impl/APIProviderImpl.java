@@ -665,9 +665,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
 
-        //Validate Operation Mediation Policies
-        validateOperationPolicyParameters(api);
-
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
         //Add default API LC if it is not there
@@ -761,6 +758,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addAPI(API api, int tenantId) throws APIManagementException {
         int apiId = apiMgtDAO.addAPI(api, tenantId, api.getOrganization());
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
+        validateOperationPolicyParameters(api);
         addURITemplates(apiId, api, tenantId);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -2535,7 +2533,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
 
                         String templateName = policy.getTemplateName();
-                        if (templateName != null || !templateName.isEmpty()) {
+                        if (templateName != null && !templateName.isEmpty()) {
                             OperationPolicyDefinition policyTemplate = getPolicyTemplateForPolicyName(templateName);
                             if (policyTemplate != null) {
                                 // A template is found for specified policy. This will be validated according to the provided
