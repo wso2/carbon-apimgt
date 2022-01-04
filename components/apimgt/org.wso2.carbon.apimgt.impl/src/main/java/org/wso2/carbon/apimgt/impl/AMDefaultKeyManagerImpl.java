@@ -377,7 +377,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, true);
         ClientInfo createdClient;
         try {
-            createdClient = dcrClient.updateApplication(oAuthApplicationInfo.getClientId(), request);
+            createdClient = dcrClient.updateApplication(Base64.getUrlEncoder().encodeToString(
+                    oAuthApplicationInfo.getClientId().getBytes(StandardCharsets.UTF_8)), request);
             return buildDTOFromClientInfo(createdClient, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
@@ -394,7 +395,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo updatedClient;
         try {
-            updatedClient = dcrClient.updateApplicationOwner(owner, oAuthApplicationInfo.getClientId());
+            updatedClient = dcrClient.updateApplicationOwner(owner, Base64.getUrlEncoder().encodeToString(
+                    oAuthApplicationInfo.getClientId().getBytes(StandardCharsets.UTF_8)));
             return buildDTOFromClientInfo(updatedClient, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
@@ -410,7 +412,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            dcrClient.deleteApplication(consumerKey);
+            dcrClient.deleteApplication(Base64.getUrlEncoder().encodeToString(
+                    consumerKey.getBytes(StandardCharsets.UTF_8)));
         } catch (KeyManagerClientException e) {
             handleException("Cannot remove service provider for the given consumer key : " + consumerKey, e);
         }
@@ -424,7 +427,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            ClientInfo clientInfo = dcrClient.getApplication(consumerKey);
+            ClientInfo clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
+                    consumerKey.getBytes(StandardCharsets.UTF_8)));
             return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             if (e.getStatusCode() == 404) {
@@ -565,7 +569,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
         ClientInfo clientInfo;
         try {
-            clientInfo = dcrClient.getApplication(consumerKey);
+            clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
+                    consumerKey.getBytes(StandardCharsets.UTF_8)));
             buildDTOFromClientInfo(clientInfo, oAuthApplicationInfo);
         } catch (KeyManagerClientException e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +

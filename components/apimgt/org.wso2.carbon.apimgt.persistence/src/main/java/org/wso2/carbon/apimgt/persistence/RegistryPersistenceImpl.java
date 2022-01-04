@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.api.model.Tag;
@@ -3269,8 +3270,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             //provider ------provides----> APIProduct
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
 
-            // Make the LC status of the API Product published by default
-            saveAPIStatus(registry, artifactPath, APIConstants.PUBLISHED);
+            String apiProductStatus = apiProduct.getState();
+            saveAPIStatus(registry, artifactPath, apiProductStatus);
 
             Set<String> tagSet = apiProduct.getTags();
             if (tagSet != null) {
@@ -3300,9 +3301,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 + apiProduct.getId().getVersion() + " created";
                 log.debug(logMessage);
             }
-            //changeLifeCycleStatusToPublish(apiProduct.getId());
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifact.getId());
-            apiArtifact.invokeAction("Publish", APIConstants.API_LIFE_CYCLE);
             
             publisherAPIProduct.setCreatedTime(String.valueOf(new Date().getTime()));
             publisherAPIProduct.setId(artifact.getId());

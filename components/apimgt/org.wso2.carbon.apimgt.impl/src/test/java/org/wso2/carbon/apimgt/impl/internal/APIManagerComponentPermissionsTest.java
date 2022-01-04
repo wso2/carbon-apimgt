@@ -77,22 +77,17 @@ public class APIManagerComponentPermissionsTest {
 
         try {
             apiManagerComponent.activate(componentContext);
-            Assert.fail("IndexOutOfBoundsException is expected here");
-        } catch (IndexOutOfBoundsException e) {
-            Assert.assertTrue(true);
-        } catch (Exception ex) {
+        }  catch (Exception ex) {
             Assert.fail("Unexpected exception was thrown");
         }
-
+        Assert.assertTrue(true);
         // Resource doesn't exists
         try {
             apiManagerComponent.activate(componentContext);
-            Assert.fail("IndexOutOfBoundsException is expected here");
-        } catch (IndexOutOfBoundsException e) {
-            Assert.assertTrue(true);
         } catch (Exception ex) {
             Assert.fail("Unexpected exception was thrown");
         }
+        Assert.assertTrue(true);
     }
 
     @Test

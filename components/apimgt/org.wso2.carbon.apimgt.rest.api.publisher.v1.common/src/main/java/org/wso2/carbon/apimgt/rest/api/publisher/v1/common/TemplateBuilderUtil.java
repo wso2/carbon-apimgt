@@ -338,6 +338,7 @@ public class TemplateBuilderUtil {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
                     , corsProperties);
         }
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
 
         Map<String, String> clientCertificateObject = null;
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
@@ -538,6 +539,7 @@ public class TemplateBuilderUtil {
         productAPIDto.setName(id.getName());
         productAPIDto.setVersion(id.getVersion());
         productAPIDto.setTenantDomain(tenantDomain);
+        productAPIDto.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         String definition = apiProduct.getDefinition();
         productAPIDto.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(apiProduct.getUuid(),
                 productAPIDto.getLocalEntriesToBeRemove()));
@@ -598,6 +600,7 @@ public class TemplateBuilderUtil {
         gatewayAPIDTO.setProvider(api.getId().getProviderName());
         gatewayAPIDTO.setApiId(api.getUUID());
         gatewayAPIDTO.setTenantDomain(tenantDomain);
+        gatewayAPIDTO.setKeyManagers(api.getKeyManagers());
 
         String definition;
         boolean isGraphQLSubscriptionAPI = false;

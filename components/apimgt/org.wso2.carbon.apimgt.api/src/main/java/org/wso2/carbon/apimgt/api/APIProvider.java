@@ -517,14 +517,13 @@ public interface APIProvider extends APIManager {
     void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException;
 
     /**
-     * Returns the details of all the life-cycle changes done per API.
+     * Returns the details of all the life-cycle changes done per API or API Product
      *
-     * @param apiId     id of the APIIdentifier
-     * @param organization Organization
-     * @return List of life-cycle events per given API
+     * @param uuid     Unique UUID of the API or API Product
+     * @return List of life-cycle events per given API or API Product
      * @throws APIManagementException if failed to copy docs
      */
-    List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException;
+    List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException;
 
     /**
      * Search API
@@ -889,13 +888,14 @@ public interface APIProvider extends APIManager {
      * This method is to change registry lifecycle states for an API artifact
      *
      * @param orgId UUID of the organization
-     * @param  uuid uuid of the API
+     * @param  apiTypeWrapper API Type Wrapper
      * @param  action  Action which need to execute from registry lifecycle
      * @param  checklist checklist items
      * @return APIStateChangeResponse API workflow state and WorkflowResponse
      * */
-    APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action, Map<String, Boolean> checklist)
-            throws APIManagementException, FaultGatewaysException;
+    APIStateChangeResponse changeLifeCycleStatus(String orgId, ApiTypeWrapper apiTypeWrapper, String action,
+                                                 Map<String, Boolean> checklist) throws APIManagementException,
+            FaultGatewaysException;
 
     /**
      * This method is to set checklist item values for a particular life-cycle state of an API
@@ -1376,12 +1376,12 @@ public interface APIProvider extends APIManager {
     void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 
     /**
-     * Remove pending lifecycle state change task for the given api.
+     * Remove pending lifecycle state change task for the given api or api product.
      *
-     * @param uuid api uuid
+     * @param  identifier Identifier object of api or api product
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    void deleteWorkflowTask(String uuid) throws APIManagementException;
+    void deleteWorkflowTask(Identifier identifier) throws APIManagementException;
 
     /**
      * This method returns the security audit properties
@@ -1679,6 +1679,16 @@ public interface APIProvider extends APIManager {
      */
     void addDeployedAPIRevision(String apiId, String apiRevisionUUID, List<DeployedAPIRevision>
             deployedAPIRevisions) throws APIManagementException;
+
+    /**
+     * Adds a new DeployedAPIRevision to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionUUID API Revision UUID
+     * @param environment - Un-deployed environment
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void removeUnDeployedAPIRevision(String apiId, String apiRevisionUUID, String environment) throws APIManagementException;
 
     /**
      * Update the displayOnDevportal field in an existing deployments of an API

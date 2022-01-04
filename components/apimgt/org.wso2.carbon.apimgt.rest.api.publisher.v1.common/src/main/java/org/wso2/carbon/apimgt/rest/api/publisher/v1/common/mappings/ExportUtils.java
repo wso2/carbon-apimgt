@@ -271,12 +271,15 @@ public class ExportUtils {
             addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider);
             addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
                     APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
-
+        }
+        // Set API Product status to created if the status is not preserved
+        if (!preserveStatus) {
+            apiProductDtoToReturn.setState(APIProductDTO.StateEnum.CREATED);
         }
         addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
         addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                preserveStatus, preserveDocs, preserveCredentials, organization);
+                Boolean.TRUE, preserveDocs, preserveCredentials, organization);
 
         // Export mTLS authentication related certificates
         if (log.isDebugEnabled()) {
@@ -662,6 +665,8 @@ public class ExportUtils {
 
         List<String> productionEndpoints;
         List<String> sandboxEndpoints;
+        List<String> productionFailovers;
+        List<String> sandboxFailovers;
         Set<String> uniqueEndpointURLs = new HashSet<>();
         JsonArray endpointCertificatesDetails = new JsonArray();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -684,8 +689,14 @@ public class ExportUtils {
                     apiDto.getName());
             sandboxEndpoints = getEndpointURLs(endpointConfig, API_DATA_SANDBOX_ENDPOINTS,
                     apiDto.getName());
+            productionFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS,
+                    apiDto.getName());
+            sandboxFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_SANDBOX_FAILOVERS,
+                    apiDto.getName());
             uniqueEndpointURLs.addAll(productionEndpoints); // Remove duplicate and append result
             uniqueEndpointURLs.addAll(sandboxEndpoints);
+            uniqueEndpointURLs.addAll(productionFailovers);
+            uniqueEndpointURLs.addAll(sandboxFailovers);
 
             for (String url : uniqueEndpointURLs) {
                 JsonArray certificateListOfUrl = getEndpointCertificateContentAndMetaData(tenantId, url,

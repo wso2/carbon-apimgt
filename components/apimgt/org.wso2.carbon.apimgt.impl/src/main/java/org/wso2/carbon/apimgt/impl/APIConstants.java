@@ -103,6 +103,8 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_MEDIA_TYPE = "tenant-config";
     public static final String TENANT_CONFIG_CACHE_NAME = "tenantConfigCache";
 
+    public static final String API_MAX_REVISION_COUNT_PROPERTY_NAME = "ApiMaxRevisionCount";
+
     public static final String RESOURCE_FOLDER_LOCATION = "repository" + File.separator + "resources";
 
     public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
@@ -542,6 +544,7 @@ public final class APIConstants {
     public static final String PUBLISHING_MODE = "publishingMode";
     public static final String PUBLISHING_TIME_OUT = "publishTimeout";
     public static final String NON_BLOCKING = "non-blocking";
+    public static final String IS_ENABLED = "is_enabled";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
@@ -2801,6 +2804,39 @@ public final class APIConstants {
         public static final String IDP_DATA_REMOVER = "IDPDataRemover";
         public static final String KM_DATA_REMOVER = "KMDataRemover";
         public static final String KM_ORGANIZATION_EXIST = "IDPOrganizationExist";
+    }
+
+    public static class SystemScopeConstants {
+        public static final String CHECK_ROLES_FROM_SAML_ASSERTION = "checkRolesFromSamlAssertion";
+        public static final String SAML2_ASSERTION = "SAML2Assertion";
+        public static final String SAML2_SSO_AUTHENTICATOR_NAME = "SAML2SSOAuthenticator";
+        public static final String ROLE_CLAIM_ATTRIBUTE = "RoleClaimAttribute";
+        public static final String ATTRIBUTE_VALUE_SEPARATOR = "AttributeValueSeparator";
+        public static final String ROLE_ATTRIBUTE_NAME = "http://wso2.org/claims/role";
+        public static final String ATTRIBUTE_VALUE_SEPERATER = ",";
+        public static final String
+                RETRIEVE_ROLES_FROM_USERSTORE_FOR_SCOPE_VALIDATION = "retrieveRolesFromUserStoreForScopeValidation";
+        public static final String ROLE_CLAIM = "ROLE_CLAIM";
+        public static final String OAUTH2_DEFAULT_SCOPE = "default";
+        public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
+        public static final String EXTENTIONS_CACHE_MANAGER = "EXTENTIONS_CACHE_MANAGER";
+        public static final String TENANT_CONFIG_CACHE_NAME = "tenantConfigCache";
+        public static final String REST_API_SCOPE = "Scope";
+        public static final String REST_API_SCOPE_NAME = "Name";
+        public static final String REST_API_SCOPE_ROLE = "Roles";
+        public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
+        public static final String REST_API_ROLE_MAPPINGS_CONFIG = "RoleMappings";
+
+        public static final String OAUTH_JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+        public static final String OAUTH_JWT_ASSERTION = "assertion";
+    }
+
+    public enum ConfigType {
+        TENANT,
+        WORKFLOW,
+        EXTERNAL_STORE,
+        GA,
+        SELF_SIGNUP
     }
 
     public static final String  PROPERTY_QUERY_KEY = "query";

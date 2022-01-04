@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.6.3-SNAPSHOT</version>
+        <version>9.10.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -65,16 +65,8 @@
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -294,23 +286,9 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client</bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
                                     org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
                                 </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
+
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.output.adapter.http:${carbon.apimgt.version}
                                 </bundleDef>

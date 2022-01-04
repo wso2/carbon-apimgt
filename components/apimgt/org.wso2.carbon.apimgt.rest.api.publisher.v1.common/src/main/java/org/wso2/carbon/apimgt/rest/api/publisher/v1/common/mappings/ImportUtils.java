@@ -309,7 +309,7 @@ public class ImportUtils {
                     apiProvider.changeAPILCCheckListItems(importedApi.getId(),
                             ImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
                 }
-                apiProvider.changeLifeCycleStatus(currentTenantDomain, importedApi.getUuid(), lifecycleAction,
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, new ApiTypeWrapper(importedApi), lifecycleAction,
                         new HashMap<>());
             }
             importedApi.setStatus(targetStatus);
@@ -1903,6 +1903,9 @@ public class ImportUtils {
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
         APIProduct importedApiProduct = null;
         JsonArray deploymentInfoArray = null;
+        String currentStatus;
+        String targetStatus;
+        String lifecycleAction;
 
         try {
             JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
@@ -1929,6 +1932,8 @@ public class ImportUtils {
             checkAPIProductResourcesValid(extractedFolderPath, userName, apiProvider, importedApiProductDTO,
                     preserveProvider, organization);
 
+            targetStatus = importedApiProductDTO.getState().toString();
+
             if (importAPIs) {
                 // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
                 // fresh import happens)
@@ -1947,16 +1952,21 @@ public class ImportUtils {
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwriteAPIProduct) && targetApiProduct != null) {
                 log.info("Existing API Product found, attempting to update it...");
+                currentStatus = targetApiProduct.getState();
                 importedApiProduct = PublisherCommonUtils.updateApiProduct(targetApiProduct, importedApiProductDTO,
                         RestApiCommonUtil.getLoggedInUserProvider(), userName, currentTenantDomain);
             } else {
                 if (targetApiProduct == null && Boolean.TRUE.equals(overwriteAPIProduct)) {
                     log.info("Cannot find : " + importedApiProductDTO.getName() + ". Creating it.");
                 }
+                currentStatus = APIStatus.CREATED.toString();
                 importedApiProduct = PublisherCommonUtils
                         .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
                                 importedApiProductDTO.getProvider(), organization);
             }
+
+            // Retrieving the life cycle action to do the lifecycle state change explicitly later
+            lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
 
             // Add/update swagger of API Product
             importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct.getUuid(),
@@ -1973,6 +1983,15 @@ public class ImportUtils {
             }
             addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
                     importedApiProduct.getId().getProviderName(), organization);
+
+            // Change API Product lifecycle if state transition is required
+            if (StringUtils.isNotEmpty(lifecycleAction)) {
+                apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+                log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, new ApiTypeWrapper(importedApiProduct),
+                        lifecycleAction, new HashMap<>());
+            }
+            importedApiProduct.setState(targetStatus);
 
             if (deploymentInfoArray == null) {
                 // If the params have not overwritten the deployment environments, yaml file will be read

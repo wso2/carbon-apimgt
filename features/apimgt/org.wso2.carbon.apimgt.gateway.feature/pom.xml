@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.6.3-SNAPSHOT</version>
+        <version>9.10.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -79,10 +79,6 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
         </dependency>
         <dependency>
@@ -102,10 +98,6 @@
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -237,8 +229,6 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub
-                                </bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-core</bundleDef>
@@ -260,18 +250,7 @@
                                 <importBundleDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.localentry.stub:${carbon.mediation.version}
                                 </importBundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
+
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
@@ -279,9 +258,6 @@
                                 <bundleDef>org.apache.commons:commons-pool2:${apache.commons.version}</bundleDef>
                                 <bundleDef>org.apache.commons:commons-lang3:${apache.commons.lang3.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.re2j:re2j:${re2j.version}</bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}
-                                </bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}
                                 </bundleDef>

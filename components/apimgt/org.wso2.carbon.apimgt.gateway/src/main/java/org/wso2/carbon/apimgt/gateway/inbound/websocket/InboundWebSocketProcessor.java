@@ -292,7 +292,7 @@ public class InboundWebSocketProcessor {
             if (selectedResource == null) {
                 throw new ResourceNotFoundException("No matching resource found to dispatch the request");
             }
-            if (inboundMessageContext.getElectedAPI().getApiType().equals(APIConstants.GRAPHQL_API)) {
+            if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())) {
                 inboundMessageContext.setGraphQLSchemaDTO(DataHolder.getInstance()
                         .getGraphQLSchemaDTOForAPI(inboundMessageContext.getElectedAPI().getUuid()));
             }

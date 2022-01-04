@@ -730,6 +730,7 @@ public final class APIUtil {
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
+            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
             if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
                     .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
                 api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
@@ -3750,8 +3751,11 @@ public final class APIUtil {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonElement jsonElement = getFileBaseTenantConfig();
-            ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
-                    gson.toJson(jsonElement));
+            String currentConfig = ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+            if (currentConfig == null) {
+                ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
+                        gson.toJson(jsonElement));
+            }
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
         }
@@ -9399,7 +9403,7 @@ public final class APIUtil {
             apiProduct.setUuid(artifact.getId());
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
-            apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setState(getLcStateFromArtifact(artifact));
             apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             apiProduct.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -9421,6 +9425,7 @@ public final class APIUtil {
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
             apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            apiProduct.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             apiProduct.setTenantDomain(tenantDomainName);
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -9913,9 +9918,7 @@ public final class APIUtil {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         int apiId = apiMgtDAO.getAPIID(uuid);
-        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                WorkflowConstants.WF_TYPE_AM_API_STATE);
-        return wfDTO;
+        return apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId), workflowType);
     }
 
     /**
@@ -10685,27 +10688,28 @@ public final class APIUtil {
             }
             keyManagerUrl =
                     (String) keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.AUTHSERVER_URL);
-
-            if (keyManagerConfigurationDTO.getProperty(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION) == null) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE,
-                        Boolean.parseBoolean(enableTokenEncryption));
+            if (StringUtils.isNotEmpty(keyManagerUrl)){
                 openIdConnectConfigurations = APIUtil.getOpenIdConnectConfigurations(
                         keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                                 .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
                                 .concat(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT));
 
-                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
-                            keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                    .concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
-                }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL,
-                            keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                    .concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
-                }
-
             }
+            if (keyManagerConfigurationDTO.getProperty(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION) == null) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE,
+                        Boolean.parseBoolean(enableTokenEncryption));
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
+                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                                .concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL,
+                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                                .concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
+            }
+
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
@@ -10775,10 +10779,16 @@ public final class APIUtil {
             }
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.CERTIFICATE_VALUE)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE,
-                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
-                                .concat(APIConstants.KeyManager.DEFAULT_JWKS_ENDPOINT));
+                if (openIdConnectConfigurations != null) {
+                    keyManagerConfigurationDTO
+                            .addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE,
+                                    openIdConnectConfigurations.getJwksEndpoint());
+                } else {
+                    keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE,
+                            keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                                    .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
+                                    .concat(APIConstants.KeyManager.DEFAULT_JWKS_ENDPOINT));
+                }
             }
             String defaultKeyManagerType =
                     apiManagerConfiguration.getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);

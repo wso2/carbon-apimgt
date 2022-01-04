@@ -583,6 +583,27 @@ paths:
             Created.
         default:
           $ref: '#/definitions/Error'
+  #--------------------------------------------
+  # UnDeployed revision information
+  #--------------------------------------------
+  /apis/undeployed-revision:
+    post:
+      tags:
+        - UnDeployed API Revision
+      summary: Remove undeployed revision
+      description: Remove undeployed Revision entry from the database
+      operationId: unDeployedAPIRevision
+      parameters:
+        - name: unDeployedAPIRevisionDTO
+          in: body
+          description: 'Notification event payload'
+          schema:
+            $ref: '#/definitions/UnDeployedAPIRevision'
+      responses:
+        200:
+          description: Fetch un-deployed revision
+        default:
+          $ref: '#/definitions/Error'
   /ga-config:
     get:
       summary: Get Google analytics config related to tenant.
@@ -830,6 +851,24 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/DeployedEnvInfo'
+  UnDeployedAPIRevision:
+    title: UnDeployed revision information
+    properties:
+      apiUUID:
+        maxLength: 255
+        minLength: 0
+        type: string
+        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+      revisionUUID:
+        maxLength: 255
+        minLength: 0
+        type: string
+        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+      environment:
+        maxLength: 255
+        minLength: 0
+        type: string
+        example: Default
   DeployedEnvInfo:
     title: Environment information
     properties:

@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -47,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -90,12 +92,10 @@ public class OAuthAuthenticator implements Authenticator {
     public OAuthAuthenticator() {
     }
 
-    public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader,
-                              List<String> keyManagerList) {
+    public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader) {
         this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
         this.isMandatory = isMandatory;
-        this.keyManagerList = keyManagerList;
     }
 
     public void init(SynapseEnvironment env) {
@@ -113,12 +113,10 @@ public class OAuthAuthenticator implements Authenticator {
         String accessToken = null;
         String remainingAuthHeader = "";
         boolean defaultVersionInvoked = false;
-        TracingSpan getClientDomainSpan = null;
-        TracingSpan authenticationSchemeSpan = null;
-        TracingSpan keyInfo = null;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String tenantDomain = GatewayUtils.getTenantDomain();
+        keyManagerList = GatewayUtils.getKeyManagers(synCtx);
         if (keyValidator == null) {
             this.keyValidator = new APIKeyValidator();
         }
@@ -242,13 +240,26 @@ public class OAuthAuthenticator implements Authenticator {
                     String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
                     if (StringUtils.isNotEmpty(keyManager)) {
+                        if (log.isDebugEnabled()){
+                            log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
+                        }
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
+                            }
                             isJwtToken = true;
                         } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
+                            }
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                        }
+                    }else{
+                        if (log.isDebugEnabled()) {
+                            log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
                         }
                     }
                 } catch ( ParseException | IllegalArgumentException e) {

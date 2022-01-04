@@ -217,6 +217,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         Object cachedAccessTokenInfo =
                 CacheProvider.createIntrospectionCache().get(validationContext.getAccessToken());
         if (cachedAccessTokenInfo != null) {
+            log.debug("AccessToken available in introspection Cache.");
             return (AccessTokenInfo) cachedAccessTokenInfo;
         }
         String electedKeyManager = null;
@@ -226,26 +227,40 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                     tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(validationContext.getTenantDomain());
             KeyManager keyManagerInstance = null;
             if (tenantKeyManagers.values().size() == 1) {
+                log.debug("KeyManager count is 1");
                 Map.Entry<String, KeyManagerDto> entry = tenantKeyManagers.entrySet().iterator().next();
                 if (entry != null) {
                     KeyManagerDto keyManagerDto = entry.getValue();
                     if (keyManagerDto != null && (validationContext.getKeyManagers()
                             .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                             validationContext.getKeyManagers().contains(keyManagerDto.getName()))) {
+                        if (log.isDebugEnabled()){
+                            log.debug("KeyManager " + keyManagerDto.getName() + " Available in API level KM list " + String.join(",", validationContext.getKeyManagers()));
+                        }
                         if (keyManagerDto.getKeyManager() != null
                                 && keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                            if (log.isDebugEnabled()){
+                                log.debug("KeyManager " + keyManagerDto.getName() + " can handle the token");
+                            }
                             keyManagerInstance = keyManagerDto.getKeyManager();
                             electedKeyManager = entry.getKey();
                         }
                     }
                 }
             } else if (tenantKeyManagers.values().size() > 1) {
+                log.debug("KeyManager count is > 1");
                 if (validationContext.getKeyManagers()
                         .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS)) {
+                    if (log.isDebugEnabled()){
+                        log.debug("API level KeyManagers contains " + APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
+                    }
                     for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
                         if (keyManagerDtoEntry.getValue().getKeyManager() != null &&
                                 keyManagerDtoEntry.getValue().getKeyManager()
                                         .canHandleToken(validationContext.getAccessToken())) {
+                            if (log.isDebugEnabled()){
+                                log.debug("KeyManager " + keyManagerDtoEntry.getValue().getName() + " can handle the token");
+                            }
                             keyManagerInstance = keyManagerDtoEntry.getValue().getKeyManager();
                             electedKeyManager = keyManagerDtoEntry.getKey();
                             break;
@@ -256,6 +271,9 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                         KeyManagerDto keyManagerDto = tenantKeyManagers.get(selectedKeyManager);
                         if (keyManagerDto != null && keyManagerDto.getKeyManager() != null &&
                                 keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                            if (log.isDebugEnabled()){
+                                log.debug("KeyManager " + keyManagerDto.getName() + " can handle the token");
+                            }
                             keyManagerInstance = keyManagerDto.getKeyManager();
                             electedKeyManager = selectedKeyManager;
                             break;
@@ -265,6 +283,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
 
             if (keyManagerInstance != null) {
+                log.debug("KeyManager instance available to validate token.");
                 AccessTokenInfo tokenInfo = keyManagerInstance.getTokenMetaData(validationContext.getAccessToken());
                 tokenInfo.setKeyManager(electedKeyManager);
                 CacheProvider.getGatewayIntrospectCache().put(validationContext.getAccessToken(), tokenInfo);
@@ -272,7 +291,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             } else {
                 AccessTokenInfo tokenInfo = new AccessTokenInfo();
                 tokenInfo.setTokenValid(false);
-                tokenInfo.setErrorcode(900901);
+                tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 log.debug("KeyManager not available to authorize token.");
                 return tokenInfo;
             }

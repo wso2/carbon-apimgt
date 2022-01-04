@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
@@ -61,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.issuers.SystemScopesIssuer;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
@@ -97,6 +99,7 @@ import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterExc
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth2.validators.scope.ScopeValidator;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -173,13 +176,7 @@ public class APIManagerComponent {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
             addApplicationsPermissionsToRegistry();
-            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            APIUtil.loadAndSyncTenantConf(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            // load self sigup configuration to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
@@ -207,6 +204,15 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            APIMgtDBUtil.initialize();
+            APIMConfigService apimConfigService = new APIMConfigServiceImpl();
+            bundleContext.registerService(APIMConfigService.class.getName(), apimConfigService, null);
+            APIUtil.loadAndSyncTenantConf(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            // load self sigup configuration to the registry
+            APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -230,7 +236,6 @@ public class APIManagerComponent {
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_LIFECYCLE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_LIFE_CYCLE_HISTORY), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_LIFECYCLE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_LIFE_CYCLE_HISTORY), APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION, null);
             setupImagePermissions();
-            APIMgtDBUtil.initialize();
             GatewayArtifactsMgtDBUtil.initialize();
             configureEventPublisherProperties();
             configureNotificationEventPublisher();
@@ -305,7 +310,7 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
-
+            bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -880,7 +885,8 @@ public class APIManagerComponent {
                 for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
                     properties.put(key, eventHubPublisherConfiguration.getProperties().get(key));
                 }
-                properties.put("is_enabled", Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
+                properties.put(APIConstants.IS_ENABLED,
+                        Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
                 try {
                     ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(properties);
                 } catch (EventPublisherException e) {
