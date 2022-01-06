@@ -769,35 +769,61 @@ public class ImportUtils {
                 }
             }
             if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                JsonObject productionEndpoint = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).
-                        getAsJsonObject();
-                if (productionEndpoint.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)) {
-                    JsonObject config = productionEndpoint.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
+                if (endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).isJsonObject()) {
+                    JsonObject productionEndpoint = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).
                             getAsJsonObject();
-                    if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
-                        Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsDouble();
-                        Integer value = (int) Math.round(actionDuration);
-                        config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
-                        config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                    endpointConfig.add(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                            getUpdatedEndpointConfig(productionEndpoint));
+                } else if (endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).isJsonArray()) {
+                    JsonArray productionEndpointArray = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).
+                            getAsJsonArray();
+                    JsonArray updatedArray = new JsonArray();
+                    for (JsonElement endpoint : productionEndpointArray) {
+                        updatedArray.add(getUpdatedEndpointConfig(endpoint.getAsJsonObject()));
                     }
+                    endpointConfig.add(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, updatedArray);
                 }
             }
             if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                JsonObject sandboxEndpoint = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).
-                        getAsJsonObject();
-                if (sandboxEndpoint.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)) {
-                    JsonObject config = sandboxEndpoint.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
+                if (endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).isJsonObject()) {
+                    JsonObject sandboxEndpoint = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).
                             getAsJsonObject();
-                    if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
-                        Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsDouble();
-                        Integer value = (int) Math.round(actionDuration);
-                        config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
-                        config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                    endpointConfig.add(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                            getUpdatedEndpointConfig(sandboxEndpoint));
+                } else if (endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).isJsonArray()) {
+                    JsonArray sandboxEndpointArray = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).
+                            getAsJsonArray();
+                    JsonArray updatedArray = new JsonArray();
+                    for (JsonElement endpoint : sandboxEndpointArray) {
+                        updatedArray.add(getUpdatedEndpointConfig(endpoint.getAsJsonObject()));
                     }
+                    endpointConfig.add(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, updatedArray);
                 }
             }
         }
         return configObject;
+    }
+
+     /**
+     * This function will preprocess and get the updated Endpoint Config object from the API/API Product configuration
+     *
+     * @param endpointConfigObject Endpoint Config object from the API/API Product configuration
+     * @return JsonObject endpointConfigObject  with pre-processed endpoint config
+     */
+    public static JsonObject getUpdatedEndpointConfig(JsonObject endpointConfigObject) {
+
+        if (endpointConfigObject.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)) {
+            JsonObject config = endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
+                    getAsJsonObject();
+            if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
+                Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).
+                        getAsDouble();
+                Integer value = (int) Math.round(actionDuration);
+                config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
+                config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+            }
+        }
+        return endpointConfigObject;
     }
 
     /**
