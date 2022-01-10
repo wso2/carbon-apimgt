@@ -782,6 +782,13 @@ public class TemplateBuilderUtil {
                     .setSequenceToBeAdd(
                             addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
         }
+
+        GatewayContentDTO gatewayPolicyContentDTO = retrieveOperationPolicySequence(extractedPath, api);
+        if (gatewayPolicyContentDTO != null) {
+            gatewayAPIDTO
+                    .setSequenceToBeAdd(
+                            addGatewayContentToList(gatewayPolicyContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+        }
     }
 
     private static void setAPIFaultSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
@@ -1168,6 +1175,33 @@ public class TemplateBuilderUtil {
         }
         return null;
     }
+
+    private static GatewayContentDTO retrieveOperationPolicySequence(String pathToAchieve, API api)
+            throws APIManagementException {
+
+        GatewayContentDTO operationPolicySequenceContentDto = new GatewayContentDTO();
+
+        String policySequence = SynapsePolicyAggregator.generatePolicySequence(pathToAchieve, api);
+
+        if (StringUtils.isNotEmpty(policySequence)) {
+            try {
+                OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(policySequence.getBytes()));
+                if (omElement != null) {
+                    String seqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_OPERATION_POLICY_SEQ_EXT;
+                    if (omElement.getAttribute(new QName("name")) != null) {
+                        omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
+                    }
+                    operationPolicySequenceContentDto.setName(seqExt);
+                    operationPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                    return operationPolicySequenceContentDto;
+                }
+            } catch (Exception e) {
+                throw new APIManagementException(e);
+            }
+        }
+        return null;
+    }
+
 
     private static Map<String, APIDTO> retrieveAssociatedApis(String extractedPath) throws APIManagementException {
 
