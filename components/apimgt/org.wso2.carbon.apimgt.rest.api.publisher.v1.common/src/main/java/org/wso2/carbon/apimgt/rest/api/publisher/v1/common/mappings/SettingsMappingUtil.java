@@ -52,12 +52,13 @@ public class SettingsMappingUtil {
      * @return SettingsDTO
      * @throws APIManagementException,IOException
      */
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException, IOException {
+    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, String organization) throws APIManagementException,
+            IOException {
 
         SettingsDTO settingsDTO = new SettingsDTO();
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
         if (isUserAvailable) {
-            Map<String, Environment> environments = APIUtil.getEnvironments();
+            Map<String, Environment> environments = APIUtil.getEnvironments(organization);
             if (environments != null) {
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }

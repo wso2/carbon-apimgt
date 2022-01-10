@@ -494,17 +494,17 @@ public class APIMappingUtil {
         return endpointUrls;
     }
 
-    public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String tenantDomain)
+    public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String organization)
             throws APIManagementException {
 
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
 
         // custom gateway URL of tenant
         Map<String, String> domains = new HashMap<>();
-        if (tenantDomain != null) {
-            domains = apiConsumer.getTenantDomainMappings(tenantDomain,
+        if (organization != null) {
+            domains = apiConsumer.getTenantDomainMappings(organization,
                     APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         }
         String customGatewayUrl = domains.get(APIConstants.CUSTOM_URL);
@@ -516,7 +516,7 @@ public class APIMappingUtil {
                 Environment environment = environments.get(revisionDeployment.getDeployment());
                 if (environment != null) {
                     APIEndpointURLsDTO apiEndpointURLsDTO = fromAPIRevisionToEndpoints(apidto, environment,
-                            revisionDeployment.getVhost(), customGatewayUrl, tenantDomain);
+                            revisionDeployment.getVhost(), customGatewayUrl, organization);
                     endpointUrls.add(apiEndpointURLsDTO);
                 }
             }

@@ -4393,7 +4393,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
@@ -4463,7 +4463,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
 
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);

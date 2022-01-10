@@ -1786,8 +1786,8 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @throws APIManagementException if failed to add APIRevision
      */
-    void deployAPIProductRevision(String apiProductId, String apiRevisionId,
-                                  List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void deployAPIProductRevision(String apiProductId, String apiRevisionId, List<APIRevisionDeployment>
+            apiRevisionDeployments) throws APIManagementException;
 
     /**
      * Undeploy revision from provided gateway environments
