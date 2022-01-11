@@ -1158,6 +1158,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (properties.containsKey(APIConstants.KeyManager.CLAIM_DIALECT)) {
             userinfo.setDialectURI(properties.get(APIConstants.KeyManager.CLAIM_DIALECT).toString());
         }
+        if (properties.containsKey(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS)) {
+            userinfo.setBindFederatedUserClaims(Boolean.valueOf(properties.
+                    get(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS).toString()));
+        }
 
         try {
             ClaimsList claims = userClient.generateClaims(userinfo);
