@@ -303,11 +303,6 @@
             <version>${graphql.java.version}</version>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.orbit.com.amazonaws</groupId>
             <artifactId>awslambda</artifactId>
         </dependency>
