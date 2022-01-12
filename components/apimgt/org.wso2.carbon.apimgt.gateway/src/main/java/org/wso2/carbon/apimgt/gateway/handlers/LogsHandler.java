@@ -23,7 +23,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.apache.log4j.MDC;
+import org.apache.logging.log4j.ThreadContext;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -101,8 +101,8 @@ public class LogsHandler extends AbstractSynapseHandler {
                     messageContext.setProperty(UUID_HEADER, uuIdHeader);
                 }
 
-                if (MDC.get(APIConstants.CORRELATION_ID) != null) {
-                    correlationIdHeader = (String) MDC.get(APIConstants.CORRELATION_ID);
+                if (ThreadContext.get(APIConstants.CORRELATION_ID) != null) {
+                    correlationIdHeader = ThreadContext.get(APIConstants.CORRELATION_ID);
                 }
                 messageContext.setProperty(CORRELATION_ID_HEADER, correlationIdHeader);
                 // apiTo = LogUtils.getTo(messageContext);
@@ -131,7 +131,7 @@ public class LogsHandler extends AbstractSynapseHandler {
                     String applIdHeader = (String) messageContext.getProperty(APP_ID_HEADER);
                     String uuIdHeader = (String) messageContext.getProperty(UUID_HEADER);
                     String correlationIdHeader = (String) messageContext.getProperty(CORRELATION_ID_HEADER);
-                    MDC.put(APIConstants.CORRELATION_ID, correlationIdHeader);
+                    ThreadContext.put(APIConstants.CORRELATION_ID, correlationIdHeader);
                     log.info(beTotalLatency + "|HTTP|" + LogUtils.getAPIName(messageContext) + "|"
                             + LogUtils.getRestMethod(messageContext) + "|" + LogUtils.getAPICtx(messageContext)
                             + LogUtils.getElectedResource(messageContext) + "|" + apiTo + "|" + authHeader + "|"
