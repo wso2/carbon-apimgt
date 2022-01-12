@@ -2504,24 +2504,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (operationPolicies != null && !operationPolicies.isEmpty()) {
                 for (OperationPolicy policy : operationPolicies) {
                     String policyNameFromURI = policy.getPolicyName();
-                    OperationPolicyDefinition policyDefinition = getAPISpecificPolicyDefinitionForPolicyName(api.getUuid(), policyNameFromURI);
+                    OperationPolicyDefinition policyDefinition = getAPISpecificPolicyDefinitionForPolicyName(
+                            api.getUuid(), policyNameFromURI);
                     if (policyDefinition != null) {
-                        for (OperationPolicySpecAttribute attribute : policyDefinition.getSpecification().getPolicyAttributes()) {
-                            if (attribute.isRequired()) {
-                                Object policyAttribute = policy.getParameters().get(attribute.getAttributeName());
-                                if (policyAttribute != null) {
-                                    //TODO: Attribute Type validation is required
-                                    //TODO: Do a API type, flow and gateway type validation
-                                    //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
-                                    //    log.error("Policy attribute type mismatched. Expected type is " +
-                                    //            attribute.getAttributeType() +
-                                    //            " but received " + policyAttribute.getClass().getName());
-                                    //}
-                                } else {
-                                    log.error("Required policy attribute is not found" + attribute.getAttributeName());
-                                    throw new APIManagementException("Required" + attribute.getAttributeName() + " parameter for " + policy.getPolicyName()
-                                            + " operation policy is either missing or empty", ExceptionCodes
-                                            .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "headerName", "SET_HEADER"));
+                        if (policyDefinition.getSpecification().getPolicyAttributes() != null ) {
+                            for (OperationPolicySpecAttribute attribute : policyDefinition.getSpecification()
+                                    .getPolicyAttributes()) {
+                                if (attribute.isRequired()) {
+                                    Object policyAttribute = policy.getParameters().get(attribute.getAttributeName());
+                                    if (policyAttribute != null) {
+                                        //TODO: Attribute Type validation is required
+                                        //TODO: Do a API type, flow and gateway type validation
+                                        //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
+                                        //    log.error("Policy attribute type mismatched. Expected type is " +
+                                        //            attribute.getAttributeType() +
+                                        //            " but received " + policyAttribute.getClass().getName());
+                                        //}
+                                    } else {
+                                        log.error("Required policy attribute is not found" +
+                                                attribute.getAttributeName());
+                                        throw new APIManagementException(
+                                                "Required" + attribute.getAttributeName() + " parameter for " +
+                                                        policy.getPolicyName()
+                                                        + " operation policy is either missing or empty", ExceptionCodes
+                                                .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "headerName",
+                                                        "SET_HEADER"));
+                                    }
                                 }
                             }
                         }
@@ -2538,25 +2546,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             if (policyTemplate != null) {
                                 // A template is found for specified policy. This will be validated according to the provided
                                 // attributes and added to API policy list
-                                for (OperationPolicySpecAttribute attribute : policyTemplate.getSpecification()
-                                        .getPolicyAttributes()) {
-                                    if (attribute.isRequired()) {
-                                        Object policyAttribute =
-                                                policy.getParameters().get(attribute.getAttributeName());
-                                        if (policyAttribute != null) {
-                                            //TODO: Attribute Type validation is required
-                                            //TODO: Do a API type, flow and gateway type validation
-                                            //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
-                                            //    log.error("Policy attribute type mismatched. Expected type is " +
-                                            //            attribute.getAttributeType() +
-                                            //            " but received " + policyAttribute.getClass().getName());
-                                            //}
-                                        } else {
-                                            log.error("Required policy attribute is not found " + attribute.getAttributeName());
-                                            throw new APIManagementException("Required" + attribute.getAttributeName()
-                                                    + " parameter for " + policy.getPolicyName() + " operation policy is either missing or empty",
-                                                    ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS,
-                                                                    "headerName", "SET_HEADER"));
+                                if (policyTemplate.getSpecification().getPolicyAttributes() != null) {
+                                    // There can be policies without policy attributes
+                                    for (OperationPolicySpecAttribute attribute : policyTemplate.getSpecification()
+                                            .getPolicyAttributes()) {
+                                        if (attribute.isRequired()) {
+                                            Object policyAttribute =
+                                                    policy.getParameters().get(attribute.getAttributeName());
+                                            if (policyAttribute != null) {
+                                                //TODO: Attribute Type validation is required
+                                                //TODO: Do a API type, flow and gateway type validation
+                                                //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
+                                                //    log.error("Policy attribute type mismatched. Expected type is " +
+                                                //            attribute.getAttributeType() +
+                                                //            " but received " + policyAttribute.getClass().getName());
+                                                //}
+                                            } else {
+                                                log.error("Required policy attribute is not found " +
+                                                        attribute.getAttributeName());
+                                                throw new APIManagementException(
+                                                        "Required" + attribute.getAttributeName()
+                                                                + " parameter for " + policy.getPolicyName() +
+                                                                " operation policy is either missing or empty",
+                                                        ExceptionCodes
+                                                                .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS,
+                                                                        "headerName", "SET_HEADER"));
+                                            }
                                         }
                                     }
                                 }

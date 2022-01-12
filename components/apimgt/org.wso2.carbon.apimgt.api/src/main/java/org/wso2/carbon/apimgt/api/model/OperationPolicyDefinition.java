@@ -5,7 +5,7 @@ import java.util.Objects;
 public class OperationPolicyDefinition {
 
     private int policyId;
-    private int templateId;
+    private int templateId = -1;
     private String apiId;
     private String revisionId;
     private String name;
