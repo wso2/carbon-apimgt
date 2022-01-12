@@ -3706,12 +3706,16 @@ public class SQLConstants {
 
         public static final String GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID =
                 "SELECT " +
-                "OPD.POLICY_NAME, OPM.DIRECTION, OPM.PARAMETERS, OPM.POLICY_ORDER " +
-                "FROM " +
-                "AM_API_URL_MAPPING AUM INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM " +
-                "INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID" +
-                "ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
-                "WHERE AUM.URL_MAPPING_ID = ?";
+                    " OPD.POLICY_NAME, OPM.DIRECTION, OPM.PARAMETERS, OPM.POLICY_ORDER " +
+                " FROM " +
+                    " AM_API_URL_MAPPING AUM " +
+                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM " +
+                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD " +
+                " ON " +
+                     " OPM.POLICY_ID = OPD.POLICY_ID " +
+                     " ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
+                " WHERE " +
+                     "AUM.URL_MAPPING_ID = ?";
 
         public static final String GET_OPERATION_POLICY_UUID =
                 "SELECT OPERATION_POLICY_MAPPING_ID FROM AM_API_OPERATION_POLICY_MAPPING WHERE " +

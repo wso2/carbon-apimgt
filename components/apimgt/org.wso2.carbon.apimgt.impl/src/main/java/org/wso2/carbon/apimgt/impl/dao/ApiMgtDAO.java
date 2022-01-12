@@ -14461,6 +14461,7 @@ public class ApiMgtDAO {
                                 insertOperationPolicyMappingStatement.setInt(2, policy.getPolicyId());
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                 insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
                                 insertOperationPolicyMappingStatement.executeUpdate();
                             }
                         }
@@ -17893,6 +17894,7 @@ public class ApiMgtDAO {
             prepStmt.setInt(2, policy.getPolicyId());
             prepStmt.setString(3, policy.getDirection());
             prepStmt.setString(4, paramJSON);
+            prepStmt.setInt(5, policy.getOrder());
             prepStmt.execute();
 
             ResultSet generatedKeys = prepStmt.getGeneratedKeys();
