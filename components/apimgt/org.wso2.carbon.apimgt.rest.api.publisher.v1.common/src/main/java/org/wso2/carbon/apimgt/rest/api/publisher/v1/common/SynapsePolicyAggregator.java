@@ -74,7 +74,7 @@ public class SynapsePolicyAggregator {
 
             String uriTemplateString = template.getUriTemplate();
             String method = template.getHTTPVerb();
-            String key = method + "_" + uriTemplateString.replace("/", "\\/");
+            String key = method + "_" + uriTemplateString.replaceAll("[\\W]", "\\\\$0");;
 
             List<String> caseBodyInFlow = new ArrayList<>();
             List<String> caseBodyOutFlow = new ArrayList<>();
