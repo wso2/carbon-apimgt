@@ -3637,135 +3637,150 @@ public class SQLConstants {
      * Static class to hold database queries related to AM_API_OPERATION_POLICY_MAPPING table
      */
     public static class OperationPolicyConstants {
-        public static final String ADD_API_OPERATION_POLICY =
+
+        // API policy mapping
+        public static final String ADD_API_OPERATION_POLICY_MAPPING =
                 "INSERT INTO AM_API_OPERATION_POLICY_MAPPING " +
-                "(URL_MAPPING_ID, POLICY_ID, DIRECTION, PARAMETERS, POLICY_ORDER) " +
-                "VALUES (?,?,?,?,?)";
+                        " (URL_MAPPING_ID, POLICY_ID, DIRECTION, PARAMETERS, POLICY_ORDER) " +
+                        " VALUES (?,?,?,?,?)";
+
+        public static final String GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID =
+                "SELECT " +
+                        " OPD.POLICY_NAME, OPM.DIRECTION, OPM.PARAMETERS, OPM.POLICY_ORDER " +
+                " FROM " +
+                        " AM_API_URL_MAPPING AUM " +
+                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
+                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID " +
+                " AND " +
+                        " AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
+                " WHERE " +
+                        " AUM.URL_MAPPING_ID = ?";
 
         public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL =
                 " SELECT " +
-                        " AUM.URL_MAPPING_ID," +
-                        " AUM.URL_PATTERN," +
-                        " AUM.HTTP_METHOD," +
-                        " OPD.POLICY_NAME," +
-                        " OPM.PARAMETERS," +
-                        " OPM.DIRECTION," +
-                        " OPM.POLICY_ORDER," +
-                        " OPM.POLICY_ID," +
-                        " OPT.TEMPLATE_NAME" +
-                        " FROM " +
+                        " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD," +
+                        " OPD.POLICY_NAME, OPM.PARAMETERS, OPM.DIRECTION, OPM.POLICY_ORDER, OPM.POLICY_ID," +
+                        " OPT.TEMPLATE_NAME " +
+                " FROM " +
                         " AM_API_URL_MAPPING AUM " +
-                        " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-                        " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
-                        " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID " +
-                        " INNER JOIN AM_OPERATION_POLICY_TEMPLATES OPT ON OPT.TEMPLATE_ID = OPD.TEMPLATE_ID " +
-                        " WHERE " +
-                        " API.API_ID = ? AND " +
+                " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
+                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID " +
+                " INNER JOIN AM_OPERATION_POLICY_TEMPLATES OPT ON OPT.TEMPLATE_ID = OPD.TEMPLATE_ID " +
+                " WHERE " +
+                        " API.API_ID = ? " +
+                " AND " +
                         " AUM.REVISION_UUID IS NULL " +
-                        " ORDER BY AUM.URL_MAPPING_ID ASC ";
+                " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
         public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_PRODUCT_SQL =
                 " SELECT " +
-                " AUM.URL_MAPPING_ID," +
-                " AUM.URL_PATTERN," +
-                " AUM.HTTP_METHOD," +
-                " OPD.POLICY_NAME," +
-                " OPM.PARAMETERS," +
-                " OPM.DIRECTION," +
-                " OPM.POLICY_ORDER," +
-                " OPM.POLICY_ID" +
+                        " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, " +
+                        " OPD.POLICY_NAME, OPM.PARAMETERS, OPM.DIRECTION, OPM.POLICY_ORDER, OPM.POLICY_ID " +
                 " FROM " +
-                " AM_API_URL_MAPPING AUM " +
-                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
-                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID" +
+                        " AM_API_URL_MAPPING AUM " +
+                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
+                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID " +
                 " WHERE " +
-                " AUM.REVISION_UUID = ? " +
+                        " AUM.REVISION_UUID = ? " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
         public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL =
                 " SELECT " +
-                " AUM.URL_MAPPING_ID," +
-                " AUM.URL_PATTERN," +
-                " AUM.HTTP_METHOD," +
-                " OPD.POLICY_NAME," +
-                " OPM.PARAMETERS," +
-                " OPM.DIRECTION," +
-                " OPM.POLICY_ORDER," +
-                " OPM.POLICY_ID," +
-                " OPT.TEMPLATE_NAME" +
+                        " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, " +
+                        " OPD.POLICY_NAME, " +
+                        " OPM.PARAMETERS, OPM.DIRECTION, OPM.POLICY_ORDER, OPM.POLICY_ID, " +
+                        " OPT.TEMPLATE_NAME " +
                 " FROM " +
-                " AM_API_URL_MAPPING AUM " +
+                        " AM_API_URL_MAPPING AUM " +
                 " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
-                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID" +
+                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
+                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID " +
                 " INNER JOIN AM_OPERATION_POLICY_TEMPLATES OPT ON OPT.TEMPLATE_ID = OPD.TEMPLATE_ID " +
                 " WHERE " +
-                " API.API_ID = ? AND " +
-                " AUM.REVISION_UUID = ? " +
+                        " API.API_ID = ? " +
+                " AND " +
+                        " AUM.REVISION_UUID = ? " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
-        public static final String GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID =
-                "SELECT " +
-                    " OPD.POLICY_NAME, OPM.DIRECTION, OPM.PARAMETERS, OPM.POLICY_ORDER " +
-                " FROM " +
-                    " AM_API_URL_MAPPING AUM " +
-                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM " +
-                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD " +
-                " ON " +
-                     " OPM.POLICY_ID = OPD.POLICY_ID " +
-                     " ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
-                " WHERE " +
-                     "AUM.URL_MAPPING_ID = ?";
-
-        public static final String GET_OPERATION_POLICY_UUID =
-                "SELECT OPERATION_POLICY_MAPPING_ID FROM AM_API_OPERATION_POLICY_MAPPING WHERE " +
-                "URL_MAPPING_ID = ? AND " +
-                "POLICY_NAME = ? AND " +
-                "DIRECTION = ? AND " +
-                "PARAMETERS = ? ";
+        // API specific policy
 
         public static final String ADD_API_SPECIFIC_POLICY_DEFINITION =
-                    "INSERT INTO AM_API_OPERATION_POLICY_DEFINITIONS " +
-                            "(API_UUID, POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES," +
-                            "TEMPLATE_ID, POLICY_PARAMETERS, POLICY_DEFINITION) VALUES (?,?,?,?,?,?,?,?,?,?)";
+                "INSERT INTO AM_API_OPERATION_POLICY_DEFINITIONS " +
+                        " (API_UUID, POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
+                        " TEMPLATE_ID, POLICY_PARAMETERS, POLICY_DEFINITION) VALUES (?,?,?,?,?,?,?,?,?,?)";
+
         public static final String ADD_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION =
                 "INSERT INTO AM_API_OPERATION_POLICY_DEFINITIONS " +
-                        "(API_UUID, REVISION_UUID, POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES," +
-                        "TEMPLATE_ID, POLICY_PARAMETERS, POLICY_DEFINITION) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-        public static final String GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION_FOR_API =
-                    "SELECT POLICY_ID FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID IS NULL ";
-        public static final String GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION =
-                "SELECT POLICY_ID FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID = ? ";
-        public static final String UPDATE_API_SPECIFIC_POLICY_DEFINITION_FOR_API =
-                    "UPDATE AM_API_OPERATION_POLICY_DEFINITIONS SET DISPLAY_NAME = ?,POLICY_DESCRIPTION = ?, FLOW = ?," +
-                            " GATEWAY_TYPES = ?, API_TYPES = ?, POLICY_PARAMETERS = ?, POLICY_DEFINITION = ? " +
-                            "WHERE API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID IS NULL";
-        public static final String UPDATE_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION =
-                "UPDATE AM_API_OPERATION_POLICY_DEFINITIONS SET DISPLAY_NAME = ?,POLICY_DESCRIPTION = ?, FLOW = ?," +
-                        " GATEWAY_TYPES = ?, API_TYPES = ?, POLICY_PARAMETERS = ?, POLICY_DEFINITION = ? " +
-                        "WHERE API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID = ?";
-        public static final String GET_API_SPECIFIC_POLICY_DEFINITION =
-                "SELECT POLICY_ID,TEMPLATE_ID,REVISION_UUID," +
-                "DISPLAY_NAME,POLICY_DESCRIPTION,FLOW,GATEWAY_TYPES,API_TYPES,POLICY_PARAMETERS,POLICY_DEFINITION" +
-                " FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE API_UUID=? AND POLICY_NAME=?";
-
-        public static final String ADD_OPERATION_POLICY_TEMPLATE =
-                "INSERT INTO AM_OPERATION_POLICY_TEMPLATES " +
-                        "(TEMPLATE_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES," +
-                        "POLICY_PARAMETERS, POLICY_DEFINITION ) " +
-                        "VALUES (?,?,?,?,?,?,?,?)";
-        public static final String GET_TEMPLATE_ID_FROM_OPERATION_POLICY_TEMPLATE =
-                "SELECT TEMPLATE_ID FROM AM_OPERATION_POLICY_TEMPLATES WHERE TEMPLATE_NAME = ?";
-        public static final String UPDATE_OPERATION_POLICY_TEMPLATE =
-                "UPDATE AM_OPERATION_POLICY_TEMPLATES SET DISPLAY_NAME = ?,POLICY_DESCRIPTION = ?, FLOW = ?," +
-                        " GATEWAY_TYPES = ?, API_TYPES = ?, POLICY_PARAMETERS = ?, POLICY_DEFINITION = ? " +
-                        "WHERE TEMPLATE_NAME = ?";
-        public static final String GET_OPERATION_POLICY_TEMPLATE_FROM_POLICY_NAME = "SELECT TEMPLATE_ID," +
-                "DISPLAY_NAME,POLICY_DESCRIPTION,FLOW,GATEWAY_TYPES,API_TYPES,POLICY_PARAMETERS,POLICY_DEFINITION" +
-                " FROM AM_OPERATION_POLICY_TEMPLATES WHERE TEMPLATE_NAME=?";
+                        " (API_UUID, POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
+                        " TEMPLATE_ID, POLICY_PARAMETERS, POLICY_DEFINITION, REVISION_UUID ) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String REMOVE_FROM_AM_API_OPERATION_POLICY_DEFINITIONS_SQL =
                 "DELETE FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE API_UUID = ?";
+
+        public static final String REMOVE_FROM_AM_API_OPERATION_POLICY_DEFINITIONS_FOR_REVISIONS_SQL =
+                "DELETE FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE REVISION_UUID = ?";
+
+        public static final String GET_API_SPECIFIC_POLICY_DEFINITION =
+                "SELECT " +
+                        " POLICY_ID, TEMPLATE_ID, REVISION_UUID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, " +
+                        " API_TYPES,POLICY_PARAMETERS,POLICY_DEFINITION" +
+                " FROM " +
+                        " AM_API_OPERATION_POLICY_DEFINITIONS " +
+                " WHERE " +
+                        " API_UUID=? AND POLICY_NAME=?";
+
+        public static final String GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION_FOR_API =
+                "SELECT " +
+                        " POLICY_ID " +
+                " FROM " +
+                        " AM_API_OPERATION_POLICY_DEFINITIONS " +
+                " WHERE " +
+                        " API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID IS NULL ";
+
+        public static final String GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION =
+                "SELECT " +
+                        " POLICY_ID " +
+                " FROM " +
+                        " AM_API_OPERATION_POLICY_DEFINITIONS " +
+                " WHERE " +
+                        " API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID = ? ";
+
+        public static final String UPDATE_API_SPECIFIC_POLICY_DEFINITION_FOR_API =
+                "UPDATE " +
+                        " AM_API_OPERATION_POLICY_DEFINITIONS " +
+                " SET DISPLAY_NAME = ?,POLICY_DESCRIPTION = ?, FLOW = ?, GATEWAY_TYPES = ?, API_TYPES = ?, " +
+                        " POLICY_PARAMETERS = ?, POLICY_DEFINITION = ? " +
+                " WHERE API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID IS NULL";
+
+        // Operation policy templates
+
+        public static final String ADD_OPERATION_POLICY_TEMPLATE =
+                "INSERT INTO AM_OPERATION_POLICY_TEMPLATES " +
+                        " (TEMPLATE_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
+                        " POLICY_PARAMETERS, POLICY_DEFINITION ) " +
+                " VALUES (?,?,?,?,?,?,?,?)";
+
+        public static final String UPDATE_OPERATION_POLICY_TEMPLATE =
+                "UPDATE " +
+                        " AM_OPERATION_POLICY_TEMPLATES " +
+                " SET " +
+                        " DISPLAY_NAME = ?,POLICY_DESCRIPTION = ?, FLOW = ?, GATEWAY_TYPES = ?, API_TYPES = ?, " +
+                        " POLICY_PARAMETERS = ?, POLICY_DEFINITION = ? " +
+                " WHERE " +
+                        " TEMPLATE_NAME = ?";
+
+        public static final String GET_TEMPLATE_ID_FROM_OPERATION_POLICY_TEMPLATE =
+                "SELECT TEMPLATE_ID FROM AM_OPERATION_POLICY_TEMPLATES WHERE TEMPLATE_NAME = ?";
+
+        public static final String GET_OPERATION_POLICY_TEMPLATE_FROM_POLICY_NAME =
+                "SELECT " +
+                        " TEMPLATE_ID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
+                        " POLICY_PARAMETERS, POLICY_DEFINITION" +
+                " FROM " +
+                        " AM_OPERATION_POLICY_TEMPLATES " +
+                " WHERE " +
+                        " TEMPLATE_NAME=?";
     }
 
     /**
