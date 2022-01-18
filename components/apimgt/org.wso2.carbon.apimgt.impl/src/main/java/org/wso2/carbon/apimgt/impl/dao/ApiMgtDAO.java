@@ -14599,6 +14599,7 @@ public class ApiMgtDAO {
 
         String deleteQuery = SQLConstants.DELETE_API_PRODUCT_SQL;
         String deleteRatingsQuery = SQLConstants.REMOVE_FROM_API_RATING_SQL;
+        String urlMappingQuery = SQLConstants.REMOVE_FROM_URI_TEMPLATES__FOR_PRODUCTS_SQL;
         String deleteOperationPolicyQuery = SQLConstants.OperationPolicyConstants.REMOVE_FROM_AM_API_OPERATION_POLICY_DEFINITIONS_SQL;
         PreparedStatement ps = null;
         Connection connection = null;
@@ -14619,9 +14620,15 @@ public class ApiMgtDAO {
             ps.executeUpdate();
             ps.close();
 
+            ps = connection.prepareStatement(urlMappingQuery);
+            ps.setString(1, Integer.toString(id));
+            ps.execute();
+            ps.close();
+
             ps = connection.prepareStatement(deleteOperationPolicyQuery);
             ps.setString(1, productIdentifier.getUUID());
             ps.execute();
+            ps.close();
 
             connection.commit();
         } catch (SQLException e) {
@@ -17241,7 +17248,7 @@ public class ApiMgtDAO {
                 removeGraphQLComplexityStatement.executeUpdate();
                 deleteAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
 
-                // Removing related revision entries from AM_GRAPHQL_COMPLEXITY table
+                // Removing related revision entries from AM_API_OPERATION_POLICY_DEFINITIONS table
                 PreparedStatement removeOperationPolicyStatement = connection.prepareStatement(SQLConstants
                         .OperationPolicyConstants.REMOVE_FROM_AM_API_OPERATION_POLICY_DEFINITIONS_FOR_REVISIONS_SQL);
                 removeOperationPolicyStatement.setString(1, apiRevision.getRevisionUUID());
@@ -17766,6 +17773,13 @@ public class ApiMgtDAO {
                 removeProductMappingsStatement.setString(2, apiRevision.getRevisionUUID());
                 removeProductMappingsStatement.executeUpdate();
 
+
+                // Removing related revision entries from AM_API_URL_MAPPING table
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_PRODUCT_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID);
+                removeURLMappingsStatement.setString(1, apiRevision.getRevisionUUID());
+                removeURLMappingsStatement.executeUpdate();
+
                 // Removing related revision entries from AM_API_CLIENT_CERTIFICATE table
                 PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
                         .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
@@ -17785,7 +17799,6 @@ public class ApiMgtDAO {
                         .OperationPolicyConstants.REMOVE_FROM_AM_API_OPERATION_POLICY_DEFINITIONS_FOR_REVISIONS_SQL);
                 removeOperationPolicyStatement.setString(1, apiRevision.getRevisionUUID());
                 removeOperationPolicyStatement.executeUpdate();
-
 
                 connection.commit();
             } catch (SQLException e) {
