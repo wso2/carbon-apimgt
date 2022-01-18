@@ -1610,6 +1610,10 @@ public class SQLConstants {
     public static final String REMOVE_FROM_URI_TEMPLATES_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID IS NULL";
 
+    //Product ID is recorded under revision column in the AM_API_URL_MAPPING table
+    public static final String REMOVE_FROM_URI_TEMPLATES__FOR_PRODUCTS_SQL =
+            "DELETE FROM AM_API_URL_MAPPING WHERE REVISION_UUID = ?";
+
     public static final String GET_ALL_URL_TEMPLATES_SQL =
             " SELECT    " +
                     "   AUM.HTTP_METHOD," +
@@ -3511,6 +3515,8 @@ public class SQLConstants {
                 " FIELD, COMPLEXITY_VALUE) VALUES(?,?,?,?,?)";
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID =
                 "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID = ?";
+        public static final String REMOVE_PRODUCT_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID =
+                "DELETE FROM AM_API_URL_MAPPING WHERE REVISION_UUID = ?";
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID =
                 "DELETE FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID = ?";
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID =
