@@ -933,7 +933,7 @@
             <dependency>
                 <groupId>org.wso2.orbit.com.h2database</groupId>
                 <artifactId>h2</artifactId>
-                <version>1.4.200.wso2v1</version>
+                <version>2.0.206.wso2v1</version>
             </dependency>
 
             <dependency>
