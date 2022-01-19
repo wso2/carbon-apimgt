@@ -9538,7 +9538,11 @@ public final class APIUtil {
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(resource.getApiId());
                 API api = getAPI(apiArtifact, registry);
 
-                resource.setEndpointConfig(api.getEndpointConfig());
+                if (api.isAdvertiseOnly()) {
+                    resource.setEndpointConfig(generateEndpointConfigForAdvertiseOnlyApi(api));
+                } else {
+                    resource.setEndpointConfig(api.getEndpointConfig());
+                }
                 resource.setEndpointSecurityMap(setEndpointSecurityForAPIProduct(api));
             }
 
@@ -9567,6 +9571,30 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return apiProduct;
+    }
+
+    /**
+     * Return the generated endpoint config JSON string for advertise only APIs
+     *
+     * @param api API object
+     * @return generated JSON string
+     */
+    public static String generateEndpointConfigForAdvertiseOnlyApi(API api) {
+        JSONObject endpointConfig = new JSONObject();
+        endpointConfig.put("endpoint_type", "http");
+        if (api.getApiExternalProductionEndpoint() != null
+                && !api.getApiExternalProductionEndpoint().isEmpty()) {
+            JSONObject productionEndpoints = new JSONObject();
+            productionEndpoints.put("url", api.getApiExternalProductionEndpoint());
+            endpointConfig.put("production_endpoints", productionEndpoints);
+        }
+        if (api.getApiExternalSandboxEndpoint() != null
+                && !api.getApiExternalSandboxEndpoint().isEmpty()) {
+            JSONObject sandboxEndpoints = new JSONObject();
+            sandboxEndpoints.put("url", api.getApiExternalSandboxEndpoint());
+            endpointConfig.put("sandbox_endpoints", sandboxEndpoints);
+        }
+        return endpointConfig.toJSONString();
     }
 
     /**
@@ -10501,7 +10529,7 @@ public final class APIUtil {
         try {
             endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new EndpointSecurity());
             endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, new EndpointSecurity());
-            if (api.isEndpointSecured()) {
+            if (api.isEndpointSecured() && !api.isAdvertiseOnly()) {
                 EndpointSecurity productionEndpointSecurity = new EndpointSecurity();
                 productionEndpointSecurity.setEnabled(true);
                 productionEndpointSecurity.setUsername(api.getEndpointUTUsername());
@@ -10513,7 +10541,7 @@ public final class APIUtil {
                 }
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionEndpointSecurity);
-            } else {
+            } else if (!api.isAdvertiseOnly()) {
                 String endpointConfig = api.getEndpointConfig();
                 if (endpointConfig != null) {
                     JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);

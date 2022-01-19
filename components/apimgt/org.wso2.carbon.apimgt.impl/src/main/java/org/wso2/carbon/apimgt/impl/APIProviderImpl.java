@@ -7083,7 +7083,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
-                apiProductResource.setEndpointConfig(api.getEndpointConfig());
+                if (api.isAdvertiseOnly()) {
+                    apiProductResource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+                } else {
+                    apiProductResource.setEndpointConfig(api.getEndpointConfig());
+                }
                 apiProductResource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
                 URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
@@ -7262,7 +7266,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
             apiProductResource.setProductIdentifier(product.getId());
-            apiProductResource.setEndpointConfig(api.getEndpointConfig());
+            if (api.isAdvertiseOnly()) {
+                apiProductResource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+            } else {
+                apiProductResource.setEndpointConfig(api.getEndpointConfig());
+            }
             apiProductResource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
             URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
