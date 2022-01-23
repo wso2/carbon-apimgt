@@ -41,6 +41,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class})
@@ -120,6 +121,16 @@ public class AbstractKeyManagerTestCase {
             assertTrue(false);
         } catch (APIManagementException e) {
             assertEquals("Error occurred while parsing JSON String", e.getMessage());
+        }
+
+        //test with invalid additionalProperties
+        OAuthApplicationInfo applicationInfo = new OAuthApplicationInfo();
+        applicationInfo.addParameter("additionalProperties", "{invalid}");
+        try {
+            keyManager.buildFromJSON(applicationInfo, "{}");
+            fail();
+        } catch (APIManagementException e) {
+            assertEquals("Error while parsing the addition properties of OAuth application", e.getMessage());
         }
     }
 
