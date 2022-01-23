@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
@@ -167,6 +168,10 @@ public class ImportUtils {
                 JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
                         ImportExportConstants.TYPE_API);
                 importedApiDTO = new Gson().fromJson(jsonObject, APIDTO.class);
+                if (importedApiDTO.getAdvertiseInfo() != null && importedApiDTO.getAdvertiseInfo().isAdvertised()
+                        && AdvertiseInfoDTO.VendorEnum.AWS.equals(importedApiDTO.getAdvertiseInfo().getVendor())) {
+                    setAdvertiseOnlyProperties(importedApiDTO);
+                }
             }
 
             // If the provided dependent APIs params config is null, it means this happening when importing an API (not
@@ -394,6 +399,30 @@ public class ImportUtils {
             }
             throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Set the updated advertiseInfo property to API DTO
+     *
+     * @param importedApiDTO imported API DTO
+     */
+    private static void setAdvertiseOnlyProperties(APIDTO importedApiDTO) {
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(importedApiDTO.getAdvertiseInfo().isAdvertised());
+        advertiseInfoDTO.setVendor(importedApiDTO.getAdvertiseInfo().getVendor());
+        advertiseInfoDTO.setApiOwner(importedApiDTO.getAdvertiseInfo().getApiOwner());
+        if (importedApiDTO.getEndpointConfig() != null) {
+            Map endpointConfig = (Map) importedApiDTO.getEndpointConfig();
+            if (endpointConfig.containsKey("production_endpoints")) {
+                advertiseInfoDTO.setApiExternalProductionEndpoint((String) ((Map) endpointConfig
+                        .get("production_endpoints")).get("url"));
+            }
+            if (endpointConfig.containsKey("sandbox_endpoints")) {
+                advertiseInfoDTO.setApiExternalSandboxEndpoint((String) ((Map) endpointConfig
+                        .get("sandbox_endpoints")).get("url"));
+            }
+        }
+        importedApiDTO.setAdvertiseInfo(advertiseInfoDTO);
     }
 
     /**
