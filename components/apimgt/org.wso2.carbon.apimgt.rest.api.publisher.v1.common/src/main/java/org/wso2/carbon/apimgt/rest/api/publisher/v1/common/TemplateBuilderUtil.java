@@ -503,17 +503,20 @@ public class TemplateBuilderUtil {
                 }
                 if (StringUtils.isNotEmpty(api.getInSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
-                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                            apiProduct.getId().getVersion()).concat("--").concat(productResource.getApiId())
+                            + APIConstants.API_CUSTOM_SEQ_IN_EXT;
                     productResource.setInSequenceName(sequenceName);
                 }
                 if (StringUtils.isNotEmpty(api.getOutSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
-                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+                            apiProduct.getId().getVersion()).concat("--").concat(productResource.getApiId())
+                            + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
                     productResource.setOutSequenceName(sequenceName);
                 }
                 if (StringUtils.isNotEmpty(api.getFaultSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
-                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                            apiProduct.getId().getVersion()).concat("--").concat(productResource.getApiId())
+                            + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
                     productResource.setFaultSequenceName(sequenceName);
                 }
                 productResource.setProductIdentifier(apiProduct.getId());
@@ -554,6 +557,7 @@ public class TemplateBuilderUtil {
                 productAPIDto.getLocalEntriesToBeAdd()));
         setClientCertificatesToBeAdded(tenantDomain, productAPIDto, clientCertificatesDTOList);
         productAPIDto.setApiDefinition(builder.getConfigStringForTemplate(environment));
+        Map<String, String> apiLocationsMap = new HashMap<>();
         for (Map.Entry<String, APIDTO> apidtoEntry : associatedAPIsMap.entrySet()) {
             String apiExtractedPath = apidtoEntry.getKey();
             APIDTO apidto = apidtoEntry.getValue();
@@ -566,7 +570,10 @@ public class TemplateBuilderUtil {
             setAPIFaultSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
             String prefix = id.getName() + "--v" + id.getVersion();
             setSecureVaultPropertyToBeAdded(prefix, api, productAPIDto);
+            apiLocationsMap.put(APIUtil.getSequenceExtensionName(api.getId().getName(), api.getId().getVersion()),
+                    apiExtractedPath);
         }
+        setOperationPolicySequenceForProducts(apiProduct, productAPIDto, apiLocationsMap);
 
         return productAPIDto;
     }
@@ -585,6 +592,19 @@ public class TemplateBuilderUtil {
         if (gatewayOutContentDTO != null) {
             gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayOutContentDTO,
                     gatewayAPIDTO.getSequenceToBeAdd()));
+        }
+    }
+
+    private static void setOperationPolicySequenceForProducts(APIProduct apiProduct, GatewayAPIDTO gatewayAPIDTO,
+                                                              Map<String, String> apiLocationsMap)
+            throws APIManagementException {
+
+        GatewayContentDTO gatewayPolicyContentDTO = retrieveOperationPolicySequenceForProducts(apiProduct,
+                apiLocationsMap);
+        if (gatewayPolicyContentDTO != null) {
+            gatewayAPIDTO
+                    .setSequenceToBeAdd(
+                            addGatewayContentToList(gatewayPolicyContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
         }
     }
 
@@ -1188,13 +1208,41 @@ public class TemplateBuilderUtil {
 
         GatewayContentDTO operationPolicySequenceContentDto = new GatewayContentDTO();
 
-        String policySequence = SynapsePolicyAggregator.generatePolicySequence(pathToAchieve, api);
+        String policySequence = SynapsePolicyAggregator.generatePolicySequenceForAPIs(pathToAchieve, api);
 
         if (StringUtils.isNotEmpty(policySequence)) {
             try {
                 OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(policySequence.getBytes()));
                 if (omElement != null) {
                     String seqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_OPERATION_POLICY_SEQ_EXT;
+                    if (omElement.getAttribute(new QName("name")) != null) {
+                        omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
+                    }
+                    operationPolicySequenceContentDto.setName(seqExt);
+                    operationPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                    return operationPolicySequenceContentDto;
+                }
+            } catch (Exception e) {
+                throw new APIManagementException(e);
+            }
+        }
+        return null;
+    }
+
+    private static GatewayContentDTO retrieveOperationPolicySequenceForProducts(APIProduct apiProduct,
+                                                                                Map<String, String> locationsMap)
+            throws APIManagementException {
+
+        GatewayContentDTO operationPolicySequenceContentDto = new GatewayContentDTO();
+
+        String policySequence = SynapsePolicyAggregator.generatePolicySequenceForProducts(apiProduct, locationsMap);
+
+        if (StringUtils.isNotEmpty(policySequence)) {
+            try {
+                OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(policySequence.getBytes()));
+                if (omElement != null) {
+                    String seqExt = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
+                            apiProduct.getId().getVersion()) + APIConstants.API_OPERATION_POLICY_SEQ_EXT;
                     if (omElement.getAttribute(new QName("name")) != null) {
                         omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
                     }
