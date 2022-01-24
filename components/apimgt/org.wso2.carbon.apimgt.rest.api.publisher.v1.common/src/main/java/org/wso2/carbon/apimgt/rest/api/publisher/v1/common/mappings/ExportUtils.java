@@ -50,7 +50,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -746,8 +746,8 @@ public class ExportUtils {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        OperationPolicyDefinition policyDefinition =  apiProvider
-                                .getAPISpecificPolicyDefinitionForPolicyName(api.getUuid(), policy.getPolicyName());
+                        OperationPolicyDataHolder policyDefinition =  apiProvider
+                                .getAPISpecificPolicyByPolicyName(api.getUuid(), policy.getPolicyName());
                         if (policyDefinition != null) {
                             String policyName = archivePath  + File.separator
                                     + ImportExportConstants.POLICIES_DIRECTORY + File.separator +

@@ -31,7 +31,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
@@ -90,7 +89,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
@@ -2677,13 +2676,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response addAPISpecificOperationPolicyDefinition(String apiId, InputStream policySpecFileInputStream,
-                                                              Attachment policySpecFileDetail,
-                                                              InputStream policyTemplateFileInputStream,
-                                                              Attachment policyTemplateFileDetail, String policyName,
-                                                              String flow, MessageContext messageContext)
+                                                            Attachment policySpecFileDetail,
+                                                            InputStream policyTemplateFileInputStream,
+                                                            Attachment policyTemplateFileDetail, String policyName,
+                                                            String flow, MessageContext messageContext)
             throws APIManagementException {
 
-        String fileName = "";
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -2703,6 +2701,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
             } else {
                 // This flow will execute if a policy specification is not found.
+                if (log.isDebugEnabled()) {
+                    log.debug("Operation policy specification not found for the policy " + policyName + " of API "
+                            + apiInfo.getName() + ". Default policy spec used");
+                }
+
                 policySpecification = new OperationPolicySpecification();
                 policySpecification.setPolicyName(policyName);
                 List<String> policyFlow = new ArrayList<String>(Arrays.asList(flow.split(",")));
@@ -2713,26 +2716,29 @@ public class ApisApiServiceImpl implements ApisApiService {
                 policyTemplate = readInputStream(policyTemplateFileInputStream, policyTemplateFileDetail);
             }
 
-            OperationPolicyDefinition operationPolicyDefinition = new OperationPolicyDefinition();
-            operationPolicyDefinition.setSpecification(policySpecification);
-            operationPolicyDefinition.setDefinition(policyTemplate);
-            operationPolicyDefinition.setName(policyName);
-            operationPolicyDefinition.setFlow(flow);
-            apiProvider.addApiSpecificOperationalPolicyDefinition(apiId, operationPolicyDefinition, organization);
+            OperationPolicyDataHolder operationPolicyDataHolder = new OperationPolicyDataHolder();
+            operationPolicyDataHolder.setSpecification(policySpecification);
+            operationPolicyDataHolder.setDefinition(policyTemplate);
+            operationPolicyDataHolder.setName(policyName);
+            operationPolicyDataHolder.setFlow(flow);
+            apiProvider.addApiSpecificOperationalPolicy(apiId, operationPolicyDataHolder, organization);
 
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "API specific operation policy has been added for the API " + apiInfo.getName() + " with name "
+                                + policyName);
+            }
 
-            if (operationPolicyDefinition != null) {
+            if (operationPolicyDataHolder != null) {
                 String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
-                        .replace(RestApiConstants.APIID_PARAM, apiId)  + "/" + "operational-policy";
+                        .replace(RestApiConstants.APIID_PARAM, apiId) + "/" + "operational-policy";
                 URI uri = new URI(uriString);
                 OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
-                createdPolicy.setName(operationPolicyDefinition.getName());
+                createdPolicy.setName(operationPolicyDataHolder.getName());
                 return Response.created(uri).entity(createdPolicy).build();
             }
 
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) { //this is due to access control restriction.
@@ -2741,10 +2747,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 throw e;
             }
-        } catch (URISyntaxException e) {
-            String errorMessage = "Error while getting location header for created " +
-                    "operational policy " + fileName;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (Exception e) {
             RestApiUtil.handleInternalServerError("An Error has occurred while adding operational policy", e, log);
         }

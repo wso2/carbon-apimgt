@@ -60,7 +60,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -416,12 +416,12 @@ public class ImportUtils {
                         String policyDefinition =
                                 getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName());
 
-                        OperationPolicyDefinition operationPolicyDefinition = new OperationPolicyDefinition();
-                        operationPolicyDefinition.setName(policy.getPolicyName());
-                        operationPolicyDefinition.setFlow(policy.getDirection());
-                        operationPolicyDefinition.setDefinition(policyDefinition);
-                        operationPolicyDefinition.setSpecification(policySpec);
-                        provider.addApiSpecificOperationalPolicyDefinition(api.getUuid(), operationPolicyDefinition,
+                        OperationPolicyDataHolder operationPolicyDataHolder = new OperationPolicyDataHolder();
+                        operationPolicyDataHolder.setName(policy.getPolicyName());
+                        operationPolicyDataHolder.setFlow(policy.getDirection());
+                        operationPolicyDataHolder.setDefinition(policyDefinition);
+                        operationPolicyDataHolder.setSpecification(policySpec);
+                        provider.addApiSpecificOperationalPolicy(api.getUuid(), operationPolicyDataHolder,
                                 null);
                         validatedOperationPolicies.add(policy);
                     } catch (APIManagementException e) {
