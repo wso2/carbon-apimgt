@@ -55,8 +55,8 @@ OperationPolicyTemplatesApiService delegate = new OperationPolicyTemplatesApiSer
         @ApiResponse(code = 201, message = "OK. Operation policy template uploaded ", response = OperationPolicyDefinitionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response addOperationPolicyTemplate( @Multipart(value = "templateSpecFile", required = false) InputStream templateSpecFileInputStream, @Multipart(value = "templateSpecFile" , required = false) Attachment templateSpecFileDetail,  @Multipart(value = "policyDefinitionFile", required = false) InputStream policyDefinitionFileInputStream, @Multipart(value = "policyDefinitionFile" , required = false) Attachment policyDefinitionFileDetail, @Multipart(value = "policyName", required = false)  String policyName, @Multipart(value = "flow", required = false)  String flow) throws APIManagementException{
-        return delegate.addOperationPolicyTemplate(templateSpecFileInputStream, templateSpecFileDetail, policyDefinitionFileInputStream, policyDefinitionFileDetail, policyName, flow, securityContext);
+    public Response addOperationPolicyTemplate( @Multipart(value = "templateSpecFile", required = false) InputStream templateSpecFileInputStream, @Multipart(value = "templateSpecFile" , required = false) Attachment templateSpecFileDetail,  @Multipart(value = "templateDefinitionFile", required = false) InputStream templateDefinitionFileInputStream, @Multipart(value = "templateDefinitionFile" , required = false) Attachment templateDefinitionFileDetail, @Multipart(value = "templateName", required = false)  String templateName, @Multipart(value = "flow", required = false)  String flow) throws APIManagementException{
+        return delegate.addOperationPolicyTemplate(templateSpecFileInputStream, templateSpecFileDetail, templateDefinitionFileInputStream, templateDefinitionFileDetail, templateName, flow, securityContext);
     }
 
     @GET
