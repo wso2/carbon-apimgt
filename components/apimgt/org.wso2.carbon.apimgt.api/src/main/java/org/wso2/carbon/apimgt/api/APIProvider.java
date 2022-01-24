@@ -1838,6 +1838,7 @@ public interface APIProvider extends APIManager {
      * @return List of environments related to the given tenant
      */
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
+
     /**
      * Set existing operation policy mapping to the URI Templates
      *
@@ -1848,44 +1849,38 @@ public interface APIProvider extends APIManager {
     void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
 
     /**
-     * Add Operation Policy
+     * Add an API specific operational policy defition. This definition will contain the policy specification and the
+     * policy definition sequence
      *
-     * @param urlMappingId  URL Mapping ID
-     * @param policy        Operation Policy to be added
-     * @return              Policy Id
-     * @throws APIManagementException
-     */
-    int addOperationPolicy(int urlMappingId, OperationPolicy policy) throws APIManagementException;
-
-    /**
-     * Get URI Templates of API identified by the UUID
-     *
-     * @param uuid      API UUID
-     * @return
-     * @throws APIManagementException
-     */
-    Set<URITemplate> getURITemplatesOfAPI(String uuid) throws APIManagementException;
-
-    /**
-     * upload operational policy definition to api
      * @param apiUUID           UUID of the API
-     * @param operationPolicyDefinition   Operation Policy
+     * @param operationPolicyDefinition   Operation Policy Definition
      * @param organization      Identifier of an organization
-     * @return added policy
+     * @return policy ID
      * @throws APIManagementException
      */
-    int addApiSpecificOperationalPolicyDefinition(String apiUUID, OperationPolicyDefinition operationPolicyDefinition, String organization)
+    int addApiSpecificOperationalPolicyDefinition(String apiUUID, OperationPolicyDefinition operationPolicyDefinition,
+                                                  String organization)
             throws APIManagementException;
 
+
+    /**
+     * Get the API Specific policy definition for the given Policy name and API UUID
+     *
+     * @param apiUUID           UUID of the API
+     * @param policyName        Operation Policy Name
+
+     * @return Operation Policy Definition
+     * @throws APIManagementException
+     */
     OperationPolicyDefinition getAPISpecificPolicyDefinitionForPolicyName(String apiUUID, String policyName)
             throws APIManagementException;
 
 
     /**
-     * upload operational policy definition to api
-     * @param operationPolicyDefinition   Operation Policy
-     * @param organization      Identifier of an organization
-     * @return added policy
+     * Add operational policy template
+     * @param operationPolicyDefinition     Operation Policy Definition
+     * @param organization                  Identifier of an organization
+     * @return status of the policy storage
      * @throws APIManagementException
      */
     boolean addOperationalPolicyTemplate(OperationPolicyDefinition operationPolicyDefinition, String organization)
