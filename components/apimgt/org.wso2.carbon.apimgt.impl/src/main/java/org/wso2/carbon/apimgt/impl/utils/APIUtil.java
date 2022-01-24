@@ -11513,12 +11513,12 @@ public final class APIUtil {
         return null;
     }
 
-    public static String getPolicySpecString(OperationPolicyDataHolder policyDefinition){
+    public static String getPolicySpecString(OperationPolicyDataHolder policyData) {
         String policyParamsString = "";
-        if (policyDefinition.getSpecification() != null) {
-            if (policyDefinition.getSpecification().getPolicyAttributes() != null){
+        if (policyData.getSpecification() != null) {
+            if (policyData.getSpecification().getPolicyAttributes() != null){
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                policyParamsString = gson.toJson(policyDefinition.getSpecification().getPolicyAttributes());
+                policyParamsString = gson.toJson(policyData.getSpecification().getPolicyAttributes());
             }
         }
         return policyParamsString;

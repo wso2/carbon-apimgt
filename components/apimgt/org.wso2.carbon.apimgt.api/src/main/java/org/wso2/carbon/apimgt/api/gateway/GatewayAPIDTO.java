@@ -48,7 +48,6 @@ public class GatewayAPIDTO implements Serializable {
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
-
     private List<String> keyManagers = new ArrayList<>();
     public String getName() {
 
