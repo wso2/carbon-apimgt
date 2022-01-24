@@ -665,6 +665,7 @@ paths:
       operationId: generateMockScripts
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/scriptType'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -722,6 +723,7 @@ paths:
       operationId: getGeneratedMockScriptsOfAPI
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/scriptType'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -8762,6 +8764,7 @@ components:
           enum:
             - INLINE
             - ENDPOINT
+            - TEMPLATE
         scopes:
           type: array
           items:
@@ -11861,7 +11864,16 @@ components:
       required: true
       schema:
         type: string
-
+    # API Revision Identifier
+    # Specified as part of the path expression
+    scriptType:
+      name: scriptType
+      in: query
+      description: |
+        implementation type of the mock implementation
+      required: false
+      schema:
+        type: string
     # API Revision Identifier
     # Specified as part of the path expression
     revisionId:

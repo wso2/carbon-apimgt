@@ -1583,7 +1583,7 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public Map<String, Object> generateExample(String apiDefinition) throws APIManagementException{
+    public Map<String, Object> generateExample(String apiDefinition, String scriptType) throws APIManagementException{
         return null;
     }
 

@@ -113,7 +113,7 @@ public class OAS3Parser extends APIDefinition {
      * @return swagger Json
      */
     @Override
-    public Map<String, Object> generateExample(String apiDefinition) throws APIManagementException {
+    public Map<String, Object> generateExample(String apiDefinition, String scriptType) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
@@ -125,10 +125,7 @@ public class OAS3Parser extends APIDefinition {
         //List for APIResMedPolicyList
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
-            int minResponseCode = 0;
-            int responseCode = 0;
             String path = entry.getKey();
-            Map<String, Schema> definitions = swagger.getComponents().getSchemas();
             //operation map to get verb
             Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
@@ -138,13 +135,6 @@ public class OAS3Parser extends APIDefinition {
                 APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
                 //setting path for apiResourceMediationPolicyObject
                 apiResourceMediationPolicyObject.setPath(path);
-                ArrayList<Integer> responseCodes = new ArrayList<Integer>();
-                //for each HTTP method get the verb
-                StringBuilder genCode = new StringBuilder();
-                boolean hasJsonPayload = false;
-                boolean hasXmlPayload = false;
-                //for setting only one initializing if condition per response code
-                boolean respCodeInitialized = false;
                 Object[] operationsArray = operationMap.entrySet().toArray();
                 if (operationsArray.length > i) {
                     Map.Entry<PathItem.HttpMethod, Operation> operationEntry =
@@ -154,44 +144,12 @@ public class OAS3Parser extends APIDefinition {
                     throw new
                             APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
-                for (String responseEntry : op.getResponses().keySet()) {
-                    if (!responseEntry.equals("default")) {
-                        responseCode = Integer.parseInt(responseEntry);
-                        responseCodes.add(responseCode);
-                        minResponseCode = Collections.min(responseCodes);
-                    }
-                    Content content = op.getResponses().get(responseEntry).getContent();
-                    if (content != null) {
-                        MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                        MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
-                        if (applicationJson != null) {
-                            Schema jsonSchema = applicationJson.getSchema();
-                            if (jsonSchema != null) {
-                                String jsonExample = getJsonExample(jsonSchema, definitions);
-                                genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
-                                respCodeInitialized = true;
-                                hasJsonPayload = true;
-                            }
-                        }
-                        if (applicationXml != null) {
-                            Schema xmlSchema = applicationXml.getSchema();
-                            if (xmlSchema != null) {
-                                String xmlExample = getXmlExample(xmlSchema, definitions);
-                                genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
-                                hasXmlPayload = true;
-                            }
-                        }
-                    } else {
-                        setDefaultGeneratedResponse(genCode, responseEntry);
-                        hasJsonPayload = true;
-                        hasXmlPayload = true;
-                    }
+                String finalScript;
+                if (APIConstants.IMPLEMENTATION_TYPE_TEMPLATE.equalsIgnoreCase(scriptType)) {
+                    finalScript = OASParserUtil.getJsonScript();
+                } else {
+                    finalScript = getJSScript(swagger.getComponents().getSchemas(), op);
                 }
-                //inserts minimum response code and mock payload variables to static script
-                String finalGenCode = getMandatoryScriptSection(minResponseCode, genCode);
-                //gets response section string depending on availability of json/xml payloads
-                String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
-                String finalScript = finalGenCode + responseConditions;
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 //sets script to each resource in the swagger
                 op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
@@ -202,6 +160,55 @@ public class OAS3Parser extends APIDefinition {
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
         return returnMap;
+    }
+
+    private String getJSScript(Map<String, Schema> definitions, Operation op) {
+        //for each HTTP method get the verb
+        StringBuilder genCode = new StringBuilder();
+        boolean hasJsonPayload = false;
+        boolean hasXmlPayload = false;
+        int minResponseCode = 0;
+        for (String responseEntry : op.getResponses().keySet()) {
+            //for setting only one initializing if condition per response code
+            boolean respCodeInitialized = false;
+            if (!responseEntry.equals("default")) {
+                int responseCode = Integer.parseInt(responseEntry);
+                if (minResponseCode > responseCode) {
+                    minResponseCode = responseCode;
+                }
+            }
+            Content content = op.getResponses().get(responseEntry).getContent();
+            if (content != null) {
+                MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
+                if (applicationJson != null) {
+                    Schema jsonSchema = applicationJson.getSchema();
+                    if (jsonSchema != null) {
+                        String jsonExample = getJsonExample(jsonSchema, definitions);
+                        genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
+                        respCodeInitialized = true;
+                        hasJsonPayload = true;
+                    }
+                }
+                if (applicationXml != null) {
+                    Schema xmlSchema = applicationXml.getSchema();
+                    if (xmlSchema != null) {
+                        String xmlExample = getXmlExample(xmlSchema, definitions);
+                        genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
+                        hasXmlPayload = true;
+                    }
+                }
+            } else {
+                setDefaultGeneratedResponse(genCode, responseEntry);
+                hasJsonPayload = true;
+                hasXmlPayload = true;
+            }
+        }
+        //inserts minimum response code and mock payload variables to static script
+        String finalGenCode = getMandatoryScriptSection(minResponseCode, genCode);
+        //gets response section string depending on availability of json/xml payloads
+        String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
+        return finalGenCode + responseConditions;
     }
 
     /**
@@ -907,6 +914,11 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
         }
         String apiSecurity = api.getApiSecurity();
+        if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)) {
+            openAPI.addExtension(APIConstants.X_WSO2_MOCK_IMPLEMENTATION, APIConstants.X_WSO2_MOCK_IMPL_ADVANCE);
+        } else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_TEMPLATE)) {
+            openAPI.addExtension(APIConstants.X_WSO2_MOCK_IMPLEMENTATION, APIConstants.X_WSO2_MOCK_IMPL_SIMPLE);
+        }
         // set mutual ssl extension if enabled
         if (apiSecurity != null) {
             List<String> securityList = Arrays.asList(apiSecurity.split(","));

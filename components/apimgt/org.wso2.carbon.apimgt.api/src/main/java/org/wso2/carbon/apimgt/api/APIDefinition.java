@@ -48,7 +48,7 @@ public abstract class APIDefinition {
      * @param apiDefinition
      * @return
      */
-    public abstract Map<String, Object> generateExample(String apiDefinition) throws APIManagementException;
+    public abstract Map<String, Object> generateExample(String apiDefinition, String scriptType) throws APIManagementException;
 
     /**
      * This method extracts the URI templates from the API definition

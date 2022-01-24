@@ -2046,14 +2046,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getGeneratedMockScriptsOfAPI(String apiId, String scriptType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, organization);
-        Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
+        Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition, scriptType);
         List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
     }
@@ -3976,7 +3976,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response generateMockScripts(String apiId, String scriptType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifierFromTable == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -3988,7 +3988,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
 
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
-        apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
+        apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition, scriptType).get(APIConstants.SWAGGER));
         apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
         return Response.ok().entity(apiDefinition).build();
     }

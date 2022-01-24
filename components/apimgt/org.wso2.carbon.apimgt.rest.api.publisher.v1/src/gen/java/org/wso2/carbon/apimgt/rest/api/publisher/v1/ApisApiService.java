@@ -89,7 +89,7 @@ public interface ApisApiService {
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException;
-      public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response generateMockScripts(String apiId, String scriptType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateContentByAlias(String apiId, String alias, MessageContext messageContext) throws APIManagementException;
@@ -120,7 +120,7 @@ public interface ApisApiService {
       public Response getAmazonResourceNamesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAuditReportOfAPI(String apiId, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;
-      public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getGeneratedMockScriptsOfAPI(String apiId, String scriptType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;

@@ -353,6 +353,7 @@ public final class APIConstants {
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";
+    public static final String IMPLEMENTATION_TYPE_TEMPLATE = "TEMPLATE";
     public static final String IMPLEMENTATION_TYPE_MARKDOWN = "MARKDOWN";
     public static final String IMPLEMENTATION_TYPE_FILE = "FILE";
 
@@ -1590,6 +1591,9 @@ public final class APIConstants {
     public static final String X_WSO2_BASEPATH = "x-wso2-basePath";
     public static final String X_WSO2_TRANSPORTS = "x-wso2-transports";
     public static final String X_WSO2_MUTUAL_SSL = "x-wso2-mutual-ssl";
+    public static final String X_WSO2_MOCK_IMPLEMENTATION = "x-wso2-mock-implementation";
+    public static final String X_WSO2_MOCK_IMPL_SIMPLE = "simple";
+    public static final String X_WSO2_MOCK_IMPL_ADVANCE = "advanced";
     public static final String X_WSO2_APP_SECURITY = "x-wso2-application-security";
     public static final String X_WSO2_RESPONSE_CACHE = "x-wso2-response-cache";
     public static final String X_WSO2_DISABLE_SECURITY = "x-wso2-disable-security";

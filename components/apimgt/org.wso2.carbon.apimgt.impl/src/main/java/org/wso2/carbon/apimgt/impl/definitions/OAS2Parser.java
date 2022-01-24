@@ -112,7 +112,7 @@ public class OAS2Parser extends APIDefinition {
      * @return Swagger Json
      */
     @Override
-    public Map<String, Object> generateExample(String swaggerDef) throws APIManagementException {
+    public Map<String, Object> generateExample(String swaggerDef, String scriptType) throws APIManagementException {
         // create APIResourceMediationPolicy List = policyList
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
@@ -122,10 +122,7 @@ public class OAS2Parser extends APIDefinition {
         //List for APIResMedPolicyList
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
-            int responseCode = 0;
-            int minResponseCode = 0;
             String path = entry.getKey();
-            Map<String, Model> definitions = swagger.getDefinitions();
             //operation map to get verb
             Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
             List<Operation> operations = swagger.getPaths().get(path).getOperations();
@@ -135,7 +132,6 @@ public class OAS2Parser extends APIDefinition {
                 APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
                 //setting path for apiResourceMediationPolicyObject
                 apiResourceMediationPolicyObject.setPath(path);
-                ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 Object[] operationsArray = operationMap.entrySet().toArray();
                 if (operationsArray.length > i) {
                     Map.Entry<HttpMethod, Operation> operationEntry =
@@ -145,48 +141,13 @@ public class OAS2Parser extends APIDefinition {
                     throw new
                             APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
-                StringBuilder genCode = new StringBuilder();
-                boolean hasJsonPayload = false;
-                boolean hasXmlPayload = false;
-                //for setting only one initializing if condition per response code
-                boolean respCodeInitialized = false;
-                for (String responseEntry : op.getResponses().keySet()) {
-                    if (!responseEntry.equals("default")) {
-                        responseCode = Integer.parseInt(responseEntry);
-                        responseCodes.add(responseCode);
-                        minResponseCode = Collections.min(responseCodes);
-                    }
-                    if (op.getResponses().get(responseEntry).getExamples() != null) {
-                        Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
-                        Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
-                        if (applicationJson != null) {
-                            String jsonExample = Json.pretty(applicationJson);
-                            genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
-                            respCodeInitialized = true;
-                            hasJsonPayload = true;
-                        }
-                        if (applicationXml != null) {
-                            String xmlExample = applicationXml.toString();
-                            genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
-                            hasXmlPayload = true;
-                        }
-                    } else if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
-                        Model model = op.getResponses().get(responseEntry).getResponseSchema();
-                        String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
-                        genCode.append(getGeneratedResponsePayloads(responseEntry, schemaExample, "json", respCodeInitialized));
-                        hasJsonPayload = true;
-                    } else if (op.getResponses().get(responseEntry).getExamples() == null
-                            && op.getResponses().get(responseEntry).getResponseSchema() == null) {
-                        setDefaultGeneratedResponse(genCode, responseEntry);
-                        hasJsonPayload = true;
-                        hasXmlPayload = true;
-                    }
+                Map<String, Model> definitions = swagger.getDefinitions();
+                String finalScript;
+                if (APIConstants.IMPLEMENTATION_TYPE_TEMPLATE.equalsIgnoreCase(scriptType)) {
+                    finalScript = OASParserUtil.getJsonScript();
+                } else {
+                    finalScript = getJSScript(definitions, op);
                 }
-                //inserts minimum response code and mock payload variables to static script
-                String finalGenCode = getMandatoryScriptSection(minResponseCode, genCode);
-                //gets response section string depending on availability of json/xml payloads
-                String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
-                String finalScript = finalGenCode + responseConditions;
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
                 //sets script to each resource in the swagger
@@ -196,6 +157,53 @@ public class OAS2Parser extends APIDefinition {
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
         return returnMap;
+    }
+
+    private String getJSScript(Map<String, Model> definitions, Operation op) {
+        StringBuilder genCode = new StringBuilder();
+        boolean hasJsonPayload = false;
+        boolean hasXmlPayload = false;
+        int minResponseCode = 0;
+        for (String responseEntry : op.getResponses().keySet()) {
+            //for setting only one initializing if condition per response code
+            boolean respCodeInitialized = false;
+            if (!responseEntry.equals("default")) {
+                int responseCode = Integer.parseInt(responseEntry);
+                if (minResponseCode > responseCode) {
+                    minResponseCode = responseCode;
+                }
+            }
+            if (op.getResponses().get(responseEntry).getExamples() != null) {
+                Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
+                Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
+                if (applicationJson != null) {
+                    String jsonExample = Json.pretty(applicationJson);
+                    genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
+                    respCodeInitialized = true;
+                    hasJsonPayload = true;
+                }
+                if (applicationXml != null) {
+                    String xmlExample = applicationXml.toString();
+                    genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
+                    hasXmlPayload = true;
+                }
+            } else if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
+                Model model = op.getResponses().get(responseEntry).getResponseSchema();
+                String schemaExample = getSchemaExample(model, definitions, new HashSet<>());
+                genCode.append(getGeneratedResponsePayloads(responseEntry, schemaExample, "json", false));
+                hasJsonPayload = true;
+            } else if (op.getResponses().get(responseEntry).getExamples() == null
+                    && op.getResponses().get(responseEntry).getResponseSchema() == null) {
+                setDefaultGeneratedResponse(genCode, responseEntry);
+                hasJsonPayload = true;
+                hasXmlPayload = true;
+            }
+        }
+        //inserts minimum response code and mock payload variables to static script
+        String finalGenCode = getMandatoryScriptSection(minResponseCode, genCode);
+        //gets response section string depending on availability of json/xml payloads
+        String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
+        return finalGenCode + responseConditions;
     }
 
     /**
@@ -819,6 +827,11 @@ public class OAS2Parser extends APIDefinition {
             swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
         }
         String apiSecurity = api.getApiSecurity();
+        if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_MOCK_IMPLEMENTATION, APIConstants.X_WSO2_MOCK_IMPL_ADVANCE);
+        } else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_TEMPLATE)) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_MOCK_IMPLEMENTATION, APIConstants.X_WSO2_MOCK_IMPL_SIMPLE);
+        }
         // set mutual ssl extension if enabled
         if (apiSecurity != null) {
             List<String> securityList = Arrays.asList(apiSecurity.split(","));

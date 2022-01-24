@@ -217,16 +217,32 @@ public class OASParserUtil {
         throw new APIManagementException("Invalid OAS definition provided.");
     }
 
-    public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
+    public static Map<String, Object> generateExamples(String apiDefinition, String scriptType) throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
 
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
-            return oas3Parser.generateExample(apiDefinition);
+            return oas3Parser.generateExample(apiDefinition, scriptType);
         } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
-            return oas2Parser.generateExample(apiDefinition);
+            return oas2Parser.generateExample(apiDefinition, scriptType);
         } else {
             throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
         }
+    }
+
+    public static String getJsonScript() {
+        return "{\n" +
+                "    \"in\": \"query\",\n" +
+                "    \"name\": \"responseCode\",\n" +
+                "    \"responses\": [{\n" +
+                "        \"value\": \"200\",\n" +
+                "        \"headers\": [],\n" +
+                "        \"code\": 200,\n" +
+                "        \"payload\": {\n" +
+                "            \"application/json\": \"{\\\"description\\\" : \\\"Dummy description\\\"}\",\n" +
+                "            \"application/xml\": \"<description>Dummy description</description>\"\n" +
+                "        }\n" +
+                "    }]\n" +
+                "}";
     }
 
     public static String getOASDefinitionWithTierContentAwareProperty(String apiDefinition,
@@ -1378,6 +1394,7 @@ public class OASParserUtil {
         extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
         extensions.remove(APIConstants.X_WSO2_RESPONSE_CACHE);
         extensions.remove(APIConstants.X_WSO2_MUTUAL_SSL);
+        extensions.remove(APIConstants.X_WSO2_MOCK_IMPLEMENTATION);
     }
 
     /**
