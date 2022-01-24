@@ -23,6 +23,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface OperationPolicyTemplatesApiService {
-      public Response addOperationPolicyTemplate(InputStream templateSpecFileInputStream, Attachment templateSpecFileDetail, InputStream templateDefinitionFileInputStream, Attachment templateDefinitionFileDetail, String templateName, String flow, MessageContext messageContext) throws APIManagementException;
+      public Response addOperationPolicyTemplate(InputStream templateSpecFileInputStream, Attachment templateSpecFileDetail, InputStream templateDefinitionFileInputStream, Attachment templateDefinitionFileDetail, MessageContext messageContext) throws APIManagementException;
       public Response getAllOperationPolicyTemplates(Integer limit, Integer offset, String query, MessageContext messageContext) throws APIManagementException;
 }

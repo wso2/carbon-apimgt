@@ -16,7 +16,6 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.apimgt.api.model;
 
 import java.util.Objects;
@@ -27,8 +26,6 @@ public class OperationPolicyDataHolder {
     private int templateId = -1;
     private String apiId;
     private String revisionId;
-    private String name;
-    private String flow;
     private OperationPolicySpecification specification;
     private String definition;
 
@@ -72,26 +69,6 @@ public class OperationPolicyDataHolder {
         this.revisionId = revisionId;
     }
 
-    public String getName() {
-
-        return name;
-    }
-
-    public void setName(String name) {
-
-        this.name = name;
-    }
-
-    public String getFlow() {
-
-        return flow;
-    }
-
-    public void setFlow(String flow) {
-
-        this.flow = flow;
-    }
-
     public OperationPolicySpecification getSpecification() {
 
         return specification;
@@ -119,8 +96,9 @@ public class OperationPolicyDataHolder {
         if (o == null || getClass() != o.getClass()) return false;
         OperationPolicyDataHolder that = (OperationPolicyDataHolder) o;
         return Objects.equals(templateId, that.templateId) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(flow, that.flow) &&
+                Objects.equals(policyId, that.policyId) &&
+                Objects.equals(apiId, that.apiId) &&
+                Objects.equals(revisionId, that.revisionId) &&
                 Objects.equals(specification, that.specification) &&
                 Objects.equals(definition, that.definition);
     }
@@ -128,6 +106,6 @@ public class OperationPolicyDataHolder {
     @Override
     public int hashCode() {
 
-        return Objects.hash(templateId, name, flow, specification, definition);
+        return Objects.hash(templateId, policyId, apiId, revisionId, specification, definition);
     }
 }
