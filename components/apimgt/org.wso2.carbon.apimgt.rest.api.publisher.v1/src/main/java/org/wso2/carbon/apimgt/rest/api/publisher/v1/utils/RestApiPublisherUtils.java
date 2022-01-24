@@ -26,7 +26,9 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -39,6 +41,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class RestApiPublisherUtils {
@@ -219,4 +223,43 @@ public class RestApiPublisherUtils {
                 "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]}}}";
     }
 
+    /**
+     * This method is used to validate the policy specifications' mandatory attributes.
+     * @return boolean
+     * @throws APIManagementException
+     * */
+    public static boolean validateOperationPolicySpecification(OperationPolicySpecification policySpecification)
+            throws APIManagementException {
+        if (policySpecification.getPolicyName() == null || policySpecification.getFlow().isEmpty()
+                || policySpecification.getApiTypes().isEmpty()
+                || policySpecification.getSupportedGatewayTypes().isEmpty()) {
+            throw new APIManagementException("Invalid policy specification provided", ExceptionCodes.INVALID_ENDPOINT_URL);
+        }
+        return true;
+    }
+
+    /**
+     * This method is used to read input stream of a file and return the string content.
+     * @return String
+     * @throws IOException
+     * */
+    public static String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws IOException {
+
+        String content = null;
+        if (fileInputStream != null) {
+            String fileName = fileDetail.getDataHandler().getName();
+
+            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+
+            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+                fileContentType = fileDetail.getContentType().toString();
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            IOUtils.copy(fileInputStream, outputStream);
+            byte[] sequenceBytes = outputStream.toByteArray();
+            InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+            content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+        }
+        return content;
+    }
 }
