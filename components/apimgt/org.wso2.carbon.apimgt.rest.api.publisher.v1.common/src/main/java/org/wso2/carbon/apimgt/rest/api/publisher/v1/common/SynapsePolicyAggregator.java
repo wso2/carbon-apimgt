@@ -29,10 +29,12 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,12 +70,16 @@ public class SynapsePolicyAggregator {
             populatePolicyCaseList(template, pathToAchieve, api.getRevisionedApiId(), caseList);
         }
 
-        Map<String, Object> configMap = new HashMap<>();
-        String seqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_OPERATION_POLICY_SEQ_EXT;
-        configMap.put("sequence_name", seqExt);
-        configMap.put("case_list", caseList);
+        if (caseList.size() != 0) {
+            Map<String, Object> configMap = new HashMap<>();
+            String seqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_OPERATION_POLICY_SEQ_EXT;
+            configMap.put("sequence_name", seqExt);
+            configMap.put("case_list", caseList);
 
-        return renderPolicyTemplate(defaultSequenceTemplate, configMap);
+            return renderPolicyTemplate(defaultSequenceTemplate, configMap);
+        } else {
+            return "";
+        }
     }
 
     public static String generatePolicySequenceForProducts(APIProduct apiProduct, Map<String, String> apiLocationsMap)
@@ -89,14 +95,17 @@ public class SynapsePolicyAggregator {
             URITemplate template = apiProductResource.getUriTemplate();
             populatePolicyCaseList(template, pathToAchieve, apiProduct.getRevisionedApiProductId(), caseList);
         }
+        if (caseList.size() != 0) {
+            Map<String, Object> configMap = new HashMap<>();
+            String seqExt = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
+                    apiProduct.getId().getVersion()) + APIConstants.API_OPERATION_POLICY_SEQ_EXT;
+            configMap.put("sequence_name", seqExt);
+            configMap.put("case_list", caseList);
 
-        Map<String, Object> configMap = new HashMap<>();
-        String seqExt = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
-                apiProduct.getId().getVersion()) + APIConstants.API_OPERATION_POLICY_SEQ_EXT;
-        configMap.put("sequence_name", seqExt);
-        configMap.put("case_list", caseList);
-
-        return renderPolicyTemplate(defaultSequenceTemplate, configMap);
+            return renderPolicyTemplate(defaultSequenceTemplate, configMap);
+        } else {
+            return "";
+        }
     }
 
     public static List<Object> populatePolicyCaseList(URITemplate template, String pathToAchieve, String revisionUUID,
@@ -117,6 +126,7 @@ public class SynapsePolicyAggregator {
         List<String> caseBodyFaultFlow = new ArrayList<>();
 
         List<OperationPolicy> operationPolicies = template.getOperationPolicies();
+        Collections.sort(operationPolicies, new OperationPolicyComparator());
         for (OperationPolicy policy : operationPolicies) {
             Map<String, Object> policyParameters = policy.getParameters();
 
