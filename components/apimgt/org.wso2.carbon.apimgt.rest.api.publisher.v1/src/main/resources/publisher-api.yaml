@@ -8048,12 +8048,6 @@ paths:
                   type: string
                   description: Policy definition to upload
                   format: binary
-                policyName:
-                  type: string
-                  description: Name of the policy
-                flow:
-                  type: string
-                  description: Flow of the sequence
         required: true
       responses:
         201:
@@ -8167,12 +8161,6 @@ paths:
                   type: string
                   description: Policy template definition to upload
                   format: binary
-                templateName:
-                  type: string
-                  description: Name of the policy template
-                flow:
-                  type: string
-                  description: Applicable flows of the template
         required: true
       responses:
         201:

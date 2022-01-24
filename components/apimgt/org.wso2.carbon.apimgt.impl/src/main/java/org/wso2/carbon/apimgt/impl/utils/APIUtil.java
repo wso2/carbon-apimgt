@@ -125,6 +125,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -11513,12 +11514,12 @@ public final class APIUtil {
         return null;
     }
 
-    public static String getPolicySpecString(OperationPolicyDataHolder policyData) {
+    public static String getPolicyAttributesAsString(OperationPolicySpecification policySpecification) {
         String policyParamsString = "";
-        if (policyData.getSpecification() != null) {
-            if (policyData.getSpecification().getPolicyAttributes() != null){
+        if (policySpecification != null) {
+            if (policySpecification.getPolicyAttributes() != null){
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                policyParamsString = gson.toJson(policyData.getSpecification().getPolicyAttributes());
+                policyParamsString = gson.toJson(policySpecification.getPolicyAttributes());
             }
         }
         return policyParamsString;

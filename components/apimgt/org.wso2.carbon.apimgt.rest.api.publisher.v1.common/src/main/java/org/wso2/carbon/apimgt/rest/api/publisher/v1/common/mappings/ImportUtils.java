@@ -416,12 +416,10 @@ public class ImportUtils {
                         String policyDefinition =
                                 getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName());
 
-                        OperationPolicyDataHolder operationPolicyDataHolder = new OperationPolicyDataHolder();
-                        operationPolicyDataHolder.setName(policy.getPolicyName());
-                        operationPolicyDataHolder.setFlow(policy.getDirection());
-                        operationPolicyDataHolder.setDefinition(policyDefinition);
-                        operationPolicyDataHolder.setSpecification(policySpec);
-                        provider.addApiSpecificOperationalPolicy(api.getUuid(), operationPolicyDataHolder,
+                        OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
+                        operationPolicyData.setDefinition(policyDefinition);
+                        operationPolicyData.setSpecification(policySpec);
+                        provider.addApiSpecificOperationalPolicy(api.getUuid(), operationPolicyData,
                                 null);
                         validatedOperationPolicies.add(policy);
                     } catch (APIManagementException e) {

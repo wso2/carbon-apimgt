@@ -2677,9 +2677,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response addAPISpecificOperationPolicyDefinition(String apiId, InputStream policySpecFileInputStream,
                                                             Attachment policySpecFileDetail,
-                                                            InputStream policyTemplateFileInputStream,
-                                                            Attachment policyTemplateFileDetail, String policyName,
-                                                            String flow, MessageContext messageContext)
+                                                            InputStream policyDefinitionFileInputStream,
+                                                            Attachment policyDefinitionFileDetail,
+                                                            MessageContext messageContext)
             throws APIManagementException {
 
         try {
@@ -2696,48 +2696,37 @@ public class ApisApiServiceImpl implements ApisApiService {
             String policyTemplate = "";
             OperationPolicySpecification policySpecification;
             if (policySpecFileInputStream != null) {
-                policySpec = readInputStream(policySpecFileInputStream, policySpecFileDetail);
+                policySpec = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
                 jsonContent = CommonUtil.yamlToJson(policySpec);
                 policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
-            } else {
-                // This flow will execute if a policy specification is not found.
-                if (log.isDebugEnabled()) {
-                    log.debug("Operation policy specification not found for the policy " + policyName + " of API "
-                            + apiInfo.getName() + ". Default policy spec used");
+
+                RestApiPublisherUtils.validateOperationPolicySpecification(policySpecification);
+
+                if (policyDefinitionFileInputStream != null) {
+                    policyTemplate = RestApiPublisherUtils
+                            .readInputStream(policyDefinitionFileInputStream, policyDefinitionFileDetail);
                 }
 
-                policySpecification = new OperationPolicySpecification();
-                policySpecification.setPolicyName(policyName);
-                List<String> policyFlow = new ArrayList<String>(Arrays.asList(flow.split(",")));
-                policySpecification.setFlow(policyFlow);
+                OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
+                operationPolicyData.setSpecification(policySpecification);
+                operationPolicyData.setDefinition(policyTemplate);
+                apiProvider.addApiSpecificOperationalPolicy(apiId, operationPolicyData, organization);
+
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "API specific operation policy has been added for the API " + apiInfo.getName() +
+                                    " with name " + policySpecification.getPolicyName());
+                }
+
+                if (operationPolicyData != null) {
+                    String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
+                            .replace(RestApiConstants.APIID_PARAM, apiId) + "/" + "operational-policy";
+                    URI uri = new URI(uriString);
+                    OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
+                    createdPolicy.setName(operationPolicyData.getSpecification().getPolicyName());
+                    return Response.created(uri).entity(createdPolicy).build();
+                }
             }
-
-            if (policyTemplateFileInputStream != null) {
-                policyTemplate = readInputStream(policyTemplateFileInputStream, policyTemplateFileDetail);
-            }
-
-            OperationPolicyDataHolder operationPolicyDataHolder = new OperationPolicyDataHolder();
-            operationPolicyDataHolder.setSpecification(policySpecification);
-            operationPolicyDataHolder.setDefinition(policyTemplate);
-            operationPolicyDataHolder.setName(policyName);
-            operationPolicyDataHolder.setFlow(flow);
-            apiProvider.addApiSpecificOperationalPolicy(apiId, operationPolicyDataHolder, organization);
-
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "API specific operation policy has been added for the API " + apiInfo.getName() + " with name "
-                                + policyName);
-            }
-
-            if (operationPolicyDataHolder != null) {
-                String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
-                        .replace(RestApiConstants.APIID_PARAM, apiId) + "/" + "operational-policy";
-                URI uri = new URI(uriString);
-                OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
-                createdPolicy.setName(operationPolicyDataHolder.getName());
-                return Response.created(uri).entity(createdPolicy).build();
-            }
-
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -2753,25 +2742,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    public String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws IOException {
 
-        String content = null;
-        if (fileInputStream != null) {
-            String fileName = fileDetail.getDataHandler().getName();
-
-            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
-
-            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
-                fileContentType = fileDetail.getContentType().toString();
-            }
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            IOUtils.copy(fileInputStream, outputStream);
-            byte[] sequenceBytes = outputStream.toByteArray();
-            InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
-            content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
-        }
-        return content;
-    }
 
 
     /**

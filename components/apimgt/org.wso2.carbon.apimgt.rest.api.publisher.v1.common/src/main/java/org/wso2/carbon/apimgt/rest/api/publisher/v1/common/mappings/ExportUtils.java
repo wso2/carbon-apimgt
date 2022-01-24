@@ -746,19 +746,19 @@ public class ExportUtils {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        OperationPolicyDataHolder policyDefinition =  apiProvider
+                        OperationPolicyDataHolder policyData =  apiProvider
                                 .getAPISpecificPolicyByPolicyName(api.getUuid(), policy.getPolicyName());
-                        if (policyDefinition != null) {
+                        if (policyData != null) {
                             String policyName = archivePath  + File.separator
                                     + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
-                                            policyDefinition.getName();
-                            if (policyDefinition.getSpecification() != null) {
+                                            policyData.getSpecification().getPolicyName();
+                            if (policyData.getSpecification() != null) {
                                 CommonUtil.writeDtoToFile(policyName, exportFormat,
                                         ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                                        policyDefinition.getSpecification());
+                                        policyData.getSpecification());
                             }
-                            if (policyDefinition.getDefinition() != null) {
-                                CommonUtil.writeFile(policyName + ".toml", policyDefinition.getDefinition());
+                            if (policyData.getDefinition() != null) {
+                                CommonUtil.writeFile(policyName + ".toml", policyData.getDefinition());
                             }
                         }
                     }

@@ -2530,7 +2530,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 }
                                 OperationPolicySpecification templateSpecification = policyTemplateData.getSpecification();
                                 if (validateAppliedPolicyWithSpecification(templateSpecification, policy)) {
-                                    policyTemplateData.setName(policyName);
                                     int policyId = addApiSpecificOperationalPolicy(api.getUuid(), policyTemplateData, null);
                                     policy.setPolicyId(policyId);
                                     validatedPolicies.add(policy);
