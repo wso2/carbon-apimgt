@@ -5760,6 +5760,10 @@ public class ApiMgtDAO {
                         for (OperationPolicy policy : uriTemplate.getOperationPolicies()) {
                             Gson gson = new Gson();
                             String paramJSON = gson.toJson(policy.getParameters());
+                            if (log.isDebugEnabled()) {
+                                log.debug("Adding operation policy "+ policy.getPolicyName() + "for API "
+                                        + api.getId().getApiName() + " to URL mapping Id " + uriMappingId);
+                            }
 
                             operationPolicyMappingPrepStmt.setInt(1, uriMappingId);
                             operationPolicyMappingPrepStmt.setInt(2, policy.getPolicyId());
@@ -14579,7 +14583,6 @@ public class ApiMgtDAO {
                 removeURLMappingsStatement.addBatch();
             }
             removeURLMappingsStatement.executeBatch();
-
             //Add new resources
             addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
         } catch (SQLException e) {
@@ -16314,7 +16317,6 @@ public class ApiMgtDAO {
                                 insertProductResourceMappingStatement.addBatch();
                             }
                             Map<Integer, Integer> policyMap = new HashMap<>();
-
                             if (urlMapping.getOperationPolicies().size() > 0) {
                                 for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
                                     if (!policyMap.keySet().contains(policy.getPolicyId())) {

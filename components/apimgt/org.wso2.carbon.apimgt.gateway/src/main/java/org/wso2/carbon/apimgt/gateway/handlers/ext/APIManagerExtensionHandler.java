@@ -78,8 +78,6 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         if (sequence instanceof Mediator) {
             return ((Mediator) sequence).mediate(messageContext);
         }
-
-
         return true;
     }
 
