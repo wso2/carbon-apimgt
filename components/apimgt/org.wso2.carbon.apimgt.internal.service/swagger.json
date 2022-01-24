@@ -745,31 +745,6 @@
         }
       }
     },
-    "/apis/undeployed-revision" : {
-      "post" : {
-        "tags" : [ "UnDeployed API Revision" ],
-        "summary" : "Remove undeployed revision",
-        "description" : "Remove undeployed Revision entry from the database",
-        "operationId" : "unDeployedAPIRevision",
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "unDeployedAPIRevisionDTO",
-          "description" : "Notification event payload",
-          "required" : false,
-          "schema" : {
-            "$ref" : "#/definitions/UnDeployedAPIRevision"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Fetch un-deployed revision"
-          },
-          "default" : {
-            "$ref" : "#/definitions/Error"
-          }
-        }
-      }
-    },
     "/ga-config" : {
       "get" : {
         "tags" : [ "Retrieving Runtime artifacts" ],
@@ -1092,29 +1067,6 @@
       },
       "title" : "Deployed revision information"
     },
-    "UnDeployedAPIRevision" : {
-      "properties" : {
-        "apiUUID" : {
-          "type" : "string",
-          "example" : "c26b2b9b-4632-4ca4-b6f3-521c8863990c",
-          "minLength" : 0,
-          "maxLength" : 255
-        },
-        "revisionUUID" : {
-          "type" : "string",
-          "example" : "c26b2b9b-4632-4ca4-b6f3-521c8863990c",
-          "minLength" : 0,
-          "maxLength" : 255
-        },
-        "environment" : {
-          "type" : "string",
-          "example" : "Default",
-          "minLength" : 0,
-          "maxLength" : 255
-        }
-      },
-      "title" : "UnDeployed revision information"
-    },
     "DeployedEnvInfo" : {
       "properties" : {
         "name" : {
@@ -1311,8 +1263,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
-          "default" : "DIRECT"
+          "default" : "DIRECT",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
         }
       }
     },

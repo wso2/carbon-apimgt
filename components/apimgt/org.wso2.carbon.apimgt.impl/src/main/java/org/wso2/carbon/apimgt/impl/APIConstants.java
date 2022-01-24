@@ -2863,16 +2863,6 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_IN = "in";
     public static final String OPERATION_SEQUENCE_TYPE_OUT = "out";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
-    public static final String HEADER_NAME_PARAM = "headerName";
-    public static final String HEADER_VALUE_PARAM = "headerValue";
-    public static final String HTTP_METHOD_PARAM = "httpMethod";
-    public static final String RESOURCE_PATH_PARAM = "resourcePath";
-    public static final String QUERY_PARAM_NAME = "paramName";
-    public static final String QUERY_PARAM_VALUE = "paramValue";
-    public static final String ENDPOINT_ID_PARAM = "endpointId";
-    public static final String PATH_PARAM_PREFIX = "uri.var.";
-
-
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
 

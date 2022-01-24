@@ -1379,9 +1379,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         validateResourceThrottlingTiers(api, tenantDomain);
 
-
-
-        //Validate Operation Mediation Policies
+        //Validate Operation Policies
         validateOperationPolicyParameters(api);
 
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
@@ -2542,7 +2540,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                         String templateName = policy.getTemplateName();
                         if (templateName != null && !templateName.isEmpty()) {
-                            OperationPolicyDefinition policyTemplate = getPolicyTemplateForPolicyName(templateName);
+                            OperationPolicyDefinition policyTemplate = getPolicyTemplateForTemplateName(templateName);
                             if (policyTemplate != null) {
                                 // A template is found for specified policy. This will be validated according to the provided
                                 // attributes and added to API policy list
@@ -9540,28 +9538,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public int addOperationPolicy(int urlMappingId, OperationPolicy policy) throws APIManagementException {
-        return apiMgtDAO.addOperationPolicy(urlMappingId, policy);
-    }
-
-    @Override
-    public Set<URITemplate> getURITemplatesOfAPI(String uuid) throws APIManagementException {
-        return apiMgtDAO.getURITemplatesOfAPI(uuid);
-    }
-
-    @Override
     public int addApiSpecificOperationalPolicyDefinition(String apiUUID,
                                                              OperationPolicyDefinition operationPolicyDefinition,
                                                              String organization)
             throws APIManagementException {
-        return apiMgtDAO.addAPISpecificOperationPolicyDefinition(apiUUID, operationPolicyDefinition);
+        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, operationPolicyDefinition);
     }
 
 
     @Override
     public OperationPolicyDefinition getAPISpecificPolicyDefinitionForPolicyName(String apiUUID, String policyName)
             throws APIManagementException {
-        return apiMgtDAO.getAPISpecificOperationPolicyDefinition(apiUUID, policyName);
+        return apiMgtDAO.getAPISpecificOperationPolicy(apiUUID, policyName);
     }
 
     @Override
@@ -9570,9 +9558,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.addOperationPolicyTemplate(operationPolicyDefinition);
     }
 
-    public OperationPolicyDefinition getPolicyTemplateForPolicyName(String policyName)
+    public OperationPolicyDefinition getPolicyTemplateForTemplateName(String templateName)
             throws APIManagementException {
-        return apiMgtDAO.getOperationPolicyTemplate(policyName);
+        return apiMgtDAO.getOperationPolicyTemplate(templateName);
     }
 
 }
