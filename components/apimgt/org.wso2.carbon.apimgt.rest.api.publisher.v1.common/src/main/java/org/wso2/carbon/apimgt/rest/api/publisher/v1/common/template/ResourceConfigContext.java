@@ -20,7 +20,12 @@ import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -52,7 +57,6 @@ public class ResourceConfigContext extends ConfigContextDecorator {
             if (api.getUriTemplates() == null || api.getUriTemplates().isEmpty()) {
                 throw new APIManagementException("At least one resource is required");
             }
-
             this.faultSeqExt = APIUtil.getFaultSequenceName(api);
         }
     }
@@ -66,8 +70,30 @@ public class ResourceConfigContext extends ConfigContextDecorator {
             context.put("apiType", api.getType());
             context.put("faultSequence", faultSeqExt != null ? faultSeqExt : api.getFaultSequence());
         } else if (apiProduct != null) {
+            //Here we aggregate duplicate resourceURIs of an API and populate httpVerbs set in the uri template
+            List<APIProductResource> productResources = new ArrayList<>(apiProduct.getProductResources());
+            List<APIProductResource> aggregateResources = new ArrayList<>();
+            List<String> uriTemplateNames = new ArrayList<String>();
+
+            for (APIProductResource productResource : productResources) {
+                URITemplate uriTemplate = productResource.getUriTemplate();
+                String productResourceKey = productResource.getApiIdentifier() + ":" + uriTemplate.getUriTemplate();
+                if (uriTemplateNames.contains(productResourceKey)) {
+                    for (APIProductResource resource : aggregateResources) {
+                        String resourceKey =
+                                resource.getApiIdentifier() + ":" + resource.getUriTemplate().getUriTemplate();
+                        if (resourceKey.equals(productResourceKey)) {
+                            resource.getUriTemplate().setHttpVerbs(uriTemplate.getHTTPVerb());
+                        }
+                    }
+                } else {
+                    uriTemplate.setHttpVerbs(uriTemplate.getHTTPVerb());
+                    aggregateResources.add(productResource);
+                    uriTemplateNames.add(productResourceKey);
+                }
+            }
             context.put("apiType", apiProduct.getType());
-            context.put("aggregates", apiProduct.getProductResources());
+            context.put("aggregates", aggregateResources);
         }
 
         return context;

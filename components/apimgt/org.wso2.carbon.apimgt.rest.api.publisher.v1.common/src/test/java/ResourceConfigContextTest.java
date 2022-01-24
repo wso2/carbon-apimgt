@@ -92,6 +92,28 @@ public class ResourceConfigContextTest {
         Object aggregates = context.get("aggregates");
         Assert.assertNotNull(aggregates);
         Assert.assertTrue(aggregates instanceof List);
+        List<APIProductResource> apiProductResources = (List<APIProductResource>) aggregates;
+        Assert.assertTrue(assertAPIProductResourceList(apiProduct.getProductResources(), apiProductResources));
+    }
+
+    private boolean assertAPIProductResourceList(List<APIProductResource> productResources,
+                                                 List<APIProductResource> aggregatedResources) {
+        for (APIProductResource aggregatedResource : aggregatedResources) {
+            for (APIProductResource productResource : productResources) {
+                if (aggregatedResource.getApiIdentifier().equals(productResource.getApiIdentifier())) {
+                    if (aggregatedResource.getUriTemplate().getUriTemplate()
+                            .equals(productResource.getUriTemplate().getUriTemplate())) {
+                        if (!aggregatedResource.getUriTemplate().getHttpVerbs()
+                                .contains(productResource.getUriTemplate().getHTTPVerb())) {
+                            return false;
+                        }
+                    }
+                } else {
+
+                }
+            }
+        }
+        return true;
     }
 
     private Set<URITemplate> setAPIUriTemplates() {
