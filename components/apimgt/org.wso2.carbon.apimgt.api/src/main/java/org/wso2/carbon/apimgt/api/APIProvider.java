@@ -1853,14 +1853,13 @@ public interface APIProvider extends APIManager {
      * policy definition sequence
      *
      * @param apiUUID           UUID of the API
-     * @param operationPolicyDefinition   Operation Policy Definition
+     * @param operationPolicyDataHolder   Operation Policy Definition
      * @param organization      Identifier of an organization
      * @return policy ID
      * @throws APIManagementException
      */
-    int addApiSpecificOperationalPolicyDefinition(String apiUUID, OperationPolicyDefinition operationPolicyDefinition,
-                                                  String organization)
-            throws APIManagementException;
+    int addApiSpecificOperationalPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder,
+                                        String organization) throws APIManagementException;
 
 
     /**
@@ -1872,17 +1871,17 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy Definition
      * @throws APIManagementException
      */
-    OperationPolicyDefinition getAPISpecificPolicyDefinitionForPolicyName(String apiUUID, String policyName)
+    OperationPolicyDataHolder getAPISpecificPolicyByPolicyName(String apiUUID, String policyName)
             throws APIManagementException;
 
 
     /**
      * Add operational policy template
-     * @param operationPolicyDefinition     Operation Policy Definition
+     * @param operationPolicyDataHolder     Operation Policy Definition
      * @param organization                  Identifier of an organization
      * @return status of the policy storage
      * @throws APIManagementException
      */
-    boolean addOperationalPolicyTemplate(OperationPolicyDefinition operationPolicyDefinition, String organization)
+    boolean addOperationalPolicyTemplate(OperationPolicyDataHolder operationPolicyDataHolder, String organization)
             throws APIManagementException;
 }

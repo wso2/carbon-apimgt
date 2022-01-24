@@ -123,7 +123,7 @@ public class SynapsePolicyAggregator {
             String policyDefinition = ImportUtils.getOperationPolicyDefinitionFromFile(pathToAchieve,
                     policy.getPolicyName());
             if (policyDefinition == null) {
-                policyDefinition = apiProvider.getAPISpecificPolicyDefinitionForPolicyName(revisionUUID,
+                policyDefinition = apiProvider.getAPISpecificPolicyByPolicyName(revisionUUID,
                         policy.getPolicyName()).getDefinition();
             }
 
