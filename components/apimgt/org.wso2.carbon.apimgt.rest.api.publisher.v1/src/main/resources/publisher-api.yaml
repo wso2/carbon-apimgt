@@ -8074,7 +8074,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationPolicyDefinition'
+                $ref: '#/components/schemas/OperationPolicyDataHolder'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -8163,11 +8163,11 @@ paths:
                   type: string
                   description: Policy template specification to upload
                   format: binary
-                policyDefinitionFile:
+                templateDefinitionFile:
                   type: string
                   description: Policy template definition to upload
                   format: binary
-                policyName:
+                templateName:
                   type: string
                   description: Name of the policy template
                 flow:
@@ -8193,7 +8193,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationPolicyDefinition'
+                $ref: '#/components/schemas/OperationPolicyDataHolder'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -11874,11 +11874,11 @@ components:
         list:
           type: array
           items:
-            $ref: '#/components/schemas/OperationPolicyDefinition'
+            $ref: '#/components/schemas/OperationPolicyDataHolder'
         pagination:
           $ref: '#/components/schemas/Pagination'
     OperationPolicyDefinition:
-      title: OperationPolicyDefinition
+      title: OperationPolicyDataHolder
       type: object
       properties:
         name:

@@ -84,8 +84,9 @@ import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
@@ -2486,108 +2487,105 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void validateOperationPolicyParameters(API api) throws APIManagementException {
+
+        boolean isOperationPoliciesAllowedForAPIType = true;
         Set<URITemplate> uriTemplates = api.getUriTemplates();
-        String apiId = api.getUuid();
 
         if (APIConstants.API_TYPE_WS.equals(api.getType()) || APIConstants.API_TYPE_SSE.equals(api.getType())
                 || APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
             if (log.isDebugEnabled()) {
                 log.debug("Operation policies are not allowed for " + api.getType() + " APIs");
             }
+            isOperationPoliciesAllowedForAPIType = false;
         }
 
         for (URITemplate uriTemplate : uriTemplates) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
             List<OperationPolicy> validatedPolicies = new ArrayList<>();
-            if (operationPolicies != null && !operationPolicies.isEmpty()) {
+            if (operationPolicies != null && !operationPolicies.isEmpty() && isOperationPoliciesAllowedForAPIType) {
                 for (OperationPolicy policy : operationPolicies) {
-                    String policyNameFromURI = policy.getPolicyName();
-                    OperationPolicyDefinition policyDefinition = getAPISpecificPolicyDefinitionForPolicyName(
-                            api.getUuid(), policyNameFromURI);
-                    if (policyDefinition != null) {
-                        if (policyDefinition.getSpecification().getPolicyAttributes() != null ) {
-                            for (OperationPolicySpecAttribute attribute : policyDefinition.getSpecification()
-                                    .getPolicyAttributes()) {
-                                if (attribute.isRequired()) {
-                                    Object policyAttribute = policy.getParameters().get(attribute.getAttributeName());
-                                    if (policyAttribute != null) {
-                                        //TODO: Attribute Type validation is required
-                                        //TODO: Do a API type, flow and gateway type validation
-                                        //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
-                                        //    log.error("Policy attribute type mismatched. Expected type is " +
-                                        //            attribute.getAttributeType() +
-                                        //            " but received " + policyAttribute.getClass().getName());
-                                        //}
-                                    } else {
-                                        log.error("Required policy attribute is not found" +
-                                                attribute.getAttributeName());
-                                        throw new APIManagementException(
-                                                "Required" + attribute.getAttributeName() + " parameter for " +
-                                                        policy.getPolicyName()
-                                                        + " operation policy is either missing or empty", ExceptionCodes
-                                                .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "headerName",
-                                                        "SET_HEADER"));
-                                    }
-                                }
-                            }
+                    String policyName = policy.getPolicyName();
+                    OperationPolicyDataHolder policyData = getAPISpecificPolicyByPolicyName(
+                            api.getUuid(), policyName);
+                    OperationPolicySpecification policySpecification = policyData.getSpecification();
+                    if (policyData != null) {
+                        //Validate the policy applied direction
+                        if (validateAppliedPolicyWithSpecification(policySpecification, policy)) {
+                            policy.setPolicyId(policyData.getPolicyId());
+                            validatedPolicies.add(policy);
                         }
-                        policy.setPolicyId(policyDefinition.getPolicyId());
-                        validatedPolicies.add(policy);
                     } else {
-                        if (log.isDebugEnabled()){
-                            log.debug("Operation policy is not found for API. Checking templates");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Operation policy by the name " + policyName + "is not found for API. Checking templates");
                         }
-
                         String templateName = policy.getTemplateName();
                         if (templateName != null && !templateName.isEmpty()) {
-                            OperationPolicyDefinition policyTemplate = getPolicyTemplateForTemplateName(templateName);
-                            if (policyTemplate != null) {
+                            OperationPolicyDataHolder policyTemplateData = getPolicyTemplateForTemplateName(templateName);
+                            if (policyTemplateData != null) {
                                 // A template is found for specified policy. This will be validated according to the provided
                                 // attributes and added to API policy list
-                                if (policyTemplate.getSpecification().getPolicyAttributes() != null) {
-                                    // There can be policies without policy attributes
-                                    for (OperationPolicySpecAttribute attribute : policyTemplate.getSpecification()
-                                            .getPolicyAttributes()) {
-                                        if (attribute.isRequired()) {
-                                            Object policyAttribute =
-                                                    policy.getParameters().get(attribute.getAttributeName());
-                                            if (policyAttribute != null) {
-                                                //TODO: Attribute Type validation is required
-                                                //TODO: Do a API type, flow and gateway type validation
-                                                //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
-                                                //    log.error("Policy attribute type mismatched. Expected type is " +
-                                                //            attribute.getAttributeType() +
-                                                //            " but received " + policyAttribute.getClass().getName());
-                                                //}
-                                            } else {
-                                                log.error("Required policy attribute is not found " +
-                                                        attribute.getAttributeName());
-                                                throw new APIManagementException(
-                                                        "Required" + attribute.getAttributeName()
-                                                                + " parameter for " + policy.getPolicyName() +
-                                                                " operation policy is either missing or empty",
-                                                        ExceptionCodes
-                                                                .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS,
-                                                                        "headerName", "SET_HEADER"));
-                                            }
-                                        }
-                                    }
+                                if (log.isDebugEnabled()) {
+                                    log.debug("A template is found for " + policyName + " as " + templateName
+                                            + ". Validating the templates");
                                 }
-                                policyTemplate.setName(policyNameFromURI);
-                                int policyId = addApiSpecificOperationalPolicyDefinition(api.getUuid(), policyTemplate, null);
-                                policy.setPolicyId(policyId);
-                                validatedPolicies.add(policy);
+                                OperationPolicySpecification templateSpecification = policyTemplateData.getSpecification();
+                                if (validateAppliedPolicyWithSpecification(templateSpecification, policy)) {
+                                    policyTemplateData.setName(policyName);
+                                    int policyId = addApiSpecificOperationalPolicy(api.getUuid(), policyTemplateData, null);
+                                    policy.setPolicyId(policyId);
+                                    validatedPolicies.add(policy);
+                                }
                             } else {
-                                log.error("Required policy " + policyNameFromURI + " is not found. Hence dropped.");
+                                log.error("Required policy " + policyName + " or policy template" +  templateName +
+                                        " is not found. Hence dropped.");
                             }
                         } else {
-                            log.error("Required policy " + policyNameFromURI + "is not found. Hence dropped.");
+                            log.error("Required policy " + policyName + "is not found. Hence dropped.");
                         }
                     }
                 }
             }
             uriTemplate.setOperationPolicies(validatedPolicies);
         }
+    }
+
+    private boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
+                                                           OperationPolicy appliedPolicy) {
+
+        //Validate the policy applied direction
+        if (!policySpecification.getFlow().contains(appliedPolicy.getDirection())) {
+            if (log.isDebugEnabled()) {
+                log.debug("The policy " + policySpecification.getDisplayName()
+                        + " is not support in the " + appliedPolicy.getDirection() + " flow. Hence skipped.");
+            }
+            return false;
+        }
+
+        //Validate policy Attributes
+        if (policySpecification.getPolicyAttributes() != null) {
+            for (OperationPolicySpecAttribute attribute : policySpecification.getPolicyAttributes()) {
+                if (attribute.isRequired()) {
+                    Object policyAttribute = appliedPolicy.getParameters().get(attribute.getAttributeName());
+                    if (policyAttribute != null) {
+                        //TODO: Attribute Type validation is required
+                        //TODO: Do a API type, flow and gateway type validation
+                        //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
+                        //    log.error("Policy attribute type mismatched. Expected type is " +
+                        //            attribute.getAttributeType() +
+                        //            " but received " + policyAttribute.getClass().getName());
+                        //}
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Required policy attribute " + attribute.getAttributeName()
+                                    + " is not found for the the policy " + policySpecification.getDisplayName()
+                                    + ". Hence skipped.");
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -9538,27 +9536,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public int addApiSpecificOperationalPolicyDefinition(String apiUUID,
-                                                             OperationPolicyDefinition operationPolicyDefinition,
-                                                             String organization)
+    public int addApiSpecificOperationalPolicy(String apiUUID,
+                                               OperationPolicyDataHolder operationPolicyDataHolder,
+                                               String organization)
             throws APIManagementException {
-        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, operationPolicyDefinition);
+        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, operationPolicyDataHolder);
     }
 
 
     @Override
-    public OperationPolicyDefinition getAPISpecificPolicyDefinitionForPolicyName(String apiUUID, String policyName)
+    public OperationPolicyDataHolder getAPISpecificPolicyByPolicyName(String apiUUID, String policyName)
             throws APIManagementException {
         return apiMgtDAO.getAPISpecificOperationPolicy(apiUUID, policyName);
     }
 
     @Override
-    public boolean addOperationalPolicyTemplate(OperationPolicyDefinition operationPolicyDefinition,String organization)
+    public boolean addOperationalPolicyTemplate(OperationPolicyDataHolder operationPolicyDataHolder, String organization)
             throws APIManagementException {
-        return apiMgtDAO.addOperationPolicyTemplate(operationPolicyDefinition);
+        return apiMgtDAO.addOperationPolicyTemplate(operationPolicyDataHolder);
     }
 
-    public OperationPolicyDefinition getPolicyTemplateForTemplateName(String templateName)
+    public OperationPolicyDataHolder getPolicyTemplateForTemplateName(String templateName)
             throws APIManagementException {
         return apiMgtDAO.getOperationPolicyTemplate(templateName);
     }
