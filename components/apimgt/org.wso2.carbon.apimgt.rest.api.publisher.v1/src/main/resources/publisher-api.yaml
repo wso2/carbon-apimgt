@@ -8074,7 +8074,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationPolicyDataHolder'
+                $ref: '#/components/schemas/OperationPolicyDefinition'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -8193,7 +8193,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationPolicyDataHolder'
+                $ref: '#/components/schemas/OperationPolicyDefinition'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -11874,11 +11874,11 @@ components:
         list:
           type: array
           items:
-            $ref: '#/components/schemas/OperationPolicyDataHolder'
+            $ref: '#/components/schemas/OperationPolicyDefinition'
         pagination:
           $ref: '#/components/schemas/Pagination'
     OperationPolicyDefinition:
-      title: OperationPolicyDataHolder
+      title: OperationPolicyDefinition
       type: object
       properties:
         name:
