@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.Map;
 import java.util.Objects;
 
-public class OperationPolicy {
+public class OperationPolicy implements Comparable<OperationPolicy>{
 
     private String policyName = "";
     private String templateName = "";
@@ -94,5 +94,10 @@ public class OperationPolicy {
 
     @Override public int hashCode() {
         return Objects.hash(policyName, direction, parameters, policyId);
+    }
+
+    @Override
+    public int compareTo(OperationPolicy o) {
+        return this.order - o.getOrder();
     }
 }
