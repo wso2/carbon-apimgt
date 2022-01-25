@@ -2719,12 +2719,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
 
                 if (operationPolicyData != null) {
-                    String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
-                            .replace(RestApiConstants.APIID_PARAM, apiId) + "/" + "operational-policy";
-                    URI uri = new URI(uriString);
                     OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
-                    createdPolicy.setName(operationPolicyData.getSpecification().getPolicyName());
-                    return Response.created(uri).entity(createdPolicy).build();
+                    createdPolicy.setName(policySpecification.getPolicyName());
+                    createdPolicy.setApiTypes(policySpecification.getApiTypes());
+                    createdPolicy.setFlows(policySpecification.getFlow());
+                    createdPolicy.setGatewayTypes(policySpecification.getSupportedGatewayTypes());
+                    return Response.ok().entity(createdPolicy).build();
                 }
             }
         } catch (APIManagementException e) {

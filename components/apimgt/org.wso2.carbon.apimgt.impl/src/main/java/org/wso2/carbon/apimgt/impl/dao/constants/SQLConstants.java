@@ -3750,7 +3750,16 @@ public class SQLConstants {
                 " FROM " +
                         " AM_API_OPERATION_POLICY_DEFINITIONS " +
                 " WHERE " +
-                        " API_UUID=? AND POLICY_NAME=?";
+                        " API_UUID=? AND POLICY_NAME=? AND REVISION_UUID IS NULL";
+
+        public static final String GET_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION =
+                "SELECT " +
+                        " POLICY_ID, TEMPLATE_ID, REVISION_UUID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, " +
+                        " API_TYPES,POLICY_PARAMETERS,POLICY_DEFINITION" +
+                " FROM " +
+                        " AM_API_OPERATION_POLICY_DEFINITIONS " +
+                " WHERE " +
+                        " API_UUID=? AND POLICY_NAME=? AND REVISION_UUID = ?";
 
         public static final String GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION_FOR_API =
                 "SELECT " +

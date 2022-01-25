@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OperationPolicySpecification {
@@ -26,10 +27,10 @@ public class OperationPolicySpecification {
     private String policyName;
     private String displayName;
     private String policyDescription;
-    private List<String> flow;
-    private List<String> supportedGatewayTypes;
-    private List<String> apiTypes;
-    private List<OperationPolicySpecAttribute> policyAttributes;
+    private List<String> flow = new ArrayList<>();
+    private List<String> supportedGatewayTypes = new ArrayList<>();
+    private List<String> apiTypes = new ArrayList<>();
+    private List<OperationPolicySpecAttribute> policyAttributes = new ArrayList<>();
 
     public String getPolicyName() {
 

@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.OperationPolicyTemplatesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDefinitionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
@@ -84,12 +85,12 @@ public class OperationPolicyTemplatesApiServiceImpl implements OperationPolicyTe
                 }
 
                 if (operationPolicyData != null) {
-                    String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
-                            .replace(RestApiConstants.APIID_PARAM, "111") + "/" + "operational-policy";
-                    URI uri = new URI(uriString);
                     OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
-                    createdPolicy.setName(operationPolicyData.getSpecification().getPolicyName());
-                    return Response.created(uri).entity(createdPolicy).build();
+                    createdPolicy.setName(policySpecification.getPolicyName());
+                    createdPolicy.setApiTypes(policySpecification.getApiTypes());
+                    createdPolicy.setFlows(policySpecification.getFlow());
+                    createdPolicy.setGatewayTypes(policySpecification.getSupportedGatewayTypes());
+                    return Response.ok().entity(createdPolicy).build();
                 }
             }
         } catch (APIManagementException e) {

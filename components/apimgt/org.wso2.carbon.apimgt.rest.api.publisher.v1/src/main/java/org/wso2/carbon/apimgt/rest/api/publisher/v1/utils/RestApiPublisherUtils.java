@@ -230,10 +230,12 @@ public class RestApiPublisherUtils {
      * */
     public static boolean validateOperationPolicySpecification(OperationPolicySpecification policySpecification)
             throws APIManagementException {
-        if (policySpecification.getPolicyName() == null || policySpecification.getFlow().isEmpty()
+        if (policySpecification.getPolicyName() == null || policySpecification.getPolicyName().isEmpty()
+                || policySpecification.getFlow().isEmpty()
                 || policySpecification.getApiTypes().isEmpty()
                 || policySpecification.getSupportedGatewayTypes().isEmpty()) {
-            throw new APIManagementException("Invalid policy specification provided", ExceptionCodes.INVALID_ENDPOINT_URL);
+            throw new APIManagementException("Invalid policy specification provided",
+                    ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
         }
         return true;
     }
