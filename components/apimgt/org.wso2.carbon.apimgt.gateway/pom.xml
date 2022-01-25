@@ -43,6 +43,12 @@
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-extensions</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -79,6 +85,12 @@
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-commons</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
