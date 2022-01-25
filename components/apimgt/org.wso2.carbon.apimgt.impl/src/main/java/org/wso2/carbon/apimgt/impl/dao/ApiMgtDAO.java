@@ -7272,7 +7272,9 @@ public class ApiMgtDAO {
                     OperationPolicy policy = new OperationPolicy();
                     policy.setPolicyName(rs.getString("POLICY_NAME"));
                     policy.setDirection(rs.getString("DIRECTION"));
+                    policy.setPolicyId(rs.getInt("POLICY_ID"));
                     policy.setOrder(rs.getInt("POLICY_ORDER"));
+                    policy.setTemplateName(rs.getString("TEMPLATE_NAME"));
                     policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                     operationPolicies.add(policy);
                 }
@@ -7297,10 +7299,10 @@ public class ApiMgtDAO {
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
         if (apiRevision != null && apiRevision.getApiUUID() != null) {
             currentApiUuid = apiRevision.getApiUUID();
-            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL;
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_FOR_API_REVISION_SQL;
             isRevision = true;
         } else {
-            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL;
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_OF_API_SQL;
             currentApiUuid = uuid;
         }
 
@@ -7347,10 +7349,10 @@ public class ApiMgtDAO {
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
         if (apiRevision != null && apiRevision.getApiUUID() != null) {
             currentApiUuid = apiRevision.getApiUUID();
-            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL;
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_FOR_API_REVISION_SQL;
             isRevision = true;
         } else {
-            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL;
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_OF_API_SQL;
             currentApiUuid = uuid;
         }
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -7392,7 +7394,7 @@ public class ApiMgtDAO {
             throws SQLException, APIManagementException {
         try (Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
-                        SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_PRODUCT_SQL)) {
+                        SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_API_PRODUCT_SQL)) {
             ps.setString(1, productRevisionId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -7404,6 +7406,7 @@ public class ApiMgtDAO {
                         policy.setPolicyName(rs.getString("POLICY_NAME"));
                         policy.setPolicyId(rs.getInt("POLICY_ID"));
                         policy.setOrder(rs.getInt("POLICY_ORDER"));
+                        policy.setTemplateName(rs.getString("TEMPLATE_NAME"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
                         uriTemplate.addOperationPolicy(policy);
@@ -14746,6 +14749,8 @@ public class ApiMgtDAO {
                                         policy.setPolicyName(policiesResult.getString("POLICY_NAME"));
                                         policy.setOrder(policiesResult.getInt("POLICY_ORDER"));
                                         policy.setDirection(policiesResult.getString("DIRECTION"));
+                                        policy.setPolicyId(policiesResult.getInt("POLICY_ID"));
+                                        policy.setTemplateName(policiesResult.getString("TEMPLATE_NAME"));
                                         policy.setParameters(APIMgtDBUtil
                                                 .convertJSONStringToMap(policiesResult.getString("PARAMETERS")));
                                         operationPolicies.add(policy);
@@ -14807,6 +14812,8 @@ public class ApiMgtDAO {
                                         policy.setPolicyName(policiesResult.getString("POLICY_NAME"));
                                         policy.setOrder(policiesResult.getInt("POLICY_ORDER"));
                                         policy.setDirection(policiesResult.getString("DIRECTION"));
+                                        policy.setPolicyId(policiesResult.getInt("POLICY_ID"));
+                                        policy.setTemplateName(policiesResult.getString("TEMPLATE_NAME"));
                                         policy.setParameters(APIMgtDBUtil
                                                 .convertJSONStringToMap(policiesResult.getString("PARAMETERS")));
                                         operationPolicies.add(policy);
@@ -18071,9 +18078,9 @@ public class ApiMgtDAO {
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
 
         if (apiRevision == null) {
-            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL;
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_OF_API_SQL;
         } else {
-            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL;
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_FOR_API_REVISION_SQL;
         }
 
         Map<String, URITemplate> uriTemplates = new HashMap<>();

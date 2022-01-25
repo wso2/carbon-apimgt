@@ -3668,17 +3668,19 @@ public class SQLConstants {
 
         public static final String GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID =
                 "SELECT " +
-                        " OPD.POLICY_NAME, OPM.DIRECTION, OPM.PARAMETERS, OPM.POLICY_ORDER " +
+                        " OPD.POLICY_NAME, OPM.DIRECTION, OPM.PARAMETERS, OPM.POLICY_ORDER, OPM.POLICY_ID, " +
+                        " OPT.TEMPLATE_NAME " +
                 " FROM " +
                         " AM_API_URL_MAPPING AUM " +
                 " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
                 " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID " +
+                " INNER JOIN AM_OPERATION_POLICY_TEMPLATES OPT ON OPT.TEMPLATE_ID = OPD.TEMPLATE_ID " +
                 " AND " +
                         " AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
                 " WHERE " +
                         " AUM.URL_MAPPING_ID = ?";
 
-        public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL =
+        public static final String GET_OPERATION_POLICIES_OF_API_SQL =
                 " SELECT " +
                         " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD," +
                         " OPD.POLICY_NAME, OPM.PARAMETERS, OPM.DIRECTION, OPM.POLICY_ORDER, OPM.POLICY_ID," +
@@ -3695,19 +3697,7 @@ public class SQLConstants {
                         " AUM.REVISION_UUID IS NULL " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
-        public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_PRODUCT_SQL =
-                " SELECT " +
-                        " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, " +
-                        " OPD.POLICY_NAME, OPM.PARAMETERS, OPM.DIRECTION, OPM.POLICY_ORDER, OPM.POLICY_ID " +
-                " FROM " +
-                        " AM_API_URL_MAPPING AUM " +
-                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
-                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID " +
-                " WHERE " +
-                        " AUM.REVISION_UUID = ? " +
-                " ORDER BY AUM.URL_MAPPING_ID ASC ";
-
-        public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL =
+        public static final String GET_OPERATION_POLICIES_FOR_API_REVISION_SQL =
                 " SELECT " +
                         " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, " +
                         " OPD.POLICY_NAME, " +
@@ -3722,6 +3712,20 @@ public class SQLConstants {
                 " WHERE " +
                         " API.API_ID = ? " +
                 " AND " +
+                        " AUM.REVISION_UUID = ? " +
+                " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
+        public static final String GET_OPERATION_POLICIES_PER_API_PRODUCT_SQL =
+                " SELECT " +
+                        " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, " +
+                        " OPD.POLICY_NAME, OPM.PARAMETERS, OPM.DIRECTION, OPM.POLICY_ORDER, OPM.POLICY_ID, " +
+                        " OPT.TEMPLATE_NAME " +
+                " FROM " +
+                        " AM_API_URL_MAPPING AUM " +
+                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
+                " INNER JOIN AM_API_OPERATION_POLICY_DEFINITIONS OPD ON OPM.POLICY_ID = OPD.POLICY_ID " +
+                " INNER JOIN AM_OPERATION_POLICY_TEMPLATES OPT ON OPT.TEMPLATE_ID = OPD.TEMPLATE_ID " +
+                " WHERE " +
                         " AUM.REVISION_UUID = ? " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
