@@ -23,9 +23,9 @@ import javax.validation.Valid;
 public class OperationPolicyDefinitionDTO   {
   
     private String name = null;
-    private String apiId = null;
-    private String id = null;
     private List<String> flows = new ArrayList<String>();
+    private List<String> gatewayTypes = new ArrayList<String>();
+    private List<String> apiTypes = new ArrayList<String>();
 
   /**
    **/
@@ -46,40 +46,6 @@ public class OperationPolicyDefinitionDTO   {
 
   /**
    **/
-  public OperationPolicyDefinitionDTO apiId(String apiId) {
-    this.apiId = apiId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  @JsonProperty("apiId")
-  public String getApiId() {
-    return apiId;
-  }
-  public void setApiId(String apiId) {
-    this.apiId = apiId;
-  }
-
-  /**
-   **/
-  public OperationPolicyDefinitionDTO id(String id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   **/
   public OperationPolicyDefinitionDTO flows(List<String> flows) {
     this.flows = flows;
     return this;
@@ -95,6 +61,40 @@ public class OperationPolicyDefinitionDTO   {
     this.flows = flows;
   }
 
+  /**
+   **/
+  public OperationPolicyDefinitionDTO gatewayTypes(List<String> gatewayTypes) {
+    this.gatewayTypes = gatewayTypes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("gatewayTypes")
+  public List<String> getGatewayTypes() {
+    return gatewayTypes;
+  }
+  public void setGatewayTypes(List<String> gatewayTypes) {
+    this.gatewayTypes = gatewayTypes;
+  }
+
+  /**
+   **/
+  public OperationPolicyDefinitionDTO apiTypes(List<String> apiTypes) {
+    this.apiTypes = apiTypes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiTypes")
+  public List<String> getApiTypes() {
+    return apiTypes;
+  }
+  public void setApiTypes(List<String> apiTypes) {
+    this.apiTypes = apiTypes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -106,14 +106,14 @@ public class OperationPolicyDefinitionDTO   {
     }
     OperationPolicyDefinitionDTO operationPolicyDefinition = (OperationPolicyDefinitionDTO) o;
     return Objects.equals(name, operationPolicyDefinition.name) &&
-        Objects.equals(apiId, operationPolicyDefinition.apiId) &&
-        Objects.equals(id, operationPolicyDefinition.id) &&
-        Objects.equals(flows, operationPolicyDefinition.flows);
+        Objects.equals(flows, operationPolicyDefinition.flows) &&
+        Objects.equals(gatewayTypes, operationPolicyDefinition.gatewayTypes) &&
+        Objects.equals(apiTypes, operationPolicyDefinition.apiTypes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, apiId, id, flows);
+    return Objects.hash(name, flows, gatewayTypes, apiTypes);
   }
 
   @Override
@@ -122,9 +122,9 @@ public class OperationPolicyDefinitionDTO   {
     sb.append("class OperationPolicyDefinitionDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    flows: ").append(toIndentedString(flows)).append("\n");
+    sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
+    sb.append("    apiTypes: ").append(toIndentedString(apiTypes)).append("\n");
     sb.append("}");
     return sb.toString();
   }
