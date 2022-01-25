@@ -52,6 +52,7 @@ public class ServiceCatalogUtils {
         service.setEndpointDef(new ByteArrayInputStream(definitionFileByteArray));
         service.setMd5(Md5HashGenerator.calculateMD5Hash(serviceDTO.toString().getBytes()) + Md5HashGenerator
                 .calculateMD5Hash(definitionFileByteArray));
+        service.setApiId(serviceDTO.getApiId());
         return service;
     }
 }

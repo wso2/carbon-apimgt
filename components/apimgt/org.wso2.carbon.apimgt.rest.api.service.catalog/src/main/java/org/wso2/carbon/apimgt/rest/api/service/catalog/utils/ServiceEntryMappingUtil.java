@@ -199,6 +199,7 @@ public class ServiceEntryMappingUtil {
         serviceDTO.setVersion(service.getVersion());
         serviceDTO.setMd5(service.getMd5());
         serviceDTO.setServiceKey(service.getKey());
+        serviceDTO.setApiId(service.getApiId());
         if (!shrink) {
             serviceDTO.setServiceUrl(service.getServiceUrl());
             serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType()
