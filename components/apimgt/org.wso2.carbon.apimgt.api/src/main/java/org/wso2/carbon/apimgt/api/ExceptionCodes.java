@@ -497,23 +497,14 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
 
     //Operation Policies related error codes
-    INVALID_OPERATION_POLICY_PARAMETERS(900915,
-            "Missing required parameters for operation policy", 400,
-            "Required parameter(s) %s for operation policy %s are either missing or empty"),
-    OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW(900916,
-            "Policy is not allowed in response flow", 400,
+    INVALID_OPERATION_POLICY(900915, "Cannot find the selected operation policy", 400,
+            "Selected operation policy is not found"),
+    INVALID_OPERATION_POLICY_PARAMETERS(900916, "Missing required parameters for operation policy specification", 400,
+            "Required parameter(s) %s for operation policy specification %s are either missing or empty"),
+    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(900917, "Operation policy is not allowed in the applied flow", 400,
             "%s policy is not allowed in response flow"),
-    UNSUPPORTED_HTTP_VERB(900917,
-            "Unsupported HTTP verb", 400,
-            "Unsupported HTTP verb defined in REWRITE_HTTP_METHOD policy"),
-
-    //Resource Endpoints related error codes
-    RESOURCE_ENDPOINT_NAME_NOT_SPECIFIED(900918, "Resource Endpoint name cannot be null or empty", 400,
-            "Resource Endpoint name cannot be null or empty"),
-    RESOURCE_ENDPOINT_NOT_FOUND(900919, "Resource Endpoint not found", 404,
-            "Requested Resource Endpoint with ID  %s could not be found"),
-    RESOURCE_ENDPOINT_ALREADY_USED(900920, "Resource Endpoint is used", 409,
-            "Resource Endpoint %s is already used in the APIs"),
+    MISSING_MANDATORY_POLICY_ATTRIBUTES(900918, "Missing mandatory operation policy attribute", 400,
+            "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false);

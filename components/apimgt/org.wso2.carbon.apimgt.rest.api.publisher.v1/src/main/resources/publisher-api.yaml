@@ -11872,17 +11872,21 @@ components:
         name:
           type: string
           example: removeHeaderPolicy
-        apiId:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
         flows:
           type: array
           items:
             type: string
             example: in
+        gatewayTypes:
+          type: array
+          items:
+            type: string
+            example: Synapse
+        apiTypes:
+          type: array
+          items:
+            type: string
+            example: REST
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

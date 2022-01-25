@@ -2505,10 +2505,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (operationPolicies != null && !operationPolicies.isEmpty() && isOperationPoliciesAllowedForAPIType) {
                 for (OperationPolicy policy : operationPolicies) {
                     String policyName = policy.getPolicyName();
-                    OperationPolicyDataHolder policyData = getAPISpecificPolicyByPolicyName(
-                            api.getUuid(), policyName);
-                    OperationPolicySpecification policySpecification = policyData.getSpecification();
+                    OperationPolicyDataHolder policyData = getAPISpecificPolicyByPolicyName(api.getUuid(), policyName);
                     if (policyData != null) {
+                        OperationPolicySpecification policySpecification = policyData.getSpecification();
                         //Validate the policy applied direction
                         if (validateAppliedPolicyWithSpecification(policySpecification, policy)) {
                             policy.setPolicyId(policyData.getPolicyId());
@@ -2530,16 +2529,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 }
                                 OperationPolicySpecification templateSpecification = policyTemplateData.getSpecification();
                                 if (validateAppliedPolicyWithSpecification(templateSpecification, policy)) {
+                                    if (!policyName.isEmpty()) {
+                                        // Selected policy name will be used as the imported policy name.
+                                        policyTemplateData.getSpecification().setPolicyName(policyName);
+                                    }
                                     int policyId = addApiSpecificOperationalPolicy(api.getUuid(), policyTemplateData, null);
                                     policy.setPolicyId(policyId);
                                     validatedPolicies.add(policy);
                                 }
                             } else {
-                                log.error("Required policy " + policyName + " or policy template" +  templateName +
-                                        " is not found. Hence dropped.");
+                                throw new APIManagementException("Required policy " + policyName + " or policy template "
+                                        +  templateName + " is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
                             }
                         } else {
-                            log.error("Required policy " + policyName + "is not found. Hence dropped.");
+                            throw new APIManagementException("Required policy " + policyName + " is not found.",
+                                    ExceptionCodes.INVALID_OPERATION_POLICY);
                         }
                     }
                 }
@@ -2549,15 +2553,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
-                                                           OperationPolicy appliedPolicy) {
+                                                           OperationPolicy appliedPolicy)
+            throws APIManagementException {
 
         //Validate the policy applied direction
         if (!policySpecification.getFlow().contains(appliedPolicy.getDirection())) {
             if (log.isDebugEnabled()) {
-                log.debug("The policy " + policySpecification.getDisplayName()
+                log.debug("The policy " + policySpecification.getPolicyName()
                         + " is not support in the " + appliedPolicy.getDirection() + " flow. Hence skipped.");
             }
-            return false;
+            throw new APIManagementException(policySpecification.getPolicyName() + " cannot be used in the request "
+                    + appliedPolicy.getDirection() + " flow.", ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
         }
 
         //Validate policy Attributes
@@ -2576,10 +2582,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Required policy attribute " + attribute.getAttributeName()
-                                    + " is not found for the the policy " + policySpecification.getDisplayName()
+                                    + " is not found for the the policy " + policySpecification.getPolicyName()
                                     + ". Hence skipped.");
                         }
-                        return false;
+                        throw new APIManagementException("Required policy attribute " + attribute.getAttributeName()
+                                + " is not found for the the policy " + policySpecification.getPolicyName()
+                                + appliedPolicy.getDirection() + " flow.",
+                                ExceptionCodes.MISSING_MANDATORY_POLICY_ATTRIBUTES);
                     }
                 }
             }
@@ -9546,7 +9555,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public OperationPolicyDataHolder getAPISpecificPolicyByPolicyName(String apiUUID, String policyName)
             throws APIManagementException {
-        return apiMgtDAO.getAPISpecificOperationPolicy(apiUUID, policyName);
+        return apiMgtDAO.getAPISpecificOperationPolicy(apiUUID, null, policyName);
     }
 
     @Override
