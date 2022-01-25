@@ -607,6 +607,9 @@ paths:
                   type: string
                   description: Swagger definitio as a file
                   format: binary
+                serviceKey:
+                  type: string
+                  description: service key of the service in the service catalog
       responses:
         200:
           description: |
