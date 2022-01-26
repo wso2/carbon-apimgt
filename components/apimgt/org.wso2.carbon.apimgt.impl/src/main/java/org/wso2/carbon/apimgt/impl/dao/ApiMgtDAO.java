@@ -17382,7 +17382,7 @@ public class ApiMgtDAO {
                                 String clonedPolicyId = null;
                                 if (!clonedPoliciesMap.keySet().contains(policy.getPolicyId())) {
                                     // Since we are creating a new revision, we need to clone all the policies from current status.
-                                    // If the policy is not cloned from a previous template, we have to clone.
+                                    // If the policy is not cloned from a previous policy, we have to clone.
                                     clonedPolicyId = cloneAPISpecificOperationPolicy(connection, apiRevision.getApiUUID(),
                                                 null, apiRevision.getApiUUID(), apiRevision.getRevisionUUID(),
                                                 policy.getPolicyName());
