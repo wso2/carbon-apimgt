@@ -46,7 +46,7 @@ public class OperationPolicyMappingUtil {
     public static OperationPolicy fromDTOToOperationPolicy(OperationPolicyDTO operationPolicyDTO) {
         OperationPolicy operationPolicy = new OperationPolicy();
         operationPolicy.setPolicyName(operationPolicyDTO.getPolicyName());
-        operationPolicy.setTemplateName(operationPolicyDTO.getTemplateName());
+        operationPolicy.setSharedPolicyRef(operationPolicyDTO.getSharedPolicyRef());
         operationPolicy.setOrder((operationPolicyDTO.getOrder()) != null ? operationPolicyDTO.getOrder() : 1);
         operationPolicy.setParameters(operationPolicyDTO.getParameters());
         return  operationPolicy;
@@ -55,7 +55,7 @@ public class OperationPolicyMappingUtil {
     public static OperationPolicyDTO fromOperationPolicyToDTO(OperationPolicy operationPolicy) {
         OperationPolicyDTO dto = new OperationPolicyDTO();
         dto.setPolicyName(operationPolicy.getPolicyName());
-        dto.setTemplateName(operationPolicy.getTemplateName());
+        dto.setSharedPolicyRef(operationPolicy.getSharedPolicyRef());
         dto.setOrder(operationPolicy.getOrder());
         dto.setParameters(operationPolicy.getParameters());
         return dto;
