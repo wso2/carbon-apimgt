@@ -419,8 +419,8 @@ public class ImportUtils {
                         OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                         operationPolicyData.setDefinition(policyDefinition);
                         operationPolicyData.setSpecification(policySpec);
-                        provider.addApiSpecificOperationalPolicy(api.getUuid(), operationPolicyData,
-                                null);
+                        String policyID = provider.addApiSpecificOperationalPolicy(api.getUuid(), operationPolicyData);
+                        policy.setPolicyId(policyID);
                         validatedOperationPolicies.add(policy);
                     } catch (APIManagementException e) {
                         log.error(e);

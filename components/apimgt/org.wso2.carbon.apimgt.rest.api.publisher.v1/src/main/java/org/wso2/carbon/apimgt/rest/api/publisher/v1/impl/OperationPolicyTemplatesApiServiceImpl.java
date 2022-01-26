@@ -77,7 +77,7 @@ public class OperationPolicyTemplatesApiServiceImpl implements OperationPolicyTe
                 OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                 operationPolicyData.setSpecification(policySpecification);
                 operationPolicyData.setDefinition(templateDefinition);
-                apiProvider.addOperationalPolicyTemplate(operationPolicyData, organization);
+                String templateID = apiProvider.addOperationalPolicyTemplate(operationPolicyData);
 
                 if (log.isDebugEnabled()) {
                     log.debug("Operation policy template has been added with name " +
@@ -87,6 +87,7 @@ public class OperationPolicyTemplatesApiServiceImpl implements OperationPolicyTe
                 if (operationPolicyData != null) {
                     OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
                     createdPolicy.setName(policySpecification.getPolicyName());
+                    createdPolicy.setPolicyId(templateID);
                     createdPolicy.setApiTypes(policySpecification.getApiTypes());
                     createdPolicy.setFlows(policySpecification.getFlow());
                     createdPolicy.setGatewayTypes(policySpecification.getSupportedGatewayTypes());
