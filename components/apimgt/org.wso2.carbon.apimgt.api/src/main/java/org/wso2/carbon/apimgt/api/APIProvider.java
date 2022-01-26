@@ -1853,7 +1853,7 @@ public interface APIProvider extends APIManager {
      * policy definition sequence
      *
      * @param apiUUID           UUID of the API
-     * @param operationPolicyDataHolder   Operation Policy Definition
+     * @param operationPolicyDataHolder   Operation Policy Data
      * @return policy ID
      * @throws APIManagementException
      */
@@ -1875,8 +1875,8 @@ public interface APIProvider extends APIManager {
 
 
     /**
-     * Add operational policy template
-     * @param operationPolicyDataHolder     Operation Policy Definition
+     * Add Shared operational policy
+     * @param operationPolicyDataHolder     Operation Policy Data
      * @return status of the policy storage
      * @throws APIManagementException
      */
