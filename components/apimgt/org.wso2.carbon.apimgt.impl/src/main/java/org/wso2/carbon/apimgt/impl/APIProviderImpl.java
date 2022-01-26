@@ -2515,31 +2515,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Operation policy by the name " + policyName + "is not found for API. Checking templates");
+                            log.debug("Operation policy by the name " + policyName + "is not found for API. Checking shared policies.");
                         }
-                        String templateName = policy.getTemplateName();
-                        if (templateName != null && !templateName.isEmpty()) {
-                            OperationPolicyDataHolder policyTemplateData = getPolicyTemplateForTemplateName(templateName);
-                            if (policyTemplateData != null) {
-                                // A template is found for specified policy. This will be validated according to the provided
+                        String sharedPolicyName = policy.getSharedPolicyRef();
+                        if (sharedPolicyName != null && !sharedPolicyName.isEmpty()) {
+                            OperationPolicyDataHolder sharedPolicyData = getSharedPolicyForPolicyName(sharedPolicyName);
+                            if (sharedPolicyData != null) {
+                                // A shared policy is found for specified policy. This will be validated according to the provided
                                 // attributes and added to API policy list
                                 if (log.isDebugEnabled()) {
-                                    log.debug("A template is found for " + policyName + " as " + templateName
-                                            + ". Validating the templates");
+                                    log.debug("A shared policy is found for " + policyName + " as " + sharedPolicyName
+                                            + ". Validating the policy");
                                 }
-                                OperationPolicySpecification templateSpecification = policyTemplateData.getSpecification();
-                                if (validateAppliedPolicyWithSpecification(templateSpecification, policy)) {
+                                OperationPolicySpecification sharedPolicySpec = sharedPolicyData.getSpecification();
+                                if (validateAppliedPolicyWithSpecification(sharedPolicySpec, policy)) {
                                     if (!policyName.isEmpty()) {
                                         // Selected policy name will be used as the imported policy name.
-                                        policyTemplateData.getSpecification().setPolicyName(policyName);
+                                        sharedPolicyData.getSpecification().setPolicyName(policyName);
                                     }
-                                    String policyId = addApiSpecificOperationalPolicy(api.getUuid(), policyTemplateData);
+                                    String policyId = addApiSpecificOperationalPolicy(api.getUuid(), sharedPolicyData);
                                     policy.setPolicyId(policyId);
                                     validatedPolicies.add(policy);
                                 }
                             } else {
-                                throw new APIManagementException("Required policy " + policyName + " or policy template "
-                                        +  templateName + " is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
+                                throw new APIManagementException("Required policy " + policyName + " or shared policy "
+                                        +  sharedPolicyName + " is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
                             }
                         } else {
                             throw new APIManagementException("Required policy " + policyName + " is not found.",
@@ -9558,14 +9558,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addOperationalPolicyTemplate(OperationPolicyDataHolder operationPolicyDataHolder)
+    public String addSharedOperationalPolicy(OperationPolicyDataHolder operationPolicyDataHolder)
             throws APIManagementException {
-        return apiMgtDAO.addOperationPolicyTemplate(operationPolicyDataHolder);
+        return apiMgtDAO.addSharedOperationPolicy(operationPolicyDataHolder);
     }
 
-    public OperationPolicyDataHolder getPolicyTemplateForTemplateName(String templateName)
+    public OperationPolicyDataHolder getSharedPolicyForPolicyName(String templateName)
             throws APIManagementException {
-        return apiMgtDAO.getOperationPolicyTemplate(templateName);
+        return apiMgtDAO.getSharedOperationPolicy(templateName);
     }
 
 }

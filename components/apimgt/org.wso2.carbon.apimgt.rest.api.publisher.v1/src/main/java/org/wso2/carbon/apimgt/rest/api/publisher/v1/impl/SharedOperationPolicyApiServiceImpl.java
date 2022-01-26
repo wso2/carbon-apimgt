@@ -30,64 +30,62 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.OperationPolicyTemplatesApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.SharedOperationPolicyApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDefinitionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.InputStream;
-import java.net.URI;
 
 import javax.ws.rs.core.Response;
 
-public class OperationPolicyTemplatesApiServiceImpl implements OperationPolicyTemplatesApiService {
+public class SharedOperationPolicyApiServiceImpl implements SharedOperationPolicyApiService {
 
-    private static final Log log = LogFactory.getLog(OperationPolicyTemplatesApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(SharedOperationPolicyApiServiceImpl.class);
 
     @Override
-    public Response addOperationPolicyTemplate(InputStream templateSpecFileInputStream,
-                                               Attachment templateSpecFileDetail,
-                                               InputStream templateDefinitionFileInputStream,
-                                               Attachment templateDefinitionFileDetail,
+    public Response addSharedOperationPolicy(InputStream sharedPolicySpecFileInputStream,
+                                               Attachment sharedPolicySpecFileDetail,
+                                               InputStream sharedPolicyDefinitionFileInputStream,
+                                               Attachment sharedPolicyDefinitionFileDetail,
                                                MessageContext messageContext) throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            String templateSpec = "";
+            String sharedPolicySpec = "";
             String jsonContent = "";
-            String templateDefinition = "";
+            String sharedPolicyDefinition = "";
             OperationPolicySpecification policySpecification;
-            if (templateSpecFileInputStream != null) {
-                templateSpec =
-                        RestApiPublisherUtils.readInputStream(templateSpecFileInputStream, templateSpecFileDetail);
-                jsonContent = CommonUtil.yamlToJson(templateSpec);
+            if (sharedPolicySpecFileInputStream != null) {
+                sharedPolicySpec =
+                        RestApiPublisherUtils.readInputStream(sharedPolicySpecFileInputStream, sharedPolicySpecFileDetail);
+                jsonContent = CommonUtil.yamlToJson(sharedPolicySpec);
                 policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
 
                 RestApiPublisherUtils.validateOperationPolicySpecification(policySpecification);
 
-                if (templateDefinitionFileInputStream != null) {
-                    templateDefinition =
+                if (sharedPolicyDefinitionFileInputStream != null) {
+                    sharedPolicyDefinition =
                             RestApiPublisherUtils
-                                    .readInputStream(templateDefinitionFileInputStream, templateDefinitionFileDetail);
+                                    .readInputStream(sharedPolicyDefinitionFileInputStream, sharedPolicyDefinitionFileDetail);
                 }
 
                 OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                 operationPolicyData.setSpecification(policySpecification);
-                operationPolicyData.setDefinition(templateDefinition);
-                String templateID = apiProvider.addOperationalPolicyTemplate(operationPolicyData);
+                operationPolicyData.setDefinition(sharedPolicyDefinition);
+                String sharedPolicyID = apiProvider.addSharedOperationalPolicy(operationPolicyData);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Operation policy template has been added with name " +
+                    log.debug("Shared Operation policy has been added with name " +
                             policySpecification.getPolicyName());
                 }
 
                 if (operationPolicyData != null) {
                     OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
                     createdPolicy.setName(policySpecification.getPolicyName());
-                    createdPolicy.setPolicyId(templateID);
+                    createdPolicy.setPolicyId(sharedPolicyID);
                     createdPolicy.setApiTypes(policySpecification.getApiTypes());
                     createdPolicy.setFlows(policySpecification.getFlow());
                     createdPolicy.setGatewayTypes(policySpecification.getSupportedGatewayTypes());
@@ -101,14 +99,14 @@ public class OperationPolicyTemplatesApiServiceImpl implements OperationPolicyTe
                 throw e;
             }
         } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while adding operational policy template",
+            RestApiUtil.handleInternalServerError("An Error has occurred while adding shared operational policy",
                     e, log);
         }
         return null;
     }
 
     @Override
-    public Response getAllOperationPolicyTemplates(Integer limit, Integer offset, String query,
+    public Response getAllSharedOperationPolicies(Integer limit, Integer offset, String query,
                                                    MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();

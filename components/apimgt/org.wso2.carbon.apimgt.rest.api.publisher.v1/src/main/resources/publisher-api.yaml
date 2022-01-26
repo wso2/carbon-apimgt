@@ -8087,15 +8087,15 @@ paths:
             -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy-definition"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
-  /operation-policy-templates:
+  /shared-operation-policy:
     get:
       tags:
         - API Operation Policies
       summary: |
-        Get all operation policy templates
+        Get all shared operation policies
       description: |
-        This operation provides you a list of all operation policy templates
-      operationId: getAllOperationPolicyTemplates
+        This operation provides you a list of all shared operation policies
+      operationId: getAllSharedOperationPolicies
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -8118,11 +8118,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OperationPolicyDefinitionsList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -8135,17 +8130,17 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy-templates"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
 
     post:
       tags:
         - API Operation Policies
-      summary: Add a new operation policy template
+      summary: Add a new shared operation policy
       description: |
-        This operation can be used to add a new operation policy template.
-      operationId: addOperationPolicyTemplate
+        This operation can be used to add a new shared operation policy.
+      operationId: addSharedOperationPolicy
       requestBody:
         content:
           multipart/form-data:
@@ -8153,20 +8148,20 @@ paths:
               required:
                 - type
               properties:
-                templateSpecFile:
+                sharedPolicySpecFile:
                   type: string
-                  description: Policy template specification to upload
+                  description: Shared operation policy specification to upload
                   format: binary
-                templateDefinitionFile:
+                sharedPolicyDefinitionFile:
                   type: string
-                  description: Policy template definition to upload
+                  description: Shared operation policy definition to upload
                   format: binary
         required: true
       responses:
         201:
           description: |
             OK.
-            Operation policy template uploaded
+            Shared operation policy uploaded
           headers:
             Location:
               description: |
@@ -8197,7 +8192,7 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: multipart/form-data" -F mediationPolicyFile=@TokenExchange.xml
-            -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy-templates"'
+            -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
   /api-products/change-lifecycle:
@@ -11814,7 +11809,7 @@ components:
       properties:
         policyName:
           type: string
-        templateName:
+        sharedPolicyRef:
           type: string
         order:
           type: int
