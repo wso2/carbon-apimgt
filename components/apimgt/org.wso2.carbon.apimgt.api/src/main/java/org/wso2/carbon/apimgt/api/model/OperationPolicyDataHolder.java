@@ -22,51 +22,19 @@ import java.util.Objects;
 
 public class OperationPolicyDataHolder {
 
-    private int policyId;
-    private int templateId = -1;
-    private String apiId;
-    private String revisionId;
+    private String policyId;
+    private String templateName;
     private OperationPolicySpecification specification;
     private String definition;
 
-    public int getPolicyId() {
+    public String getPolicyId() {
 
         return policyId;
     }
 
-    public void setPolicyId(int policyId) {
+    public void setPolicyId(String policyId) {
 
         this.policyId = policyId;
-    }
-
-    public int getTemplateId() {
-
-        return templateId;
-    }
-
-    public void setTemplateId(int templateId) {
-
-        this.templateId = templateId;
-    }
-
-    public String getApiId() {
-
-        return apiId;
-    }
-
-    public void setApiId(String apiId) {
-
-        this.apiId = apiId;
-    }
-
-    public String getRevisionId() {
-
-        return revisionId;
-    }
-
-    public void setRevisionId(String revisionId) {
-
-        this.revisionId = revisionId;
     }
 
     public OperationPolicySpecification getSpecification() {
@@ -89,16 +57,24 @@ public class OperationPolicyDataHolder {
         this.definition = definition;
     }
 
+    public String getTemplateName() {
+
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+
+        this.templateName = templateName;
+    }
+
     @Override
     public boolean equals(Object o) {
 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OperationPolicyDataHolder that = (OperationPolicyDataHolder) o;
-        return Objects.equals(templateId, that.templateId) &&
-                Objects.equals(policyId, that.policyId) &&
-                Objects.equals(apiId, that.apiId) &&
-                Objects.equals(revisionId, that.revisionId) &&
+        return Objects.equals(policyId, that.policyId) &&
+                Objects.equals(templateName, that.templateName) &&
                 Objects.equals(specification, that.specification) &&
                 Objects.equals(definition, that.definition);
     }
@@ -106,6 +82,6 @@ public class OperationPolicyDataHolder {
     @Override
     public int hashCode() {
 
-        return Objects.hash(templateId, policyId, apiId, revisionId, specification, definition);
+        return Objects.hash(policyId, templateName, specification, definition);
     }
 }

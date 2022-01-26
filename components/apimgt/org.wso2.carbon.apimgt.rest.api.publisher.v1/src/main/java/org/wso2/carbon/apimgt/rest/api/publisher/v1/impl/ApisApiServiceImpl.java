@@ -2710,7 +2710,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                 operationPolicyData.setSpecification(policySpecification);
                 operationPolicyData.setDefinition(policyTemplate);
-                apiProvider.addApiSpecificOperationalPolicy(apiId, operationPolicyData, organization);
+                String policyID = apiProvider.addApiSpecificOperationalPolicy(apiId, operationPolicyData);
 
                 if (log.isDebugEnabled()) {
                     log.debug(
@@ -2721,6 +2721,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (operationPolicyData != null) {
                     OperationPolicyDefinitionDTO createdPolicy = new OperationPolicyDefinitionDTO();
                     createdPolicy.setName(policySpecification.getPolicyName());
+                    createdPolicy.setPolicyId(policyID);
                     createdPolicy.setApiTypes(policySpecification.getApiTypes());
                     createdPolicy.setFlows(policySpecification.getFlow());
                     createdPolicy.setGatewayTypes(policySpecification.getSupportedGatewayTypes());

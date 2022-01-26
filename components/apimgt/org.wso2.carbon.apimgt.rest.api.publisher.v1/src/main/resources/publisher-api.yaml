@@ -11872,6 +11872,9 @@ components:
         name:
           type: string
           example: removeHeaderPolicy
+        policyId:
+          type: string
+          example: 121223q41-24141-124124124-12414
         flows:
           type: array
           items:

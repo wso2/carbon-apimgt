@@ -23,6 +23,7 @@ import javax.validation.Valid;
 public class OperationPolicyDefinitionDTO   {
   
     private String name = null;
+    private String policyId = null;
     private List<String> flows = new ArrayList<String>();
     private List<String> gatewayTypes = new ArrayList<String>();
     private List<String> apiTypes = new ArrayList<String>();
@@ -42,6 +43,23 @@ public class OperationPolicyDefinitionDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public OperationPolicyDefinitionDTO policyId(String policyId) {
+    this.policyId = policyId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "121223q41-24141-124124124-12414", value = "")
+  @JsonProperty("policyId")
+  public String getPolicyId() {
+    return policyId;
+  }
+  public void setPolicyId(String policyId) {
+    this.policyId = policyId;
   }
 
   /**
@@ -106,6 +124,7 @@ public class OperationPolicyDefinitionDTO   {
     }
     OperationPolicyDefinitionDTO operationPolicyDefinition = (OperationPolicyDefinitionDTO) o;
     return Objects.equals(name, operationPolicyDefinition.name) &&
+        Objects.equals(policyId, operationPolicyDefinition.policyId) &&
         Objects.equals(flows, operationPolicyDefinition.flows) &&
         Objects.equals(gatewayTypes, operationPolicyDefinition.gatewayTypes) &&
         Objects.equals(apiTypes, operationPolicyDefinition.apiTypes);
@@ -113,7 +132,7 @@ public class OperationPolicyDefinitionDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, flows, gatewayTypes, apiTypes);
+    return Objects.hash(name, policyId, flows, gatewayTypes, apiTypes);
   }
 
   @Override
@@ -122,6 +141,7 @@ public class OperationPolicyDefinitionDTO   {
     sb.append("class OperationPolicyDefinitionDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    flows: ").append(toIndentedString(flows)).append("\n");
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
     sb.append("    apiTypes: ").append(toIndentedString(apiTypes)).append("\n");
