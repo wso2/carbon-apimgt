@@ -27,7 +27,7 @@ public class OperationPolicy implements Comparable<OperationPolicy>{
     private String templateName = "";
     private String direction;
     private Map<String, Object> parameters;
-    private int policyId;
+    private String policyId;
     private int order = 1;
 
     public String getPolicyName() {
@@ -54,11 +54,11 @@ public class OperationPolicy implements Comparable<OperationPolicy>{
         return direction;
     }
 
-    public void setPolicyId(int policyId) {
+    public void setPolicyId(String policyId) {
         this.policyId = policyId;
     }
 
-    public int getPolicyId() {
+    public String getPolicyId() {
         return policyId;
     }
 

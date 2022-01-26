@@ -2533,7 +2533,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         // Selected policy name will be used as the imported policy name.
                                         policyTemplateData.getSpecification().setPolicyName(policyName);
                                     }
-                                    int policyId = addApiSpecificOperationalPolicy(api.getUuid(), policyTemplateData, null);
+                                    String policyId = addApiSpecificOperationalPolicy(api.getUuid(), policyTemplateData);
                                     policy.setPolicyId(policyId);
                                     validatedPolicies.add(policy);
                                 }
@@ -9535,9 +9535,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public int addApiSpecificOperationalPolicy(String apiUUID,
-                                               OperationPolicyDataHolder operationPolicyDataHolder,
-                                               String organization)
+    public String addApiSpecificOperationalPolicy(String apiUUID,
+                                               OperationPolicyDataHolder operationPolicyDataHolder)
             throws APIManagementException {
         return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, operationPolicyDataHolder);
     }
@@ -9550,7 +9549,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public boolean addOperationalPolicyTemplate(OperationPolicyDataHolder operationPolicyDataHolder, String organization)
+    public String addOperationalPolicyTemplate(OperationPolicyDataHolder operationPolicyDataHolder)
             throws APIManagementException {
         return apiMgtDAO.addOperationPolicyTemplate(operationPolicyDataHolder);
     }
