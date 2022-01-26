@@ -1880,6 +1880,6 @@ public interface APIProvider extends APIManager {
      * @return status of the policy storage
      * @throws APIManagementException
      */
-    String addOperationalPolicyTemplate(OperationPolicyDataHolder operationPolicyDataHolder)
+    String addSharedOperationalPolicy(OperationPolicyDataHolder operationPolicyDataHolder)
             throws APIManagementException;
 }

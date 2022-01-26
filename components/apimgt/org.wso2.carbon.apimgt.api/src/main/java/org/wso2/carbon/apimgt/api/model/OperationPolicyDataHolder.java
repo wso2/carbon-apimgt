@@ -23,7 +23,7 @@ import java.util.Objects;
 public class OperationPolicyDataHolder {
 
     private String policyId;
-    private String templateName;
+    private String sharedPolicyName;
     private OperationPolicySpecification specification;
     private String definition;
 
@@ -57,14 +57,14 @@ public class OperationPolicyDataHolder {
         this.definition = definition;
     }
 
-    public String getTemplateName() {
+    public String getSharedPolicyName() {
 
-        return templateName;
+        return sharedPolicyName;
     }
 
-    public void setTemplateName(String templateName) {
+    public void setSharedPolicyName(String sharedPolicyName) {
 
-        this.templateName = templateName;
+        this.sharedPolicyName = sharedPolicyName;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class OperationPolicyDataHolder {
         if (o == null || getClass() != o.getClass()) return false;
         OperationPolicyDataHolder that = (OperationPolicyDataHolder) o;
         return Objects.equals(policyId, that.policyId) &&
-                Objects.equals(templateName, that.templateName) &&
+                Objects.equals(sharedPolicyName, that.sharedPolicyName) &&
                 Objects.equals(specification, that.specification) &&
                 Objects.equals(definition, that.definition);
     }
@@ -82,6 +82,6 @@ public class OperationPolicyDataHolder {
     @Override
     public int hashCode() {
 
-        return Objects.hash(policyId, templateName, specification, definition);
+        return Objects.hash(policyId, sharedPolicyName, specification, definition);
     }
 }

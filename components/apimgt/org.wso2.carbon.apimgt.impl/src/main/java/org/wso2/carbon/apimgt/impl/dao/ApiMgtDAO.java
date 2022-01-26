@@ -7274,7 +7274,7 @@ public class ApiMgtDAO {
                     policy.setDirection(rs.getString("DIRECTION"));
                     policy.setPolicyId(rs.getString("POLICY_ID"));
                     policy.setOrder(rs.getInt("POLICY_ORDER"));
-                    policy.setTemplateName(rs.getString("TEMPLATE_NAME"));
+                    policy.setSharedPolicyRef(rs.getString("SHARED_POLICY_NAME"));
                     policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                     operationPolicies.add(policy);
                 }
@@ -7325,7 +7325,7 @@ public class ApiMgtDAO {
                         policy.setOrder(rs.getInt("POLICY_ORDER"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
-                        policy.setTemplateName(rs.getString("TEMPLATE_NAME"));
+                        policy.setSharedPolicyRef(rs.getString("SHARED_POLICY_NAME"));
                         uriTemplate.addOperationPolicy(policy);
                     }
                 }
@@ -7374,7 +7374,7 @@ public class ApiMgtDAO {
                         policy.setOrder(rs.getInt("POLICY_ORDER"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
-                        policy.setTemplateName(rs.getString("TEMPLATE_NAME"));
+                        policy.setSharedPolicyRef(rs.getString("SHARED_POLICY_NAME"));
                         uriTemplate.addOperationPolicy(policy);
                     }
                 }
@@ -7406,7 +7406,7 @@ public class ApiMgtDAO {
                         policy.setPolicyName(rs.getString("POLICY_NAME"));
                         policy.setPolicyId(rs.getString("POLICY_ID"));
                         policy.setOrder(rs.getInt("POLICY_ORDER"));
-                        policy.setTemplateName(rs.getString("TEMPLATE_NAME"));
+                        policy.setSharedPolicyRef(rs.getString("SHARED_POLICY_NAME"));
                         policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
                         uriTemplate.addOperationPolicy(policy);
@@ -14750,7 +14750,7 @@ public class ApiMgtDAO {
                                         policy.setOrder(policiesResult.getInt("POLICY_ORDER"));
                                         policy.setDirection(policiesResult.getString("DIRECTION"));
                                         policy.setPolicyId(policiesResult.getString("POLICY_ID"));
-                                        policy.setTemplateName(policiesResult.getString("TEMPLATE_NAME"));
+                                        policy.setSharedPolicyRef(policiesResult.getString("SHARED_POLICY_NAME"));
                                         policy.setParameters(APIMgtDBUtil
                                                 .convertJSONStringToMap(policiesResult.getString("PARAMETERS")));
                                         operationPolicies.add(policy);
@@ -14813,7 +14813,7 @@ public class ApiMgtDAO {
                                         policy.setOrder(policiesResult.getInt("POLICY_ORDER"));
                                         policy.setDirection(policiesResult.getString("DIRECTION"));
                                         policy.setPolicyId(policiesResult.getString("POLICY_ID"));
-                                        policy.setTemplateName(policiesResult.getString("TEMPLATE_NAME"));
+                                        policy.setSharedPolicyRef(policiesResult.getString("SHARED_POLICY_NAME"));
                                         policy.setParameters(APIMgtDBUtil
                                                 .convertJSONStringToMap(policiesResult.getString("PARAMETERS")));
                                         operationPolicies.add(policy);
@@ -18112,7 +18112,7 @@ public class ApiMgtDAO {
                     operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
                     operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                     operationPolicy.setDirection(rs.getString("DIRECTION"));
-                    operationPolicy.setTemplateName(rs.getString("TEMPLATE_NAME"));
+                    operationPolicy.setSharedPolicyRef(rs.getString("SHARED_POLICY_NAME"));
                     uriTemplate.addOperationPolicy(operationPolicy);
                     uriTemplate.setHTTPVerb(httpMethod);
                     uriTemplate.setUriTemplate(urlPattern);
@@ -18240,7 +18240,7 @@ public class ApiMgtDAO {
                     statement.setString(6, policySpecification.getFlow().toString());
                     statement.setString(7, policySpecification.getSupportedGatewayTypes().toString());
                     statement.setString(8, policySpecification.getApiTypes().toString());
-                    statement.setString(9, policyData.getTemplateName());
+                    statement.setString(9, policyData.getSharedPolicyName());
                     statement.setBinaryStream(10,
                             new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
                     statement
@@ -18299,7 +18299,7 @@ public class ApiMgtDAO {
             insertOperationPolicyDefinitionStatement.setString(6, policySpec.getFlow().toString());
             insertOperationPolicyDefinitionStatement.setString(7, policySpec.getSupportedGatewayTypes().toString());
             insertOperationPolicyDefinitionStatement.setString(8, policySpec.getApiTypes().toString());
-            insertOperationPolicyDefinitionStatement.setString(9, policyData.getTemplateName());
+            insertOperationPolicyDefinitionStatement.setString(9, policyData.getSharedPolicyName());
             insertOperationPolicyDefinitionStatement.setBinaryStream(10,
                     new ByteArrayInputStream(
                             APIUtil.getPolicyAttributesAsString(policySpec).getBytes()));
@@ -18385,7 +18385,7 @@ public class ApiMgtDAO {
             if (rs.next()) {
                 policyData = new OperationPolicyDataHolder();
                 policyData.setPolicyId(rs.getString("POLICY_ID"));
-                policyData.setTemplateName(rs.getString("TEMPLATE_NAME"));
+                policyData.setSharedPolicyName(rs.getString("SHARED_POLICY_NAME"));
 
                 OperationPolicySpecification policySpecification = new OperationPolicySpecification();
                 policySpecification.setPolicyName(policyName);
@@ -18442,29 +18442,29 @@ public class ApiMgtDAO {
         return list;
     }
 
-    // Operation policy template related operations
+    // Shared operation policy related operations
 
     /**
-     * Add a new operation policy template to the database
+     * Add a new shared operation policy to the database
      *
      * @param policyData      Unique Identifier of API
      * @throws APIManagementException
      */
-    public String addOperationPolicyTemplate(OperationPolicyDataHolder policyData)
+    public String addSharedOperationPolicy(OperationPolicyDataHolder policyData)
             throws APIManagementException {
 
         OperationPolicySpecification policySpecification = policyData.getSpecification();
-        String templateUUID = null;
+        String sharedPolicyUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            templateUUID = getTemplateId(connection, policySpecification.getPolicyName());
-            if (templateUUID != null) {
-                updateOperationPolicyTemplate(connection, policySpecification.getPolicyName(), policyData);
+            sharedPolicyUUID = getSharedPolicyId(connection, policySpecification.getPolicyName());
+            if (sharedPolicyUUID != null) {
+                updateSharedOperationPolicy(connection, policySpecification.getPolicyName(), policyData);
             } else {
-                String dbQuery = SQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY_TEMPLATE;
-                templateUUID = UUID.randomUUID().toString();
+                String dbQuery = SQLConstants.OperationPolicyConstants.ADD_SHARED_OPERATION_POLICY;
+                sharedPolicyUUID = UUID.randomUUID().toString();
                 try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-                    statement.setString(1, templateUUID);
+                    statement.setString(1, sharedPolicyUUID);
                     statement.setString(2, policySpecification.getPolicyName());
                     statement.setString(3, policySpecification.getDisplayName());
                     statement.setString(4, policySpecification.getPolicyDescription());
@@ -18480,25 +18480,25 @@ public class ApiMgtDAO {
             }
             connection.commit();
         } catch (SQLException | APIManagementException e) {
-            handleException("Failed to add operation policy template " + policySpecification.getPolicyName(), e);
+            handleException("Failed to add shared operation policy " + policySpecification.getPolicyName(), e);
         }
-        return templateUUID;
+        return sharedPolicyUUID;
     }
 
     /**
-     * Update an existing operation policy template
+     * Update an existing shared operation policy
      *
-     * @param templateName      Template name
-     * @param policyData        Updated policy definition
+     * @param sharedPolicyName      Shared policy name
+     * @param policyData            Updated policy definition
      * @throws APIManagementException
      */
-    public boolean updateOperationPolicyTemplate(Connection connection, String templateName, OperationPolicyDataHolder policyData)
+    public boolean updateSharedOperationPolicy(Connection connection, String sharedPolicyName, OperationPolicyDataHolder policyData)
             throws APIManagementException {
 
         boolean result = false;
         OperationPolicySpecification policySpecification = policyData.getSpecification();
         try (PreparedStatement statement = connection.prepareStatement(
-                SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_TEMPLATE)) {
+                SQLConstants.OperationPolicyConstants.UPDATE_SHARED_OPERATION_POLICY)) {
             statement.setString(1, policySpecification.getDisplayName());
             statement.setString(2, policySpecification.getPolicyDescription());
             statement.setString(3, policySpecification.getFlow().toString());
@@ -18507,38 +18507,38 @@ public class ApiMgtDAO {
             statement.setBinaryStream(6,
                     new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
             statement.setBinaryStream(7, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
-            statement.setString(8, templateName);
+            statement.setString(8, sharedPolicyName);
             result = statement.executeUpdate() == 1;
         } catch (SQLException e) {
-            handleException("Failed to update operation policy template of " + templateName, e);
+            handleException("Failed to update shared operation policy of " + sharedPolicyName, e);
         }
         return result;
     }
 
     /**
-     * Retrieve the operation policy template by providing the template name
+     * Retrieve the shared operation policy by providing the shared policy name
      *
-     * @param templateName      Template name
-     * @return Operation policy template
+     * @param sharedPolicyName      Shared policy name
+     * @return Shared operation policy
      * @throws APIManagementException
      */
-    public OperationPolicyDataHolder getOperationPolicyTemplate(String templateName)
+    public OperationPolicyDataHolder getSharedOperationPolicy(String sharedPolicyName)
             throws APIManagementException {
 
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_TEMPLATE_FROM_POLICY_NAME;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_SHARED_OPERATION_POLICY_FROM_SHARED_POLICY_NAME;
         OperationPolicyDataHolder policyData;
         ResultSet rs = null;
         String policyDefinitionString = "";
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-            statement.setString(1, templateName);
+            statement.setString(1, sharedPolicyName);
             rs = statement.executeQuery();
             if (rs.next()) {
                 policyData = new OperationPolicyDataHolder();
-                policyData.setTemplateName(templateName);
+                policyData.setSharedPolicyName(sharedPolicyName);
 
                 OperationPolicySpecification policySpecification = new OperationPolicySpecification();
-                policySpecification.setPolicyName(templateName);
+                policySpecification.setPolicyName(sharedPolicyName);
                 policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
                 policySpecification.setPolicyDescription(rs.getString("POLICY_DESCRIPTION"));
                 policySpecification.setFlow(getListFromString(rs.getString("FLOW")));
@@ -18551,13 +18551,13 @@ public class ApiMgtDAO {
                             new TypeToken<List<OperationPolicySpecAttribute>>() {
                             }.getType());
                 } catch (IOException e) {
-                    log.error("Error while converting policy specification attributes for the template " + templateName, e);
+                    log.error("Error while converting policy specification attributes for the shared policy " + sharedPolicyName, e);
                 }
 
                 try (InputStream policyDefinitionStream = rs.getBinaryStream("POLICY_DEFINITION")) {
                     policyDefinitionString = IOUtils.toString(policyDefinitionStream);
                 } catch (IOException e) {
-                    log.error("Error while converting policy definition of template " + templateName, e);
+                    log.error("Error while converting policy definition of shared policy " + sharedPolicyName, e);
                 }
                 policySpecification.setPolicyAttributes(policySpecAttributes);
                 policyData.setSpecification(policySpecification);
@@ -18565,24 +18565,24 @@ public class ApiMgtDAO {
                 return policyData;
             }
         } catch (SQLException e) {
-            handleException("Failed to get operation policy template for the name " + templateName, e);
+            handleException("Failed to get shared operation policy for the name " + sharedPolicyName, e);
         }
         return null;
     }
 
-    public String getTemplateId(Connection connection, String templateName) throws APIManagementException {
+    public String getSharedPolicyId(Connection connection, String sharedPolicyName) throws APIManagementException {
 
         String policyId = null;
-        String query = SQLConstants.OperationPolicyConstants.GET_TEMPLATE_ID_FROM_POLICY_TEMPLATE;
+        String query = SQLConstants.OperationPolicyConstants.GET_SHARED_POLICY_ID_FROM_SHARED_POLICY_NAME;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, templateName);
+            statement.setString(1, sharedPolicyName);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    policyId = resultSet.getString("TEMPLATE_NAME");
+                    policyId = resultSet.getString("SHARED_POLICY_NAME");
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get operation policy template ID for template " + templateName, e);
+            handleException("Failed to get policy ID for shared policy " + sharedPolicyName, e);
         }
         return policyId;
     }

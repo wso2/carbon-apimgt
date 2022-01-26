@@ -24,7 +24,7 @@ import java.util.Objects;
 public class OperationPolicy implements Comparable<OperationPolicy>{
 
     private String policyName = "";
-    private String templateName = "";
+    private String sharedPolicyRef = "";
     private String direction;
     private Map<String, Object> parameters;
     private String policyId;
@@ -72,14 +72,14 @@ public class OperationPolicy implements Comparable<OperationPolicy>{
         this.order = order;
     }
 
-    public String getTemplateName() {
+    public String getSharedPolicyRef() {
 
-        return templateName;
+        return sharedPolicyRef;
     }
 
-    public void setTemplateName(String templateName) {
+    public void setSharedPolicyRef(String sharedPolicyRef) {
 
-        this.templateName = templateName;
+        this.sharedPolicyRef = sharedPolicyRef;
     }
 
     @Override public boolean equals(Object o) {
