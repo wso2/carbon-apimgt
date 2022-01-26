@@ -2693,7 +2693,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String policySpec = "";
             String jsonContent = "";
-            String policyTemplate = "";
+            String policyDefinition = "";
             OperationPolicySpecification policySpecification;
             if (policySpecFileInputStream != null) {
                 policySpec = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
@@ -2703,13 +2703,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiPublisherUtils.validateOperationPolicySpecification(policySpecification);
 
                 if (policyDefinitionFileInputStream != null) {
-                    policyTemplate = RestApiPublisherUtils
+                    policyDefinition = RestApiPublisherUtils
                             .readInputStream(policyDefinitionFileInputStream, policyDefinitionFileDetail);
                 }
 
                 OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                 operationPolicyData.setSpecification(policySpecification);
-                operationPolicyData.setDefinition(policyTemplate);
+                operationPolicyData.setDefinition(policyDefinition);
                 String policyID = apiProvider.addApiSpecificOperationalPolicy(apiId, operationPolicyData);
 
                 if (log.isDebugEnabled()) {
