@@ -205,7 +205,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#service-catalog#v0</warName>
+                    <warName>api#am#service-catalog#v1</warName>
                 </configuration>
             </plugin>
             <plugin>

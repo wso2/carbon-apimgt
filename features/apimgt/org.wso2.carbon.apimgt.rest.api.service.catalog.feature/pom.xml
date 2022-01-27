@@ -83,7 +83,7 @@
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#service-catalog#v0.war</destFileName>
+                                    <destFileName>api#am#service-catalog#v1.war</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.yaml</groupId>

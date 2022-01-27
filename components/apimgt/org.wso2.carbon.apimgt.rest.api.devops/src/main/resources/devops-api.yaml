@@ -14,7 +14,7 @@
 ################################################################################
 openapi: 3.0.1
 info:
-  version: v1
+  version: v0
   title: WSO2 API Manager - DevOps
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - DevOps.
