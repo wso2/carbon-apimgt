@@ -4305,8 +4305,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
             if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
                 throw new APIManagementException("Creating API Revisions is not supported for advertise only APIs: "
-                        + apiId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_SUPPORTED_FOR_ADVERTISE_ONLY_APIS,
-                        apiId));
+                        + apiId);
             }
 
             //validate API update operation permitted based on the LC state

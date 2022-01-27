@@ -485,8 +485,6 @@ public enum ExceptionCodes implements ErrorHandler {
                "Definition", 400, "Unsupported protocol specified in Async API Definition"),
     API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS(900915, "API Creation is not supported with other Async APIs", 500,
             "API Creation is not supported with other Async APIs"),
-    API_REVISION_NOT_SUPPORTED_FOR_ADVERTISE_ONLY_APIS(900916, "Creating API Revisions is not supported for advertise only APIs", 500,
-            "Creating API Revisions is not supported for advertise only APIs"),
 
     //Service Catalog related error codes
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
