@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway/src/main/resources/gateway-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
-    "version" : "v2",
+    "version" : "v3",
     "title" : "WSO2 API Manager - Gateway",
     "contact" : {
       "name" : "WSO2",
@@ -15,7 +15,7 @@
     }
   },
   "host" : "apis.wso2.com",
-  "basePath" : "/api/am/gateway/v2",
+  "basePath" : "/api/am/gateway/v3",
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
@@ -66,7 +66,7 @@
         },
         "x-code-samples" : [ {
           "lang" : "Curl",
-          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v3/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
     },
@@ -134,7 +134,7 @@
         } ],
         "x-code-samples" : [ {
           "lang" : "Curl",
-          "source" : "curl -k \"https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck\""
+          "source" : "curl -k \"https://localhost:9443/api/am/gateway/v3/server-startup-healthcheck\""
         } ]
       }
     },

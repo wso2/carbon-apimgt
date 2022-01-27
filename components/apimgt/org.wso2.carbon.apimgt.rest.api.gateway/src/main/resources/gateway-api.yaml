@@ -3,7 +3,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "v2"
+  version: "v3"
   title: "WSO2 API Manager - Gateway"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.
@@ -31,7 +31,7 @@ host: apis.wso2.com
 
 # The base path of the API.
 # Will be prefixed to all paths.
-basePath: /api/am/gateway/v2
+basePath: /api/am/gateway/v3
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.
@@ -91,7 +91,7 @@ paths:
             $ref: '#/definitions/Error'
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v3/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
           -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
 
@@ -131,7 +131,7 @@ paths:
             $ref: '#/definitions/Error'
         x-code-samples:
           - lang: Curl
-            source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+            source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v3/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
             -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /server-startup-healthcheck:
@@ -161,7 +161,7 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck"
+          source: curl -k "https://localhost:9443/api/am/gateway/v3/server-startup-healthcheck"
 
   /api-artifact:
 
@@ -199,7 +199,7 @@ paths:
             $ref: '#/definitions/Error'
         x-code-samples:
           - lang: Curl
-            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v3/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
             -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /local-entry:
@@ -238,7 +238,7 @@ paths:
             $ref: '#/definitions/Error'
         x-code-samples:
           - lang: Curl
-            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v3/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
             -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /sequence:
@@ -276,7 +276,7 @@ paths:
             $ref: '#/definitions/Error'
         x-code-samples:
           - lang: Curl
-            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v3/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
             -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /end-points:
@@ -315,7 +315,7 @@ paths:
             $ref: '#/definitions/Error'
         x-code-samples:
           - lang: Curl
-            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v3/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
             -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /apis:
