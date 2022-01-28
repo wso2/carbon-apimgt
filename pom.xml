@@ -1908,7 +1908,7 @@
         <carbon.apimgt.version>9.12.4-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.2.36</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.2.37</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.6.2</carbon.kernel.version>
         <carbon.kernel.feature.version>4.6.2</carbon.kernel.feature.version>
@@ -2071,9 +2071,9 @@
         <!-- apache pdfbox version -->
         <pdfbox.version>1.8.16</pdfbox.version>
 
-        <event.processor.stub.version>2.2.16</event.processor.stub.version>
-        <event.processor.core.version>2.2.16</event.processor.core.version>
-        <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
+        <event.processor.stub.version>2.3.0</event.processor.stub.version>
+        <event.processor.core.version>2.3.0</event.processor.core.version>
+	<swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v1</swagger.inflector.oas3.version>
         <swagger.parser.version>1.0.51.wso2v1</swagger.parser.version>
