@@ -827,11 +827,6 @@ public class OAS2Parser extends APIDefinition {
             swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
         }
         String apiSecurity = api.getApiSecurity();
-        if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)) {
-            swagger.setVendorExtension(APIConstants.X_WSO2_MOCK_IMPLEMENTATION, APIConstants.X_WSO2_MOCK_IMPL_ADVANCE);
-        } else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_TEMPLATE)) {
-            swagger.setVendorExtension(APIConstants.X_WSO2_MOCK_IMPLEMENTATION, APIConstants.X_WSO2_MOCK_IMPL_SIMPLE);
-        }
         // set mutual ssl extension if enabled
         if (apiSecurity != null) {
             List<String> securityList = Arrays.asList(apiSecurity.split(","));

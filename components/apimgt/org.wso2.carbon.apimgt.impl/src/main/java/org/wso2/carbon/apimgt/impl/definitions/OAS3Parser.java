@@ -146,7 +146,7 @@ public class OAS3Parser extends APIDefinition {
                 }
                 String finalScript;
                 if (APIConstants.IMPLEMENTATION_TYPE_TEMPLATE.equalsIgnoreCase(scriptType)) {
-                    finalScript = OASParserUtil.getJsonScript();
+                    finalScript = getJsonScript(swagger.getComponents().getSchemas(), op);
                 } else {
                     finalScript = getJSScript(swagger.getComponents().getSchemas(), op);
                 }
@@ -162,6 +162,60 @@ public class OAS3Parser extends APIDefinition {
         return returnMap;
     }
 
+    private String getJsonScript(Map<String, Schema> definitions, Operation op) {
+        StringBuilder script = new StringBuilder("{\n" +
+                "\t\"in\": \"default\",\n" +
+                "\t\"responses\": [" +
+                "\t\t{\n" +
+                "\t\t\t\"code\": 200,\n" +
+                "\t\t\t\"content\": [\n" +
+                "\t\t\t\t{\n" +
+                "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
+                "\t\t\t\t\t\"body\": \"{\\\"description\\\" : \\\"Not Implemented\\\"}\"\n" +
+                "\t\t\t\t}, " +
+                "\t\t\t\t{\n" +
+                "\t\t\t\t\t\"contentType\": \"application/xml\",\n" +
+                "\t\t\t\t\t\"body\": \"<description>Not Implemented</description>\"\n" +
+                "\t\t\t\t}\n" +
+                "\t\t\t]\n" +
+                "\t\t}"
+        );
+        for (String responseCode : op.getResponses().keySet()) {
+            Content content = op.getResponses().get(responseCode).getContent();
+            String jsonExample = "{\"description\" : \"Dummy description\"}";
+            String xmlExample = "\"<description>Dummy description</description>\"";
+            if (content != null) {
+                MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
+                if (applicationJson != null) {
+                    Schema jsonSchema = applicationJson.getSchema();
+                    if (jsonSchema != null) {
+                        jsonExample = getJsonExample(jsonSchema, definitions);
+                    }
+                }
+                if (applicationXml != null) {
+                    Schema xmlSchema = applicationXml.getSchema();
+                    if (xmlSchema != null) {
+                        xmlExample = getXmlExample(xmlSchema, definitions);
+                    }
+                }
+            }
+            script.append(",\n\t\t{\n" +
+                    "\t\t\t\"code\": ").append(responseCode).append(",\n" +
+                    "\t\t\t\"content\": [\n" +
+                    "\t\t\t\t{\n" +
+                    "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
+                    "\t\t\t\t\t\"body\": ").append(jsonExample).append("\n" +
+                    "\t\t\t\t}, " +
+                    "\t\t\t\t{\n" +
+                    "\t\t\t\t\t\"contentType\": \"application/xml\",\n" +
+                    "\t\t\t\t\t\"body\": ").append(xmlExample).append("\n" +
+                    "\t\t\t\t}\n" +
+                    "\t\t\t]\n" +
+                    "\t\t}");
+        }
+        return script + "\n\t]\n}";
+    }
     private String getJSScript(Map<String, Schema> definitions, Operation op) {
         //for each HTTP method get the verb
         StringBuilder genCode = new StringBuilder();
@@ -914,11 +968,6 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
         }
         String apiSecurity = api.getApiSecurity();
-        if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)) {
-            openAPI.addExtension(APIConstants.X_WSO2_MOCK_IMPLEMENTATION, APIConstants.X_WSO2_MOCK_IMPL_ADVANCE);
-        } else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_TEMPLATE)) {
-            openAPI.addExtension(APIConstants.X_WSO2_MOCK_IMPLEMENTATION, APIConstants.X_WSO2_MOCK_IMPL_SIMPLE);
-        }
         // set mutual ssl extension if enabled
         if (apiSecurity != null) {
             List<String> securityList = Arrays.asList(apiSecurity.split(","));
