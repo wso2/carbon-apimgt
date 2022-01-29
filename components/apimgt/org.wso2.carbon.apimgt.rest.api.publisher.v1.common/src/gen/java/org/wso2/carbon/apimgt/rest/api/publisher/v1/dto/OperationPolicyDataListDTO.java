@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDefinitionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import javax.validation.constraints.*;
 
@@ -22,22 +22,22 @@ import javax.validation.Valid;
 
 
 
-public class OperationPolicyDefinitionsListDTO   {
+public class OperationPolicyDataListDTO   {
   
     private Integer count = null;
-    private List<OperationPolicyDefinitionDTO> list = new ArrayList<OperationPolicyDefinitionDTO>();
+    private List<OperationPolicyDataDTO> list = new ArrayList<OperationPolicyDataDTO>();
     private PaginationDTO pagination = null;
 
   /**
-   * Number of operation policy definitions returned. 
+   * Number of operation policies returned. 
    **/
-  public OperationPolicyDefinitionsListDTO count(Integer count) {
+  public OperationPolicyDataListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "Number of operation policy definitions returned. ")
+  @ApiModelProperty(example = "1", value = "Number of operation policies returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -48,7 +48,7 @@ public class OperationPolicyDefinitionsListDTO   {
 
   /**
    **/
-  public OperationPolicyDefinitionsListDTO list(List<OperationPolicyDefinitionDTO> list) {
+  public OperationPolicyDataListDTO list(List<OperationPolicyDataDTO> list) {
     this.list = list;
     return this;
   }
@@ -57,16 +57,16 @@ public class OperationPolicyDefinitionsListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<OperationPolicyDefinitionDTO> getList() {
+  public List<OperationPolicyDataDTO> getList() {
     return list;
   }
-  public void setList(List<OperationPolicyDefinitionDTO> list) {
+  public void setList(List<OperationPolicyDataDTO> list) {
     this.list = list;
   }
 
   /**
    **/
-  public OperationPolicyDefinitionsListDTO pagination(PaginationDTO pagination) {
+  public OperationPolicyDataListDTO pagination(PaginationDTO pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -91,10 +91,10 @@ public class OperationPolicyDefinitionsListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    OperationPolicyDefinitionsListDTO operationPolicyDefinitionsList = (OperationPolicyDefinitionsListDTO) o;
-    return Objects.equals(count, operationPolicyDefinitionsList.count) &&
-        Objects.equals(list, operationPolicyDefinitionsList.list) &&
-        Objects.equals(pagination, operationPolicyDefinitionsList.pagination);
+    OperationPolicyDataListDTO operationPolicyDataList = (OperationPolicyDataListDTO) o;
+    return Objects.equals(count, operationPolicyDataList.count) &&
+        Objects.equals(list, operationPolicyDataList.list) &&
+        Objects.equals(pagination, operationPolicyDataList.pagination);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class OperationPolicyDefinitionsListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class OperationPolicyDefinitionsListDTO {\n");
+    sb.append("class OperationPolicyDataListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

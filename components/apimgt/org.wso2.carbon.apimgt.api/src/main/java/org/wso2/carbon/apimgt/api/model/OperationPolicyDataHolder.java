@@ -26,6 +26,7 @@ public class OperationPolicyDataHolder {
     private String sharedPolicyName;
     private OperationPolicySpecification specification;
     private String definition;
+    private String tenantDomain;
 
     public String getPolicyId() {
 
@@ -65,6 +66,16 @@ public class OperationPolicyDataHolder {
     public void setSharedPolicyName(String sharedPolicyName) {
 
         this.sharedPolicyName = sharedPolicyName;
+    }
+
+    public String getTenantDomain() {
+
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+
+        this.tenantDomain = tenantDomain;
     }
 
     @Override

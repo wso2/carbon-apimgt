@@ -326,4 +326,8 @@ public final class RestApiConstants {
     public static final int TAG_LIMIT_DEFAULT = 1000;
     public static final int TAG_OFFSET_DEFAULT = 0;
 
+    public static final String RESOURCE_PATH_OPERATION_POLICY = "/operation-policy";
+    public static final String RESOURCE_PATH_SHARED_OPERATION_POLICY = "/shared-operation-policy";
+
+
 }
