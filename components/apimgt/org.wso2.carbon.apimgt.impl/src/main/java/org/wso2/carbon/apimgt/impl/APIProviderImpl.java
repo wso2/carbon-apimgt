@@ -759,10 +759,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addAPI(API api, int tenantId) throws APIManagementException {
         int apiId = apiMgtDAO.addAPI(api, tenantId, api.getOrganization());
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
-        validateOperationPolicyParameters(api);
-        addURITemplates(apiId, api, tenantId);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        validateOperationPolicyParameters(api, tenantDomain);
+        addURITemplates(apiId, api, tenantId);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -1381,7 +1381,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateResourceThrottlingTiers(api, tenantDomain);
 
         //Validate Operation Policies
-        validateOperationPolicyParameters(api);
+        validateOperationPolicyParameters(api, tenantDomain);
 
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
@@ -2486,10 +2486,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void validateOperationPolicyParameters(API api) throws APIManagementException {
+    private void validateOperationPolicyParameters(API api, String tenantDomain) throws APIManagementException {
 
         boolean isOperationPoliciesAllowedForAPIType = true;
         Set<URITemplate> uriTemplates = api.getUriTemplates();
+
 
         if (APIConstants.API_TYPE_WS.equals(api.getType()) || APIConstants.API_TYPE_SSE.equals(api.getType())
                 || APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
@@ -2519,7 +2520,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                         String sharedPolicyName = policy.getSharedPolicyRef();
                         if (sharedPolicyName != null && !sharedPolicyName.isEmpty()) {
-                            OperationPolicyDataHolder sharedPolicyData = getSharedPolicyForPolicyName(sharedPolicyName);
+                            OperationPolicyDataHolder sharedPolicyData = getSharedPolicyByPolicyName(sharedPolicyName,
+                                    tenantDomain);
                             if (sharedPolicyData != null) {
                                 // A shared policy is found for specified policy. This will be validated according to the provided
                                 // attributes and added to API policy list
@@ -2533,7 +2535,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         // Selected policy name will be used as the imported policy name.
                                         sharedPolicyData.getSpecification().setPolicyName(policyName);
                                     }
-                                    String policyId = addApiSpecificOperationalPolicy(api.getUuid(), sharedPolicyData);
+                                    String policyId = addApiSpecificOperationalPolicy(api.getUuid(), sharedPolicyData,
+                                            tenantDomain);
                                     policy.setPolicyId(policyId);
                                     validatedPolicies.add(policy);
                                 }
@@ -9544,10 +9547,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addApiSpecificOperationalPolicy(String apiUUID,
-                                               OperationPolicyDataHolder operationPolicyDataHolder)
-            throws APIManagementException {
-        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, operationPolicyDataHolder);
+    public String addApiSpecificOperationalPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder,
+                                                  String tenantDomain) throws APIManagementException {
+        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, operationPolicyDataHolder, tenantDomain);
     }
 
 
@@ -9558,14 +9560,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addSharedOperationalPolicy(OperationPolicyDataHolder operationPolicyDataHolder)
+    public OperationPolicyDataHolder getAPISpecificPolicyByPolicyId(String apiUUID, String policyId, String tenantDomain,
+                                                                    boolean isWithPolicyDefinition)
             throws APIManagementException {
-        return apiMgtDAO.addSharedOperationPolicy(operationPolicyDataHolder);
+        return apiMgtDAO.getAPISpecificOperationPolicyByPolicyId(apiUUID, policyId, tenantDomain, isWithPolicyDefinition);
     }
 
-    public OperationPolicyDataHolder getSharedPolicyForPolicyName(String templateName)
+    @Override
+    public List<OperationPolicyDataHolder> getLightWeightAPISpecificOperationPolicies(String apiUUID, String tenantDomain)
             throws APIManagementException {
-        return apiMgtDAO.getSharedOperationPolicy(templateName);
+        return apiMgtDAO.getLightWeightAPISpecificOperationPolicies(apiUUID, tenantDomain);
+    }
+
+    @Override
+    public boolean deleteAPISpecificOperationPolicyByPolicyId(String apiUUID, String policyId, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.deleteAPISpecificOperationPolicy(apiUUID, policyId, tenantDomain);
+    }
+
+    @Override
+    public String addSharedOperationalPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.addSharedOperationPolicy(operationPolicyDataHolder, tenantDomain);
+    }
+
+    @Override
+    public List<OperationPolicyDataHolder> getLightWeightSharedOperationPolicies(String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.getLightWeightSharedOperationPolicies(tenantDomain);
+    }
+
+    public OperationPolicyDataHolder getSharedPolicyByPolicyName(String sharedPolicyName, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.getSharedOperationPolicyByPolicyName(sharedPolicyName, tenantDomain);
+    }
+
+    @Override
+    public OperationPolicyDataHolder getSharedOperationPolicyByPolicyId(String policyId, String tenantDomain,
+                                                                        boolean isWithPolicyDefinition)
+            throws APIManagementException {
+        return apiMgtDAO.getSharedOperationPolicyByPolicyID(policyId, tenantDomain, isWithPolicyDefinition);
+    }
+
+    @Override
+    public boolean deleteSharedOperationPolicyByPolicyId(String policyId, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.deleteSharedOperationPolicy(policyId, tenantDomain);
     }
 
 }

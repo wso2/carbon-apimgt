@@ -7971,15 +7971,15 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
-  /apis/{apiId}/operation-policy-definition:
+  /apis/{apiId}/operation-policy:
     get:
       tags:
-        - API Operation Policies
+        - API Operation Policy
       summary: |
-        Get all applicabale operation policy definitions for an API
+        Get all applicabale operation policies for an API
       description: |
-        This operation provides you a list of all applicabale operation policy definitions for an API
-      operationId: getAllAPISpecificOperationPolicyDefinitions
+        This operation provides you a list of all applicabale operation policies for an API
+      operationId: getAllAPISpecificOperationPolicies
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/limit'
@@ -8002,7 +8002,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationPolicyDefinitionsList'
+                $ref: '#/components/schemas/OperationPolicyDataList'
         304:
           description: |
             Not Modified.
@@ -8020,17 +8020,17 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy-definition"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
 
     post:
       tags:
-        - API Operation Policies
-      summary: Add an API specific operation policy definition
+        - API Operation Policy
+      summary: Add an API specific operation policy
       description: |
-        This operation can be used to add an API specifc operation policy definition.
-      operationId: addAPISpecificOperationPolicyDefinition
+        This operation can be used to add an API specifc operation policy.
+      operationId: addAPISpecificOperationPolicy
       parameters:
         - $ref: '#/components/parameters/apiId'
       requestBody:
@@ -8068,7 +8068,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationPolicyDefinition'
+                $ref: '#/components/schemas/OperationPolicyData'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -8084,13 +8084,193 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: multipart/form-data" -F mediationPolicyFile=@TokenExchange.xml
-            -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy-definition"'
+            -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
+
+
+  /apis/{apiId}/operation-policy/{operationPolicyId}:
+    get:
+      tags:
+        - API Operation Policy
+      summary: Get an API Specific Operation Policy
+      description: |
+        This operation can be used to retrieve a particular API specific operation policy.
+      operationId: getAPISpecificOperationPolicyByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyData'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_get.yaml
+
+    delete:
+      tags:
+        - API Operation Policy
+      summary: Delete an API Specific Operation Policy
+      description: |
+        This operation can be used to delete an existing API specific opreation policy providing the Id of the API and the Id of the policy.
+      operationId: deleteAPISpecificOperationPolicyByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: {}
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
+
+  /apis/{apiId}/import-shared-operation-policy:
+    post:
+      tags:
+        - API Operation Policy
+      summary: Import a shared operation policy to
+      description: |
+        This operation can be used to download a particular API specific operation policy.
+      operationId: importSharedOperationPolicyToAPI
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - name: operationPolicyId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ID of the shared operation policy
+          example: 96077508-fd01-4fae-bc64-5de0e2baf43c
+        - name: apiSpecificPolicyName
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ID of the shared operation policy
+          example: Pizza-log-policy
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains the URL of the newly created entity.
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyData'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/import-shared-operation-policy?operationPolicyId=f56eb8b4-128c-45aa-ad35-9c87a546261a/content&apiSpecificPolicyName=Pizza-log-policy"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
+
+  /apis/{apiId}/operation-policy/{operationPolicyId}/content:
+    get:
+      tags:
+        - API Operation Policy
+      summary: Download an API Specific Operation Policy
+      description: |
+        This operation can be used to download a particular API specific operation policy.
+      operationId: getAPISpecificOperationPolicyContentByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
+
+
   /shared-operation-policy:
     get:
       tags:
-        - API Operation Policies
+        - Shared Operation Policies
       summary: |
         Get all shared operation policies
       description: |
@@ -8117,7 +8297,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationPolicyDefinitionsList'
+                $ref: '#/components/schemas/OperationPolicyDataList'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -8136,7 +8316,7 @@ paths:
 
     post:
       tags:
-        - API Operation Policies
+        - Shared Operation Policies
       summary: Add a new shared operation policy
       description: |
         This operation can be used to add a new shared operation policy.
@@ -8176,7 +8356,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationPolicyDefinition'
+                $ref: '#/components/schemas/OperationPolicyData'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -8195,6 +8375,121 @@ paths:
             -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
+
+
+  /shared-operation-policy/{operationPolicyId}:
+    get:
+      tags:
+        - Shared Operation Policies
+      summary: Get the shared operation policy by policy ID
+      description: |
+        This operation can be used to retrieve a particular shared operation policy.
+      operationId: getSharedOperationPolicyByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyData'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_get.yaml
+
+    delete:
+      tags:
+        - Shared Operation Policies
+      summary: Delete a Shared Operation Policy
+      description: |
+        This operation can be used to delete an existing shared opreation policy by providing the Id of the policy.
+      operationId: deleteSharedOperationPolicyByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: {}
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
+
+  /shared-operation-policy/{operationPolicyId}/content:
+    get:
+      tags:
+        - Shared Operation Policies
+      summary: Download an Shared Operation Policy
+      description: |
+        This operation can be used to download a particular shared operation policy.
+      operationId: getSharedOperationPolicyContentByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+      x-examples:
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
+
   /api-products/change-lifecycle:
     post:
       tags:
@@ -11845,31 +12140,37 @@ components:
         endpointURI:
           type: string
           example: default
-    OperationPolicyDefinitionsList:
-      title: Operation policy definitions List
+    OperationPolicyDataList:
+      title: Operation policy List
       type: object
       properties:
         count:
           type: integer
           description: |
-            Number of operation policy definitions returned.
+            Number of operation policies returned.
           example: 1
         list:
           type: array
           items:
-            $ref: '#/components/schemas/OperationPolicyDefinition'
+            $ref: '#/components/schemas/OperationPolicyData'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    OperationPolicyDefinition:
-      title: OperationPolicyDefinition
+    OperationPolicyData:
+      title: OperationPolicyData
       type: object
       properties:
-        name:
-          type: string
-          example: removeHeaderPolicy
         policyId:
           type: string
           example: 121223q41-24141-124124124-12414
+        name:
+          type: string
+          example: removeHeaderPolicy
+        displayName:
+          type: string
+          example: Remove Header Policy
+        policyDescription:
+          type: string
+          example: With this policy, user can add a new header to the request
         flows:
           type: array
           items:
@@ -11885,6 +12186,38 @@ components:
           items:
             type: string
             example: REST
+        polictAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicySpecAttribute'
+    OperationPolicySpecAttribute:
+      title: OperationPolicySpecAttribute
+      type: object
+      properties:
+        attributeName:
+          type: string
+          description: Name of the attibute
+          example: headerName
+        attributeDisplayName:
+          type: string
+          description: Display name of the attibute
+          example: Header Name
+        attributeDescription:
+          type: string
+          description: Description of the attibute
+          example: Name of the header to be removed
+        attributeValidationRegex:
+          type: string
+          description: UI validation regex for the attibute
+          example: /^[a-z\s]{0,255}$/i
+        attributeType:
+          type: string
+          description: Type of the attibute
+          example: string
+        required:
+          type: boolean
+          description: Is this attibute mandetory for the policy
+          example: true
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -12166,6 +12499,14 @@ components:
       in: query
       description: |
         Subscription Id
+      required: true
+      schema:
+        type: string
+    operationPolicyId:
+      name: operationPolicyId
+      in: path
+      description: |
+        Operation policy Id
       required: true
       schema:
         type: string

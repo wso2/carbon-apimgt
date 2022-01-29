@@ -32,7 +32,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.FileUtil;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,22 +50,11 @@ import java.util.Set;
 public class SynapsePolicyAggregator {
 
     private static final Log log = LogFactory.getLog(SynapsePolicyAggregator.class);
-    private static String defaultSequenceTemplate =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                    "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"{{sequence_name}}\">" +
-                    "   <switch source=\"$ctx:URL_TEMPLATE_SWITCH\">" +
-                    "    {% for case in case_list %}" +
-                    "      <case regex=\"{{case.case_regex}}\">" +
-                    "        {% for policy in case.policy_sequence %}" +
-                    "        {{policy}}" +
-                    "        {% endfor %}" +
-                    "      </case>" +
-                    "    {% endfor %}" +
-                    "   </switch>" +
-                    "</sequence>";
+    private static final String POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
+            + "repository" + File.separator + "resources" + File.separator + "operation_policy_template.j2";
 
     public static String generatePolicySequenceForAPIs(String pathToAchieve, API api)
-            throws APIManagementException {
+            throws APIManagementException, IOException {
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         List<Object> caseList = new ArrayList<>();
@@ -76,14 +69,15 @@ public class SynapsePolicyAggregator {
             configMap.put("sequence_name", seqExt);
             configMap.put("case_list", caseList);
 
-            return renderPolicyTemplate(defaultSequenceTemplate, configMap);
+            String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION);
+            return renderPolicyTemplate(operationPolicyTemplate, configMap);
         } else {
             return "";
         }
     }
 
     public static String generatePolicySequenceForProducts(APIProduct apiProduct, Map<String, String> apiLocationsMap)
-            throws APIManagementException {
+            throws APIManagementException, IOException {
 
         List<Object> caseList = new ArrayList<>();
 
@@ -102,7 +96,8 @@ public class SynapsePolicyAggregator {
             configMap.put("sequence_name", seqExt);
             configMap.put("case_list", caseList);
 
-            return renderPolicyTemplate(defaultSequenceTemplate, configMap);
+            String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION);
+            return renderPolicyTemplate(operationPolicyTemplate, configMap);
         } else {
             return "";
         }
@@ -119,7 +114,6 @@ public class SynapsePolicyAggregator {
         String uriTemplateString = template.getUriTemplate();
         String method = template.getHTTPVerb();
         String key = method + "_" + uriTemplateString.replaceAll("[\\W]", "\\\\$0");
-        ;
 
         List<String> caseBodyInFlow = new ArrayList<>();
         List<String> caseBodyOutFlow = new ArrayList<>();
@@ -139,12 +133,14 @@ public class SynapsePolicyAggregator {
 
             if (policyDefinition != null) {
                 String renderedTemplate = renderPolicyTemplate(policyDefinition, policyParameters);
-                if (APIConstants.OPERATION_SEQUENCE_TYPE_IN.equals(policy.getDirection())) {
-                    caseBodyInFlow.add(renderedTemplate);
-                } else if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
-                    caseBodyOutFlow.add(renderedTemplate);
-                } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection())) {
-                    caseBodyFaultFlow.add(renderedTemplate);
+                if (renderedTemplate != null && !renderedTemplate.isEmpty()) {
+                    if (APIConstants.OPERATION_SEQUENCE_TYPE_IN.equals(policy.getDirection())) {
+                        caseBodyInFlow.add(renderedTemplate);
+                    } else if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
+                        caseBodyOutFlow.add(renderedTemplate);
+                    } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection())) {
+                        caseBodyFaultFlow.add(renderedTemplate);
+                    }
                 }
             } else {
                 log.error("Policy definition for " + policy.getPolicyName() + " is not found in the artifact");
@@ -174,12 +170,8 @@ public class SynapsePolicyAggregator {
 
     public static String renderPolicyTemplate(String template, Map<String, Object> configMap) {
 
-        if (configMap.size() == 0) {
-            return "";
-        } else {
-            Jinjava jinjava = new Jinjava();
-            return jinjava.render(template, configMap);
-        }
+        Jinjava jinjava = new Jinjava();
+        return jinjava.render(template, configMap);
     }
 
 }

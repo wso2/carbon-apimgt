@@ -3745,12 +3745,14 @@ public class SQLConstants {
         public static final String ADD_API_SPECIFIC_POLICY_DEFINITION =
                 "INSERT INTO AM_API_OPERATION_POLICY_DEFINITIONS " +
                         " (POLICY_ID, API_UUID, POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, " +
-                        "API_TYPES, SHARED_POLICY_NAME, POLICY_PARAMETERS, POLICY_DEFINITION) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                        " API_TYPES, SHARED_POLICY_NAME, POLICY_PARAMETERS, POLICY_DEFINITION, TENANT_DOMAIN) " +
+                        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String ADD_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION =
                 "INSERT INTO AM_API_OPERATION_POLICY_DEFINITIONS " +
                         " (POLICY_ID, API_UUID, POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
-                        " SHARED_POLICY_NAME, POLICY_PARAMETERS, POLICY_DEFINITION, REVISION_UUID ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                        " SHARED_POLICY_NAME, POLICY_PARAMETERS, POLICY_DEFINITION, TENANT_DOMAIN, REVISION_UUID )" +
+                        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String REMOVE_FROM_AM_API_OPERATION_POLICY_DEFINITIONS_SQL =
                 "DELETE FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE API_UUID = ?";
@@ -3758,23 +3760,50 @@ public class SQLConstants {
         public static final String REMOVE_FROM_AM_API_OPERATION_POLICY_DEFINITIONS_FOR_REVISIONS_SQL =
                 "DELETE FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE REVISION_UUID = ?";
 
-        public static final String GET_API_SPECIFIC_POLICY_DEFINITION =
+        public static final String GET_API_SPECIFIC_POLICY_BY_POLICY_NAME =
                 "SELECT " +
                         " POLICY_ID, SHARED_POLICY_NAME, REVISION_UUID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, " +
-                        " API_TYPES,POLICY_PARAMETERS,POLICY_DEFINITION" +
+                        " API_TYPES, POLICY_PARAMETERS, POLICY_DEFINITION, TENANT_DOMAIN" +
                 " FROM " +
                         " AM_API_OPERATION_POLICY_DEFINITIONS " +
                 " WHERE " +
                         " API_UUID=? AND POLICY_NAME=? AND REVISION_UUID IS NULL";
 
-        public static final String GET_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION =
+        public static final String GET_API_SPECIFIC_POLICY_BY_POLICY_ID =
                 "SELECT " +
-                        " POLICY_ID, SHARED_POLICY_NAME, REVISION_UUID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, " +
-                        " API_TYPES,POLICY_PARAMETERS,POLICY_DEFINITION" +
+                        " POLICY_NAME, SHARED_POLICY_NAME, REVISION_UUID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, " +
+                        " API_TYPES, POLICY_PARAMETERS" +
                 " FROM " +
                         " AM_API_OPERATION_POLICY_DEFINITIONS " +
                 " WHERE " +
-                        " API_UUID=? AND POLICY_NAME=? AND REVISION_UUID = ?";
+                        " API_UUID=? AND POLICY_ID= ? AND TENANT_DOMAIN= ?";
+
+        public static final String GET_API_SPECIFIC_POLICY_WITH_DEFINITION_BY_POLICY_ID =
+                "SELECT " +
+                        " POLICY_NAME, SHARED_POLICY_NAME, REVISION_UUID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, " +
+                        " API_TYPES, POLICY_PARAMETERS, POLICY_DEFINITION" +
+                " FROM " +
+                        " AM_API_OPERATION_POLICY_DEFINITIONS " +
+                " WHERE " +
+                        " API_UUID = ? AND POLICY_ID = ? AND TENANT_DOMAIN = ?";
+
+        public static final String GET_ALL_API_SPECIFIC_OPERATION_POLICIES =
+                "SELECT " +
+                        " POLICY_ID, POLICY_NAME, SHARED_POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, " +
+                        " FLOW, GATEWAY_TYPES, API_TYPES, POLICY_PARAMETERS, TENANT_DOMAIN " +
+                " FROM " +
+                        " AM_API_OPERATION_POLICY_DEFINITIONS " +
+                " WHERE " +
+                        " API_UUID = ? AND TENANT_DOMAIN = ? AND REVISION_UUID IS NULL";
+
+        public static final String GET_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION =
+                "SELECT " +
+                        " POLICY_ID, SHARED_POLICY_NAME, REVISION_UUID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, " +
+                        " API_TYPES, POLICY_PARAMETERS, POLICY_DEFINITION, TENANT_DOMAIN" +
+                " FROM " +
+                        " AM_API_OPERATION_POLICY_DEFINITIONS " +
+                " WHERE " +
+                        " API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID = ?";
 
         public static final String GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION_FOR_API =
                 "SELECT " +
@@ -3799,6 +3828,10 @@ public class SQLConstants {
                         " POLICY_PARAMETERS = ?, POLICY_DEFINITION = ? " +
                 " WHERE API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID IS NULL";
 
+        public static final String DELETE_API_SPECIFIC_OPERATION_POLICY=
+                "DELETE FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE API_UUID = ? AND API POLICY_ID = ? AND " +
+                        " TENANT_DOMAIN = ? AND REVISION_UUID IS NULL";
+
         // Shared Operation policy
 
         public static final String GET_SHARED_POLICY_ID_FROM_SHARED_POLICY_NAME =
@@ -3807,13 +3840,13 @@ public class SQLConstants {
                 " FROM " +
                         " AM_SHARED_OPERATION_POLICY " +
                 " WHERE " +
-                        " SHARED_POLICY_NAME = ? ";
+                        " SHARED_POLICY_NAME = ? AND TENANT_DOMAIN = ? ";
 
         public static final String ADD_SHARED_OPERATION_POLICY =
                 "INSERT INTO AM_SHARED_OPERATION_POLICY " +
                         " (SHARED_POLICY_ID, SHARED_POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
-                        " POLICY_PARAMETERS, POLICY_DEFINITION ) " +
-                " VALUES (?, ?,?,?,?,?,?,?,?)";
+                        " POLICY_PARAMETERS, POLICY_DEFINITION, TENANT_DOMAIN) " +
+                " VALUES (?, ?,?,?,?,?,?,?,?,?)";
 
         public static final String UPDATE_SHARED_OPERATION_POLICY =
                 "UPDATE " +
@@ -3822,16 +3855,47 @@ public class SQLConstants {
                         " DISPLAY_NAME = ?,POLICY_DESCRIPTION = ?, FLOW = ?, GATEWAY_TYPES = ?, API_TYPES = ?, " +
                         " POLICY_PARAMETERS = ?, POLICY_DEFINITION = ? " +
                 " WHERE " +
-                        " SHARED_POLICY_NAME = ?";
+                        " SHARED_POLICY_NAME = ? AND TENANT_DOMAIN = ?";
 
         public static final String GET_SHARED_OPERATION_POLICY_FROM_SHARED_POLICY_NAME =
                 "SELECT " +
                         " SHARED_POLICY_ID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
+                        " POLICY_PARAMETERS" +
+                " FROM " +
+                        " AM_SHARED_OPERATION_POLICY " +
+                " WHERE " +
+                        " SHARED_POLICY_NAME=? AND TENANT_DOMAIN = ?";
+
+        public static final String GET_SHARED_OPERATION_POLICY_FROM_SHARED_POLICY_ID =
+                "SELECT " +
+                        " SHARED_POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
+                        " POLICY_PARAMETERS" +
+                " FROM " +
+                        " AM_SHARED_OPERATION_POLICY " +
+                " WHERE " +
+                        " SHARED_POLICY_ID=? AND TENANT_DOMAIN = ?";
+        public static final String GET_SHARED_OPERATION_POLICY_WITH_DEFINITION_FROM_SHARED_POLICY_ID =
+                "SELECT " +
+                        " SHARED_POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
                         " POLICY_PARAMETERS, POLICY_DEFINITION" +
                 " FROM " +
                         " AM_SHARED_OPERATION_POLICY " +
                 " WHERE " +
-                        " SHARED_POLICY_NAME=?";
+                        " SHARED_POLICY_ID=? AND TENANT_DOMAIN = ?";
+        public static final String GET_ALL_SHARED_OPERATION_POLICIES =
+                "SELECT " +
+                        " SHARED_POLICY_ID, SHARED_POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, " +
+                        " FLOW, GATEWAY_TYPES, API_TYPES,POLICY_PARAMETERS,POLICY_DEFINITION " +
+                " FROM " +
+                        " AM_SHARED_OPERATION_POLICY " +
+                " WHERE " +
+                        " TENANT_DOMAIN = ?";
+
+        public static final String DELETE_SHARED_OPERATION_POLICY =
+                "DELETE FROM AM_SHARED_OPERATION_POLICY WHERE SHARED_POLICY_ID = ? AND TENANT_DOMAIN = ?";
+
+
+
     }
 
     /**
