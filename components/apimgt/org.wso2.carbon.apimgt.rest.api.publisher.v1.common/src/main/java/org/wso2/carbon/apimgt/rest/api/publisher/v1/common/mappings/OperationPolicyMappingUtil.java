@@ -166,8 +166,9 @@ public class OperationPolicyMappingUtil {
 
         if (policySpecification.getPolicyAttributes() != null) {
             List<OperationPolicySpecAttributeDTO> specAttributeDtoList = new ArrayList<>();
-            for (OperationPolicySpecAttribute specAttribute : policySpecification.getPolicyAttributes()){
-                OperationPolicySpecAttributeDTO specAttributeDTO = fromOperationPolicySpecAtributtesToDTO(specAttribute);
+            for (OperationPolicySpecAttribute specAttribute : policySpecification.getPolicyAttributes()) {
+                OperationPolicySpecAttributeDTO specAttributeDTO =
+                        fromOperationPolicySpecAtributtesToDTO(specAttribute);
                 specAttributeDtoList.add(specAttributeDTO);
             }
             policyDataDTO.setPolictAttributes(specAttributeDtoList);
@@ -175,7 +176,8 @@ public class OperationPolicyMappingUtil {
         return policyDataDTO;
     }
 
-    public static OperationPolicySpecAttributeDTO fromOperationPolicySpecAtributtesToDTO(OperationPolicySpecAttribute specAttribute) {
+    public static OperationPolicySpecAttributeDTO fromOperationPolicySpecAtributtesToDTO(
+            OperationPolicySpecAttribute specAttribute) {
         OperationPolicySpecAttributeDTO specAttributeDTO = new OperationPolicySpecAttributeDTO();
         specAttributeDTO.setAttributeName(specAttribute.getAttributeName());
         specAttributeDTO.setAttributeDisplayName(specAttribute.getAttributeDisplayName());
@@ -185,5 +187,4 @@ public class OperationPolicyMappingUtil {
         specAttributeDTO.setRequired(specAttribute.isRequired());
         return specAttributeDTO;
     }
-
 }

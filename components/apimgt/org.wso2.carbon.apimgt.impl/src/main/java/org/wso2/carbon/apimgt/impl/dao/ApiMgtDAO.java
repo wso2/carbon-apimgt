@@ -18682,11 +18682,18 @@ public class ApiMgtDAO {
                     policySpecAttributes = new Gson().fromJson(policyParametersString,
                             new TypeToken<List<OperationPolicySpecAttribute>>() {
                             }.getType());
+                    policySpecification.setPolicyAttributes(policySpecAttributes);
                 } catch (IOException e) {
                     log.error("Error while converting policy specification attributes for the shared policy " + sharedPolicyName, e);
                 }
+                try (InputStream policyDefinitionStream = rs.getBinaryStream("POLICY_DEFINITION")) {
+                    String policyDefinitionString = IOUtils.toString(policyDefinitionStream);
+                    policyData.setDefinition(policyDefinitionString);
+                } catch (IOException e) {
+                    log.error("Error while converting policy definition of shared policy " + sharedPolicyName, e);
+                }
 
-                policySpecification.setPolicyAttributes(policySpecAttributes);
+
                 policyData.setSpecification(policySpecification);
                 return policyData;
             }

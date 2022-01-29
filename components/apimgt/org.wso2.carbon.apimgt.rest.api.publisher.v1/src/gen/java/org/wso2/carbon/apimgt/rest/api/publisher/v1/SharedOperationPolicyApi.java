@@ -116,8 +116,8 @@ SharedOperationPolicyApiService delegate = new SharedOperationPolicyApiServiceIm
         @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = OperationPolicyDataDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getSharedOperationPolicyByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
-        return delegate.getSharedOperationPolicyByPolicyId(apiId, operationPolicyId, securityContext);
+    public Response getSharedOperationPolicyByPolicyId(@ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
+        return delegate.getSharedOperationPolicyByPolicyId(operationPolicyId, securityContext);
     }
 
     @GET
@@ -136,7 +136,7 @@ SharedOperationPolicyApiService delegate = new SharedOperationPolicyApiServiceIm
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getSharedOperationPolicyContentByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
-        return delegate.getSharedOperationPolicyContentByPolicyId(apiId, operationPolicyId, securityContext);
+    public Response getSharedOperationPolicyContentByPolicyId(@ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
+        return delegate.getSharedOperationPolicyContentByPolicyId(operationPolicyId, securityContext);
     }
 }

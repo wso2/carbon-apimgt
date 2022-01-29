@@ -3814,7 +3814,7 @@ public class SQLConstants {
                 " WHERE API_UUID = ? AND POLICY_NAME = ? AND REVISION_UUID IS NULL";
 
         public static final String DELETE_API_SPECIFIC_OPERATION_POLICY=
-                "DELETE FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE API_UUID = ? AND API POLICY_ID = ? AND " +
+                "DELETE FROM AM_API_OPERATION_POLICY_DEFINITIONS WHERE API_UUID = ? AND POLICY_ID = ? AND " +
                         " TENANT_DOMAIN = ? AND REVISION_UUID IS NULL";
 
         // Shared Operation policy
@@ -3845,7 +3845,7 @@ public class SQLConstants {
         public static final String GET_SHARED_OPERATION_POLICY_FROM_SHARED_POLICY_NAME =
                 "SELECT " +
                         " SHARED_POLICY_ID, DISPLAY_NAME, POLICY_DESCRIPTION, FLOW, GATEWAY_TYPES, API_TYPES, " +
-                        " POLICY_PARAMETERS" +
+                        " POLICY_PARAMETERS, POLICY_DEFINITION" +
                 " FROM " +
                         " AM_SHARED_OPERATION_POLICY " +
                 " WHERE " +
