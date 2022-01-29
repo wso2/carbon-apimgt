@@ -758,7 +758,7 @@ public class ExportUtils {
                                         policyData.getSpecification());
                             }
                             if (policyData.getDefinition() != null) {
-                                CommonUtil.writeFile(policyName + ".toml", policyData.getDefinition());
+                                CommonUtil.writeFile(policyName + ".j2", policyData.getDefinition());
                             }
                         }
                     }

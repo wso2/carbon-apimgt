@@ -19,9 +19,16 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicySpecAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +41,7 @@ public class OperationPolicyMappingUtil {
 
     public static List<OperationPolicy> fromDTOListToOperationPolicyList(
             List<OperationPolicyDTO> operationPolicyDTOList) {
+
         List<OperationPolicy> operationPolicyList = new ArrayList<>();
         for (OperationPolicyDTO operationPolicyDto : operationPolicyDTOList) {
             OperationPolicy operationPolicy = fromDTOToOperationPolicy(operationPolicyDto);
@@ -42,17 +50,18 @@ public class OperationPolicyMappingUtil {
         return operationPolicyList;
     }
 
-
     public static OperationPolicy fromDTOToOperationPolicy(OperationPolicyDTO operationPolicyDTO) {
+
         OperationPolicy operationPolicy = new OperationPolicy();
         operationPolicy.setPolicyName(operationPolicyDTO.getPolicyName());
         operationPolicy.setSharedPolicyRef(operationPolicyDTO.getSharedPolicyRef());
         operationPolicy.setOrder((operationPolicyDTO.getOrder()) != null ? operationPolicyDTO.getOrder() : 1);
         operationPolicy.setParameters(operationPolicyDTO.getParameters());
-        return  operationPolicy;
+        return operationPolicy;
     }
 
     public static OperationPolicyDTO fromOperationPolicyToDTO(OperationPolicy operationPolicy) {
+
         OperationPolicyDTO dto = new OperationPolicyDTO();
         dto.setPolicyName(operationPolicy.getPolicyName());
         dto.setSharedPolicyRef(operationPolicy.getSharedPolicyRef());
@@ -62,6 +71,7 @@ public class OperationPolicyMappingUtil {
     }
 
     public static APIOperationPoliciesDTO fromOperationPolicyListToDTO(List<OperationPolicy> operationPolicyList) {
+
         APIOperationPoliciesDTO dto = new APIOperationPoliciesDTO();
         List<OperationPolicyDTO> in = new ArrayList<>();
         List<OperationPolicyDTO> out = new ArrayList<>();
@@ -85,6 +95,7 @@ public class OperationPolicyMappingUtil {
 
     public static List<OperationPolicy> fromDTOToAPIOperationPoliciesList(
             APIOperationPoliciesDTO apiOperationPoliciesDTO) {
+
         List<OperationPolicy> operationPoliciesList = new ArrayList<>();
 
         if (apiOperationPoliciesDTO != null) {
@@ -111,4 +122,68 @@ public class OperationPolicyMappingUtil {
         }
         return operationPoliciesList;
     }
+
+    public static OperationPolicyDataListDTO fromOperationPolicyDataListToDTO(
+            List<OperationPolicyDataHolder> policyDataList, int offset, int limit) {
+
+        List<OperationPolicyDataDTO> operationPolicyList = new ArrayList<>();
+
+        if (policyDataList == null) {
+            policyDataList = new ArrayList<>();
+        }
+
+        int size = policyDataList.size();
+        int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = Math.min(offset + limit - 1, size - 1);
+        for (int i = start; i <= end; i++) {
+            operationPolicyList.add(fromOperationPolicyDataToDTO(policyDataList.get(i)));
+        }
+
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(size);
+
+        OperationPolicyDataListDTO dataListDTO = new OperationPolicyDataListDTO();
+        dataListDTO.setList(operationPolicyList);
+        dataListDTO.setCount(operationPolicyList.size());
+        dataListDTO.setPagination(paginationDTO);
+
+        return dataListDTO;
+    }
+
+    public static OperationPolicyDataDTO fromOperationPolicyDataToDTO(OperationPolicyDataHolder policyData) {
+
+        OperationPolicyDataDTO policyDataDTO = new OperationPolicyDataDTO();
+        OperationPolicySpecification policySpecification = policyData.getSpecification();
+        policyDataDTO.setPolicyId(policyData.getPolicyId());
+        policyDataDTO.setName(policySpecification.getPolicyName());
+        policyDataDTO.setDisplayName(policySpecification.getDisplayName());
+        policyDataDTO.setPolicyDescription(policySpecification.getPolicyDescription());
+        policyDataDTO.setGatewayTypes(policySpecification.getSupportedGatewayTypes());
+        policyDataDTO.setApiTypes(policySpecification.getApiTypes());
+        policyDataDTO.setFlows(policySpecification.getFlow());
+
+        if (policySpecification.getPolicyAttributes() != null) {
+            List<OperationPolicySpecAttributeDTO> specAttributeDtoList = new ArrayList<>();
+            for (OperationPolicySpecAttribute specAttribute : policySpecification.getPolicyAttributes()){
+                OperationPolicySpecAttributeDTO specAttributeDTO = fromOperationPolicySpecAtributtesToDTO(specAttribute);
+                specAttributeDtoList.add(specAttributeDTO);
+            }
+            policyDataDTO.setPolictAttributes(specAttributeDtoList);
+        }
+        return policyDataDTO;
+    }
+
+    public static OperationPolicySpecAttributeDTO fromOperationPolicySpecAtributtesToDTO(OperationPolicySpecAttribute specAttribute) {
+        OperationPolicySpecAttributeDTO specAttributeDTO = new OperationPolicySpecAttributeDTO();
+        specAttributeDTO.setAttributeName(specAttribute.getAttributeName());
+        specAttributeDTO.setAttributeDisplayName(specAttribute.getAttributeDisplayName());
+        specAttributeDTO.setAttributeDescription(specAttribute.getAttributeDescription());
+        specAttributeDTO.setAttributeType(specAttribute.getAttributeType());
+        specAttributeDTO.setAttributeValidationRegex(specAttribute.getAttributeValidationRegex());
+        specAttributeDTO.setRequired(specAttribute.isRequired());
+        return specAttributeDTO;
+    }
+
 }

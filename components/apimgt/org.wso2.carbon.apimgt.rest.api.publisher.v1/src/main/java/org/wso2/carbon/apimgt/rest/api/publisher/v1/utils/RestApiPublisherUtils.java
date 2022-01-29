@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,13 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -37,6 +44,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -263,5 +271,33 @@ public class RestApiPublisherUtils {
             content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
         }
         return content;
+    }
+
+    public static File exportOperationPolicyData(OperationPolicyDataHolder policyData)
+            throws APIManagementException {
+
+        File exportFolder = null;
+        try {
+            exportFolder = CommonUtil.createTempDirectory(null);
+            String exportAPIBasePath = exportFolder.toString();
+            String archivePath =
+                    exportAPIBasePath.concat(File.separator + policyData.getSpecification().getPolicyName());
+            CommonUtil.createDirectory(archivePath);
+            String policyName = archivePath + File.separator + policyData.getSpecification().getPolicyName();
+            if (policyData.getSpecification() != null) {
+                CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
+                        ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                        policyData.getSpecification());
+            }
+            if (policyData.getDefinition() != null) {
+                CommonUtil.writeFile(policyName + ".j2", policyData.getDefinition());
+            }
+
+            CommonUtil.archiveDirectory(exportAPIBasePath);
+            FileUtils.deleteQuietly(new File(exportAPIBasePath));
+            return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
+        } catch (APIImportExportException | IOException e) {
+            throw new APIManagementException("Error while exporting operation policy", e);
+        }
     }
 }

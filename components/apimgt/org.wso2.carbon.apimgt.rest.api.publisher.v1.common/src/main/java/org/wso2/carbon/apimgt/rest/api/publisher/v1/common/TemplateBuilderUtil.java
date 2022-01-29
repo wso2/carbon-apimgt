@@ -1201,7 +1201,12 @@ public class TemplateBuilderUtil {
 
         GatewayContentDTO operationPolicySequenceContentDto = new GatewayContentDTO();
 
-        String policySequence = SynapsePolicyAggregator.generatePolicySequenceForAPIs(pathToAchieve, api);
+        String policySequence = null;
+        try {
+            policySequence = SynapsePolicyAggregator.generatePolicySequenceForAPIs(pathToAchieve, api);
+        } catch (IOException e) {
+            throw new APIManagementException(e);
+        }
 
         if (StringUtils.isNotEmpty(policySequence)) {
             try {
@@ -1228,7 +1233,12 @@ public class TemplateBuilderUtil {
 
         GatewayContentDTO operationPolicySequenceContentDto = new GatewayContentDTO();
 
-        String policySequence = SynapsePolicyAggregator.generatePolicySequenceForProducts(apiProduct, locationsMap);
+        String policySequence = null;
+        try {
+            policySequence = SynapsePolicyAggregator.generatePolicySequenceForProducts(apiProduct, locationsMap);
+        } catch (IOException e) {
+            throw new APIManagementException(e);
+        }
 
         if (StringUtils.isNotEmpty(policySequence)) {
             try {

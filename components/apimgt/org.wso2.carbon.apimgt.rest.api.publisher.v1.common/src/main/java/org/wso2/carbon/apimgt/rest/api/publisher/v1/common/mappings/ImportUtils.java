@@ -255,7 +255,8 @@ public class ImportUtils {
                                 importedApiDTO.getProvider(), organization);
             }
 
-            importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath));
+            importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath,
+                    currentTenantDomain));
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
             lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
@@ -402,7 +403,7 @@ public class ImportUtils {
     }
 
     public static Set<URITemplate> validateOperationPolicies(API api, APIProvider provider,
-                                                             String extractedFolderPath) {
+                                                             String extractedFolderPath, String tenantDomain) {
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         for (URITemplate uriTemplate : uriTemplates) {
@@ -419,7 +420,8 @@ public class ImportUtils {
                         OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                         operationPolicyData.setDefinition(policyDefinition);
                         operationPolicyData.setSpecification(policySpec);
-                        String policyID = provider.addApiSpecificOperationalPolicy(api.getUuid(), operationPolicyData);
+                        String policyID = provider.addApiSpecificOperationalPolicy(api.getUuid(), operationPolicyData,
+                                tenantDomain);
                         policy.setPolicyId(policyID);
                         validatedOperationPolicies.add(policy);
                     } catch (APIManagementException e) {
@@ -455,7 +457,7 @@ public class ImportUtils {
         String yamlContent = null;
         try {
             String fileName = extractedFolderPath + File.separator
-                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator + policyName + ".toml";
+                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator + policyName + ".j2";
 
             if (CommonUtil.checkFileExistence(fileName)) {
                 if (log.isDebugEnabled()) {
