@@ -51,7 +51,8 @@ public class SynapsePolicyAggregator {
 
     private static final Log log = LogFactory.getLog(SynapsePolicyAggregator.class);
     private static final String POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
-            + "repository" + File.separator + "resources" + File.separator + "operation_policy_template.j2";
+            + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
+            + "operation_policy_template.j2";
 
     public static String generatePolicySequenceForAPIs(String pathToAchieve, API api)
             throws APIManagementException, IOException {
@@ -69,7 +70,8 @@ public class SynapsePolicyAggregator {
             configMap.put("sequence_name", seqExt);
             configMap.put("case_list", caseList);
 
-            String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION);
+            String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION)
+                    .replace("\\", ""); //Removing escape characters from the template
             return renderPolicyTemplate(operationPolicyTemplate, configMap);
         } else {
             return "";
