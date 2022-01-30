@@ -8021,8 +8021,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
 
     post:
       tags:
@@ -8083,10 +8081,8 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -H "Content-Type: multipart/form-data" -F mediationPolicyFile=@TokenExchange.xml
-            -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
+            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy"'
 
 
   /apis/{apiId}/operation-policy/{operationPolicyId}:
@@ -8130,8 +8126,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_get.yaml
 
     delete:
       tags:
@@ -8163,8 +8157,6 @@ paths:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
 
   /apis/{apiId}/import-shared-operation-policy:
     post:
@@ -8224,8 +8216,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/import-shared-operation-policy?operationPolicyId=f56eb8b4-128c-45aa-ad35-9c87a546261a/content&apiSpecificPolicyName=Pizza-log-policy"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
 
   /apis/{apiId}/operation-policy/{operationPolicyId}/content:
     get:
@@ -8263,8 +8253,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
 
 
   /shared-operation-policy:
@@ -8311,8 +8299,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
 
     post:
       tags:
@@ -8371,11 +8357,8 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -H "Content-Type: multipart/form-data" -F mediationPolicyFile=@TokenExchange.xml
-            -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
-
+            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
+            "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy"'
 
   /shared-operation-policy/{operationPolicyId}:
     get:
@@ -8417,8 +8400,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_get.yaml
 
     delete:
       tags:
@@ -8449,8 +8430,6 @@ paths:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
 
   /shared-operation-policy/{operationPolicyId}/content:
     get:
@@ -8487,8 +8466,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
 
   /api-products/change-lifecycle:
     post:
