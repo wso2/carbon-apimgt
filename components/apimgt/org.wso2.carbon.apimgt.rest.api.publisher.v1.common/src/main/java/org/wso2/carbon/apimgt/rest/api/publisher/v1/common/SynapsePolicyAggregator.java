@@ -99,7 +99,8 @@ public class SynapsePolicyAggregator {
             configMap.put("sequence_name", seqExt);
             configMap.put("case_list", caseList);
 
-            String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION);
+            String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION)
+                    .replace("\\", ""); //Removing escape characters from the template
             return renderPolicyTemplate(operationPolicyTemplate, configMap);
         } else {
             return "";

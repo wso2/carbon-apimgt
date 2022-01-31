@@ -726,21 +726,20 @@ public class ExportUtils {
     }
 
     /**
-     * Retrieve the deployed gateway environments and store those in the archive directory.
+     * Retrieve the operation policies and store those in the archive directory.
      *
      * @param archivePath  File path to export the endpoint certificates
      * @param apiID        UUID of the API/ API Product
      * @param exportFormat Export format of file
      * @param apiProvider  API Provider
-     * @throws APIImportExportException If an error occurs while exporting gateway environments
+     * @throws APIImportExportException If an error occurs while exporting operation policies
      */
     public static void addOperationalPoliciesToArchive(String archivePath, String apiID,
                                                        ExportFormat exportFormat, APIProvider apiProvider, API api)
-            throws APIManagementException, APIImportExportException {
-
-        CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
+            throws APIManagementException {
 
         try {
+            CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
             Set<URITemplate> uriTemplates = api.getUriTemplates();
             for (URITemplate uriTemplate : uriTemplates) {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
@@ -752,6 +751,7 @@ public class ExportUtils {
                             String policyName = archivePath  + File.separator
                                     + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
                                             policyData.getSpecification().getPolicyName();
+                            // Policy specification and definition will have the same name
                             if (policyData.getSpecification() != null) {
                                 CommonUtil.writeDtoToFile(policyName, exportFormat,
                                         ImportExportConstants.TYPE_POLICY_SPECIFICATION,
@@ -764,12 +764,9 @@ public class ExportUtils {
                     }
                 }
             }
-        } catch (APIImportExportException e) {
+        } catch (IOException | APIImportExportException e) {
             throw new APIManagementException(
-                    "Error in converting deployment environment details to JSON object in API: " + apiID, e);
-        } catch (IOException e) {
-            throw new APIManagementException(
-                    "Error while saving deployment environment details for API: " + apiID + " as YAML", e);
+                    "Error while adding operation policy details for API: " + apiID, e);
         }
     }
 
