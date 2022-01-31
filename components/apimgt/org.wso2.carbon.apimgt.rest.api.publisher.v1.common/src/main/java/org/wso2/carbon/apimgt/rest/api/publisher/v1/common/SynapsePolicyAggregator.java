@@ -140,9 +140,9 @@ public class SynapsePolicyAggregator {
             if (policyDefinition != null) {
                 String renderedTemplate = renderPolicyTemplate(policyDefinition, policyParameters);
                 if (renderedTemplate != null && !renderedTemplate.isEmpty()) {
-                    if (APIConstants.OPERATION_SEQUENCE_TYPE_IN.equals(policy.getDirection())) {
+                    if (APIConstants.OPERATION_SEQUENCE_TYPE_RESQUEST.equals(policy.getDirection())) {
                         caseBodyInFlow.add(renderedTemplate);
-                    } else if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
+                    } else if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(policy.getDirection())) {
                         caseBodyOutFlow.add(renderedTemplate);
                     } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection())) {
                         caseBodyFaultFlow.add(renderedTemplate);

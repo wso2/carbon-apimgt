@@ -28,9 +28,9 @@
       "items": {
         "type": "string",
         "enum": [
-          "Request",
-          "Response",
-          "Fault"
+          "request",
+          "response",
+          "fault"
         ]
       }
     },

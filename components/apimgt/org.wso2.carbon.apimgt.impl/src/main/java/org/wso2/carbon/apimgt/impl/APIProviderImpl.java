@@ -2565,7 +2565,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug("The policy " + policySpecification.getPolicyName()
                         + " is not support in the " + appliedPolicy.getDirection() + " flow. Hence skipped.");
             }
-            throw new APIManagementException(policySpecification.getPolicyName() + " cannot be used in the request "
+            throw new APIManagementException(policySpecification.getPolicyName() + " cannot be used in the "
                     + appliedPolicy.getDirection() + " flow.", ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
         }
 

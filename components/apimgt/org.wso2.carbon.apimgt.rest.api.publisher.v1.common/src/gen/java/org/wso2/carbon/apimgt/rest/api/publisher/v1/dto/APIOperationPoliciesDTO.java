@@ -23,44 +23,44 @@ import javax.validation.Valid;
 
 public class APIOperationPoliciesDTO   {
   
-    private List<OperationPolicyDTO> in = new ArrayList<OperationPolicyDTO>();
-    private List<OperationPolicyDTO> out = new ArrayList<OperationPolicyDTO>();
+    private List<OperationPolicyDTO> request = new ArrayList<OperationPolicyDTO>();
+    private List<OperationPolicyDTO> response = new ArrayList<OperationPolicyDTO>();
     private List<OperationPolicyDTO> fault = new ArrayList<OperationPolicyDTO>();
 
   /**
    **/
-  public APIOperationPoliciesDTO in(List<OperationPolicyDTO> in) {
-    this.in = in;
+  public APIOperationPoliciesDTO request(List<OperationPolicyDTO> request) {
+    this.request = request;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("in")
-  public List<OperationPolicyDTO> getIn() {
-    return in;
+  @JsonProperty("request")
+  public List<OperationPolicyDTO> getRequest() {
+    return request;
   }
-  public void setIn(List<OperationPolicyDTO> in) {
-    this.in = in;
+  public void setRequest(List<OperationPolicyDTO> request) {
+    this.request = request;
   }
 
   /**
    **/
-  public APIOperationPoliciesDTO out(List<OperationPolicyDTO> out) {
-    this.out = out;
+  public APIOperationPoliciesDTO response(List<OperationPolicyDTO> response) {
+    this.response = response;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("out")
-  public List<OperationPolicyDTO> getOut() {
-    return out;
+  @JsonProperty("response")
+  public List<OperationPolicyDTO> getResponse() {
+    return response;
   }
-  public void setOut(List<OperationPolicyDTO> out) {
-    this.out = out;
+  public void setResponse(List<OperationPolicyDTO> response) {
+    this.response = response;
   }
 
   /**
@@ -91,14 +91,14 @@ public class APIOperationPoliciesDTO   {
       return false;
     }
     APIOperationPoliciesDTO apIOperationPolicies = (APIOperationPoliciesDTO) o;
-    return Objects.equals(in, apIOperationPolicies.in) &&
-        Objects.equals(out, apIOperationPolicies.out) &&
+    return Objects.equals(request, apIOperationPolicies.request) &&
+        Objects.equals(response, apIOperationPolicies.response) &&
         Objects.equals(fault, apIOperationPolicies.fault);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(in, out, fault);
+    return Objects.hash(request, response, fault);
   }
 
   @Override
@@ -106,8 +106,8 @@ public class APIOperationPoliciesDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIOperationPoliciesDTO {\n");
     
-    sb.append("    in: ").append(toIndentedString(in)).append("\n");
-    sb.append("    out: ").append(toIndentedString(out)).append("\n");
+    sb.append("    request: ").append(toIndentedString(request)).append("\n");
+    sb.append("    response: ").append(toIndentedString(response)).append("\n");
     sb.append("    fault: ").append(toIndentedString(fault)).append("\n");
     sb.append("}");
     return sb.toString();
