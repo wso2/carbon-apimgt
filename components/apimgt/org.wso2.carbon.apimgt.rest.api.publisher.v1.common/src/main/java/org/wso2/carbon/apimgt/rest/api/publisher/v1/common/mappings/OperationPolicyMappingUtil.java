@@ -75,22 +75,22 @@ public class OperationPolicyMappingUtil {
     public static APIOperationPoliciesDTO fromOperationPolicyListToDTO(List<OperationPolicy> operationPolicyList) {
 
         APIOperationPoliciesDTO dto = new APIOperationPoliciesDTO();
-        List<OperationPolicyDTO> in = new ArrayList<>();
-        List<OperationPolicyDTO> out = new ArrayList<>();
+        List<OperationPolicyDTO> request = new ArrayList<>();
+        List<OperationPolicyDTO> response = new ArrayList<>();
         List<OperationPolicyDTO> fault = new ArrayList<>();
 
         for (OperationPolicy op : operationPolicyList) {
             OperationPolicyDTO policyDTO = fromOperationPolicyToDTO(op);
-            if (APIConstants.OPERATION_SEQUENCE_TYPE_IN.equals(op.getDirection())) {
-                in.add(policyDTO);
-            } else if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(op.getDirection())) {
-                out.add(policyDTO);
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_RESQUEST.equals(op.getDirection())) {
+                request.add(policyDTO);
+            } else if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(op.getDirection())) {
+                response.add(policyDTO);
             } else if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(op.getDirection())) {
                 fault.add(policyDTO);
             }
         }
-        dto.setIn(in);
-        dto.setOut(out);
+        dto.setRequest(request);
+        dto.setResponse(response);
         dto.setFault(fault);
         return dto;
     }
@@ -101,18 +101,18 @@ public class OperationPolicyMappingUtil {
         List<OperationPolicy> operationPoliciesList = new ArrayList<>();
 
         if (apiOperationPoliciesDTO != null) {
-            List<OperationPolicyDTO> in = apiOperationPoliciesDTO.getIn();
-            List<OperationPolicyDTO> out = apiOperationPoliciesDTO.getOut();
+            List<OperationPolicyDTO> request = apiOperationPoliciesDTO.getRequest();
+            List<OperationPolicyDTO> response = apiOperationPoliciesDTO.getResponse();
             List<OperationPolicyDTO> fault = apiOperationPoliciesDTO.getFault();
-            for (OperationPolicyDTO op : in) {
+            for (OperationPolicyDTO op : request) {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
-                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_IN);
+                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESQUEST);
                 operationPoliciesList.add(operationPolicy);
             }
 
-            for (OperationPolicyDTO op : out) {
+            for (OperationPolicyDTO op : response) {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
-                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_OUT);
+                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
                 operationPoliciesList.add(operationPolicy);
             }
 
