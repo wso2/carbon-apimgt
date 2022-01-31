@@ -8168,7 +8168,7 @@ paths:
       operationId: importSharedOperationPolicyToAPI
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - name: operationPolicyId
+        - name: sharedOperationPolicyId
           in: query
           required: true
           schema:
@@ -12132,37 +12132,102 @@ components:
             $ref: '#/components/schemas/OperationPolicyData'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    OperationPolicyData:
-      title: OperationPolicyData
+    SharedOperationPolicyDataList:
+      title: Shared operation policy List
       type: object
       properties:
+        count:
+          type: integer
+          description: |
+            Number of shared operation policies returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/SharedOperationPolicyData'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    OperationPolicyData:
+      title: Operation Policy Data
+      type: object
+      properties:
+        policyCategory:
+          type: string
+          example: Mediation
         policyId:
           type: string
           example: 121223q41-24141-124124124-12414
-        name:
+        policyName:
           type: string
           example: removeHeaderPolicy
-        displayName:
+        policyDisplayName:
+          type: string
+          example: Remove Header Policy
+        sharedPolicyRef:
+          type: string
+          example: AddHeaderSharedPolicy
+        policyDescription:
+          type: string
+          example: With this policy, user can add a new header to the request
+        applicableFlows:
+          type: array
+          items:
+            type: string
+            example: in
+        supportedGateways:
+          type: array
+          items:
+            type: string
+            example: Synapse
+        supportedApiTypes:
+          type: array
+          items:
+            type: string
+            example: REST
+        multipleAllowed:
+          type: boolean
+          example: true
+        polictAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicySpecAttribute'
+    SharedOperationPolicyData:
+      title: Shared Operation Policy Data
+      type: object
+      properties:
+        policyCategory:
+          type: string
+          example: Mediation
+        policyId:
+          type: string
+          example: 121223q41-24141-124124124-12414
+        policyName:
+          type: string
+          example: removeHeaderPolicy
+        policyDisplayName:
           type: string
           example: Remove Header Policy
         policyDescription:
           type: string
           example: With this policy, user can add a new header to the request
-        flows:
+        applicableFlows:
           type: array
           items:
             type: string
             example: in
-        gatewayTypes:
+        supportedGateways:
           type: array
           items:
             type: string
             example: Synapse
-        apiTypes:
+        supportedApiTypes:
           type: array
           items:
             type: string
             example: REST
+        multipleAllowed:
+          type: boolean
+          example: true
         polictAttributes:
           type: array
           items:

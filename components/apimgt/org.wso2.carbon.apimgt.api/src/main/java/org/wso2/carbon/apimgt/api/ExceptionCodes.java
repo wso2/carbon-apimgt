@@ -499,11 +499,13 @@ public enum ExceptionCodes implements ErrorHandler {
     //Operation Policies related error codes
     INVALID_OPERATION_POLICY(900915, "Cannot find the selected operation policy", 400,
             "Selected operation policy is not found"),
-    INVALID_OPERATION_POLICY_PARAMETERS(900916, "Missing required parameters for operation policy specification", 400,
+    INVALID_OPERATION_POLICY_SPECIFICATION(900916, "Invalid operation policy specification found", 400, "Invalid operation policy specification. %s", false),
+
+    INVALID_OPERATION_POLICY_PARAMETERS(900917, "Missing required parameters for operation policy specification", 400,
             "Required parameter(s) %s for operation policy specification %s are either missing or empty"),
-    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(900917, "Operation policy is not allowed in the applied flow", 400,
+    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(900918, "Operation policy is not allowed in the applied flow", 400,
             "%s policy is not allowed in response flow"),
-    MISSING_MANDATORY_POLICY_ATTRIBUTES(900918, "Missing mandatory operation policy attribute", 400,
+    MISSING_MANDATORY_POLICY_ATTRIBUTES(900919, "Missing mandatory operation policy attribute", 400,
             "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +

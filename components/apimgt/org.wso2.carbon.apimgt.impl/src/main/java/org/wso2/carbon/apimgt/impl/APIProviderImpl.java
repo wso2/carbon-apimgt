@@ -2560,7 +2560,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         //Validate the policy applied direction
-        if (!policySpecification.getFlow().contains(appliedPolicy.getDirection())) {
+        if (!policySpecification.getApplicableFlows().contains(appliedPolicy.getDirection())) {
             if (log.isDebugEnabled()) {
                 log.debug("The policy " + policySpecification.getPolicyName()
                         + " is not support in the " + appliedPolicy.getDirection() + " flow. Hence skipped.");

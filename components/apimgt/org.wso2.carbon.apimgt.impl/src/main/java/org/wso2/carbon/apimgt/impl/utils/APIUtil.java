@@ -124,7 +124,6 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -377,6 +376,8 @@ public final class APIUtil {
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
     private static Schema tenantConfigJsonSchema;
+    private static Schema operationPolicySpecSchema;
+
 
     private APIUtil() {
 
@@ -394,6 +395,13 @@ public final class APIUtil {
             tenantConfigJsonSchema = SchemaLoader.load(tenantConfigSchema);
         } catch (IOException e) {
             log.error("Error occurred while reading tenant-config-schema.json", e);
+        }
+
+        try (InputStream inputStream = APIUtil.class.getResourceAsStream("/operationPolicy/operation-policy-specification-schema.json")) {
+            org.json.JSONObject operationPolicySpecificationSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
+            operationPolicySpecSchema = SchemaLoader.load(operationPolicySpecificationSchema);
+        } catch (IOException e) {
+            log.error("Error occurred while reading operation-policy-specification-schema.json", e);
         }
     }
 
@@ -11462,6 +11470,10 @@ public final class APIUtil {
     }
     public static Schema retrieveTenantConfigJsonSchema(){
         return tenantConfigJsonSchema;
+    }
+
+    public static Schema retrieveOperationPolicySpecificationJsonSchema(){
+        return operationPolicySpecSchema;
     }
 
     /**

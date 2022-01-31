@@ -23,17 +23,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SharedOperationPolicyApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.OperationPolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedOperationPolicyDataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedOperationPolicyDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -77,9 +81,21 @@ public class SharedOperationPolicyApiServiceImpl implements SharedOperationPolic
                 sharedPolicySpec = RestApiPublisherUtils.readInputStream(sharedPolicySpecFileInputStream,
                         sharedPolicySpecFileDetail);
                 jsonContent = CommonUtil.yamlToJson(sharedPolicySpec);
-                policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
+                Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
+                if (schema != null) {
+                    try {
+                        org.json.JSONObject uploadedConfig = new org.json.JSONObject(jsonContent);
+                        schema.validate(uploadedConfig);
+                    } catch (ValidationException e) {
+                        List<String> errors = e.getAllMessages();
+                        String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
+                        throw new APIManagementException("Policy specification validation failure. "+ errorMessage,
+                                ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
+                                        errorMessage));
+                    }
+                }
 
-                RestApiPublisherUtils.validateOperationPolicySpecification(policySpecification);
+                policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
 
                 if (sharedPolicyDefinitionFileInputStream != null) {
                     sharedPolicyDefinition =
@@ -97,8 +113,8 @@ public class SharedOperationPolicyApiServiceImpl implements SharedOperationPolic
                     log.debug("A Shared Operation policy has been added with name " +
                             policySpecification.getPolicyName() + " and uuid " + sharedPolicyID);
                 }
-                OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil
-                        .fromOperationPolicyDataToDTO(operationPolicyData);
+                SharedOperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil
+                        .fromSharedOperationPolicyDataToDTO(operationPolicyData);
                 return Response.ok().entity(createdPolicy).build();
             }
         } catch (APIManagementException e) {
@@ -176,8 +192,8 @@ public class SharedOperationPolicyApiServiceImpl implements SharedOperationPolic
             // Since policy definition is bit bulky, we don't query the definition unnecessarily.
             List<OperationPolicyDataHolder>
                     sharedOperationPolicyLIst = apiProvider.getLightWeightSharedOperationPolicies(tenantDomain);
-            OperationPolicyDataListDTO policyListDTO = OperationPolicyMappingUtil
-                    .fromOperationPolicyDataListToDTO(sharedOperationPolicyLIst, offset, limit);
+            SharedOperationPolicyDataListDTO policyListDTO = OperationPolicyMappingUtil
+                    .fromSharedOperationPolicyDataListToDTO(sharedOperationPolicyLIst, offset, limit);
             return Response.ok().entity(policyListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -209,8 +225,8 @@ public class SharedOperationPolicyApiServiceImpl implements SharedOperationPolic
             OperationPolicyDataHolder policyDataHolder =
                     apiProvider.getSharedOperationPolicyByPolicyId(operationPolicyId,
                             organization, false);
-            OperationPolicyDataDTO policyDataDTO =
-                    OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(policyDataHolder);
+            SharedOperationPolicyDataDTO policyDataDTO =
+                    OperationPolicyMappingUtil.fromSharedOperationPolicyDataToDTO(policyDataHolder);
             return Response.ok().entity(policyDataDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

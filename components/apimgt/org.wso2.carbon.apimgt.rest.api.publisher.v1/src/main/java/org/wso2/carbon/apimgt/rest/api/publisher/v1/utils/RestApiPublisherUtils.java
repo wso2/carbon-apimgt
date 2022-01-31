@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -229,23 +228,6 @@ public class RestApiPublisherUtils {
                 + "{\"description\":\"SOAPAction header for soap 1.1\",\"name\":\"SOAPAction\",\"type\":\"string\","
                 + "\"required\":false,\"in\":\"header\"}],\"responses\":{\"200\":{\"description\":\"OK\"}}," +
                 "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]}}}";
-    }
-
-    /**
-     * This method is used to validate the policy specifications' mandatory attributes.
-     * @return boolean
-     * @throws APIManagementException
-     * */
-    public static boolean validateOperationPolicySpecification(OperationPolicySpecification policySpecification)
-            throws APIManagementException {
-        if (policySpecification.getPolicyName() == null || policySpecification.getPolicyName().isEmpty()
-                || policySpecification.getFlow().isEmpty()
-                || policySpecification.getApiTypes().isEmpty()
-                || policySpecification.getSupportedGatewayTypes().isEmpty()) {
-            throw new APIManagementException("Invalid policy specification provided",
-                    ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
-        }
-        return true;
     }
 
     /**

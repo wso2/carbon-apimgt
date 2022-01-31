@@ -1515,8 +1515,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains the URL of the newly created entity. ", response = OperationPolicyDataDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response importSharedOperationPolicyToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "ID of the shared operation policy",required=true)  @QueryParam("operationPolicyId") String operationPolicyId,  @NotNull @ApiParam(value = "ID of the shared operation policy",required=true)  @QueryParam("apiSpecificPolicyName") String apiSpecificPolicyName) throws APIManagementException{
-        return delegate.importSharedOperationPolicyToAPI(apiId, operationPolicyId, apiSpecificPolicyName, securityContext);
+    public Response importSharedOperationPolicyToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "ID of the shared operation policy",required=true)  @QueryParam("sharedOperationPolicyId") String sharedOperationPolicyId,  @NotNull @ApiParam(value = "ID of the shared operation policy",required=true)  @QueryParam("apiSpecificPolicyName") String apiSpecificPolicyName) throws APIManagementException{
+        return delegate.importSharedOperationPolicyToAPI(apiId, sharedOperationPolicyId, apiSpecificPolicyName, securityContext);
     }
 
     @POST
