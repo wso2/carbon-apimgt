@@ -17067,6 +17067,8 @@ public class ApiMgtDAO {
                                                     apiRevision.getRevisionUUID(), policy.getPolicyName());
                                     String policyId = null;
                                     if (!updatedPoliciesMap.keySet().contains(policy.getPolicyName())) {
+                                        // This will replace the API specific policy that is having revision UUID as null
+                                        // If that policy does not exists, a new policy without revision will be created.
                                         policyId = addAPISpecificOperationPolicy(apiRevision.getApiUUID(), policyData, tenantDomain);
                                         updatedPoliciesMap.put(policy.getPolicyId(), policyId);
                                     } else {
@@ -18177,17 +18179,13 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         String policyId = null;
-        String revisionId = null;
-
-        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
-        if (apiRevision != null) {
-            revisionId = apiRevision.getRevisionUUID();
-        }
-
         OperationPolicySpecification policySpecification = policyData.getSpecification();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            policyId = getAPISpecificPolicyId(connection, apiUUID, revisionId, policySpecification.getPolicyName());
+            // A new API Specific policy is added only in two methods. In here and when cloning a policy at revision creation step.
+            // In here, we are always updating or creating the new policy for working copy (current API), policyID check is done for
+            // revisionUUID = null entries
+            policyId = getAPISpecificPolicyId(connection, apiUUID, null, policySpecification.getPolicyName());
             if (policyId != null) {
                 updateAPISpecificOperationPolicy(connection, apiUUID, policyData);
             } else {
