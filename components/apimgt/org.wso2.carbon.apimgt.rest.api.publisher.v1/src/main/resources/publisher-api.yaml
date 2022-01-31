@@ -12092,11 +12092,11 @@ components:
     APIOperationPolicies:
       title: API Operation Level Policies
       properties:
-        in:
+        request:
           type: array
           items:
             $ref: '#/components/schemas/OperationPolicy'
-        out:
+        response:
           type: array
           items:
             $ref: '#/components/schemas/OperationPolicy'
