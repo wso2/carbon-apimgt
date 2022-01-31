@@ -138,7 +138,7 @@ public interface ApisApiService {
       public Response importGraphQLSchema(String ifMatch, String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String inlineAPIDefinition, MessageContext messageContext) throws APIManagementException;
       public Response importServiceFromCatalog(String serviceKey, APIDTO APIDTO, MessageContext messageContext) throws APIManagementException;
-      public Response importSharedOperationPolicyToAPI(String apiId, String operationPolicyId, String apiSpecificPolicyName, MessageContext messageContext) throws APIManagementException;
+      public Response importSharedOperationPolicyToAPI(String apiId, String sharedOperationPolicyId, String apiSpecificPolicyName, MessageContext messageContext) throws APIManagementException;
       public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;
       public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response reimportServiceFromCatalog(String apiId, MessageContext messageContext) throws APIManagementException;

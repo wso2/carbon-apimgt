@@ -51,6 +51,8 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONTokener;
@@ -2704,9 +2706,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (policySpecFileInputStream != null) {
                 policySpec = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
                 jsonContent = CommonUtil.yamlToJson(policySpec);
-                policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
 
-                RestApiPublisherUtils.validateOperationPolicySpecification(policySpecification);
+                Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
+                if (schema != null) {
+                    try {
+                        org.json.JSONObject uploadedConfig = new org.json.JSONObject(jsonContent);
+                        schema.validate(uploadedConfig);
+                    } catch (ValidationException e) {
+                        List<String> errors = e.getAllMessages();
+                        String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
+                        throw new APIManagementException("Policy specification validation failure. "+ errorMessage,
+                                ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
+                                        errorMessage));
+                    }
+                }
+
+                policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
 
                 if (policyDefinitionFileInputStream != null) {
                     policyDefinition = RestApiPublisherUtils

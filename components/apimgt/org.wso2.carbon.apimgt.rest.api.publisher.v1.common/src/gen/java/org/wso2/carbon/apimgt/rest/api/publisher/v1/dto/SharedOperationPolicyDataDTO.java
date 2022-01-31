@@ -21,13 +21,12 @@ import javax.validation.Valid;
 
 
 
-public class OperationPolicyDataDTO   {
+public class SharedOperationPolicyDataDTO   {
   
     private String policyCategory = null;
     private String policyId = null;
     private String policyName = null;
     private String policyDisplayName = null;
-    private String sharedPolicyRef = null;
     private String policyDescription = null;
     private List<String> applicableFlows = new ArrayList<String>();
     private List<String> supportedGateways = new ArrayList<String>();
@@ -37,7 +36,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO policyCategory(String policyCategory) {
+  public SharedOperationPolicyDataDTO policyCategory(String policyCategory) {
     this.policyCategory = policyCategory;
     return this;
   }
@@ -54,7 +53,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO policyId(String policyId) {
+  public SharedOperationPolicyDataDTO policyId(String policyId) {
     this.policyId = policyId;
     return this;
   }
@@ -71,7 +70,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO policyName(String policyName) {
+  public SharedOperationPolicyDataDTO policyName(String policyName) {
     this.policyName = policyName;
     return this;
   }
@@ -88,7 +87,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO policyDisplayName(String policyDisplayName) {
+  public SharedOperationPolicyDataDTO policyDisplayName(String policyDisplayName) {
     this.policyDisplayName = policyDisplayName;
     return this;
   }
@@ -105,24 +104,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO sharedPolicyRef(String sharedPolicyRef) {
-    this.sharedPolicyRef = sharedPolicyRef;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "AddHeaderSharedPolicy", value = "")
-  @JsonProperty("sharedPolicyRef")
-  public String getSharedPolicyRef() {
-    return sharedPolicyRef;
-  }
-  public void setSharedPolicyRef(String sharedPolicyRef) {
-    this.sharedPolicyRef = sharedPolicyRef;
-  }
-
-  /**
-   **/
-  public OperationPolicyDataDTO policyDescription(String policyDescription) {
+  public SharedOperationPolicyDataDTO policyDescription(String policyDescription) {
     this.policyDescription = policyDescription;
     return this;
   }
@@ -139,7 +121,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO applicableFlows(List<String> applicableFlows) {
+  public SharedOperationPolicyDataDTO applicableFlows(List<String> applicableFlows) {
     this.applicableFlows = applicableFlows;
     return this;
   }
@@ -156,7 +138,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO supportedGateways(List<String> supportedGateways) {
+  public SharedOperationPolicyDataDTO supportedGateways(List<String> supportedGateways) {
     this.supportedGateways = supportedGateways;
     return this;
   }
@@ -173,7 +155,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO supportedApiTypes(List<String> supportedApiTypes) {
+  public SharedOperationPolicyDataDTO supportedApiTypes(List<String> supportedApiTypes) {
     this.supportedApiTypes = supportedApiTypes;
     return this;
   }
@@ -190,7 +172,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO multipleAllowed(Boolean multipleAllowed) {
+  public SharedOperationPolicyDataDTO multipleAllowed(Boolean multipleAllowed) {
     this.multipleAllowed = multipleAllowed;
     return this;
   }
@@ -207,7 +189,7 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO polictAttributes(List<OperationPolicySpecAttributeDTO> polictAttributes) {
+  public SharedOperationPolicyDataDTO polictAttributes(List<OperationPolicySpecAttributeDTO> polictAttributes) {
     this.polictAttributes = polictAttributes;
     return this;
   }
@@ -232,35 +214,33 @@ public class OperationPolicyDataDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    OperationPolicyDataDTO operationPolicyData = (OperationPolicyDataDTO) o;
-    return Objects.equals(policyCategory, operationPolicyData.policyCategory) &&
-        Objects.equals(policyId, operationPolicyData.policyId) &&
-        Objects.equals(policyName, operationPolicyData.policyName) &&
-        Objects.equals(policyDisplayName, operationPolicyData.policyDisplayName) &&
-        Objects.equals(sharedPolicyRef, operationPolicyData.sharedPolicyRef) &&
-        Objects.equals(policyDescription, operationPolicyData.policyDescription) &&
-        Objects.equals(applicableFlows, operationPolicyData.applicableFlows) &&
-        Objects.equals(supportedGateways, operationPolicyData.supportedGateways) &&
-        Objects.equals(supportedApiTypes, operationPolicyData.supportedApiTypes) &&
-        Objects.equals(multipleAllowed, operationPolicyData.multipleAllowed) &&
-        Objects.equals(polictAttributes, operationPolicyData.polictAttributes);
+    SharedOperationPolicyDataDTO sharedOperationPolicyData = (SharedOperationPolicyDataDTO) o;
+    return Objects.equals(policyCategory, sharedOperationPolicyData.policyCategory) &&
+        Objects.equals(policyId, sharedOperationPolicyData.policyId) &&
+        Objects.equals(policyName, sharedOperationPolicyData.policyName) &&
+        Objects.equals(policyDisplayName, sharedOperationPolicyData.policyDisplayName) &&
+        Objects.equals(policyDescription, sharedOperationPolicyData.policyDescription) &&
+        Objects.equals(applicableFlows, sharedOperationPolicyData.applicableFlows) &&
+        Objects.equals(supportedGateways, sharedOperationPolicyData.supportedGateways) &&
+        Objects.equals(supportedApiTypes, sharedOperationPolicyData.supportedApiTypes) &&
+        Objects.equals(multipleAllowed, sharedOperationPolicyData.multipleAllowed) &&
+        Objects.equals(polictAttributes, sharedOperationPolicyData.polictAttributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyCategory, policyId, policyName, policyDisplayName, sharedPolicyRef, policyDescription, applicableFlows, supportedGateways, supportedApiTypes, multipleAllowed, polictAttributes);
+    return Objects.hash(policyCategory, policyId, policyName, policyDisplayName, policyDescription, applicableFlows, supportedGateways, supportedApiTypes, multipleAllowed, polictAttributes);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class OperationPolicyDataDTO {\n");
+    sb.append("class SharedOperationPolicyDataDTO {\n");
     
     sb.append("    policyCategory: ").append(toIndentedString(policyCategory)).append("\n");
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
     sb.append("    policyDisplayName: ").append(toIndentedString(policyDisplayName)).append("\n");
-    sb.append("    sharedPolicyRef: ").append(toIndentedString(sharedPolicyRef)).append("\n");
     sb.append("    policyDescription: ").append(toIndentedString(policyDescription)).append("\n");
     sb.append("    applicableFlows: ").append(toIndentedString(applicableFlows)).append("\n");
     sb.append("    supportedGateways: ").append(toIndentedString(supportedGateways)).append("\n");
