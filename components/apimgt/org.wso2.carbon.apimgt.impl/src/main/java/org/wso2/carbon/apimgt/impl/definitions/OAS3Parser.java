@@ -74,17 +74,8 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -163,11 +154,11 @@ public class OAS3Parser extends APIDefinition {
     }
 
     private String getJsonScript(Map<String, Schema> definitions, Operation op) {
-        StringBuilder script = new StringBuilder("{\n" +
+        String defaultScript = "{\n" +
                 "\t\"in\": \"default\",\n" +
                 "\t\"responses\": [" +
                 "\t\t{\n" +
-                "\t\t\t\"code\": 200,\n" +
+                "\t\t\t\"code\": 504,\n" +
                 "\t\t\t\"content\": [\n" +
                 "\t\t\t\t{\n" +
                 "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
@@ -178,12 +169,21 @@ public class OAS3Parser extends APIDefinition {
                 "\t\t\t\t\t\"body\": \"<description>Not Implemented</description>\"\n" +
                 "\t\t\t\t}\n" +
                 "\t\t\t]\n" +
-                "\t\t}"
-        );
+                "\t\t}\n\t]\n}";
+        if (op.getResponses() == null || op.getResponses().size() < 1) {
+            return defaultScript;
+        }
+        boolean isExampleAdded = false;
+        StringBuilder script = new StringBuilder(
+                "{\n" +
+                        "\t\"in\": \"query\",\n" +
+                        "\t\"name\": \"responseCode\",\n" +
+                        "\t\"responses\": [");
         for (String responseCode : op.getResponses().keySet()) {
             Content content = op.getResponses().get(responseCode).getContent();
-            String jsonExample = "{\"description\" : \"Dummy description\"}";
-            String xmlExample = "\"<description>Dummy description</description>\"";
+            String jsonExample = "";
+            String xmlExample = "";
+            boolean isPayloadTypeAdded = false;
             if (content != null) {
                 MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
@@ -200,22 +200,46 @@ public class OAS3Parser extends APIDefinition {
                     }
                 }
             }
-            script.append(",\n\t\t{\n" +
+            if (isExampleAdded) {
+                script.append(",");
+            }
+            script.append("\n\t\t{\n" +
                     "\t\t\t\"code\": ").append(responseCode).append(",\n" +
-                    "\t\t\t\"content\": [\n" +
-                    "\t\t\t\t{\n" +
-                    "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
-                    "\t\t\t\t\t\"body\": ").append(jsonExample).append("\n" +
-                    "\t\t\t\t}, " +
-                    "\t\t\t\t{\n" +
-                    "\t\t\t\t\t\"contentType\": \"application/xml\",\n" +
-                    "\t\t\t\t\t\"body\": ").append(xmlExample).append("\n" +
-                    "\t\t\t\t}\n" +
-                    "\t\t\t]\n" +
-                    "\t\t}");
+                    "\t\t\t\"content\": [\n");
+            if ((jsonExample != null && !jsonExample.isEmpty()) || (!xmlExample.isEmpty())) {
+                if (jsonExample != null && !jsonExample.isEmpty()) {
+                    script.append("\t\t\t\t{\n" +
+                            "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
+                            "\t\t\t\t\t\"body\": ").append(jsonExample).append("\n" +
+                            "\t\t\t\t},\n");
+                    isPayloadTypeAdded = true;
+                }
+                if (!xmlExample.isEmpty()) {
+                    if (isPayloadTypeAdded) {
+                        script.append(",\n");
+                    }
+                    script.append("\t\t\t\t{\n" +
+                            "\t\t\t\t\t\"contentType\": \"application/xml\",\n" +
+                            "\t\t\t\t\t\"body\": ").append(xmlExample).append("\n" +
+                            "\t\t\t\t}\n");
+                }
+            } else {
+                script.append("\t\t\t\t{\n" +
+                                "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
+                                "\t\t\t\t\t\"body\": ").append("\"\"").append("\n" +
+                                "\t\t\t\t},\n")
+                        .append("\t\t\t\t{\n" +
+                                "\t\t\t\t\t\"contentType\": \"application/xml\",\n" +
+                                "\t\t\t\t\t\"body\": ").append("\"\"").append("\n" +
+                                "\t\t\t\t}\n");
+            }
+            script.append("\t\t\t]\n\t\t}");
+            isExampleAdded = true;
         }
-        return script + "\n\t]\n}";
+        script.append("\n\t]\n}");
+        return (isExampleAdded) ? script.toString() : defaultScript;
     }
+
     private String getJSScript(Map<String, Schema> definitions, Operation op) {
         //for each HTTP method get the verb
         StringBuilder genCode = new StringBuilder();

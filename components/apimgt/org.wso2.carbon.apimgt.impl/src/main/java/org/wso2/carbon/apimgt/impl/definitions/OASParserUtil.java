@@ -229,22 +229,6 @@ public class OASParserUtil {
         }
     }
 
-    public static String getJsonScript() {
-        return "{\n" +
-                "    \"in\": \"query\",\n" +
-                "    \"name\": \"responseCode\",\n" +
-                "    \"responses\": [{\n" +
-                "        \"value\": \"200\",\n" +
-                "        \"headers\": [],\n" +
-                "        \"code\": 200,\n" +
-                "        \"payload\": {\n" +
-                "            \"application/json\": \"{\\\"description\\\" : \\\"Dummy description\\\"}\",\n" +
-                "            \"application/xml\": \"<description>Dummy description</description>\"\n" +
-                "        }\n" +
-                "    }]\n" +
-                "}";
-    }
-
     public static String getOASDefinitionWithTierContentAwareProperty(String apiDefinition,
                                                                       List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
         if (contentAwareTiersList == null || contentAwareTiersList.isEmpty()) {

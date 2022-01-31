@@ -51,6 +51,9 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -144,7 +147,7 @@ public class OAS2Parser extends APIDefinition {
                 Map<String, Model> definitions = swagger.getDefinitions();
                 String finalScript;
                 if (APIConstants.IMPLEMENTATION_TYPE_TEMPLATE.equalsIgnoreCase(scriptType)) {
-                    finalScript = OASParserUtil.getJsonScript();
+                    finalScript = getJsonScript(definitions, op);
                 } else {
                     finalScript = getJSScript(definitions, op);
                 }
@@ -157,6 +160,89 @@ public class OAS2Parser extends APIDefinition {
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
         return returnMap;
+    }
+
+    private String getJsonScript(Map<String, Model> definitions, Operation op) {
+        String defaultScript = "{\n" +
+                "\t\"in\": \"default\",\n" +
+                "\t\"responses\": [" +
+                "\t\t{\n" +
+                "\t\t\t\"code\": 504,\n" +
+                "\t\t\t\"content\": [\n" +
+                "\t\t\t\t{\n" +
+                "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
+                "\t\t\t\t\t\"body\": \"{\\\"description\\\" : \\\"Not Implemented\\\"}\"\n" +
+                "\t\t\t\t}, " +
+                "\t\t\t\t{\n" +
+                "\t\t\t\t\t\"contentType\": \"application/xml\",\n" +
+                "\t\t\t\t\t\"body\": \"<description>Not Implemented</description>\"\n" +
+                "\t\t\t\t}\n" +
+                "\t\t\t]\n" +
+                "\t\t}\n\t]\n}";
+        if (op.getResponses() == null || op.getResponses().size() < 1) {
+            return defaultScript;
+        }
+        boolean isExampleAdded = false;
+        StringBuilder script = new StringBuilder(
+                "{\n" +
+                        "\t\"in\": \"query\",\n" +
+                        "\t\"name\": \"responseCode\",\n" +
+                        "\t\"responses\": [");
+        for (String responseCode : op.getResponses().keySet()) {
+            String jsonExample = "";
+            String xmlExample = "";
+            boolean isPayloadTypeAdded = false;
+            if (op.getResponses().get(responseCode).getExamples() != null) {
+                Object applicationJson = op.getResponses().get(responseCode).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
+                Object applicationXml = op.getResponses().get(responseCode).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
+                if (applicationJson != null) {
+                    jsonExample = Json.pretty(applicationJson);
+                }
+                if (applicationXml != null) {
+                    xmlExample = applicationXml.toString();
+                }
+            } else if (op.getResponses().get(responseCode).getResponseSchema() != null) {
+                Model model = op.getResponses().get(responseCode).getResponseSchema();
+                jsonExample = getSchemaExample(model, definitions, new HashSet<>());
+            }
+            if (isExampleAdded) {
+                script.append(",");
+            }
+            script.append("\n\t\t{\n" +
+                    "\t\t\t\"code\": ").append(responseCode).append(",\n" +
+                    "\t\t\t\"content\": [\n");
+            if ((jsonExample != null && !jsonExample.isEmpty()) || (!xmlExample.isEmpty())) {
+                if (jsonExample != null && !jsonExample.isEmpty()) {
+                    script.append("\t\t\t\t{\n" +
+                            "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
+                            "\t\t\t\t\t\"body\": ").append(jsonExample).append("\n" +
+                            "\t\t\t\t}");
+                    isPayloadTypeAdded = true;
+                }
+                if (xmlExample != null && !xmlExample.isEmpty()) {
+                    if (isPayloadTypeAdded) {
+                        script.append(",\n");
+                    }
+                    script.append("\t\t\t\t{\n" +
+                            "\t\t\t\t\t\"contentType\": \"application/xml\",\n" +
+                            "\t\t\t\t\t\"body\": ").append(xmlExample).append("\n" +
+                            "\t\t\t\t}\n");
+                }
+            } else {
+                script.append("\t\t\t\t{\n" +
+                                "\t\t\t\t\t\"contentType\": \"application/json\",\n" +
+                                "\t\t\t\t\t\"body\": ").append("\"\"").append("\n" +
+                                "\t\t\t\t},\n")
+                        .append("\t\t\t\t{\n" +
+                                "\t\t\t\t\t\"contentType\": \"application/xml\",\n" +
+                                "\t\t\t\t\t\"body\": ").append("\"\"").append("\n" +
+                                "\t\t\t\t}\n");
+            }
+            script.append("\t\t\t]\n\t\t}");
+            isExampleAdded = true;
+        }
+        script.append("\n\t]\n}");
+        return (isExampleAdded) ? script.toString() : defaultScript;
     }
 
     private String getJSScript(Map<String, Model> definitions, Operation op) {
@@ -192,8 +278,7 @@ public class OAS2Parser extends APIDefinition {
                 String schemaExample = getSchemaExample(model, definitions, new HashSet<>());
                 genCode.append(getGeneratedResponsePayloads(responseEntry, schemaExample, "json", false));
                 hasJsonPayload = true;
-            } else if (op.getResponses().get(responseEntry).getExamples() == null
-                    && op.getResponses().get(responseEntry).getResponseSchema() == null) {
+            } else {
                 setDefaultGeneratedResponse(genCode, responseEntry);
                 hasJsonPayload = true;
                 hasXmlPayload = true;
