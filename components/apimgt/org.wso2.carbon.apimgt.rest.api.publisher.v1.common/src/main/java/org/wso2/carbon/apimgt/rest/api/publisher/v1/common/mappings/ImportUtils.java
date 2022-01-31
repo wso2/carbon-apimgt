@@ -418,6 +418,7 @@ public class ImportUtils {
                                 getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName());
 
                         OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
+                        operationPolicyData.setSharedPolicyName(policy.getSharedPolicyRef());
                         operationPolicyData.setDefinition(policyDefinition);
                         operationPolicyData.setSpecification(policySpec);
                         String policyID = provider.addApiSpecificOperationalPolicy(api.getUuid(), operationPolicyData,
