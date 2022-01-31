@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
 import com.hubspot.jinjava.Jinjava;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -116,6 +117,7 @@ public class SynapsePolicyAggregator {
         String uriTemplateString = template.getUriTemplate();
         String method = template.getHTTPVerb();
         String key = method + "_" + uriTemplateString.replaceAll("[\\W]", "\\\\$0");
+        key = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(key)); // This will replace & with &amp; for query params
 
         List<String> caseBodyInFlow = new ArrayList<>();
         List<String> caseBodyOutFlow = new ArrayList<>();
