@@ -24,13 +24,20 @@ import java.util.List;
 
 public class OperationPolicySpecification {
 
+    public enum PolicyCategory {
+        Mediation,
+        Security
+    }
+
+    private PolicyCategory policyCategory = PolicyCategory.Mediation;
     private String policyName;
-    private String displayName;
+    private String policyDisplayName;
     private String policyDescription;
-    private List<String> flow = new ArrayList<>();
-    private List<String> supportedGatewayTypes = new ArrayList<>();
-    private List<String> apiTypes = new ArrayList<>();
+    private List<String> applicableFlows = new ArrayList<>();
+    private List<String> supportedGateways = new ArrayList<>();
+    private List<String> supportedApiTypes = new ArrayList<>();
     private List<OperationPolicySpecAttribute> policyAttributes = new ArrayList<>();
+    private boolean multipleAllowed;
 
     public String getPolicyName() {
 
@@ -42,14 +49,14 @@ public class OperationPolicySpecification {
         this.policyName = policyName;
     }
 
-    public String getDisplayName() {
+    public String getPolicyDisplayName() {
 
-        return displayName;
+        return policyDisplayName;
     }
 
-    public void setDisplayName(String displayName) {
+    public void setPolicyDisplayName(String policyDisplayName) {
 
-        this.displayName = displayName;
+        this.policyDisplayName = policyDisplayName;
     }
 
     public String getPolicyDescription() {
@@ -62,34 +69,34 @@ public class OperationPolicySpecification {
         this.policyDescription = policyDescription;
     }
 
-    public List<String> getFlow() {
+    public List<String> getApplicableFlows() {
 
-        return flow;
+        return applicableFlows;
     }
 
-    public void setFlow(List<String> flow) {
+    public void setApplicableFlows(List<String> applicableFlows) {
 
-        this.flow = flow;
+        this.applicableFlows = applicableFlows;
     }
 
-    public List<String> getSupportedGatewayTypes() {
+    public List<String> getSupportedGateways() {
 
-        return supportedGatewayTypes;
+        return supportedGateways;
     }
 
-    public void setSupportedGatewayTypes(List<String> supportedGatewayTypes) {
+    public void setSupportedGateways(List<String> supportedGateways) {
 
-        this.supportedGatewayTypes = supportedGatewayTypes;
+        this.supportedGateways = supportedGateways;
     }
 
-    public List<String> getApiTypes() {
+    public List<String> getSupportedApiTypes() {
 
-        return apiTypes;
+        return supportedApiTypes;
     }
 
-    public void setApiTypes(List<String> apiTypes) {
+    public void setSupportedApiTypes(List<String> supportedApiTypes) {
 
-        this.apiTypes = apiTypes;
+        this.supportedApiTypes = supportedApiTypes;
     }
 
     public List<OperationPolicySpecAttribute> getPolicyAttributes() {
@@ -101,5 +108,25 @@ public class OperationPolicySpecification {
             List<OperationPolicySpecAttribute> policyAttributes) {
 
         this.policyAttributes = policyAttributes;
+    }
+
+    public PolicyCategory getPolicyCategory() {
+
+        return policyCategory;
+    }
+
+    public void setPolicyCategory(PolicyCategory policyCategory) {
+
+        this.policyCategory = policyCategory;
+    }
+
+    public boolean isMultipleAllowed() {
+
+        return multipleAllowed;
+    }
+
+    public void setMultipleAllowed(boolean multipleAllowed) {
+
+        this.multipleAllowed = multipleAllowed;
     }
 }

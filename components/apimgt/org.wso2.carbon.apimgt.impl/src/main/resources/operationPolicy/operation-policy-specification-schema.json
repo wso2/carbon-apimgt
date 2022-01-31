@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "policyCategory": {
+      "type": "string",
+      "enum": [
+        "Mediation",
+        "Security"
+      ]
+    },
+    "policyName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policyDisplayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policyDescription": {
+      "type": "string"
+    },
+    "multipleAllowed": {
+      "type": "boolean"
+    },
+    "applicableFlows": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Request",
+          "Response",
+          "Fault"
+        ]
+      }
+    },
+    "supportedGateways": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Synapse",
+          "CC"
+        ]
+      }
+    },
+    "supportedApiTypes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "policyAttributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attributeName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "attributeDisplayName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "attributeDescription": {
+            "type": "string"
+          },
+          "attributeValidationRegex": {
+            "type": "string"
+          },
+          "attributeType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "attributeName",
+          "attributeDisplayName",
+          "attributeDescription",
+          "attributeValidationRegex",
+          "attributeType",
+          "required"
+        ]
+      }
+    }
+  },
+  "required": [
+    "policyCategory",
+    "policyName",
+    "policyDisplayName",
+    "policyDescription",
+    "multipleAllowed",
+    "applicableFlows",
+    "supportedGateways",
+    "supportedApiTypes"
+  ]
+}

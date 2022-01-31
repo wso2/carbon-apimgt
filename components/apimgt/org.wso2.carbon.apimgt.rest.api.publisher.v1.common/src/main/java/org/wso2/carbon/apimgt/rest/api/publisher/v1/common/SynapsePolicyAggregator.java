@@ -117,7 +117,9 @@ public class SynapsePolicyAggregator {
         String uriTemplateString = template.getUriTemplate();
         String method = template.getHTTPVerb();
         String key = method + "_" + uriTemplateString.replaceAll("[\\W]", "\\\\$0");
-        key = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(key)); // This will replace & with &amp; for query params
+
+        // This will replace & with &amp; for query params
+        key = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(key));
 
         List<String> caseBodyInFlow = new ArrayList<>();
         List<String> caseBodyOutFlow = new ArrayList<>();

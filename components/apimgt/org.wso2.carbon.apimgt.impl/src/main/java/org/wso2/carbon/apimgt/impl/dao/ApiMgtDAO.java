@@ -18144,16 +18144,18 @@ public class ApiMgtDAO {
         String query = SQLConstants.OperationPolicyConstants.UPDATE_API_SPECIFIC_POLICY_DEFINITION_FOR_API;
         OperationPolicySpecification policySpecification = policyData.getSpecification();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, policySpecification.getDisplayName());
+            statement.setString(1, policySpecification.getPolicyDisplayName());
             statement.setString(2, policySpecification.getPolicyDescription());
-            statement.setString(3, policySpecification.getFlow().toString());
-            statement.setString(4, policySpecification.getSupportedGatewayTypes().toString());
-            statement.setString(5, policySpecification.getApiTypes().toString());
+            statement.setString(3, policySpecification.getApplicableFlows().toString());
+            statement.setString(4, policySpecification.getSupportedGateways().toString());
+            statement.setString(5, policySpecification.getSupportedApiTypes().toString());
             statement.setBinaryStream(6,
                     new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
             statement.setBinaryStream(7, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
-            statement.setString(8, apiUUID);
-            statement.setString(9, policySpecification.getPolicyName());
+            statement.setString(8, policySpecification.getPolicyCategory().toString());
+            statement.setBoolean(9, policySpecification.isMultipleAllowed());
+            statement.setString(10, apiUUID);
+            statement.setString(11, policySpecification.getPolicyName());
             result = statement.executeUpdate() == 1;
         } catch (SQLException e) {
             handleException("Failed to update operation policy of API " + apiUUID + " for policy "
@@ -18195,17 +18197,19 @@ public class ApiMgtDAO {
                     statement.setString(1, policyId);
                     statement.setString(2, apiUUID);
                     statement.setString(3, policySpecification.getPolicyName());
-                    statement.setString(4, policySpecification.getDisplayName());
+                    statement.setString(4, policySpecification.getPolicyDisplayName());
                     statement.setString(5, policySpecification.getPolicyDescription());
-                    statement.setString(6, policySpecification.getFlow().toString());
-                    statement.setString(7, policySpecification.getSupportedGatewayTypes().toString());
-                    statement.setString(8, policySpecification.getApiTypes().toString());
+                    statement.setString(6, policySpecification.getApplicableFlows().toString());
+                    statement.setString(7, policySpecification.getSupportedGateways().toString());
+                    statement.setString(8, policySpecification.getSupportedApiTypes().toString());
                     statement.setString(9, policyData.getSharedPolicyName());
                     statement.setBinaryStream(10,
                             new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
                     statement
                             .setBinaryStream(11, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
                     statement.setString(12, tenantDomain);
+                    statement.setString(13, policySpecification.getPolicyCategory().toString());
+                    statement.setBoolean(14, policySpecification.isMultipleAllowed());
                     statement.executeUpdate();
                 }
             }
@@ -18255,11 +18259,11 @@ public class ApiMgtDAO {
             insertOperationPolicyDefinitionStatement.setString(1, policyID);
             insertOperationPolicyDefinitionStatement.setString(2, newApiUUID);
             insertOperationPolicyDefinitionStatement.setString(3, policySpec.getPolicyName());
-            insertOperationPolicyDefinitionStatement.setString(4, policySpec.getDisplayName());
+            insertOperationPolicyDefinitionStatement.setString(4, policySpec.getPolicyDisplayName());
             insertOperationPolicyDefinitionStatement.setString(5, policySpec.getPolicyDescription());
-            insertOperationPolicyDefinitionStatement.setString(6, policySpec.getFlow().toString());
-            insertOperationPolicyDefinitionStatement.setString(7, policySpec.getSupportedGatewayTypes().toString());
-            insertOperationPolicyDefinitionStatement.setString(8, policySpec.getApiTypes().toString());
+            insertOperationPolicyDefinitionStatement.setString(6, policySpec.getApplicableFlows().toString());
+            insertOperationPolicyDefinitionStatement.setString(7, policySpec.getSupportedGateways().toString());
+            insertOperationPolicyDefinitionStatement.setString(8, policySpec.getSupportedApiTypes().toString());
             insertOperationPolicyDefinitionStatement.setString(9, policyData.getSharedPolicyName());
             insertOperationPolicyDefinitionStatement.setBinaryStream(10,
                     new ByteArrayInputStream(
@@ -18267,8 +18271,10 @@ public class ApiMgtDAO {
             insertOperationPolicyDefinitionStatement.setBinaryStream(11,
                     new ByteArrayInputStream(policyData.getDefinition().getBytes()));
             insertOperationPolicyDefinitionStatement.setString(12, policyData.getTenantDomain());
+            insertOperationPolicyDefinitionStatement.setString(13, policySpec.getPolicyCategory().toString());
+            insertOperationPolicyDefinitionStatement.setBoolean(14, policySpec.isMultipleAllowed());
             if (newApiRevisionUUID != null) {
-                insertOperationPolicyDefinitionStatement.setString(13, newApiRevisionUUID);
+                insertOperationPolicyDefinitionStatement.setString(15, newApiRevisionUUID);
             }
             insertOperationPolicyDefinitionStatement.executeUpdate();
         } catch (SQLException | APIManagementException e) {
@@ -18355,11 +18361,14 @@ public class ApiMgtDAO {
 
                 OperationPolicySpecification policySpecification = new OperationPolicySpecification();
                 policySpecification.setPolicyName(policyName);
-                policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
+                policySpecification.setPolicyDisplayName(rs.getString("DISPLAY_NAME"));
                 policySpecification.setPolicyDescription(rs.getString("POLICY_DESCRIPTION"));
-                policySpecification.setFlow(getListFromString(rs.getString("FLOW")));
-                policySpecification.setApiTypes(getListFromString(rs.getString("API_TYPES")));
-                policySpecification.setSupportedGatewayTypes(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setApplicableFlows(getListFromString(rs.getString("FLOW")));
+                policySpecification.setSupportedApiTypes(getListFromString(rs.getString("API_TYPES")));
+                policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setPolicyCategory(OperationPolicySpecification.PolicyCategory
+                        .valueOf(rs.getString("POLICY_CATEGORY")));
+                policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
                 List<OperationPolicySpecAttribute> policySpecAttributes = null;
                 try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {
                     String policyParametersString = IOUtils.toString(policyParametersStream);
@@ -18427,11 +18436,14 @@ public class ApiMgtDAO {
 
                 OperationPolicySpecification policySpecification = new OperationPolicySpecification();
                 policySpecification.setPolicyName(rs.getString("POLICY_NAME"));
-                policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
+                policySpecification.setPolicyDisplayName(rs.getString("DISPLAY_NAME"));
                 policySpecification.setPolicyDescription(rs.getString("POLICY_DESCRIPTION"));
-                policySpecification.setFlow(getListFromString(rs.getString("FLOW")));
-                policySpecification.setApiTypes(getListFromString(rs.getString("API_TYPES")));
-                policySpecification.setSupportedGatewayTypes(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setApplicableFlows(getListFromString(rs.getString("FLOW")));
+                policySpecification.setSupportedApiTypes(getListFromString(rs.getString("API_TYPES")));
+                policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setPolicyCategory(OperationPolicySpecification.PolicyCategory
+                        .valueOf(rs.getString("POLICY_CATEGORY")));
+                policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
                 List<OperationPolicySpecAttribute> policySpecAttributes = null;
                 try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {
                     String policyParametersString = IOUtils.toString(policyParametersStream);
@@ -18492,11 +18504,14 @@ public class ApiMgtDAO {
 
                 OperationPolicySpecification policySpecification = new OperationPolicySpecification();
                 policySpecification.setPolicyName(rs.getString("POLICY_NAME"));
-                policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
+                policySpecification.setPolicyDisplayName(rs.getString("DISPLAY_NAME"));
                 policySpecification.setPolicyDescription(rs.getString("POLICY_DESCRIPTION"));
-                policySpecification.setFlow(getListFromString(rs.getString("FLOW")));
-                policySpecification.setApiTypes(getListFromString(rs.getString("API_TYPES")));
-                policySpecification.setSupportedGatewayTypes(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setApplicableFlows(getListFromString(rs.getString("FLOW")));
+                policySpecification.setSupportedApiTypes(getListFromString(rs.getString("API_TYPES")));
+                policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setPolicyCategory(OperationPolicySpecification.PolicyCategory
+                        .valueOf(rs.getString("POLICY_CATEGORY")));
+                policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
                 List<OperationPolicySpecAttribute> policySpecAttributes = null;
                 try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {
                     String policyParametersString = IOUtils.toString(policyParametersStream);
@@ -18589,15 +18604,17 @@ public class ApiMgtDAO {
                 try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
                     statement.setString(1, sharedPolicyUUID);
                     statement.setString(2, policySpecification.getPolicyName());
-                    statement.setString(3, policySpecification.getDisplayName());
+                    statement.setString(3, policySpecification.getPolicyDisplayName());
                     statement.setString(4, policySpecification.getPolicyDescription());
-                    statement.setString(5, policySpecification.getFlow().toString());
-                    statement.setString(6, policySpecification.getSupportedGatewayTypes().toString());
-                    statement.setString(7, policySpecification.getApiTypes().toString());
+                    statement.setString(5, policySpecification.getApplicableFlows().toString());
+                    statement.setString(6, policySpecification.getSupportedGateways().toString());
+                    statement.setString(7, policySpecification.getSupportedApiTypes().toString());
                     statement.setBinaryStream(8,
                             new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
                     statement.setBinaryStream(9, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
                     statement.setString(10, tenantDomain);
+                    statement.setString(11, policySpecification.getPolicyCategory().toString());
+                    statement.setBoolean(12, policySpecification.isMultipleAllowed());
                     statement.executeUpdate();
 
                 }
@@ -18626,16 +18643,18 @@ public class ApiMgtDAO {
         OperationPolicySpecification policySpecification = policyData.getSpecification();
         try (PreparedStatement statement = connection.prepareStatement(
                 SQLConstants.OperationPolicyConstants.UPDATE_SHARED_OPERATION_POLICY)) {
-            statement.setString(1, policySpecification.getDisplayName());
+            statement.setString(1, policySpecification.getPolicyDisplayName());
             statement.setString(2, policySpecification.getPolicyDescription());
-            statement.setString(3, policySpecification.getFlow().toString());
-            statement.setString(4, policySpecification.getSupportedGatewayTypes().toString());
-            statement.setString(5, policySpecification.getApiTypes().toString());
+            statement.setString(3, policySpecification.getApplicableFlows().toString());
+            statement.setString(4, policySpecification.getSupportedGateways().toString());
+            statement.setString(5, policySpecification.getSupportedApiTypes().toString());
             statement.setBinaryStream(6,
                     new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
             statement.setBinaryStream(7, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
-            statement.setString(8, sharedPolicyName);
-            statement.setString(9, tenantDomain);
+            statement.setString(8, policySpecification.getPolicyCategory().toString());
+            statement.setBoolean(9, policySpecification.isMultipleAllowed());
+            statement.setString(10, sharedPolicyName);
+            statement.setString(11, tenantDomain);
             result = statement.executeUpdate() == 1;
         } catch (SQLException e) {
             handleException("Failed to update shared operation policy of " + sharedPolicyName, e);
@@ -18671,11 +18690,14 @@ public class ApiMgtDAO {
 
                 OperationPolicySpecification policySpecification = new OperationPolicySpecification();
                 policySpecification.setPolicyName(sharedPolicyName);
-                policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
+                policySpecification.setPolicyDisplayName(rs.getString("DISPLAY_NAME"));
                 policySpecification.setPolicyDescription(rs.getString("POLICY_DESCRIPTION"));
-                policySpecification.setFlow(getListFromString(rs.getString("FLOW")));
-                policySpecification.setApiTypes(getListFromString(rs.getString("API_TYPES")));
-                policySpecification.setSupportedGatewayTypes(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setApplicableFlows(getListFromString(rs.getString("FLOW")));
+                policySpecification.setSupportedApiTypes(getListFromString(rs.getString("API_TYPES")));
+                policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setPolicyCategory(OperationPolicySpecification.PolicyCategory
+                        .valueOf(rs.getString("POLICY_CATEGORY")));
+                policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
                 List<OperationPolicySpecAttribute> policySpecAttributes = null;
                 try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {
                     String policyParametersString = IOUtils.toString(policyParametersStream);
@@ -18737,11 +18759,14 @@ public class ApiMgtDAO {
 
                 OperationPolicySpecification policySpecification = new OperationPolicySpecification();
                 policySpecification.setPolicyName(rs.getString("SHARED_POLICY_NAME"));
-                policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
+                policySpecification.setPolicyDisplayName(rs.getString("DISPLAY_NAME"));
                 policySpecification.setPolicyDescription(rs.getString("POLICY_DESCRIPTION"));
-                policySpecification.setFlow(getListFromString(rs.getString("FLOW")));
-                policySpecification.setApiTypes(getListFromString(rs.getString("API_TYPES")));
-                policySpecification.setSupportedGatewayTypes(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setApplicableFlows(getListFromString(rs.getString("FLOW")));
+                policySpecification.setSupportedApiTypes(getListFromString(rs.getString("API_TYPES")));
+                policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setPolicyCategory(OperationPolicySpecification.PolicyCategory
+                        .valueOf(rs.getString("POLICY_CATEGORY")));
+                policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
                 List<OperationPolicySpecAttribute> policySpecAttributes = null;
                 try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {
                     String policyParametersString = IOUtils.toString(policyParametersStream);
@@ -18826,11 +18851,14 @@ public class ApiMgtDAO {
 
                 OperationPolicySpecification policySpecification = new OperationPolicySpecification();
                 policySpecification.setPolicyName(rs.getString("SHARED_POLICY_NAME"));
-                policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
+                policySpecification.setPolicyDisplayName(rs.getString("DISPLAY_NAME"));
                 policySpecification.setPolicyDescription(rs.getString("POLICY_DESCRIPTION"));
-                policySpecification.setFlow(getListFromString(rs.getString("FLOW")));
-                policySpecification.setApiTypes(getListFromString(rs.getString("API_TYPES")));
-                policySpecification.setSupportedGatewayTypes(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setApplicableFlows(getListFromString(rs.getString("FLOW")));
+                policySpecification.setSupportedApiTypes(getListFromString(rs.getString("API_TYPES")));
+                policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
+                policySpecification.setPolicyCategory(OperationPolicySpecification.PolicyCategory
+                        .valueOf(rs.getString("POLICY_CATEGORY")));
+                policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
                 List<OperationPolicySpecAttribute> policySpecAttributes = null;
                 try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {
                     String policyParametersString = IOUtils.toString(policyParametersStream);
