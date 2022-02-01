@@ -75,6 +75,16 @@ public class JWTUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Org ID: $" + orgId + " not appended in scopes.");
                 }
+                // check whether organization claim value and orgId matches
+                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
+                if (orgId == null) {
+                    log.error("Organization is not present in the request");
+                    return false;
+                }
+                if (!orgId.equals(orgClaim)) {
+                    log.error(String.format("Requested OrgId (%s) and the token's organization claim (%s) mismatch!", orgId, orgClaim));
+                    return false;
+                }
             } else {
                 scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                         .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
