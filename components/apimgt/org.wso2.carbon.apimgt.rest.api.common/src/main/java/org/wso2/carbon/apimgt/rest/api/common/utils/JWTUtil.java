@@ -77,6 +77,10 @@ public class JWTUtil {
                 }
                 // check whether organization claim value and orgId matches
                 String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
+                if (orgId == null) {
+                    log.error("Organization is not present in the request");
+                    return false;
+                }
                 if (!orgId.equals(orgClaim)) {
                     log.error(String.format("Requested OrgId (%s) and the token's organization claim (%s) mismatch!", orgId, orgClaim));
                     return false;
