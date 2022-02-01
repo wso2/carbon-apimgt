@@ -147,6 +147,12 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 if (log.isDebugEnabled()) {
                     log.debug("Org ID: $" + orgId + " not appended in scopes.");
                 }
+                // check whether organization claim value and orgId matches
+                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
+                if (!orgId.equals(orgClaim)) {
+                    log.error("OrgId and organization claim mismatch!");
+                    return false;
+                }
             } else {
                 scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                         .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
