@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ /*
-  ~  * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~  * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~  *
   ~  * WSO2 Inc. licenses this file to you under the Apache License,
   ~  * Version 2.0 (the "License"); you may not use this file except
@@ -24,8 +24,8 @@
          version="3.0" metadata-complete="true">
     <absolute-ordering />
 
-    <description>JAX-WS/JAX-RS Device Registration Agent Endpoint</description>
-    <display-name>JAX-WS/JAX-RS Servlet</display-name>
+    <display-name>WSO2 APIM REST API</display-name>
+    <description>WSO2 API Manager REST API</description>
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>WEB-INF/beans.xml</param-value>
@@ -36,8 +36,6 @@
         </listener-class>
     </listener>
     <servlet>
-        <description>JAX-WS/JAX-RS Device Registration Agent Endpoint</description>
-        <display-name>JAX-WS/JAX-RS Servlet</display-name>
         <servlet-name>CXFServlet</servlet-name>
         <servlet-class>
             org.apache.cxf.transport.servlet.CXFServlet

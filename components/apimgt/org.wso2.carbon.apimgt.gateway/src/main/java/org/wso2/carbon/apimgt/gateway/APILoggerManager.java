@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -29,6 +29,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -45,16 +46,17 @@ import java.util.Map;
  */
 public class APILoggerManager {
     private static final Log log = LogFactory.getLog(APILoggerManager.class);
-    private static Map<String, String> logProperties = new HashMap<>();
-    private static APILoggerManager apiLoggerManager = new APILoggerManager();
-    private EventHubConfigurationDto eventHubConfigurationDto;
+    private static final Map<String, String> logProperties = new HashMap<>();
+    private static final APILoggerManager apiLoggerManager = new APILoggerManager();
+    private final EventHubConfigurationDto eventHubConfigurationDto;
     public static final int RETRIEVAL_RETRIES = 15;
     public static final int RETRIEVAL_TIMEOUT_IN_SECONDS = 15;
     public static final String UTF8 = "UTF-8";
 
     public void initializeAPILoggerList() {
         try {
-            String responseString = invokeService("/api-logging-configs", MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            String responseString = invokeService("/api-logging-configs",
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             JSONObject responseJson = new JSONObject(responseString);
             JSONArray apiLogArray = responseJson.getJSONArray("apis");
             for (int i = 0; i < apiLogArray.length(); i++) {
@@ -78,8 +80,8 @@ public class APILoggerManager {
     }
 
     public APILoggerManager() {
-        this.eventHubConfigurationDto = org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getEventHubConfigurationDto();
+        this.eventHubConfigurationDto = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                .getAPIManagerConfiguration().getEventHubConfigurationDto();
     }
 
     public static APILoggerManager getInstance() {
@@ -102,9 +104,8 @@ public class APILoggerManager {
         byte[] credentials = getServiceCredentials(eventHubConfigurationDto);
         int servicePort = serviceURL.getPort();
         String serviceProtocol = serviceURL.getProtocol();
-        method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                         APIConstants.AUTHORIZATION_BASIC +
-                         new String(credentials, StandardCharsets.UTF_8));
+        method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
+                + new String(credentials, StandardCharsets.UTF_8));
         if (tenantDomain != null) {
             method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
         }
@@ -112,7 +113,7 @@ public class APILoggerManager {
 
         HttpResponse httpResponse = null;
         int retryCount = 0;
-        boolean retry = false;
+        boolean retry;
         do {
             try {
                 httpResponse = httpClient.execute(method);
@@ -125,7 +126,7 @@ public class APILoggerManager {
                              + ". Retrying after " + RETRIEVAL_TIMEOUT_IN_SECONDS +
                              " seconds.");
                     try {
-                        Thread.sleep(RETRIEVAL_TIMEOUT_IN_SECONDS * 1000);
+                        Thread.sleep(RETRIEVAL_TIMEOUT_IN_SECONDS * 1000L);
                     } catch (InterruptedException e) {
                         // Ignore
                     }

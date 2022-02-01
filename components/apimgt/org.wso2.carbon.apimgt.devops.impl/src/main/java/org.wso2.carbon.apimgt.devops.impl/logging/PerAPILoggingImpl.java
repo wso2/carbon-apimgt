@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -21,10 +21,9 @@
 package org.wso2.carbon.apimgt.devops.impl.logging;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LoggingMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APILogInfoDTO;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -38,32 +37,43 @@ import java.util.List;
  */
 public class PerAPILoggingImpl {
     private static final String PER_API_LOGGING_PERMISSION_PATH = "/permission/protected/configure/logging";
+    private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
+    private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     public void addUpdateAPILogger(String tenantId, String apiId, String logLevel) throws APIManagementException {
+        if (apiMgtDAO.getAPIInfoByUUID(apiId) == null) {
+            throw new APIManagementException("API not found.",
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), PER_API_LOGGING_PERMISSION_PATH)) {
-            throw new APIManagementException("Invalid logging permission",
+            throw new APIManagementException(INVALID_LOGGING_PERMISSION,
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
         }
         LoggingMgtDAO.getInstance().addAPILogger(tenantId, apiId, logLevel);
         publishLogAPIData(tenantId, apiId, logLevel);
     }
-    private void publishLogAPIData(String tenant, String apiId, String value) throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenant);
-        APIEvent apiEvent = new APIEvent(apiId, value, APIConstants.EventType.UDATE_API_LOG_LEVEL.name(), existingAPI.getContext());
+
+    private void publishLogAPIData(String tenantId, String apiId, String logLevel) throws APIManagementException {
+        APIEvent apiEvent = new APIEvent(apiId, logLevel, APIConstants.EventType.UDATE_API_LOG_LEVEL.name(),
+                apiMgtDAO.getAPIContext(apiId));
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
+
     public List<APILogInfoDTO> getAPILoggerList(String tenantId, boolean loggingEnabled) throws APIManagementException {
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), PER_API_LOGGING_PERMISSION_PATH)) {
-            throw new APIManagementException("Invalid logging permission",
+            throw new APIManagementException(INVALID_LOGGING_PERMISSION,
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
         }
         return LoggingMgtDAO.getInstance().retrieveAPILoggerList(tenantId, loggingEnabled);
     }
 
     public List<APILogInfoDTO> getAPILoggerListByApiId(String tenantId, String apiId) throws APIManagementException {
+        if (apiMgtDAO.getAPIInfoByUUID(apiId) == null) {
+            throw new APIManagementException("API not found.",
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), PER_API_LOGGING_PERMISSION_PATH)) {
-            throw new APIManagementException("Invalid logging permission",
+            throw new APIManagementException(INVALID_LOGGING_PERMISSION,
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
         }
         return LoggingMgtDAO.getInstance().retrieveAPILoggerByAPIID(tenantId, apiId);
