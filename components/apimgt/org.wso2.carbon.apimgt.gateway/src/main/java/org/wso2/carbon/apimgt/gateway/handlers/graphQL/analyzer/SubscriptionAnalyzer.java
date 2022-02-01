@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer;
 
 import graphql.analysis.FieldComplexityCalculator;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import org.apache.commons.logging.Log;
@@ -120,12 +122,12 @@ public class SubscriptionAnalyzer extends QueryAnalyzer {
         String graphQLAccessControlPolicy;
         Set<GraphQLType> additionalTypes = getSchema().getAdditionalTypes();
         for (GraphQLType additionalType : additionalTypes) {
-            if (additionalType.getName().startsWith(APIConstants.GRAPHQL_ADDITIONAL_TYPE_PREFIX)) {
-                for (GraphQLType type : additionalType.getChildren()) {
-                    if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
-                        graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
-                        return graphQLAccessControlPolicy;
-                    }
+            String additionalTypeName = ((GraphQLObjectType) additionalType).getName();
+            if (additionalTypeName.startsWith(APIConstants.GRAPHQL_ADDITIONAL_TYPE_PREFIX) &&
+                    additionalTypeName.contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                for (GraphQLFieldDefinition type : ((GraphQLObjectType) additionalType).getFieldDefinitions()) {
+                    graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
+                    return graphQLAccessControlPolicy;
                 }
             }
         }
