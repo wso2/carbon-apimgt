@@ -27,10 +27,8 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -263,9 +261,9 @@ public class RestApiPublisherUtils {
             exportFolder = CommonUtil.createTempDirectory(null);
             String exportAPIBasePath = exportFolder.toString();
             String archivePath =
-                    exportAPIBasePath.concat(File.separator + policyData.getSpecification().getPolicyName());
+                    exportAPIBasePath.concat(File.separator + policyData.getSpecification().getName());
             CommonUtil.createDirectory(archivePath);
-            String policyName = archivePath + File.separator + policyData.getSpecification().getPolicyName();
+            String policyName = archivePath + File.separator + policyData.getSpecification().getName();
             if (policyData.getSpecification() != null) {
                 CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
                         ImportExportConstants.TYPE_POLICY_SPECIFICATION,

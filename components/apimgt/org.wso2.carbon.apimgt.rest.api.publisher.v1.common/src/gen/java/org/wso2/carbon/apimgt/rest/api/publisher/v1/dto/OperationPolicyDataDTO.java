@@ -27,12 +27,13 @@ public class OperationPolicyDataDTO   {
     private String policyId = null;
     private String policyName = null;
     private String policyDisplayName = null;
-    private String sharedPolicyRef = null;
     private String policyDescription = null;
     private List<String> applicableFlows = new ArrayList<String>();
     private List<String> supportedGateways = new ArrayList<String>();
     private List<String> supportedApiTypes = new ArrayList<String>();
     private Boolean multipleAllowed = null;
+    private Boolean isAPISpecific = null;
+    private String md5 = null;
     private List<OperationPolicySpecAttributeDTO> polictAttributes = new ArrayList<OperationPolicySpecAttributeDTO>();
 
   /**
@@ -101,23 +102,6 @@ public class OperationPolicyDataDTO   {
   }
   public void setPolicyDisplayName(String policyDisplayName) {
     this.policyDisplayName = policyDisplayName;
-  }
-
-  /**
-   **/
-  public OperationPolicyDataDTO sharedPolicyRef(String sharedPolicyRef) {
-    this.sharedPolicyRef = sharedPolicyRef;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "AddHeaderSharedPolicy", value = "")
-  @JsonProperty("sharedPolicyRef")
-  public String getSharedPolicyRef() {
-    return sharedPolicyRef;
-  }
-  public void setSharedPolicyRef(String sharedPolicyRef) {
-    this.sharedPolicyRef = sharedPolicyRef;
   }
 
   /**
@@ -207,6 +191,40 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
+  public OperationPolicyDataDTO isAPISpecific(Boolean isAPISpecific) {
+    this.isAPISpecific = isAPISpecific;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("isAPISpecific")
+  public Boolean isIsAPISpecific() {
+    return isAPISpecific;
+  }
+  public void setIsAPISpecific(Boolean isAPISpecific) {
+    this.isAPISpecific = isAPISpecific;
+  }
+
+  /**
+   **/
+  public OperationPolicyDataDTO md5(String md5) {
+    this.md5 = md5;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "121223q41-24141-124124124-12414", value = "")
+  @JsonProperty("md5")
+  public String getMd5() {
+    return md5;
+  }
+  public void setMd5(String md5) {
+    this.md5 = md5;
+  }
+
+  /**
+   **/
   public OperationPolicyDataDTO polictAttributes(List<OperationPolicySpecAttributeDTO> polictAttributes) {
     this.polictAttributes = polictAttributes;
     return this;
@@ -237,18 +255,19 @@ public class OperationPolicyDataDTO   {
         Objects.equals(policyId, operationPolicyData.policyId) &&
         Objects.equals(policyName, operationPolicyData.policyName) &&
         Objects.equals(policyDisplayName, operationPolicyData.policyDisplayName) &&
-        Objects.equals(sharedPolicyRef, operationPolicyData.sharedPolicyRef) &&
         Objects.equals(policyDescription, operationPolicyData.policyDescription) &&
         Objects.equals(applicableFlows, operationPolicyData.applicableFlows) &&
         Objects.equals(supportedGateways, operationPolicyData.supportedGateways) &&
         Objects.equals(supportedApiTypes, operationPolicyData.supportedApiTypes) &&
         Objects.equals(multipleAllowed, operationPolicyData.multipleAllowed) &&
+        Objects.equals(isAPISpecific, operationPolicyData.isAPISpecific) &&
+        Objects.equals(md5, operationPolicyData.md5) &&
         Objects.equals(polictAttributes, operationPolicyData.polictAttributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyCategory, policyId, policyName, policyDisplayName, sharedPolicyRef, policyDescription, applicableFlows, supportedGateways, supportedApiTypes, multipleAllowed, polictAttributes);
+    return Objects.hash(policyCategory, policyId, policyName, policyDisplayName, policyDescription, applicableFlows, supportedGateways, supportedApiTypes, multipleAllowed, isAPISpecific, md5, polictAttributes);
   }
 
   @Override
@@ -260,12 +279,13 @@ public class OperationPolicyDataDTO   {
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
     sb.append("    policyDisplayName: ").append(toIndentedString(policyDisplayName)).append("\n");
-    sb.append("    sharedPolicyRef: ").append(toIndentedString(sharedPolicyRef)).append("\n");
     sb.append("    policyDescription: ").append(toIndentedString(policyDescription)).append("\n");
     sb.append("    applicableFlows: ").append(toIndentedString(applicableFlows)).append("\n");
     sb.append("    supportedGateways: ").append(toIndentedString(supportedGateways)).append("\n");
     sb.append("    supportedApiTypes: ").append(toIndentedString(supportedApiTypes)).append("\n");
     sb.append("    multipleAllowed: ").append(toIndentedString(multipleAllowed)).append("\n");
+    sb.append("    isAPISpecific: ").append(toIndentedString(isAPISpecific)).append("\n");
+    sb.append("    md5: ").append(toIndentedString(md5)).append("\n");
     sb.append("    polictAttributes: ").append(toIndentedString(polictAttributes)).append("\n");
     sb.append("}");
     return sb.toString();

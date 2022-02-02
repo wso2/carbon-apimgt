@@ -22,11 +22,17 @@ import java.util.Objects;
 
 public class OperationPolicyDataHolder {
 
+    private boolean isApiSpecificPolicy;
     private String policyId;
-    private String sharedPolicyName;
-    private OperationPolicySpecification specification;
     private String definition;
     private String tenantDomain;
+    private String md5Hash;
+    private String apiUUID;
+    private String revisionUUID;
+    private OperationPolicySpecification specification;
+    private boolean isImportedPolicy = false;
+    private String originalPolicyId;
+
 
     public String getPolicyId() {
 
@@ -58,16 +64,6 @@ public class OperationPolicyDataHolder {
         this.definition = definition;
     }
 
-    public String getSharedPolicyName() {
-
-        return sharedPolicyName;
-    }
-
-    public void setSharedPolicyName(String sharedPolicyName) {
-
-        this.sharedPolicyName = sharedPolicyName;
-    }
-
     public String getTenantDomain() {
 
         return tenantDomain;
@@ -78,6 +74,66 @@ public class OperationPolicyDataHolder {
         this.tenantDomain = tenantDomain;
     }
 
+    public boolean isApiSpecificPolicy() {
+
+        return apiUUID != null;
+    }
+
+    public void setApiSpecificPolicy(boolean apiSpecificPolicy) {
+
+        isApiSpecificPolicy = apiSpecificPolicy;
+    }
+
+    public String getMd5Hash() {
+
+        return md5Hash;
+    }
+
+    public void setMd5Hash(String md5Hash) {
+
+        this.md5Hash = md5Hash;
+    }
+
+    public String getApiUUID() {
+
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+
+        this.apiUUID = apiUUID;
+    }
+
+    public String getRevisionUUID() {
+
+        return revisionUUID;
+    }
+
+    public void setRevisionUUID(String revisionUUID) {
+
+        this.revisionUUID = revisionUUID;
+    }
+
+    public boolean isImportedPolicy() {
+
+        return isImportedPolicy;
+    }
+
+    public void setImportedPolicy(boolean importedPolicy) {
+
+        isImportedPolicy = importedPolicy;
+    }
+
+    public String getOriginalPolicyId() {
+
+        return originalPolicyId;
+    }
+
+    public void setOriginalPolicyId(String originalPolicyId) {
+
+        this.originalPolicyId = originalPolicyId;
+    }
+
     @Override
     public boolean equals(Object o) {
 
@@ -85,14 +141,15 @@ public class OperationPolicyDataHolder {
         if (o == null || getClass() != o.getClass()) return false;
         OperationPolicyDataHolder that = (OperationPolicyDataHolder) o;
         return Objects.equals(policyId, that.policyId) &&
-                Objects.equals(sharedPolicyName, that.sharedPolicyName) &&
                 Objects.equals(specification, that.specification) &&
-                Objects.equals(definition, that.definition);
+                Objects.equals(definition, that.definition) &&
+                Objects.equals(md5Hash, that.md5Hash) &&
+                Objects.equals(apiUUID, that.apiUUID);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(policyId, sharedPolicyName, specification, definition);
+        return Objects.hash(policyId, specification, definition, md5Hash, apiUUID);
     }
 }
