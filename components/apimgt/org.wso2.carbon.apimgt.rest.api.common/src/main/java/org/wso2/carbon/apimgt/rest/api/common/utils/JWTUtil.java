@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.utils;
 
+import net.minidev.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -75,14 +76,20 @@ public class JWTUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Org ID: $" + orgId + " not appended in scopes.");
                 }
-                // check whether organization claim value and orgId matches
-                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
+
                 if (orgId == null) {
                     log.error("Organization is not present in the request");
                     return false;
                 }
-                if (!orgId.equals(orgClaim)) {
-                    log.error(String.format("Requested OrgId (%s) and the token's organization claim (%s) mismatch!", orgId, orgClaim));
+
+                String orgUuid = JWTUtil.getOrgIdFromJwt(signedJWTInfo);
+                if (orgUuid == null) {
+                    log.error("Unable to get organization claim from the jwt");
+                    return false;
+                }
+                // check whether organization claim value and orgId matches
+                if (!orgId.equals(orgUuid)) {
+                    log.error(String.format("Requested OrgId (%s) and the token's organization claim (%s) mismatch!", orgId, orgUuid));
                     return false;
                 }
             } else {
@@ -224,5 +231,24 @@ public class JWTUtil {
             }
         }
         return containsOrgId;
+    }
+
+    public static String getOrgIdFromJwt(SignedJWTInfo jwtInfo) {
+        try {
+            JSONObject organizationClaim = jwtInfo.getJwtClaimsSet().getJSONObjectClaim("organization");
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved organization claim from jwt: " + organizationClaim);
+            }
+            if (organizationClaim != null && organizationClaim.containsKey("uuid")) {
+                return organizationClaim.getAsString("uuid");
+            }
+        } catch (ParseException e) {
+            if (log.isDebugEnabled()) {
+                log.error("Failed to parse organization claim from JWT claims", e);
+            } else {
+                log.error("Failed to parse organization claim from JWT claims: " + e.getMessage());
+            }
+        }
+        return null;
     }
 }
