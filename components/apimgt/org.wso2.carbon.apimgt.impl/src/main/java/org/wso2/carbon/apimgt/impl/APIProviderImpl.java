@@ -2510,43 +2510,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 " Checking API specific policies.");
                     }
                     // First check the API specific operation policy list
-                    OperationPolicyDataHolder apiSpecificPolicyData = getOperationPolicyByPolicyName(policyName,
-                            api.getUuid(), tenantDomain, false);
+                    OperationPolicyDataHolder apiSpecificPolicyData = getAPISpecificOperationPolicyByPolicyName(policyName,
+                            api.getUuid(), null, tenantDomain, false);
                     if (apiSpecificPolicyData != null) {
-                        // A shared policy is found for specified policy. This will be validated according to the provided
+                        // An API specific policy is found for specified policy. This will be validated according to the provided
                         // attributes and added to API policy list
                         if (log.isDebugEnabled()) {
-                            log.debug("A shared policy is found for " + policyName + " as " + policyName
-                                    + ". Validating the policy");
+                            log.debug("An API specific policy is found for " + policyName + ". Validating the policy");
                         }
-                        OperationPolicySpecification sharedPolicySpec = apiSpecificPolicyData.getSpecification();
-                        if (validateAppliedPolicyWithSpecification(sharedPolicySpec, policy)) {
-                            if (!policyName.isEmpty()) {
-                                // Selected policy name will be used as the imported policy name.
-                                apiSpecificPolicyData.getSpecification().setName(policyName);
-                            }
+                        OperationPolicySpecification apiSpecificPolicySpec = apiSpecificPolicyData.getSpecification();
+                        if (validateAppliedPolicyWithSpecification(apiSpecificPolicySpec, policy)) {
                             policy.setPolicyId(apiSpecificPolicyData.getPolicyId());
                             validatedPolicies.add(policy);
                         }
                     } else {
                         // check the common operation policy list
                         OperationPolicyDataHolder commonPolicyData =
-                                getOperationPolicyByPolicyName(policyName, null, tenantDomain, false);
+                                getCommonOperationPolicyByPolicyName(policyName, tenantDomain, false);
                         if (commonPolicyData != null) {
-                            // A shared policy is found for specified policy. This will be validated according to the provided
+                            // A common policy is found for specified policy. This will be validated according to the provided
                             // attributes and added to API policy list
                             if (log.isDebugEnabled()) {
                                 log.debug(
-                                        "A shared policy is found for " + policyName + " as " + policyName
-                                                + ". Validating the policy");
+                                        "A common policy is found for " + policyName + ". Validating the policy");
                             }
-                            OperationPolicySpecification sharedPolicySpec =
-                                    apiSpecificPolicyData.getSpecification();
-                            if (validateAppliedPolicyWithSpecification(sharedPolicySpec, policy)) {
-                                if (!policyName.isEmpty()) {
-                                    // Selected policy name will be used as the imported policy name.
-                                    apiSpecificPolicyData.getSpecification().setName(policyName);
-                                }
+                            OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
+                            if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy)) {
                                 policy.setPolicyId(commonPolicyData.getPolicyId());
                                 validatedPolicies.add(policy);
                             }
@@ -9553,37 +9542,75 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String importOperationPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder,
-                                        String tenantDomain) throws APIManagementException {
-        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, operationPolicyDataHolder, tenantDomain);
-    }
-
-
-    @Override
-    public OperationPolicyDataHolder getImportedOperationPolicyByPolicyName(String apiUUID, String revisionUUID,
-                                                                                    String policyName, boolean isWithPolicyDefinition)
+    public String importOperationPolicy(OperationPolicyDataHolder importedPolicyData, String tenantDomain)
             throws APIManagementException {
-        return apiMgtDAO.getImportedOperationPolicyByPolicyName(apiUUID, revisionUUID, policyName, isWithPolicyDefinition);
+
+        OperationPolicySpecification importedSpec = importedPolicyData.getSpecification();
+        OperationPolicyDataHolder existingOperationPolicy =
+                getAPISpecificOperationPolicyByPolicyName(importedSpec.getName(), importedPolicyData.getApiUUID(),
+                        null, tenantDomain, false);
+        String policyId = null;
+        if (existingOperationPolicy != null) {
+            if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Matching API specific policy found for imported policy. MD5 hashes match.");
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Matching API specific policy found for imported policy. MD5 hashes does not match." +
+                            "Therefore updating the existing policy");
+                }
+                updateOperationPolicy(existingOperationPolicy.getPolicyId(), importedPolicyData, tenantDomain);
+            }
+            policyId = existingOperationPolicy.getPolicyId();
+        } else {
+            existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(),tenantDomain,false);
+            if (existingOperationPolicy != null) {
+                if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Matching common policy found for imported policy.");
+                    }
+                } else {
+                    updateOperationPolicy(existingOperationPolicy.getPolicyId(), importedPolicyData, tenantDomain);
+                }
+                policyId = existingOperationPolicy.getPolicyId();
+            } else {
+                policyId = addOperationPolicy(importedPolicyData, tenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug("There aren't any matching policies for the imported policy. A new policy created with ID "
+                            + policyId);
+                }
+            }
+        }
+
+        return policyId;
     }
 
     @Override
     public String addOperationPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain)
             throws APIManagementException {
-        return apiMgtDAO.addOperationPolicy(operationPolicyDataHolder, tenantDomain);
+        return apiMgtDAO.addOperationPolicy(operationPolicyDataHolder);
     }
 
     @Override
     public String getOperationPolicyId(String policyName, String apiUUID, String tenantDomain)
             throws APIManagementException {
-        return apiMgtDAO.getOperationPolicyId(policyName, apiUUID, tenantDomain);
+        return apiMgtDAO.getOperationPolicyIdByPolicyName(policyName, apiUUID, null, tenantDomain);
     }
 
     @Override
-    public OperationPolicyDataHolder getOperationPolicyByPolicyName(String policyName, String apiUUID,
-                                                                    String tenantDomain,
+    public OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
+                                                                    String revisionUUID, String tenantDomain,
                                                                     boolean isWithPolicyDefinition)
             throws APIManagementException {
-        return apiMgtDAO.getOperationPolicyByPolicyName(policyName, apiUUID, tenantDomain, isWithPolicyDefinition);
+        return apiMgtDAO.getOperationPolicyByPolicyName(policyName, apiUUID, revisionUUID, tenantDomain, isWithPolicyDefinition);
+    }
+
+    @Override
+    public OperationPolicyDataHolder getCommonOperationPolicyByPolicyName(String policyName, String tenantDomain,
+                                                                    boolean isWithPolicyDefinition)
+            throws APIManagementException {
+        return apiMgtDAO.getOperationPolicyByPolicyName(policyName, null, null, tenantDomain, isWithPolicyDefinition);
     }
 
     @Override
@@ -9595,7 +9622,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean updateOperationPolicy(String operationPolicyId, OperationPolicyDataHolder operationPolicyDataHolder,
                                          String tenantDomain) throws APIManagementException {
-        return apiMgtDAO.updateOperationPolicy(operationPolicyId, operationPolicyDataHolder, tenantDomain);
+        return apiMgtDAO.updateOperationPolicy(operationPolicyId, operationPolicyDataHolder);
     }
 
     @Override
@@ -9611,16 +9638,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public boolean deleteOperationPolicy(String policyId, String tenantDomain)
-            throws APIManagementException {
-        return apiMgtDAO.deleteOperationPolicyByPolicyId(policyId, null, tenantDomain);
+    public boolean deleteOperationPolicyById(String policyId, String tenantDomain) throws APIManagementException {
+        return apiMgtDAO.deleteOperationPolicyByPolicyId(policyId);
     }
 
-    @Override
-    public boolean deleteAPISpecificOperationPolicy(String apiUUID, String policyId, String tenantDomain)
-            throws APIManagementException {
-        return apiMgtDAO.deleteOperationPolicyByPolicyId(policyId, apiUUID, tenantDomain);
-    }
     @Override
     public APIRevision checkAPIUUIDIsARevisionUUID(String apiUuid) throws APIManagementException {
         return apiMgtDAO.checkAPIUUIDIsARevisionUUID(apiUuid);

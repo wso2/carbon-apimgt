@@ -1869,20 +1869,7 @@ public interface APIProvider extends APIManager {
      * @return UUID of the newly added operation policy
      * @throws APIManagementException
      */
-    String importOperationPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder,
-                                 String tenantDomain) throws APIManagementException;
-
-
-    /**
-     * Get the API Specific policy for the given Policy name and API UUID
-     *
-     * @param apiUUID           UUID of the API
-     * @param policyName        Operation Policy Name
-     * @return Operation Policy
-     * @throws APIManagementException
-     */
-    OperationPolicyDataHolder getImportedOperationPolicyByPolicyName(String apiUUID, String revisionUUID,
-                                                                             String policyName, boolean isWithPolicyDefinition)
+    String importOperationPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain)
             throws APIManagementException;
 
 
@@ -1910,8 +1897,22 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getOperationPolicyByPolicyName(String policyName, String apiUUID, String tenantDomain,
-                                                             boolean isWithPolicyDefinition)
+    OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID, String revisionUUID,
+                                                             String tenantDomain, boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Get operation policy for a given policy name. Since policy ID is not available, this needs policy name, API UUID
+     * and tenant domain to isolate the correct policy.
+     *
+     * @param policyName             Policy name
+     * @param tenantDomain           Tenant domain
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyDataHolder getCommonOperationPolicyByPolicyName(String policyName, String tenantDomain, boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
@@ -1970,19 +1971,7 @@ public interface APIProvider extends APIManager {
      * @return True if policy was deleted
      * @throws APIManagementException
      */
-    boolean deleteOperationPolicy(String policyId, String tenantDomain)
-            throws APIManagementException;
-
-    /**
-     * Delete an API Specific policy given by the policy ID.
-     *
-     * @param apiUUID         UUID of the API
-     * @param policyId        Operation Policy UUID
-     * @param tenantDomain    Tenant Domain
-     * @return Status of the deletion
-     * @throws APIManagementException
-     */
-    boolean deleteAPISpecificOperationPolicy(String apiUUID, String policyId, String tenantDomain)
+    boolean deleteOperationPolicyById(String policyId, String tenantDomain)
             throws APIManagementException;
 
     APIRevision checkAPIUUIDIsARevisionUUID(String apiUuid) throws APIManagementException;

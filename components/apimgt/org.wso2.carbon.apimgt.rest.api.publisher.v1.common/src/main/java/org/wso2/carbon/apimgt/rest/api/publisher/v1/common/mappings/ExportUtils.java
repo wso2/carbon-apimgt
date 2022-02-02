@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
@@ -735,25 +734,19 @@ public class ExportUtils {
      * @param apiProvider  API Provider
      * @throws APIImportExportException If an error occurs while exporting operation policies
      */
-    public static void addOperationalPoliciesToArchive(String archivePath, String apiID,
-                                                       ExportFormat exportFormat, APIProvider apiProvider, API api)
+    public static void addOperationalPoliciesToArchive(String archivePath, String apiID, ExportFormat exportFormat,
+                                                       APIProvider apiProvider, API api)
             throws APIManagementException {
 
         try {
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
-            APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiID);
-            String revisionAPIId = null;
-            if (apiRevision != null) {
-                revisionAPIId = apiRevision.getRevisionUUID();
-                apiID = apiRevision.getApiUUID();
-            }
             Set<URITemplate> uriTemplates = api.getUriTemplates();
             for (URITemplate uriTemplate : uriTemplates) {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        OperationPolicyDataHolder policyData =  apiProvider.getImportedOperationPolicyByPolicyName(
-                                apiID, revisionAPIId, policy.getPolicyName(), true);
+                        OperationPolicyDataHolder policyData =
+                                apiProvider.getOperationPolicyByPolicyId(policy.getPolicyId(), true);
                         if (policyData != null) {
                             String policyName = archivePath  + File.separator
                                     + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
