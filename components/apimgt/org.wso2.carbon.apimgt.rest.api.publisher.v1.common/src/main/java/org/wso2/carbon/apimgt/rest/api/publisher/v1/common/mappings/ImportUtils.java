@@ -31,6 +31,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
@@ -418,10 +420,13 @@ public class ImportUtils {
                                 getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName());
 
                         OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
+                        operationPolicyData.setApiUUID(api.getUuid());
                         operationPolicyData.setDefinition(policyDefinition);
                         operationPolicyData.setSpecification(policySpec);
-                        String policyID = provider.importOperationPolicy(api.getUuid(), operationPolicyData,
-                                tenantDomain);
+                        operationPolicyData.setTenantDomain(tenantDomain);
+                        operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(new Gson().toJson(policySpec),
+                                policyDefinition));
+                        String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
                         policy.setPolicyId(policyID);
                         validatedOperationPolicies.add(policy);
                     } catch (APIManagementException e) {
@@ -445,6 +450,21 @@ public class ImportUtils {
             }
             // Retrieving the field "data" in deployment_environments.yaml
             JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+
+            Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
+            if (schema != null) {
+                try {
+                    org.json.JSONObject uploadedConfig = new org.json.JSONObject(configElement.getAsString());
+                    schema.validate(uploadedConfig);
+                } catch (ValidationException e) {
+                    List<String> errors = e.getAllMessages();
+                    String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
+                    throw new APIManagementException("Policy specification validation failure. "+ errorMessage,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
+                                    errorMessage));
+                }
+            }
+
             return new Gson().fromJson(configElement, OperationPolicySpecification.class);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy specification info from path: "

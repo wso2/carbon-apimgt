@@ -2730,12 +2730,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
                 OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                 operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(jsonContent, policyDefinition));
+                operationPolicyData.setTenantDomain(organization);
                 operationPolicyData.setApiUUID(apiId);
                 operationPolicyData.setSpecification(policySpecification);
                 operationPolicyData.setDefinition(policyDefinition);
 
                 OperationPolicyDataHolder existingPolicy =
-                        apiProvider.getOperationPolicyByPolicyName(policySpecification.getName(), apiId, organization, false);
+                        apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(), apiId,
+                                null, organization, false);
                 String policyID;
                 if (existingPolicy != null) {
                     policyID = existingPolicy.getPolicyId();
@@ -2924,7 +2926,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     throw new APIManagementException("Cannot delete an operation policy of a different API.");
                 }
 
-                boolean isDeleted = apiProvider.deleteOperationPolicy(operationPolicyId, organization);
+                boolean isDeleted = apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
                 if (!isDeleted) {
                     throw new APIManagementException("An unexpected error occurred while deleting the API specific " +
                             "operation policy " + operationPolicyId + " from API " + apiInfo.getName());

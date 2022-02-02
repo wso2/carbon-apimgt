@@ -110,12 +110,13 @@ public class OperationPolicyApiServiceImpl implements OperationPolicyApiService 
                 }
 
                 OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
+                operationPolicyData.setTenantDomain(organization);
                 operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(jsonContent, policyDefinition));
                 operationPolicyData.setSpecification(policySpecification);
                 operationPolicyData.setDefinition(policyDefinition);
 
                 OperationPolicyDataHolder existingPolicy =
-                        apiProvider.getOperationPolicyByPolicyName(policySpecification.getName(), null, organization, false);
+                        apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(), organization, false);
                 String policyID;
                 if (existingPolicy != null) {
                     if (existingPolicy.isApiSpecificPolicy()) {
@@ -174,8 +175,11 @@ public class OperationPolicyApiServiceImpl implements OperationPolicyApiService 
                     throw new APIManagementException("Cannot delete an API specific operation policy at the " +
                             " common policies resource.");
                 }
+                if (!organization.equals(existingPolicy.getTenantDomain())) {
+                    throw new APIManagementException("Cannot delete the specified operation policy");
+                }
 
-                boolean isDeleted = apiProvider.deleteOperationPolicy(operationPolicyId, organization);
+                boolean isDeleted = apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
                 if (!isDeleted) {
                     throw new APIManagementException("Error while deleting common operation policy : " + operationPolicyId
                             + " on organization " + organization);

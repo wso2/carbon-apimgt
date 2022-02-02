@@ -5706,8 +5706,6 @@ public class ApiMgtDAO {
                      connection.prepareStatement(SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
              PreparedStatement operationPolicyMappingPrepStmt =
                      connection.prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING)) {
-
-            Map<String, String> importedPolicyMap = new HashMap<>();
             for (URITemplate uriTemplate : api.getUriTemplates()) {
                 uriMappingPrepStmt.setInt(1, apiId);
                 uriMappingPrepStmt.setString(2, uriTemplate.getHTTPVerb());
@@ -5761,18 +5759,6 @@ public class ApiMgtDAO {
                     if (uriTemplate.getOperationPolicies() != null) {
                         for (OperationPolicy policy : uriTemplate.getOperationPolicies()) {
                             String importedPolicyId = null;
-                            if (!importedPolicyMap.keySet().contains(policy.getPolicyId())) {
-                                if (importedPolicyId == null) {
-                                    // At this point, we have already validated the policy's existance and no need
-                                    // to validate again
-                                    importedPolicyId = importOperationPolicyFromPolicyList(connection,
-                                            policy.getPolicyName(), api.getUuid(), tenantDomain);
-                                }
-                                // policy ID is stored in a map as same policy can be applied to multiple operations
-                                // and we only need to import the policy once.
-                                importedPolicyMap.put(policy.getPolicyName(), importedPolicyId);
-                            }
-
                             Gson gson = new Gson();
                             String paramJSON = gson.toJson(policy.getParameters());
                             if (log.isDebugEnabled()) {
@@ -5781,7 +5767,7 @@ public class ApiMgtDAO {
                             }
 
                             operationPolicyMappingPrepStmt.setInt(1, uriMappingId);
-                            operationPolicyMappingPrepStmt.setString(2, importedPolicyMap.get(policy.getPolicyName()));
+                            operationPolicyMappingPrepStmt.setString(2, policy.getPolicyId());
                             operationPolicyMappingPrepStmt.setString(3, policy.getDirection());
                             operationPolicyMappingPrepStmt.setString(4, paramJSON);
                             operationPolicyMappingPrepStmt.setInt(5, policy.getOrder());
@@ -6301,17 +6287,13 @@ public class ApiMgtDAO {
 
         int apiId;
         String deleteOldMappingsQuery = SQLConstants.REMOVE_FROM_URI_TEMPLATES_SQL;
-        String deleteOldOperationPoliciesQuery = SQLConstants.OperationPolicyConstants.REMOVE_FROM_IMPORTED_POLICY_TABLE_FOR_API_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(deleteOldMappingsQuery);
-             PreparedStatement policyStmt = connection.prepareStatement(deleteOldOperationPoliciesQuery)) {
+             PreparedStatement prepStmt = connection.prepareStatement(deleteOldMappingsQuery)) {
             connection.setAutoCommit(false);
             apiId = getAPIID(api.getUuid(), connection);
             prepStmt.setInt(1, apiId);
-            policyStmt.setString(1, api.getUuid());
             try {
                 prepStmt.execute();
-                policyStmt.execute();
                 addURITemplates(apiId, api, tenantId, connection);
                 connection.commit();
             } catch (SQLException e) {
@@ -18123,160 +18105,6 @@ public class ApiMgtDAO {
         return uriTemplateList;
     }
 
-    /**
-     * Update API specific operation policy
-     *
-     * @param apiUUID           Unique Identifier of API
-     * @param policyData  Updated policy
-     * @param connection        DB connection
-     * @throws APIManagementException
-     */
-    public boolean updateAPISpecificOperationPolicy(Connection connection, String apiUUID, OperationPolicyDataHolder policyData)
-            throws APIManagementException {
-
-        boolean result = false;
-        String query = SQLConstants.OperationPolicyConstants.UPDATE_API_SPECIFIC_POLICY_DEFINITION_FOR_API;
-        OperationPolicySpecification policySpecification = policyData.getSpecification();
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, policySpecification.getDisplayName());
-            statement.setString(2, policySpecification.getDescription());
-            statement.setString(3, policySpecification.getApplicableFlows().toString());
-            statement.setString(4, policySpecification.getSupportedGateways().toString());
-            statement.setString(5, policySpecification.getSupportedApiTypes().toString());
-            statement.setBinaryStream(6,
-                    new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
-            statement.setBinaryStream(7, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
-            statement.setString(8, policySpecification.getCategory().toString());
-            statement.setBoolean(9, policySpecification.isMultipleAllowed());
-            statement.setString(10, apiUUID);
-            statement.setString(11, policySpecification.getName());
-            result = statement.executeUpdate() == 1;
-        } catch (SQLException e) {
-            handleException("Failed to update operation policy of API " + apiUUID + " for policy "
-                            + policySpecification.getName(), e);
-        }
-        return result;
-    }
-
-    String importOperationPolicyFromPolicyList(Connection connection, String policyName, String apiUUID, String tenantDomain)
-            throws APIManagementException {
-
-        String policyId = null;
-        try {
-            OperationPolicyDataHolder policyToBeImported = getOperationPolicyForName(connection, policyName, apiUUID, tenantDomain);
-            if (policyToBeImported != null) {
-                OperationPolicySpecification policySpecification = policyToBeImported.getSpecification();
-                policyId = UUID.randomUUID().toString();
-                String dbQuery = SQLConstants.OperationPolicyConstants.IMPORT_POLICY_FROM_POLICY_LIST;
-                try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-                    statement.setString(1, policyId);
-                    statement.setString(2, policyToBeImported.getPolicyId());
-                    statement.setString(3, apiUUID);
-                    statement.setString(4, policySpecification.getName());
-                    statement.setString(5, policySpecification.getDisplayName());
-                    statement.setString(6, policySpecification.getDescription());
-                    statement.setString(7, policySpecification.getApplicableFlows().toString());
-                    statement.setString(8, policySpecification.getSupportedGateways().toString());
-                    statement.setString(9, policySpecification.getSupportedApiTypes().toString());
-                    statement.setBinaryStream(10,
-                            new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
-                    statement
-                            .setBinaryStream(11, new ByteArrayInputStream(policyToBeImported.getDefinition().getBytes()));
-                    statement.setString(12, tenantDomain);
-                    statement.setString(13, policySpecification.getCategory().toString());
-                    statement.setBoolean(14, policySpecification.isMultipleAllowed());
-                    statement.setString(15, policyToBeImported.getMd5Hash());
-                    statement.executeUpdate();
-                }
-            }
-            connection.commit();
-        } catch (SQLException | APIManagementException e) {
-            handleException("Failed to import operation policy for the API " + apiUUID + " by the name of "
-                    + policyName, e);
-        }
-        return policyId;
-    }
-
-    OperationPolicyDataHolder getOperationPolicyForName(Connection connection, String policyName, String apiUUID, String tenantDomain)
-            throws APIManagementException {
-        OperationPolicyDataHolder policyData = null;
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_WITH_DEFINITION_FROM_POLICY_NAME_FOR_ANY;
-        ResultSet rs = null;
-        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-            statement.setString(1, policyName);
-            statement.setString(2, tenantDomain);
-            statement.setString(3, apiUUID);
-            rs = statement.executeQuery();
-            if (rs.next()) {
-                policyData = new OperationPolicyDataHolder();
-                policyData.setTenantDomain(tenantDomain);
-                policyData.setApiUUID(rs.getString("API_UUID"));
-                policyData.setPolicyId(rs.getString("POLICY_ID"));
-                policyData.setMd5Hash(rs.getString("POLICY_MD5"));
-                policyData.setSpecification(populatePolicySpecificationFromRS(rs));
-                policyData.setDefinition(getPolicyDefinitionFromRs(rs));
-
-                return policyData;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get operation policy definition for API " + apiUUID + " by the policy name of "
-                    + policyName, e);
-        }
-        return policyData;
-    }
-
-    /**
-     * Add an API specific operation policy to the API
-     *
-     * @param apiUUID           Unique Identifier of API
-     * @param policyData        Operation policy data
-     * @param tenantDomain      Tenant domain
-     * @return  policyID of the newly created operation policy
-     * @throws APIManagementException
-     */
-    public String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyDataHolder policyData, String tenantDomain)
-            throws APIManagementException {
-
-        String policyId = null;
-        OperationPolicySpecification policySpecification = policyData.getSpecification();
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            // A new API Specific policy is added only in two methods. In here and when cloning a policy at revision creation step.
-            // In here, we are always updating or creating the new policy for working copy (current API), policyID check is done for
-            // revisionUUID = null entries
-            policyId = getAPISpecificPolicyId(connection, apiUUID, null, policySpecification.getName());
-            if (policyId != null) {
-                updateAPISpecificOperationPolicy(connection, apiUUID, policyData);
-            } else {
-                policyId = UUID.randomUUID().toString();
-                String dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_POLICY_DEFINITION;
-                try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-                    statement.setString(1, policyId);
-                    statement.setString(2, apiUUID);
-                    statement.setString(3, policySpecification.getName());
-                    statement.setString(4, policySpecification.getDisplayName());
-                    statement.setString(5, policySpecification.getDescription());
-                    statement.setString(6, policySpecification.getApplicableFlows().toString());
-                    statement.setString(7, policySpecification.getSupportedGateways().toString());
-                    statement.setString(8, policySpecification.getSupportedApiTypes().toString());
-                    statement.setBinaryStream(10,
-                            new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
-                    statement
-                            .setBinaryStream(11, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
-                    statement.setString(12, tenantDomain);
-                    statement.setString(13, policySpecification.getCategory().toString());
-                    statement.setBoolean(14, policySpecification.isMultipleAllowed());
-                    statement.executeUpdate();
-                }
-            }
-            connection.commit();
-        } catch (SQLException | APIManagementException e) {
-            handleException("Failed to add a new operation policy for the API " + apiUUID + " by the name of "
-                    + policySpecification.getName(), e);
-        }
-
-        return policyId;
-    }
 
     /**
      * Clone API specific operation policy when creating a new revision
@@ -18293,7 +18121,7 @@ public class ApiMgtDAO {
 
         String policyID = null;
         try {
-            OperationPolicyDataHolder policyData = getOperationPolicyById(connection, policyId);
+            OperationPolicyDataHolder policyData = getOperationPolicyById(connection, policyId, true);
             if (policyData != null) {
                 policyID = UUID.randomUUID().toString();
                 String dbScript = SQLConstants.OperationPolicyConstants.ADD_NEW_OPERATION_POLICY_FOR_REVISION;;
@@ -18326,126 +18154,6 @@ public class ApiMgtDAO {
         return policyID;
     }
 
-    OperationPolicyDataHolder getOperationPolicyById(Connection connection, String policyId)
-            throws APIManagementException {
-        OperationPolicyDataHolder policyData = null;
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_WITH_DEFINITION_FOR_POLICY_ID;
-        ResultSet rs = null;
-        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-            statement.setString(1, policyId);
-            rs = statement.executeQuery();
-            if (rs.next()) {
-                policyData = new OperationPolicyDataHolder();
-                policyData.setPolicyId(policyId);
-                policyData.setApiUUID(rs.getString("API_UUID"));
-                policyData.setRevisionUUID(rs.getString("REVISION_UUID"));
-                policyData.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                policyData.setMd5Hash(rs.getString("POLICY_MD5"));
-                policyData.setSpecification(populatePolicySpecificationFromRS(rs));
-                policyData.setDefinition(getPolicyDefinitionFromRs(rs));
-                return policyData;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get operation policy definition of policy " + policyId, e);
-        }
-        return policyData;
-    }
-
-    /**
-     * Get the policy ID of an API specific operation policy by providing the API UUID, revision UUID and policy name
-     *
-     * @param apiUUID       Unique Identifier of API
-     * @param revisionUUID  Unique Identifier of API revision
-     * @param policyName    Name of the policy
-     * @return policyID
-     * @throws APIManagementException
-     */
-    public String getAPISpecificPolicyId(Connection connection, String apiUUID, String revisionUUID, String policyName)
-            throws APIManagementException {
-
-        String policyId = null;
-        String query;
-        if (revisionUUID != null) {
-            query = SQLConstants.OperationPolicyConstants.GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION_FOR_REVISION;
-        } else {
-            query = SQLConstants.OperationPolicyConstants.GET_POLICY_ID_FROM_API_SPECIFIC_POLICY_DEFINITION_FOR_API;
-        }
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiUUID);
-            statement.setString(2, policyName);
-            if (revisionUUID != null) {
-                statement.setString(3, revisionUUID);
-            }
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    policyId = resultSet.getString("POLICY_ID");
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get operation policy ID of API " + apiUUID + " for policy " + policyName, e);
-        }
-        return policyId;
-    }
-
-    /**
-     * Retrieve an imported operation policy by providing the API UUID, revision UUID and policy name
-     *
-     * @param apiUUID       Unique Identifier of API
-     * @param revisionUUID  Unique Identifier of the API revision
-     * @param policyName    Unique key of the Service
-     * @return OperationPolicyDataHolder
-     * @throws APIManagementException
-     */
-    public OperationPolicyDataHolder getImportedOperationPolicyByPolicyName(String apiUUID, String revisionUUID,
-                                                                                    String policyName, boolean isWithPolicyDefinition)
-            throws APIManagementException {
-
-        String dbQuery;
-        if (isWithPolicyDefinition) {
-            dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_POLICY_WITH_DEFINITION_BY_POLICY_NAME;
-        } else {
-            dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_POLICY_BY_POLICY_NAME;
-        }
-
-        if (revisionUUID == null) {
-            dbQuery += " REVISION_UUID IS NULL";
-        } else {
-            dbQuery += " REVISION_UUID = ?";
-        }
-        OperationPolicyDataHolder importedPolicyData;
-        ResultSet rs = null;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-            statement.setString(1, apiUUID);
-            statement.setString(2, policyName);
-            if (revisionUUID != null) {
-                statement.setString(3, revisionUUID);
-            }
-            rs = statement.executeQuery();
-            if (rs.next()) {
-                importedPolicyData = new OperationPolicyDataHolder();
-                importedPolicyData.setApiUUID(apiUUID);
-                importedPolicyData.setRevisionUUID(revisionUUID);
-                importedPolicyData.setPolicyId(rs.getString("POLICY_ID"));
-                importedPolicyData.setOriginalPolicyId(rs.getString("ORIGINAL_POLICY_ID"));
-                importedPolicyData.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                importedPolicyData.setMd5Hash(rs.getString("POLICY_MD5"));
-                importedPolicyData.setSpecification(populatePolicySpecificationFromRS(rs));
-                importedPolicyData.setImportedPolicy(true);
-                if (isWithPolicyDefinition) {
-                    importedPolicyData.setDefinition(getPolicyDefinitionFromRs(rs));
-                }
-
-                return importedPolicyData;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get operation policy definition for API " + apiUUID + " by the policy name of "
-                    + policyName, e);
-        }
-        return null;
-    }
-
-
 
     /**
      * Create a string list from a single string element by splitting from the comma
@@ -18469,15 +18177,13 @@ public class ApiMgtDAO {
      * Add a new common operation policy to the database
      *
      * @param policyData      Unique Identifier of API
-     * @param tenantDomain    Tenant domain
      * @return UUID of the newly created shared policy
      * @throws APIManagementException
      */
-    public String addOperationPolicy(OperationPolicyDataHolder policyData, String tenantDomain)
+    public String addOperationPolicy(OperationPolicyDataHolder policyData)
             throws APIManagementException {
-
+        String policyUUID = null;
         OperationPolicySpecification policySpecification = policyData.getSpecification();
-        String sharedPolicyUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             String dbQuery;
             if (policyData.isApiSpecificPolicy()) {
@@ -18485,9 +18191,9 @@ public class ApiMgtDAO {
             } else {
                 dbQuery = SQLConstants.OperationPolicyConstants.ADD_COMMON_OPERATION_POLICY;
             }
-            sharedPolicyUUID = UUID.randomUUID().toString();
+            policyUUID = UUID.randomUUID().toString();
             try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-                statement.setString(1, sharedPolicyUUID);
+                statement.setString(1, policyUUID);
                 statement.setString(2, policySpecification.getName());
                 statement.setString(3, policySpecification.getDisplayName());
                 statement.setString(4, policySpecification.getDescription());
@@ -18497,20 +18203,19 @@ public class ApiMgtDAO {
                 statement.setBinaryStream(8,
                         new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
                 statement.setBinaryStream(9, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
-                statement.setString(10, tenantDomain);
+                statement.setString(10, policyData.getTenantDomain());
                 statement.setString(11, policySpecification.getCategory().toString());
                 statement.setBoolean(12, policySpecification.isMultipleAllowed());
-                statement.setBoolean(13, policyData.isApiSpecificPolicy());
-                statement.setString(14, policyData.getMd5Hash());
+                statement.setString(13, policyData.getMd5Hash());
                 if (policyData.isApiSpecificPolicy()) {
-                    statement.setString(15, policyData.getApiUUID());
+                    statement.setString(14, policyData.getApiUUID());
                 }
                 statement.executeUpdate();
             }
         } catch (SQLException e) {
             handleException("Failed to add operation policy " + policySpecification.getName(), e);
         }
-        return sharedPolicyUUID;
+        return policyUUID;
     }
 
     /**
@@ -18518,11 +18223,10 @@ public class ApiMgtDAO {
      *
      * @param policyId              Shared policy UUID
      * @param policyData            Updated policy definition
-     * @param tenantDomain          Tenant domain
      * @return  True if the update was successful
      * @throws APIManagementException
      */
-    public boolean updateOperationPolicy(String policyId, OperationPolicyDataHolder policyData, String tenantDomain)
+    public boolean updateOperationPolicy(String policyId, OperationPolicyDataHolder policyData)
             throws APIManagementException {
 
         boolean result = false;
@@ -18530,22 +18234,23 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(
                 SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY)) {
-            statement.setString(1, policySpecification.getDisplayName());
-            statement.setString(2, policySpecification.getDescription());
-            statement.setString(3, policySpecification.getApplicableFlows().toString());
-            statement.setString(4, policySpecification.getSupportedGateways().toString());
-            statement.setString(5, policySpecification.getSupportedApiTypes().toString());
-            statement.setBinaryStream(6,
+            statement.setString(1, policySpecification.getName());
+            statement.setString(2, policySpecification.getDisplayName());
+            statement.setString(3, policySpecification.getDescription());
+            statement.setString(4, policySpecification.getApplicableFlows().toString());
+            statement.setString(5, policySpecification.getSupportedGateways().toString());
+            statement.setString(6, policySpecification.getSupportedApiTypes().toString());
+            statement.setBinaryStream(7,
                     new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
-            statement.setBinaryStream(7, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
+            statement.setBinaryStream(8, new ByteArrayInputStream(policyData.getDefinition().getBytes()));
+            statement.setString(8, policyData.getTenantDomain());
             statement.setString(8, policySpecification.getCategory().toString());
             statement.setBoolean(9, policySpecification.isMultipleAllowed());
-            statement.setBoolean(10, policyData.isApiSpecificPolicy());
             statement.setString(11, policyData.getMd5Hash());
             statement.setString(12, policyId);
             result = statement.executeUpdate() == 1;
         } catch (SQLException e) {
-            handleException("Failed to update the common operation policy of " + policySpecification.getName(), e);
+            handleException("Failed to update the operation policy of " + policySpecification.getName(), e);
         }
         return result;
     }
@@ -18562,16 +18267,26 @@ public class ApiMgtDAO {
     public OperationPolicyDataHolder getOperationPolicyByPolicyID(String policyId, boolean isWithPolicyDefinition)
             throws APIManagementException {
 
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getOperationPolicyById(connection, policyId, isWithPolicyDefinition);
+        } catch (SQLException e) {
+            handleException("Failed to get the operation policy for id " + policyId, e);
+        }
+        return null;
+    }
+
+    OperationPolicyDataHolder getOperationPolicyById(Connection connection, String policyId, boolean isWithPolicyDefinition)
+            throws APIManagementException {
+
         String dbQuery;
         if (isWithPolicyDefinition) {
             dbQuery = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_WITH_DEFINITION_FROM_POLICY_ID;
         } else {
             dbQuery = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_FROM_POLICY_ID;
         }
-        OperationPolicyDataHolder policyData;
+        OperationPolicyDataHolder policyData = null;
         ResultSet rs = null;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyId);
             rs = statement.executeQuery();
             if (rs.next()) {
@@ -18584,51 +18299,12 @@ public class ApiMgtDAO {
                 if (isWithPolicyDefinition) {
                     policyData.setDefinition(getPolicyDefinitionFromRs(rs));
                 }
-                return policyData;
             }
         } catch (SQLException e) {
-            handleException("Failed to get the operation policy for id " + policyId, e);
+            handleException("Failed to get operation policy definition of policy " + policyId, e);
         }
-        return null;
+        return policyData;
     }
-
-    /**
-     * Retrieve an operation policy by providing the policy name and tenant domain
-     *
-     * @param policyName    Policy name
-     * @param tenantDomain  Tenant Domain
-     * @param connection    DB connection
-     * @return operation policy
-     * @throws APIManagementException
-     */
-    public OperationPolicyDataHolder getOperationPolicyByPolicyName(String policyName, String tenantDomain,
-                                                                    Connection connection)
-            throws APIManagementException {
-
-        OperationPolicyDataHolder policyData;
-        ResultSet rs = null;
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_WITH_DEFINITION_FROM_POLICY_NAME;
-        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-            statement.setString(1, policyName);
-            statement.setString(2, tenantDomain);
-            rs = statement.executeQuery();
-            if (rs.next()) {
-                policyData = new OperationPolicyDataHolder();
-                policyData.setTenantDomain(tenantDomain);
-                policyData.setPolicyId(rs.getString("POLICY_ID"));
-                policyData.setApiUUID(rs.getString("API_UUID"));
-                policyData.setMd5Hash(rs.getString("POLICY_MD5"));
-                policyData.setSpecification(populatePolicySpecificationFromRS(rs));
-                policyData.setDefinition(getPolicyDefinitionFromRs(rs));
-                return policyData;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get the operation policy of " + policyName, e);
-        }
-        return null;
-    }
-
-
 
     /**
      * Retrieve an operation policy by providing the policy name and tenant domain
@@ -18639,8 +18315,22 @@ public class ApiMgtDAO {
      * @return operation policy
      * @throws APIManagementException
      */
-    public OperationPolicyDataHolder getOperationPolicyByPolicyName(String policyName, String apiUUID, String tenantDomain,
-                                                                    boolean isWithPolicyDefinition)
+    public OperationPolicyDataHolder getOperationPolicyByPolicyName(String policyName, String apiUUID, String revisionUUID,
+                                                                    String tenantDomain, boolean isWithPolicyDefinition)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+             return getOperationPolicyByPolicyName(connection, policyName, apiUUID, revisionUUID, tenantDomain,
+                     isWithPolicyDefinition);
+        } catch (SQLException e) {
+            handleException("Failed to get the operation policy of " + policyName, e);
+        }
+        return null;
+    }
+
+    OperationPolicyDataHolder getOperationPolicyByPolicyName(Connection connection, String policyName, String apiUUID,
+                                                             String revisionUUID, String tenantDomain,
+                                                             boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         String dbQuery;
@@ -18650,17 +18340,17 @@ public class ApiMgtDAO {
             dbQuery = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_FROM_POLICY_NAME;
         }
 
-        if (apiUUID != null) {
-            dbQuery += " AND API_UUID = ?";
-        }
-        OperationPolicyDataHolder policyData;
+        dbQuery += populateQueryForParameters(apiUUID, revisionUUID);
+        OperationPolicyDataHolder policyData = null;
         ResultSet rs = null;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyName);
             statement.setString(2, tenantDomain);
             if (apiUUID != null) {
                 statement.setString(3, apiUUID);
+                if (revisionUUID != null) {
+                    statement.setString(4, revisionUUID);
+                }
             }
             rs = statement.executeQuery();
             if (rs.next()) {
@@ -18678,7 +18368,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to get the operation policy of " + policyName, e);
         }
-        return null;
+        return policyData;
     }
 
     /**
@@ -18689,22 +18379,21 @@ public class ApiMgtDAO {
      * @return UUID of the shared operation policy
      * @throws APIManagementException
      */
-    public String getOperationPolicyId(String policyName, String apiUUID, String tenantDomain)
+    public String getOperationPolicyIdByPolicyName(String policyName, String apiUUID, String revisionUUID, String tenantDomain)
             throws APIManagementException {
 
         String policyId = null;
-        String query;
-        if (apiUUID != null) {
-            query = SQLConstants.OperationPolicyConstants.GET_POLICY_ID_FOR_API_SPECIFIC_POLICY_NAME;
-        } else {
-            query = SQLConstants.OperationPolicyConstants.GET_POLICY_ID_FOR_COMMON_POLICY_NAME;
-        }
+        String query = SQLConstants.OperationPolicyConstants.GET_POLICY_ID_FOR_POLICY_NAME;
+        query += populateQueryForParameters(apiUUID, revisionUUID);
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, policyName);
             statement.setString(2, tenantDomain);
             if (apiUUID != null) {
                 statement.setString(3, apiUUID);
+                if (revisionUUID != null) {
+                    statement.setString(4, revisionUUID);
+                }
             }
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -18715,6 +18404,18 @@ public class ApiMgtDAO {
             handleException("Failed to get policy ID for the policy " + policyName, e);
         }
         return policyId;
+    }
+
+    public String populateQueryForParameters(String apiUUID, String revisionUUID) {
+        String query = "";
+        if (apiUUID != null) {
+            String apiUUIDQueryPart = " AND API_UUID = ? ";
+            String revisionQueryPart = (revisionUUID != null) ? " AND REVISION_UUID = ?" : " AND REVISION_UUID IS NULL";
+            query += apiUUIDQueryPart + revisionQueryPart;
+        } else {
+            query += "AND API_UUID IS NULL";
+        }
+        return query;
     }
 
     /**
@@ -18762,30 +18463,20 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Delete an operation policy by providing the policy UUID and tenant domain
+     * Delete an operation policy by providing the policy UUID
      *
      * @param policyId          UUID of the policy to be deleted
-     * @param tenantDomain      Tenant domain name
      * @return True if deleted successfully
      * @throws APIManagementException
      */
-    public boolean deleteOperationPolicyByPolicyId(String policyId, String apiUUID, String tenantDomain) throws APIManagementException {
-        String dbQuery;
-        if (apiUUID != null) {
-            dbQuery = SQLConstants.OperationPolicyConstants.DELETE_API_SPECIFIC_OPERATION_POLICY;
-        } else {
-            dbQuery = SQLConstants.OperationPolicyConstants.DELETE_COMMON_OPERATION_POLICY;
-        }
+    public boolean deleteOperationPolicyByPolicyId(String policyId) throws APIManagementException {
+        String dbQuery = SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_ID;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyId);
-            statement.setString(2, tenantDomain);
-            if (apiUUID != null) {
-                statement.setString(3, apiUUID);
-            }
             statement.execute();
         } catch (SQLException e) {
-            handleException("Failed to delete operation policy " + policyId + " for tenant " + tenantDomain , e);
+            handleException("Failed to delete operation policy " + policyId, e);
         }
         return true;
     }
