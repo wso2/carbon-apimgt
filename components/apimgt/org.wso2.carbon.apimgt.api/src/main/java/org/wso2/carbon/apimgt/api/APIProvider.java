@@ -1849,6 +1849,18 @@ public interface APIProvider extends APIManager {
     void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
 
     /**
+     * Get operation policy ID
+     *
+     * @param policyName     Name of the policy
+     * @param apiUUID        UUID of the API
+     * @param tenantDomain   Tenant domain
+     * @return ID of the policy
+     * @throws APIManagementException
+     */
+    String getOperationPolicyId(String policyName, String apiUUID, String tenantDomain) throws APIManagementException;
+
+
+    /**
      * Add an API specific operation policy. This will contain the policy specification and the
      * policy definition
      *
@@ -1857,8 +1869,8 @@ public interface APIProvider extends APIManager {
      * @return UUID of the newly added operation policy
      * @throws APIManagementException
      */
-    String addApiSpecificOperationalPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder,
-                                           String tenantDomain) throws APIManagementException;
+    String importOperationPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder,
+                                 String tenantDomain) throws APIManagementException;
 
 
     /**
@@ -1869,40 +1881,100 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getAPISpecificPolicyByPolicyName(String apiUUID, String policyName)
+    OperationPolicyDataHolder getImportedOperationPolicyByPolicyName(String apiUUID, String revisionUUID,
+                                                                             String policyName, boolean isWithPolicyDefinition)
             throws APIManagementException;
 
+
     /**
-     * Get the API Specific policy definition for the given Policy UUID and API UUID
+     * Add operation policy to the tenant
      *
-     * @param apiUUID                   UUID of the API
-     * @param policyId                  Operation Policy UUID
-     * @param tenantDomain              Tenant domain
-     * @param isWithPolicyDefinition    This will decide whether to return policy definition or not as policy definition
-     *                                  is bit bulky
+     * @param operationPolicyDataHolder     Operation Policy Data that includes policy specification and policy definition
+     * @param tenantDomain                  Tenant domain
+     * @return status of the policy storage
+     * @throws APIManagementException
+     */
+    String addOperationPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain)
+            throws APIManagementException;
+
+
+    /**
+     * Get operation policy for a given policy name. Since policy ID is not available, this needs policy name, API UUID
+     * and tenant domain to isolate the correct policy.
+     *
+     * @param policyName             Policy name
+     * @param apiUUID                Unique identifier for API
+     * @param tenantDomain           Tenant domain
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getAPISpecificPolicyByPolicyId(String apiUUID, String policyId, String tenantDomain,
+    OperationPolicyDataHolder getOperationPolicyByPolicyName(String policyName, String apiUUID, String tenantDomain,
                                                              boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
-     * Get the lightweight version of the Operation policies. This will not include the policy definition as it is bulky.
-     * Policy specification and policy UUID will be included in the policyDataHolder object.
+     * Get operation policy for a given Policy UUID
+     *
+     * @param policyId               Policy UUID
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyDataHolder getOperationPolicyByPolicyId(String policyId, boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+
+    /**
+     * Update the operation policy
+     *
+     * @param operationPolicyId             Unique identifier of the operation policy
+     * @param operationPolicyData           Operation Policy Data that needs to be updated.
+     * @param tenantDomain                  Tenant domain
+     * @return status of the policy storage
+     * @throws APIManagementException
+     */
+    boolean updateOperationPolicy(String operationPolicyId, OperationPolicyDataHolder operationPolicyData,
+                                  String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get a light weight version of all the common policies for the tenant domain. This will not include the policy
+     * definition as it is bulky. Policy specification and policy UUID will be included in the policyDataHolder object.
+     *
+     * @param tenantDomain           Tenant Domain name
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    List<OperationPolicyDataHolder> getAllCommonOperationPolicies(String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Get a light weight version of all the API Specific Operation policies. This will not include the policy
+     * definition as it is bulky. Policy specification and policy UUID will be included in the policyDataHolder object.
      *
      * @param apiUUID             UUID of the API
      * @param tenantDomain        tenant domain
      * @return List of Operation Policies
      * @throws APIManagementException
      */
-    List<OperationPolicyDataHolder> getLightWeightAPISpecificOperationPolicies(String apiUUID, String tenantDomain)
+    List<OperationPolicyDataHolder> getAllAPISpecificOperationPolicies(String apiUUID, String tenantDomain)
             throws APIManagementException;
 
+    /**
+     * Delete a common operation policy by providing the policy ID
+     *
+     * @param policyId        Operation Policy UUID
+     * @param tenantDomain    Tenant Domain
+     * @return True if policy was deleted
+     * @throws APIManagementException
+     */
+    boolean deleteOperationPolicy(String policyId, String tenantDomain)
+            throws APIManagementException;
 
     /**
-     * Delete an API Specific policy given by the policy ID. This will delete only the API Specific policies that are
-     * not bounded by a revision. Revisioned policies cannot be deleted.
+     * Delete an API Specific policy given by the policy ID.
      *
      * @param apiUUID         UUID of the API
      * @param policyId        Operation Policy UUID
@@ -1910,54 +1982,8 @@ public interface APIProvider extends APIManager {
      * @return Status of the deletion
      * @throws APIManagementException
      */
-    boolean deleteAPISpecificOperationPolicyByPolicyId(String apiUUID, String policyId, String tenantDomain)
+    boolean deleteAPISpecificOperationPolicy(String apiUUID, String policyId, String tenantDomain)
             throws APIManagementException;
 
-
-    /**
-     * Add Shared operation policy to the tenant
-     *
-     * @param operationPolicyDataHolder     Operation Policy Data that includes policy specification and policy definition
-     * @param tenantDomain                  Tenant domain
-     * @return status of the policy storage
-     * @throws APIManagementException
-     */
-    String addSharedOperationalPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain)
-            throws APIManagementException;
-
-    /**
-     * Get a light weight version of all the shared policies for the tenant domain. This will only return policy
-     * specification and policy ID and policy definition is bit bulky.
-     *
-     * @param tenantDomain           Tenant Domain name
-     * @return List of Operation Policies
-     * @throws APIManagementException
-     */
-    List<OperationPolicyDataHolder> getLightWeightSharedOperationPolicies(String tenantDomain)
-            throws APIManagementException;
-
-    /**
-     * Get the shared operation policy for a given Policy UUID
-     *
-     * @param policyId               Shared Policy UUID
-     * @param tenantDomain           Tenant Domain
-     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
-     *                               is bit bulky
-     * @return Operation Policy
-     * @throws APIManagementException
-     */
-    OperationPolicyDataHolder getSharedOperationPolicyByPolicyId(String policyId, String tenantDomain,
-                                                                 boolean isWithPolicyDefinition)
-            throws APIManagementException;
-
-    /**
-     * Delete a shared operation policy by providing the policy ID
-     *
-     * @param policyId        Shared Operation Policy UUID
-     * @param tenantDomain    Tenant Domain
-     * @return True if policy was deleted
-     * @throws APIManagementException
-     */
-    boolean deleteSharedOperationPolicyByPolicyId(String policyId, String tenantDomain)
-            throws APIManagementException;
+    APIRevision checkAPIUUIDIsARevisionUUID(String apiUuid) throws APIManagementException;
 }

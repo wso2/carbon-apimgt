@@ -2,22 +2,22 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "policyCategory": {
+    "category": {
       "type": "string",
       "enum": [
         "Mediation",
         "Security"
       ]
     },
-    "policyName": {
+    "name": {
       "type": "string",
       "minLength": 1
     },
-    "policyDisplayName": {
+    "displayName": {
       "type": "string",
       "minLength": 1
     },
-    "policyDescription": {
+    "description": {
       "type": "string"
     },
     "multipleAllowed": {
@@ -55,21 +55,21 @@
       "items": {
         "type": "object",
         "properties": {
-          "attributeName": {
+          "name": {
             "type": "string",
             "minLength": 1
           },
-          "attributeDisplayName": {
+          "displayName": {
             "type": "string",
             "minLength": 1
           },
-          "attributeDescription": {
+          "description": {
             "type": "string"
           },
-          "attributeValidationRegex": {
+          "validationRegex": {
             "type": "string"
           },
-          "attributeType": {
+          "type": {
             "type": "string",
             "minLength": 1
           },
@@ -78,21 +78,21 @@
           }
         },
         "required": [
-          "attributeName",
-          "attributeDisplayName",
-          "attributeDescription",
-          "attributeValidationRegex",
-          "attributeType",
+          "name",
+          "displayName",
+          "description",
+          "validationRegex",
+          "type",
           "required"
         ]
       }
     }
   },
   "required": [
-    "policyCategory",
-    "policyName",
-    "policyDisplayName",
-    "policyDescription",
+    "category",
+    "name",
+    "displayName",
+    "description",
     "multipleAllowed",
     "applicableFlows",
     "supportedGateways",

@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
@@ -740,17 +741,23 @@ public class ExportUtils {
 
         try {
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
+            APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiID);
+            String revisionAPIId = null;
+            if (apiRevision != null) {
+                revisionAPIId = apiRevision.getRevisionUUID();
+                apiID = apiRevision.getApiUUID();
+            }
             Set<URITemplate> uriTemplates = api.getUriTemplates();
             for (URITemplate uriTemplate : uriTemplates) {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        OperationPolicyDataHolder policyData =  apiProvider
-                                .getAPISpecificPolicyByPolicyName(api.getUuid(), policy.getPolicyName());
+                        OperationPolicyDataHolder policyData =  apiProvider.getImportedOperationPolicyByPolicyName(
+                                apiID, revisionAPIId, policy.getPolicyName(), true);
                         if (policyData != null) {
                             String policyName = archivePath  + File.separator
                                     + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
-                                            policyData.getSpecification().getPolicyName();
+                                            policyData.getSpecification().getName();
                             // Policy specification and definition will have the same name
                             if (policyData.getSpecification() != null) {
                                 CommonUtil.writeDtoToFile(policyName, exportFormat,

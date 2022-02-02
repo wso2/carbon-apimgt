@@ -29,44 +29,44 @@ public class OperationPolicySpecification {
         Security
     }
 
-    private PolicyCategory policyCategory = PolicyCategory.Mediation;
-    private String policyName;
-    private String policyDisplayName;
-    private String policyDescription;
+    private PolicyCategory category = PolicyCategory.Mediation;
+    private String name;
+    private String displayName;
+    private String description;
     private List<String> applicableFlows = new ArrayList<>();
     private List<String> supportedGateways = new ArrayList<>();
     private List<String> supportedApiTypes = new ArrayList<>();
     private List<OperationPolicySpecAttribute> policyAttributes = new ArrayList<>();
     private boolean multipleAllowed;
 
-    public String getPolicyName() {
+    public String getName() {
 
-        return policyName;
+        return name;
     }
 
-    public void setPolicyName(String policyName) {
+    public void setName(String name) {
 
-        this.policyName = policyName;
+        this.name = name;
     }
 
-    public String getPolicyDisplayName() {
+    public String getDisplayName() {
 
-        return policyDisplayName;
+        return displayName;
     }
 
-    public void setPolicyDisplayName(String policyDisplayName) {
+    public void setDisplayName(String displayName) {
 
-        this.policyDisplayName = policyDisplayName;
+        this.displayName = displayName;
     }
 
-    public String getPolicyDescription() {
+    public String getDescription() {
 
-        return policyDescription;
+        return description;
     }
 
-    public void setPolicyDescription(String policyDescription) {
+    public void setDescription(String description) {
 
-        this.policyDescription = policyDescription;
+        this.description = description;
     }
 
     public List<String> getApplicableFlows() {
@@ -110,14 +110,14 @@ public class OperationPolicySpecification {
         this.policyAttributes = policyAttributes;
     }
 
-    public PolicyCategory getPolicyCategory() {
+    public PolicyCategory getCategory() {
 
-        return policyCategory;
+        return category;
     }
 
-    public void setPolicyCategory(PolicyCategory policyCategory) {
+    public void setCategory(PolicyCategory category) {
 
-        this.policyCategory = policyCategory;
+        this.category = category;
     }
 
     public boolean isMultipleAllowed() {

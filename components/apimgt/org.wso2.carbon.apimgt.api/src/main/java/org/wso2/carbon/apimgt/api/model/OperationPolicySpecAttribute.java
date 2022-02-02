@@ -21,61 +21,61 @@ package org.wso2.carbon.apimgt.api.model;
 
 public class OperationPolicySpecAttribute {
 
-    private String attributeName;
-    private String attributeDisplayName;
-    private String attributeDescription;
-    private String attributeValidationRegex;
-    private String attributeType;
+    private String name;
+    private String displayName;
+    private String description;
+    private String validationRegex;
+    private String type;
     private boolean required;
 
-    public String getAttributeName() {
+    public String getName() {
 
-        return attributeName;
+        return name;
     }
 
-    public void setAttributeName(String attributeName) {
+    public void setName(String name) {
 
-        this.attributeName = attributeName;
+        this.name = name;
     }
 
-    public String getAttributeDisplayName() {
+    public String getDisplayName() {
 
-        return attributeDisplayName;
+        return displayName;
     }
 
-    public void setAttributeDisplayName(String attributeDisplayName) {
+    public void setDisplayName(String displayName) {
 
-        this.attributeDisplayName = attributeDisplayName;
+        this.displayName = displayName;
     }
 
-    public String getAttributeDescription() {
+    public String getDescription() {
 
-        return attributeDescription;
+        return description;
     }
 
-    public void setAttributeDescription(String attributeDescription) {
+    public void setDescription(String description) {
 
-        this.attributeDescription = attributeDescription;
+        this.description = description;
     }
 
-    public String getAttributeValidationRegex() {
+    public String getValidationRegex() {
 
-        return attributeValidationRegex;
+        return validationRegex;
     }
 
-    public void setAttributeValidationRegex(String attributeValidationRegex) {
+    public void setValidationRegex(String validationRegex) {
 
-        this.attributeValidationRegex = attributeValidationRegex;
+        this.validationRegex = validationRegex;
     }
 
-    public String getAttributeType() {
+    public String getType() {
 
-        return attributeType;
+        return type;
     }
 
-    public void setAttributeType(String attributeType) {
+    public void setType(String type) {
 
-        this.attributeType = attributeType;
+        this.type = type;
     }
 
     public boolean isRequired() {
