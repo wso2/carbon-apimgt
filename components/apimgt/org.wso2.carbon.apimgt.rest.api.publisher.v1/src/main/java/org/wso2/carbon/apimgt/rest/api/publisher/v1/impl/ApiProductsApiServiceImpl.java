@@ -810,9 +810,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API Revision for API Product: " + apiProductId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving created revision API location for API Product: "
                     + apiProductId;
