@@ -59,7 +59,7 @@ import java.util.Set;
  * This class consists the internal Admin REST API requests to communicate with Solace broker
  */
 public class SolaceAdminApis {
-    
+
     private static final Log log = LogFactory.getLog(SolaceAdminApis.class);
 
     String baseUrl;
@@ -139,6 +139,85 @@ public class SolaceAdminApis {
             }
         }
         return null;
+    }
+
+    /**
+     * Update API in Solace using AsyncAPI Definition
+     *
+     * @param organization  name of the Organization
+     * @param title         name of the Solace API
+     * @param apiDefinition Async definition of the Solace API
+     * @return CloseableHttpResponse of the PATCH call
+     */
+    public CloseableHttpResponse updateAPIDefinition(String organization, String title, String apiDefinition)
+            throws APIManagementException {
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/apis/" + title);
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
+        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+        JsonNode jsonNodeTree;
+        String jsonAsYaml = null;
+        // convert json to yaml
+        try {
+            jsonNodeTree = new ObjectMapper().readTree(apiDefinition);
+            jsonAsYaml = new YAMLMapper().writeValueAsString(jsonNodeTree);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while generating Swagger json from Async API Definition", e);
+        }
+        //add definition to request body
+        if (jsonAsYaml != null) {
+            StringEntity params = null;
+            try {
+                params = new StringEntity(jsonAsYaml);
+            } catch (UnsupportedEncodingException e) {
+                throw new APIManagementException(e);
+            }
+            httpPatch.setEntity(params);
+            try {
+                return APIUtil.executeHTTPRequest(httpPatch, httpClient);
+            } catch (IOException | APIManagementException e) {
+                throw new APIManagementException(e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update API Product in Solace using AsyncAPI Definition
+     *
+     * @param organization           name of the Organization
+     * @param environment            name of the Environment
+     * @param apiProductName         name of the API product
+     * @param apiNameForRegistration name of the Solace API product
+     * @param aai20Document          Async definition of the Solace API
+     * @return CloseableHttpResponse of the PATCH call
+     */
+    public CloseableHttpResponse updateAPIProductDefinition(String organization, String environment,
+                                                            Aai20Document aai20Document, String apiProductName,
+                                                            String apiNameForRegistration)
+            throws APIManagementException {
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
+        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        //Create Request Body for Patch
+        org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, environment, apiProductName,
+                apiNameForRegistration);
+        //PATCH request body should not contain any additional properties.
+        requestBody.remove("name");
+        try {
+            StringEntity parameter = new StringEntity(requestBody.toString());
+            httpPatch.setEntity(parameter);
+        } catch (UnsupportedEncodingException e) {
+            throw new APIManagementException(e);
+        }
+        try {
+            return APIUtil.executeHTTPRequest(httpPatch, httpClient);
+        } catch (IOException | APIManagementException e) {
+            throw new APIManagementException(e);
+        }
     }
 
     /**
@@ -741,5 +820,4 @@ public class SolaceAdminApis {
         requestBody.put("credentials", credentialsBody);
         return requestBody;
     }
-
 }

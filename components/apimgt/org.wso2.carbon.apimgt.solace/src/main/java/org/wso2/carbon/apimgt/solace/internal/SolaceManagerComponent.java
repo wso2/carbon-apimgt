@@ -25,6 +25,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
+import org.wso2.carbon.apimgt.solace.notifiers.SolaceAPINotifier;
 import org.wso2.carbon.apimgt.solace.notifiers.SolaceApplicationNotifier;
 import org.wso2.carbon.apimgt.solace.notifiers.SolaceKeyGenNotifier;
 import org.wso2.carbon.apimgt.solace.notifiers.SolaceSubscriptionsNotifier;
@@ -50,6 +51,7 @@ public class SolaceManagerComponent {
         //Registering Notifiers
         bundleContext.registerService(Notifier.class.getName(), new SolaceSubscriptionsNotifier(), null);
         bundleContext.registerService(Notifier.class.getName(), new SolaceApplicationNotifier(), null);
+        bundleContext.registerService(Notifier.class.getName(), new SolaceAPINotifier(), null);
         bundleContext.registerService(Notifier.class.getName(), new SolaceKeyGenNotifier(), null);
 
         if (log.isDebugEnabled()) {
