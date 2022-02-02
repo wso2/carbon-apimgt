@@ -24,7 +24,6 @@ import java.util.Objects;
 public class OperationPolicy implements Comparable<OperationPolicy>{
 
     private String policyName = "";
-    private String sharedPolicyRef = "";
     private String direction;
     private Map<String, Object> parameters;
     private String policyId;
@@ -70,16 +69,6 @@ public class OperationPolicy implements Comparable<OperationPolicy>{
     public void setOrder(int order) {
 
         this.order = order;
-    }
-
-    public String getSharedPolicyRef() {
-
-        return sharedPolicyRef;
-    }
-
-    public void setSharedPolicyRef(String sharedPolicyRef) {
-
-        this.sharedPolicyRef = sharedPolicyRef;
     }
 
     @Override public boolean equals(Object o) {

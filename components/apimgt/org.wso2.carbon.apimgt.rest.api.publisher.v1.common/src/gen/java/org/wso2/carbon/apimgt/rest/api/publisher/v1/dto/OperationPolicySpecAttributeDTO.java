@@ -20,101 +20,101 @@ import javax.validation.Valid;
 
 public class OperationPolicySpecAttributeDTO   {
   
-    private String attributeName = null;
-    private String attributeDisplayName = null;
-    private String attributeDescription = null;
-    private String attributeValidationRegex = null;
-    private String attributeType = null;
+    private String name = null;
+    private String displayName = null;
+    private String description = null;
+    private String validationRegex = null;
+    private String type = null;
     private Boolean required = null;
 
   /**
    * Name of the attibute
    **/
-  public OperationPolicySpecAttributeDTO attributeName(String attributeName) {
-    this.attributeName = attributeName;
+  public OperationPolicySpecAttributeDTO name(String name) {
+    this.name = name;
     return this;
   }
 
   
   @ApiModelProperty(example = "headerName", value = "Name of the attibute")
-  @JsonProperty("attributeName")
-  public String getAttributeName() {
-    return attributeName;
+  @JsonProperty("name")
+  public String getName() {
+    return name;
   }
-  public void setAttributeName(String attributeName) {
-    this.attributeName = attributeName;
+  public void setName(String name) {
+    this.name = name;
   }
 
   /**
    * Display name of the attibute
    **/
-  public OperationPolicySpecAttributeDTO attributeDisplayName(String attributeDisplayName) {
-    this.attributeDisplayName = attributeDisplayName;
+  public OperationPolicySpecAttributeDTO displayName(String displayName) {
+    this.displayName = displayName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Header Name", value = "Display name of the attibute")
-  @JsonProperty("attributeDisplayName")
-  public String getAttributeDisplayName() {
-    return attributeDisplayName;
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
   }
-  public void setAttributeDisplayName(String attributeDisplayName) {
-    this.attributeDisplayName = attributeDisplayName;
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
    * Description of the attibute
    **/
-  public OperationPolicySpecAttributeDTO attributeDescription(String attributeDescription) {
-    this.attributeDescription = attributeDescription;
+  public OperationPolicySpecAttributeDTO description(String description) {
+    this.description = description;
     return this;
   }
 
   
   @ApiModelProperty(example = "Name of the header to be removed", value = "Description of the attibute")
-  @JsonProperty("attributeDescription")
-  public String getAttributeDescription() {
-    return attributeDescription;
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
   }
-  public void setAttributeDescription(String attributeDescription) {
-    this.attributeDescription = attributeDescription;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   /**
    * UI validation regex for the attibute
    **/
-  public OperationPolicySpecAttributeDTO attributeValidationRegex(String attributeValidationRegex) {
-    this.attributeValidationRegex = attributeValidationRegex;
+  public OperationPolicySpecAttributeDTO validationRegex(String validationRegex) {
+    this.validationRegex = validationRegex;
     return this;
   }
 
   
   @ApiModelProperty(example = "/^[a-z\\s]{0,255}$/i", value = "UI validation regex for the attibute")
-  @JsonProperty("attributeValidationRegex")
-  public String getAttributeValidationRegex() {
-    return attributeValidationRegex;
+  @JsonProperty("validationRegex")
+  public String getValidationRegex() {
+    return validationRegex;
   }
-  public void setAttributeValidationRegex(String attributeValidationRegex) {
-    this.attributeValidationRegex = attributeValidationRegex;
+  public void setValidationRegex(String validationRegex) {
+    this.validationRegex = validationRegex;
   }
 
   /**
    * Type of the attibute
    **/
-  public OperationPolicySpecAttributeDTO attributeType(String attributeType) {
-    this.attributeType = attributeType;
+  public OperationPolicySpecAttributeDTO type(String type) {
+    this.type = type;
     return this;
   }
 
   
   @ApiModelProperty(example = "string", value = "Type of the attibute")
-  @JsonProperty("attributeType")
-  public String getAttributeType() {
-    return attributeType;
+  @JsonProperty("type")
+  public String getType() {
+    return type;
   }
-  public void setAttributeType(String attributeType) {
-    this.attributeType = attributeType;
+  public void setType(String type) {
+    this.type = type;
   }
 
   /**
@@ -145,17 +145,17 @@ public class OperationPolicySpecAttributeDTO   {
       return false;
     }
     OperationPolicySpecAttributeDTO operationPolicySpecAttribute = (OperationPolicySpecAttributeDTO) o;
-    return Objects.equals(attributeName, operationPolicySpecAttribute.attributeName) &&
-        Objects.equals(attributeDisplayName, operationPolicySpecAttribute.attributeDisplayName) &&
-        Objects.equals(attributeDescription, operationPolicySpecAttribute.attributeDescription) &&
-        Objects.equals(attributeValidationRegex, operationPolicySpecAttribute.attributeValidationRegex) &&
-        Objects.equals(attributeType, operationPolicySpecAttribute.attributeType) &&
+    return Objects.equals(name, operationPolicySpecAttribute.name) &&
+        Objects.equals(displayName, operationPolicySpecAttribute.displayName) &&
+        Objects.equals(description, operationPolicySpecAttribute.description) &&
+        Objects.equals(validationRegex, operationPolicySpecAttribute.validationRegex) &&
+        Objects.equals(type, operationPolicySpecAttribute.type) &&
         Objects.equals(required, operationPolicySpecAttribute.required);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(attributeName, attributeDisplayName, attributeDescription, attributeValidationRegex, attributeType, required);
+    return Objects.hash(name, displayName, description, validationRegex, type, required);
   }
 
   @Override
@@ -163,11 +163,11 @@ public class OperationPolicySpecAttributeDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class OperationPolicySpecAttributeDTO {\n");
     
-    sb.append("    attributeName: ").append(toIndentedString(attributeName)).append("\n");
-    sb.append("    attributeDisplayName: ").append(toIndentedString(attributeDisplayName)).append("\n");
-    sb.append("    attributeDescription: ").append(toIndentedString(attributeDescription)).append("\n");
-    sb.append("    attributeValidationRegex: ").append(toIndentedString(attributeValidationRegex)).append("\n");
-    sb.append("    attributeType: ").append(toIndentedString(attributeType)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    validationRegex: ").append(toIndentedString(validationRegex)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    required: ").append(toIndentedString(required)).append("\n");
     sb.append("}");
     return sb.toString();

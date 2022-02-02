@@ -7974,9 +7974,9 @@ paths:
   /apis/{apiId}/operation-policy:
     get:
       tags:
-        - API Operation Policy
+        - Operation Policies
       summary: |
-        Get all applicabale operation policies for an API
+        Get all API specific operation policies for an API
       description: |
         This operation provides you a list of all applicabale operation policies for an API
       operationId: getAllAPISpecificOperationPolicies
@@ -8003,11 +8003,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OperationPolicyDataList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -8024,10 +8019,10 @@ paths:
 
     post:
       tags:
-        - API Operation Policy
+        - Operation Policies
       summary: Add an API specific operation policy
       description: |
-        This operation can be used to add an API specifc operation policy.
+        This operation can be used to add an API specifc operation policy. This policy cannot be used in other APIs.
       operationId: addAPISpecificOperationPolicy
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -8089,13 +8084,18 @@ paths:
     get:
       tags:
         - API Operation Policy
-      summary: Get an API Specific Operation Policy
+      summary: Get policy details of an API specific policy
       description: |
         This operation can be used to retrieve a particular API specific operation policy.
-      operationId: getAPISpecificOperationPolicyByPolicyId
+      operationId: getOperationPolicyForAPIByPolicyId
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/operationPolicyId'
+        - name: includeCommonPolicies
+          in: query
+          description: When checking for the policy by policyID, if this is true, common policies will also be included
+          schema:
+            type: boolean
       responses:
         200:
           description: |
@@ -8132,7 +8132,7 @@ paths:
         - API Operation Policy
       summary: Delete an API Specific Operation Policy
       description: |
-        This operation can be used to delete an existing API specific opreation policy providing the Id of the API and the Id of the policy.
+        This operation can be used to delete an existing API specific opreation policy by providing the Id of the API and the Id of the policy.
       operationId: deleteAPISpecificOperationPolicyByPolicyId
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -8158,65 +8158,6 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
-  /apis/{apiId}/import-shared-operation-policy:
-    post:
-      tags:
-        - API Operation Policy
-      summary: Import a shared operation policy to
-      description: |
-        This operation can be used to download a particular API specific operation policy.
-      operationId: importSharedOperationPolicyToAPI
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - name: sharedOperationPolicyId
-          in: query
-          required: true
-          schema:
-            type: string
-          description: ID of the shared operation policy
-          example: 96077508-fd01-4fae-bc64-5de0e2baf43c
-        - name: apiSpecificPolicyName
-          in: query
-          required: true
-          schema:
-            type: string
-          description: ID of the shared operation policy
-          example: Pizza-log-policy
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created object as entity in the body.
-            Location header contains the URL of the newly created entity.
-          headers:
-            Location:
-              description: |
-                The URL of the newly created resource.
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OperationPolicyData'
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/import-shared-operation-policy?operationPolicyId=f56eb8b4-128c-45aa-ad35-9c87a546261a/content&apiSpecificPolicyName=Pizza-log-policy"'
-
   /apis/{apiId}/operation-policy/{operationPolicyId}/content:
     get:
       tags:
@@ -8228,6 +8169,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/operationPolicyId'
+        - name: includeCommonPolicies
+          in: query
+          description: When checking for the policy by policyID, if this is true, common policies will also be included
+          schema:
+            type: boolean
       responses:
         200:
           description: |
@@ -8254,16 +8200,15 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
-
-  /shared-operation-policy:
+  /operation-policy:
     get:
       tags:
-        - Shared Operation Policies
+        - Operation Policies
       summary: |
-        Get all shared operation policies
+        Get all common operation policies
       description: |
-        This operation provides you a list of all shared operation policies
-      operationId: getAllSharedOperationPolicies
+        This operation provides you a list of all common operation policies
+      operationId: getAllCommonOperationPolicies
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -8298,15 +8243,15 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy"'
 
     post:
       tags:
-        - Shared Operation Policies
-      summary: Add a new shared operation policy
+        - Operation Policies
+      summary: Add a new common operation policy
       description: |
-        This operation can be used to add a new shared operation policy.
-      operationId: addSharedOperationPolicy
+        This operation can be used to add a new common operation policy.
+      operationId: addCommonOperationPolicy
       requestBody:
         content:
           multipart/form-data:
@@ -8314,13 +8259,13 @@ paths:
               required:
                 - type
               properties:
-                sharedPolicySpecFile:
+                policySpecFile:
                   type: string
-                  description: Shared operation policy specification to upload
+                  description: Operation policy specification to upload
                   format: binary
-                sharedPolicyDefinitionFile:
+                policyDefinitionFile:
                   type: string
-                  description: Shared operation policy definition to upload
+                  description: Operation policy definition to upload
                   format: binary
         required: true
       responses:
@@ -8358,16 +8303,16 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
-            "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy"'
 
-  /shared-operation-policy/{operationPolicyId}:
+  /operation-policy/{operationPolicyId}:
     get:
       tags:
-        - Shared Operation Policies
-      summary: Get the shared operation policy by policy ID
+        - Operation Policies
+      summary: Get the common operation policy by policy ID
       description: |
-        This operation can be used to retrieve a particular shared operation policy.
-      operationId: getSharedOperationPolicyByPolicyId
+        This operation can be used to retrieve a particular common operation policy.
+      operationId: getCommonOperationPolicyByPolicyId
       parameters:
         - $ref: '#/components/parameters/operationPolicyId'
       responses:
@@ -8399,15 +8344,15 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
     delete:
       tags:
-        - Shared Operation Policies
-      summary: Delete a Shared Operation Policy
+        - Operation Policies
+      summary: Delete a common operation policy
       description: |
-        This operation can be used to delete an existing shared opreation policy by providing the Id of the policy.
-      operationId: deleteSharedOperationPolicyByPolicyId
+        This operation can be used to delete an existing common opreation policy by providing the Id of the policy.
+      operationId: deleteCommonOperationPolicyByPolicyId
       parameters:
         - $ref: '#/components/parameters/operationPolicyId'
       responses:
@@ -8429,16 +8374,16 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
-  /shared-operation-policy/{operationPolicyId}/content:
+  /operation-policy/{operationPolicyId}/content:
     get:
       tags:
-        - Shared Operation Policies
-      summary: Download an Shared Operation Policy
+        - Operation Policies
+      summary: Download a common operation policy
       description: |
-        This operation can be used to download a particular shared operation policy.
-      operationId: getSharedOperationPolicyContentByPolicyId
+        This operation can be used to download a selected common operation policy.
+      operationId: getCommonOperationPolicyContentByPolicyId
       parameters:
         - $ref: '#/components/parameters/operationPolicyId'
       responses:
@@ -8465,7 +8410,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/shared-operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
   /api-products/change-lifecycle:
     post:
@@ -12132,21 +12077,6 @@ components:
             $ref: '#/components/schemas/OperationPolicyData'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    SharedOperationPolicyDataList:
-      title: Shared operation policy List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of shared operation policies returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/SharedOperationPolicyData'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
     OperationPolicyData:
       title: Operation Policy Data
       type: object
@@ -12163,9 +12093,6 @@ components:
         policyDisplayName:
           type: string
           example: Remove Header Policy
-        sharedPolicyRef:
-          type: string
-          example: AddHeaderSharedPolicy
         policyDescription:
           type: string
           example: With this policy, user can add a new header to the request
@@ -12187,47 +12114,12 @@ components:
         multipleAllowed:
           type: boolean
           example: true
-        polictAttributes:
-          type: array
-          items:
-            $ref: '#/components/schemas/OperationPolicySpecAttribute'
-    SharedOperationPolicyData:
-      title: Shared Operation Policy Data
-      type: object
-      properties:
-        policyCategory:
-          type: string
-          example: Mediation
-        policyId:
+        isAPISpecific:
+          type: boolean
+          example: true
+        md5:
           type: string
           example: 121223q41-24141-124124124-12414
-        policyName:
-          type: string
-          example: removeHeaderPolicy
-        policyDisplayName:
-          type: string
-          example: Remove Header Policy
-        policyDescription:
-          type: string
-          example: With this policy, user can add a new header to the request
-        applicableFlows:
-          type: array
-          items:
-            type: string
-            example: in
-        supportedGateways:
-          type: array
-          items:
-            type: string
-            example: Synapse
-        supportedApiTypes:
-          type: array
-          items:
-            type: string
-            example: REST
-        multipleAllowed:
-          type: boolean
-          example: true
         polictAttributes:
           type: array
           items:
@@ -12236,23 +12128,23 @@ components:
       title: OperationPolicySpecAttribute
       type: object
       properties:
-        attributeName:
+        name:
           type: string
           description: Name of the attibute
           example: headerName
-        attributeDisplayName:
+        displayName:
           type: string
           description: Display name of the attibute
           example: Header Name
-        attributeDescription:
+        description:
           type: string
           description: Description of the attibute
           example: Name of the header to be removed
-        attributeValidationRegex:
+        validationRegex:
           type: string
           description: UI validation regex for the attibute
           example: /^[a-z\s]{0,255}$/i
-        attributeType:
+        type:
           type: string
           description: Type of the attibute
           example: string
