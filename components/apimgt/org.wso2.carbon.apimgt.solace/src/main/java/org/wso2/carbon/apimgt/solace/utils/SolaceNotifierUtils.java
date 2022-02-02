@@ -388,8 +388,8 @@ public class SolaceNotifierUtils {
                             log.error("Error while creating Solace application '" + application.getName() + ". : " +
                                     response4.getStatusLine().toString());
                         }
-                        throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.
-                                getStatusLine().getReasonPhrase());
+                        throw new APIManagementException("response4.\n" +
+                                "                                getStatusLine().getReasonPhrase()");
                     }
                 } else {
                     if (log.isDebugEnabled()) {
