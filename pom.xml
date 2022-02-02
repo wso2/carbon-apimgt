@@ -1754,16 +1754,6 @@
                 <version>${jaeger.client.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.io.fabric8</groupId>
-                <artifactId>kubernetes-client</artifactId>
-                <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.org.apache.commons</groupId>
-                <artifactId>commons-compress</artifactId>
-                <version>${org.wso2.orbit.org.apache.commons.compress.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.claim.mgt</artifactId>
                 <version>${carbon.identity.version}</version>
@@ -2150,8 +2140,6 @@
         <okhttp.wso2.version>4.2.0.wso2v1</okhttp.wso2.version>
         <okio.wso2.version>2.4.0.wso2v1</okio.wso2.version>
 
-        <org.wso2.orbit.io.fabric8.kubernetes.version>4.6.4.wso2v1</org.wso2.orbit.io.fabric8.kubernetes.version>
-        <org.wso2.orbit.org.apache.commons.compress.version>1.18.0.wso2v1</org.wso2.orbit.org.apache.commons.compress.version>
         <openfeign.version>11.0</openfeign.version>
         <maven.spotbugsplugin.version>3.1.10</maven.spotbugsplugin.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
