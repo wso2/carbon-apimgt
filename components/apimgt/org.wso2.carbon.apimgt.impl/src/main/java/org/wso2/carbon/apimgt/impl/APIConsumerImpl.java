@@ -242,7 +242,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         super(username);
         userNameWithoutChange = username;
         readTagCacheConfigs();
+        readRecommendationConfigs();
+    }
 
+    public APIConsumerImpl(String username, String organization) throws APIManagementException {
+        super(username, organization);
+        userNameWithoutChange = username;
+        readTagCacheConfigs();
+        readRecommendationConfigs();
+    }
+
+    private void readRecommendationConfigs() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         recommendationEnvironment = config.getApiRecommendationEnvironment();
@@ -6124,11 +6134,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         }
 
-        String apiTenantDomain = apiTypeWrapper.getOrganization();
+        String apiOrganization = apiTypeWrapper.getOrganization();
 
         //Tenant based validation for subscription
         boolean subscriptionAllowed = false;
-        if (!tenantDomain.equals(apiTenantDomain)) {
+        if (!organization.equals(apiOrganization)) {
             if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
                 subscriptionAllowed = true;
             } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {

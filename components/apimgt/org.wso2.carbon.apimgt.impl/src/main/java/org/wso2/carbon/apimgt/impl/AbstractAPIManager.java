@@ -181,6 +181,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
+    protected String organization;
     protected String username;
     protected static final GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
     // Property to indicate whether access control restriction feature is enabled.
@@ -196,6 +197,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username) throws APIManagementException {
+        this(username, StringUtils.isNoneBlank(username) ? MultitenantUtils.getTenantDomain(username) : null);
+    }
+
+    public AbstractAPIManager(String username, String organization) throws APIManagementException {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
@@ -210,11 +215,12 @@ public abstract class AbstractAPIManager implements APIManager {
                 this.username = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
-                String tenantDomainName = MultitenantUtils.getTenantDomain(username);
+                String tenantDomainName = APIUtil.getInternalOrganizationDomain(organization);
                 String tenantUserName = getTenantAwareUsername(username);
                 int tenantId = getTenantManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
+                this.organization = organization;
                 this.username = tenantUserName;
 
                 loadTenantRegistry(tenantId);

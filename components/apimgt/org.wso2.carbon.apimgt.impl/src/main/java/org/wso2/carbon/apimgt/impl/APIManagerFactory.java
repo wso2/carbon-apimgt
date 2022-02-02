@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
+import org.wso2.carbon.user.core.UserCoreConstants;
 
 public class APIManagerFactory {
 
@@ -57,6 +58,13 @@ public class APIManagerFactory {
 
     }
 
+    private APIConsumer newConsumer(String username, String organization) throws APIManagementException {
+        if (username.equals(ANONYMOUS_USER)) {
+            username = null;
+        }
+        return new UserAwareAPIConsumer(username, organization);
+    }
+
     public APIProvider getAPIProvider(String username) throws APIManagementException {
         APIProvider provider = providers.get(username);
         if (provider == null) {
@@ -74,23 +82,37 @@ public class APIManagerFactory {
     }
 
     public APIConsumer getAPIConsumer() throws APIManagementException {
-        return getAPIConsumer(ANONYMOUS_USER);
+        return getAPIConsumerFromCache(ANONYMOUS_USER, () -> newConsumer(ANONYMOUS_USER));
     }
 
     public APIConsumer getAPIConsumer(String username) throws APIManagementException {
-        APIConsumer consumer = consumers.get(username);
+        return getAPIConsumerFromCache(username, () -> newConsumer(username));
+    }
+
+    public APIConsumer getAPIConsumer(String username, String organization) throws APIManagementException {
+        String cacheKey = username + UserCoreConstants.TENANT_DOMAIN_COMBINER + organization;
+        return getAPIConsumerFromCache(cacheKey, () -> newConsumer(username, organization));
+    }
+
+    public APIConsumer getAPIConsumerFromCache(String key, ConsumerCreator consumerCreator)
+            throws APIManagementException {
+        APIConsumer consumer = consumers.get(key);
         if (consumer == null) {
-            synchronized (username.intern()) {
-                consumer = consumers.get(username);
+            synchronized (key.intern()) {
+                consumer = consumers.get(key);
                 if (consumer != null) {
                     return consumer;
                 }
 
-                consumer = newConsumer(username);
-                consumers.put(username, consumer);
+                consumer = consumerCreator.create();
+                consumers.put(key, consumer);
             }
         }
         return consumer;
+    }
+
+    interface ConsumerCreator {
+        APIConsumer create() throws APIManagementException;
     }
 
     public void clearAll() {

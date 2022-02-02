@@ -180,7 +180,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            apiConsumer = RestApiCommonUtil.getConsumer(username);
+            apiConsumer = RestApiCommonUtil.getConsumer(username, organization);
             String applicationId = body.getApplicationId();
 
             //check whether user is permitted to access the API. If the API does not exist,
