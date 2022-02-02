@@ -103,7 +103,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 } else {
                     RelayUtils.buildMessage(axis2MC);
                     OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
-                    if (body != null && body.getChildrenWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null){
+                    if (body != null && body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null){
                         payload = body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)).getText();
                     } else {
                         if (log.isDebugEnabled()) {
