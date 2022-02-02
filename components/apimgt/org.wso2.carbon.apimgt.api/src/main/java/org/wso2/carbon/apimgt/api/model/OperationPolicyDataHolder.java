@@ -30,8 +30,6 @@ public class OperationPolicyDataHolder {
     private String apiUUID;
     private String revisionUUID;
     private OperationPolicySpecification specification;
-    private boolean isImportedPolicy = false;
-    private String originalPolicyId;
 
 
     public String getPolicyId() {
@@ -112,26 +110,6 @@ public class OperationPolicyDataHolder {
     public void setRevisionUUID(String revisionUUID) {
 
         this.revisionUUID = revisionUUID;
-    }
-
-    public boolean isImportedPolicy() {
-
-        return isImportedPolicy;
-    }
-
-    public void setImportedPolicy(boolean importedPolicy) {
-
-        isImportedPolicy = importedPolicy;
-    }
-
-    public String getOriginalPolicyId() {
-
-        return originalPolicyId;
-    }
-
-    public void setOriginalPolicyId(String originalPolicyId) {
-
-        this.originalPolicyId = originalPolicyId;
     }
 
     @Override
