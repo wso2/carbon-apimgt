@@ -197,7 +197,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username) throws APIManagementException {
-        this(username, StringUtils.isNoneBlank(username) ? MultitenantUtils.getTenantDomain(username) : null);
+        this(username, StringUtils.isNoneBlank(username) ? MultitenantUtils.getTenantDomain(username) : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     public AbstractAPIManager(String username, String organization) throws APIManagementException {
