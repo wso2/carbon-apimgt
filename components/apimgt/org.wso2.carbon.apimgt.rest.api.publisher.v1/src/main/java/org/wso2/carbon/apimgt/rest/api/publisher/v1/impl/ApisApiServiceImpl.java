@@ -229,7 +229,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAllAPIs(Integer limit, Integer offset, String sortBy, String sortOrder, String xWSO2Tenant,
                                String query, String ifNoneMatch, Boolean expand, String accept,
-                               MessageContext messageContext) {
+                               MessageContext messageContext) throws APIManagementException {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
@@ -242,7 +242,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         expand = expand != null && expand;
         sortBy = sortBy != null ? sortBy : RestApiConstants.DEFAULT_SORT_CRITERION;
         sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
-        try {
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
@@ -291,10 +290,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 return Response.ok().entity(apiListDTO).build();
             }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving APIs";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
         return null;
     }
 
@@ -3051,7 +3046,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Thumbnail image of the API
      */
     @Override
-    public Response getAPIThumbnail(String apiId, String ifNoneMatch, MessageContext messageContext) {
+    public Response getAPIThumbnail(String apiId, String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -3075,8 +3071,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving thumbnail of API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         }
         return null;
@@ -4348,7 +4343,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response containing newly created APIRevision object
      */
     @Override
-    public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
+    public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -4372,9 +4368,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API Revision for API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving created revision API location for API : "
                     + apiId;
