@@ -4401,6 +4401,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
+        //validate whether the API is advertise only
+        APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+        if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
+            throw new APIManagementException("Deploying API Revisions is not supported for advertise only APIs: "
+                    + apiId);
+        }
+
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
