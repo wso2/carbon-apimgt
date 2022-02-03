@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.12.4-SNAPSHOT</version>
+        <version>9.14.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -336,19 +336,9 @@
             <version>${graphql.java.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
-            <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.orbit.com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
             <version>${okio.wso2.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>${org.wso2.orbit.org.apache.commons.compress.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
@@ -621,12 +611,7 @@
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
-                            io.fabric8.kubernetes.client.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
-                            io.fabric8.kubernetes.api.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
-                            io.fabric8.kubernetes.internal.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
-                            io.fabric8.openshift.client.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
                             okio.*;version="${okio.wso2.version}",
-                            org.apache.commons.compress.*;version="${org.wso2.orbit.org.apache.commons.compress.version}",
                             okhttp3.*;version="${okhttp.wso2.version}"
                             *;resolution:=optional
                         </Import-Package>

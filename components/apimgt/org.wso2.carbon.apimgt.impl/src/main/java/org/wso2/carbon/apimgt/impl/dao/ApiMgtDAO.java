@@ -15826,9 +15826,13 @@ public class ApiMgtDAO {
 
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = (connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData().getDriverName().contains("Microsoft") ? connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID_MSSQL) : connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID))) {
+             PreparedStatement statement = (connection.getMetaData().getDriverName().contains("MS SQL") ||
+                     connection.getMetaData().getDriverName().contains("Microsoft") ?
+                     connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID_MSSQL) :
+                     (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData().getDriverName()
+                             .contains("H2")) ?
+                             connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID_MYSQL) :
+                             connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID))) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {

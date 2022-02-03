@@ -291,6 +291,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Please provide the Authorization : Bearer <> token to proceed."),
     MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
             "Please provide the Authorization : Basic <> token to proceed."),
+    INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the resource."),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
     OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
@@ -483,6 +484,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "Missing protocol in Async API Definition"),
     UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION(900912, "Unsupported protocol specified in Async API " +
                "Definition", 400, "Unsupported protocol specified in Async API Definition"),
+    LOGGING_API_NOT_FOUND(901400, "Requested Resource Not Found", 404, "Request API Not Found for context: %s"),
+    LOGGING_API_INCORRECT_LOG_LEVEL(901401, "Bad Request", 400, "Log level should be either OFF, BASIC, STANDARD or FULL"),
+    LOGGING_API_MISSING_DATA(901402, "Missing data", 400, "API context or log level is missing"),
 
     //Service Catalog related error codes
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
