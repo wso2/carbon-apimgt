@@ -38,6 +38,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +52,7 @@ import static org.apache.synapse.rest.RESTConstants.REST_SUB_REQUEST_PATH;
  * Unit test cases related GraphQLAPIHandler.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ DataHolder.class})
+@PrepareForTest({ DataHolder.class })
 public class GraphQLAPIHandlerTest {
 
     Axis2MessageContext messageContext;
@@ -115,6 +116,9 @@ public class GraphQLAPIHandlerTest {
         Assert.assertTrue(graphQLAPIHandler.handleRequest(messageContext));
     }
 
+    /**
+     * This method will test Graphql Query request flow.
+     */
     @Test
     public void testHandleRequestForGraphQLQueries() {
         Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(false);
