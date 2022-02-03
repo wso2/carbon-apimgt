@@ -69,7 +69,8 @@ public class RegistrySearchUtil {
     public static final String API_DESCRIPTION = "Description";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
     public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
-    public static final String ADVERTISE_ONLY_SEARCH_TYPE_PREFIX = "advertiseOnly";
+    public static final String ADVERTISE_ONLY_SEARCH_TYPE_PREFIX = "thirdParty";
+    public static final String ADVERTISE_ONLY_ADVERTISED_PROPERTY = "advertiseOnly";
     public static final String ENABLE_STORE = "enableStore";
     public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
     public static final String NULL_USER_ROLE_LIST = "null";
@@ -274,6 +275,8 @@ public class RegistrySearchUtil {
                     } else if (searchKeys[0].equals(CATEGORY_SEARCH_TYPE_PREFIX)) {
                         searchKeys[0] = API_CATEGORIES_CATEGORY_NAME;
                         searchKeys[1] = searchKeys[1].replace("*", "");
+                    } else if (searchKeys[0].equals(ADVERTISE_ONLY_SEARCH_TYPE_PREFIX)) {
+                        searchKeys[0] = ADVERTISE_ONLY_ADVERTISED_PROPERTY;
                     }
 
                     if (filteredQuery.length() == 0) {
