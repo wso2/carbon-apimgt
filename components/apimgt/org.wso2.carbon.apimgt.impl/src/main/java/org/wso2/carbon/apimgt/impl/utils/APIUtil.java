@@ -518,10 +518,6 @@ public final class APIUtil {
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
-            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
 
@@ -769,10 +765,6 @@ public final class APIUtil {
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
-            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
@@ -1043,10 +1035,6 @@ public final class APIUtil {
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
-            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
 
@@ -1169,10 +1157,6 @@ public final class APIUtil {
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
-            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
@@ -3289,10 +3273,6 @@ public final class APIUtil {
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
-            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
 
@@ -5529,10 +5509,6 @@ public final class APIUtil {
             api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
-            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -9537,12 +9513,7 @@ public final class APIUtil {
 
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(resource.getApiId());
                 API api = getAPI(apiArtifact, registry);
-
-                if (api.isAdvertiseOnly()) {
-                    resource.setEndpointConfig(generateEndpointConfigForAdvertiseOnlyApi(api));
-                } else {
-                    resource.setEndpointConfig(api.getEndpointConfig());
-                }
+                resource.setEndpointConfig(api.getEndpointConfig());
                 resource.setEndpointSecurityMap(setEndpointSecurityForAPIProduct(api));
             }
 
@@ -11233,10 +11204,6 @@ public final class APIUtil {
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
-            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
 
