@@ -4304,7 +4304,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate whether the API is advertise only
             APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
             if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
-                throw new APIManagementException("Creating API Revisions is not supported for advertise only APIs: "
+                throw new APIManagementException("Creating API Revisions is not supported for third party APIs: "
                         + apiId);
             }
 
@@ -4404,7 +4404,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate whether the API is advertise only
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
         if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
-            throw new APIManagementException("Deploying API Revisions is not supported for advertise only APIs: "
+            throw new APIManagementException("Deploying API Revisions is not supported for third party APIs: "
                     + apiId);
         }
 
@@ -4645,7 +4645,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (APIDTO.TypeEnum.ASYNC.equals(apiDTOFromProperties.getType()) &&
                 (apiDTOFromProperties.getAdvertiseInfo() == null ||
                         !apiDTOFromProperties.getAdvertiseInfo().isAdvertised())) {
-            RestApiUtil.handleBadRequest("ASYNC API type supports only advertise only APIs", log);
+            RestApiUtil.handleBadRequest("ASYNC type APIs only can be created as third party APIs", log);
         }
 
         //validate websocket url and change transport types
