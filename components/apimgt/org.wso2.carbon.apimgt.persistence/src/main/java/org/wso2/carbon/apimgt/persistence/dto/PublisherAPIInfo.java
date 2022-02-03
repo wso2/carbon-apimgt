@@ -42,11 +42,6 @@ public class PublisherAPIInfo {
     private String description;
     private String gatewayVendor;
     private boolean advertiseOnly;
-    private String apiExternalProductionEndpoint;
-    private String apiExternalSandboxEndpoint;
-    private String redirectURL;
-    private String apiOwner;
-    private String vendor;
 
     public String getAudience() {
         return audience;
@@ -152,54 +147,11 @@ public class PublisherAPIInfo {
         this.advertiseOnly = advertiseOnly;
     }
 
-    public String getApiExternalProductionEndpoint() {
-        return apiExternalProductionEndpoint;
-    }
-
-    public void setApiExternalProductionEndpoint(String apiExternalProductionEndpoint) {
-        this.apiExternalProductionEndpoint = apiExternalProductionEndpoint;
-    }
-
-    public String getApiExternalSandboxEndpoint() {
-        return apiExternalSandboxEndpoint;
-    }
-
-    public void setApiExternalSandboxEndpoint(String apiExternalSandboxEndpoint) {
-        this.apiExternalSandboxEndpoint = apiExternalSandboxEndpoint;
-    }
-
-    public String getRedirectURL() {
-        return redirectURL;
-    }
-
-    public void setRedirectURL(String redirectURL) {
-        this.redirectURL = redirectURL;
-    }
-
-    public String getApiOwner() {
-        return apiOwner;
-    }
-
-    public void setApiOwner(String apiOwner) {
-        this.apiOwner = apiOwner;
-    }
-
-    public String getVendor() {
-        return vendor;
-    }
-
-    public void setVendor(String vendor) {
-        this.vendor = vendor;
-    }
-
     @Override
     public String toString() {
         return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version=" +
                 version + ", providerName=" + providerName + ", context=" + context + ", status=" + status + ", type="
-                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly
-                + ",apiExternalProductionEndpoint=" + apiExternalProductionEndpoint + ",apiExternalSandboxEndpoint="
-                + apiExternalSandboxEndpoint + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner
-                + ", vendor" + vendor + "]";
+                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly + "]";
     }
 
     public Map<String, String> getAdditionalProperties() {

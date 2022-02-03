@@ -93,6 +93,11 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     private String versionTimestamp;
     private String audience;
+    private String apiExternalProductionEndpoint;
+    private String apiExternalSandboxEndpoint;
+    private String redirectURL;
+    private String apiOwner;
+    private String vendor;
 
     public String getAudience() {
         return audience;
@@ -553,6 +558,46 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.versionTimestamp = versionTimestamp;
     }
 
+    public String getApiExternalProductionEndpoint() {
+        return apiExternalProductionEndpoint;
+    }
+
+    public void setApiExternalProductionEndpoint(String apiExternalProductionEndpoint) {
+        this.apiExternalProductionEndpoint = apiExternalProductionEndpoint;
+    }
+
+    public String getApiExternalSandboxEndpoint() {
+        return apiExternalSandboxEndpoint;
+    }
+
+    public void setApiExternalSandboxEndpoint(String apiExternalSandboxEndpoint) {
+        this.apiExternalSandboxEndpoint = apiExternalSandboxEndpoint;
+    }
+
+    public String getRedirectURL() {
+        return redirectURL;
+    }
+
+    public void setRedirectURL(String redirectURL) {
+        this.redirectURL = redirectURL;
+    }
+
+    public String getApiOwner() {
+        return apiOwner;
+    }
+
+    public void setApiOwner(String apiOwner) {
+        this.apiOwner = apiOwner;
+    }
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(String vendor) {
+        this.vendor = vendor;
+    }
+
     @Override
     public String toString() {
         return "PublisherAPI [isDefaultVersion=" + isDefaultVersion + ", description=" + description + ", wsdlUrl="
@@ -578,7 +623,9 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + gatewayVendor +  ", asyncTransportProtocols=" + asyncTransportProtocols + ", accessControlRoles="
                 + accessControlRoles + ", additionalProperties=" + additionalProperties
                 + ", thumbnail=" + thumbnail + ", createdTime=" + createdTime + ", lastUpdated=" + lastUpdated
-                + ", versionTimestamp=" + versionTimestamp
+                + ", versionTimestamp=" + versionTimestamp + ",apiExternalProductionEndpoint="
+                + apiExternalProductionEndpoint + ",apiExternalSandboxEndpoint=" + apiExternalSandboxEndpoint
+                + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor
                 + ", toString()=" + super.toString() + "]";
     }
 }
