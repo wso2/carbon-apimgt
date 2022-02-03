@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.12.5-SNAPSHOT</version>
+        <version>9.14.3-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -65,5 +65,7 @@
         <module>org.wso2.carbon.apimgt.common.jms</module>
         <module>org.wso2.carbon.apimgt.common.analytics</module>
         <module>org.wso2.carbon.apimgt.cleanup.service</module>
+        <module>org.wso2.carbon.apimgt.rest.api.devops</module>
+        <module>org.wso2.carbon.apimgt.devops.impl</module>
     </modules>
 </project>

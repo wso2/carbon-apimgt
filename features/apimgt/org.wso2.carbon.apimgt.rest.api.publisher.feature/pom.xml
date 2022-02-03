@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.12.5-SNAPSHOT</version>
+        <version>9.14.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -281,9 +281,7 @@
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
 
-                                <bundleDef>org.wso2.orbit.io.fabric8:kubernetes-client:${org.wso2.orbit.io.fabric8.kubernetes.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio:${okio.wso2.version}</bundleDef>
-                                <bundleDef>org.wso2.orbit.org.apache.commons:commons-compress:${org.wso2.orbit.org.apache.commons.compress.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp:${okhttp.wso2.version}</bundleDef>
                                 <bundleDef>
                                     org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
