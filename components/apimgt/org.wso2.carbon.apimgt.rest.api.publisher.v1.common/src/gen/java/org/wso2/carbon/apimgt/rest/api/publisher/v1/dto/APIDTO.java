@@ -275,7 +275,8 @@ return null;
     @XmlEnum(String.class)
     public enum EndpointImplementationTypeEnum {
         INLINE("INLINE"),
-        ENDPOINT("ENDPOINT");
+        ENDPOINT("ENDPOINT"),
+        MOCKED_OAS("MOCKED_OAS");
         private String value;
 
         EndpointImplementationTypeEnum (String v) {

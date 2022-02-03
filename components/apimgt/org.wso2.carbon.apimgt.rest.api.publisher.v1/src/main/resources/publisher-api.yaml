@@ -8762,6 +8762,7 @@ components:
           enum:
             - INLINE
             - ENDPOINT
+            - MOCKED_OAS
         scopes:
           type: array
           items:
