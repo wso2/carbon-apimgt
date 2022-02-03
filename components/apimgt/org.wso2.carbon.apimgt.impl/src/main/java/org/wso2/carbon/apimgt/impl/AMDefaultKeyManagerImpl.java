@@ -464,7 +464,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             String credentials = tokenRequest.getClientId() + ':' + tokenRequest.getClientSecret();
             String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
-            tokenResponse = authClient.generate(authToken, GRANT_TYPE_VALUE, scopes);
+            if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(tokenRequest.getGrantType())) {
+                tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
+                        tokenRequest.getGrantType(), scopes, (String) tokenRequest.getRequestParam(APIConstants
+                                .OAuthConstants.SUBJECT_TOKEN), APIConstants.OAuthConstants.JWT_TOKEN_TYPE);
+            } else {
+                tokenResponse = authClient.generate(authToken, GRANT_TYPE_VALUE, scopes);
+            }
+
         } catch (KeyManagerClientException e) {
             throw new APIManagementException("Error occurred while calling token endpoint - " + e.getReason(), e);
         }
