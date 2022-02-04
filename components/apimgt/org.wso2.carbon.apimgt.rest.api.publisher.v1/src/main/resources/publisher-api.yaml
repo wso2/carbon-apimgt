@@ -12013,7 +12013,7 @@ components:
       properties:
         policyName:
           type: string
-        sharedPolicyRef:
+        policyId:
           type: string
         order:
           type: int

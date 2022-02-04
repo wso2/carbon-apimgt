@@ -23,12 +23,15 @@ import java.util.Objects;
 public class OperationPolicyDataHolder {
 
     private boolean isApiSpecificPolicy;
+    private boolean isClonedPolicy;
+    private boolean isARevision;
     private String policyId;
     private String definition;
     private String tenantDomain;
     private String md5Hash;
     private String apiUUID;
     private String revisionUUID;
+    private String clonedCommonPolicyId;
     private OperationPolicySpecification specification;
 
 
@@ -110,6 +113,25 @@ public class OperationPolicyDataHolder {
     public void setRevisionUUID(String revisionUUID) {
 
         this.revisionUUID = revisionUUID;
+    }
+
+    public boolean isClonedPolicy() {
+
+        return clonedCommonPolicyId != null;
+    }
+
+    public String getClonedCommonPolicyId() {
+
+        return clonedCommonPolicyId;
+    }
+
+    public void setClonedCommonPolicyId(String clonedCommonPolicyId) {
+
+        this.clonedCommonPolicyId = clonedCommonPolicyId;
+    }
+
+    public boolean isARevision() {
+        return revisionUUID != null;
     }
 
     @Override

@@ -228,6 +228,9 @@ public class ImportUtils {
                 processAdvertiseOnlyPropertiesInDTO(importedApiDTO, tokenScopes);
             }
 
+            Map<String, List<OperationPolicy>> extractedPoliciesMap =
+                    extractAndDropOperationPoliciesFromURITemplate(importedApiDTO.getOperations());
+
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
                 log.info("Existing API found, attempting to update it...");
@@ -257,8 +260,11 @@ public class ImportUtils {
                                 importedApiDTO.getProvider(), organization);
             }
 
-            importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath,
-                    currentTenantDomain));
+            if (!extractedPoliciesMap.isEmpty()) {
+                importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath,
+                        extractedPoliciesMap, currentTenantDomain));
+                apiProvider.updateAPI(importedApi);
+            }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
             lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
@@ -404,37 +410,57 @@ public class ImportUtils {
         }
     }
 
-    public static Set<URITemplate> validateOperationPolicies(API api, APIProvider provider,
-                                                             String extractedFolderPath, String tenantDomain) {
+    public static Map<String, List<OperationPolicy>> extractAndDropOperationPoliciesFromURITemplate
+            (List<APIOperationsDTO> operationsDTO) {
+        Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
+        for (APIOperationsDTO dto : operationsDTO) {
+            String key = dto.getVerb() + ":" + dto.getTarget();
+            List<OperationPolicy> operationPolicies =
+                    OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(dto.getOperationPolicies());
+            if (!operationPolicies.isEmpty()) {
+                operationPoliciesMap.put(key, operationPolicies);
+            }
+            dto.setOperationPolicies(null);
+        }
+        return operationPoliciesMap;
+    }
+
+    public static Set<URITemplate> validateOperationPolicies(API api, APIProvider provider, String extractedFolderPath,
+                                                             Map<String, List<OperationPolicy>> extractedPoliciesMap,
+                                                             String tenantDomain) {
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         for (URITemplate uriTemplate : uriTemplates) {
-            List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
-            List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
-            if (operationPolicies != null && !operationPolicies.isEmpty()) {
-                for (OperationPolicy policy : operationPolicies) {
-                    try {
-                        OperationPolicySpecification policySpec =
-                                getOperationPolicySpecificationFromFile(extractedFolderPath, policy.getPolicyName());
-                        String policyDefinition =
-                                getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName());
+            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+            if (extractedPoliciesMap.containsKey(key)) {
+                List<OperationPolicy> operationPolicies = extractedPoliciesMap.get(key);
+                List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
+                if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    for (OperationPolicy policy : operationPolicies) {
+                        try {
+                            OperationPolicySpecification policySpec =
+                                    getOperationPolicySpecificationFromFile(extractedFolderPath,
+                                            policy.getPolicyName());
+                            String policyDefinition =
+                                    getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName());
 
-                        OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
-                        operationPolicyData.setApiUUID(api.getUuid());
-                        operationPolicyData.setDefinition(policyDefinition);
-                        operationPolicyData.setSpecification(policySpec);
-                        operationPolicyData.setTenantDomain(tenantDomain);
-                        operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(new Gson().toJson(policySpec),
-                                policyDefinition));
-                        String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
-                        policy.setPolicyId(policyID);
-                        validatedOperationPolicies.add(policy);
-                    } catch (APIManagementException e) {
-                        log.error(e);
+                            OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
+                            operationPolicyData.setApiUUID(api.getUuid());
+                            operationPolicyData.setDefinition(policyDefinition);
+                            operationPolicyData.setSpecification(policySpec);
+                            operationPolicyData.setTenantDomain(tenantDomain);
+                            operationPolicyData
+                                    .setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpec, policyDefinition));
+                            String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
+                            policy.setPolicyId(policyID);
+                            validatedOperationPolicies.add(policy);
+                        } catch (APIManagementException e) {
+                            log.error(e);
+                        }
                     }
                 }
+                uriTemplate.setOperationPolicies(validatedOperationPolicies);
             }
-            uriTemplate.setOperationPolicies(validatedOperationPolicies);
         }
         return uriTemplates;
     }
@@ -454,12 +480,12 @@ public class ImportUtils {
             Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
             if (schema != null) {
                 try {
-                    org.json.JSONObject uploadedConfig = new org.json.JSONObject(configElement.getAsString());
+                    org.json.JSONObject uploadedConfig = new org.json.JSONObject(configElement.toString());
                     schema.validate(uploadedConfig);
                 } catch (ValidationException e) {
                     List<String> errors = e.getAllMessages();
                     String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
-                    throw new APIManagementException("Policy specification validation failure. "+ errorMessage,
+                    throw new APIManagementException("Policy specification validation failure. " + errorMessage,
                             ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
                                     errorMessage));
                 }

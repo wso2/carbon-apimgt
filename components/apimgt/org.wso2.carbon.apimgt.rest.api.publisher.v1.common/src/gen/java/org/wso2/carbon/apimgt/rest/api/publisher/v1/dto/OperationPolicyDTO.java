@@ -24,7 +24,7 @@ import javax.validation.Valid;
 public class OperationPolicyDTO   {
   
     private String policyName = null;
-    private String sharedPolicyRef = null;
+    private String policyId = null;
     private Integer order = null;
     private Map<String, Object> parameters = new HashMap<String, Object>();
 
@@ -48,19 +48,19 @@ public class OperationPolicyDTO   {
 
   /**
    **/
-  public OperationPolicyDTO sharedPolicyRef(String sharedPolicyRef) {
-    this.sharedPolicyRef = sharedPolicyRef;
+  public OperationPolicyDTO policyId(String policyId) {
+    this.policyId = policyId;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("sharedPolicyRef")
-  public String getSharedPolicyRef() {
-    return sharedPolicyRef;
+  @JsonProperty("policyId")
+  public String getPolicyId() {
+    return policyId;
   }
-  public void setSharedPolicyRef(String sharedPolicyRef) {
-    this.sharedPolicyRef = sharedPolicyRef;
+  public void setPolicyId(String policyId) {
+    this.policyId = policyId;
   }
 
   /**
@@ -108,14 +108,14 @@ public class OperationPolicyDTO   {
     }
     OperationPolicyDTO operationPolicy = (OperationPolicyDTO) o;
     return Objects.equals(policyName, operationPolicy.policyName) &&
-        Objects.equals(sharedPolicyRef, operationPolicy.sharedPolicyRef) &&
+        Objects.equals(policyId, operationPolicy.policyId) &&
         Objects.equals(order, operationPolicy.order) &&
         Objects.equals(parameters, operationPolicy.parameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyName, sharedPolicyRef, order, parameters);
+    return Objects.hash(policyName, policyId, order, parameters);
   }
 
   @Override
@@ -124,7 +124,7 @@ public class OperationPolicyDTO   {
     sb.append("class OperationPolicyDTO {\n");
     
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
-    sb.append("    sharedPolicyRef: ").append(toIndentedString(sharedPolicyRef)).append("\n");
+    sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    order: ").append(toIndentedString(order)).append("\n");
     sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("}");

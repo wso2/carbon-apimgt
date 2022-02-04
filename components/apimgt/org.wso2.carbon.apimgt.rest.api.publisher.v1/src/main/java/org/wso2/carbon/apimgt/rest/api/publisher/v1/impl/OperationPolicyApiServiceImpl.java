@@ -111,7 +111,7 @@ public class OperationPolicyApiServiceImpl implements OperationPolicyApiService 
 
                 OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                 operationPolicyData.setTenantDomain(organization);
-                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(jsonContent, policyDefinition));
+                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpecification, policyDefinition));
                 operationPolicyData.setSpecification(policySpecification);
                 operationPolicyData.setDefinition(policyDefinition);
 
@@ -130,7 +130,7 @@ public class OperationPolicyApiServiceImpl implements OperationPolicyApiService 
                                 + " has been updated");
                     }
                 } else {
-                    policyID = apiProvider.addOperationPolicy(operationPolicyData, organization);
+                    policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
                     if (log.isDebugEnabled()) {
                         log.debug("A common operation policy has been added with name " + policySpecification.getName());
                     }
@@ -169,7 +169,7 @@ public class OperationPolicyApiServiceImpl implements OperationPolicyApiService 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             OperationPolicyDataHolder existingPolicy =
-                    apiProvider.getOperationPolicyByPolicyId(operationPolicyId, false);
+                    apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, false);
             if (existingPolicy != null) {
                 if (existingPolicy.isApiSpecificPolicy()) {
                     throw new APIManagementException("Cannot delete an API specific operation policy at the " +
@@ -225,11 +225,11 @@ public class OperationPolicyApiServiceImpl implements OperationPolicyApiService 
             offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             // Since policy definition is bit bulky, we don't query the definition unnecessarily.
             List<OperationPolicyDataHolder> commonOperationPolicyLIst =
-                    apiProvider.getAllCommonOperationPolicies(tenantDomain);
+                    apiProvider.getAllCommonOperationPolicies(organization);
             OperationPolicyDataListDTO policyListDTO = OperationPolicyMappingUtil
                     .fromOperationPolicyDataListToDTO(commonOperationPolicyLIst, offset, limit);
             return Response.ok().entity(policyListDTO).build();
@@ -259,8 +259,10 @@ public class OperationPolicyApiServiceImpl implements OperationPolicyApiService 
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
             OperationPolicyDataHolder existingPolicy =
-                    apiProvider.getOperationPolicyByPolicyId(operationPolicyId, false);
+                    apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, false);
             if (existingPolicy != null && !existingPolicy.isApiSpecificPolicy()) {
                 OperationPolicyDataDTO policyDataDTO =
                         OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
@@ -295,7 +297,10 @@ public class OperationPolicyApiServiceImpl implements OperationPolicyApiService 
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            OperationPolicyDataHolder policyData = apiProvider.getOperationPolicyByPolicyId(operationPolicyId, true);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+            OperationPolicyDataHolder policyData =
+                    apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization,true);
             if (policyData != null && !policyData.isApiSpecificPolicy()) {
                 File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
