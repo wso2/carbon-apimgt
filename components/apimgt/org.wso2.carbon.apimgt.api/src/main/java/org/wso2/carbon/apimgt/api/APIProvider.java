@@ -1848,16 +1848,6 @@ public interface APIProvider extends APIManager {
      */
     void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
 
-    /**
-     * Get operation policy ID
-     *
-     * @param policyName     Name of the policy
-     * @param apiUUID        UUID of the API
-     * @param tenantDomain   Tenant domain
-     * @return ID of the policy
-     * @throws APIManagementException
-     */
-    String getOperationPolicyId(String policyName, String apiUUID, String tenantDomain) throws APIManagementException;
 
 
     /**
@@ -1884,6 +1874,29 @@ public interface APIProvider extends APIManager {
     String addOperationPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain)
             throws APIManagementException;
 
+    /**
+     * Add operation policy to the tenant
+     *
+     * @param operationPolicyDataHolder     Operation Policy Data that includes policy specification and policy definition
+     * @param tenantDomain                  Tenant domain
+     * @return status of the policy storage
+     * @throws APIManagementException
+     */
+    String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain,
+                                        boolean cloned)
+            throws APIManagementException;
+
+    /**
+     * Add operation policy to the tenant
+     *
+     * @param operationPolicyDataHolder     Operation Policy Data that includes policy specification and policy definition
+     * @param tenantDomain                  Tenant domain
+     * @return status of the policy storage
+     * @throws APIManagementException
+     */
+    String addCommonOperationPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain)
+            throws APIManagementException;
+
 
     /**
      * Get operation policy for a given policy name. Since policy ID is not available, this needs policy name, API UUID
@@ -1898,7 +1911,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID, String revisionUUID,
-                                                             String tenantDomain, boolean isWithPolicyDefinition)
+                                                                        String tenantDomain, boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
@@ -1912,8 +1925,10 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getCommonOperationPolicyByPolicyName(String policyName, String tenantDomain, boolean isWithPolicyDefinition)
+    OperationPolicyDataHolder getCommonOperationPolicyByPolicyName(String policyName, String tenantDomain,
+                                                                   boolean isWithPolicyDefinition)
             throws APIManagementException;
+
 
     /**
      * Get operation policy for a given Policy UUID
@@ -1924,7 +1939,20 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getOperationPolicyByPolicyId(String policyId, boolean isWithPolicyDefinition)
+    OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyId(String policyId, String organization, boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+
+    /**
+     * Get operation policy for a given Policy UUID
+     *
+     * @param policyId               Policy UUID
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyDataHolder getCommonOperationPolicyByPolicyId(String policyId, String organization, boolean isWithPolicyDefinition)
             throws APIManagementException;
 
 

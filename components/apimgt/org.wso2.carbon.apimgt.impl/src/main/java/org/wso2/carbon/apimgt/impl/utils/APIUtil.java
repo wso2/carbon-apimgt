@@ -11538,8 +11538,8 @@ public final class APIUtil {
         }
         return policyParamsString;
     }
-
-    public static String getMd5OfOperationPolicy(String policySpecificationAsString, String policyDefinition) {
+    public static String getMd5OfOperationPolicy(OperationPolicySpecification policySpecification, String policyDefinition) {
+        String policySpecificationAsString = new Gson().toJson(policySpecification);
         return DigestUtils.md5Hex(policySpecificationAsString + policyDefinition);
     }
 }
