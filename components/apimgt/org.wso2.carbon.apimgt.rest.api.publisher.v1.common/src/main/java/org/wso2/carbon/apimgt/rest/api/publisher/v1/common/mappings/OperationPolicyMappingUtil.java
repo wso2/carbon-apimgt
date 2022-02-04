@@ -54,7 +54,7 @@ public class OperationPolicyMappingUtil {
 
         OperationPolicy operationPolicy = new OperationPolicy();
         operationPolicy.setPolicyName(operationPolicyDTO.getPolicyName());
-        operationPolicy.setOrder((operationPolicyDTO.getOrder()) != null ? operationPolicyDTO.getOrder() : 1);
+        operationPolicy.setPolicyId(operationPolicyDTO.getPolicyId());
         operationPolicy.setParameters(operationPolicyDTO.getParameters());
         return operationPolicy;
     }
@@ -63,6 +63,7 @@ public class OperationPolicyMappingUtil {
 
         OperationPolicyDTO dto = new OperationPolicyDTO();
         dto.setPolicyName(operationPolicy.getPolicyName());
+        dto.setPolicyId(operationPolicy.getPolicyId());
         dto.setOrder(operationPolicy.getOrder());
         dto.setParameters(operationPolicy.getParameters());
         return dto;
@@ -100,22 +101,31 @@ public class OperationPolicyMappingUtil {
             List<OperationPolicyDTO> request = apiOperationPoliciesDTO.getRequest();
             List<OperationPolicyDTO> response = apiOperationPoliciesDTO.getResponse();
             List<OperationPolicyDTO> fault = apiOperationPoliciesDTO.getFault();
+            int requestCount = 1;
+            int responseCount = 1;
+            int faultCount = 1;
             for (OperationPolicyDTO op : request) {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
                 operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESQUEST);
+                operationPolicy.setOrder(requestCount);
                 operationPoliciesList.add(operationPolicy);
+                requestCount += 1;
             }
 
             for (OperationPolicyDTO op : response) {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
                 operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+                operationPolicy.setOrder(responseCount);
                 operationPoliciesList.add(operationPolicy);
+                responseCount += 1;
             }
 
             for (OperationPolicyDTO op : fault) {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
                 operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+                operationPolicy.setOrder(faultCount);
                 operationPoliciesList.add(operationPolicy);
+                faultCount += 1;
             }
         }
         return operationPoliciesList;

@@ -201,7 +201,9 @@ public class ExportUtils {
         if (!preserveStatus) {
             apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
         }
-        addOperationalPoliciesToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider, api);
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        addOperationPoliciesToArchive(archivePath, apiDtoToReturn.getId(), tenantDomain, exportFormat, apiProvider,
+                api);
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
@@ -734,8 +736,8 @@ public class ExportUtils {
      * @param apiProvider  API Provider
      * @throws APIImportExportException If an error occurs while exporting operation policies
      */
-    public static void addOperationalPoliciesToArchive(String archivePath, String apiID, ExportFormat exportFormat,
-                                                       APIProvider apiProvider, API api)
+    public static void addOperationPoliciesToArchive(String archivePath, String apiID, String tenantDomain,
+                                                     ExportFormat exportFormat, APIProvider apiProvider, API api)
             throws APIManagementException {
 
         try {
@@ -746,11 +748,12 @@ public class ExportUtils {
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
                         OperationPolicyDataHolder policyData =
-                                apiProvider.getOperationPolicyByPolicyId(policy.getPolicyId(), true);
+                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), tenantDomain,
+                                        true);
                         if (policyData != null) {
-                            String policyName = archivePath  + File.separator
+                            String policyName = archivePath + File.separator
                                     + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
-                                            policyData.getSpecification().getName();
+                                    policyData.getSpecification().getName();
                             // Policy specification and definition will have the same name
                             if (policyData.getSpecification() != null) {
                                 CommonUtil.writeDtoToFile(policyName, exportFormat,
