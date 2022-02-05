@@ -78,7 +78,7 @@ public class OperationPolicyMappingUtil {
 
         for (OperationPolicy op : operationPolicyList) {
             OperationPolicyDTO policyDTO = fromOperationPolicyToDTO(op);
-            if (APIConstants.OPERATION_SEQUENCE_TYPE_RESQUEST.equals(op.getDirection())) {
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(op.getDirection())) {
                 request.add(policyDTO);
             } else if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(op.getDirection())) {
                 response.add(policyDTO);
@@ -106,7 +106,7 @@ public class OperationPolicyMappingUtil {
             int faultCount = 1;
             for (OperationPolicyDTO op : request) {
                 OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
-                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESQUEST);
+                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
                 operationPolicy.setOrder(requestCount);
                 operationPoliciesList.add(operationPolicy);
                 requestCount += 1;
