@@ -748,8 +748,8 @@ public class ExportUtils {
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
                         OperationPolicyDataHolder policyData =
-                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), tenantDomain,
-                                        true);
+                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
+                                        tenantDomain, true);
                         if (policyData != null) {
                             String policyName = archivePath + File.separator
                                     + ImportExportConstants.POLICIES_DIRECTORY + File.separator +

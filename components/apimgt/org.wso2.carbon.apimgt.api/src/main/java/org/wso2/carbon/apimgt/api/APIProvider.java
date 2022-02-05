@@ -1939,7 +1939,8 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyId(String policyId, String organization, boolean isWithPolicyDefinition)
+    OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
+                                                                      String organization, boolean isWithPolicyDefinition)
             throws APIManagementException;
 
 

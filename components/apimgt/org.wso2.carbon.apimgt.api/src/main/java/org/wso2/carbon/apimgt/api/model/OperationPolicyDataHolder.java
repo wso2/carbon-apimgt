@@ -22,9 +22,6 @@ import java.util.Objects;
 
 public class OperationPolicyDataHolder {
 
-    private boolean isApiSpecificPolicy;
-    private boolean isClonedPolicy;
-    private boolean isARevision;
     private String policyId;
     private String definition;
     private String tenantDomain;
@@ -78,11 +75,6 @@ public class OperationPolicyDataHolder {
     public boolean isApiSpecificPolicy() {
 
         return apiUUID != null;
-    }
-
-    public void setApiSpecificPolicy(boolean apiSpecificPolicy) {
-
-        isApiSpecificPolicy = apiSpecificPolicy;
     }
 
     public String getMd5Hash() {
