@@ -2752,7 +2752,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 operationPolicyData.setPolicyId(policyID);
                 OperationPolicyDataDTO operationPolicyDataDTO = OperationPolicyMappingUtil
                         .fromOperationPolicyDataToDTO(operationPolicyData);
-                URI createdPolicyUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + "/"
+                URI createdPolicyUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION
+                        + RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + "/"
                         + RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES + "/" + policyID);
                 return Response.created(createdPolicyUri).entity(operationPolicyDataDTO).build();
             }
@@ -2765,7 +2766,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
-
     /**
      * Get the list of all API specific operation policies for a given API
      *
@@ -2836,7 +2836,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY,
+                        operationPolicyId, e, log);
             } else {
                 String errorMessage = "Error while getting an API specific operation policy with ID :" + operationPolicyId
                         + " for API " + apiId + " " + e.getMessage();
@@ -2881,7 +2882,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY,
+                        operationPolicyId, e, log);
             } else {
                 String errorMessage = "Error while getting an API specific operation policy with ID :" + operationPolicyId
                         + " for API " + apiId + " " + e.getMessage();
@@ -2929,7 +2931,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY,
+                        operationPolicyId, e, log);
             } else {
                 String errorMessage = "Error while deleting the API specific operation policy with ID :" + operationPolicyId
                         + " for API " + apiId + " " + e.getMessage();

@@ -3709,7 +3709,7 @@ public class SQLConstants {
                 " WHERE " +
                         " API.API_ID = ? " +
                 " AND " +
-                        " AOP.REVISION_UUID IS NULL " +
+                        " AUM.REVISION_UUID IS NULL " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
         public static final String GET_OPERATION_POLICIES_FOR_API_REVISION_SQL =
@@ -3725,7 +3725,7 @@ public class SQLConstants {
                         " WHERE " +
                         " API.API_ID = ? " +
                         " AND " +
-                        " AOP.REVISION_UUID = ? " +
+                        " AUM.REVISION_UUID = ? " +
                         " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
         public static final String GET_OPERATION_POLICIES_PER_API_PRODUCT_SQL =
@@ -3740,18 +3740,15 @@ public class SQLConstants {
                         " AUM.REVISION_UUID = ? " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
-        // API specific policy
-
-        // Shared Operation policy
 
         public static final String ADD_COMMON_OPERATION_POLICY =
                 "INSERT INTO AM_COMMON_OPERATION_POLICY (POLICY_UUID) VALUES (?)";
 
         public static final String ADD_API_SPECIFIC_OPERATION_POLICY =
-                "INSERT INTO AM_API_OPERATION_POLICY(POLICY_UUID, API_UUID, CLONED_COMMON_POLICY_UUID) VALUES (?,?,?)";
+                "INSERT INTO AM_API_OPERATION_POLICY(POLICY_UUID, API_UUID, CLONED_POLICY_UUID) VALUES (?,?,?)";
 
         public static final String ADD_API_SPECIFIC_OPERATION_POLICY_WITH_REVISION =
-                "INSERT INTO AM_API_OPERATION_POLICY (POLICY_UUID, API_UUID, CLONED_COMMON_POLICY_UUID, REVISION_UUID) VALUES (?,?,?,?)";
+                "INSERT INTO AM_API_OPERATION_POLICY (POLICY_UUID, API_UUID, CLONED_POLICY_UUID, REVISION_UUID) VALUES (?,?,?,?)";
 
         public static final String ADD_OPERATION_POLICY =
                 "INSERT INTO AM_OPERATION_POLICY " +
@@ -3761,7 +3758,7 @@ public class SQLConstants {
                         " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String UPDATE_API_OPERATION_POLICY_BY_POLICY_ID =
-                "UPDATE  AM_API_OPERATION_POLICY SET CLONED_COMMON_POLICY_UUID = ?  WHERE  POLICY_UUID = ?";
+                "UPDATE  AM_API_OPERATION_POLICY SET CLONED_POLICY_UUID = ?  WHERE  POLICY_UUID = ?";
 
 
         public static final String UPDATE_OPERATION_POLICY_CONTENT =
@@ -3796,7 +3793,7 @@ public class SQLConstants {
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
                         " OP.POLICY_PARAMETERS, OP.POLICY_DEFINITION, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5, " +
-                        " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_COMMON_POLICY_UUID " +
+                        " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_POLICY_UUID " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
                         " WHERE " +
@@ -3815,7 +3812,7 @@ public class SQLConstants {
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
                         " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5, " +
-                        " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_COMMON_POLICY_UUID " +
+                        " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_POLICY_UUID " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
                         " WHERE " +
@@ -3834,7 +3831,7 @@ public class SQLConstants {
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
                         " OP.POLICY_PARAMETERS, OP.POLICY_DEFINITION, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5, " +
-                        " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_COMMON_POLICY_UUID " +
+                        " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_POLICY_UUID " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
                         " WHERE " +
@@ -3854,7 +3851,7 @@ public class SQLConstants {
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
                         " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5, " +
-                        " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_COMMON_POLICY_UUID " +
+                        " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_POLICY_UUID " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
                         " WHERE " +
@@ -3887,7 +3884,7 @@ public class SQLConstants {
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
                 " WHERE " +
                         " OP.ORGANIZATION = ? AND AOP.API_UUID = ? AND AOP.REVISION_UUID IS NULL " +
-                        " AND AOP.CLONED_COMMON_POLICY_UUID IS NULL";
+                        " AND AOP.CLONED_POLICY_UUID IS NULL";
 
         public static final String DELETE_OPERATION_POLICY_BY_ID =
                 "DELETE FROM AM_OPERATION_POLICY WHERE POLICY_UUID = ?";
@@ -3895,7 +3892,7 @@ public class SQLConstants {
         public static final String GET_CLONED_POLICY_ID_FOR_COMMON_POLICY_ID =
                 "SELECT POLICY_UUID FROM AM_API_OPERATION_POLICY " +
                         " WHERE " +
-                        " CLONED_COMMON_POLICY_UUID = ?  AND API_UUID = ? AND REVISION_UUID IS NULL";
+                        " CLONED_POLICY_UUID = ?  AND API_UUID = ? AND REVISION_UUID IS NULL";
 
         public static final String GET_ALL_API_SPECIFIC_POLICIES_FOR_API_ID =
                 "SELECT POLICY_UUID FROM AM_API_OPERATION_POLICY WHERE API_UUID = ?";
@@ -3905,7 +3902,7 @@ public class SQLConstants {
 
         public static final String GET_ALL_CLONED_POLICIES_FOR_API =
                 "SELECT POLICY_UUID FROM AM_API_OPERATION_POLICY WHERE API_UUID = ? AND REVISION_UUID IS NULL " +
-                        " AND CLONED_COMMON_POLICY_UUID IS NOT NULL";
+                        " AND CLONED_POLICY_UUID IS NOT NULL";
 
     }
 

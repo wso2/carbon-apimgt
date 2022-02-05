@@ -138,8 +138,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 operationPolicyData.setPolicyId(policyID);
                 OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil
                         .fromOperationPolicyDataToDTO(operationPolicyData);
-                URI createdPolicyUri = new URI(RestApiConstants.COMMON_OPERATION_POLICIES_RESOURCE_PATH + "/"
-                        + policyID);
+                URI createdPolicyUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION
+                        + RestApiConstants.COMMON_OPERATION_POLICIES_RESOURCE_PATH + "/" + policyID);
                 return Response.created(createdPolicyUri).entity(createdPolicy).build();
             }
         } catch (APIManagementException e) {
@@ -181,8 +181,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil
-                        .handleResourceNotFoundError(RestApiConstants.COMMON_OPERATION_POLICIES_RESOURCE_PATH, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.COMMON_OPERATION_POLICIES_RESOURCE_PATH,
+                                operationPolicyId, e, log);
             } else {
                 String errorMessage = "Error while deleting the common operation policy with ID: " + operationPolicyId
                         + " " + e.getMessage();
@@ -258,8 +258,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
 
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil
-                        .handleResourceNotFoundError(RestApiConstants.COMMON_OPERATION_POLICIES_RESOURCE_PATH, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.COMMON_OPERATION_POLICIES_RESOURCE_PATH,
+                        operationPolicyId, e, log);
             } else {
                 String errorMessage = "Error while getting the common operation policy with ID :" +operationPolicyId
                         + " " + e.getMessage();
@@ -299,8 +299,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil
-                        .handleResourceNotFoundError(RestApiConstants.COMMON_OPERATION_POLICIES_RESOURCE_PATH, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.COMMON_OPERATION_POLICIES_RESOURCE_PATH,
+                        operationPolicyId, e, log);
             } else {
                 String errorMessage = "Error while getting the content of common operation policy with ID :"
                         + operationPolicyId + " " + e.getMessage();
