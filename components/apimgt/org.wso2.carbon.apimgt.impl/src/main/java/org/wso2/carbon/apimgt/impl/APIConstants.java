@@ -2860,7 +2860,7 @@ public final class APIConstants {
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
     //Constants related to Operation Mediation Policies
-    public static final String OPERATION_SEQUENCE_TYPE_RESQUEST = "request";
+    public static final String OPERATION_SEQUENCE_TYPE_REQUEST = "request";
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
 
