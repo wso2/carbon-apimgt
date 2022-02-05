@@ -4,8 +4,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.OperationPolicyApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.OperationPolicyApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.OperationPoliciesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.OperationPoliciesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
@@ -24,18 +24,18 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import java.util.Map;
 import java.util.List;
 import javax.validation.constraints.*;
-@Path("/operation-policy")
+@Path("/operation-policies")
 
-@Api(description = "the operation-policy API")
-
-
+@Api(description = "the operation-policies API")
 
 
-public class OperationPolicyApi  {
+
+
+public class OperationPoliciesApi  {
 
   @Context MessageContext securityContext;
 
-OperationPolicyApiService delegate = new OperationPolicyApiServiceImpl();
+OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
 
 
     @POST
@@ -83,7 +83,7 @@ OperationPolicyApiService delegate = new OperationPolicyApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all common operation policies ", notes = "This operation provides you a list of all common operation policies ", response = OperationPolicyDataListDTO.class, authorizations = {
+    @ApiOperation(value = "Get all common operation policies to all the APIs ", notes = "This operation provides you a list of all common operation policies that can be used by any API ", response = OperationPolicyDataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
@@ -103,7 +103,7 @@ OperationPolicyApiService delegate = new OperationPolicyApiServiceImpl();
     @Path("/{operationPolicyId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the common operation policy by policy ID", notes = "This operation can be used to retrieve a particular common operation policy. ", response = OperationPolicyDataDTO.class, authorizations = {
+    @ApiOperation(value = "Get the details of a common operation policy by providing policy ID", notes = "This operation can be used to retrieve a particular common operation policy. ", response = OperationPolicyDataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),

@@ -184,7 +184,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
-    @Path("/{apiId}/operation-policy")
+    @Path("/{apiId}/operation-policies")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Add an API specific operation policy", notes = "This operation can be used to add an API specifc operation policy. This policy cannot be used in other APIs. ", response = OperationPolicyDataDTO.class, authorizations = {
@@ -500,7 +500,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @DELETE
-    @Path("/{apiId}/operation-policy/{operationPolicyId}")
+    @Path("/{apiId}/operation-policies/{operationPolicyId}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an API Specific Operation Policy", notes = "This operation can be used to delete an existing API specific opreation policy by providing the Id of the API and the Id of the policy. ", response = Void.class, authorizations = {
@@ -510,7 +510,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
             @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
-    }, tags={ "API Operation Policy",  })
+    }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
@@ -1042,7 +1042,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiId}/operation-policy/{operationPolicyId}/content")
+    @Path("/{apiId}/operation-policies/{operationPolicyId}/content")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Download an API Specific Operation Policy", notes = "This operation can be used to download a particular API specific operation policy. ", response = Void.class, authorizations = {
@@ -1053,12 +1053,12 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
             @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
-    }, tags={ "API Operation Policy",  })
+    }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getAPISpecificOperationPolicyContentByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId,  @ApiParam(value = "When checking for the policy by policyID, if this is true, common policies will also be included")  @QueryParam("includeCommonPolicies") Boolean includeCommonPolicies) throws APIManagementException{
-        return delegate.getAPISpecificOperationPolicyContentByPolicyId(apiId, operationPolicyId, includeCommonPolicies, securityContext);
+    public Response getAPISpecificOperationPolicyContentByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
+        return delegate.getAPISpecificOperationPolicyContentByPolicyId(apiId, operationPolicyId, securityContext);
     }
 
     @GET
@@ -1140,7 +1140,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiId}/operation-policy")
+    @Path("/{apiId}/operation-policies")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all API specific operation policies for an API ", notes = "This operation provides you a list of all applicabale operation policies for an API ", response = OperationPolicyDataListDTO.class, authorizations = {
@@ -1328,7 +1328,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiId}/operation-policy/{operationPolicyId}")
+    @Path("/{apiId}/operation-policies/{operationPolicyId}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get policy details of an API specific policy", notes = "This operation can be used to retrieve a particular API specific operation policy. ", response = OperationPolicyDataDTO.class, authorizations = {
@@ -1339,13 +1339,13 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
             @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
-    }, tags={ "API Operation Policy",  })
+    }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = OperationPolicyDataDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getOperationPolicyForAPIByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId,  @ApiParam(value = "When checking for the policy by policyID, if this is true, common policies will also be included")  @QueryParam("includeCommonPolicies") Boolean includeCommonPolicies) throws APIManagementException{
-        return delegate.getOperationPolicyForAPIByPolicyId(apiId, operationPolicyId, includeCommonPolicies, securityContext);
+    public Response getOperationPolicyForAPIByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
+        return delegate.getOperationPolicyForAPIByPolicyId(apiId, operationPolicyId, securityContext);
     }
 
     @GET

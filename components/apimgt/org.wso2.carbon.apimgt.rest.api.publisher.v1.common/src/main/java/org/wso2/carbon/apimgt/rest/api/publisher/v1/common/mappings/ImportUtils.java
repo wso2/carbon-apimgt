@@ -448,7 +448,7 @@ public class ImportUtils {
                             operationPolicyData.setApiUUID(api.getUuid());
                             operationPolicyData.setDefinition(policyDefinition);
                             operationPolicyData.setSpecification(policySpec);
-                            operationPolicyData.setTenantDomain(tenantDomain);
+                            operationPolicyData.setOrganization(tenantDomain);
                             operationPolicyData
                                     .setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpec, policyDefinition));
                             String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);

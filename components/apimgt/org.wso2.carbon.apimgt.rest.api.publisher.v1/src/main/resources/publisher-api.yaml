@@ -7971,7 +7971,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
-  /apis/{apiId}/operation-policy:
+  /apis/{apiId}/operation-policies:
     get:
       tags:
         - Operation Policies
@@ -8015,7 +8015,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
 
     post:
       tags:
@@ -8077,13 +8077,13 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
 
 
-  /apis/{apiId}/operation-policy/{operationPolicyId}:
+  /apis/{apiId}/operation-policies/{operationPolicyId}:
     get:
       tags:
-        - API Operation Policy
+        - Operation Policies
       summary: Get policy details of an API specific policy
       description: |
         This operation can be used to retrieve a particular API specific operation policy.
@@ -8091,11 +8091,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/operationPolicyId'
-        - name: includeCommonPolicies
-          in: query
-          description: When checking for the policy by policyID, if this is true, common policies will also be included
-          schema:
-            type: boolean
       responses:
         200:
           description: |
@@ -8125,11 +8120,11 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
     delete:
       tags:
-        - API Operation Policy
+        - Operation Policies
       summary: Delete an API Specific Operation Policy
       description: |
         This operation can be used to delete an existing API specific opreation policy by providing the Id of the API and the Id of the policy.
@@ -8156,12 +8151,12 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
-  /apis/{apiId}/operation-policy/{operationPolicyId}/content:
+  /apis/{apiId}/operation-policies/{operationPolicyId}/content:
     get:
       tags:
-        - API Operation Policy
+        - Operation Policies
       summary: Download an API Specific Operation Policy
       description: |
         This operation can be used to download a particular API specific operation policy.
@@ -8169,11 +8164,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/operationPolicyId'
-        - name: includeCommonPolicies
-          in: query
-          description: When checking for the policy by policyID, if this is true, common policies will also be included
-          schema:
-            type: boolean
       responses:
         200:
           description: |
@@ -8198,16 +8188,16 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
-  /operation-policy:
+  /operation-policies:
     get:
       tags:
         - Operation Policies
       summary: |
-        Get all common operation policies
+        Get all common operation policies to all the APIs
       description: |
-        This operation provides you a list of all common operation policies
+        This operation provides you a list of all common operation policies that can be used by any API
       operationId: getAllCommonOperationPolicies
       parameters:
         - $ref: '#/components/parameters/limit'
@@ -8243,7 +8233,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies"'
 
     post:
       tags:
@@ -8303,13 +8293,13 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies"'
 
-  /operation-policy/{operationPolicyId}:
+  /operation-policies/{operationPolicyId}:
     get:
       tags:
         - Operation Policies
-      summary: Get the common operation policy by policy ID
+      summary: Get the details of a common operation policy by providing policy ID
       description: |
         This operation can be used to retrieve a particular common operation policy.
       operationId: getCommonOperationPolicyByPolicyId
@@ -8344,7 +8334,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
     delete:
       tags:
@@ -8374,9 +8364,9 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
-  /operation-policy/{operationPolicyId}/content:
+  /operation-policies/{operationPolicyId}/content:
     get:
       tags:
         - Operation Policies
@@ -8410,7 +8400,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/operation-policy/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
   /api-products/change-lifecycle:
     post:

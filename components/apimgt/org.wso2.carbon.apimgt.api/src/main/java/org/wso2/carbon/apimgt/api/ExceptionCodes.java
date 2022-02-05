@@ -507,6 +507,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s policy is not allowed in response flow"),
     MISSING_MANDATORY_POLICY_ATTRIBUTES(900919, "Missing mandatory operation policy attribute", 400,
             "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
+    OPERATION_POLICY_NOT_FOUND(900915, "Operation Policy Not Found", 404, "Requested operation policy with id '%s' not found"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false);
