@@ -2832,7 +2832,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate whether api exists or not
             APIInfo apiInfo = validateAPIExistence(apiId);
 
-            OperationPolicyDataHolder existingPolicy = apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, organization, false);
+            OperationPolicyDataHolder existingPolicy =
+                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
             if (existingPolicy != null && existingPolicy.isApiSpecificPolicy()) {
                 OperationPolicyDataDTO policyDataDTO =
                         OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
@@ -2874,7 +2875,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             APIInfo apiInfo = validateAPIExistence(apiId);
 
-            OperationPolicyDataHolder policyData = apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, organization,true);
+            OperationPolicyDataHolder policyData =
+                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization,true);
             if (policyData != null && policyData.isApiSpecificPolicy()) {
             File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
@@ -2915,7 +2917,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIInfo apiInfo = validateAPIExistence(apiId);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OperationPolicyDataHolder existingPolicy =
-                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, organization, false);
+                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
             if (existingPolicy != null) {
                 if (!existingPolicy.isApiSpecificPolicy()) {
                     throw new APIManagementException("Cannot delete a common operation policy at the " +
