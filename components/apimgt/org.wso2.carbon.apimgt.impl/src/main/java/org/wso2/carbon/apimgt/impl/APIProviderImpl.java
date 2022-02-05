@@ -2506,7 +2506,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (OperationPolicy policy : operationPolicies) {
                     String policyId = policy.getPolicyId();
                     // First check the API specific operation policy list
-                    OperationPolicyDataHolder policyData = getOperationPolicyByPolicyId(policyId, false);
+                    OperationPolicyDataHolder policyData =
+                            getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, true);
                     if (policyData != null) {
                         if (log.isDebugEnabled()) {
                             log.debug("A policy is found for " + policyId + " as " + policyData.getSpecification().getName()
@@ -9621,10 +9622,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyId(String policyId, String organization,
+    public OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
+                                                                             String organization,
                                                                              boolean isWithPolicyDefinition)
             throws APIManagementException {
-        return apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyId, organization, isWithPolicyDefinition);
+        return apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyId, apiUUID, organization, isWithPolicyDefinition);
     }
 
     @Override
