@@ -24,11 +24,11 @@ public class OperationPolicyDataHolder {
 
     private String policyId;
     private String definition;
-    private String tenantDomain;
+    private String organization;
     private String md5Hash;
-    private String apiUUID;
-    private String revisionUUID;
-    private String clonedCommonPolicyId;
+    private String apiUUID;                 // Null for common policies
+    private String revisionUUID;            // Null for common policies and API specific policies that are not revisioned yet
+    private String clonedCommonPolicyId;    // Null for common policies and API specific policies that are not cloned.
     private OperationPolicySpecification specification;
 
 
@@ -62,14 +62,14 @@ public class OperationPolicyDataHolder {
         this.definition = definition;
     }
 
-    public String getTenantDomain() {
+    public String getOrganization() {
 
-        return tenantDomain;
+        return organization;
     }
 
-    public void setTenantDomain(String tenantDomain) {
+    public void setOrganization(String organization) {
 
-        this.tenantDomain = tenantDomain;
+        this.organization = organization;
     }
 
     public boolean isApiSpecificPolicy() {
@@ -136,12 +136,12 @@ public class OperationPolicyDataHolder {
                 Objects.equals(specification, that.specification) &&
                 Objects.equals(definition, that.definition) &&
                 Objects.equals(md5Hash, that.md5Hash) &&
-                Objects.equals(apiUUID, that.apiUUID);
+                Objects.equals(organization, that.organization);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(policyId, specification, definition, md5Hash, apiUUID);
+        return Objects.hash(policyId, specification, definition, md5Hash, organization);
     }
 }

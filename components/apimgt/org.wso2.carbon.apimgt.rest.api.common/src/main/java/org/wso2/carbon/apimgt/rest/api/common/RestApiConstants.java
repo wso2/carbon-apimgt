@@ -327,7 +327,11 @@ public final class RestApiConstants {
     public static final int TAG_OFFSET_DEFAULT = 0;
 
     public static final String RESOURCE_PATH_OPERATION_POLICY = "/operation-policy";
-    public static final String RESOURCE_PATH_SHARED_OPERATION_POLICY = "/shared-operation-policy";
+    public static final String COMMON_OPERATION_POLICIES_RESOURCE_PATH = "/operation-policies";
+    public static final String RESOURCE_PATH_OPERATION_POLICIES = "/operation-policies";
+    public static final String OPERATION_POLICY_ID_PARAM = "{operationPolicyId}";
 
+    public static final String API_SPECIFIC_POLICY_RESOURCE_PATH = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/"
+            + RESOURCE_PATH_OPERATION_POLICIES;
 
 }
