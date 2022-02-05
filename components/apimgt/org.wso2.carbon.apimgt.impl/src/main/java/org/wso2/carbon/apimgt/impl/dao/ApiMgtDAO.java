@@ -18365,7 +18365,7 @@ public class ApiMgtDAO {
 
         OperationPolicyDataHolder policyData = getOperationPolicyByPolicyID(connection, policyId, true);
         if (policyData != null) {
-            // If we are taking a clone from common policy, common policy's Id is used as the CLONED_COMMON_POLICY_ID.
+            // If we are taking a clone from common policy, common policy's Id is used as the CLONED_POLICY_ID.
             // If we are cloning for an API Product, dependent APIs' id is used.
             return addAPISpecificOperationPolicy(connection, apiUUID, revisionUUID, policyData, policyId);
         } else {
@@ -18402,7 +18402,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * This method is used the restore flow. At the restore, apart from the policy details, CLONED_COMMON_POLICY_ID column
+     * This method is used the restore flow. At the restore, apart from the policy details, CLONED_POLICY_ID column
      * too can change and that needs to be updated.
      *
      * @param connection DB connection
@@ -18541,8 +18541,9 @@ public class ApiMgtDAO {
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyId);
         ResultSet rs = statement.executeQuery();
+        OperationPolicyDataHolder policyData = null;
         if (rs.next()) {
-            OperationPolicyDataHolder policyData = new OperationPolicyDataHolder();
+            policyData = new OperationPolicyDataHolder();
             policyData.setPolicyId(policyId);
             policyData.setOrganization(rs.getString("ORGANIZATION"));
             policyData.setMd5Hash(rs.getString("POLICY_MD5"));
@@ -18550,11 +18551,10 @@ public class ApiMgtDAO {
             if (isWithPolicyDefinition) {
                 policyData.setDefinition(getPolicyDefinitionFromRs(rs));
             }
-            return policyData;
         }
         rs.close();
         statement.close();
-        return null;
+        return policyData;
     }
 
     /**
@@ -18613,7 +18613,7 @@ public class ApiMgtDAO {
             policyData.setOrganization(organization);
             policyData.setMd5Hash(rs.getString("POLICY_MD5"));
             policyData.setRevisionUUID(rs.getString("REVISION_UUID"));
-            policyData.setClonedCommonPolicyId(rs.getString("CLONED_COMMON_POLICY_UUID"));
+            policyData.setClonedCommonPolicyId(rs.getString("CLONED_POLICY_UUID"));
             policyData.setSpecification(populatePolicySpecificationFromRS(rs));
             if (isWithPolicyDefinition) {
                 policyData.setDefinition(getPolicyDefinitionFromRs(rs));
@@ -18663,8 +18663,9 @@ public class ApiMgtDAO {
         statement.setString(1, policyId);
         statement.setString(2, organization);
         ResultSet rs = statement.executeQuery();
+        OperationPolicyDataHolder policyData = null;
         if (rs.next()) {
-            OperationPolicyDataHolder policyData = new OperationPolicyDataHolder();
+            policyData = new OperationPolicyDataHolder();
             policyData.setPolicyId(policyId);
             policyData.setOrganization(organization);
             policyData.setMd5Hash(rs.getString("POLICY_MD5"));
@@ -18675,7 +18676,7 @@ public class ApiMgtDAO {
         }
         rs.close();
         statement.close();
-        return null;
+        return policyData;
     }
 
     /**
@@ -18718,8 +18719,9 @@ public class ApiMgtDAO {
         statement.setString(1, policyName);
         statement.setString(2, tenantDomain);
         ResultSet rs = statement.executeQuery();
+        OperationPolicyDataHolder policyData = null;
         if (rs.next()) {
-            OperationPolicyDataHolder policyData = new OperationPolicyDataHolder();
+            policyData = new OperationPolicyDataHolder();
             policyData.setOrganization(tenantDomain);
             policyData.setPolicyId(rs.getString("POLICY_UUID"));
             policyData.setMd5Hash(rs.getString("POLICY_MD5"));
@@ -18727,11 +18729,10 @@ public class ApiMgtDAO {
             if (isWithPolicyDefinition) {
                 policyData.setDefinition(getPolicyDefinitionFromRs(rs));
             }
-            return policyData;
         }
         rs.close();
         statement.close();
-        return null;
+        return policyData;
     }
 
     /**
@@ -18793,20 +18794,22 @@ public class ApiMgtDAO {
             statement.setString(4, revisionUUID);
         }
         ResultSet rs = statement.executeQuery();
+        OperationPolicyDataHolder policyData = null;
         if (rs.next()) {
-            OperationPolicyDataHolder policyData = new OperationPolicyDataHolder();
+            policyData = new OperationPolicyDataHolder();
             policyData.setOrganization(tenantDomain);
             policyData.setPolicyId(rs.getString("POLICY_UUID"));
             policyData.setApiUUID(rs.getString("API_UUID"));
             policyData.setRevisionUUID(rs.getString("REVISION_UUID"));
             policyData.setMd5Hash(rs.getString("POLICY_MD5"));
+            policyData.setClonedCommonPolicyId(rs.getString("CLONED_POLICY_UUID"));
             policyData.setSpecification(populatePolicySpecificationFromRS(rs));
             if (isWithPolicyDefinition) {
                 policyData.setDefinition(getPolicyDefinitionFromRs(rs));
             }
             return policyData;
         }
-        return null;
+        return policyData;
     }
 
     /**
@@ -18878,7 +18881,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * This method will query AM_API_OPERATION_POLICY table from CLONED_COMMON_POLICY_ID row for a matching policy ID
+     * This method will query AM_API_OPERATION_POLICY table from CLONED_POLICY_ID row for a matching policy ID
      * for the required API. This is useful to find the cloned API specific policy ID from a common policy.
      *
      * @param connection     DB connection
@@ -18895,12 +18898,13 @@ public class ApiMgtDAO {
         statement.setString(1, commonPolicyId);
         statement.setString(2, apiUUID);
         ResultSet rs = statement.executeQuery();
+        String policyId = null;
         if (rs.next()) {
-            return rs.getString("POLICY_UUID");
+            policyId =  rs.getString("POLICY_UUID");
         }
         rs.close();
         statement.close();
-        return null;
+        return policyId;
     }
 
     /**
