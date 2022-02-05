@@ -2687,18 +2687,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                   Attachment policySpecFileDetail,
                                                   InputStream policyDefinitionFileInputStream,
                                                   Attachment policyDefinitionFileDetail,
-                                                  MessageContext messageContext)
-            throws APIManagementException {
+                                                  MessageContext messageContext) {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            validateAPIExistence(apiId);
             String policySpec = "";
             String jsonContent = "";
             String policyDefinition = "";
@@ -2730,7 +2726,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
                 OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
                 operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpecification, policyDefinition));
-                operationPolicyData.setTenantDomain(organization);
+                operationPolicyData.setOrganization(organization);
                 operationPolicyData.setApiUUID(apiId);
                 operationPolicyData.setSpecification(policySpecification);
                 operationPolicyData.setDefinition(policyDefinition);
@@ -2743,29 +2739,29 @@ public class ApisApiServiceImpl implements ApisApiService {
                     policyID = existingPolicy.getPolicyId();
                     apiProvider.updateOperationPolicy(policyID, operationPolicyData, organization);
                     if (log.isDebugEnabled()) {
-                        log.debug("Existing API specific operation policy with name " + policySpecification.getName()
-                                + " has been updated for the API " + apiInfo.getName());
+                        log.debug("Existing API specific operation policy with ID " + policyID + " and name "
+                                + policySpecification.getName() + " has been updated for the API " + apiId);
                     }
                 } else {
-                    policyID = apiProvider.addAPISpecificOperationPolicy(apiId, operationPolicyData, organization, false);
+                    policyID = apiProvider.addAPISpecificOperationPolicy(apiId, operationPolicyData, organization);
                     if (log.isDebugEnabled()) {
-                        log.debug("An API specific operation policy has been added for the API " + apiInfo.getName() +
-                                " with name " + policySpecification.getName());
+                        log.debug("An API specific operation policy has been added for the API " + apiId +
+                                " with id " + policyID);
                     }
                 }
                 operationPolicyData.setPolicyId(policyID);
                 OperationPolicyDataDTO operationPolicyDataDTO = OperationPolicyMappingUtil
                         .fromOperationPolicyDataToDTO(operationPolicyData);
-                return Response.ok().entity(operationPolicyDataDTO).build();
+                URI createdPolicyUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + "/"
+                        + RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES + "/" + policyID);
+                return Response.created(createdPolicyUri).entity(operationPolicyDataDTO).build();
             }
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, apiId, e, log);
-            } else {
-                throw e;
-            }
+            String errorMessage = "Error while adding an API specific operation policy." + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An error has occurred while adding operation policy", e, log);
+            RestApiUtil.handleInternalServerError("An error has occurred while adding an API specific " +
+                    "operation policy", e, log);
         }
         return null;
     }
@@ -2780,12 +2776,11 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return A list of operation policies available for the API
      */
     @Override
-    public Response getAllAPISpecificOperationPolicies(String apiId, Integer limit, Integer offset,
-                                                       String query, MessageContext messageContext)
-            throws APIManagementException {
+    public Response getAllAPISpecificOperationPolicies(String apiId, Integer limit, Integer offset, String query,
+                                                       MessageContext messageContext) {
 
         try {
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            validateAPIExistence(apiId);
             limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
             offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
@@ -2800,11 +2795,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .fromOperationPolicyDataListToDTO(sharedOperationPolicyLIst, offset, limit);
             return Response.ok().entity(policyListDTO).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, apiId, e, log);
-            } else {
-                throw e;
-            }
+            String errorMessage = "Error while retrieving the list of all API specific operation policies." + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (Exception e) {
             RestApiUtil.handleInternalServerError("An error has occurred while getting the list of API specific " +
                     " operation policies", e, log);
@@ -2821,35 +2813,38 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Operation policy DTO as response
      */
     @Override
-    public Response getOperationPolicyForAPIByPolicyId(String apiId, String operationPolicyId, Boolean includeCommonPolicies,
-                                                            MessageContext messageContext)
-            throws APIManagementException {
+    public Response getOperationPolicyForAPIByPolicyId(String apiId, String operationPolicyId,
+                                                       MessageContext messageContext) {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate whether api exists or not
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            validateAPIExistence(apiId);
 
             OperationPolicyDataHolder existingPolicy =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
-            if (existingPolicy != null && existingPolicy.isApiSpecificPolicy()) {
+            if (existingPolicy != null) {
                 OperationPolicyDataDTO policyDataDTO =
                         OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
                 return Response.ok().entity(policyDataDTO).build();
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, operationPolicyId, log);
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
+                        + operationPolicyId + " for API " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, apiId, e, log);
             } else {
-                throw e;
+                String errorMessage = "Error while getting an API specific operation policy with ID :" + operationPolicyId
+                        + " for API " + apiId + " " + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while getting the specification of " +
-                    "operation policy", e, log);
+            RestApiUtil.handleInternalServerError("An Error has occurred while getting the operation policy with ID " +
+                    operationPolicyId + "operation policy for API " + apiId, e, log);
         }
         return null;
     }
@@ -2864,35 +2859,37 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPISpecificOperationPolicyContentByPolicyId(String apiId, String operationPolicyId,
-                                                                   Boolean includeCommonPolicies,
-                                                                   MessageContext messageContext)
-            throws APIManagementException {
+                                                                   MessageContext messageContext) {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            validateAPIExistence(apiId);
 
             OperationPolicyDataHolder policyData =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization,true);
-            if (policyData != null && policyData.isApiSpecificPolicy()) {
-            File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
-            return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + file.getName() + "\"").build();
+            if (policyData != null) {
+                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
+                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"").build();
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, operationPolicyId, log);
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
+                        + operationPolicyId + " for API " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, apiId, e, log);
             } else {
-                throw e;
+                String errorMessage = "Error while getting an API specific operation policy with ID :" + operationPolicyId
+                        + " for API " + apiId + " " + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (Exception e) {
             RestApiUtil.handleInternalServerError("An Error has occurred while exporting the API specific" +
-                    " operation policy", e, log);
+                    " operation policy with ID" + operationPolicyId + " for API " + apiId, e, log);
         }
         return null;
     }
@@ -2907,52 +2904,40 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response deleteAPISpecificOperationPolicyByPolicyId(String apiId, String operationPolicyId,
-                                                               MessageContext messageContext)
-            throws APIManagementException {
+                                                               MessageContext messageContext) {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
+            validateAPIExistence(apiId);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OperationPolicyDataHolder existingPolicy =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
             if (existingPolicy != null) {
-                if (!existingPolicy.isApiSpecificPolicy()) {
-                    throw new APIManagementException("Cannot delete a common operation policy at the " +
-                            " API level.");
-                }
-
-                if (!apiId.equals(existingPolicy.getApiUUID())) {
-                    throw new APIManagementException("Cannot delete an operation policy of a different API.");
-                }
-
-                boolean isDeleted = apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
-                if (!isDeleted) {
-                    throw new APIManagementException("An unexpected error occurred while deleting the API specific " +
-                            "operation policy " + operationPolicyId + " from API " + apiInfo.getName());
-                }
+                apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
 
                 if (log.isDebugEnabled()) {
                     log.debug("The operation policy " + operationPolicyId + " has been deleted from the the API "
-                            + apiInfo.getName());
+                            + apiId);
                 }
-                return Response.ok().entity("The API specific operation policy with ID " + operationPolicyId
-                        + " has been deleted successfully from the API " + apiInfo.getName()).build();
+                return Response.ok().build();
             } else {
-                throw new APIManagementException("Cannot delete the API specific operation policy " + operationPolicyId
-                        + " of " + apiInfo.getName() + " API as it does not exists");
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
+                        + operationPolicyId + " for API " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY, apiId, e, log);
             } else {
-                throw e;
+                String errorMessage = "Error while deleting the API specific operation policy with ID :" + operationPolicyId
+                        + " for API " + apiId + " " + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (Exception e) {
             RestApiUtil.handleInternalServerError("An error has occurred while deleting the API specific " +
-                    "operation policy", e, log);
+                    " operation policy with ID" + operationPolicyId + " for API " + apiId, e, log);
         }
         return null;
     }
