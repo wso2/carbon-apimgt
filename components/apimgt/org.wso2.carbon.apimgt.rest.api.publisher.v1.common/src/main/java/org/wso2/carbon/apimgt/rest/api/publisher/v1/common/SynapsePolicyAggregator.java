@@ -62,6 +62,9 @@ public class SynapsePolicyAggregator {
             Map<String, Object> configMap = new HashMap<>();
             configMap.put("sequence_name", sequenceName);
             configMap.put("case_list", caseList);
+            if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(flow)) {
+                configMap.put("fault_sequence", true);
+            }
             String operationPolicyTemplate = FileUtil.readFileToString(POLICY_SEQUENCE_TEMPLATE_LOCATION)
                     .replace("\\", ""); //Removing escape characters from the template
             return renderPolicyTemplate(operationPolicyTemplate, configMap);
