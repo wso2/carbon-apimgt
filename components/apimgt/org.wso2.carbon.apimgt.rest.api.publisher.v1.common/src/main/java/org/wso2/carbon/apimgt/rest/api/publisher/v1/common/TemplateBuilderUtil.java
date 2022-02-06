@@ -75,6 +75,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -89,8 +90,9 @@ public class TemplateBuilderUtil {
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
-            List<ClientCertificateDTO> clientCertificateDTOS, List<SoapToRestMediationDto> soapToRestInMediationDtos,
-            List<SoapToRestMediationDto> soapToRestMediationDtos)
+                                                               List<ClientCertificateDTO> clientCertificateDTOS,
+                                                               List<SoapToRestMediationDto> soapToRestInMediationDtos,
+                                                               List<SoapToRestMediationDto> soapToRestMediationDtos)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -264,7 +266,8 @@ public class TemplateBuilderUtil {
     }
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(APIProduct apiProduct, String tenantDomain,
-            List<ClientCertificateDTO> clientCertificateDTOS, Map<String, APIDTO> associatedAPIMap)
+                                                               List<ClientCertificateDTO> clientCertificateDTOS,
+                                                               Map<String, APIDTO> associatedAPIMap)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -532,8 +535,9 @@ public class TemplateBuilderUtil {
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, APIProduct apiProduct,
-            APITemplateBuilder builder, String tenantDomain, Map<String, APIDTO> associatedAPIsMap,
-            List<ClientCertificateDTO> clientCertificatesDTOList)
+                                                                 APITemplateBuilder builder, String tenantDomain,
+                                                                 Map<String, APIDTO> associatedAPIsMap,
+                                                                 List<ClientCertificateDTO> clientCertificatesDTOList)
             throws APITemplateException, XMLStreamException, APIManagementException {
 
         APIProductIdentifier id = apiProduct.getId();
@@ -612,10 +616,10 @@ public class TemplateBuilderUtil {
         }
     }
 
-
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, API api,
-            APITemplateBuilder builder, String tenantDomain, String extractedPath, APIDTO apidto,
-            List<ClientCertificateDTO> clientCertificatesDTOList)
+                                                                 APITemplateBuilder builder, String tenantDomain,
+                                                                 String extractedPath, APIDTO apidto,
+                                                                 List<ClientCertificateDTO> clientCertificatesDTOList)
             throws APIManagementException, APITemplateException, XMLStreamException {
 
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
@@ -792,6 +796,7 @@ public class TemplateBuilderUtil {
         api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(perTopicMappings));
         addWebsocketTopicResourceKeys(api);
     }
+
     private static void setCustomSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
                                                     APIDTO apidto) throws APIManagementException {
 
@@ -800,13 +805,13 @@ public class TemplateBuilderUtil {
                     retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             if (gatewayInContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
-                                addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
             GatewayContentDTO gatewayOutContentDTO =
                     retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
             if (gatewayOutContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
-                                addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
             GatewayContentDTO gatewayFaultContentDTO =
                     retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
@@ -816,17 +821,17 @@ public class TemplateBuilderUtil {
             }
         } else {
             GatewayContentDTO gatewayInContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
-                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
             if (gatewayInContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
-                                addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
             GatewayContentDTO gatewayOutContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
-                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
-                            , api);
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
+                    , api);
             if (gatewayOutContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
-                                addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
         }
     }
@@ -838,7 +843,7 @@ public class TemplateBuilderUtil {
         String faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
         if (!APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
             gatewayAPIDTO.setSequencesToBeRemove(
-                            GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
+                    GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
             List<MediationPolicyDTO> mediationPolicies = apidto.getMediationPolicies();
             GatewayContentDTO faultSequenceContent =
                     retrieveSequence(extractedPath, mediationPolicies, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
@@ -1263,7 +1268,6 @@ public class TemplateBuilderUtil {
         return null;
     }
 
-
     private static GatewayContentDTO retrieveOperationPolicySequenceForProducts(APIProduct apiProduct, API api,
                                                                                 String extractedLocation, String flow)
             throws APIManagementException {
@@ -1322,7 +1326,6 @@ public class TemplateBuilderUtil {
         }
         return null;
     }
-
 
     private static Map<String, APIDTO> retrieveAssociatedApis(String extractedPath) throws APIManagementException {
 
@@ -1462,9 +1465,10 @@ public class TemplateBuilderUtil {
     }
 
     public static JSONObject getModifiedProperties(JSONObject originalProperties) {
+
         JSONObject modifiedProperties = new JSONObject();
         if (originalProperties.size() > 0) {
-            for (Iterator iterator = originalProperties.keySet().iterator(); iterator.hasNext();) {
+            for (Iterator iterator = originalProperties.keySet().iterator(); iterator.hasNext(); ) {
                 String key = (String) iterator.next();
                 String val = (String) originalProperties.get(key);
                 if (key.endsWith("__display")) {

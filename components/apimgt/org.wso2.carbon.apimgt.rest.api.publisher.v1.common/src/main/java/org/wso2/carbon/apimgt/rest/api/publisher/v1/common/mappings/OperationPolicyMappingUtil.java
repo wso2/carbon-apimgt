@@ -190,6 +190,7 @@ public class OperationPolicyMappingUtil {
 
     public static OperationPolicySpecAttributeDTO fromOperationPolicySpecAttributesToDTO(
             OperationPolicySpecAttribute specAttribute) {
+
         OperationPolicySpecAttributeDTO specAttributeDTO = new OperationPolicySpecAttributeDTO();
         specAttributeDTO.setName(specAttribute.getName());
         specAttributeDTO.setDisplayName(specAttribute.getDisplayName());

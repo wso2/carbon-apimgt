@@ -3687,30 +3687,30 @@ public class SQLConstants {
         public static final String GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID =
                 "SELECT " +
                         " OP.POLICY_NAME, OPM.DIRECTION, OPM.PARAMETERS, OPM.POLICY_ORDER, OPM.POLICY_UUID " +
-                " FROM " +
+                        " FROM " +
                         " AM_API_URL_MAPPING AUM " +
-                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
-                " INNER JOIN AM_OPERATION_POLICY OP ON OPM.POLICY_UUID = OP.POLICY_UUID " +
-                " AND " +
+                        " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
+                        " INNER JOIN AM_OPERATION_POLICY OP ON OPM.POLICY_UUID = OP.POLICY_UUID " +
+                        " AND " +
                         " AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
-                " WHERE " +
+                        " WHERE " +
                         " AUM.URL_MAPPING_ID = ?";
 
         public static final String GET_OPERATION_POLICIES_OF_API_SQL =
                 " SELECT " +
                         " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD," +
                         " OP.POLICY_NAME, OPM.PARAMETERS, OPM.DIRECTION, OPM.POLICY_ORDER, OPM.POLICY_UUID" +
-                " FROM " +
+                        " FROM " +
                         " AM_API_URL_MAPPING AUM " +
-                " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
-                " INNER JOIN AM_OPERATION_POLICY OP ON OPM.POLICY_UUID = OP.POLICY_UUID " +
-                " INNER JOIN AM_API_OPERATION_POLICY AOP ON OPM.POLICY_UUID = AOP.POLICY_UUID " +
-                " WHERE " +
+                        " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                        " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
+                        " INNER JOIN AM_OPERATION_POLICY OP ON OPM.POLICY_UUID = OP.POLICY_UUID " +
+                        " INNER JOIN AM_API_OPERATION_POLICY AOP ON OPM.POLICY_UUID = AOP.POLICY_UUID " +
+                        " WHERE " +
                         " API.API_ID = ? " +
-                " AND " +
+                        " AND " +
                         " AUM.REVISION_UUID IS NULL " +
-                " ORDER BY AUM.URL_MAPPING_ID ASC ";
+                        " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
         public static final String GET_OPERATION_POLICIES_FOR_API_REVISION_SQL =
                 " SELECT " +
@@ -3732,14 +3732,13 @@ public class SQLConstants {
                 " SELECT " +
                         " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, " +
                         " OP.POLICY_NAME, OPM.PARAMETERS, OPM.DIRECTION, OPM.POLICY_ORDER, OPM.POLICY_UUID " +
-                " FROM " +
+                        " FROM " +
                         " AM_API_URL_MAPPING AUM " +
-                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
-                " INNER JOIN AM_OPERATION_POLICY OP ON OPM.POLICY_UUID = OP.POLICY_UUID " +
-                " WHERE " +
+                        " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
+                        " INNER JOIN AM_OPERATION_POLICY OP ON OPM.POLICY_UUID = OP.POLICY_UUID " +
+                        " WHERE " +
                         " AUM.REVISION_UUID = ? " +
-                " ORDER BY AUM.URL_MAPPING_ID ASC ";
-
+                        " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
         public static final String ADD_COMMON_OPERATION_POLICY =
                 "INSERT INTO AM_COMMON_OPERATION_POLICY (POLICY_UUID) VALUES (?)";
@@ -3760,33 +3759,32 @@ public class SQLConstants {
         public static final String UPDATE_API_OPERATION_POLICY_BY_POLICY_ID =
                 "UPDATE  AM_API_OPERATION_POLICY SET CLONED_POLICY_UUID = ?  WHERE  POLICY_UUID = ?";
 
-
         public static final String UPDATE_OPERATION_POLICY_CONTENT =
                 "UPDATE " +
                         " AM_OPERATION_POLICY " +
-                " SET " +
+                        " SET " +
                         " POLICY_NAME = ?, DISPLAY_NAME = ?, POLICY_DESCRIPTION = ?, APPLICABLE_FLOWS = ?, GATEWAY_TYPES = ?, " +
                         " API_TYPES = ?, POLICY_PARAMETERS = ?, POLICY_DEFINITION = ?, ORGANIZATION = ?, POLICY_CATEGORY = ?, " +
                         " MULTIPLE_ALLOWED = ?, POLICY_MD5 = ? " +
-                " WHERE " +
+                        " WHERE " +
                         " POLICY_UUID = ?";
 
         public static final String GET_OPERATION_POLICY_FROM_POLICY_ID =
                 "SELECT " +
                         " POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, APPLICABLE_FLOWS, GATEWAY_TYPES, API_TYPES, " +
                         " POLICY_PARAMETERS, POLICY_CATEGORY, MULTIPLE_ALLOWED, POLICY_MD5, ORGANIZATION " +
-                " FROM " +
+                        " FROM " +
                         " AM_OPERATION_POLICY " +
-                " WHERE " +
+                        " WHERE " +
                         " POLICY_UUID = ?";
         public static final String GET_OPERATION_POLICY_WITH_DEFINITION_FROM_POLICY_ID =
                 "SELECT " +
                         " POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, APPLICABLE_FLOWS, GATEWAY_TYPES, API_TYPES, " +
                         " POLICY_PARAMETERS, POLICY_DEFINITION, POLICY_CATEGORY, MULTIPLE_ALLOWED, POLICY_MD5, " +
                         " ORGANIZATION " +
-                " FROM " +
+                        " FROM " +
                         " AM_OPERATION_POLICY " +
-                " WHERE " +
+                        " WHERE " +
                         " POLICY_UUID = ?";
 
         public static final String GET_API_SPECIFIC_OPERATION_POLICY_WITH_DEFINITION_FROM_POLICY_ID =
@@ -3837,7 +3835,6 @@ public class SQLConstants {
                         " WHERE " +
                         " OP.POLICY_NAME = ? AND OP.ORGANIZATION = ? AND AOP.API_UUID = ? ";
 
-
         public static final String GET_COMMON_OPERATION_POLICY_WITH_DEFINITION_FROM_POLICY_NAME =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
@@ -3857,7 +3854,6 @@ public class SQLConstants {
                         " WHERE " +
                         " OP.POLICY_NAME = ? AND OP.ORGANIZATION = ? AND AOP.API_UUID = ? ";
 
-
         public static final String GET_COMMON_OPERATION_POLICY_WITH_OUT_DEFINITION_FROM_POLICY_NAME =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
@@ -3871,18 +3867,18 @@ public class SQLConstants {
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, " +
                         " OP.API_TYPES, OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5 " +
-                " FROM " +
+                        " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_COMMON_OPERATION_POLICY COP ON OP.POLICY_UUID = COP.POLICY_UUID " +
-                " WHERE " +
+                        " WHERE " +
                         " OP.ORGANIZATION = ?";
 
         public static final String GET_ALL_API_SPECIFIC_OPERATION_POLICIES_WITHOUT_CLONED_POLICIES =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, " +
                         " OP.API_TYPES, OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5 " +
-                " FROM " +
+                        " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
-                " WHERE " +
+                        " WHERE " +
                         " OP.ORGANIZATION = ? AND AOP.API_UUID = ? AND AOP.REVISION_UUID IS NULL " +
                         " AND AOP.CLONED_POLICY_UUID IS NULL";
 
