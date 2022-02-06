@@ -552,7 +552,6 @@ public class TemplateBuilderUtil {
         productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
                 productAPIDto.getLocalEntriesToBeAdd()));
         setClientCertificatesToBeAdded(tenantDomain, productAPIDto, clientCertificatesDTOList);
-        productAPIDto.setApiDefinition(builder.getConfigStringForTemplate(environment));
         for (Map.Entry<String, APIDTO> apidtoEntry : associatedAPIsMap.entrySet()) {
             String apiExtractedPath = apidtoEntry.getKey();
             APIDTO apidto = apidtoEntry.getValue();
@@ -566,7 +565,7 @@ public class TemplateBuilderUtil {
             String prefix = id.getName() + "--v" + id.getVersion();
             setSecureVaultPropertyToBeAdded(prefix, api, productAPIDto);
         }
-
+        productAPIDto.setApiDefinition(builder.getConfigStringForTemplate(environment));
         return productAPIDto;
     }
 
@@ -1237,6 +1236,17 @@ public class TemplateBuilderUtil {
                     }
                     operationPolicySequenceContentDto.setName(seqExt);
                     operationPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                    switch (flow) {
+                        case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+                            api.setInSequence(seqExt);
+                            break;
+                        case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+                            api.setOutSequence(seqExt);
+                            break;
+                        case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+                            api.setFaultSequence(seqExt);
+                            break;
+                    }
                     return operationPolicySequenceContentDto;
                 }
             } catch (Exception e) {
@@ -1280,6 +1290,23 @@ public class TemplateBuilderUtil {
                     }
                     operationPolicySequenceContentDto.setName(seqExt);
                     operationPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+
+                    for (APIProductResource productResource : apiProduct.getProductResources()) {
+                        if (productResource.getApiIdentifier().equals(api.getId())) {
+                            switch (flow) {
+                                case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+                                    productResource.setInSequenceName(seqExt);
+                                    break;
+                                case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+                                    productResource.setOutSequenceName(seqExt);
+                                    break;
+                                case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+                                    productResource.setFaultSequenceName(seqExt);
+                                    break;
+                            }
+                        }
+                    }
+
                     return operationPolicySequenceContentDto;
                 }
             } catch (Exception e) {
