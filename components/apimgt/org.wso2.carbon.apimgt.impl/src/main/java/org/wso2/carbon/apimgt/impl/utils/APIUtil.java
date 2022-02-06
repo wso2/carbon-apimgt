@@ -767,6 +767,8 @@ public final class APIUtil {
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants.API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
+            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants.API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(
