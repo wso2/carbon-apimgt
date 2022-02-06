@@ -253,7 +253,7 @@ public class TemplateBuilderUtil {
             if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.emptyMap(), 0);
+                        Collections.emptyMap(), 2);
             } else {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.emptyMap());
@@ -398,7 +398,7 @@ public class TemplateBuilderUtil {
             if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.emptyMap(), 0);
+                        Collections.emptyMap(), 2);
             } else {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.emptyMap());
