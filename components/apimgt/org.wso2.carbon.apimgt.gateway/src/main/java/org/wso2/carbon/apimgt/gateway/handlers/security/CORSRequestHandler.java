@@ -202,6 +202,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     .getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
             messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+            messageContext.setProperty(APIConstants.REST_METHOD, httpMethod);
+
 
             //If this is an OPTIONS request
             if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
