@@ -2710,8 +2710,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                         schema.validate(uploadedConfig);
                     } catch (ValidationException e) {
                         List<String> errors = e.getAllMessages();
-                        String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
-                        throw new APIManagementException("Policy specification validation failure. "+ errorMessage,
+                        String errorMessage =
+                                errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
+                        throw new APIManagementException("Policy specification validation failure. " + errorMessage,
                                 ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
                                         errorMessage));
                     }
@@ -2766,6 +2767,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
     /**
      * Get the list of all API specific operation policies for a given API
      *
@@ -2795,7 +2797,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .fromOperationPolicyDataListToDTO(sharedOperationPolicyLIst, offset, limit);
             return Response.ok().entity(policyListDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving the list of all API specific operation policies." + e.getMessage();
+            String errorMessage =
+                    "Error while retrieving the list of all API specific operation policies." + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (Exception e) {
             RestApiUtil.handleInternalServerError("An error has occurred while getting the list of API specific " +
@@ -2836,11 +2839,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY,
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
                         operationPolicyId, e, log);
             } else {
-                String errorMessage = "Error while getting an API specific operation policy with ID :" + operationPolicyId
-                        + " for API " + apiId + " " + e.getMessage();
+                String errorMessage =
+                        "Error while getting an API specific operation policy with ID :" + operationPolicyId
+                                + " for API " + apiId + " " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (Exception e) {
@@ -2870,7 +2874,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
 
             OperationPolicyDataHolder policyData =
-                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization,true);
+                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, true);
             if (policyData != null) {
                 File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
@@ -2882,11 +2886,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY,
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
                         operationPolicyId, e, log);
             } else {
-                String errorMessage = "Error while getting an API specific operation policy with ID :" + operationPolicyId
-                        + " for API " + apiId + " " + e.getMessage();
+                String errorMessage =
+                        "Error while getting an API specific operation policy with ID :" + operationPolicyId
+                                + " for API " + apiId + " " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (Exception e) {
@@ -2931,11 +2936,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICY,
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
                         operationPolicyId, e, log);
             } else {
-                String errorMessage = "Error while deleting the API specific operation policy with ID :" + operationPolicyId
-                        + " for API " + apiId + " " + e.getMessage();
+                String errorMessage =
+                        "Error while deleting the API specific operation policy with ID :" + operationPolicyId
+                                + " for API " + apiId + " " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (Exception e) {

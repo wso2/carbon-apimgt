@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+
 import java.util.Comparator;
 
 /**
@@ -31,6 +32,7 @@ import java.util.Comparator;
 public class OperationPolicyComparator implements Comparator<OperationPolicy> {
 
     public int compare(OperationPolicy op1, OperationPolicy op2) {
+
         return op1.compareTo(op2);
     }
 }

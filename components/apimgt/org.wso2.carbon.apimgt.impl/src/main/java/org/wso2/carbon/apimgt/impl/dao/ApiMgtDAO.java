@@ -5766,10 +5766,6 @@ public class ApiMgtDAO {
                                                 tenantDomain, false);
                                 String clonedPolicyId = policy.getPolicyId();
                                 if (existingPolicy != null) {
-                                    if (existingPolicy.isARevision()) {
-                                        throw new APIManagementException("Cannot use a revision");
-                                    }
-
                                     if (existingPolicy.isClonedPolicy()) {
                                         usedClonedPolicies.add(clonedPolicyId);
                                     }
@@ -5797,7 +5793,7 @@ public class ApiMgtDAO {
                             Gson gson = new Gson();
                             String paramJSON = gson.toJson(policy.getParameters());
                             if (log.isDebugEnabled()) {
-                                log.debug("Adding operation policy "+ policy.getPolicyName() + " for API "
+                                log.debug("Adding operation policy " + policy.getPolicyName() + " for API "
                                         + api.getId().getApiName() + " to URL mapping Id " + uriMappingId);
                             }
 
@@ -14344,10 +14340,6 @@ public class ApiMgtDAO {
                                                     tenantDomain, false);
                                     String clonedPolicyId = policy.getPolicyId();
                                     if (existingPolicy != null) {
-                                        if (existingPolicy.isARevision()) {
-                                            throw new APIManagementException("Cannot use a revision");
-                                        }
-
                                         if (existingPolicy.isClonedPolicy()) {
                                             usedClonedPolicies.add(clonedPolicyId);
                                         }
@@ -14372,12 +14364,12 @@ public class ApiMgtDAO {
                                     clonedPoliciesMap.put(policy.getPolicyId(), clonedPolicyId);
                                 }
 
-
                                 Gson gson = new Gson();
                                 String paramJSON = gson.toJson(policy.getParameters());
 
                                 insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                insertOperationPolicyMappingStatement.setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
+                                insertOperationPolicyMappingStatement
+                                        .setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                 insertOperationPolicyMappingStatement.setString(4, paramJSON);
                                 insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
@@ -18015,7 +18007,7 @@ public class ApiMgtDAO {
     }
 
     private String addAPISpecificOperationPolicy(Connection connection, String apiUUID, String revisionUUID,
-                                                OperationPolicyDataHolder policyData, String clonedPolicyId)
+                                                 OperationPolicyDataHolder policyData, String clonedPolicyId)
             throws SQLException {
 
         String policyUUID = addOperationPolicyContent(connection, policyData);
@@ -18390,7 +18382,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      **/
     private String revisionOperationPolicy(Connection connection, String policyId, String apiUUID, String revisionUUID,
-                                          String organization)
+                                           String organization)
             throws APIManagementException, SQLException {
 
         OperationPolicyDataHolder policyData = getAPISpecificOperationPolicyByPolicyID(connection, policyId, apiUUID,
@@ -18416,7 +18408,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      **/
     private void updateAPISpecificOperationPolicyWithClonedPolicyId(Connection connection, String policyId,
-                                                                   OperationPolicyDataHolder policyData)
+                                                                    OperationPolicyDataHolder policyData)
             throws SQLException {
 
         if (policyData.getClonedCommonPolicyId() != null) {
@@ -18440,8 +18432,9 @@ public class ApiMgtDAO {
      * @throws SQLException
      * @throws APIManagementException
      **/
-    private String restoreOperationPolicyRevision(Connection connection, String apiUUID, String policyId, int revisionId,
-                                                 String organization) throws SQLException, APIManagementException {
+    private String restoreOperationPolicyRevision(Connection connection, String apiUUID, String policyId,
+                                                  int revisionId,
+                                                  String organization) throws SQLException, APIManagementException {
 
         OperationPolicyDataHolder revisionedPolicy = getAPISpecificOperationPolicyByPolicyID(connection, policyId,
                 apiUUID, organization, true);
@@ -18533,7 +18526,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      */
     private OperationPolicyDataHolder getOperationPolicyByPolicyID(Connection connection, String policyId,
-                                                           boolean isWithPolicyDefinition) throws SQLException {
+                                                                   boolean isWithPolicyDefinition) throws SQLException {
 
         String dbQuery;
         if (isWithPolicyDefinition) {
@@ -18904,7 +18897,7 @@ public class ApiMgtDAO {
         ResultSet rs = statement.executeQuery();
         String policyId = null;
         if (rs.next()) {
-            policyId =  rs.getString("POLICY_UUID");
+            policyId = rs.getString("POLICY_UUID");
         }
         rs.close();
         statement.close();
@@ -18923,7 +18916,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private void deleteAllAPISpecificOperationPoliciesByAPIUUID(Connection connection, String apiUUID,
-                                                               String revisionUUID)
+                                                                String revisionUUID)
             throws SQLException {
 
         String dbQuery;
@@ -18954,13 +18947,15 @@ public class ApiMgtDAO {
      * that policy is removed from the UI, this method is used to clean such unused policies that are imported,
      * but not used
      *
-     * @param connection                DB connection
-     * @param usedClonedPoliciesSet     Currently used imported API specific policies set
-     * @param apiUUID                   UUID of the API
+     * @param connection            DB connection
+     * @param usedClonedPoliciesSet Currently used imported API specific policies set
+     * @param apiUUID               UUID of the API
      * @throws SQLException
      */
-    private void cleanUnusedClonedOperationPolicies(Connection connection, Set<String> usedClonedPoliciesSet, String apiUUID)
+    private void cleanUnusedClonedOperationPolicies(Connection connection, Set<String> usedClonedPoliciesSet,
+                                                    String apiUUID)
             throws SQLException {
+
         Set<String> allClonedPoliciesForAPI = getAllClonedPolicyIdsForAPI(connection, apiUUID);
         Set<String> policiesToDelete = allClonedPoliciesForAPI;
         policiesToDelete.removeAll(usedClonedPoliciesSet);

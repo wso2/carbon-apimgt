@@ -26,11 +26,10 @@ public class OperationPolicyDataHolder {
     private String definition;
     private String organization;
     private String md5Hash;
-    private String apiUUID;                 // Null for common policies
-    private String revisionUUID;            // Null for common policies and API specific policies that are not revisioned yet
+    private String apiUUID;      // Null for common policies
+    private String revisionUUID; // Null for common policies and API specific policies that are not revisioned yet
     private String clonedCommonPolicyId;    // Null for common policies and API specific policies that are not cloned.
     private OperationPolicySpecification specification;
-
 
     public String getPolicyId() {
 
@@ -123,6 +122,7 @@ public class OperationPolicyDataHolder {
     }
 
     public boolean isARevision() {
+
         return revisionUUID != null;
     }
 
