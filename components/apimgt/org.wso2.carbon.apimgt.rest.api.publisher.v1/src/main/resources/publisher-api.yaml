@@ -8091,13 +8091,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/operationPolicyId'
-        - name: withCommonPolicies
-          in: query
-          description:
-            Specify whether to return the policy specification for common policies as well.
-          schema:
-            type: boolean
-            default: false
       responses:
         200:
           description: |
@@ -8171,13 +8164,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/operationPolicyId'
-        - name: withCommonPolicies
-          in: query
-          description:
-            Specify whether to return the policy specification for common policies as well.
-          schema:
-            type: boolean
-            default: false
       responses:
         200:
           description: |
