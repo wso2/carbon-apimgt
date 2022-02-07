@@ -80,6 +80,28 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     }
 
     @GET
+    @Path("/specification/schema")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Export the operation policies specification schema.", notes = "This operation can be used to export the operation-policy-specification-schema.json used in deployment. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
+            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
+        })
+    }, tags={ "Operation Policies",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Operation policy specification schema exported successfully. ", response = String.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response exportOperationPolicySpecificationSchema() throws APIManagementException{
+        return delegate.exportOperationPolicySpecificationSchema(securityContext);
+    }
+
+    @GET
     
     
     @Produces({ "application/json" })

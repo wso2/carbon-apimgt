@@ -195,6 +195,15 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
         return null;
     }
 
+    @Override
+    public Response exportOperationPolicySpecificationSchema(MessageContext messageContext)
+            throws APIManagementException {
+
+        String schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema().toString();
+        return Response.ok().entity(schema)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
+    }
+
     /**
      * Get the list of all common operation policies for a given organization
      *

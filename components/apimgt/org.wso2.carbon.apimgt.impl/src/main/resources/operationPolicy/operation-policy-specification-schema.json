@@ -40,14 +40,19 @@
         "type": "string",
         "enum": [
           "Synapse",
-          "CC"
+          "ChoreoConnect"
         ]
       }
     },
     "supportedApiTypes": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "enum": [
+          "REST",
+          "GRAPHQL",
+          "STREAMING"
+        ]
       }
     },
     "policyAttributes": {

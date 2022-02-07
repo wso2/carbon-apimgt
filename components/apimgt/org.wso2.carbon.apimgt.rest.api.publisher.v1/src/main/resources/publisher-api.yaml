@@ -7974,7 +7974,7 @@ paths:
   /apis/{apiId}/operation-policies:
     get:
       tags:
-        - Operation Policies
+        - API specific Operation Policies
       summary: |
         Get all API specific operation policies for an API
       description: |
@@ -8019,7 +8019,7 @@ paths:
 
     post:
       tags:
-        - Operation Policies
+        - API specific Operation Policies
       summary: Add an API specific operation policy
       description: |
         This operation can be used to add an API specifc operation policy. This policy cannot be used in other APIs.
@@ -8083,7 +8083,7 @@ paths:
   /apis/{apiId}/operation-policies/{operationPolicyId}:
     get:
       tags:
-        - Operation Policies
+        - API specific Operation Policies
       summary: Get policy details of an API specific policy
       description: |
         This operation can be used to retrieve a particular API specific operation policy.
@@ -8124,7 +8124,7 @@ paths:
 
     delete:
       tags:
-        - Operation Policies
+        - API specific Operation Policies
       summary: Delete an API Specific Operation Policy
       description: |
         This operation can be used to delete an existing API specific opreation policy by providing the Id of the API and the Id of the policy.
@@ -8156,7 +8156,7 @@ paths:
   /apis/{apiId}/operation-policies/{operationPolicyId}/content:
     get:
       tags:
-        - Operation Policies
+        - API specific Operation Policies
       summary: Download an API Specific Operation Policy
       description: |
         This operation can be used to download a particular API specific operation policy.
@@ -8401,6 +8401,48 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+
+  /operation-policies/specification/schema:
+    get:
+      tags:
+        - Operation Policies
+      summary: Export the operation policies specification schema.
+      description: |
+        This operation can be used to export the operation-policy-specification-schema.json used in deployment.
+      operationId: exportOperationPolicySpecificationSchema
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy specification schema exported successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/v2/operation-policies/specification/schema" > operation-policy-specification-schema.json'
+
 
   /api-products/change-lifecycle:
     post:
