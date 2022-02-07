@@ -217,7 +217,7 @@ public class SolaceAdminApis {
     }
 
     /**
-     * Check existence of the developer in Solace.
+     * Check existence of the developer in Solace
      *
      * @param organization name of the Organization
      * @return CloseableHttpResponse of the GET call
