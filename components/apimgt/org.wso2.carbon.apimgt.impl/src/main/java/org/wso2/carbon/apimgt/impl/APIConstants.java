@@ -1622,6 +1622,7 @@ public final class APIConstants {
     public static final String ENDPOINT_TYPE_LOADBALANCE = "load_balance";
     public static final String ENDPOINT_CONFIG = "endpoint_config";
     public static final String ENDPOINT_TYPE_HTTP = "http";
+    public static final String ENDPOINT_TYPE_SERVICE = "service";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
     public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
@@ -2727,6 +2728,7 @@ public final class APIConstants {
         public static final String MD5 = "MD5";
         public static final String SERVICE_VERSION = "SERVICE_VERSION";
         public static final String SERVICE_URL = "SERVICE_URL";
+        public static final String API_ID = "API_ID";
         public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
         public static final String DEFINITION_URL = "DEFINITION_URL";
         public static final String DESCRIPTION = "DESCRIPTION";

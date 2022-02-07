@@ -1221,6 +1221,8 @@ public class OASParserUtil {
             endpointResult = populateLoadBalanceConfig(endpointConfig, isProduction);
         } else if (APIConstants.ENDPOINT_TYPE_HTTP.equalsIgnoreCase(type)) {
             endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_HTTP);
+        } else if (APIConstants.ENDPOINT_TYPE_SERVICE.equalsIgnoreCase(type)) {
+            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_SERVICE);
         } else if (APIConstants.ENDPOINT_TYPE_ADDRESS.equalsIgnoreCase(type)) {
             endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_ADDRESS);
         } else {
