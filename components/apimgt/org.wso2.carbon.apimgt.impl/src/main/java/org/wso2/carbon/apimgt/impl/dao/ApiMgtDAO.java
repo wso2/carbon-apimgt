@@ -17602,6 +17602,31 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieve the Unique Identifier of the Service used in API
+     *
+     * @param apiId    Unique Identifier of API
+     * @return Service Key
+     * @throws APIManagementException
+     */
+    public String retrieveServiceKeyByApiId(int apiId) throws APIManagementException {
+
+        String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL_WITHOUT_TENANT_ID;
+        String serviceKey = StringUtils.EMPTY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
+            preparedStatement.setInt(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    serviceKey = resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Service Key associated with API " + apiId, e);
+        }
+        return serviceKey;
+    }
+
+    /**
      * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
      *
      * @param apiId      Unique Identifier of API
@@ -17612,7 +17637,7 @@ public class ApiMgtDAO {
     public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, Connection connection)
             throws SQLException, APIManagementException {
         try {
-            if (!retrieveServiceKeyByApiId(apiId, -1234).isEmpty()) {
+            if (!retrieveServiceKeyByApiId(apiId).isEmpty()) {
                 try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
                     statement.setString(1, serviceKey);
                     statement.setString(2, md5);
