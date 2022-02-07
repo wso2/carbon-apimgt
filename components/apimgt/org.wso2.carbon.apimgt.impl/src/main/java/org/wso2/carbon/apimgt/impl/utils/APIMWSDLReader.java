@@ -67,6 +67,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -160,14 +161,51 @@ public class APIMWSDLReader {
      * @throws APIManagementException Error occurred during validation
      */
     public static WSDLValidationResponse validateWSDLFile(InputStream inputStream) throws APIManagementException {
+        WSDLValidationResponse wsdlValidationResponse;
+        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
+                + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+        String wsdlFilePath = path + File.separator + APIConstants.WSDL_FILE
+                + APIConstants.WSDL_FILE_EXTENSION;
+        // Append an additional '/' if not found before the prefix
+        if (!wsdlFilePath.startsWith("/")) {
+            wsdlFilePath = "/" + wsdlFilePath;
+        }
+
+        APIFileUtil.extractSingleWSDLFile(inputStream, path, wsdlFilePath);
+        String finalPath = APIConstants.FILE_URI_PREFIX + wsdlFilePath;
+
         try {
-            byte[] wsdlContent = APIUtil.toByteArray(inputStream);
-            WSDLProcessor processor = getWSDLProcessor(wsdlContent);
-            return getWsdlValidationResponse(processor);
+            WSDLProcessor processor = getWSDLProcessor(finalPath);
+            wsdlValidationResponse = new WSDLValidationResponse();
+            if (processor.hasError()) {
+                wsdlValidationResponse.setValid(false);
+                wsdlValidationResponse.setError(processor.getError());
+            } else {
+                wsdlValidationResponse.setValid(true);
+                wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
+                wsdlValidationResponse.setWsdlProcessor(processor);
+            }
+            return wsdlValidationResponse;
         } catch (APIManagementException e) {
             return handleExceptionDuringValidation(e);
-        } catch (IOException e) {
-            throw new APIMgtWSDLException("Error while validating WSDL", e);
+        }
+    }
+
+    /**
+     * Gets WSDL definition as a byte array given the WSDL definition
+     *
+     * @param wsdlDefinition generated WSDL definition
+     * @return converted WSDL definition as byte array
+     * @throws APIManagementException
+     */
+    public byte[] getWSDL(Definition wsdlDefinition) throws APIManagementException {
+        try {
+            WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
+        } catch (WSDLException e) {
+            throw new APIManagementException("Error occurs when change the address URL of the WSDL", e);
         }
     }
 
@@ -185,6 +223,18 @@ public class APIMWSDLReader {
         } catch (APIManagementException e) {
             return handleExceptionDuringValidation(e);
         }
+    }
+
+    /**
+     * Extract the WSDL file and validates it
+     *
+     * @param wsdlContent file content as a byte array
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
+    public static WSDLValidationResponse validateWSDLFile(byte[] wsdlContent) throws  APIManagementException {
+        WSDLProcessor processor = getWSDLProcessor(wsdlContent);
+        return getWsdlValidationResponse(processor);
     }
 
     /**
@@ -225,20 +275,52 @@ public class APIMWSDLReader {
     public static WSDLProcessor getWSDLProcessor(String wsdlPath) throws APIManagementException {
         WSDLProcessor wsdl11Processor = new WSDL11ProcessorImpl();
         WSDLProcessor wsdl20Processor = new WSDL20ProcessorImpl();
-        try {
-            if (wsdl11Processor.canProcess(wsdlPath)) {
-                wsdl11Processor.initPath(wsdlPath);
-                return wsdl11Processor;
-            } else if (wsdl20Processor.canProcess(wsdlPath)) {
-                wsdl20Processor.initPath(wsdlPath);
-                return wsdl20Processor;
-            } else {
-                //no processors found if this line reaches
-                throw new APIManagementException("No WSDL processor found to process WSDL content.",
-                        ExceptionCodes.CONTENT_NOT_RECOGNIZED_AS_WSDL);
+        byte[] wsdlContent;
+        APIMWSDLReader wsdlReader;
+        if (wsdlPath.endsWith(".wsdl") || wsdlPath.endsWith("?wsdl")) {
+            wsdlReader = new APIMWSDLReader(wsdlPath);
+            wsdlContent = wsdlReader.getWSDL();
+            return getWSDLProcessor(wsdlContent);
+        } else {
+            try {
+                if (wsdl11Processor.canProcess(wsdlPath)) {
+                    wsdl11Processor.initPath(wsdlPath);
+                    return wsdl11Processor;
+                } else if (wsdl20Processor.canProcess(wsdlPath)) {
+                    wsdl20Processor.initPath(wsdlPath);
+                    return wsdl20Processor;
+                } else {
+                    //no processors found if this line reaches
+                    throw new APIManagementException("No WSDL processor found to process WSDL content.",
+                            ExceptionCodes.CONTENT_NOT_RECOGNIZED_AS_WSDL);
+                }
+            } catch (APIMgtWSDLException e) {
+                throw new APIManagementException("Error while instantiating wsdl processor class", e);
             }
-        } catch (APIMgtWSDLException e) {
-            throw new APIManagementException("Error while instantiating wsdl processor class", e);
+        }
+    }
+
+    /**
+     * Get the Secured Parsed Document from given file
+     *
+     * @param file file path
+     * @return Secured Parsed Document
+     * @throws APIManagementException When error occurred when parsing the file
+     */
+    public Document getSecuredParsedDocument(String file) throws APIManagementException {
+        String errorMsg = "Error while reading WSDL document";
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(new File(file));
+            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(inputStream);
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            throw new APIManagementException(errorMsg, e);
+        } finally {
+            if (inputStream != null) {
+                IOUtils.closeQuietly(inputStream);
+            }
         }
     }
 
@@ -323,9 +405,10 @@ public class APIMWSDLReader {
      * @return WSDL11SOAPOperationExtractor for the provided URL
      * @throws APIManagementException If an error occurs while determining the processor
      */
-    public static WSDL11SOAPOperationExtractor getWSDLSOAPOperationExtractor(String wsdlPath)
-            throws APIManagementException {
+    public static WSDL11SOAPOperationExtractor getWSDLSOAPOperationExtractor(String wsdlPath, APIMWSDLReader
+            wsdlReader) throws APIManagementException {
         WSDL11SOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor();
+        processor.loadXSDs(wsdlReader, wsdlPath);
         processor.initPath(wsdlPath);
         return processor;
     }
@@ -400,23 +483,6 @@ public class APIMWSDLReader {
         } catch (Exception e) {
             String msg = "Error occurs when change the address URL of the WSDL";
             throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
-     * Gets WSDL definition as a byte array given the WSDL definition
-     * @param wsdlDefinition generated WSDL definition
-     * @return converted WSDL definition as byte array
-     * @throws APIManagementException
-     */
-    public byte[] getWSDL(Definition wsdlDefinition) throws APIManagementException {
-        try {
-            WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
-            return byteArrayOutputStream.toByteArray();
-        } catch (Exception e) {
-            throw new APIManagementException("Error occurs when change the address URL of the WSDL", e);
         }
     }
 
@@ -678,6 +744,7 @@ public class APIMWSDLReader {
     private void setServiceDefinitionForWSDL2(org.apache.woden.wsdl20.Description definition, API api)
             throws APIManagementException {
         org.apache.woden.wsdl20.Service[] serviceMap = definition.getServices();
+        String organization = api.getOrganization();
         // URL addressURI;
         try {
             for (org.apache.woden.wsdl20.Service svc : serviceMap) {
@@ -690,7 +757,7 @@ public class APIMWSDLReader {
                     // } else {
                     String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(),
                                                                      api.getTransports());
-                    setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) +
+                    setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport, organization) +
                                                    api.getContext() + '/' + api.getId().getVersion()));
                     //}
                 }
@@ -862,6 +929,7 @@ public class APIMWSDLReader {
             throws APIManagementException {
         Map serviceMap = definition.getAllServices();
         URL addressURI;
+        String organization = api.getOrganization();
         for (Object entry : serviceMap.entrySet()) {
             Map.Entry svcEntry = (Map.Entry) entry;
             Service svc = (Service) svcEntry.getValue();
@@ -890,7 +958,7 @@ public class APIMWSDLReader {
                         // Here if there is a conversion failure , consider "https" as default protocol
                     }
                     setAddressUrl(extensibilityElement, endpointTransport, api.getContext(), environmentName,
-                            environmentType);
+                            environmentType, organization);
                 }
             }
         }
@@ -937,19 +1005,21 @@ public class APIMWSDLReader {
 	 */
 	private void setAddressUrl(ExtensibilityElement exElement, String transports, API api) throws APIManagementException {
 
+        String organization = api.getOrganization();
+
         if (exElement instanceof SOAP12AddressImpl) {
-            ((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports, organization) + api.getContext());
         } else if (exElement instanceof SOAPAddressImpl) {
-            ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports, organization) + api.getContext());
         } else if (exElement instanceof HTTPAddressImpl) {
-            ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports, organization) + api.getContext());
         } else if (exElement instanceof UnknownExtensibilityElement) {
             Element unknownExtensibilityElement = ((UnknownExtensibilityElement) exElement).getElement();
             if (unknownExtensibilityElement != null) {
                 NodeList nodeList = unknownExtensibilityElement.getElementsByTagNameNS(APIConstants.WSDL_NAMESPACE_URI,
                         APIConstants.WSDL_ELEMENT_LOCAL_NAME);
                 if (nodeList != null && nodeList.getLength() > 0) {
-                    nodeList.item(0).setTextContent(APIUtil.getGatewayendpoint(transports) + api.getContext());
+                    nodeList.item(0).setTextContent(APIUtil.getGatewayendpoint(transports, organization) + api.getContext());
                 }
             }
         } else {
@@ -970,24 +1040,24 @@ public class APIMWSDLReader {
      * @throws APIManagementException when unsupported WSDL as a input
      */
     private void setAddressUrl(ExtensibilityElement exElement, String transports, String context,
-            String environmentName, String environmentType) throws APIManagementException {
+            String environmentName, String environmentType, String organization) throws APIManagementException {
         if (exElement instanceof SOAP12AddressImpl) {
             ((SOAP12AddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType, organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((SOAP12AddressImpl) exElement).getLocationURI());
             }
         } else if (exElement instanceof SOAPAddressImpl) {
             ((SOAPAddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType, organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((SOAPAddressImpl) exElement).getLocationURI());
             }
         } else if (exElement instanceof HTTPAddressImpl) {
             ((HTTPAddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType, organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((HTTPAddressImpl) exElement).getLocationURI());

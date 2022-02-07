@@ -17,7 +17,14 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 /**
@@ -43,8 +50,8 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
                 .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
     }
 
-    UserAwareAPIConsumer(String username, APIMRegistryService registryService) throws APIManagementException {
-        super(username, registryService);
+    UserAwareAPIConsumer(String username) throws APIManagementException {
+        super(username);
         this.username = username;
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -64,19 +71,19 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public void removeSubscription(Identifier identifier, String userId,
-                                   int applicationId) throws APIManagementException {
-        super.removeSubscription(identifier, userId, applicationId);
+    public void removeSubscription(Identifier identifier, String userId, int applicationId,
+                                   String organization) throws APIManagementException {
+        super.removeSubscription(identifier, userId, applicationId, organization);
     }
 
     @Override
-    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
-        super.removeSubscription(subscription);
+    public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
+        super.removeSubscription(subscription, organization);
     }
 
     @Override
-    public int addApplication(Application application, String userId) throws APIManagementException {
-        return super.addApplication(application, userId);
+    public int addApplication(Application application, String userId, String organization) throws APIManagementException {
+        return super.addApplication(application, userId, organization);
     }
 
     @Override
@@ -89,9 +96,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super.removeApplication(application, username);
     }
      @Override
-    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId) throws
-             APIManagementException {
-        super.removeSubscription(identifier, userId, applicationId, groupId);
+    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
+                                   String organization) throws APIManagementException {
+        super.removeSubscription(identifier, userId, applicationId, groupId, organization);
     }
 
     /**
@@ -105,33 +112,26 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return super.addComment(identifier, comment, user);
+    public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
+        return super.addComment(uuid, comment, user);
     }
 
     @Override
-    public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
-        super.deleteComment(identifier,commentId);
+    public void deleteComment(String uuid, String commentId) throws APIManagementException {
+        super.deleteComment(uuid, commentId);
     }
 
     @Override
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getAPI(identifier);
-    }
-    
-    @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
-            throws APIManagementException {
-        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, requestedTenantDomain);
-        Identifier identifier;
-        if (apiTypeWrapper.isAPIProduct()) {
-            identifier = apiTypeWrapper.getApiProduct().getId();
-        } else {
-            identifier = apiTypeWrapper.getApi().getId();
-        }
-        //TO-DO Commented to since need to work for monodb should be move to registry persistent impl
-//        checkAccessControlPermission(identifier);
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
+        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organization);
         return apiTypeWrapper;
+    }
+
+    @Override
+    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
+        API api = super.getLightweightAPI(identifier, orgId);
+        checkVisibilityPermission(userNameWithoutChange, api.getVisibility(),
+                api.getVisibleRoles());
+        return api;
     }
 }

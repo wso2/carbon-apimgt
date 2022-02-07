@@ -153,20 +153,26 @@ public class OAuthClient {
                 tokenResponse.setRefreshToken((String) jsonResponse.get("refresh_token"));
             }
             if (jsonResponse.containsKey("scope")) {
-                Set<String> scopeSet = Stream.of( jsonResponse.get("scope").toString().trim()
-                        .split("\\s*,\\s*") ).collect(Collectors.toSet());
+                Set<String> scopeSet = Stream.of(jsonResponse.get("scope").toString().trim()
+                        .split("\\s*,\\s*")).collect(Collectors.toSet());
                 tokenResponse.setScope(scopeSet);
             }
             if (jsonResponse.containsKey("token_type")) {
                 tokenResponse.setTokenType((String) jsonResponse.get("token_type"));
             }
             if (jsonResponse.containsKey("expires_in")) {
-                tokenResponse.setExpiresIn( jsonResponse.get("expires_in").toString());
+                tokenResponse.setExpiresIn(jsonResponse.get("expires_in").toString());
+            } else if (null != APIUtil.getMediationConfigurationFromAPIMConfig(
+                    APIConstants.OAuthConstants.OAUTH_MEDIATION_CONFIG +
+                            APIConstants.OAuthConstants.EXPIRES_IN_CONFIG)) {
+                tokenResponse.setExpiresIn(APIUtil.getMediationConfigurationFromAPIMConfig(
+                        APIConstants.OAuthConstants.OAUTH_MEDIATION_CONFIG +
+                                APIConstants.OAuthConstants.EXPIRES_IN_CONFIG));
+                long currentTimeInSeconds = System.currentTimeMillis() / 1000;
+                long expiryTimeInSeconds = currentTimeInSeconds + Long.parseLong(tokenResponse.getExpiresIn());
+                tokenResponse.setValidTill(expiryTimeInSeconds);
             }
         }
-        long currentTimeInSeconds = System.currentTimeMillis() / 1000;
-        long expiryTimeInSeconds = currentTimeInSeconds + Long.parseLong(tokenResponse.getExpiresIn());
-        tokenResponse.setValidTill(expiryTimeInSeconds);
 
         if (log.isDebugEnabled()) {
             log.debug("Response: [status-code] " + responseCode + " [message] "

@@ -29,6 +29,18 @@ public class ThrottleProperties {
     private JMSConnectionProperties jmsConnectionProperties;
     private boolean enableUnlimitedTier;
     private String throttleDataSourceName;
+
+    public boolean isEnablePolicyDeployment() {
+
+        return enablePolicyDeployment;
+    }
+
+    public void setEnablePolicyDeployment(boolean enablePolicyDeployment) {
+
+        this.enablePolicyDeployment = enablePolicyDeployment;
+    }
+
+    private boolean enablePolicyDeployment;
     private PolicyDeployer policyDeployer;
     private BlockCondition blockCondition;
     private boolean enableHeaderConditions = false;

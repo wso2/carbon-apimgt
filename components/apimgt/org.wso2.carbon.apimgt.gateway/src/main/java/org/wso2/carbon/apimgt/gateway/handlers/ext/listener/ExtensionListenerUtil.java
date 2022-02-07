@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -308,6 +309,9 @@ public class ExtensionListenerUtil {
             } catch (IOException | XMLStreamException e) {
                 log.error("Error while setting payload " + axis2MC.getLogIDString(), e);
             }
+        } else if (extensionResponseDTO.getPayload() == null && contentType == null &&
+                ExtensionResponseStatus.RETURN_ERROR.toString().equals(extensionResponseDTO.getResponseStatus())) {
+            axis2MC.setProperty(APIConstants.NO_ENTITY_BODY, true);
         }
     }
 
@@ -330,7 +334,17 @@ public class ExtensionListenerUtil {
                 log.debug("Continuing the handler flow " + axis2MC.getLogIDString());
             }
             return true;
-        } else if (ExtensionResponseStatus.RETURN_RESPONSE.toString().equals(responseStatus)) {
+        } else if (ExtensionResponseStatus.RETURN_ERROR.toString().equals(responseStatus)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Continuing the handler error flow " + axis2MC.getLogIDString());
+            }
+            messageContext.setProperty(SynapseConstants.ERROR_CODE,
+                    APIConstants.ExtensionListenerConstants.API_EXTENSION_LISTENER_ERROR);
+            messageContext.setProperty(SynapseConstants.ERROR_DETAIL,
+                    APIConstants.ExtensionListenerConstants.API_EXTENSION_LISTENER_ERROR_MESSAGE);
+        }
+        if (ExtensionResponseStatus.RETURN_RESPONSE.toString().equals(responseStatus) ||
+                ExtensionResponseStatus.RETURN_ERROR.toString().equals(responseStatus)) {
             // This property need to be set to avoid sending the content in pass-through pipe (request message)
             // as the response.
             axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);

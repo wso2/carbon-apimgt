@@ -39,7 +39,41 @@ public class KeyManagerInfoDTO   {
     private Boolean enableOAuthAppCreation = true;
     private Boolean enableMapOAuthConsumerApps = false;
     private List<KeyManagerApplicationConfigurationDTO> applicationConfiguration = new ArrayList<KeyManagerApplicationConfigurationDTO>();
+    private String alias = null;
     private Object additionalProperties = null;
+
+    @XmlType(name="TokenTypeEnum")
+    @XmlEnum(String.class)
+    public enum TokenTypeEnum {
+        EXCHANGED("EXCHANGED"),
+        DIRECT("DIRECT"),
+        BOTH("BOTH");
+        private String value;
+
+        TokenTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TokenTypeEnum fromValue(String v) {
+            for (TokenTypeEnum b : TokenTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private TokenTypeEnum tokenType = TokenTypeEnum.DIRECT;
 
   /**
    **/
@@ -318,6 +352,24 @@ public class KeyManagerInfoDTO   {
   }
 
   /**
+   * The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token 
+   **/
+  public KeyManagerInfoDTO alias(String alias) {
+    this.alias = alias;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9443/oauth2/token", value = "The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token ")
+  @JsonProperty("alias")
+  public String getAlias() {
+    return alias;
+  }
+  public void setAlias(String alias) {
+    this.alias = alias;
+  }
+
+  /**
    **/
   public KeyManagerInfoDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
@@ -333,6 +385,24 @@ public class KeyManagerInfoDTO   {
   }
   public void setAdditionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT and BOTH.
+   **/
+  public KeyManagerInfoDTO tokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT and BOTH.")
+  @JsonProperty("tokenType")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
   }
 
 
@@ -361,12 +431,14 @@ public class KeyManagerInfoDTO   {
         Objects.equals(enableOAuthAppCreation, keyManagerInfo.enableOAuthAppCreation) &&
         Objects.equals(enableMapOAuthConsumerApps, keyManagerInfo.enableMapOAuthConsumerApps) &&
         Objects.equals(applicationConfiguration, keyManagerInfo.applicationConfiguration) &&
-        Objects.equals(additionalProperties, keyManagerInfo.additionalProperties);
+        Objects.equals(alias, keyManagerInfo.alias) &&
+        Objects.equals(additionalProperties, keyManagerInfo.additionalProperties) &&
+        Objects.equals(tokenType, keyManagerInfo.tokenType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, displayName, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, applicationConfiguration, additionalProperties);
+    return Objects.hash(id, name, type, displayName, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, applicationConfiguration, alias, additionalProperties, tokenType);
   }
 
   @Override
@@ -390,7 +462,9 @@ public class KeyManagerInfoDTO   {
     sb.append("    enableOAuthAppCreation: ").append(toIndentedString(enableOAuthAppCreation)).append("\n");
     sb.append("    enableMapOAuthConsumerApps: ").append(toIndentedString(enableMapOAuthConsumerApps)).append("\n");
     sb.append("    applicationConfiguration: ").append(toIndentedString(applicationConfiguration)).append("\n");
+    sb.append("    alias: ").append(toIndentedString(alias)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

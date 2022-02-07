@@ -22,12 +22,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.WebhooksDAO;
 import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.notification.event.WebhooksSubscriptionEvent;
-import org.wso2.carbon.apimgt.notification.util.NotificationUtil;
-import org.wso2.carbon.databridge.commons.Event;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -115,12 +116,9 @@ public class WebhooksSubscriptionEventHandler implements EventHandler {
                 event.getCallback(), event.getTopic(), event.getMode(), event.getSecret(), event.getExpiryTime(),
                 event.getSubscriberName(), event.getApplicationTier(), event.getTier(), event.getApiTier(),
                 !isSuccess};
-        Event notificationMessage = new Event(APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID,
-                System.currentTimeMillis(), null, null, objects);
-        NotificationUtil.publishEventToStreamService(notificationMessage);
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully sent the webhooks subscription notification on realtime");
-        }
+        EventPublisherEvent asyncWebhooksEvent = new EventPublisherEvent(
+                APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID, System.currentTimeMillis(), objects);
+        APIUtil.publishEvent(EventPublisherType.ASYNC_WEBHOOKS, asyncWebhooksEvent, asyncWebhooksEvent.toString());
     }
 
     /**

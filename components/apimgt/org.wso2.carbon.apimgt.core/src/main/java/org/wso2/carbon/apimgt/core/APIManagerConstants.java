@@ -16,8 +16,6 @@
 package org.wso2.carbon.apimgt.core;
 
 public class APIManagerConstants {
-	
-	public static final String APPLICATION_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/tiers.xml";
 
     public static final String GOVERNANCE_REGISTRY_PREFIX = "gov:";
     

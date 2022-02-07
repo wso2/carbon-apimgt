@@ -1,0 +1,13 @@
+<ns:LocalizableMessage xmlns:ns="http://schemas.cordys.com/General/1.0/">
+    <ns:MessageCode>string</ns:MessageCode>
+    <!--Zero or more repetitions:-->
+    <ns:Insertion>
+        e
+        <ns:LocalizableMessage>
+            <ns:MessageCode>string</ns:MessageCode>
+            <!--Zero or more repetitions:-->
+            <ns:Insertion/>
+        </ns:LocalizableMessage>
+        gero
+    </ns:Insertion>
+</ns:LocalizableMessage>

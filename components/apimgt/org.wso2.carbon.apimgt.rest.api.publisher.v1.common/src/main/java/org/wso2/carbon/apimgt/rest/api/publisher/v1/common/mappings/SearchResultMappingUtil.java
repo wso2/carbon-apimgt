@@ -66,6 +66,7 @@ public class SearchResultMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         apiResultDTO.setContext(context);
+        apiResultDTO.setContextTemplate(api.getContextTemplate());
         apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
         apiResultDTO.setTransportType(api.getType());
         apiResultDTO.setDescription(api.getDescription());

@@ -51,7 +51,7 @@ public class WebSubConfigContextTest {
         api.setUriTemplates(setAPIUriTemplates());
         api.setType(APIConstants.APITransportType.WEBSUB.toString());
         WebsubSubscriptionConfiguration webSubConfig =
-                new WebsubSubscriptionConfiguration("", "", "");
+                new WebsubSubscriptionConfiguration(false, "", "", "");
         api.setWebsubSubscriptionConfiguration(webSubConfig);
         Environment environment = new Environment();
         environment.setType("production");
@@ -81,7 +81,7 @@ public class WebSubConfigContextTest {
         api.setUriTemplates(setAPIUriTemplates());
         api.setType(APIConstants.APITransportType.WEBSUB.toString());
         WebsubSubscriptionConfiguration webSubConfig =
-                new WebsubSubscriptionConfiguration("9207975e1fef9c41fab41645f81dbf0f", "SHA1",
+                new WebsubSubscriptionConfiguration(true, "9207975e1fef9c41fab41645f81dbf0f", "SHA1",
                         "x-hub-signature");
         api.setWebsubSubscriptionConfiguration(webSubConfig);
         Environment environment = new Environment();

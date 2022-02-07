@@ -109,6 +109,8 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                     workflowType = "AM_APPLICATION_REGISTRATION_SANDBOX";
                 } else if (workflowType.equals("API_STATE")) {
                     workflowType = "AM_API_STATE";
+                } else if (workflowType.equals("API_PRODUCT_STATE")) {
+                    workflowType = "AM_API_PRODUCT_STATE";
                 }
             }
             workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);

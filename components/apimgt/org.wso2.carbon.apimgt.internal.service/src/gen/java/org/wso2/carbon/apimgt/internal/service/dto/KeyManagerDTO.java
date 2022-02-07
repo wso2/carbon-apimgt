@@ -22,6 +22,39 @@ public class KeyManagerDTO   {
     private String tenantDomain = null;
     private Object _configuration = null;
 
+    @XmlType(name="TokenTypeEnum")
+    @XmlEnum(String.class)
+    public enum TokenTypeEnum {
+        EXCHANGED("EXCHANGED"),
+        DIRECT("DIRECT"),
+        BOTH("BOTH");
+        private String value;
+
+        TokenTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TokenTypeEnum fromValue(String v) {
+            for (TokenTypeEnum b : TokenTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private TokenTypeEnum tokenType = TokenTypeEnum.DIRECT;
+
   /**
    **/
   public KeyManagerDTO name(String name) {
@@ -107,6 +140,24 @@ public class KeyManagerDTO   {
     this._configuration = _configuration;
   }
 
+  /**
+   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.
+   **/
+  public KeyManagerDTO tokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.")
+  @JsonProperty("tokenType")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -121,12 +172,13 @@ public class KeyManagerDTO   {
         Objects.equals(type, keyManager.type) &&
         Objects.equals(enabled, keyManager.enabled) &&
         Objects.equals(tenantDomain, keyManager.tenantDomain) &&
-        Objects.equals(_configuration, keyManager._configuration);
+        Objects.equals(_configuration, keyManager._configuration) &&
+        Objects.equals(tokenType, keyManager.tokenType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, type, enabled, tenantDomain, _configuration);
+    return Objects.hash(name, type, enabled, tenantDomain, _configuration, tokenType);
   }
 
   @Override
@@ -139,6 +191,7 @@ public class KeyManagerDTO   {
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    tenantDomain: ").append(toIndentedString(tenantDomain)).append("\n");
     sb.append("    _configuration: ").append(toIndentedString(_configuration)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

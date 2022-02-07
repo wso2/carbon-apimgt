@@ -96,33 +96,33 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            APIUtil.loadTenantExternalStoreConfig(tenantId);
+            APIUtil.loadTenantExternalStoreConfig(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load external-stores.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
-            APIUtil.loadTenantGAConfig(tenantId);
+            APIUtil.loadTenantGAConfig(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
             //load workflow-extension configuration to the registry
-            APIUtil.loadTenantWorkFlowExtensions(tenantId);
+            APIUtil.loadTenantWorkFlowExtensions(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load workflow-extension.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
             //load self signup configurations to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
+            APIUtil.loadTenantSelfSignUpConfigurations(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
-            APIUtil.loadAndSyncTenantConf(tenantId);
+            APIUtil.loadAndSyncTenantConf(tenantDomain);
         } catch (APIManagementException e) {
             log.error("Failed to load " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);
         } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment

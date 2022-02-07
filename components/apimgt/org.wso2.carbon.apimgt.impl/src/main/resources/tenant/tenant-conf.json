@@ -2,27 +2,6 @@
   "EnableMonetization" : false,
   "EnableRecommendation" : false,
   "IsUnlimitedTierPaid" : false,
-  "ContainerMgt": [
-    {
-      "Type": "Kubernetes",
-      "ContainerMgtInfo": [
-        {
-          "ClusterName": "",
-          "DisplayName": "",
-          "Properties": {
-            "MasterURL": "",
-            "AccessURL": "",
-            "SAToken": "",
-            "Namespace": "default",
-            "Replicas": 1,
-            "BasicSecurityCustomResourceName": "",
-            "OauthSecurityCustomResourceName": "",
-            "JWTSecurityCustomResourceName": ""
-          }
-        }
-      ]
-    }
-  ],
   "ExtensionHandlerPosition": "bottom",
   "RESTAPIScopes": {
     "Scope": [
@@ -45,6 +24,10 @@
       {
         "Name": "apim:api_delete",
         "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:api_manage",
+        "Roles": "admin"
       },
       {
         "Name": "apim:subscribe",
@@ -75,11 +58,19 @@
         "Roles": "admin,Internal/publisher"
       },
       {
+        "Name": "apim:subscription_manage",
+        "Roles": "admin,Internal/publisher"
+      },
+      {
         "Name": "apim:mediation_policy_view",
         "Roles": "admin,Internal/creator"
       },
       {
         "Name": "apim:mediation_policy_create",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:api_mediation_policy_manage",
         "Roles": "admin,Internal/creator"
       },
       {
@@ -147,6 +138,10 @@
         "Roles": "admin,Internal/creator"
       },
       {
+        "Name": "apim:client_certificates_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
         "Name": "apim:threat_protection_policy_manage",
         "Roles": "admin,Internal/creator"
       },
@@ -188,6 +183,10 @@
       },
       {
         "Name": "apim:ep_certificates_view",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:ep_certificates_manage",
         "Roles": "admin,Internal/creator"
       },
       {
@@ -292,6 +291,34 @@
       },
       {
         "Name": "apim:environment_read",
+        "Roles": "admin"
+      },
+      {
+        "Name": "service_catalog:service_view",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "service_catalog:service_write",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:comment_view",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:comment_write",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:comment_manage",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:throttling_policy_manage",
+        "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics"
+      },
+      {
+        "Name": "apim:admin_application_view",
         "Roles": "admin"
       }
     ]

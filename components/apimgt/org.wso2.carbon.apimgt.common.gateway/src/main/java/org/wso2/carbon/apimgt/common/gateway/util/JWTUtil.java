@@ -107,13 +107,7 @@ public final class JWTUtil {
 
             jwtHeader.append("\"x5t\":\"");
             jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append("\",");
-
-            jwtHeader.append("\"kid\":\"");
-            jwtHeader.append(getKID(base64UrlEncodedThumbPrint, getJWSCompliantAlgorithmCode(signatureAlgorithm)));
-            jwtHeader.append("\"");
-
-            jwtHeader.append("}");
+            jwtHeader.append("\"}");
             return jwtHeader.toString();
 
         } catch (NoSuchAlgorithmException | CertificateEncodingException | UnsupportedEncodingException e) {
@@ -138,18 +132,6 @@ public final class JWTUtil {
             buf.append(hexDigits[aByte & 0x0f]);
         }
         return buf.toString();
-    }
-
-    /**
-     * Helper method to add kid claim into to JWT_HEADER.
-     *
-     * @param certThumbprint     thumbPrint generated for certificate
-     * @param signatureAlgorithm relevant signature algorithm
-     * @return KID
-     */
-    private static String getKID(String certThumbprint, String signatureAlgorithm) {
-
-        return certThumbprint + "_" + signatureAlgorithm;
     }
 
     /**

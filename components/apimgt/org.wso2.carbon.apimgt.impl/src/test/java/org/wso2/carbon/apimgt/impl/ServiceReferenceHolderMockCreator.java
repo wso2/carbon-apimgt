@@ -69,11 +69,6 @@ public class ServiceReferenceHolderMockCreator {
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryServiceMockCreator.getMock());
     }
 
-    public void initRegistryServiceMockCreator(boolean isResourceExists, Object content, int tenantId) throws RegistryException {
-        registryServiceMockCreator = new RegistryServiceMockCreator(isResourceExists, content, tenantId);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryServiceMockCreator.getMock());
-    }
-
     public static void initContextService() {
         //PowerMockito.mockStatic(ServiceReferenceHolder.class);
         Mockito.when(ServiceReferenceHolder.getContextService()).

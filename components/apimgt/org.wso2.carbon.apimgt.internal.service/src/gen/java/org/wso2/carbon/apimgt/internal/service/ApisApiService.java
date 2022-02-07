@@ -10,7 +10,10 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
+import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 
 import java.util.List;
 
@@ -22,4 +25,6 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface ApisApiService {
       public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String gatewayLabel, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList, MessageContext messageContext) throws APIManagementException;
+      public Response unDeployedAPIRevision(UnDeployedAPIRevisionDTO unDeployedAPIRevisionDTO, MessageContext messageContext) throws APIManagementException;
 }

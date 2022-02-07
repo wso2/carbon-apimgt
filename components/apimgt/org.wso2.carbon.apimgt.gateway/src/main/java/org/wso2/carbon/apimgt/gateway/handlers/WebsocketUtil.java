@@ -169,7 +169,7 @@ public class WebsocketUtil {
 		return accessToken + ':' + apiContext + ':' + matchingResource;
 	}
 
-	static MessageContext getSynapseMessageContext(String tenantDomain) throws AxisFault {
+	public static MessageContext getSynapseMessageContext(String tenantDomain) throws AxisFault {
 
 		org.apache.axis2.context.MessageContext axis2MsgCtx = createAxis2MessageContext();
 		ServiceContext svcCtx = new ServiceContext();

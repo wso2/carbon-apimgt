@@ -72,9 +72,6 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     @Override
     public boolean handleRequest(MessageContext synCtx) {
 
-        if (GatewayUtils.isAPIStatusPrototype(synCtx)) {
-            return true;
-        }
         String requestSubPath = getRequestSubPath(synCtx);
         // all other requests are assumed to be for subscription as there will be only 2 resources for web hook api
         if (!requestSubPath.startsWith(eventReceiverResourcePath)) {

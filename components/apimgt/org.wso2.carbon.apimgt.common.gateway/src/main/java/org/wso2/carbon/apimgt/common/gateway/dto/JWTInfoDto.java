@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.common.gateway.dto;
 
+import org.apache.commons.lang3.SerializationUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +42,32 @@ public class JWTInfoDto {
     private String apiName;
     private JWTValidationInfo jwtValidationInfo;
     private Map<String, String> appAttributes = new HashMap<>();
+    private String sub;
+    private String[] organizations;
+
+    public JWTInfoDto() {
+
+    }
+
+    public JWTInfoDto(JWTInfoDto jwtInfoDto) {
+
+        this.applicationId = jwtInfoDto.getApplicationId();
+        this.keyType = jwtInfoDto.getKeyType();
+        this.version = jwtInfoDto.getVersion();
+        this.applicationName = jwtInfoDto.getApplicationName();
+        this.endUser = jwtInfoDto.getEndUser();
+        this.endUserTenantId = jwtInfoDto.getEndUserTenantId();
+        this.applicationUUId = jwtInfoDto.getApplicationUUId();
+        this.subscriber = jwtInfoDto.getSubscriber();
+        this.subscriptionTier = jwtInfoDto.getSubscriptionTier();
+        this.applicationTier = jwtInfoDto.getApplicationTier();
+        this.apiContext = jwtInfoDto.getApiContext();
+        this.apiName = jwtInfoDto.getApiName();
+        this.jwtValidationInfo = new JWTValidationInfo(jwtInfoDto.getJwtValidationInfo());
+        this.appAttributes = jwtInfoDto.getAppAttributes();
+        this.sub = jwtInfoDto.getSub();
+        this.organizations = SerializationUtils.clone(jwtInfoDto.getOrganizations());
+    }
 
     public String getApplicationTier() {
 
@@ -189,5 +217,23 @@ public class JWTInfoDto {
     public void setAppAttributes(Map<String, String> appAttributes) {
 
         this.appAttributes = appAttributes;
+    }
+
+    public String getSub() {
+        return sub;
+    }
+
+    public void setSub(String sub) {
+        this.sub = sub;
+    }
+
+    public String[] getOrganizations() {
+
+        return SerializationUtils.clone(organizations);
+    }
+
+    public void setOrganizations(String[] organizations) {
+
+        this.organizations = SerializationUtils.clone(organizations);
     }
 }

@@ -21,6 +21,11 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.EndPointsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.LocalEntryApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.SequenceApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.ApisApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.ApplicationsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.SubscriptionsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.ServerStartupHealthcheckApi"/>
+
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>

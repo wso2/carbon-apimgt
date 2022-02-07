@@ -59,8 +59,10 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO( isUserAvailable, monetizationEnabled, recommendationEnabled, anonymousEnabled );
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO( isUserAvailable, monetizationEnabled,
+                    recommendationEnabled, anonymousEnabled, organization);
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";

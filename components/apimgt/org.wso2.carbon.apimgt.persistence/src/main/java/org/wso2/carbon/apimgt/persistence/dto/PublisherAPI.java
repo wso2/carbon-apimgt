@@ -47,6 +47,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String visibleOrganizations; //visibleTenants
     private boolean endpointSecured;
     private String swaggerDefinition;
+    private String asyncApiDefinition;
     private boolean endpointAuthDigest;
     private String endpointUTUsername;
     private String endpointUTPassword;
@@ -59,6 +60,8 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String redirectURL;  // check ??
     private String apiOwner;
     private boolean advertiseOnly;
+    private String vendor;
+
     private String endpointConfig;
     private String subscriptionAvailability; // e.g. "CURRENT_TENANT";who is allowed for subscriptions
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;
@@ -89,6 +92,19 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
+    private String gatewayVendor;
+    private String asyncTransportProtocols;
+
+    private String versionTimestamp;
+    private String audience;
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
         return soapToRestSequences;
@@ -296,6 +312,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setAdvertiseOnly(boolean advertiseOnly) {
         this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public String getEndpointConfig() {
@@ -530,6 +554,41 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.wsUriMapping = wsUriMapping;
     }
 
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
+    }
+
+    @Override
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    @Override
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getAsyncTransportProtocols() { return asyncTransportProtocols; }
+
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
+    }
+
+
+    public String getVersionTimestamp() {
+
+        return versionTimestamp;
+    }
+
+    public void setVersionTimestamp(String versionTimestamp) {
+
+        this.versionTimestamp = versionTimestamp;
+    }
+
     @Override
     public String toString() {
         return "PublisherAPI [isDefaultVersion=" + isDefaultVersion + ", description=" + description + ", wsdlUrl="
@@ -552,9 +611,11 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + websubSubscriptionConfiguration + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", monetizationProperties="
                 + monetizationProperties + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
-                + deploymentEnvironments + ", tags=" + tags + ", accessControl=" + accessControl
-                + ", accessControlRoles=" + accessControlRoles + ", additionalProperties=" + additionalProperties
+                + deploymentEnvironments + ", tags=" + tags + ", accessControl=" + accessControl + ", gatewayVendor="
+                + gatewayVendor +  ", asyncTransportProtocols=" + asyncTransportProtocols + ", accessControlRoles="
+                + accessControlRoles + ", additionalProperties=" + additionalProperties
                 + ", thumbnail=" + thumbnail + ", createdTime=" + createdTime + ", lastUpdated=" + lastUpdated
+                + ", versionTimestamp=" + versionTimestamp
                 + ", toString()=" + super.toString() + "]";
     }
 }

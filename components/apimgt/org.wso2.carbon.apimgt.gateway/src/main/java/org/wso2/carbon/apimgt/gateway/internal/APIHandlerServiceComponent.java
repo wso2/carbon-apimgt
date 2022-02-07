@@ -15,10 +15,10 @@
  */
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.commons.throttle.core.DistributedCounterManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -34,18 +34,17 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGenera
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
-import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
@@ -61,9 +60,11 @@ import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import redis.clients.jedis.JedisMonitor;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.File;
-import java.io.IOException;
 
 @Component(
         name = "org.wso2.carbon.apimgt.handlers",
@@ -88,42 +89,41 @@ public class APIHandlerServiceComponent {
         // Set private key
         ServiceReferenceHolder.getInstance().setPrivateKey();
 
-        try {
-            ConfigurationContext ctx =
-                    ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(),
-                            getAxis2ClientXmlLocation());
-            ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
-            clientPool = APIKeyValidatorClientPool.getInstance();
-            APIManagerConfiguration apiManagerConfiguration =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-            String gatewayType = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-            GatewayStartupListener gatewayStartupListener = new GatewayStartupListener();
-            bundleContext.registerService(ServerStartupObserver.class.getName(), gatewayStartupListener, null);
-            bundleContext.registerService(ServerShutdownHandler.class, gatewayStartupListener, null);
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class, gatewayStartupListener, null);
-            if ("Synapse".equalsIgnoreCase(gatewayType)) {
-                // Register Tenant service creator to deploy tenant specific common synapse configurations
-                TenantServiceCreator listener = new TenantServiceCreator();
-                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
-                bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
+        clientPool = APIKeyValidatorClientPool.getInstance();
+        GatewayStartupListener gatewayStartupListener = new GatewayStartupListener();
+        bundleContext.registerService(ServerStartupObserver.class.getName(), gatewayStartupListener, null);
+        bundleContext.registerService(ServerShutdownHandler.class, gatewayStartupListener, null);
+        bundleContext.registerService(Axis2ConfigurationContextObserver.class, gatewayStartupListener, null);
+        bundleContext.registerService(JMSListenerShutDownService.class, gatewayStartupListener, null);
+        // Register Tenant service creator to deploy tenant specific common synapse configurations
+        TenantServiceCreator listener = new TenantServiceCreator();
+        bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
+        bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
 
-                // Set APIM Gateway JWT Generator
+        // Set APIM Gateway JWT Generator
 
-                registration =
-                        context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
-                                new APIMgtGatewayJWTGeneratorImpl(), null);
-                registration =
-                        context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
-                                new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
-                // Start JWT revoked map cleaner.
-                RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
-                revokedJWTMapCleaner.startJWTRevokedMapCleaner();
-                ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
-                        .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
-            }
-        } catch (IOException e) {
-            log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
+        registration =
+                context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
+                        new APIMgtGatewayJWTGeneratorImpl(), null);
+        registration =
+                context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
+                        new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
+        // Start JWT revoked map cleaner.
+        RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
+        revokedJWTMapCleaner.startJWTRevokedMapCleaner();
+        ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
+                .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
+
+        RedisConfig redisConfig =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getRedisConfig();
+        if (redisConfig.isRedisEnabled()) {
+            RedisBaseDistributedCountManager redisBaseDistributedCountManager =
+                    new RedisBaseDistributedCountManager(ServiceReferenceHolder.getInstance().getRedisPool());
+            context.getBundleContext().registerService(DistributedCounterManager.class,
+                    redisBaseDistributedCountManager, null);
+            ServiceReferenceHolder.getInstance().setRedisPool(getJedisPool(redisConfig));
         }
+
         // Create caches for the super tenant
         ServerConfiguration.getInstance().overrideConfigurationProperty("Cache.ForceLocalCache", "true");
         CacheProvider.createGatewayKeyCache();
@@ -140,7 +140,6 @@ public class APIHandlerServiceComponent {
         CacheProvider.createGatewayInternalKeyCache();
         CacheProvider.createGatewayInternalKeyDataCache();
         CacheProvider.createInvalidInternalKeyCache();
-        initializeRedisCache();
     }
 
     @Deactivate
@@ -154,9 +153,9 @@ public class APIHandlerServiceComponent {
             log.debug("Unregistering ThrottleDataService...");
             registration.unregister();
         }
-        RedisCacheUtils redisCacheUtils = ServiceReferenceHolder.getInstance().getRedisCacheUtils();
-        if (redisCacheUtils != null) {
-            redisCacheUtils.stopRedisCacheSession();
+        if (ServiceReferenceHolder.getInstance().getRedisPool() != null &&
+                !ServiceReferenceHolder.getInstance().getRedisPool().isClosed()) {
+            ServiceReferenceHolder.getInstance().getRedisPool().destroy();
         }
     }
 
@@ -272,20 +271,6 @@ public class APIHandlerServiceComponent {
     protected String getFilePath() {
 
         return CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
-    }
-
-    protected String getAxis2ClientXmlLocation() {
-
-        String axis2ClientXml =
-                ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".clientAxis2XmlLocation");
-        return axis2ClientXml;
-    }
-
-    protected String getClientRepoLocation() {
-
-        String axis2ClientXml =
-                ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".ClientRepositoryLocation");
-        return axis2ClientXml;
     }
 
     @Reference(
@@ -452,23 +437,28 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setKeyManagerDataService(null);
     }
 
-    private void initializeRedisCache() {
+    private JedisPool getJedisPool(RedisConfig redisConfig){
 
-        RedisConfig redisConfig =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getRedisConfigProperties();
-        if (redisConfig.isRedisEnabled()) {
-            RedisCacheUtils redisCacheUtils;
-                if (redisConfig.getUser() != null
-                        && redisConfig.getPassword() != null
-                        && redisConfig.getConnectionTimeout() != 0) {
-                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort(),
-                            redisConfig.getConnectionTimeout(), redisConfig.getUser(),
-                            redisConfig.getPassword(), redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
-                } else {
-                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort());
-                }
-                ServiceReferenceHolder.getInstance().setRedisCacheUtil(redisCacheUtils);
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(redisConfig.getMaxTotal());
+        jedisPoolConfig.setMaxIdle(redisConfig.getMaxIdle());
+        jedisPoolConfig.setMinIdle(redisConfig.getMinIdle());
+        jedisPoolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
+        jedisPoolConfig.setBlockWhenExhausted(redisConfig.isBlockWhenExhausted());
+        jedisPoolConfig.setMinEvictableIdleTimeMillis(redisConfig.getMinEvictableIdleTimeMillis());
+        jedisPoolConfig.setTimeBetweenEvictionRunsMillis(redisConfig.getTimeBetweenEvictionRunsMillis());
+        jedisPoolConfig.setNumTestsPerEvictionRun(redisConfig.getNumTestsPerEvictionRun());
+        JedisPool jedisPool;
+        if (StringUtils.isNotEmpty(redisConfig.getUser()) && redisConfig.getPassword() != null) {
+            jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
+                    redisConfig.getConnectionTimeout(), redisConfig.getUser(),
+                    String.valueOf(redisConfig.getPassword()), redisConfig.isSslEnabled());
+        } else {
+            jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
+                    redisConfig.getConnectionTimeout(), redisConfig.isSslEnabled());
+
         }
+        return jedisPool;
     }
 }
 

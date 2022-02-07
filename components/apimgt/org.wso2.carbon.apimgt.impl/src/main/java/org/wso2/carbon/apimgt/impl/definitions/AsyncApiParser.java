@@ -4,6 +4,7 @@ import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
 import io.apicurio.datamodels.asyncapi.models.AaiOperation;
+import io.apicurio.datamodels.asyncapi.models.AaiOperationBindings;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ImplicitOAuthFlow;
@@ -20,6 +21,9 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -31,17 +35,196 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Component(
+        name = "wso2.async.definition.parser.component",
+        immediate = true,
+        service = APIDefinition.class
+)
 public class AsyncApiParser extends APIDefinition {
+
+    String metaSchema = "{\n" +
+            "    \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n" +
+            "    \"$id\": \"http://json-schema.org/draft-07/schema#\",\n" +
+            "    \"title\": \"Core schema meta-schema\",\n" +
+            "    \"definitions\": {\n" +
+            "        \"schemaArray\": {\n" +
+            "            \"type\": \"array\",\n" +
+            "            \"items\": { \"$ref\": \"#\" }\n" +
+            "        },\n" +
+            "        \"nonNegativeInteger\": {\n" +
+            "            \"type\": \"integer\",\n" +
+            "            \"minimum\": 0\n" +
+            "        },\n" +
+            "        \"nonNegativeIntegerDefault0\": {\n" +
+            "            \"allOf\": [\n" +
+            "                { \"$ref\": \"#/definitions/nonNegativeInteger\" },\n" +
+            "                { \"default\": 0 }\n" +
+            "            ]\n" +
+            "        },\n" +
+            "        \"simpleTypes\": {\n" +
+            "            \"enum\": [\n" +
+            "                \"array\",\n" +
+            "                \"boolean\",\n" +
+            "                \"integer\",\n" +
+            "                \"null\",\n" +
+            "                \"number\",\n" +
+            "                \"object\",\n" +
+            "                \"string\"\n" +
+            "            ]\n" +
+            "        },\n" +
+            "        \"stringArray\": {\n" +
+            "            \"type\": \"array\",\n" +
+            "            \"items\": { \"type\": \"string\" },\n" +
+            "            \"uniqueItems\": true,\n" +
+            "            \"default\": []\n" +
+            "        }\n" +
+            "    },\n" +
+            "    \"type\": [\"object\", \"boolean\"],\n" +
+            "    \"properties\": {\n" +
+            "        \"$id\": {\n" +
+            "            \"type\": \"string\",\n" +
+            "            \"format\": \"uri-reference\"\n" +
+            "        },\n" +
+            "        \"$schema\": {\n" +
+            "            \"type\": \"string\",\n" +
+            "            \"format\": \"uri\"\n" +
+            "        },\n" +
+            "        \"$ref\": {\n" +
+            "            \"type\": \"string\",\n" +
+            "            \"format\": \"uri-reference\"\n" +
+            "        },\n" +
+            "        \"$comment\": {\n" +
+            "            \"type\": \"string\"\n" +
+            "        },\n" +
+            "        \"title\": {\n" +
+            "            \"type\": \"string\"\n" +
+            "        },\n" +
+            "        \"description\": {\n" +
+            "            \"type\": \"string\"\n" +
+            "        },\n" +
+            "        \"default\": true,\n" +
+            "        \"readOnly\": {\n" +
+            "            \"type\": \"boolean\",\n" +
+            "            \"default\": false\n" +
+            "        },\n" +
+            "        \"writeOnly\": {\n" +
+            "            \"type\": \"boolean\",\n" +
+            "            \"default\": false\n" +
+            "        },\n" +
+            "        \"examples\": {\n" +
+            "            \"type\": \"array\",\n" +
+            "            \"items\": true\n" +
+            "        },\n" +
+            "        \"multipleOf\": {\n" +
+            "            \"type\": \"number\",\n" +
+            "            \"exclusiveMinimum\": 0\n" +
+            "        },\n" +
+            "        \"maximum\": {\n" +
+            "            \"type\": \"number\"\n" +
+            "        },\n" +
+            "        \"exclusiveMaximum\": {\n" +
+            "            \"type\": \"number\"\n" +
+            "        },\n" +
+            "        \"minimum\": {\n" +
+            "            \"type\": \"number\"\n" +
+            "        },\n" +
+            "        \"exclusiveMinimum\": {\n" +
+            "            \"type\": \"number\"\n" +
+            "        },\n" +
+            "        \"maxLength\": { \"$ref\": \"#/definitions/nonNegativeInteger\" },\n" +
+            "        \"minLength\": { \"$ref\": \"#/definitions/nonNegativeIntegerDefault0\" },\n" +
+            "        \"pattern\": {\n" +
+            "            \"type\": \"string\",\n" +
+            "            \"format\": \"regex\"\n" +
+            "        },\n" +
+            "        \"additionalItems\": { \"$ref\": \"#\" },\n" +
+            "        \"items\": {\n" +
+            "            \"anyOf\": [\n" +
+            "                { \"$ref\": \"#\" },\n" +
+            "                { \"$ref\": \"#/definitions/schemaArray\" }\n" +
+            "            ],\n" +
+            "            \"default\": true\n" +
+            "        },\n" +
+            "        \"maxItems\": { \"$ref\": \"#/definitions/nonNegativeInteger\" },\n" +
+            "        \"minItems\": { \"$ref\": \"#/definitions/nonNegativeIntegerDefault0\" },\n" +
+            "        \"uniqueItems\": {\n" +
+            "            \"type\": \"boolean\",\n" +
+            "            \"default\": false\n" +
+            "        },\n" +
+            "        \"contains\": { \"$ref\": \"#\" },\n" +
+            "        \"maxProperties\": { \"$ref\": \"#/definitions/nonNegativeInteger\" },\n" +
+            "        \"minProperties\": { \"$ref\": \"#/definitions/nonNegativeIntegerDefault0\" },\n" +
+            "        \"required\": { \"$ref\": \"#/definitions/stringArray\" },\n" +
+            "        \"additionalProperties\": { \"$ref\": \"#\" },\n" +
+            "        \"definitions\": {\n" +
+            "            \"type\": \"object\",\n" +
+            "            \"additionalProperties\": { \"$ref\": \"#\" },\n" +
+            "            \"default\": {}\n" +
+            "        },\n" +
+            "        \"properties\": {\n" +
+            "            \"type\": \"object\",\n" +
+            "            \"additionalProperties\": { \"$ref\": \"#\" },\n" +
+            "            \"default\": {}\n" +
+            "        },\n" +
+            "        \"patternProperties\": {\n" +
+            "            \"type\": \"object\",\n" +
+            "            \"additionalProperties\": { \"$ref\": \"#\" },\n" +
+            "            \"propertyNames\": { \"format\": \"regex\" },\n" +
+            "            \"default\": {}\n" +
+            "        },\n" +
+            "        \"dependencies\": {\n" +
+            "            \"type\": \"object\",\n" +
+            "            \"additionalProperties\": {\n" +
+            "                \"anyOf\": [\n" +
+            "                    { \"$ref\": \"#\" },\n" +
+            "                    { \"$ref\": \"#/definitions/stringArray\" }\n" +
+            "                ]\n" +
+            "            }\n" +
+            "        },\n" +
+            "        \"propertyNames\": { \"$ref\": \"#\" },\n" +
+            "        \"const\": true,\n" +
+            "        \"enum\": {\n" +
+            "            \"type\": \"array\",\n" +
+            "            \"items\": true,\n" +
+            "            \"uniqueItems\": true\n" +
+            "        },\n" +
+            "        \"type\": {\n" +
+            "            \"anyOf\": [\n" +
+            "                { \"$ref\": \"#/definitions/simpleTypes\" },\n" +
+            "                {\n" +
+            "                    \"type\": \"array\",\n" +
+            "                    \"items\": { \"$ref\": \"#/definitions/simpleTypes\" },\n" +
+            "                    \"uniqueItems\": true\n" +
+            "                }\n" +
+            "            ]\n" +
+            "        },\n" +
+            "        \"format\": { \"type\": \"string\" },\n" +
+            "        \"contentMediaType\": { \"type\": \"string\" },\n" +
+            "        \"contentEncoding\": { \"type\": \"string\" },\n" +
+            "        \"if\": { \"$ref\": \"#\" },\n" +
+            "        \"then\": { \"$ref\": \"#\" },\n" +
+            "        \"else\": { \"$ref\": \"#\" },\n" +
+            "        \"allOf\": { \"$ref\": \"#/definitions/schemaArray\" },\n" +
+            "        \"anyOf\": { \"$ref\": \"#/definitions/schemaArray\" },\n" +
+            "        \"oneOf\": { \"$ref\": \"#/definitions/schemaArray\" },\n" +
+            "        \"not\": { \"$ref\": \"#\" }\n" +
+            "    },\n" +
+            "    \"default\": true\n" +
+            "}";
 
     private static final String ASYNCAPI_JSON_HYPERSCHEMA = "{\n" +
             "  \"title\": \"AsyncAPI 2.0.0 schema.\",\n" +
@@ -306,18 +489,6 @@ public class AsyncApiParser extends APIDefinition {
             "        },\n" +
             "        \"securitySchemes\": {\n" +
             "          \"type\": \"object\",\n" +
-            "          \"patternProperties\": {\n" +
-            "            \"^[\\\\w\\\\d\\\\.\\\\-_]+$\": {\n" +
-            "              \"oneOf\": [\n" +
-            "                {\n" +
-            "                  \"$ref\": \"#/definitions/Reference\"\n" +
-            "                },\n" +
-            "                {\n" +
-            "                  \"$ref\": \"#/definitions/SecurityScheme\"\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          }\n" +
             "        },\n" +
             "        \"parameters\": {\n" +
             "          \"$ref\": \"#/definitions/parameters\"\n" +
@@ -1239,9 +1410,6 @@ public class AsyncApiParser extends APIDefinition {
             "      \"properties\": {\n" +
             "        \"type\": {\n" +
             "          \"type\": \"string\",\n" +
-            "          \"enum\": [\n" +
-            "            \"oauth2\"\n" +
-            "          ]\n" +
             "        },\n" +
             "        \"description\": {\n" +
             "          \"type\": \"string\"\n" +
@@ -1434,23 +1602,28 @@ public class AsyncApiParser extends APIDefinition {
                 Aai20ChannelItem channel = (Aai20ChannelItem) entry.getValue();
                 if (includePublish && channel.publish != null) {
                     uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_PUBLISH,
-                            (Aai20Operation) channel.publish, scopes));
+                            (Aai20Operation) channel.publish, scopes, channel));
                 }
                 if (channel.subscribe != null) {
                     uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_SUBSCRIBE,
-                            (Aai20Operation) channel.subscribe, scopes));
+                            (Aai20Operation) channel.subscribe, scopes, channel));
                 }
             }
         }
         return uriTemplates;
     }
 
-    private URITemplate buildURITemplate(String target, String verb, Aai20Operation operation, Set<Scope> scopes)
-            throws APIManagementException {
+    private URITemplate buildURITemplate(String target, String verb, Aai20Operation operation, Set<Scope> scopes,
+                                         Aai20ChannelItem channel) throws APIManagementException {
         URITemplate template = new URITemplate();
         template.setHTTPVerb(verb);
         template.setHttpVerbs(verb);
         template.setUriTemplate(target);
+
+        Extension authTypeExtension = channel.getExtension(APIConstants.SWAGGER_X_AUTH_TYPE);
+        if (authTypeExtension != null && authTypeExtension.value instanceof String) {
+            template.setAuthType(authTypeExtension.value.toString());
+        }
 
         List<String> opScopes = getScopeOfOperations(operation);
         if (!opScopes.isEmpty()) {
@@ -1476,15 +1649,22 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     private List<String> getScopeOfOperations(Aai20Operation operation) {
-
-
         return getScopeOfOperationsFromExtensions(operation);
     }
 
     private List<String> getScopeOfOperationsFromExtensions(Aai20Operation operation) {
         Extension scopeBindings = operation.getExtension("x-scopes");
         if (scopeBindings != null) {
-            return (List<String>) scopeBindings.value;
+            if (scopeBindings.value instanceof LinkedHashMap) {
+                return (List<String>) ((LinkedHashMap) scopeBindings.value)
+                        .values()
+                        .stream()
+                        .collect(Collectors.toList());
+            }
+
+            if (scopeBindings.value instanceof ArrayList) {
+                return (List<String>) scopeBindings.value;
+            }
         }
         return Collections.emptyList();
     }
@@ -1497,16 +1677,20 @@ public class AsyncApiParser extends APIDefinition {
             Aai20SecurityScheme oauth2 = (Aai20SecurityScheme) document.components.securitySchemes.get("oauth2");
             if (oauth2 != null && oauth2.flows != null && oauth2.flows.implicit != null) {
                 Map<String, String> scopes = oauth2.flows.implicit.scopes;
-                Map<String, String> scopeBindings = (Map<String, String>) oauth2.flows.implicit.getExtension(
-                        APIConstants.SWAGGER_X_SCOPES_BINDINGS).value;
-                if (scopes != null && scopeBindings != null) {
+                Extension xScopesBindings = oauth2.flows.implicit.getExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                Map<String, String> scopeBindings = new HashMap<>();
+                if (xScopesBindings != null) {
+                    scopeBindings = (Map<String, String>) xScopesBindings.value;
+                }
+                if (scopes != null) {
                     for (Map.Entry<String, String> entry : scopes.entrySet()) {
                         Scope scope = new Scope();
                         scope.setKey(entry.getKey());
                         scope.setName(entry.getKey());
                         scope.setDescription(entry.getValue());
-                        if (scopeBindings.get(scope.getKey()) != null) {
-                            scope.setRoles(scopeBindings.get(scope.getKey()));
+                        String scopeBinding = scopeBindings.get(scope.getKey());
+                        if (scopeBinding != null) {
+                            scope.setRoles(scopeBinding);
                         }
                         scopeSet.add(scope);
                     }
@@ -1527,13 +1711,17 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url, boolean returnJsonContent) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
 
         //import and load AsyncAPI HyperSchema for JSON schema validation
         JSONObject hyperSchema = new JSONObject(ASYNCAPI_JSON_HYPERSCHEMA);
-        Schema schemaValidator = SchemaLoader.load(hyperSchema);
         String protocol = StringUtils.EMPTY;
 
         boolean validationSuccess = false;
@@ -1544,6 +1732,11 @@ public class AsyncApiParser extends APIDefinition {
 
         //validate AsyncAPI using JSON schema validation
         try {
+            JSONParser parser = new JSONParser();
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(metaSchema);
+            SchemaLoader schemaLoader = SchemaLoader.builder().registerSchemaByURI
+                    (new URI("http://json-schema.org/draft-07/schema#"), json).schemaJson(hyperSchema).build();
+            Schema schemaValidator = schemaLoader.load().build();
             schemaValidator.validate(schemaToBeValidated);
             /*AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             validationErrorMessages = new ArrayList<>();
@@ -1583,12 +1776,17 @@ public class AsyncApiParser extends APIDefinition {
                 validationSuccess = true;
                 validationErrorMessages = null;
             }*/
-
+            
             validationSuccess = true;
-
-        } catch (ValidationException e){
+        } catch(ValidationException e) {
             //validation error messages
             validationErrorMessages = e.getAllMessages();
+        } catch (URISyntaxException e) {
+            String msg = "Error occurred when registering the schema";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Error occurred when parsing the schema";
+            throw new APIManagementException(msg, e);
         }
 
         // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
@@ -1718,6 +1916,11 @@ public class AsyncApiParser extends APIDefinition {
     @Override
     public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException{
         return null;
+    }
+
+    @Override
+    public String getVendorFromExtension(String swaggerContent) {
+        return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
     }
 
     @Override
@@ -1864,5 +2067,108 @@ public class AsyncApiParser extends APIDefinition {
             }
         }
         return wsUriMapping;
+    }
+
+    /**
+     * Get available transport protocols for the Async API
+     *
+     * @param definition Async API Definition
+     * @return List<String> List of available transport protocols
+     * @throws APIManagementException If the async env configuration if not provided properly
+     */
+    public static List<String> getTransportProtocolsForAsyncAPI(String definition) throws APIManagementException {
+        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
+        HashSet<String> asyncTransportProtocols = new HashSet<>();
+        for (AaiChannelItem channel : aai20Document.getChannels()) {
+            asyncTransportProtocols.addAll(getProtocols(channel));
+        }
+        ArrayList<String> asyncTransportProtocolsList = new ArrayList<>(asyncTransportProtocols);
+        return asyncTransportProtocolsList;
+    }
+
+    /**
+     * Get the transport protocols
+     *
+     * @param channel AaiChannelItem to get protocol
+     * @return HashSet<String> set of transport protocols
+     */
+    public static HashSet<String> getProtocols(AaiChannelItem channel) {
+
+        HashSet<String> protocols = new HashSet<>();
+
+        if (channel.subscribe != null) {
+            if (channel.subscribe.bindings != null) {
+                protocols.addAll(getProtocolsFromBindings(channel.subscribe.bindings));
+            }
+        }
+        if (channel.publish != null) {
+            if (channel.publish.bindings != null) {
+                protocols.addAll(getProtocolsFromBindings(channel.publish.bindings));
+            }
+        }
+
+        return protocols;
+    }
+
+    /**
+     * Get the transport protocols the bindings
+     *
+     * @param bindings AaiOperationBindings to get protocols
+     * @return HashSet<String> set of transport protocols
+     */
+    private static HashSet<String> getProtocolsFromBindings(AaiOperationBindings bindings) {
+
+        HashSet<String> protocolsFromBindings = new HashSet<>();
+
+        if (bindings.http != null) {
+            protocolsFromBindings.add(APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.ws != null) {
+            protocolsFromBindings.add(APIConstants.WS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.kafka != null) {
+            protocolsFromBindings.add(APIConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.amqp != null) {
+            protocolsFromBindings.add(APIConstants.AMQP_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.amqp1 != null) {
+            protocolsFromBindings.add(APIConstants.AMQP1_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.mqtt != null) {
+            protocolsFromBindings.add(APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.mqtt5 != null) {
+            protocolsFromBindings.add(APIConstants.MQTT5_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.nats != null) {
+            protocolsFromBindings.add(APIConstants.NATS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.jms != null) {
+            protocolsFromBindings.add(APIConstants.JMS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.sns != null) {
+            protocolsFromBindings.add(APIConstants.SNS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.sqs != null) {
+            protocolsFromBindings.add(APIConstants.SQS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.stomp != null) {
+            protocolsFromBindings.add(APIConstants.STOMP_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.redis != null) {
+            protocolsFromBindings.add(APIConstants.REDIS_TRANSPORT_PROTOCOL_NAME);
+        }
+
+        if (bindings.hasExtraProperties()) {
+            protocolsFromBindings.addAll(bindings.getExtraPropertyNames());
+        }
+
+        return protocolsFromBindings;
+    }
+
+    @Override
+    public String getType() {
+        return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
     }
 }

@@ -63,6 +63,7 @@ public class APIProduct {
 
     private JSONObject monetizationProperties = new JSONObject();
     private boolean isMonetizationEnabled = false;
+    private String versionTimestamp;
 
     /**
      * API security at the gateway level.
@@ -81,6 +82,8 @@ public class APIProduct {
      */
     private String productionMaxTps;
     private String sandboxMaxTps;
+    
+    private String organization;
 
     /**
      * Custom authorization header specific to the API
@@ -122,6 +125,11 @@ public class APIProduct {
      * Property to hold revision id
      */
     private int revisionId;
+
+    /**
+     * Used to set the workflow status in lifecycle state change workflow
+     */
+    private String workflowStatus = null;
 
     public APIProduct(){}
 
@@ -607,5 +615,46 @@ public class APIProduct {
 
     public void setRevisionId(int revisionId) {
         this.revisionId = revisionId;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    /**
+     * Property to indicate the gateway vendor to deploy API Product
+     */
+    private String gatewayVendor;
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getVersionTimestamp() {
+
+        return versionTimestamp;
+    }
+
+    public void setVersionTimestamp(String versionTimestamp) {
+
+        this.versionTimestamp = versionTimestamp;
+    }
+
+    public String getWorkflowStatus() {
+
+        return workflowStatus;
+    }
+
+    public void setWorkflowStatus(String workflowStatus) {
+
+        this.workflowStatus = workflowStatus;
     }
 }

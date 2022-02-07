@@ -31,12 +31,12 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -96,11 +96,11 @@ public class APIManagerConfiguration {
     public static final String JMS_PORT = "jms.port";
     public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
+    public static final String WEBSUB_DEFAULT_GATEWAY_URL = "http://localhost:9021";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
     private CacheInvalidationConfiguration cacheInvalidationConfiguration;
-    private JSONArray containerMgtAttributes = new JSONArray();
 
     private RecommendationEnvironment recommendationEnvironment;
 
@@ -114,10 +114,17 @@ public class APIManagerConfiguration {
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
+    private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
+    private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
+
+    public Map<String, List<String>> getRestApiJWTAuthAudiences() {
+        return restApiJWTAuthAudiences;
+    }
+
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
         return extensionListenerMap;
@@ -335,25 +342,66 @@ public class APIManagerConfiguration {
                 String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
                 analyticsProps.put("auth.api.token", resolvedAuthToken);
                 analyticsProperties = analyticsProps;
-            } else if ("RedisConfig".equals(localName)) {
-                OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
-                OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
-                OMElement redisUser = element.getFirstChildWithName(new QName("RedisUser"));
-                OMElement redisPassword = element.getFirstChildWithName(new QName("RedisPassword"));
-                OMElement redisDatabaseId = element.getFirstChildWithName(new QName("RedisDatabaseId"));
-                OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName("RedisConnectionTimeout"));
-                OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName("RedisIsSslEnabled"));
-                redisConfig = new RedisConfig();
+            } else if ("PersistenceConfigs".equals(localName)) {
+                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                Map<String, String> persistenceProps = new HashMap<>();
+                while (analyticsPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    persistenceProps.put(name, value);
+                }
+                
+                persistenceProperties = persistenceProps;
+            } else if (APIConstants.REDIS_CONFIG.equals(localName)) {
+                OMElement redisHost = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_HOST));
+                OMElement redisPort = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PORT));
+                OMElement redisUser = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_USER));
+                OMElement redisPassword = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PASSWORD));
+                OMElement redisDatabaseId = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_DATABASE_ID));
+                OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_CONNECTION_TIMEOUT));
+                OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_IS_SSL_ENABLED));
+                OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PROPERTIES));
                 redisConfig.setRedisEnabled(true);
                 redisConfig.setHost(redisHost.getText());
                 redisConfig.setPort(Integer.parseInt(redisPort.getText()));
                 if (redisUser != null && redisPassword != null && redisDatabaseId != null
                         && redisConnectionTimeout != null && redisIsSslEnabled != null) {
                     redisConfig.setUser(redisUser.getText());
-                    redisConfig.setPassword(redisPassword.getText().toCharArray());
+                    redisConfig.setPassword(MiscellaneousUtil.resolve(redisPassword, secretResolver).toCharArray());
                     redisConfig.setDatabaseId(Integer.parseInt(redisDatabaseId.getText()));
                     redisConfig.setConnectionTimeout(Integer.parseInt(redisConnectionTimeout.getText()));
                     redisConfig.setSslEnabled(Boolean.parseBoolean(redisIsSslEnabled.getText()));
+                }
+                if (propertiesElement !=null){
+                    Iterator<OMElement> properties = propertiesElement.getChildElements();
+                    if (properties != null) {
+                        while (properties.hasNext()) {
+                            OMElement propertyNode = properties.next();
+                            if (APIConstants.CONFIG_REDIS_MAX_TOTAL.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMaxTotal(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_MAX_IDLE.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMaxIdle(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_MIN_IDLE.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMinIdle(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_TEST_ON_BORROW.equals(propertyNode.getLocalName())) {
+                                redisConfig.setTestOnBorrow(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_TEST_ON_RETURN.equals(propertyNode.getLocalName())) {
+                                redisConfig.setTestOnReturn(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_TEST_WHILE_IDLE.equals(propertyNode.getLocalName())) {
+                                redisConfig.setTestWhileIdle(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_BLOCK_WHEN_EXHAUSTED.equals(propertyNode.getLocalName())) {
+                                redisConfig.setBlockWhenExhausted(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMinEvictableIdleTimeMillis(Long.parseLong(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS.equals(propertyNode.getLocalName())) {
+                                redisConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
+                                redisConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
+                            }
+                        }
+                    }
                 }
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
@@ -362,92 +410,9 @@ public class APIManagerConfiguration {
             } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
                 apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
-
                 while (environmentIterator.hasNext()) {
-                    Environment environment = new Environment();
                     OMElement environmentElem = (OMElement) environmentIterator.next();
-                    environment.setType(environmentElem.getAttributeValue(new QName("type")));
-                    String showInConsole = environmentElem.getAttributeValue(new QName("api-console"));
-                    if (showInConsole != null) {
-                        environment.setShowInConsole(Boolean.parseBoolean(showInConsole));
-                    } else {
-                        environment.setShowInConsole(true);
-                    }
-                    String isDefault = environmentElem.getAttributeValue(new QName("isDefault"));
-                    if (isDefault != null) {
-                        environment.setDefault(Boolean.parseBoolean(isDefault));
-                    } else {
-                        environment.setDefault(false);
-                    }
-                    environment.setName(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_NAME)).getText()));
-                    environment.setDisplayName(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
-                    if (StringUtils.isEmpty(environment.getDisplayName())) {
-                        environment.setDisplayName(environment.getName());
-                    }
-                    environment.setServerURL(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_SERVER_URL)).getText()));
-                    environment.setUserName(APIUtil.replaceSystemProperty(
-
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_USERNAME)).getText()));
-                    OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(
-                            APIConstants.API_GATEWAY_PASSWORD));
-                    String value = MiscellaneousUtil.resolve(passwordElement, secretResolver);
-                    environment.setPassword(APIUtil.replaceSystemProperty(value));
-                    environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_ENDPOINT)).getText()));
-                    OMElement websocketGatewayEndpoint = environmentElem
-                            .getFirstChildWithName(new QName(APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT));
-                    if (websocketGatewayEndpoint != null) {
-                        environment.setWebsocketGatewayEndpoint(
-                                APIUtil.replaceSystemProperty(websocketGatewayEndpoint.getText()));
-                    } else {
-                        environment.setWebsocketGatewayEndpoint(WEBSOCKET_DEFAULT_GATEWAY_URL);
-                    }
-                    OMElement description =
-                            environmentElem.getFirstChildWithName(new QName("Description"));
-                    if (description != null) {
-                        environment.setDescription(description.getText());
-                    } else {
-                        environment.setDescription("");
-                    }
-                    environment.setReadOnly(true);
-                    List<VHost> vhosts = new LinkedList<>();
-                    environment.setVhosts(vhosts);
-                    environment.setEndpointsAsVhost();
-                    Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
-                            APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
-                            APIConstants.API_GATEWAY_VIRTUAL_HOST);
-                    while (vhostIterator.hasNext()) {
-                        OMElement vhostElem = (OMElement) vhostIterator.next();
-                        String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT)).getText());
-                        String httpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT)).getText());
-                        String wsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
-                        String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
-
-                        VHost vhost = VHost.fromEndpointUrls(new String[]{httpEp, httpsEp, wsEp, wssEp});
-                        vhosts.add(vhost);
-                    }
-
-                    if (!apiGatewayEnvironments.containsKey(environment.getName())) {
-                        apiGatewayEnvironments.put(environment.getName(), environment);
-                    } else {
-                        /*
-                          This will be happen only on server startup therefore we log and continue the startup
-                         */
-                        log.error("Duplicate environment name found in api-manager.xml " +
-                                environment.getName());
-                    }
+                    setEnvironmentConfig(environmentElem);
                 }
             } else if (APIConstants.EXTERNAL_API_STORES
                     .equals(localName)) {  //Initialize 'externalAPIStores' config elements
@@ -461,7 +426,7 @@ public class APIManagerConfiguration {
                     String className = storeElem.getAttributeValue(new QName(APIConstants
                             .EXTERNAL_API_STORE_CLASS_NAME));
                     try {
-                        store.setPublisher((APIPublisher) APIUtil.getClassForName(className).newInstance());
+                        store.setPublisher((APIPublisher) APIUtil.getClassInstance(className));
                     } catch (InstantiationException e) {
                         String msg = "One or more classes defined in" + APIConstants.EXTERNAL_API_STORE_CLASS_NAME +
                                 "cannot be instantiated";
@@ -579,10 +544,126 @@ public class APIManagerConfiguration {
                 setSkipListConfigurations(element);
             } else if (APIConstants.ExtensionListenerConstants.EXTENSION_LISTENERS.equals(localName)) {
                 setExtensionListenerConfigurations(element);
+            } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
+                setRestApiJWTAuthAudiences(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
         }
+    }
+
+    /**
+     * Set property values for each gateway environments defined in the api-manager.xml config file
+     *
+     * @param environmentElem OMElement of a single environment in the gateway environments list
+     */
+    void setEnvironmentConfig(OMElement environmentElem) throws APIManagementException {
+        Environment environment = new Environment();
+        environment.setType(environmentElem.getAttributeValue(new QName("type")));
+        String showInConsole = environmentElem.getAttributeValue(new QName("api-console"));
+        if (showInConsole != null) {
+            environment.setShowInConsole(Boolean.parseBoolean(showInConsole));
+        } else {
+            environment.setShowInConsole(true);
+        }
+        String isDefault = environmentElem.getAttributeValue(new QName("isDefault"));
+        if (isDefault != null) {
+            environment.setDefault(Boolean.parseBoolean(isDefault));
+        } else {
+            environment.setDefault(false);
+        }
+        environment.setName(APIUtil.replaceSystemProperty(
+                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_NAME)).getText()));
+        environment.setDisplayName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
+        if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
+        environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_SERVER_URL)).getText()));
+        environment.setUserName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_USERNAME)).getText()));
+        OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_PASSWORD));
+        String resolvedPassword = MiscellaneousUtil.resolve(passwordElement, secretResolver);
+        environment.setPassword(APIUtil.replaceSystemProperty(resolvedPassword));
+        environment.setProvider(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_PROVIDER)).getText()));
+        environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_ENDPOINT)).getText()));
+        OMElement websocketGatewayEndpoint = environmentElem.getFirstChildWithName(new QName(
+                APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT));
+        if (websocketGatewayEndpoint != null) {
+            environment.setWebsocketGatewayEndpoint(APIUtil.replaceSystemProperty(websocketGatewayEndpoint.getText()));
+        } else {
+            environment.setWebsocketGatewayEndpoint(WEBSOCKET_DEFAULT_GATEWAY_URL);
+        }
+        OMElement webSubGatewayEndpoint = environmentElem
+                .getFirstChildWithName(new QName(APIConstants.API_WEBSUB_GATEWAY_ENDPOINT));
+        if (webSubGatewayEndpoint != null) {
+            environment.setWebSubGatewayEndpoint(APIUtil.replaceSystemProperty(webSubGatewayEndpoint.getText()));
+        } else {
+            environment.setWebSubGatewayEndpoint(WEBSUB_DEFAULT_GATEWAY_URL);
+        }
+        OMElement description =
+                environmentElem.getFirstChildWithName(new QName("Description"));
+        if (description != null) {
+            environment.setDescription(description.getText());
+        } else {
+            environment.setDescription("");
+        }
+        environment.setReadOnly(true);
+        List<VHost> vhosts = new LinkedList<>();
+        environment.setVhosts(vhosts);
+        environment.setEndpointsAsVhost();
+        Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
+                APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
+                APIConstants.API_GATEWAY_VIRTUAL_HOST);
+        while (vhostIterator.hasNext()) {
+            OMElement vhostElem = (OMElement) vhostIterator.next();
+            String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT)).getText());
+            String httpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT)).getText());
+            String wsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
+            String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
+            String webSubHttpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT)).getText());
+            String webSubHttpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT)).getText());
+
+            //Prefix websub endpoints with 'websub_' so that the endpoint URL
+            // would begin with: 'websub_http://', since API type is identified by the URL protocol below.
+            webSubHttpEp = "websub_" + webSubHttpEp;
+            webSubHttpsEp = "websub_" + webSubHttpsEp;
+
+            VHost vhost = VHost.fromEndpointUrls(new String[]{
+                    httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
+            vhosts.add(vhost);
+        }
+        OMElement properties = environmentElem.getFirstChildWithName(new
+                QName(APIConstants.API_GATEWAY_ADDITIONAL_PROPERTIES));
+        Map<String, String> additionalProperties = new HashMap<>();
+        if (properties != null) {
+            Iterator gatewayAdditionalProperties = properties.getChildrenWithLocalName
+                    (APIConstants.API_GATEWAY_ADDITIONAL_PROPERTY);
+            while (gatewayAdditionalProperties.hasNext()) {
+                OMElement propertyElem = (OMElement) gatewayAdditionalProperties.next();
+                String propName = propertyElem.getAttributeValue(new QName("name"));
+                String resolvedValue = MiscellaneousUtil.resolve(propertyElem, secretResolver);
+                additionalProperties.put(propName, resolvedValue);
+            }
+        }
+        environment.setAdditionalProperties(additionalProperties);
+
+        if (!apiGatewayEnvironments.containsKey(environment.getName())) {
+            apiGatewayEnvironments.put(environment.getName(), environment);
+        } else {
+
+            //This will happen only on server startup therefore we log and continue the startup
+            log.error("Duplicate environment name found in api-manager.xml " +
+                    environment.getName());
+        }
+
     }
 
     private void setSkipListConfigurations(OMElement element) {
@@ -720,10 +801,6 @@ public class APIManagerConfiguration {
     public JSONArray getMonetizationAttributes() {
 
         return monetizationAttributes;
-    }
-
-    public JSONArray getContainerMgtAttributes() {
-        return containerMgtAttributes;
     }
 
     /**
@@ -967,6 +1044,11 @@ public class APIManagerConfiguration {
             if (skipRedeployingPoliciesElement != null) {
                 throttleProperties.setSkipRedeployingPolicies(skipRedeployingPoliciesElement
                         .getText().split(APIConstants.DELEM_COMMA));
+            }
+            OMElement enablePolicyDeployElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_DEPLOYMENT));
+            if (enablePolicyDeployElement != null) {
+                throttleProperties.setEnablePolicyDeployment(Boolean.parseBoolean(enablePolicyDeployElement.getText()));
             }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
@@ -1415,9 +1497,16 @@ public class APIManagerConfiguration {
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
             }
-            OMElement jwtUserClaimsElement =omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
-            if (jwtUserClaimsElement != null ){
+            OMElement jwtUserClaimsElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
+            if (jwtUserClaimsElement != null) {
                 jwtConfigurationDto.setEnableUserClaims(Boolean.parseBoolean(jwtUserClaimsElement.getText()));
+            }
+            OMElement enableTenantBaseSigningElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));
+            if (enableTenantBaseSigningElement != null) {
+                jwtConfigurationDto.
+                        setTenantBasedSigningEnabled(Boolean.parseBoolean(enableTenantBaseSigningElement.getText()));
             }
             OMElement gatewayJWTConfigurationElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR));
@@ -1442,6 +1531,11 @@ public class APIManagerConfiguration {
                             }
                         }
                     }
+                    OMElement claimRetrievalElement =
+                            configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
+                    if (claimRetrievalElement != null) {
+                        jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
+                    }
                 }
             }
         }
@@ -1457,7 +1551,7 @@ public class APIManagerConfiguration {
         return workflowProperties;
     }
 
-    public RedisConfig getRedisConfigProperties() {
+    public RedisConfig getRedisConfig() {
 
         return redisConfig;
     }
@@ -1698,6 +1792,7 @@ public class APIManagerConfiguration {
                 eventHubReceiverConfiguration.setJmsConnectionParameters(properties);
                 eventHubConfigurationDto.setEventHubReceiverConfiguration(eventHubReceiverConfiguration);
             }
+
             OMElement eventPublisherElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.EVENT_PUBLISHER_CONFIGURATIONS));
             EventHubConfigurationDto.EventHubPublisherConfiguration eventHubPublisherConfiguration =
@@ -1722,10 +1817,39 @@ public class APIManagerConfiguration {
                 if (eventTypeElement != null) {
                     eventHubPublisherConfiguration.setType(eventTypeElement.getText().trim());
                 }
+                Map<String, String> publisherProps = extractPublisherProperties(eventPublisherElement);
+                if (publisherProps != null) {
+                    eventHubPublisherConfiguration.setProperties(publisherProps);
+                }
                 eventHubConfigurationDto.setEventHubPublisherConfiguration(eventHubPublisherConfiguration);
             }
         }
         this.eventHubConfigurationDto = eventHubConfigurationDto;
+    }
+
+    /**
+     * Extracts out the additional parameters of the publisher configuration.
+     *
+     * @param eventPublisherElement publisher element defined in the format of
+     *                              <EventPublisherConfiguration>"
+     *                              "<Properties>"
+     *                              "<Property name="testProp">testVal</Property>"
+     *                              "</Properties>"
+     *                              "</EventPublisherConfiguration>
+     * @return the extracted properties as a map
+     */
+    public Map<String, String> extractPublisherProperties(OMElement eventPublisherElement) {
+        OMElement propertiesElement = eventPublisherElement.getFirstChildWithName(
+                new QName(APIConstants.AdvancedThrottleConstants.PROPERTIES_CONFIGURATION));
+        Iterator eventPublisherPropertiesIterator = propertiesElement.getChildrenWithLocalName("Property");
+        Map<String, String> publisherProps = new HashMap<>();
+        while (eventPublisherPropertiesIterator.hasNext()) {
+            OMElement propertyElem = (OMElement) eventPublisherPropertiesIterator.next();
+            String name = propertyElem.getAttributeValue(new QName("name"));
+            String value = propertyElem.getText();
+            publisherProps.put(name, value);
+        }
+        return publisherProps;
     }
 
     public ExtendedJWTConfigurationDto getJwtConfigurationDto() {
@@ -1767,15 +1891,6 @@ public class APIManagerConfiguration {
             log.debug("Data Source Element is not set. Set to default Data Source");
         }
 
-        OMElement publishDirectlyToGatewayElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer
-                        .PUBLISH_DIRECTLY_TO_GW_CONFIG));
-        if (publishDirectlyToGatewayElement != null) {
-            gatewayArtifactSynchronizerProperties.setPublishDirectlyToGatewayEnabled(
-                    JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
-        } else {
-            log.debug("Publish directly to gateway is not set. Set to default true");
-        }
     }
 
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
@@ -1831,7 +1946,7 @@ public class APIManagerConfiguration {
 
         OMElement eventWaitingTimeElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EVENT_WAITING_TIME_CONFIG));
-        if (eventWaitingTimeElement!= null) {
+        if (eventWaitingTimeElement != null) {
             long eventWaitingTime = Long.valueOf(eventWaitingTimeElement.getText());
             gatewayArtifactSynchronizerProperties.setEventWaitingTime(eventWaitingTime);
         } else {
@@ -1850,6 +1965,10 @@ public class APIManagerConfiguration {
 
     public static Map<String, String> getAnalyticsProperties() {
         return analyticsProperties;
+    }
+    
+    public static Map<String, String> getPersistenceProperties() {
+        return persistenceProperties;
     }
 
     /**
@@ -1873,8 +1992,7 @@ public class APIManagerConfiguration {
             if (listenerTypeElement != null && listenerClassElement != null) {
                 String listenerClass = listenerClassElement.getText();
                 try {
-                    ExtensionListener extensionListener = (ExtensionListener) APIUtil
-                            .getClassForName(listenerClass).newInstance();
+                    ExtensionListener extensionListener = (ExtensionListener) APIUtil.getClassInstance(listenerClass);
                     extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
                 } catch (InstantiationException e) {
                     log.error("Error while instantiating class " + listenerClass, e);
@@ -1885,5 +2003,25 @@ public class APIManagerConfiguration {
                 }
             }
         }
+    }
+
+    private void setRestApiJWTAuthAudiences(OMElement omElement){
+
+        Iterator jwtAudiencesElement =
+                omElement.getChildrenWithLocalName(APIConstants.JWT_AUDIENCE);
+        while (jwtAudiencesElement.hasNext()) {
+            OMElement jwtAudienceElement = (OMElement) jwtAudiencesElement.next();
+            String basePath = jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.BASEPATH)).getText();
+            List<String> audienceForPath = restApiJWTAuthAudiences.get(basePath);
+            if (audienceForPath == null) {
+                audienceForPath = new ArrayList<>();
+            }
+            audienceForPath.add(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
+            restApiJWTAuthAudiences.put(basePath, audienceForPath);
+        }
+    }
+
+    public Map<String, Environment> getGatewayEnvironments() {
+        return apiGatewayEnvironments;
     }
 }

@@ -65,6 +65,7 @@ public class RegistrySearchUtil {
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+    private static final String CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX = "contextTemplate";
     public static final String API_DESCRIPTION = "Description";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
     public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
@@ -74,9 +75,11 @@ public class RegistrySearchUtil {
     public static final String GET_API_PRODUCT_QUERY  = "type=APIProduct";
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
-            VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
-            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
-            CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase() };
+            CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
+            LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(), API_STATUS.toLowerCase(),
+            CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX, CATEGORY_SEARCH_TYPE_PREFIX,
+            ENABLE_STORE.toLowerCase(), "sort", "group", "group.sort", "group.field",
+            "group.ngroups", "group.format" };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
@@ -246,7 +249,7 @@ public class RegistrySearchUtil {
                 filteredQuery.append(query);
                 break;
             }
-            // If the query does not contains "=" then it is an errornous scenario.
+            // If the query does not contain "=" then it is an erroneous scenario.
             if (query.contains("=")) {
                 String[] searchKeys = query.split("=");
 
@@ -391,7 +394,8 @@ public class RegistrySearchUtil {
         return null;
     }
     
-    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus) throws APIPersistenceException {
+    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus,
+                            boolean isAllowDisplayMultipleVersions) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
         if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery)) {
             
@@ -400,9 +404,15 @@ public class RegistrySearchUtil {
                 statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                         APIConstants.DEPRECATED };
             }
-            if ("".equals(searchQuery)) { // normal listing
+            if (StringUtils.isEmpty(searchQuery)) { // normal listing
                 String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
-                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
+                if (isAllowDisplayMultipleVersions) {
+                    modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
+                } else {
+                    // solr result grouping is used when displayMultipleVersions is not enabled(default).
+                    modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria +
+                            "&group=true&group.field=name&group.ngroups=true&group.sort=versionTimestamp desc";
+                }
             }
             
             String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
@@ -415,8 +425,17 @@ public class RegistrySearchUtil {
     }
 
     public static String getPublisherSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
+
+        // If the context is dynamic, modify the searchQuery to use the templated context instead of plain context
+        if (searchQuery.contains("context") && searchQuery.contains("{")) {
+            searchQuery = searchQuery.replace(CONTEXT_SEARCH_TYPE_PREFIX, CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX);
+            searchQuery = searchQuery.replace("{", ClientUtils.escapeQueryChars("{"));
+            searchQuery = searchQuery.replace("}", ClientUtils.escapeQueryChars("}"));
+        }
+
         String newSearchQuery = constructNewSearchQuery(searchQuery);
-        if ("".equals(searchQuery)) {// if (!query.contains(APIConstants.TYPE)) {
+
+        if (!newSearchQuery.contains(APIConstants.TYPE)) {
             String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY
                     + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST);
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;

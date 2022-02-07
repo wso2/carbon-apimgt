@@ -24,11 +24,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
@@ -39,15 +39,16 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -60,7 +61,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.cache.Cache;
 
 /**
@@ -78,7 +78,6 @@ public class OAuthAuthenticator implements Authenticator {
     protected JWTValidator jwtValidator = null;
 
     private String securityHeader = HttpHeaders.AUTHORIZATION;
-    private SynapseEnvironment environment = null;
     private APIManagerConfiguration config = null;
     private String defaultAPIHeader="WSO2_AM_API_DEFAULT_VERSION";
     private String consumerKeyHeaderSegment = "Bearer";
@@ -87,24 +86,19 @@ public class OAuthAuthenticator implements Authenticator {
     private String securityContextHeader;
     private boolean removeOAuthHeadersFromOutMessage =  true;
     private boolean removeDefaultAPIHeaderFromOutMessage = true;
-    private String clientDomainHeader = "referer";
     private String requestOrigin;
-    private String remainingAuthHeader;
     private boolean isMandatory;
 
     public OAuthAuthenticator() {
     }
 
-    public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader,
-                              List<String> keyManagerList) {
+    public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader) {
         this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
         this.isMandatory = isMandatory;
-        this.keyManagerList = keyManagerList;
     }
 
     public void init(SynapseEnvironment env) {
-        environment = env;
     }
 
     public void destroy() {
@@ -117,19 +111,18 @@ public class OAuthAuthenticator implements Authenticator {
     public AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException {
         boolean isJwtToken = false;
         String accessToken = null;
+        String remainingAuthHeader = "";
         boolean defaultVersionInvoked = false;
-        TracingSpan getClientDomainSpan = null;
-        TracingSpan authenticationSchemeSpan = null;
-        TracingSpan keyInfo = null;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        keyManagerList = GatewayUtils.getKeyManagers(synCtx);
         if (keyValidator == null) {
             this.keyValidator = new APIKeyValidator();
         }
 
         if (jwtValidator == null) {
-            this.jwtValidator = new JWTValidator(this.keyValidator);
+            this.jwtValidator = new JWTValidator(this.keyValidator, tenantDomain);
         }
 
         config = getApiManagerConfiguration();
@@ -139,7 +132,48 @@ public class OAuthAuthenticator implements Authenticator {
         if (headers != null) {
             requestOrigin = (String) headers.get("Origin");
 
-            accessToken = extractCustomerKeyFromAuthHeader(headers);
+            // Extract the access token from auth header
+
+            // From 1.0.7 version of this component onwards remove the OAuth authorization header from
+            // the message is configurable. So we dont need to remove headers at this point.
+            String authHeader = (String) headers.get(getSecurityHeader());
+            if (authHeader == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("OAuth2 Authentication: Expected authorization header with the name '"
+                            .concat(getSecurityHeader()).concat("' was not found."));
+                }
+            } else {
+                ArrayList<String> remainingAuthHeaders = new ArrayList<>();
+                boolean consumerkeyFound = false;
+                String[] splitHeaders = authHeader.split(oauthHeaderSplitter);
+                if (splitHeaders != null) {
+                    for (int i = 0; i < splitHeaders.length; i++) {
+                        String[] elements = splitHeaders[i].split(consumerKeySegmentDelimiter);
+                        if (elements != null && elements.length > 1) {
+                            int j = 0;
+                            boolean isConsumerKeyHeaderAvailable = false;
+                            for (String element : elements) {
+                                if (!"".equals(element.trim())) {
+                                    if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
+                                        isConsumerKeyHeaderAvailable = true;
+                                    } else if (isConsumerKeyHeaderAvailable) {
+                                        accessToken = removeLeadingAndTrailing(elements[j].trim());
+                                        consumerkeyFound = true;
+                                    }
+                                }
+                                j++;
+                            }
+                        }
+                        if (!consumerkeyFound) {
+                            remainingAuthHeaders.add(splitHeaders[i]);
+                        } else {
+                            consumerkeyFound = false;
+                        }
+                    }
+                }
+                remainingAuthHeader = String.join(oauthHeaderSplitter, remainingAuthHeaders);
+            }
+
             if (log.isDebugEnabled()) {
                 log.debug(accessToken != null ? "Received Token ".concat(accessToken) : "No valid Authorization header found");
             }
@@ -147,28 +181,26 @@ public class OAuthAuthenticator implements Authenticator {
             defaultVersionInvoked = headers.containsKey(defaultAPIHeader);
         }
 
-
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Default Version API invoked");
         }
 
-        if(removeOAuthHeadersFromOutMessage){
+        if (removeOAuthHeadersFromOutMessage) {
             //Remove authorization headers sent for authentication at the gateway and pass others to the backend
             if (StringUtils.isNotBlank(remainingAuthHeader)) {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Removing OAuth key from Authorization header");
                 }
                 headers.put(getSecurityHeader(), remainingAuthHeader);
-                remainingAuthHeader = "";
             } else {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Removing Authorization header from headers");
                 }
                 headers.remove(getSecurityHeader());
             }
 
         }
-        if(removeDefaultAPIHeaderFromOutMessage){
+        if (removeDefaultAPIHeaderFromOutMessage) {
             headers.remove(defaultAPIHeader);
         }
 
@@ -179,18 +211,6 @@ public class OAuthAuthenticator implements Authenticator {
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         SignedJWTInfo signedJWTInfo = null;
 
-        if (Util.tracingEnabled()) {
-            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-            TracingTracer tracer = Util.getGlobalTracer();
-            getClientDomainSpan = Util.startSpan(APIMgtGatewayConstants.GET_CLIENT_DOMAIN, keySpan, tracer);
-        }
-        String clientDomain = getClientDomain(synCtx);
-        if (Util.tracingEnabled()) {
-            Util.finishSpan(getClientDomainSpan);
-        }
-        if(log.isDebugEnabled() && null != clientDomain) {
-            log.debug("Received Client Domain ".concat(clientDomain));
-        }
         //If the matching resource does not require authentication
         Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
@@ -198,12 +218,6 @@ public class OAuthAuthenticator implements Authenticator {
         org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
 
-        if (Util.tracingEnabled()) {
-            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-            TracingTracer tracer = Util.getGlobalTracer();
-            authenticationSchemeSpan =
-                    Util.startSpan(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME, keySpan, tracer);
-        }
         String authenticationScheme;
         try {
             //Initial guess of a JWT token using the presence of a DOT.
@@ -226,13 +240,26 @@ public class OAuthAuthenticator implements Authenticator {
                     String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
                     if (StringUtils.isNotEmpty(keyManager)) {
+                        if (log.isDebugEnabled()){
+                            log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
+                        }
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
+                            }
                             isJwtToken = true;
                         } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
+                            }
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                        }
+                    }else{
+                        if (log.isDebugEnabled()) {
+                            log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
                         }
                     }
                 } catch ( ParseException | IllegalArgumentException e) {
@@ -249,61 +276,9 @@ public class OAuthAuthenticator implements Authenticator {
         } catch (APISecurityException ex) {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
         }
-        if (Util.tracingEnabled()) {
-            Util.finishSpan(authenticationSchemeSpan);
-        }
         context.stop();
         APIKeyValidationInfoDTO info;
-        if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
-
-            if(log.isDebugEnabled()){
-                log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
-            }
-
-            //using existing constant in Message context removing the additinal constant in API Constants
-            String clientIP = null;
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
-                    getAxis2MessageContext();
-            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
-                                                         axis2MessageContext.getProperty
-                                                                 (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-            if (transportHeaderMap != null) {
-                clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-            }
-
-            //Setting IP of the client
-            if (clientIP != null && !clientIP.isEmpty()) {
-                if (clientIP.indexOf(",") > 0) {
-                    clientIP = clientIP.substring(0, clientIP.indexOf(","));
-                }
-            } else {
-                clientIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-            }
-
-            //Create a dummy AuthenticationContext object with hard coded values for
-            // Tier and KeyType. This is because we cannot determine the Tier nor Key
-            // Type without subscription information..
-            AuthenticationContext authContext = new AuthenticationContext();
-            authContext.setAuthenticated(true);
-            authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
-            authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
-            //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario,
-            //we will use the client's IP address for throttling.
-            authContext.setApiKey(clientIP);
-            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-            //This name is hardcoded as anonymous because there is no associated user token
-            authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
-            authContext.setCallerToken(null);
-            authContext.setApplicationName(null);
-            authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
-            authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
-            authContext.setConsumerKey(null);
-            String apiNameFromContextAndVersion = GatewayUtils.getAPINameFromContextAndVersion(synCtx);
-            synCtx.setProperty("API_NAME", apiNameFromContextAndVersion);
-            APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
-            return new AuthenticationResponse(true, isMandatory, false, 0, null);
-        } else if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
+        if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
             info = new APIKeyValidationInfoDTO();
             info.setAuthorized(false);
             info.setValidationStatus(900906);
@@ -343,19 +318,11 @@ public class OAuthAuthenticator implements Authenticator {
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
             context = timer.start();
 
-            if (Util.tracingEnabled()) {
-                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-                TracingTracer tracer = Util.getGlobalTracer();
-                keyInfo = Util.startSpan(APIMgtGatewayConstants.GET_KEY_VALIDATION_INFO, keySpan, tracer);
-            }
             try {
-                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion, authenticationScheme, clientDomain,
+                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion, authenticationScheme,
                         matchingResource, httpMethod, defaultVersionInvoked,keyManagerList);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
-            }
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(keyInfo);
             }
             context.stop();
             synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
@@ -420,60 +387,6 @@ public class OAuthAuthenticator implements Authenticator {
         }
     }
 
-    /**
-     * Extracts the customer API key from the OAuth Authentication header. If the required
-     * security header is present in the provided map, it will be removed from the map
-     * after processing.
-     *
-     * @param headersMap Map of HTTP headers
-     * @return extracted customer key value or null if the required header is not present
-     */
-    public String extractCustomerKeyFromAuthHeader(Map headersMap) {
-
-        //From 1.0.7 version of this component onwards remove the OAuth authorization header from
-        // the message is configurable. So we dont need to remove headers at this point.
-        String authHeader = (String) headersMap.get(getSecurityHeader());
-        if (authHeader == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("OAuth2 Authentication: Expected authorization header with the name '"
-                        .concat(getSecurityHeader()).concat("' was not found."));
-            }
-            return null;
-        }
-
-        ArrayList<String> remainingAuthHeaders = new ArrayList<>();
-        String consumerKey = null;
-        boolean consumerkeyFound = false;
-        String[] headers = authHeader.split(oauthHeaderSplitter);
-        if (headers != null) {
-            for (int i = 0; i < headers.length; i++) {
-                String[] elements = headers[i].split(consumerKeySegmentDelimiter);
-                if (elements != null && elements.length > 1) {
-                    int j = 0;
-                    boolean isConsumerKeyHeaderAvailable = false;
-                    for (String element : elements) {
-                        if (!"".equals(element.trim())) {
-                            if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
-                                isConsumerKeyHeaderAvailable = true;
-                            } else if (isConsumerKeyHeaderAvailable) {
-                                consumerKey = removeLeadingAndTrailing(elements[j].trim());
-                                consumerkeyFound = true;
-                            }
-                        }
-                        j++;
-                    }
-                }
-                if (!consumerkeyFound) {
-                    remainingAuthHeaders.add(headers[i]);
-                } else {
-                    consumerkeyFound = false;
-                }
-            }
-        }
-        remainingAuthHeader = String.join(oauthHeaderSplitter, remainingAuthHeaders);
-        return consumerKey;
-    }
-
     private String removeLeadingAndTrailing(String base) {
         String result = base;
 
@@ -491,17 +404,7 @@ public class OAuthAuthenticator implements Authenticator {
         return "Bearer realm=\"WSO2 API Manager\"";
     }
 
-    private String getClientDomain(MessageContext synCtx) {
-        String clientDomainHeaderValue = null;
-        Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
-                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (headers != null) {
-            clientDomainHeaderValue = (String) headers.get(clientDomainHeader);
-        }
-        return clientDomainHeaderValue;
-    }
-
-	public String getRequestOrigin() {
+    public String getRequestOrigin() {
 		return requestOrigin;
 	}
 
@@ -578,14 +481,6 @@ public class OAuthAuthenticator implements Authenticator {
 
     private void setRemoveOAuthHeadersFromOutMessage(boolean removeOAuthHeadersFromOutMessage) {
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeadersFromOutMessage;
-    }
-
-    public String getClientDomainHeader() {
-        return clientDomainHeader;
-    }
-
-    public void setClientDomainHeader(String clientDomainHeader) {
-        this.clientDomainHeader = clientDomainHeader;
     }
 
     public boolean isRemoveDefaultAPIHeaderFromOutMessage() {

@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -66,6 +65,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -440,16 +440,10 @@ public class Utils {
             if (headers.containsKey(Utils.getClientCertificateHeader())) {
                 try {
                     if (!isClientCertificateValidationEnabled() || APIUtil
-                            .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
+                            .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
                         X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
-                        if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
-                            // If valid client certificate is sent via header give it priority over the transport level cert
-                            axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
-                            return x509Certificate;
-                        } else {
-                            log.debug("Certificate in Header didn't exist in truststore");
-                            return null;
-                        }
+                        axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
+                        return x509Certificate;
                     }
                 } catch (APIManagementException e) {
                     String msg = "Error while validating into Certificate Existence";
@@ -471,18 +465,17 @@ public class Utils {
         byte[] bytes;
         if (certificate != null) {
             if (!isClientCertificateEncoded()) {
-                certificate = certificate
-                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING_SPACE, "")
-                        .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
-                certificate = certificate.replaceAll(" ", "\n");
-                certificate = APIConstants.BEGIN_CERTIFICATE_STRING + certificate
-                        + APIConstants.END_CERTIFICATE_STRING;
+                certificate = APIUtil.getX509certificateContent(certificate);
                 bytes = certificate.getBytes();
             } else {
-                certificate = URLDecoder.decode(certificate)
-                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                        .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                try {
+                    certificate = URLDecoder.decode(certificate, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    String msg = "Error while URL decoding certificate";
+                    throw new APIManagementException(msg, e);
+                }
+
+                certificate = APIUtil.getX509certificateContent(certificate);
                 bytes = Base64.decodeBase64(certificate);
             }
 
@@ -639,5 +632,19 @@ public class Utils {
         public int compare(String o1, String o2) {
             return o2.length() - o1.length();
         }
+    }
+
+    /**
+     * Evaluate current request transport and message context to check if its a GraphQL subscription execution path.
+     *
+     * @param messageContext MessageContext
+     * @return true if graphql subscription request execution path
+     */
+    public static boolean isGraphQLSubscriptionRequest(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        return (APIConstants.WS_PROTOCOL.equals(axis2MC.getIncomingTransportName()) ||
+                APIConstants.WSS_PROTOCOL.equals(axis2MC.getIncomingTransportName())
+                        && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST));
     }
 }

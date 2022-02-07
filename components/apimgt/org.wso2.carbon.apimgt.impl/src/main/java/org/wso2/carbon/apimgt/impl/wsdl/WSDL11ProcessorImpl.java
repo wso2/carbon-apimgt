@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -238,6 +239,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
               Definition wsdlDefinition) throws APIMgtWSDLException {
         Map serviceMap = wsdlDefinition.getAllServices();
         URL addressURI;
+        String organization = api.getOrganization();
         for (Object entry : serviceMap.entrySet()) {
             Map.Entry svcEntry = (Map.Entry) entry;
             Service svc = (Service) svcEntry.getValue();
@@ -266,7 +268,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
                     }
                     try {
                         setAddressUrl(extensibilityElement, endpointTransport, api.getContext(), environmentName,
-                                environmentType);
+                                environmentType, organization);
                     } catch (APIManagementException e) {
                         throw new APIMgtWSDLException("Error while setting gateway access URLs in the WSDL", e);
                     }
@@ -366,6 +368,11 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
         return wsdlDefinition;
     }
 
+    @Override
+    public void loadXSDs(APIMWSDLReader wsdlReader, String url) throws APIManagementException {
+        throw new UnsupportedOperationException("This method is not implemented");
+    }
+
     /**
      * Get endpoints defined in WSDL file(s).
      *
@@ -444,24 +451,28 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
      * @throws APIManagementException when unsupported WSDL as a input
      */
     private void setAddressUrl(ExtensibilityElement exElement, String transports, String context,
-                               String environmentName, String environmentType) throws APIManagementException {
+                               String environmentName, String environmentType, String organization)
+            throws APIManagementException {
         if (exElement instanceof SOAP12AddressImpl) {
             ((SOAP12AddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType,
+                            organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((SOAP12AddressImpl) exElement).getLocationURI());
             }
         } else if (exElement instanceof SOAPAddressImpl) {
             ((SOAPAddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType,
+                            organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((SOAPAddressImpl) exElement).getLocationURI());
             }
         } else if (exElement instanceof HTTPAddressImpl) {
             ((HTTPAddressImpl) exElement)
-                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType,
+                            organization) + context);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway endpoint for environment:" + environmentName + " is: "
                         + ((HTTPAddressImpl) exElement).getLocationURI());

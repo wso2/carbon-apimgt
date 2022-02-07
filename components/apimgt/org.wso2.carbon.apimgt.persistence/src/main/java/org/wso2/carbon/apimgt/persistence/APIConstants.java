@@ -53,6 +53,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBLE_ROLES = "overview_visibleRoles";
     public static final String API_OVERVIEW_VISIBLE_TENANTS = "overview_visibleTenants";
     public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
+    public static final String API_OVERVIEW_AUDIENCE = "overview_audience";
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
@@ -89,6 +90,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";
     public static final String API_OVERVIEW_OWNER = "overview_apiOwner";
     public static final String API_OVERVIEW_ADVERTISE_ONLY = "overview_advertiseOnly";
+    public static final String API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR = "overview_vendor";
     public static final String API_OVERVIEW_ENDPOINT_CONFIG = "overview_endpointConfig";
 
     public static final String API_OVERVIEW_SUBSCRIPTION_AVAILABILITY = "overview_subscriptionAvailability";
@@ -118,6 +120,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
+    public static final String API_OVERVIEW_VERSION_TIMESTAMP = "overview_versionTimestamp";
+
 
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
@@ -166,17 +170,7 @@ public final class APIConstants {
     public static final String GOVERNANCE_COMPONENT_REGISTRY_LOCATION = "/repository/components/org.wso2.carbon" +
                                     ".governance";
 
-    public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
-
-    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
-
-    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
-
-    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
-
-    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
-
-    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
+    public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
     public static final String DOCUMENTATION_KEY = "document";
 
@@ -226,7 +220,6 @@ public final class APIConstants {
 
     // Prefix used for saving the custom properties related with APIs
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
-    public static final String API_RELATED_CUSTOM_PROPERTIES_SURFIX = "__display";
 
     /**
      * CustomIndexer property to indicate whether it is gone through API Custom Indexer.
@@ -302,7 +295,7 @@ public final class APIConstants {
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
     public static final String[] API_SUPPORTED_TYPE_LIST =
-            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB"};
+            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK"};
 
     public static class AuditLogConstants {
         public static final String API_PRODUCT = "APIProduct";
@@ -369,8 +362,16 @@ public final class APIConstants {
     public static final String GRAPHQL_LOCAL_ENTRY_EXTENSION = "_graphQL";
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
-    
+    public static final String ALLOW_MULTIPLE_VERSIONS = "allowMultipleVersions";
+
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
+    public static final String API_TYPE_WEBSUB = "WEBSUB";
+    public static final String API_TYPE_SSE = "SSE";
+    public static final String API_TYPE_WEBHOOK = "WEBHOOK";
+    public static final String API_TYPE_WS = "WS";
 
     public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.json";
+
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
+    public static final String ASYNC_API_TRANSPORT_PROTOCOLS = "asyncTransportProtocols";
 }

@@ -26,10 +26,8 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -44,7 +42,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,12 +78,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException {
-        checkAccessControlPermission(api.getId());
-        super.createNewAPIVersion(api, newVersion);
-    }
-
-    @Override
     public List<String> getCustomInSequences(APIIdentifier apiIdentifier) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.getCustomInSequences(apiIdentifier);
@@ -102,12 +93,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getWSDL(apiId);
-    }
-
-    @Override
-    public void manageAPI(API api) throws APIManagementException,FaultGatewaysException {
-        checkAccessControlPermission(api.getId());
-        super.updateAPI(api);
     }
 
     @Override
@@ -136,52 +121,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
-            throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.propergateAPIStatusChangeToGateways(identifier, newStatus);
-    }
-
-    @Override
-    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
-            throws APIManagementException {
-        return propergateAPIStatusChangeToGateways(identifier, newStatus.getStatus());
-    }
-
-    @Override
-    public boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
-            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
-        checkAccessControlPermission(identifier);
-        return super.updateAPIforStateChange(identifier, newStatus, failedGatewaysMap);
-    }
-
-    @Override
-    public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
-            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
-        return updateAPIforStateChange(identifier, newStatus.getStatus(), failedGatewaysMap);
-    }
-
-    @Override
-    public void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename,
-            InputStream content, String contentType) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        super.addFileToDocumentation(apiId, documentation, filename, content, contentType);
-    }
-
-    @Override
-    public void addDocumentation(Identifier id,
-                                 Documentation documentation) throws APIManagementException {
-
-        //todo : implement access control check for api products too
-        if (id instanceof APIIdentifier) {
-            checkAccessControlPermission(id);
-        }
-        super.addDocumentation(id, documentation);
-    }
-
-    @Override
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        API api = super.getLightweightAPIByUUID(uuid, requestedTenantDomain);
+    public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
+        API api = super.getLightweightAPIByUUID(uuid, organization);
         if (api != null) {
             checkAccessControlPermission(api.getId());
         }
@@ -189,15 +130,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getLightweightAPI(identifier);
-    }
-
-    @Override
-    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getOpenAPIDefinition(apiId, orgId);
+        return super.getOpenAPIDefinition(apiId, organization);
     }
 
     @Override
@@ -219,9 +154,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException {
         //checkAccessControlPermission(apiId);
-        return super.updateDocumentation(apiId, documentation, orgId);
+        return super.updateDocumentation(apiId, documentation, organization);
     }
 
     @Override
@@ -238,14 +173,15 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getLifeCycleEvents(apiId);
+    public List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException {
+
+        return super.getLifeCycleEvents(uuid);
     }
 
     @Override
-    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException {
-        apiMgtDAO.updateSubscription(apiId, subStatus, appId);
+    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId, String organization)
+            throws APIManagementException {
+        apiMgtDAO.updateSubscription(apiId, subStatus, appId, organization);
     }
 
     @Override
@@ -258,10 +194,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         return super.getSubscriptionByUUID(uuid);
     }
 
-    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
-            throws APIManagementException, FaultGatewaysException {
+    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus,
+            String organization) throws APIManagementException, FaultGatewaysException {
         checkAccessControlPermission(apiIdentifier);
-        return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
+        return super.changeLifeCycleStatus(apiIdentifier, targetStatus, organization);
     }
 
     @Override
@@ -284,16 +220,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getAPI(identifier);
-    }
-
-    @Override
     public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
-            String tierName) throws APIManagementException {
+            String tierName, String organization) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
-        return super.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName);
+        return super.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName, organization);
     }
 
     @Override
@@ -325,11 +255,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException {
         checkAccessControlPermission(apiid);
         return super.getDefaultVersion(apiid);
-    }
-
-    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.getConsumerKeys(apiIdentifier);
     }
 
     @Override
@@ -464,8 +389,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
-        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, String organization) throws APIManagementException {
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias, organization);
         if (clientCertificateDTO != null) {
             checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
         }
@@ -473,9 +398,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
-        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias, organization);
         if (clientCertificateDTO != null) {
             checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
         }
@@ -494,9 +419,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
-            String tier, int tenantId) throws APIManagementException {
+            String tier, int tenantId, String organization) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
-        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId);
+        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId, organization);
     }
 
     @Override
@@ -505,13 +430,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
-        super.deleteWorkflowTask(apiIdentifier);
-    }
-
-    @Override
-    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getAsyncAPIDefinition(apiId);
+    public void deleteWorkflowTask(Identifier identifier) throws APIManagementException {
+        super.deleteWorkflowTask(identifier);
     }
 }

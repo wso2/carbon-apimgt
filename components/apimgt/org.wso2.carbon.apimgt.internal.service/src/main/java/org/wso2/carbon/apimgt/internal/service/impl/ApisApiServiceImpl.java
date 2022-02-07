@@ -18,22 +18,33 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-
-import java.io.File;
-import javax.ws.rs.core.Response;
+import org.wso2.carbon.context.CarbonContext;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -78,5 +89,52 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.ok().entity(apiListDTO).build();
         }
         return null;
+    }
+
+    public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        List<String> revisionUUIDs = new ArrayList<>();
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
+            // get revision uuid
+            String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
+                    deployedAPIRevisionDTO.getApiId());
+            if (revisionUUID == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
+            if (!revisionUUIDs.contains(revisionUUID)) {
+                revisionUUIDs.add(revisionUUID);
+                Map<String, Environment> environments = APIUtil.getEnvironments(tenantDomain);
+                List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
+                for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
+                    DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
+                    deployedAPIRevision.setRevisionUUID(revisionUUID);
+                    String environment = deployedEnvInfoDTO.getName();
+                    if (environments.get(environment) == null) {
+                        RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                    }
+                    deployedAPIRevision.setDeployment(environment);
+                    deployedAPIRevision.setVhost(deployedEnvInfoDTO.getVhost());
+                    if (StringUtils.isEmpty(deployedEnvInfoDTO.getVhost())) {
+                        RestApiUtil.handleBadRequest(
+                                "Required field 'vhost' not found in deployment", log
+                        );
+                    }
+                    deployedAPIRevisions.add(deployedAPIRevision);
+                }
+                apiProvider.addDeployedAPIRevision(deployedAPIRevisionDTO.getApiId(), revisionUUID, deployedAPIRevisions);
+            }
+        }
+
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response unDeployedAPIRevision(UnDeployedAPIRevisionDTO unDeployedAPIRevisionDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.removeUnDeployedAPIRevision(unDeployedAPIRevisionDTO.getApiUUID(), unDeployedAPIRevisionDTO.getRevisionUUID(),
+                unDeployedAPIRevisionDTO.getEnvironment());
+        return Response.ok().build();
     }
 }

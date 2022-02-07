@@ -165,7 +165,7 @@ public class ThrottleConditionEvaluator {
 
     private boolean isHeaderPresent(MessageContext messageContext, ConditionDTO condition) {
 
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) messageContext
+        Map<String, String> transportHeaderMap = (Map<String, String>) messageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (transportHeaderMap != null) {
             String value = transportHeaderMap.get(condition.getConditionName());
@@ -181,7 +181,7 @@ public class ThrottleConditionEvaluator {
 
     private boolean isHeaderPresent(MessageContext messageContext, ConditionDto.HeaderConditions condition) {
 
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) messageContext
+        Map<String, String> transportHeaderMap = (Map<String, String>) messageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         boolean status = true;
         for (Map.Entry<String, String> headerEntry : condition.getValues().entrySet()) {
@@ -251,13 +251,12 @@ public class ThrottleConditionEvaluator {
         boolean status = true;
 
         for (Map.Entry<String, String> queryParam : condition.getValues().entrySet()) {
-            String value = queryParamMap.get(queryParam.getKey());
-            if (value == null) {
+            if (queryParamMap == null || queryParamMap.get(queryParam.getKey()) == null) {
                 status = false;
                 break;
             } else {
                 Pattern pattern = Pattern.compile(queryParam.getValue());
-                Matcher matcher = pattern.matcher(value);
+                Matcher matcher = pattern.matcher(queryParamMap.get(queryParam.getKey()));
                 status = status && matcher.find();
             }
         }

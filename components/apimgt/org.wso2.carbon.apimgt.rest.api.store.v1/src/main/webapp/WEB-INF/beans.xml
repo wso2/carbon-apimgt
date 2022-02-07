@@ -71,6 +71,7 @@
                   value="#{systemProperties['rest.api.devportal.allowed.origins'] != null ?
                       systemProperties['rest.api.devportal.allowed.origins'].split(',') : {}}"/>
     </bean>
+    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor"/>
 
     <!-- Out interceptors -->
     <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
@@ -86,6 +87,7 @@
             <ref bean="PostAuthenticationInterceptor"/>
             <ref bean="SubscriberRegistrationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
+            <ref bean="OrganizationInterceptor"/>
         </cxf:inInterceptors>
         <cxf:outInterceptors>
             <ref bean="gZipInterceptor"/>

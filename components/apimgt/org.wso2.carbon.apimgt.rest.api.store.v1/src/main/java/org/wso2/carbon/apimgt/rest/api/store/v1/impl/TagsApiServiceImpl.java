@@ -47,21 +47,16 @@ public class TagsApiServiceImpl implements TagsApiService {
     public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
         //pre-processing
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        limit = limit != null ? limit : RestApiConstants.TAG_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.TAG_OFFSET_DEFAULT;
 
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();
         try {
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
-
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            tagSet = apiConsumer.getAllTags(requestedTenantDomain);
+            tagSet = apiConsumer.getAllTags(organization);
             if (tagSet != null) {
                 tagList.addAll(tagSet);
             }
@@ -70,10 +65,7 @@ public class TagsApiServiceImpl implements TagsApiService {
             return Response.ok().entity(tagListDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving tags", e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
+        } 
         return null;
     }
 

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -255,6 +256,11 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     }
 
     @Override
+    public void loadXSDs(APIMWSDLReader wsdlReader, String url) {
+        throw new UnsupportedOperationException("This method is not implemented");
+    }
+
+    @Override
     public void updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
         if (Mode.SINGLE.equals(getMode())) {
             updateEndpointsOfSingleWSDL(api, environmentName, environmentType);
@@ -321,6 +327,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     private void updateEndpointsOfSingleWSDL(API api, String environmentName, String environmentType,
                 Description wsdlDescription) throws APIMgtWSDLException {
         Service[] serviceMap = wsdlDescription.getServices();
+        String organization = api.getOrganization();
         try {
             for (Service svc : serviceMap) {
                 Endpoint[] portMap = svc.getEndpoints();
@@ -329,7 +336,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
                     String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(),
                             api.getTransports());
                     setAddressUrl(element, new URI(APIUtil.getGatewayEndpoint(endpointTransport, environmentName,
-                            environmentType) + api.getContext()));
+                            environmentType, organization) + api.getContext()));
                 }
             }
         } catch (URISyntaxException | APIManagementException e) {

@@ -24,6 +24,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -59,7 +60,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         TracingTracer tracer = ServiceReferenceHolder.getInstance().getTracer();
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
         if (Util.tracingEnabled()) {
-            TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TracingSpan backendLatencySpan =
                     Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
             messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
@@ -89,9 +90,18 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
         if (Util.tracingEnabled()) {
+            Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            if (resourceSpanObject != null){
+                GatewayUtils.setAPIResource((TracingSpan) resourceSpanObject, messageContext);
+                Util.finishSpan((TracingSpan) resourceSpanObject);
+            }
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
+            API api = GatewayUtils.getAPI(messageContext);
+            if (api!= null){
+                Util.updateOperation(responseLatencySpan, api.getApiName().concat("--").concat(api.getApiVersion()).concat("--").concat(GatewayUtils.getTenantDomain()));
+            }
             Util.finishSpan(responseLatencySpan);
         }
         return true;

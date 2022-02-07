@@ -126,6 +126,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/sortOrder'
         - $ref: '#/components/parameters/requestedTenant'
         - name: query
           in: query
@@ -184,6 +186,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
@@ -251,6 +254,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -311,6 +315,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:api_import_export
             - apim:api_product_import_export
       x-code-samples:
@@ -382,6 +387,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -415,6 +421,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_delete
+            - apim:api_manage
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
@@ -470,6 +477,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/API'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_import_export
 
   /apis/{apiId}/reimport-service:
     put:
@@ -507,6 +519,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -561,6 +574,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -634,6 +648,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -690,6 +705,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -745,6 +761,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -814,6 +831,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -872,6 +890,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -938,6 +957,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -990,6 +1010,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1059,6 +1080,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1113,6 +1135,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1169,6 +1192,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1260,6 +1284,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
@@ -1307,7 +1332,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1361,8 +1388,10 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1391,6 +1420,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1431,7 +1461,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
@@ -1473,6 +1505,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
@@ -1512,7 +1545,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1550,6 +1585,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
@@ -1583,7 +1619,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1624,6 +1662,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1670,6 +1709,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1725,6 +1765,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
@@ -1761,6 +1802,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1815,6 +1857,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1849,7 +1892,9 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
+            - apim:comment_manage
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
@@ -1919,6 +1964,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:comment_write
+            - apim:comment_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1972,7 +2018,9 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
+            - apim:comment_manage
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
@@ -2043,6 +2091,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:comment_write
+            - apim:comment_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2081,7 +2130,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:comment_write
-            - apim:admin
+            - apim:comment_manage
+            - apim:admin # special scope added to moderate other comments as well
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2135,7 +2185,9 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
+            - apim:comment_manage
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
@@ -2202,6 +2254,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2291,6 +2344,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2363,6 +2417,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2424,6 +2479,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2472,6 +2528,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2523,6 +2580,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2573,6 +2631,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2621,6 +2680,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2676,6 +2736,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2741,6 +2802,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2784,6 +2846,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2823,6 +2886,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2852,7 +2916,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2901,7 +2967,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2952,6 +3020,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
+            - apim:document_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3008,7 +3078,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
-            - apim:document_create
+            - apim:api_manage
+            - apim:document_create #deprecate
+            - apim:document_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3065,6 +3137,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
+            - apim:document_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3129,6 +3203,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:document_manage
       x-code-samples:
         - lang: Curl
@@ -3159,6 +3234,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:document_manage
       x-code-samples:
         - lang: Curl
@@ -3238,6 +3314,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
+            - apim:document_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3312,7 +3390,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
-            - apim:document_create
+            - apim:api_manage
+            - apim:document_create #deprecate
+            - apim:document_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3351,7 +3431,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
-            - apim:document_create
+            - apim:api_manage
+            - apim:document_manage
+            - apim:document_create #deprecate
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3407,7 +3489,10 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage 
             - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3483,8 +3568,11 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_create
+            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
+            - apim:api_manage
             - apim:mediation_policy_create
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3544,7 +3632,10 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3578,7 +3669,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3632,7 +3725,10 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3711,7 +3807,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3746,6 +3844,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3796,6 +3895,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3866,6 +3966,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3902,7 +4003,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -3936,6 +4039,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3971,7 +4075,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -4030,6 +4136,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4067,6 +4174,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4113,6 +4221,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4134,7 +4243,6 @@ paths:
           in: query
           description: External Store Ids of stores which the API needs to be published
             or updated.
-          required: true
           schema:
             type: string
         - $ref: '#/components/parameters/If-Match'
@@ -4167,6 +4275,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4200,6 +4309,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_generate_key
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4286,9 +4396,11 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_create
             - apim:api_import_export
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4416,7 +4528,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4474,7 +4588,9 @@ paths:
                 $ref: '#/components/schemas/Error'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4503,7 +4619,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4561,6 +4679,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscription_block
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4605,6 +4724,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscription_block
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4659,6 +4779,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:tier_view
+            - apim:tier_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4709,6 +4831,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:tier_view
+            - apim:tier_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4768,6 +4892,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:tier_view
+            - apim:tier_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4823,7 +4949,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:mediation_policy_view
+            - apim:mediation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4879,7 +5007,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:mediation_policy_view
+            - apim:mediation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4923,7 +5053,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:client_certificates_view
+            - apim:client_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4987,7 +5119,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:client_certificates_add
+            - apim:client_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5032,7 +5166,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:client_certificates_view
+            - apim:client_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5096,7 +5232,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:client_certificates_update
+            - apim:client_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5140,6 +5278,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:client_certificates_update
       x-code-samples:
         - lang: Curl
@@ -5181,7 +5320,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:client_certificates_view
+            - apim:client_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5235,7 +5376,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:ep_certificates_view
+            - apim:ep_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5297,7 +5440,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:ep_certificates_add
+            - apim:ep_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5341,7 +5486,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:ep_certificates_view
+            - apim:ep_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5404,7 +5551,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:ep_certificates_update
+            - apim:ep_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5446,7 +5595,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:ep_certificates_update
+            - apim:ep_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5486,7 +5637,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:ep_certificates_view
+            - apim:ep_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5545,6 +5698,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:api_import_export
             - apim:api_product_import_export
       x-code-samples:
@@ -5606,6 +5760,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5658,6 +5813,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5715,7 +5871,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5781,6 +5939,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5812,6 +5971,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
             - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
@@ -5865,7 +6025,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5935,6 +6097,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5986,7 +6149,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6041,7 +6206,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       operationId: getIsAPIProductOutdated
 
   /api-products/{apiProductId}/documents:
@@ -6088,7 +6255,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6144,6 +6313,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6200,7 +6370,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6265,6 +6437,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6294,6 +6467,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6369,7 +6543,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6444,6 +6620,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6484,8 +6661,10 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
             - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
@@ -6527,6 +6706,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6564,8 +6744,10 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6603,6 +6785,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6634,8 +6817,10 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6676,6 +6861,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
@@ -6725,6 +6911,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6780,6 +6967,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
             - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
@@ -6816,6 +7004,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6897,7 +7086,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_import_export
+            - apim:api_view
+            - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7003,6 +7193,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7027,6 +7218,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7057,6 +7249,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7085,6 +7278,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:publisher_settings
       x-code-samples:
         - lang: Curl
@@ -7141,6 +7335,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7165,6 +7360,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7194,6 +7390,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7234,6 +7431,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7310,6 +7508,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7402,6 +7601,8 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_publish
+            - apim:api_manage
+            - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7437,6 +7638,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
+            - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7463,7 +7666,9 @@ paths:
                 $ref: '#/components/schemas/KeyManagerList'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7522,6 +7727,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
 
   /apis/import-asyncapi:
     post:
@@ -7581,6 +7787,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
 
   /apis/{apiId}/asyncapi:
     get:
@@ -7631,6 +7838,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
 
     put:
       tags:
@@ -7699,6 +7907,248 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
+  /apis/{apiId}/environments/{envId}/keys:
+    get:
+      tags:
+        - APIs
+      summary: get environment specific API properties
+      description: |
+        This operation can be used to retrieve environment specific API properties from an existing API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/envId'
+      responses:
+        '200':
+          description: |
+            OK.
+            Successful response with environment specific API properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentProperties'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+    put:
+      tags:
+        - APIs
+      summary: Update environment specific API properties
+      description: |
+        This operation can be used to update the environment specific API properties of an existing API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/envId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentProperties'
+        required: true
+      responses:
+        '200':
+          description: |
+            OK.
+            Successful response with environment specific API properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentProperties'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+
+  /api-products/change-lifecycle:
+    post:
+      tags:
+        - API Product Lifecycle
+      summary: Change API Product LC Status
+      description: |
+        This operation is used to change the lifecycle of an API Product.
+        Eg: Publish an API Product which is in `CREATED` state. In order to change the lifecycle, we need to provide the
+        lifecycle `action` as a query parameter.
+
+        For example, to Publish an API Product, `action` should be `Publish`. Note that the `Re-publish` action is
+        available only after calling `Block`.
+
+        Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter.
+        Please see parameters table for more information.
+      parameters:
+        - name: action
+          in: query
+          description: |
+            The action to demote or promote the state of the API Product.
+
+            Supported actions are [ **Publish**, **Deploy as a Prototype**, **Demote to Created**, **Block**, **Deprecate**, **Re-Publish**, **Retire** ]
+          required: true
+          schema:
+            type: string
+            enum:
+              - Publish
+              - Deploy as a Prototype
+              - Demote to Created
+              - Block
+              - Deprecate
+              - Re-Publish
+              - Retire
+        - name: lifecycleChecklist
+          in: query
+          description: |
+            Supported checklist items are as follows.
+            1. **Deprecate old versions after publishing the API**: Setting this to true will deprecate older versions of a particular API Product when it is promoted to Published state from Created state.
+            2. **Requires re-subscription when publishing the API**: If you set this to true, users need to re subscribe to the API Products although they may have subscribed to an older version.
+            You can specify additional checklist items by using an **"attribute:"** modifier.
+            Eg: "Deprecate old versions after publishing the API:true" will deprecate older versions of a particular API Product when it is promoted to Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false" format.
+            **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v2/api-products/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate%20old%20versions%20after%20publishing%20the%20API%3Atrue,Requires%20re-subscription%20when%20publishing%20the%20API%3Afalse"
+          schema:
+            type: string
+        - $ref: '#/components/parameters/apiProductId-Q'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle changed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
+      operationId: changeAPIProductLifecycle
+
+  /api-products/{apiProductId}/lifecycle-history:
+    get:
+      tags:
+        - API Product Lifecycle
+      summary: Get Lifecycle State Change History of the API Products.
+      description: |
+        This operation can be used to retrieve Lifecycle state change history of the API Products.
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state change history returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleHistory'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
+      operationId: getAPIProductLifecycleHistory
+
+  /api-products/{apiProductId}/lifecycle-state:
+    get:
+      tags:
+        - API Product Lifecycle
+      summary: Get Lifecycle State Data of the API Product.
+      description: |
+        This operation can be used to retrieve Lifecycle state data of the API Product.
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleState'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
+      operationId: getAPIProductLifecycleState
+
+  /api-products/{apiProductId}/lifecycle-state/pending-tasks:
+    delete:
+      tags:
+        - API Product Lifecycle
+      summary: Delete Pending Lifecycle State Change Tasks
+      description: |
+        This operation can be used to remove pending lifecycle state change requests that are in pending state
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state change pending task removed successfully.
+          content: {}
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
+      operationId: deleteAPIProductLifecycleStatePendingTasks
 
 components:
   schemas:
@@ -7821,6 +8271,30 @@ components:
         context:
           type: string
           example: CalculatorAPI
+        additionalProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+          description: Map of custom properties of API
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
         version:
           type: string
           example: 1.0.0
@@ -7832,6 +8306,13 @@ components:
         type:
           type: string
           example: HTTP
+        audience:
+          type: string
+          description: The audience of the API. Accepted values are PUBLIC, SINGLE
+          example: PUBLIC
+          enum:
+            - PUBLIC
+            - SINGLE
         lifeCycleStatus:
           type: string
           example: CREATED
@@ -7845,7 +8326,15 @@ components:
           type: array
           items:
             type: string
-
+        createdTime:
+          type: string
+          example : 2021-02-11 09:57:25
+        updatedTime:
+          type: string
+          example : 2021-02-11 09:57:25
+        gatewayVendor:
+          type: string
+          example: wso2
     Topic:
       title: Topic object
       required:
@@ -7903,9 +8392,9 @@ components:
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
         name:
-          maxLength: 50
+          maxLength: 60
           minLength: 1
-          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+\[\]\/]*$)'
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
           type: string
           example: PizzaShackAPI
         description:
@@ -7913,7 +8402,7 @@ components:
           type: string
           example: This is a simple API for Pizza Shack online pizza delivery store.
         context:
-          maxLength: 82
+          maxLength: 232
           minLength: 1
           type: string
           example: pizza
@@ -7934,25 +8423,19 @@ components:
           example: CREATED
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         wsdlInfo:
           $ref: '#/components/schemas/WSDLInfo'
         wsdlUrl:
           type: string
           readOnly: true
           example: /apimgt/applicationdata/wsdls/admin--soap1.wsdl
-        testKey:
-          type: string
-          readOnly: true
-          example: 8swdwj9080edejhj
         responseCachingEnabled:
           type: boolean
           example: true
         cacheTimeout:
           type: integer
           example: 300
-        destinationStatsEnabled:
-          type: string
-          example: Disabled
         hasThumbnail:
           type: boolean
           example: false
@@ -7974,15 +8457,10 @@ components:
         enableSchemaValidation:
           type: boolean
           example: false
-        enableStore:
-          type: boolean
-          example: true
-          x-otherScopes:
-            - apim:api_publish
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
           example: HTTP
           default: HTTP
           enum:
@@ -7993,6 +8471,14 @@ components:
             - GRAPHQL
             - WEBSUB
             - SSE
+            - WEBHOOK
+        audience:
+          type: string
+          description: The audience of the API. Accepted values are PUBLIC, SINGLE
+          example: PUBLIC
+          enum:
+            - PUBLIC
+            - SINGLE
         transport:
           type: array
           description: |
@@ -8011,6 +8497,7 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         policies:
           type: array
           example:
@@ -8019,6 +8506,7 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         apiThrottlingPolicy:
           type: string
           description: The API level throttling policy selected for the particular
@@ -8026,6 +8514,7 @@ components:
           example: Unlimited
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         authorizationHeader:
           type: string
           pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
@@ -8056,6 +8545,7 @@ components:
             - RESTRICTED
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         visibleRoles:
           type: array
           description: The user roles that are able to access the API in Developer Portal
@@ -8064,23 +8554,12 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         visibleTenants:
           type: array
           example: []
           items:
             type: string
-        endpointSecurity:
-          $ref: '#/components/schemas/APIEndpointSecurity'
-        gatewayEnvironments:
-          type: array
-          description: |
-            List of gateway environments the API is available
-          example:
-            - Default
-          items:
-            type: string
-          x-otherScopes:
-            - apim:api_publish
         mediationPolicies:
           type: array
           example:
@@ -8104,18 +8583,42 @@ components:
             - SPECIFIC_TENANTS
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         subscriptionAvailableTenants:
           type: array
           example: []
           items:
             type: string
         additionalProperties:
-          type: object
-          additionalProperties:
-            type: string
+          type: array
           description: Map of custom properties of API
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
         accessControl:
@@ -8141,6 +8644,7 @@ components:
             - $ref: '#/components/schemas/APIBusinessInformation'
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         corsConfiguration:
           $ref: '#/components/schemas/APICorsConfiguration'
         websubSubscriptionConfiguration:
@@ -8154,6 +8658,7 @@ components:
           type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         endpointConfig:
           type: object
           properties: {}
@@ -8318,9 +8823,24 @@ components:
               example: false
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
+        gatewayVendor:
+          title: field to identify gateway vendor
+          type: string
+          example:
+            wso2
+        asyncTransportProtocols:
+          type: array
+          description: |
+            Supported transports for the async API (http and/or https).
+          example:
+            - http
+            - https
+          items:
+            type: string
       x-scopes:
         - apim:api_create
         - apim:api_import_export
+        - apim:api_manage
 
     #-----------------------------------------------------
     # The API Revision resource
@@ -8419,7 +8939,10 @@ components:
           readOnly: true
           type: string
           format: date-time
-
+        successDeployedTime:
+          readOnly: true
+          type: string
+          format: date-time
     AuditReport:
       title: Resource for Audit Report
       type: object
@@ -8494,6 +9017,10 @@ components:
           enum:
             - CREATED
             - PUBLISHED
+            - DEPRECATED
+            - RETIRED
+            - BLOCKED
+            - PROTOTYPED
         securityScheme:
           type: array
           description: |
@@ -8503,6 +9030,9 @@ components:
             - oauth2
           items:
             type: string
+        gatewayVendor:
+          type: string
+          example: wso2
     APIProduct:
       title: API Product object
       required:
@@ -8543,19 +9073,17 @@ components:
           type: string
           description: |
             State of the API product. Only published api products are visible on the Developer Portal
+          default: CREATED
           enum:
             - CREATED
             - PUBLISHED
+            - DEPRECATED
+            - RETIRED
+            - BLOCKED
+            - PROTOTYPED
         enableSchemaValidation:
           type: boolean
           example: false
-        enableStore:
-          type: boolean
-          example: true
-        testKey:
-          type: string
-          readOnly: true
-          example: 8swdwj9080edejhj
         isRevision:
           type: boolean
           example: false
@@ -8611,14 +9139,6 @@ components:
           description: The user roles that are able to view/modify as API Product
             publisher or creator.
           example: []
-          items:
-            type: string
-        gatewayEnvironments:
-          type: array
-          description: |
-            List of gateway environments the API Product is available
-          example:
-            - Default
           items:
             type: string
         apiType:
@@ -8687,11 +9207,31 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         additionalProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+          description: Map of custom properties of API
+        additionalPropertiesMap:
           type: object
           additionalProperties:
-            type: string
-          description: Map of custom properties of API
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
         businessInformation:
@@ -8702,6 +9242,11 @@ components:
           type: string
         lastUpdatedTime:
           type: string
+        gatewayVendor:
+          title: field to identify gateway vendor
+          type: string
+          example:
+            wso2
         apis:
           type: array
           description: |
@@ -8733,6 +9278,9 @@ components:
           example: []
           items:
             type: string
+        workflowStatus:
+          type: string
+          example: APPROVED
     ProductAPI:
       title: ProductAPI
       required:
@@ -9410,7 +9958,7 @@ components:
           type: object
           properties:
             policyId:
-              type: int
+              type: integer
               description: Id of policy
               example: 1
             uuid:
@@ -9438,7 +9986,7 @@ components:
               description: Indicates whether the policy is deployed successfully or not.
               default: false
             tenantId:
-              type: int
+              type: integer
               description: Throttling policy tenant domain id
               example: -1234
             tenantDomain:
@@ -9596,13 +10144,15 @@ components:
     Environment:
       title: Environment
       required:
-        - endpoints
+        - id
         - name
         - serverUrl
         - showInApiConsole
         - type
       type: object
       properties:
+        id:
+          type: string
         name:
           type: string
           example: default
@@ -9615,6 +10165,9 @@ components:
         serverUrl:
           type: string
           example: https://localhost:9443/services/
+        provider:
+          type: string
+          example: wso2
         showInApiConsole:
           type: boolean
           example: true
@@ -9622,6 +10175,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VHost'
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayEnvironmentProtocolURI'
+        additionalProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalProperty'
     EnvironmentList:
       title: Environment List
       type: object
@@ -9635,6 +10196,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    AdditionalProperty:
+      title: Additional Gateway Properties
+      type: object
+      properties:
+        key:
+          type: string
+          example: Organization
+        value:
+          type: string
+          example: wso2
     VHost:
       title: Virtual Host
       type: object
@@ -9657,6 +10228,12 @@ components:
         wssPort:
           type: integer
           example: 8099
+        websubHttpPort:
+          type: integer
+          example: 9021
+        websubHttpsPort:
+          type: integer
+          example: 8021
     FileInfo:
       title: File Information including meta data
       type: object
@@ -9681,22 +10258,6 @@ components:
           type: integer
           format: int64
           example: 1000
-    APIEndpointSecurity:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Accepts one of the following, basic or digest.
-          example: BASIC
-          enum:
-            - BASIC
-            - DIGEST
-        username:
-          type: string
-          example: admin
-        password:
-          type: string
-          example: password
     APIBusinessInformation:
       type: object
       properties:
@@ -9707,7 +10268,6 @@ components:
         businessOwnerEmail:
           type: string
           example: businessowner@wso2.com
-          pattern: '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$'
         technicalOwner:
           maxLength: 120
           type: string
@@ -9719,6 +10279,10 @@ components:
     WebsubSubscriptionConfiguration:
       type: object
       properties:
+        enable:
+          type: boolean
+          default: false
+          description: Toggle enable WebSub subscription configuration
         secret:
           type: string
           description: Secret key to be used for subscription
@@ -10466,6 +11030,10 @@ components:
               type: string
               description: A string that represents the context of the user's request
               example: CalculatorAPI
+            contextTemplate:
+              type: string
+              description: The templated context of the API
+              example: CalculatorAPI/{version}
             version:
               type: string
               description: The version of the API
@@ -10682,6 +11250,7 @@ components:
           type: array
           example:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
           items:
             type: string
@@ -10709,6 +11278,10 @@ components:
             Is Cross Tenant Subscriptions Enabled
           example: false
           default: false
+        authorizationHeader:
+          type: string
+          description: Authorization Header
+          example: authorization
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object
@@ -10831,6 +11404,12 @@ components:
         apiOwner:
           type: string
           example: admin
+        vendor:
+          type: string
+          default: WSO2
+          enum:
+            - WSO2
+            - AWS
     APICategory:
       title: API Category
       required:
@@ -10916,6 +11495,14 @@ components:
           type: integer
           format: int32
           example: 3600
+    EnvironmentProperties:
+      title: Envionment specific API properties request body
+      type: object
+      additionalProperties:
+        type: string
+      example:
+        productionEndpoint: https://localhost:9443/pizzashack/v1/api/
+        sandboxEndpoint: https://localhost:9443/pizzashack/v1/api/
     AsyncAPISpecificationValidationResponse:
       title: AsyncAPI Specification Validation Response
       required:
@@ -10959,6 +11546,15 @@ components:
               items:
                 type: string
                 example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            gatewayVendor:
+              type: string
+              example: wso2
+            asyncTransportProtocols:
+              type: array
+              description: contains available transports for an async API
+              items:
+                type: string
+                example: http
           description:
             API definition information
         errors:
@@ -10968,6 +11564,19 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
+    GatewayEnvironmentProtocolURI:
+      title: Gateway Environment protocols and URIs
+      required:
+        - protocol
+        - endpointURI
+      type: object
+      properties:
+        protocol:
+          type: string
+          example: default
+        endpointURI:
+          type: string
+          example: default
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -11350,6 +11959,30 @@ components:
       schema:
         type: integer
         default: 0
+    sortBy:
+      name: sortBy
+      in: query
+      description: |
+        Criteria for sorting.
+      schema:
+        type: string
+        default: createdTime
+        enum:
+          - apiName
+          - version
+          - createdTime
+          - status
+    sortOrder:
+      name: sortOrder
+      in: query
+      description: |
+        Order of sorting(ascending/descending).
+      schema:
+        type: string
+        default: desc
+        enum:
+          - asc
+          - desc
     If-None-Match:
       name: If-None-Match
       in: header
@@ -11452,6 +12085,24 @@ components:
       in: query
       schema:
         type: string
+    envId:
+      name: envId
+      in: path
+      description: |
+        **Env ID** consisting of the **UUID** of the gateway environment.
+      required: true
+      schema:
+        type: string
+    apiProductId-Q:
+      name: apiProductId
+      in: query
+      description: |
+        **API Product ID** consisting of the **UUID** of the API Product.
+        The combination of the provider, name and the version of the API Product is also accepted as a valid API Product ID.
+        Should be formatted as **provider-name-version**.
+      required: true
+      schema:
+        type: string
   requestBodies:
     threatProtectionPolicy:
       description: |
@@ -11473,21 +12124,26 @@ components:
             apim:api_create: Create API
             apim:api_delete: Delete API
             apim:api_publish: Publish API
+            apim:api_manage: Manage all API related operations
             apim:subscription_view: View Subscription
             apim:subscription_block: Block Subscription
+            apim:subscription_manage: Manage all Subscription related operations
             apim:threat_protection_policy_create: Create threat protection policies
             apim:threat_protection_policy_manage: Update and delete threat protection policies
-            apim:document_create: Create API documents
-            apim:document_manage: Update and delete API documents
+            apim:document_create: Create API documents #deprecate
+            apim:document_manage: Create, update and delete API documents
+            apim:api_mediation_policy_manage: View, create, update and remove API specific mediation policies
             apim:mediation_policy_view: View mediation policies
             apim:mediation_policy_create: Create mediation policies
             apim:mediation_policy_manage: Update and delete mediation policies
             apim:client_certificates_view: View client certificates
             apim:client_certificates_add: Add client certificates
             apim:client_certificates_update: Update and delete client certificates
+            apim:client_certificates_manage: View, create, update and remove client certificates
             apim:ep_certificates_view: View backend endpoint certificates
             apim:ep_certificates_add: Add backend endpoint certificates
             apim:ep_certificates_update: Update and delete backend endpoint certificates
+            apim:ep_certificates_manage: View, create, update and remove endpoint certificates
             apim:publisher_settings: Retrieve store settings
             apim:pub_alert_manage: Get/ subscribe/ configure publisher alerts
             apim:shared_scope_manage: Manage shared scopes
@@ -11498,3 +12154,6 @@ components:
             apim:admin: Manage all admin operations
             apim:comment_view: Read permission to comments
             apim:comment_write: Write permission to comments
+            apim:comment_manage: Read and Write comments
+            apim:tier_view: View throttling policies
+            apim:tier_manage: View, update and delete throttling policies

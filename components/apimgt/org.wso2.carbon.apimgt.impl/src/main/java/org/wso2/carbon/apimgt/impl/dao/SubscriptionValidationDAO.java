@@ -128,6 +128,7 @@ public class SubscriptionValidationDAO {
                     application.setSubName(resultSet.getString("SUB_NAME"));
                     application.setName(resultSet.getString("APS_NAME"));
                     application.setTokenType(resultSet.getString("TOKEN_TYPE"));
+                    application.setOrganization(resultSet.getString("ORGANIZATION"));
                     temp.put(appId, application);
                 }
                 String attributeName = resultSet.getString("ATTRIBUTE_NAME");
@@ -1106,14 +1107,13 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                        if (APIConstants.API_PRODUCT.equals(apiType)) {
-                            attachURlMappingDetailsOfApiProduct(connection, api);
-                            return api;
-                        } else {
-                            if (deployment.equals(deploymentName)) {
-                                attachURLMappingDetails(connection, revision, api);
+                        if (deployment.equals(deploymentName)) {
+                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                                attachURlMappingDetailsOfApiProduct(connection, api);
                                 return api;
                             }
+                            attachURLMappingDetails(connection, revision, api);
+                            return api;
                         }
                     }
                 }
@@ -1172,20 +1172,14 @@ public class SubscriptionValidationDAO {
 
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_UUID_SQL;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-            sql = sql.concat("AND AM_API.CONTEXT NOT LIKE /t/%");
+            sql = sql.concat("AND AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
-            sql = sql.concat("AND AM_API.CONTEXT LIKE /t/" + organization + "%");
+            sql = sql.concat("AND AM_API.CONTEXT LIKE '/t/" + organization + "%'");
         }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, apiId);
                 preparedStatement.setString(2, deployment);
-                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                    preparedStatement.setString(3, "");
-                } else {
-                    preparedStatement.setString(3, "/t/" + organization);
-                }
-
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");

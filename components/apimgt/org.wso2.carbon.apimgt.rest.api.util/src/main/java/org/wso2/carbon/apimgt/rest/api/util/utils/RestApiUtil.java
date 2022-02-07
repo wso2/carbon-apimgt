@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.message.Message;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -65,6 +66,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -1347,7 +1349,7 @@ public class RestApiUtil {
     public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
 
         Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml"};
+        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml", "/service-catalog-api.yaml"};
         for (String fileName : fileNameArray) {
             String definition = null;
             try {
@@ -1388,5 +1390,56 @@ public class RestApiUtil {
             log.error("Error while retrieving Anonymous config from registry", e);
         }
         return true;
+    }
+    
+    /**
+     * Method to extract the organization
+     * @param ctx MessageContext
+     * @return organization 
+     */
+    
+    public static String getOrganization(MessageContext ctx) {
+        return (String) ctx.get(RestApiConstants.ORGANIZATION);
+    }
+
+    /**
+     * Method to extract the validated organization
+     * @param ctx MessageContext
+     * @return organization
+     */
+
+    public static String getValidatedOrganization(MessageContext ctx) throws APIManagementException{
+        String organization = (String) ctx.get(RestApiConstants.ORGANIZATION);
+        if (organization == null) {
+            throw new APIManagementException(
+                    "Organization is not found in the request", ExceptionCodes.ORGANIZATION_NOT_FOUND);
+        }
+        return organization;
+    }
+
+    /**
+     * Method to resolve the organization
+     * @param message Message
+     * @return organization
+     */
+
+    public static String resolveOrganization (Message message) throws APIManagementException{
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+        // populate properties needed for the resolver.
+        HashMap<String, Object> properties = new HashMap<String, Object>();
+        properties.put(APIConstants.PROPERTY_HEADERS_KEY, message.get(Message.PROTOCOL_HEADERS));
+        properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
+        String organization = resolver.resolve(properties);
+        return  organization;
+    }
+
+    public static String resolveOrganization (HashMap<String,Object> message) throws APIManagementException{
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+        // populate properties needed for the resolver.
+        HashMap<String, Object> properties = new HashMap<String, Object>();
+        properties.put(APIConstants.PROPERTY_HEADERS_KEY, message.get(Message.PROTOCOL_HEADERS));
+        properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
+        String organization = resolver.resolve(properties);
+        return  organization;
     }
 }

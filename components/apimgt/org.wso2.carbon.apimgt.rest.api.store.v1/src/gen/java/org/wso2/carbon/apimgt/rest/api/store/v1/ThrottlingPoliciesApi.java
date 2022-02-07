@@ -41,13 +41,13 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     @Path("/{policyLevel}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get All Available Throttling Policies", notes = "Get available Throttling Policies ", response = ThrottlingPolicyListDTO.class, responseContainer = "List", authorizations = {
+    @ApiOperation(value = "Get All Available Throttling Policies", notes = "Get available Throttling Policies ", response = ThrottlingPolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
     }, tags={ "Throttling Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. List of throttling policies returned. ", response = ThrottlingPolicyListDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "OK. List of throttling policies returned. ", response = ThrottlingPolicyListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response throttlingPoliciesPolicyLevelGet(@ApiParam(value = "List Application or Subscription type thro. ",required=true, allowableValues="application, subscription") @PathParam("policyLevel") String policyLevel,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{

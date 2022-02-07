@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.0.155-SNAPSHOT</version>
+        <version>9.14.5-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -30,12 +30,11 @@
     <url>http://wso2.org</url>
 
     <modules>
+        <module>org.wso2.carbon.apimgt.eventing.feature</module>
+        <module>org.wso2.carbon.apimgt.eventing.hub.feature</module>
         <module>org.wso2.carbon.apimgt.core.feature</module>
         <module>org.wso2.carbon.apimgt.gateway.feature</module>
         <module>org.wso2.carbon.apimgt.jms.listener.feature</module>
-        <module>org.wso2.carbon.apimgt.publisher.feature</module>
-        <module>org.wso2.carbon.apimgt.store.feature</module>
-        <module>org.wso2.carbon.apimgt.admin.feature</module>
         <module>org.wso2.carbon.apimgt.keymanager.feature</module>
         <!--<module>org.wso2.carbon.apimgt.micro.gateway.default.feature</module>-->
         <!--<module>org.wso2.carbon.apimgt.micro.gateway.feature</module>-->
@@ -44,6 +43,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.store.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.admin.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.gateway.feature</module>
+        <module>org.wso2.carbon.apimgt.rest.api.devops.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.dcr.feature</module>
         <module>org.wso2.carbon.apimgt.scxml.feature</module>
         <module>org.wso2.carbon.apimgt.throttling.siddhi.extension.feature</module>

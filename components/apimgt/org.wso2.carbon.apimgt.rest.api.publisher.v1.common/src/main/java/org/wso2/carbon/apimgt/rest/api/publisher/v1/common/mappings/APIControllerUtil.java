@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
@@ -156,12 +155,6 @@ public class APIControllerUtil {
         }
         importedApiDto.setEndpointConfig(endpointConfig);
 
-        //handle gateway environments
-        if (envParams.get(ImportExportConstants.GATEWAY_ENVIRONMENTS_FIELD) != null) {
-            List<String> environments = setupGatewayEnvironments(
-                    envParams.get(ImportExportConstants.GATEWAY_ENVIRONMENTS_FIELD).getAsJsonArray());
-            importedApiDto.setGatewayEnvironments(environments);
-        }
 
         //handle mutualSSL certificates
         handleMutualSslCertificates(envParams, importedApiDto, null, importedApi.getId(), pathToArchive);
@@ -301,63 +294,144 @@ public class APIControllerUtil {
         for (String endpointType : endpointTypes) {
             if (security.has(endpointType)) {
                 JsonObject endpointSecurityDetails = security.get(endpointType).getAsJsonObject();
-                if (endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_ENABLED)) {
-                    String securityEnabled = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED)
-                            .getAsString();
+                if (endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_ENABLED) && (
+                        endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED) != null
+                                || !endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED).isJsonNull())) {
+                    boolean securityEnabled = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED)
+                            .getAsBoolean();
 
                     // Set endpoint security details to API
-                    if (Boolean.parseBoolean(securityEnabled)) {
-                        // Check whether the username, password and type fields have set in the params file
-                        JsonElement type = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_TYPE);
-                        if (endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_USERNAME) == null) {
-                            throw new APIManagementException(
-                                    "You have enabled endpoint security but the username is not found "
-                                            + "in the params file. Please specify username field for and continue...",
-                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
-                        } else if (endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) == null) {
-                            throw new APIManagementException(
-                                    "You have enabled endpoint security but the password is not found "
-                                            + "in the params file. Please specify password field for and continue...",
-                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
-                        } else if (type == null) {
-                            throw new APIManagementException(
-                                    "You have enabled endpoint security but the password is not found "
-                                            + "in the params file. Please specify password field for and continue...",
-                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                    if (securityEnabled) {
+                        String endpointSecurityType;
+                        if (endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_TYPE) && (
+                                endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_TYPE) != null
+                                        || !endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_TYPE)
+                                        .isJsonNull())) {
+                            // Check whether the type is defined in the params file
+                            JsonElement type = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_TYPE);
+                            endpointSecurityType = type.getAsString();
                         } else {
-                            // Setup security type (basic or digest)
-                            endpointSecurityDetails.remove(APIConstants.ENDPOINT_SECURITY_TYPE);
-                            if (StringUtils.equals(type.getAsString().toLowerCase(),
-                                    APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST)) {
-                                endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
-                                        APIEndpointSecurityDTO.TypeEnum.DIGEST.toString());
-                            } else if (StringUtils.equals(type.getAsString().toLowerCase(),
-                                    APIConstants.ENDPOINT_SECURITY_TYPE_BASIC)) {
-                                endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
-                                        APIEndpointSecurityDTO.TypeEnum.BASIC.toString());
-                            } else {
-                                // If the type is not either basic or digest, return an error
-                                throw new APIManagementException(
-                                        "Invalid endpoint security type found in the params file. "
-                                                + "Should be either basic or digest"
-                                                + "Please specify correct security types field for and continue...",
-                                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
-                            }
+                            throw new APIManagementException(
+                                    "You have enabled endpoint security but the type is not found "
+                                            + "in the params file. Please specify type field and continue...",
+                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
                         }
+
+                        // Setup security type (basic, digest or oauth)
+                        endpointSecurityDetails.remove(APIConstants.ENDPOINT_SECURITY_TYPE);
+                        if (StringUtils.equals(endpointSecurityType.toLowerCase(),
+                                APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST)) {
+                            endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                    APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
+                            validateEndpointSecurityUsernamePassword(endpointSecurityDetails);
+                        } else if (StringUtils.equals(endpointSecurityType.toLowerCase(),
+                                APIConstants.ENDPOINT_SECURITY_TYPE_BASIC)) {
+                            endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                    APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
+                            validateEndpointSecurityUsernamePassword(endpointSecurityDetails);
+                        } else if (StringUtils.equals(endpointSecurityType.toLowerCase(),
+                                APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                            endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                    APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.toUpperCase());
+                            validateEndpointSecurityOauth(endpointSecurityDetails);
+                        } else {
+                            // If the type is not either basic or digest, return an error
+                            throw new APIManagementException("Invalid endpoint security type found in the params file. "
+                                    + "Should be either basic, digest or oauth. "
+                                    + "Please specify correct security types field and continue...",
+                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                        }
+                    } else {
+                        endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                ImportExportConstants.ENDPOINT_NONE_SECURITY_TYPE);
                     }
                 }
             } else {
-                // Even though the security field is defined, if either production/sandbox is not defined under that,
-                // set endpoint security to none. Otherwise the security will be blank if you check from the UI.
+                // Even though the security field is defined, if either production/sandbox is not defined
+                // under that,set endpoint security to none. Otherwise the security will be blank if you
+                // check from the UI.
                 JsonObject endpointSecurityForNotDefinedEndpointType = new JsonObject();
                 endpointSecurityForNotDefinedEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
                         ImportExportConstants.ENDPOINT_NONE_SECURITY_TYPE);
-                endpointSecurityForNotDefinedEndpointType
-                        .addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.FALSE);
+                endpointSecurityForNotDefinedEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED,
+                        Boolean.FALSE);
                 security.add(endpointType, endpointSecurityForNotDefinedEndpointType);
             }
         }
         endpointConfig.add(APIConstants.ENDPOINT_SECURITY, security);
+    }
+
+    /**
+     * Check whether the username, password and type fields have set in the params file
+     *
+     * @param endpointSecurityDetails Endpoint security details per endpoint type
+     * @throws APIManagementException If an error occurs when reading the security env parameters
+     */
+    private static void validateEndpointSecurityUsernamePassword(JsonObject endpointSecurityDetails)
+            throws APIManagementException {
+        if (!endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_USERNAME)
+                || endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_USERNAME) == null
+                || endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_USERNAME).isJsonNull()) {
+            throw new APIManagementException("You have enabled endpoint security but the username is not found "
+                    + "in the params file. Please specify username field and continue...",
+                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        }
+        if (!endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_PASSWORD)
+                || endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) == null
+                || endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_PASSWORD).isJsonNull()) {
+            throw new APIManagementException("You have enabled endpoint security but the password is not found "
+                    + "in the params file. Please specify password field and continue...",
+                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        }
+    }
+
+    /**
+     * Validate the neccessary OAuth 2.0 endpoint security parameters have set in the params file
+     *
+     * @param endpointSecurityDetails Endpoint security details per endpoint type
+     * @throws APIManagementException If an error occurs when reading the security env parameters
+     */
+    private static void validateEndpointSecurityOauth(JsonObject endpointSecurityDetails)
+            throws APIManagementException {
+
+        if (endpointSecurityDetails.has(APIConstants.OAuthConstants.GRANT_TYPE) && (
+                endpointSecurityDetails.get(APIConstants.OAuthConstants.GRANT_TYPE) != null
+                        || !endpointSecurityDetails.get(APIConstants.OAuthConstants.GRANT_TYPE).isJsonNull())) {
+            String grantType = endpointSecurityDetails.get(APIConstants.OAuthConstants.GRANT_TYPE).getAsString();
+
+            endpointSecurityDetails.remove(APIConstants.OAuthConstants.GRANT_TYPE);
+            if (StringUtils.equals(grantType.toLowerCase(), APIConstants.OAuthConstants.PASSWORD.toLowerCase())) {
+                validateEndpointSecurityUsernamePassword(endpointSecurityDetails);
+                endpointSecurityDetails.addProperty(APIConstants.OAuthConstants.GRANT_TYPE,
+                        APIConstants.OAuthConstants.PASSWORD);
+            }
+            if (StringUtils.equals(grantType.toLowerCase(),
+                    APIConstants.OAuthConstants.CLIENT_CREDENTIALS.toLowerCase())) {
+                endpointSecurityDetails.addProperty(APIConstants.OAuthConstants.GRANT_TYPE,
+                        APIConstants.OAuthConstants.CLIENT_CREDENTIALS);
+            }
+        } else {
+            throw new APIManagementException("You have enabled oauth endpoint security but the grant type is not found "
+                    + "in the params file. Please specify grantType field and continue...",
+                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        }
+
+        if (!endpointSecurityDetails.has(APIConstants.OAuthConstants.OAUTH_CLIENT_ID)
+                || endpointSecurityDetails.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) == null
+                || endpointSecurityDetails.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID).isJsonNull()) {
+            throw new APIManagementException("You have enabled oauth endpoint security but the client id is not found "
+                    + "in the params file. Please specify clientId field and continue...",
+                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        }
+
+        if (!endpointSecurityDetails.has(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                || endpointSecurityDetails.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) == null
+                || endpointSecurityDetails.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).isJsonNull()) {
+            throw new APIManagementException(
+                    "You have enabled oauth endpoint security but the client secret is not found "
+                            + "in the params file. Please specify clientSecret field and continue...",
+                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        }
     }
 
     /**
@@ -732,8 +806,8 @@ public class APIControllerUtil {
             JsonElement sandboxEndpoints = loadBalancedConfigs
                     .get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY);
             if (sandboxEndpoints != null) {
-                updatedSOAPEndpointParams
-                        .add(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY, sandboxEndpoints.getAsJsonArray());
+                updatedSOAPEndpointParams.add(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY,
+                        handleSoapFailoverAndLoadBalancedEndpointValues(sandboxEndpoints.getAsJsonArray()));
             }
 
         } else if (ImportExportConstants.FAILOVER_ROUTING_POLICY
@@ -930,6 +1004,14 @@ public class APIControllerUtil {
         //generate meta-data yaml file
         String metadataFilePath = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
+                oldFile.delete();
+            }
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.JSON_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.JSON_EXTENSION);
+                oldFile.delete();
+            }
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
                     ImportExportConstants.TYPE_CLIENT_CERTIFICATES, jsonElement);
         } catch (APIImportExportException e) {
@@ -991,6 +1073,14 @@ public class APIControllerUtil {
         //generate meta-data yaml file
         String metadataFilePath = pathToArchive + ImportExportConstants.ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
+                oldFile.delete();
+            }
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.JSON_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.JSON_EXTENSION);
+                oldFile.delete();
+            }
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
                     ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, updatedCertsArray);
         } catch (APIImportExportException e) {

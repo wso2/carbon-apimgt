@@ -21,19 +21,17 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class NotFoundException extends WebApplicationException {
 
     private String message;
-    public NotFoundException() {
-        super(Response.Status.NOT_FOUND);
-    }
 
     public NotFoundException(ErrorDTO errorDTO) {
         super(Response.status(Response.Status.NOT_FOUND)
                 .entity(errorDTO)
-                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
         message = errorDTO.getDescription();
     }

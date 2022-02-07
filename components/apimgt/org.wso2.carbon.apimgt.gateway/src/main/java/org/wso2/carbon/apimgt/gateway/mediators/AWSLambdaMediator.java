@@ -17,27 +17,33 @@
  */
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang.StringUtils;
-import org.apache.synapse.commons.json.JsonUtil;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.mediators.AbstractMediator;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 import java.io.ByteArrayInputStream;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * This @AWSLambdaMediator mediator invokes AWS Lambda functions when
@@ -50,6 +56,11 @@ public class AWSLambdaMediator extends AbstractMediator {
     private String region = "";
     private String resourceName = "";
     private int resourceTimeout = APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT;
+    private static final String PATH_PARAMETERS = "pathParameters";
+    private static final String QUERY_STRING_PARAMETERS = "queryStringParameters";
+    private static final String BODY_PARAMETER = "body";
+    private static final String PATH = "path";
+    private static final String HTTP_METHOD = "httpMethod";
 
     public AWSLambdaMediator() {
 
@@ -64,18 +75,56 @@ public class AWSLambdaMediator extends AbstractMediator {
     public boolean mediate(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
+        JsonObject payload = new JsonObject();
+
+        // set headers
+        JsonObject headers = new JsonObject();
+        TreeMap transportHeaders =
+                (TreeMap) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        for (Object keyObj : transportHeaders.keySet()) {
+            String key = (String) keyObj;
+            String value = (String) transportHeaders.get(keyObj);
+            headers.addProperty(key, value);
+        }
+        payload.add(APIConstants.PROPERTY_HEADERS_KEY, headers);
+
+        // set path/query parameters
+        JsonObject pathParameters = new JsonObject();
+        JsonObject queryStringParameters = new JsonObject();
+        Set propertySet = messageContext.getPropertyKeySet();
+        for (Object key : propertySet) {
+            if (key != null) {
+                String propertyKey = key.toString();
+                if (propertyKey.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)) {
+                    pathParameters.addProperty(propertyKey.substring(RESTConstants.REST_URI_VARIABLE_PREFIX.length()),
+                            (String) messageContext.getProperty(propertyKey));
+                } else if (propertyKey.startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX)) {
+                    queryStringParameters.addProperty(propertyKey.substring(RESTConstants.REST_QUERY_PARAM_PREFIX.length()),
+                            (String) messageContext.getProperty(propertyKey));
+                }
+            }
+        }
+        payload.add(PATH_PARAMETERS, pathParameters);
+        payload.add(QUERY_STRING_PARAMETERS, queryStringParameters);
+        payload.addProperty(HTTP_METHOD, (String) messageContext.getProperty(APIConstants.REST_METHOD));
+        payload.addProperty(PATH, (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE));
 
         // Set lambda backend invocation start time for analytics
         messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
 
-        String payload;
+        String body;
         if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
-            payload = JsonUtil.jsonPayloadToString(axis2MessageContext);
+            body = JsonUtil.jsonPayloadToString(axis2MessageContext);
         } else {
-            payload = "{}";
+            body = "{}";
         }
+        payload.add(BODY_PARAMETER, new JsonParser().parse(body).getAsJsonObject());
 
-        InvokeResult invokeResult = invokeLambda(payload);
+        if (log.isDebugEnabled()) {
+            log.debug("Passing the payload " + payload.toString() + " to AWS Lambda function with resource name "
+                    + resourceName);
+        }
+        InvokeResult invokeResult = invokeLambda(payload.toString());
 
         if (invokeResult != null) {
             if (log.isDebugEnabled()) {
@@ -113,7 +162,7 @@ public class AWSLambdaMediator extends AbstractMediator {
                 if (log.isDebugEnabled()) {
                     log.debug("Using temporary credentials supplied by the IAM role attached to the EC2 instance");
                 }
-                credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+                credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
             } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Using user given stored credentials");

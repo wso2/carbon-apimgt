@@ -34,6 +34,8 @@ public class WorkflowConstants {
     
     public static final String WF_TYPE_AM_API_STATE = "AM_API_STATE";
 
+    public static final String WF_TYPE_AM_API_PRODUCT_STATE = "AM_API_PRODUCT_STATE";
+
     public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION =
             "AM_APPLICATION_REGISTRATION_PRODUCTION";
 
@@ -68,6 +70,8 @@ public class WorkflowConstants {
     public static final String APPLICATION_DELETION = "ApplicationDeletion";
     
     public static final String API_STATE_CHANGE = "APIStateChange";
+
+    public static final String API_PRODUCT_STATE_CHANGE = "APIProductStateChange";
     
     public static final String API_WF_SCOPE = "apim:api_workflow";
 
@@ -105,6 +109,8 @@ public class WorkflowConstants {
     
     public static final String DEFAULT_EXECUTOR_API_STATE_CHANGE = 
             "org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor";
+    public static final String DEFAULT_EXECUTOR_API_PRODUCT_STATE_CHANGE =
+            "org.wso2.carbon.apimgt.impl.workflow.APIProductStateChangeSimpleWorkflowExecutor";
     
     public static final String WORKFLOW_OAUTH_APP_NAME = "workflow_app";
     public static final String WORKFLOW_OAUTH_APP_GRANT_TYPES = "client_credentials password refresh_token";
@@ -128,6 +134,8 @@ public class WorkflowConstants {
         public static final String VARIABLE_CALLBACKURL = "callbackUrl";
         public static final String VARIABLE_WFREF = "wfReference";
         public static final String VARIABLE_INVOKER = "invoker";
+
+        public static final String API_ID = "apiId";
         
         public static final String DATA = "data";
         public static final String ID = "id";

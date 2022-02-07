@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.internal.service.RuntimeArtifactsApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactListDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -70,7 +72,11 @@ public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiServic
                 return Response.ok().entity(synapseArtifactListDTO)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
             }
+        } else {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(RestApiUtil.getErrorDTO(ExceptionCodes.NO_API_ARTIFACT_FOUND))
+                    .build();
         }
-        return Response.noContent().build();
     }
 }

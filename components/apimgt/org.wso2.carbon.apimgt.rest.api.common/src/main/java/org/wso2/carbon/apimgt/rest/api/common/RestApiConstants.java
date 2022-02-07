@@ -37,17 +37,25 @@ public final class RestApiConstants {
     public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
+    public static final String ORGANIZATION = "organization";
+    public static final String MASKED_TOKEN = "maskedToken";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
-    public static final String OAUTH2_AUTHENTICATION = "oauth2";
+    public static final String OPAQUE_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
+    public static final String JWT_AUTHENTICATION = "jwt";
+    public static final String JWT_TOKEN = "JWT_TOKEN";
+    public static final String DOT = ".";
+    public static final long TIMESTAMP_SKEW_INSECONDS = 0;
 
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
-    public static final String PUBLISHER_SCOPE = "apim:api_publish";
+    public static final String API_MANAGE_SCOPE = "apim:api_manage";
     public static final String CREATOR_SCOPE = "apim:api_create";
     public static final String ADMIN_SCOPE = "apim:admin";
+    public static final String PUBLISHER_SCOPE = "apim:api_publish";
+
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
@@ -174,11 +182,18 @@ public final class RestApiConstants {
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
+    public static final String BACKEND_JWT_HEADER_NAME = "X-JWT-Assertion";
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
     public static final String COOKIE_HEADER_NAME = "cookie";
     public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive
 
     public static final String API_VERSION = "API_VERSION";
+    public static final String REQUEST_URL = "org.apache.cxf.request.uri";
+    public static final String REQUEST_METHOD = "org.apache.cxf.request.method";
+    public static final String BASE_PATH = "org.apache.cxf.message.Message.BASE_PATH";
+    public static final String PROTOCOL_HEADERS = "org.apache.cxf.message.Message.PROTOCOL_HEADERS";
+    public static final String URI_TEMPLATES = "TEMPLATES";
+    public static final String ORG_ID = "ORG_ID";
 
     public static final int PAGINATION_LIMIT_DEFAULT = 25;
     public static final int PAGINATION_OFFSET_DEFAULT = 0;
@@ -186,7 +201,9 @@ public final class RestApiConstants {
     public static final String PAGINATION_NEXT_LIMIT = "next_limit";
     public static final String PAGINATION_PREVIOUS_OFFSET = "previous_offset";
     public static final String PAGINATION_PREVIOUS_LIMIT = "previous_limit";
+    public static final String DEFAULT_SORT_CRITERION = "createdTime";
     public static final String DEFAULT_SORT_ORDER = "asc";
+    public static final String DESCENDING_SORT_ORDER = "desc";
 
     public static final String APIS_GET_PAGINATION_URL =
             RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
@@ -305,5 +322,8 @@ public final class RestApiConstants {
 
     public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
             Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
+
+    public static final int TAG_LIMIT_DEFAULT = 1000;
+    public static final int TAG_OFFSET_DEFAULT = 0;
 
 }

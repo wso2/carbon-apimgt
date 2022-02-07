@@ -52,27 +52,6 @@ public class OAuthAuthenticatorTest {
     public void authenticate() throws Exception {
     }
 
-    @Test
-    public void extractCustomerKeyFromAuthHeader() throws Exception {
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        OAuthAuthenticator oauthAuthenticator = new OauthAuthenticatorWrapper(apiManagerConfiguration);
-
-        Map map = new HashMap();
-        Assert.assertNull("Assertion failure due to not null", oauthAuthenticator.extractCustomerKeyFromAuthHeader
-                (map));
-        map.put(HttpHeaders.AUTHORIZATION, "Bearer abcde-fghij");
-        Assert.assertNotNull(oauthAuthenticator.extractCustomerKeyFromAuthHeader(map), "Assertion failure due to null");
-
-    }
-
 
     @Test
     public void getRequestOrigin() throws Exception {

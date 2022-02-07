@@ -39,6 +39,7 @@ public class SubscribedAPI {
     private String subCreatedStatus;
     private List<APIKey> keys = new ArrayList<APIKey>();
     private String uuid;
+    private String organization;
 
     private String createdTime;
     private String updatedTime;
@@ -56,6 +57,26 @@ public class SubscribedAPI {
 
     public SubscribedAPI(String uuid) {
         this.uuid = uuid;
+    }
+
+    public SubscribedAPI(Application application, APIProductIdentifier identifier) {
+        this.application = application;
+        this.productId = identifier;
+    }
+
+    public SubscribedAPI(Application application, APIIdentifier identifier) {
+        this.application = application;
+        this.apiId = identifier;
+    }
+
+    public SubscribedAPI(Subscriber subscriber, Identifier identifier) {
+
+        if (identifier instanceof APIIdentifier) {
+            this.apiId = (APIIdentifier) identifier;
+        } else if (identifier instanceof APIProductIdentifier) {
+            this.productId = (APIProductIdentifier) identifier;
+        }
+        this.subscriber = subscriber;
     }
 
     public void setApplication(Application application) {
@@ -139,13 +160,21 @@ public class SubscribedAPI {
     public String getUUID() {
         return uuid;
     }
-    
+
     public APIProductIdentifier getProductId() {
         return productId;
     }
 
     public void setProductId(APIProductIdentifier productId) {
         this.productId = productId;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 
     @Override
@@ -189,7 +218,7 @@ public class SubscribedAPI {
     public void setRequestedTier(Tier requestedTier) {
         this.requestedTier = requestedTier;
     }
-    
+
     public Identifier getIdentifier() {
         if (apiId != null) {
             return apiId;

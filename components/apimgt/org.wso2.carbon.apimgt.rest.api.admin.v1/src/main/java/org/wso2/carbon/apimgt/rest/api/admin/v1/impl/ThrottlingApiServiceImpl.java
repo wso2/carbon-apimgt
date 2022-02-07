@@ -23,6 +23,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.message.Message;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -34,8 +35,10 @@ import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO.ConditionTypeEnum;
@@ -76,9 +79,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesAdvancedGet(String accept, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            Policy[] apiPolicies = apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_API);
+            int tenantId = APIUtil.getTenantId(userName);
+            Policy[] apiPolicies = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_API);
             List<APIPolicy> policies = new ArrayList<>();
             for (Policy policy : apiPolicies) {
                 policies.add((APIPolicy) policy);
@@ -221,33 +225,30 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
+    public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
 
-            //This will give PolicyNotFoundException if there's no policy exists with UUID
-            APIPolicy existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
-            }
-            if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
-                    PolicyConstants.POLICY_LEVEL_API)) {
-                String message = "Policy " + policyId + " already attached to API/Resource";
-                log.error(message);
-                throw new APIManagementException(message);
-            }
-            apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
-            return Response.ok().build();
+        //This will give PolicyNotFoundException if there's no policy exists with UUID
+        APIPolicy existingPolicy = null;
+        try {
+            existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, e, log);
-            } else {
-                String errorMessage = "Error while deleting Advanced level policy : " + policyId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, e, log);
         }
-        return null;
+        if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
+        }
+        if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API)) {
+            String message = "Advanced Throttling Policy " + existingPolicy.getPolicyName() + ": " + policyId
+                    + " already attached to API/Resource";
+            throw new APIManagementException(message, ExceptionCodes
+                    .from(ExceptionCodes.ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR,
+                            existingPolicy.getPolicyName()));
+        }
+        apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
+        return Response.ok().build();
     }
 
     /**
@@ -259,9 +260,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesApplicationGet(String accept, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            Policy[] appPolicies = apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_APP);
+            int tenantId = APIUtil.getTenantId(userName);
+            Policy[] appPolicies = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_APP);
             List<ApplicationPolicy> policies = new ArrayList<>();
             for (Policy policy : appPolicies) {
                 policies.add((ApplicationPolicy) policy);
@@ -445,9 +447,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesSubscriptionGet(String accept, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            Policy[] subscriptionPolicies = apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_SUB);
+            int tenantId = APIUtil.getTenantId(userName);
+            Policy[] subscriptionPolicies = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_SUB);
             List<SubscriptionPolicy> policies = new ArrayList<>();
             for (Policy policy : subscriptionPolicies) {
                 policies.add((SubscriptionPolicy) policy);
@@ -497,7 +500,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             apiProvider.addPolicy(subscriptionPolicy);
 
             //update policy permissions
-            updatePolicyPermissions(body, null);
+            updatePolicyPermissions(body);
 
             //retrieve the new policy and send back as the response
             SubscriptionPolicy newSubscriptionPolicy = apiProvider.getSubscriptionPolicy(username,
@@ -537,10 +540,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Update APIM with the subscription throttle policy permission
      *
      * @param body subscription throttle policy
-     * @param existingPolicy 
      * @throws APIManagementException when there are validation errors or error while updating the permissions
      */
-    private void updatePolicyPermissions(SubscriptionThrottlePolicyDTO body, SubscriptionPolicy existingPolicy) throws APIManagementException {
+    private void updatePolicyPermissions(SubscriptionThrottlePolicyDTO body) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         SubscriptionThrottlePolicyPermissionDTO policyPermissions = body.getPermissions();
         if (policyPermissions != null) {
@@ -557,11 +559,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             } else {
                 throw new APIManagementException(ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
             }
-        } else if (policyPermissions == null && existingPolicy != null) {
-            TierPermissionDTO dto = (TierPermissionDTO) apiProvider.getThrottleTierPermission(body.getPolicyName());
-            if (dto != null && dto.getRoles() != null) {
-                apiProvider.updateThrottleTierPermissions(body.getPolicyName(), null, null);
-            }
+        } else {
+            apiProvider.deleteTierPermissions(body.getPolicyName());
         }
     }
 
@@ -651,7 +650,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             apiProvider.updatePolicy(subscriptionPolicy);
 
             //update policy permissions
-            updatePolicyPermissions(body, existingPolicy);
+            updatePolicyPermissions(body);
 
             //retrieve the new policy and send back as the response
             SubscriptionPolicy newSubscriptionPolicy = apiProvider.getSubscriptionPolicy(username,
@@ -719,13 +718,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesCustomGet(String accept, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();
+            int tenantId = APIUtil.getTenantId(userName);
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
 
-            Policy[] globalPolicies = apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_GLOBAL);
+            Policy[] globalPolicies = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_GLOBAL);
             List<GlobalPolicy> policies = new ArrayList<>();
             for (Policy policy : globalPolicies) {
                 policies.add((GlobalPolicy) policy);

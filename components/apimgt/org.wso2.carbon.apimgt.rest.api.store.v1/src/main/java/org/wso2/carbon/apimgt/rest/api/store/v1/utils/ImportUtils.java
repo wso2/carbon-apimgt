@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
+import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -125,8 +126,9 @@ public class ImportUtils {
         apiKey.setConsumerSecret(new String(Base64.decodeBase64(applicationKeyDto.getConsumerSecret())));
         apiKey.setKeyManager(applicationKeyDto.getKeyManager());
         apiKey.setGrantTypes(StringUtils.join(applicationKeyDto.getSupportedGrantTypes(), ", "));
-        if (apiKey.getGrantTypes() != null && apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey
-                .getGrantTypes().contains(GRANT_TYPE_CODE)) {
+
+        if (apiKey.getGrantTypes() != null && (apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT)
+                || apiKey.getGrantTypes().contains(GRANT_TYPE_CODE))) {
             apiKey.setCallbackUrl(applicationKeyDto.getCallbackUrl());
         }
         apiKey.setValidityPeriod(applicationKeyDto.getToken().getValidityTime());
@@ -139,16 +141,17 @@ public class ImportUtils {
      *
      * @param subscribedAPIs Subscribed APIs
      * @param userId         Username of the subscriber
-     * @param appId          Application Id
+     * @param application    Application
      * @param update         Whether to update the application or not
      * @param apiConsumer    API Consumer
+     * @param organization   Organization
      * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-                                                          Application application, Boolean update,
-                                                          APIConsumer apiConsumer) throws APIManagementException,
+            Application application, Boolean update, APIConsumer apiConsumer, String organization)
+            throws APIManagementException,
             UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
@@ -177,14 +180,16 @@ public class ImportUtils {
                 if (apiSet != null && !apiSet.isEmpty()) {
                     Object type = apiSet.iterator().next();
                     ApiTypeWrapper apiTypeWrapper = null;
+                    String apiOrApiProductUuid;
                     //Check whether the object is ApiProduct
                     if (isApiProduct(type)) {
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(apiProduct.getId(), organization);
                     } else {
                         API api = (API) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(api);
+                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(api.getId(), organization);
                     }
+                    apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiOrApiProductUuid, organization);
                     // Tier of the imported subscription
                     String targetTier = subscribedAPI.getThrottlingPolicy();
                     // Checking whether the target tier is available
@@ -265,18 +270,19 @@ public class ImportUtils {
     /**
      * Adds a key to a given Application
      *
-     * @param username    User for import application
-     * @param application Application used to add key
-     * @param apiKey      API key for adding to application
-     * @param apiConsumer API Consumer
+     * @param username          User for import application
+     * @param application       Application used to add key
+     * @param applicationKeyDTO Application Key DTO
+     * @param apiConsumer       API Consumer
+     * @param update            Whether to update the OAuth Client or not
      * @throws APIManagementException
      */
-    public static void addApplicationKey(String username, Application application, APIKey apiKey,
-            APIConsumer apiConsumer) throws APIManagementException {
+    public static void addApplicationKey(String username, Application application, ApplicationKeyDTO applicationKeyDTO,
+            APIConsumer apiConsumer, Boolean update) throws APIManagementException {
         String[] accessAllowDomainsArray = { "ALL" };
         JSONObject jsonParamObj = new JSONObject();
         jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
-        String grantTypes = apiKey.getGrantTypes();
+        String grantTypes = StringUtils.join(applicationKeyDTO.getSupportedGrantTypes(), ',');
         if (!StringUtils.isEmpty(grantTypes)) {
             jsonParamObj.put(APIConstants.JSON_GRANT_TYPES, grantTypes);
         }
@@ -284,16 +290,40 @@ public class ImportUtils {
            User can provide clientId only or both clientId and clientSecret
            User cannot provide clientSecret only
          */
-        if (!StringUtils.isEmpty(apiKey.getConsumerKey())) {
-            jsonParamObj.put(APIConstants.JSON_CLIENT_ID, apiKey.getConsumerKey());
-            if (!StringUtils.isEmpty(apiKey.getConsumerSecret())) {
-                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, apiKey.getConsumerSecret());
+        if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerKey())) {
+            jsonParamObj.put(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
+            if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerSecret())) {
+                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, applicationKeyDTO.getConsumerSecret());
             }
         }
+        if (!StringUtils.isEmpty(applicationKeyDTO.getCallbackUrl())) {
+            jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, applicationKeyDTO.getCallbackUrl());
+        }
+        if (applicationKeyDTO.getAdditionalProperties() != null) {
+            String additionalProperties = new Gson().toJson(applicationKeyDTO.getAdditionalProperties());
+            org.json.JSONObject jsonObject = new org.json.JSONObject(additionalProperties);
+            Set<String> keysSet = jsonObject.keySet();
+            for (String key : keysSet) {
+                if (jsonObject.get(key) instanceof Double) {
+                    jsonObject.put(key, String.valueOf(((Double) jsonObject.get(key)).intValue()));
+                } else {
+                    jsonObject.put(key, jsonObject.get(key).toString());
+                }
+            }
+            jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());
+        }
         String jsonParams = jsonParamObj.toString();
-        String tokenScopes = apiKey.getTokenScope();
-        apiConsumer.requestApprovalForApplicationRegistration(username, application.getName(), apiKey.getType(),
-                apiKey.getCallbackUrl(), accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()),
-                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null);
+        String tokenScopes = StringUtils.join(applicationKeyDTO.getToken().getTokenScopes(), ',');
+
+        if (!update) {
+            apiConsumer.requestApprovalForApplicationRegistration(username, application,
+                    applicationKeyDTO.getKeyType().toString(), applicationKeyDTO.getCallbackUrl(),
+                    accessAllowDomainsArray, Long.toString(applicationKeyDTO.getToken().getValidityTime()), tokenScopes,
+                    jsonParams, applicationKeyDTO.getKeyManager(), null, true);
+        } else {
+            apiConsumer.updateAuthClient(username, application, applicationKeyDTO.getKeyType().toString(),
+                    applicationKeyDTO.getCallbackUrl(), null, null, null, application.getGroupId(), jsonParams,
+                    applicationKeyDTO.getKeyManager());
+        }
     }
 }

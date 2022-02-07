@@ -52,7 +52,7 @@ public class APIBusinessInformationDTO   {
   
   @ApiModelProperty(example = "businessowner@wso2.com", value = "")
   @JsonProperty("businessOwnerEmail")
- @Pattern(regexp="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$")  public String getBusinessOwnerEmail() {
+  public String getBusinessOwnerEmail() {
     return businessOwnerEmail;
   }
   public void setBusinessOwnerEmail(String businessOwnerEmail) {

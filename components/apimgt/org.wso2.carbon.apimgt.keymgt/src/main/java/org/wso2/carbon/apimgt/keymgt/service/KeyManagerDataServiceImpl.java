@@ -346,6 +346,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         application.setPolicy(event.getApplicationPolicy());
         application.setTokenType(event.getTokenType());
         application.setUUID(event.getUuid());
+        application.setOrganization(event.getTenantDomain());
         event.getAttributes().forEach(application::addAttribute);
         application.setSubName(event.getSubscriber());
         if (log.isDebugEnabled()) {
@@ -363,8 +364,8 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         sub.setPolicyId(event.getPolicyId());
         sub.setSubscriptionId(String.valueOf(event.getSubscriptionId()));
         sub.setSubscriptionState(event.getSubscriptionState());
-        sub.setApiUUId(event.getApiUUID());
-        sub.setAppUUID(event.getApplicationUUID());
+        sub.setApiUUID(event.getApiUUID());
+        sub.setApplicationUUID(event.getApplicationUUID());
         sub.setSubscriptionUUId(event.getSubscriptionUUID());
         sub.setTimeStamp(event.getTimeStamp());
         if (log.isDebugEnabled()) {

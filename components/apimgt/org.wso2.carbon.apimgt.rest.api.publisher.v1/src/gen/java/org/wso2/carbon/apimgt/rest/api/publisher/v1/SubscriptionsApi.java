@@ -44,7 +44,8 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Block a Subscription", notes = "This operation can be used to block a subscription. Along with the request, `blockState` must be specified as a query parameter.  1. `BLOCKED` : Subscription is completely blocked for both Production and Sandbox environments. 2. `PROD_ONLY_BLOCKED` : Subscription is blocked for Production environment only. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscription_block", description = "Block Subscription")
+            @AuthorizationScope(scope = "apim:subscription_block", description = "Block Subscription"),
+            @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })
     }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
@@ -62,7 +63,9 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of a Subscriber", notes = "This operation can be used to get details of a user who subscribed to the API. ", response = SubscriberInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription"),
+            @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })
     }, tags={ "Subscriber",  })
     @ApiResponses(value = { 
@@ -78,7 +81,9 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of a Pending Invoice for a Monetized Subscription with Metered Billing.", notes = "This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing. ", response = APIMonetizationUsageDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription"),
+            @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })
     }, tags={ "API Monetization",  })
     @ApiResponses(value = { 
@@ -95,7 +100,9 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of  1. Retrieving all subscriptions for the user's APIs. `GET https://127.0.0.1:9443/api/am/publisher/v2/subscriptions`  2. Retrieving subscriptions for a specific API. `GET https://127.0.0.1:9443/api/am/publisher/v2/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed` ", response = SubscriptionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription"),
+            @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })
     }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
@@ -112,7 +119,8 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Unblock a Subscription", notes = "This operation can be used to unblock a subscription specifying the subscription Id. The subscription will be fully unblocked after performing this operation. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscription_block", description = "Block Subscription")
+            @AuthorizationScope(scope = "apim:subscription_block", description = "Block Subscription"),
+            @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })
     }, tags={ "Subscriptions" })
     @ApiResponses(value = { 

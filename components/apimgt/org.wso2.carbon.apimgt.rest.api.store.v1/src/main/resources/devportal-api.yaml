@@ -1101,7 +1101,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-            - apim:admin
+            - apim:admin # special scope added to moderate comments
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2540,6 +2540,51 @@ paths:
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v2/subscriptions/multiple"'
 
   ######################################################
+  # The "Subscriptions related to API" resource API
+  ######################################################
+  /subscriptions/{apiId}/additionalInfo:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get Additional Information of subscriptions attached to an API.
+      description: |
+        This operation can be used to retrieve all additional Information of subscriptions attached to an API by providing the API id.
+      operationId: getAdditionalInfoOfAPISubscriptions
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Types and fields returned successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              schema:
+                type: string
+                default: application/json
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdditionalSubscriptionInfoList'
+        404:
+          description: |
+            Not Found.
+            Retrieving types and fields failed.
+          content: {}
+      security:
+        - OAuth2Security: []
+      x-code-samples:
+        - lang: Curl
+          source: curl -k "https://localhost:9443/api/am/devportal/v2/subscriptions/e93fb282-b456-48fc-8981-003fb89086ae/additionalInfo"
+
+  ######################################################
   # The "Individual Subscription" resource APIs
   ######################################################
   /subscriptions/{subscriptionId}:
@@ -2797,9 +2842,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ThrottlingPolicyList'
+                $ref: '#/components/schemas/ThrottlingPolicyList'
         304:
           description: |
             Not Modified.
@@ -3432,6 +3475,9 @@ components:
         type:
           type: string
           example: WS
+        createdTime:
+          type: string
+          example: 1614020559444
         provider:
           type: string
           description: |
@@ -3607,9 +3653,16 @@ components:
           example: true
           default: false
         additionalProperties:
-          type: object
-          additionalProperties:
-            type: string
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
           description: |
             Custom(user defined) properties of API
           example: {}
@@ -3709,6 +3762,20 @@ components:
         lastUpdatedTime:
           type: string
           example: 2020-10-31T13:57:16.229
+        gatewayVendor:
+          title: Gateway vendor of the API
+          type: string
+          example:
+            wso2
+        asyncTransportProtocols:
+          type: array
+          description: |
+            Supported transports for the aync API.
+          example:
+            - http
+            - mqtt
+          items:
+            type: string
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -3746,7 +3813,7 @@ components:
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
         name:
-          maxLength: 70
+          maxLength: 100
           minLength: 1
           type: string
           example: CalculatorApp
@@ -4536,6 +4603,12 @@ components:
           type: string
           description: Token to be revoked, if any
           example: ""
+        grantType:
+          type: string
+          default: CLIENT_CREDENTIALS
+          enum:
+            - CLIENT_CREDENTIALS
+            - TOKEN_EXCHANGE
         additionalProperties:
           type: object
           properties: {}
@@ -5010,6 +5083,12 @@ components:
         apiOwner:
           type: string
           example: admin
+        vendor:
+          type: string
+          default: WSO2
+          enum:
+            - WSO2
+            - AWS
     APICategory:
       title: API Category
       required:
@@ -5129,9 +5208,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyManagerApplicationConfiguration'
+        alias:
+          type: string
+          description: |
+            The alias of Identity Provider.
+            If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token
+          example: https://localhost:9443/oauth2/token
         additionalProperties:
           type: object
           properties: {}
+        tokenType:
+          type: string
+          description: The type of the tokens to be used (exchanged or without exchanged).
+            Accepted values are EXCHANGED, DIRECT and BOTH.
+          example: EXCHANGED
+          default: DIRECT
+          enum:
+            - EXCHANGED
+            - DIRECT
+            - BOTH
     KeyManagerApplicationConfiguration:
       title: Key Manager application Configuration
       type: object
@@ -5246,6 +5341,89 @@ components:
         newPassword:
           type: string
           example: newpassword1234
+    AdditionalSubscriptionInfoList:
+      title: Additional Subscription Info List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of additional information sets of subscription returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalSubscriptionInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    AdditionalSubscriptionInfo:
+      title: Additional Information of subscriptions related to an API
+      type: object
+      properties:
+        subscriptionId:
+          type: string
+          description: The UUID of the subscription
+          readOnly: true
+          example: faae5fcc-cbae-40c4-bf43-89931630d313
+        applicationId:
+          type: string
+          description: The UUID of the application
+          example: b3ade481-30b0-4b38-9a67-498a40873a6d
+        applicationName:
+          type: string
+          description: The name of the application
+          example: Sample Application
+        apiId:
+          type: string
+          description: The unique identifier of the API.
+          example: 2962f3bb-8330-438e-baee-0ee1d6434ba4
+        isSolaceAPI:
+          type: boolean
+          example: false
+        solaceOrganization:
+          type: string
+          example: SolaceWso2
+        solaceDeployedEnvironments:
+          type: array
+          items:
+            type: object
+            properties:
+              environmentName:
+                type: string
+              environmentDisplayName:
+                type: string
+              organizationName:
+                type: string
+              solaceURLs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    protocol:
+                      type: string
+                      example: Defalt
+                    endpointURL:
+                      type: string
+                      example: Default
+              SolaceTopicsObject:
+                type: object
+                properties:
+                  defaultSyntax:
+                    $ref: '#/components/schemas/SolaceTopics'
+                  mqttSyntax:
+                    $ref: '#/components/schemas/SolaceTopics'
+    SolaceTopics:
+      title: SolaceTopics
+      type: object
+      properties:
+        publishTopics:
+          type: array
+          items:
+            type: string
+        subscribeTopics:
+          type: array
+          items:
+            type: string
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -5591,7 +5769,7 @@ components:
             openid: Authorize access to user details
             apim:subscribe: Subscribe API
             apim:api_key: Generate API Keys
-            apim:app_manage: Retrieve, Manage applications
+            apim:app_manage: Retrieve, Manage and Import, Export applications
             apim:sub_manage: Retrieve, Manage subscriptions
             apim:store_settings: Retrieve Developer Portal settings
             apim:sub_alert_manage: Retrieve, subscribe and configure Developer Portal alert types

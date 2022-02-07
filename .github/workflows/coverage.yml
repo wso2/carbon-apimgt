@@ -5,40 +5,95 @@ on:
     - cron:  '0 20 * * *'
 
 jobs:
-  build:
+  build-carbon:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout master
-      uses: actions/checkout@v1
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '14.x'
-    - name: Build carbon-apimgt with Tests, skipping AspectJ
-      run: mvn clean install --file pom.xml -Dskip.aspectj=true
-    - name: Get carbon.apimgt.version
-      run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
-    - name: Print carbon.apimgt.version
-      run: |
-        echo $(cat ../CARBON_APIMGT_VERSION_FILE)
-    - name: Checkout Product-APIM
-      uses: actions/checkout@v1
-      with: 
-        repository: wso2/product-apim
-        ref: refs/heads/master
-    - name: Build Product-Apim with Tests
-      continue-on-error: true
-      run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file ../product-apim/pom.xml
-    - name: Upload unit test coverage to Codecov
-      uses: codecov/codecov-action@v1.2.1
-      with:
-        flags: unit_tests
-    - name: Upload integration test coverage to Codecov
-      uses: codecov/codecov-action@v1.2.1
-      with:
-        flags: integration_tests
-        directory: ../product-apim/
+      - name: Run hostname
+        run: hostname
+      - name: Fix host entry
+        run: sudo echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
+      - name: Show hosts
+        run: cat /etc/hosts
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '10'
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8.0.282+8
+          distribution: 'adopt'
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build carbon-apimgt with Tests, skipping AspectJ
+        run: mvn clean install --file pom.xml -Dskip.aspectj=true
+      - name: Upload unit test coverage to Codecov
+        uses: codecov/codecov-action@v1.2.1
+        with:
+          flags: unit_tests
+
+  build-product:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - id: 1
+            segment: group1
+          - id: 2
+            segment: group2
+      fail-fast: false
+    steps:
+      - name: Run hostname
+        run: hostname
+      - name: Fix host entry
+        run: sudo echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
+      - name: Show hosts
+        run: cat /etc/hosts
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '10'
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8.0.282+8
+          distribution: 'adopt'
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Cache maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build carbon-apimgt without tests, skip AspectJ, skip portal builds
+        run: mvn clean install --file pom.xml -Dmaven.test.skip=true -Dskip.aspectj=true -Dnpm.build.skip=true
+      - name: Get carbon.apimgt.version
+        run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
+      - name: Print carbon.apimgt.version
+        run: |
+          echo $(cat ../CARBON_APIMGT_VERSION_FILE)
+      - name: Checkout Product-APIM
+        uses: actions/checkout@v2
+        with:
+          repository: wso2/product-apim
+          ref: refs/heads/master
+          fetch-depth: '10'
+          path: product-apim
+      - name: Build product-apim with tests
+        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml -DskipBenchMarkTest=true
+        env:
+          PRODUCT_APIM_TEST_GROUPS: ${{ matrix.segment }}
+      - name: Upload integration test coverage to Codecov
+        uses: codecov/codecov-action@v1.2.1
+        with:
+          flags: integration_tests
+          directory: product-apim/

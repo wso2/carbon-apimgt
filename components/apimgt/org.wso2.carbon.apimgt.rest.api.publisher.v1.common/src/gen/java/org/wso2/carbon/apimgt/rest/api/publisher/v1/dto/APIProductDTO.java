@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
@@ -40,7 +42,11 @@ public class APIProductDTO   {
     @XmlEnum(String.class)
     public enum StateEnum {
         CREATED("CREATED"),
-        PUBLISHED("PUBLISHED");
+        PUBLISHED("PUBLISHED"),
+        DEPRECATED("DEPRECATED"),
+        RETIRED("RETIRED"),
+        BLOCKED("BLOCKED"),
+        PROTOTYPED("PROTOTYPED");
         private String value;
 
         StateEnum (String v) {
@@ -66,10 +72,8 @@ public class APIProductDTO   {
 return null;
         }
     }
-    private StateEnum state = null;
+    private StateEnum state = StateEnum.CREATED;
     private Boolean enableSchemaValidation = null;
-    private Boolean enableStore = null;
-    private String testKey = null;
     private Boolean isRevision = null;
     private String revisionedApiProductId = null;
     private Integer revisionId = null;
@@ -143,7 +147,6 @@ return null;
     }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
-    private List<String> gatewayEnvironments = new ArrayList<String>();
 
     @XmlType(name="ApiTypeEnum")
     @XmlEnum(String.class)
@@ -216,16 +219,20 @@ return null;
     }
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
-    private Map<String, String> additionalProperties = new HashMap<String, String>();
+    private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
+    private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
     private APIMonetizationInfoDTO monetization = null;
     private APIProductBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
+    private String gatewayVendor = null;
     private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<String> categories = new ArrayList<String>();
+    private String workflowStatus = null;
 
   /**
    * UUID of the api product 
@@ -367,40 +374,6 @@ return null;
   }
   public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
-  }
-
-  /**
-   **/
-  public APIProductDTO enableStore(Boolean enableStore) {
-    this.enableStore = enableStore;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("enableStore")
-  public Boolean isEnableStore() {
-    return enableStore;
-  }
-  public void setEnableStore(Boolean enableStore) {
-    this.enableStore = enableStore;
-  }
-
-  /**
-   **/
-  public APIProductDTO testKey(String testKey) {
-    this.testKey = testKey;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "8swdwj9080edejhj", value = "")
-  @JsonProperty("testKey")
-  public String getTestKey() {
-    return testKey;
-  }
-  public void setTestKey(String testKey) {
-    this.testKey = testKey;
   }
 
   /**
@@ -579,24 +552,6 @@ return null;
   }
 
   /**
-   * List of gateway environments the API Product is available 
-   **/
-  public APIProductDTO gatewayEnvironments(List<String> gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[\"Default\"]", value = "List of gateway environments the API Product is available ")
-  @JsonProperty("gatewayEnvironments")
-  public List<String> getGatewayEnvironments() {
-    return gatewayEnvironments;
-  }
-  public void setGatewayEnvironments(List<String> gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-  }
-
-  /**
    * The API type to be used. Accepted values are API, APIPRODUCT
    **/
   public APIProductDTO apiType(ApiTypeEnum apiType) {
@@ -758,19 +713,38 @@ return null;
   /**
    * Map of custom properties of API
    **/
-  public APIProductDTO additionalProperties(Map<String, String> additionalProperties) {
+  public APIProductDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
   @ApiModelProperty(value = "Map of custom properties of API")
+      @Valid
   @JsonProperty("additionalProperties")
-  public Map<String, String> getAdditionalProperties() {
+  public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+  public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public APIProductDTO additionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalPropertiesMap")
+  public Map<String, APIInfoAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
+    return additionalPropertiesMap;
+  }
+  public void setAdditionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
   }
 
   /**
@@ -862,6 +836,23 @@ return null;
   }
 
   /**
+   **/
+  public APIProductDTO gatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2", value = "")
+  @JsonProperty("gatewayVendor")
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
+
+  /**
    * APIs and resources in the API Product. 
    **/
   public APIProductDTO apis(List<ProductAPIDTO> apis) {
@@ -916,6 +907,23 @@ return null;
     this.categories = categories;
   }
 
+  /**
+   **/
+  public APIProductDTO workflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "APPROVED", value = "")
+  @JsonProperty("workflowStatus")
+  public String getWorkflowStatus() {
+    return workflowStatus;
+  }
+  public void setWorkflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -934,8 +942,6 @@ return null;
         Objects.equals(hasThumbnail, apIProduct.hasThumbnail) &&
         Objects.equals(state, apIProduct.state) &&
         Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
-        Objects.equals(enableStore, apIProduct.enableStore) &&
-        Objects.equals(testKey, apIProduct.testKey) &&
         Objects.equals(isRevision, apIProduct.isRevision) &&
         Objects.equals(revisionedApiProductId, apIProduct.revisionedApiProductId) &&
         Objects.equals(revisionId, apIProduct.revisionId) &&
@@ -946,7 +952,6 @@ return null;
         Objects.equals(visibleTenants, apIProduct.visibleTenants) &&
         Objects.equals(accessControl, apIProduct.accessControl) &&
         Objects.equals(accessControlRoles, apIProduct.accessControlRoles) &&
-        Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
         Objects.equals(apiType, apIProduct.apiType) &&
         Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(tags, apIProduct.tags) &&
@@ -957,19 +962,22 @@ return null;
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, apIProduct.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, apIProduct.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, apIProduct.additionalPropertiesMap) &&
         Objects.equals(monetization, apIProduct.monetization) &&
         Objects.equals(businessInformation, apIProduct.businessInformation) &&
         Objects.equals(corsConfiguration, apIProduct.corsConfiguration) &&
         Objects.equals(createdTime, apIProduct.createdTime) &&
         Objects.equals(lastUpdatedTime, apIProduct.lastUpdatedTime) &&
+        Objects.equals(gatewayVendor, apIProduct.gatewayVendor) &&
         Objects.equals(apis, apIProduct.apis) &&
         Objects.equals(scopes, apIProduct.scopes) &&
-        Objects.equals(categories, apIProduct.categories);
+        Objects.equals(categories, apIProduct.categories) &&
+        Objects.equals(workflowStatus, apIProduct.workflowStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, enableStore, testKey, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, gatewayVendor, apis, scopes, categories, workflowStatus);
   }
 
   @Override
@@ -985,8 +993,6 @@ return null;
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
-    sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
-    sb.append("    testKey: ").append(toIndentedString(testKey)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    revisionedApiProductId: ").append(toIndentedString(revisionedApiProductId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
@@ -997,7 +1003,6 @@ return null;
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
-    sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
@@ -1008,14 +1013,17 @@ return null;
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
+    sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("}");
     return sb.toString();
   }

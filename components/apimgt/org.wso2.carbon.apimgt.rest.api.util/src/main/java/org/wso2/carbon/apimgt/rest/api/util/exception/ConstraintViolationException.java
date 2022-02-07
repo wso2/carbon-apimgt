@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Set;
 
@@ -32,7 +33,7 @@ public class ConstraintViolationException extends WebApplicationException {
     public <T> ConstraintViolationException(Set<ConstraintViolation<T>> violations) {
         super(Response.status(Response.Status.BAD_REQUEST)
                 .entity(RestApiUtil.getConstraintViolationErrorDTO(violations))
-                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
  
         //Set the error message

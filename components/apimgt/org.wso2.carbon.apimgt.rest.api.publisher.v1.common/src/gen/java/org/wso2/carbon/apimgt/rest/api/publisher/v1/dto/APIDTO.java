@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -37,6 +38,7 @@ import javax.validation.Valid;
 
 @Scope(name = "apim:api_create", description="", value ="")
 @Scope(name = "apim:api_import_export", description="", value ="")
+@Scope(name = "apim:api_manage", description="", value ="")
 public class APIDTO   {
   
     private String id = null;
@@ -46,21 +48,18 @@ public class APIDTO   {
     private String version = null;
     private String provider = null;
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private String lifeCycleStatus = null;
     private WSDLInfoDTO wsdlInfo = null;
     private String wsdlUrl = null;
-    private String testKey = null;
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
-    private String destinationStatsEnabled = null;
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
     private Boolean isRevision = null;
     private String revisionedApiId = null;
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
-    @Scope(name = "apim:api_publish", description="", value ="")
-    private Boolean enableStore = null;
 
     @XmlType(name="TypeEnum")
     @XmlEnum(String.class)
@@ -71,7 +70,8 @@ public class APIDTO   {
         SOAP("SOAP"),
         GRAPHQL("GRAPHQL"),
         WEBSUB("WEBSUB"),
-        SSE("SSE");
+        SSE("SSE"),
+        WEBHOOK("WEBHOOK");
         private String value;
 
         TypeEnum (String v) {
@@ -98,12 +98,47 @@ return null;
         }
     }
     private TypeEnum type = TypeEnum.HTTP;
+
+    @XmlType(name="AudienceEnum")
+    @XmlEnum(String.class)
+    public enum AudienceEnum {
+        PUBLIC("PUBLIC"),
+        SINGLE("SINGLE");
+        private String value;
+
+        AudienceEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static AudienceEnum fromValue(String v) {
+            for (AudienceEnum b : AudienceEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private AudienceEnum audience = null;
     private List<String> transport = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> tags = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> policies = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
@@ -141,13 +176,12 @@ return null;
         }
     }
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> visibleRoles = new ArrayList<String>();
     private List<String> visibleTenants = new ArrayList<String>();
-    private APIEndpointSecurityDTO endpointSecurity = null;
-    @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> gatewayEnvironments = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
 
     @XmlType(name="SubscriptionAvailabilityEnum")
@@ -182,10 +216,15 @@ return null;
         }
     }
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private Map<String, String> additionalProperties = new HashMap<String, String>();
+    @Scope(name = "apim:api_manage", description="", value ="")
+    private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
+    @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
+    private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
     private APIMonetizationInfoDTO monetization = null;
 
     @XmlType(name="AccessControlEnum")
@@ -221,12 +260,14 @@ return null;
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private String lastUpdatedTime = null;
     private Object endpointConfig = null;
 
@@ -269,6 +310,8 @@ return null;
     private Object keyManagers = null;
     private APIServiceInfoDTO serviceInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
+    private String gatewayVendor = null;
+    private List<String> asyncTransportProtocols = new ArrayList<String>();
 
   /**
    * UUID of the api registry artifact 
@@ -299,7 +342,7 @@ return null;
   @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+\\[\\]/]*$)") @Size(min=1,max=50)  public String getName() {
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\[\\]/]*$)") @Size(min=1,max=60)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -334,7 +377,7 @@ return null;
   @ApiModelProperty(example = "pizza", required = true, value = "")
   @JsonProperty("context")
   @NotNull
- @Size(min=1,max=82)  public String getContext() {
+ @Size(min=1,max=232)  public String getContext() {
     return context;
   }
   public void setContext(String context) {
@@ -431,23 +474,6 @@ return null;
 
   /**
    **/
-  public APIDTO testKey(String testKey) {
-    this.testKey = testKey;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "8swdwj9080edejhj", value = "")
-  @JsonProperty("testKey")
-  public String getTestKey() {
-    return testKey;
-  }
-  public void setTestKey(String testKey) {
-    this.testKey = testKey;
-  }
-
-  /**
-   **/
   public APIDTO responseCachingEnabled(Boolean responseCachingEnabled) {
     this.responseCachingEnabled = responseCachingEnabled;
     return this;
@@ -478,23 +504,6 @@ return null;
   }
   public void setCacheTimeout(Integer cacheTimeout) {
     this.cacheTimeout = cacheTimeout;
-  }
-
-  /**
-   **/
-  public APIDTO destinationStatsEnabled(String destinationStatsEnabled) {
-    this.destinationStatsEnabled = destinationStatsEnabled;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "Disabled", value = "")
-  @JsonProperty("destinationStatsEnabled")
-  public String getDestinationStatsEnabled() {
-    return destinationStatsEnabled;
-  }
-  public void setDestinationStatsEnabled(String destinationStatsEnabled) {
-    this.destinationStatsEnabled = destinationStatsEnabled;
   }
 
   /**
@@ -601,24 +610,7 @@ return null;
   }
 
   /**
-   **/
-  public APIDTO enableStore(Boolean enableStore) {
-    this.enableStore = enableStore;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("enableStore")
-  public Boolean isEnableStore() {
-    return enableStore;
-  }
-  public void setEnableStore(Boolean enableStore) {
-    this.enableStore = enableStore;
-  }
-
-  /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -626,13 +618,31 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
   }
   public void setType(TypeEnum type) {
     this.type = type;
+  }
+
+  /**
+   * The audience of the API. Accepted values are PUBLIC, SINGLE
+   **/
+  public APIDTO audience(AudienceEnum audience) {
+    this.audience = audience;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, SINGLE")
+  @JsonProperty("audience")
+  public AudienceEnum getAudience() {
+    return audience;
+  }
+  public void setAudience(AudienceEnum audience) {
+    this.audience = audience;
   }
 
   /**
@@ -814,42 +824,6 @@ return null;
 
   /**
    **/
-  public APIDTO endpointSecurity(APIEndpointSecurityDTO endpointSecurity) {
-    this.endpointSecurity = endpointSecurity;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("endpointSecurity")
-  public APIEndpointSecurityDTO getEndpointSecurity() {
-    return endpointSecurity;
-  }
-  public void setEndpointSecurity(APIEndpointSecurityDTO endpointSecurity) {
-    this.endpointSecurity = endpointSecurity;
-  }
-
-  /**
-   * List of gateway environments the API is available 
-   **/
-  public APIDTO gatewayEnvironments(List<String> gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[\"Default\"]", value = "List of gateway environments the API is available ")
-  @JsonProperty("gatewayEnvironments")
-  public List<String> getGatewayEnvironments() {
-    return gatewayEnvironments;
-  }
-  public void setGatewayEnvironments(List<String> gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-  }
-
-  /**
-   **/
   public APIDTO mediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
     this.mediationPolicies = mediationPolicies;
     return this;
@@ -904,19 +878,38 @@ return null;
   /**
    * Map of custom properties of API
    **/
-  public APIDTO additionalProperties(Map<String, String> additionalProperties) {
+  public APIDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
   @ApiModelProperty(value = "Map of custom properties of API")
+      @Valid
   @JsonProperty("additionalProperties")
-  public Map<String, String> getAdditionalProperties() {
+  public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+  public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public APIDTO additionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalPropertiesMap")
+  public Map<String, APIInfoAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
+    return additionalPropertiesMap;
+  }
+  public void setAdditionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
   }
 
   /**
@@ -1241,6 +1234,41 @@ return null;
     this.advertiseInfo = advertiseInfo;
   }
 
+  /**
+   **/
+  public APIDTO gatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2", value = "")
+  @JsonProperty("gatewayVendor")
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
+
+  /**
+   * Supported transports for the async API (http and/or https). 
+   **/
+  public APIDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
+    this.asyncTransportProtocols = asyncTransportProtocols;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the async API (http and/or https). ")
+  @JsonProperty("asyncTransportProtocols")
+  public List<String> getAsyncTransportProtocols() {
+    return asyncTransportProtocols;
+  }
+  public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
+    this.asyncTransportProtocols = asyncTransportProtocols;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1260,18 +1288,16 @@ return null;
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(wsdlInfo, API.wsdlInfo) &&
         Objects.equals(wsdlUrl, API.wsdlUrl) &&
-        Objects.equals(testKey, API.testKey) &&
         Objects.equals(responseCachingEnabled, API.responseCachingEnabled) &&
         Objects.equals(cacheTimeout, API.cacheTimeout) &&
-        Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(isRevision, API.isRevision) &&
         Objects.equals(revisionedApiId, API.revisionedApiId) &&
         Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
-        Objects.equals(enableStore, API.enableStore) &&
         Objects.equals(type, API.type) &&
+        Objects.equals(audience, API.audience) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(tags, API.tags) &&
         Objects.equals(policies, API.policies) &&
@@ -1282,12 +1308,11 @@ return null;
         Objects.equals(visibility, API.visibility) &&
         Objects.equals(visibleRoles, API.visibleRoles) &&
         Objects.equals(visibleTenants, API.visibleTenants) &&
-        Objects.equals(endpointSecurity, API.endpointSecurity) &&
-        Objects.equals(gatewayEnvironments, API.gatewayEnvironments) &&
         Objects.equals(mediationPolicies, API.mediationPolicies) &&
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, API.additionalPropertiesMap) &&
         Objects.equals(monetization, API.monetization) &&
         Objects.equals(accessControl, API.accessControl) &&
         Objects.equals(accessControlRoles, API.accessControlRoles) &&
@@ -1305,12 +1330,14 @@ return null;
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(serviceInfo, API.serviceInfo) &&
-        Objects.equals(advertiseInfo, API.advertiseInfo);
+        Objects.equals(advertiseInfo, API.advertiseInfo) &&
+        Objects.equals(gatewayVendor, API.gatewayVendor) &&
+        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, asyncTransportProtocols);
   }
 
   @Override
@@ -1327,18 +1354,16 @@ return null;
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    wsdlInfo: ").append(toIndentedString(wsdlInfo)).append("\n");
     sb.append("    wsdlUrl: ").append(toIndentedString(wsdlUrl)).append("\n");
-    sb.append("    testKey: ").append(toIndentedString(testKey)).append("\n");
     sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
-    sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
-    sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
@@ -1349,12 +1374,11 @@ return null;
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
-    sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
-    sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
@@ -1373,6 +1397,8 @@ return null;
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
 import javax.validation.constraints.*;
 
@@ -34,11 +35,15 @@ public class KeyManagerDTO   {
     private String introspectionEndpoint = null;
     private String clientRegistrationEndpoint = null;
     private String tokenEndpoint = null;
+    private String displayTokenEndpoint = null;
     private String revokeEndpoint = null;
+    private String displayRevokeEndpoint = null;
     private String userInfoEndpoint = null;
     private String authorizeEndpoint = null;
+    private List<KeyManagerEndpointDTO> endpoints = new ArrayList<KeyManagerEndpointDTO>();
     private KeyManagerCertificatesDTO certificates = null;
     private String issuer = null;
+    private String alias = null;
     private String scopeManagementEndpoint = null;
     private List<String> availableGrantTypes = new ArrayList<String>();
     private Boolean enableTokenGeneration = null;
@@ -53,6 +58,39 @@ public class KeyManagerDTO   {
     private List<TokenValidationDTO> tokenValidation = new ArrayList<TokenValidationDTO>();
     private Boolean enabled = null;
     private Object additionalProperties = null;
+
+    @XmlType(name="TokenTypeEnum")
+    @XmlEnum(String.class)
+    public enum TokenTypeEnum {
+        EXCHANGED("EXCHANGED"),
+        DIRECT("DIRECT"),
+        BOTH("BOTH");
+        private String value;
+
+        TokenTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TokenTypeEnum fromValue(String v) {
+            for (TokenTypeEnum b : TokenTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private TokenTypeEnum tokenType = TokenTypeEnum.DIRECT;
 
   /**
    **/
@@ -213,6 +251,23 @@ public class KeyManagerDTO   {
 
   /**
    **/
+  public KeyManagerDTO displayTokenEndpoint(String displayTokenEndpoint) {
+    this.displayTokenEndpoint = displayTokenEndpoint;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/token", value = "")
+  @JsonProperty("displayTokenEndpoint")
+  public String getDisplayTokenEndpoint() {
+    return displayTokenEndpoint;
+  }
+  public void setDisplayTokenEndpoint(String displayTokenEndpoint) {
+    this.displayTokenEndpoint = displayTokenEndpoint;
+  }
+
+  /**
+   **/
   public KeyManagerDTO revokeEndpoint(String revokeEndpoint) {
     this.revokeEndpoint = revokeEndpoint;
     return this;
@@ -226,6 +281,23 @@ public class KeyManagerDTO   {
   }
   public void setRevokeEndpoint(String revokeEndpoint) {
     this.revokeEndpoint = revokeEndpoint;
+  }
+
+  /**
+   **/
+  public KeyManagerDTO displayRevokeEndpoint(String displayRevokeEndpoint) {
+    this.displayRevokeEndpoint = displayRevokeEndpoint;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/revoke", value = "")
+  @JsonProperty("displayRevokeEndpoint")
+  public String getDisplayRevokeEndpoint() {
+    return displayRevokeEndpoint;
+  }
+  public void setDisplayRevokeEndpoint(String displayRevokeEndpoint) {
+    this.displayRevokeEndpoint = displayRevokeEndpoint;
   }
 
   /**
@@ -264,6 +336,24 @@ public class KeyManagerDTO   {
 
   /**
    **/
+  public KeyManagerDTO endpoints(List<KeyManagerEndpointDTO> endpoints) {
+    this.endpoints = endpoints;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("endpoints")
+  public List<KeyManagerEndpointDTO> getEndpoints() {
+    return endpoints;
+  }
+  public void setEndpoints(List<KeyManagerEndpointDTO> endpoints) {
+    this.endpoints = endpoints;
+  }
+
+  /**
+   **/
   public KeyManagerDTO certificates(KeyManagerCertificatesDTO certificates) {
     this.certificates = certificates;
     return this;
@@ -295,6 +385,24 @@ public class KeyManagerDTO   {
   }
   public void setIssuer(String issuer) {
     this.issuer = issuer;
+  }
+
+  /**
+   * The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token 
+   **/
+  public KeyManagerDTO alias(String alias) {
+    this.alias = alias;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9443/oauth2/token", value = "The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token ")
+  @JsonProperty("alias")
+  public String getAlias() {
+    return alias;
+  }
+  public void setAlias(String alias) {
+    this.alias = alias;
   }
 
   /**
@@ -538,6 +646,24 @@ public class KeyManagerDTO   {
     this.additionalProperties = additionalProperties;
   }
 
+  /**
+   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT and BOTH.
+   **/
+  public KeyManagerDTO tokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT and BOTH.")
+  @JsonProperty("tokenType")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -557,11 +683,15 @@ public class KeyManagerDTO   {
         Objects.equals(introspectionEndpoint, keyManager.introspectionEndpoint) &&
         Objects.equals(clientRegistrationEndpoint, keyManager.clientRegistrationEndpoint) &&
         Objects.equals(tokenEndpoint, keyManager.tokenEndpoint) &&
+        Objects.equals(displayTokenEndpoint, keyManager.displayTokenEndpoint) &&
         Objects.equals(revokeEndpoint, keyManager.revokeEndpoint) &&
+        Objects.equals(displayRevokeEndpoint, keyManager.displayRevokeEndpoint) &&
         Objects.equals(userInfoEndpoint, keyManager.userInfoEndpoint) &&
         Objects.equals(authorizeEndpoint, keyManager.authorizeEndpoint) &&
+        Objects.equals(endpoints, keyManager.endpoints) &&
         Objects.equals(certificates, keyManager.certificates) &&
         Objects.equals(issuer, keyManager.issuer) &&
+        Objects.equals(alias, keyManager.alias) &&
         Objects.equals(scopeManagementEndpoint, keyManager.scopeManagementEndpoint) &&
         Objects.equals(availableGrantTypes, keyManager.availableGrantTypes) &&
         Objects.equals(enableTokenGeneration, keyManager.enableTokenGeneration) &&
@@ -575,12 +705,13 @@ public class KeyManagerDTO   {
         Objects.equals(scopesClaim, keyManager.scopesClaim) &&
         Objects.equals(tokenValidation, keyManager.tokenValidation) &&
         Objects.equals(enabled, keyManager.enabled) &&
-        Objects.equals(additionalProperties, keyManager.additionalProperties);
+        Objects.equals(additionalProperties, keyManager.additionalProperties) &&
+        Objects.equals(tokenType, keyManager.tokenType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
+    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, displayTokenEndpoint, revokeEndpoint, displayRevokeEndpoint, userInfoEndpoint, authorizeEndpoint, endpoints, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties, tokenType);
   }
 
   @Override
@@ -597,11 +728,15 @@ public class KeyManagerDTO   {
     sb.append("    introspectionEndpoint: ").append(toIndentedString(introspectionEndpoint)).append("\n");
     sb.append("    clientRegistrationEndpoint: ").append(toIndentedString(clientRegistrationEndpoint)).append("\n");
     sb.append("    tokenEndpoint: ").append(toIndentedString(tokenEndpoint)).append("\n");
+    sb.append("    displayTokenEndpoint: ").append(toIndentedString(displayTokenEndpoint)).append("\n");
     sb.append("    revokeEndpoint: ").append(toIndentedString(revokeEndpoint)).append("\n");
+    sb.append("    displayRevokeEndpoint: ").append(toIndentedString(displayRevokeEndpoint)).append("\n");
     sb.append("    userInfoEndpoint: ").append(toIndentedString(userInfoEndpoint)).append("\n");
     sb.append("    authorizeEndpoint: ").append(toIndentedString(authorizeEndpoint)).append("\n");
+    sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
     sb.append("    certificates: ").append(toIndentedString(certificates)).append("\n");
     sb.append("    issuer: ").append(toIndentedString(issuer)).append("\n");
+    sb.append("    alias: ").append(toIndentedString(alias)).append("\n");
     sb.append("    scopeManagementEndpoint: ").append(toIndentedString(scopeManagementEndpoint)).append("\n");
     sb.append("    availableGrantTypes: ").append(toIndentedString(availableGrantTypes)).append("\n");
     sb.append("    enableTokenGeneration: ").append(toIndentedString(enableTokenGeneration)).append("\n");
@@ -616,6 +751,7 @@ public class KeyManagerDTO   {
     sb.append("    tokenValidation: ").append(toIndentedString(tokenValidation)).append("\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

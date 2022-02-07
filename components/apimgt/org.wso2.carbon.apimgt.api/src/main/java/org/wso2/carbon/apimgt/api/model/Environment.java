@@ -24,7 +24,9 @@ import org.wso2.carbon.apimgt.api.APIConstants;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represent an Environment.
@@ -38,6 +40,7 @@ public class Environment implements Serializable {
     private String password;
     private String apiGatewayEndpoint;
     private String websocketGatewayEndpoint;
+    private String webSubGatewayEndpoint;
     private boolean isDefault;
 
     // New fields added with dynamic environments
@@ -48,6 +51,8 @@ public class Environment implements Serializable {
     private String description;
     private boolean isReadOnly;
     private List<VHost> vhosts = new ArrayList<>();
+    private String provider;
+    private Map<String, String> additionalProperties = new HashMap<>();
 
     public boolean isDefault() {
         return isDefault;
@@ -63,6 +68,14 @@ public class Environment implements Serializable {
 
     public void setWebsocketGatewayEndpoint(String websocketGatewayEndpoint) {
         this.websocketGatewayEndpoint = websocketGatewayEndpoint;
+    }
+
+    public String getWebSubGatewayEndpoint() {
+        return webSubGatewayEndpoint;
+    }
+
+    public void setWebSubGatewayEndpoint(String webSubGatewayEndpoint) {
+        this.webSubGatewayEndpoint = webSubGatewayEndpoint;
     }
 
     public boolean isShowInConsole() {
@@ -195,8 +208,28 @@ public class Environment implements Serializable {
         }
     }
 
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
+
     public void setEndpointsAsVhost() throws APIManagementException {
-        String[] endpoints = (apiGatewayEndpoint + "," + websocketGatewayEndpoint).split(",", 4);
+        // Prefix websub endpoints with 'websub_', since API type will be identified with this URL.
+        String modifiedWebSubGatewayEndpoint = webSubGatewayEndpoint.replaceAll("http://", "websub_http://")
+                .replaceAll("https://", "websub_https://");
+        String[] endpoints = (apiGatewayEndpoint + "," + websocketGatewayEndpoint + "," + modifiedWebSubGatewayEndpoint)
+                .split(",", 6);
         getVhosts().add(VHost.fromEndpointUrls(endpoints));
     }
 

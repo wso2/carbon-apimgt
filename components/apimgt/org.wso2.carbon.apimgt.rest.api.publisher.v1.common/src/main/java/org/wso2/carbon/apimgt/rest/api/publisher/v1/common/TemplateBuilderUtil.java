@@ -45,9 +45,8 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryService;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -62,8 +61,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APITemplateB
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -74,6 +71,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -116,7 +114,7 @@ public class TemplateBuilderUtil {
         } else {
             //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
             // in tenant registry
-            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
+            authorizationHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.AUTHORIZATION_HEADER);
         }
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
@@ -194,7 +192,7 @@ public class TemplateBuilderUtil {
         }
         //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
         String removeHeaderFromOutMessage = APIUtil
-                .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+                .getOAuthConfiguration(tenantDomain, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
         if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
             authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
         } else {
@@ -291,7 +289,7 @@ public class TemplateBuilderUtil {
         } else {
             //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
             // in tenant registry
-            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
+            authorizationHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.AUTHORIZATION_HEADER);
         }
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
@@ -340,6 +338,7 @@ public class TemplateBuilderUtil {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
                     , corsProperties);
         }
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
 
         Map<String, String> clientCertificateObject = null;
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
@@ -366,7 +365,7 @@ public class TemplateBuilderUtil {
 
         //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
         String removeHeaderFromOutMessage = APIUtil
-                .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+                .getOAuthConfiguration(tenantDomain, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
         if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
             authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
         } else {
@@ -419,29 +418,8 @@ public class TemplateBuilderUtil {
      */
     private static String getExtensionHandlerPosition(String tenantDomain) throws APIManagementException {
 
-        String extensionHandlerPosition = null;
-        try {
-            String content = getTenantConfigContent(tenantDomain);
-            if (content != null) {
-                JSONParser jsonParser = new JSONParser();
-                JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-                extensionHandlerPosition = (String) tenantConf.get(APIConstants.EXTENSION_HANDLER_POSITION);
-            }
-        } catch (RegistryException | UserStoreException e) {
-            throw new APIManagementException("Couldn't read tenant configuration from tenant registry", e);
-        } catch (ParseException e) {
-            throw new APIManagementException(
-                    "Couldn't parse tenant configuration for reading extension handler position", e);
-        }
-        return extensionHandlerPosition;
-    }
-
-    protected static String getTenantConfigContent(String tenantDomain) throws RegistryException, UserStoreException {
-
-        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-
-        return apimRegistryService
-                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+        JSONObject tenantConf = APIUtil.getTenantConfig(tenantDomain);
+        return (String) tenantConf.get(APIConstants.EXTENSION_HANDLER_POSITION);
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -455,10 +433,19 @@ public class TemplateBuilderUtil {
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
 
+        JSONObject originalProperties = api.getAdditionalProperties();
+        // add new property for entires that has a __display suffix
+        JSONObject modifiedProperties = getModifiedProperties(originalProperties);
+        api.setAdditionalProperties(modifiedProperties);
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
                 clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
-        return createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
+        GatewayAPIDTO gatewaAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
                 extractedFolderPath, apidto, clientCertificatesDTOList);
+        // Reset the additional properties to the original values
+        if (originalProperties != null) {
+            api.setAdditionalProperties(originalProperties);
+        }
+        return gatewaAPIDto;
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -552,6 +539,7 @@ public class TemplateBuilderUtil {
         productAPIDto.setName(id.getName());
         productAPIDto.setVersion(id.getVersion());
         productAPIDto.setTenantDomain(tenantDomain);
+        productAPIDto.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         String definition = apiProduct.getDefinition();
         productAPIDto.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(apiProduct.getUuid(),
                 productAPIDto.getLocalEntriesToBeRemove()));
@@ -612,8 +600,10 @@ public class TemplateBuilderUtil {
         gatewayAPIDTO.setProvider(api.getId().getProviderName());
         gatewayAPIDTO.setApiId(api.getUUID());
         gatewayAPIDTO.setTenantDomain(tenantDomain);
+        gatewayAPIDTO.setKeyManagers(api.getKeyManagers());
 
         String definition;
+        boolean isGraphQLSubscriptionAPI = false;
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
             //Build schema with additional info
@@ -621,10 +611,11 @@ public class TemplateBuilderUtil {
                     gatewayAPIDTO.getLocalEntriesToBeRemove()));
             GatewayContentDTO graphqlLocalEntry = new GatewayContentDTO();
             graphqlLocalEntry.setName(api.getUUID() + "_graphQL");
-            graphqlLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
-                    api.getGraphQLSchema() + "</localEntry>");
+            graphqlLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" + "<![CDATA[" +
+                    api.getGraphQLSchema() + "]]>" + "</localEntry>");
             gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(graphqlLocalEntry,
                     gatewayAPIDTO.getLocalEntriesToBeAdd()));
+            gatewayAPIDTO.setGraphQLSchema(api.getGraphQLSchema());
             Set<URITemplate> uriTemplates = new HashSet<>();
             URITemplate template = new URITemplate();
             template.setAuthType("Any");
@@ -633,6 +624,18 @@ public class TemplateBuilderUtil {
             template.setUriTemplate("/*");
             uriTemplates.add(template);
             api.setUriTemplates(uriTemplates);
+
+            GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+            if (graphql.isSubscriptionAvailable(api.getGraphQLSchema())) {
+                isGraphQLSubscriptionAPI = true;
+                // if subscriptions are available add new URI template with wild card resource without http verb.
+                template = new URITemplate();
+                template.setUriTemplate("/*");
+                uriTemplates.add(template);
+                api.setUriTemplates(uriTemplates);
+                api.setEndpointConfig(populateSubscriptionEndpointConfig(api.getEndpointConfig()));
+                addGqlWebSocketTopicMappings(api);
+            }
         } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
                 || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
@@ -699,7 +702,8 @@ public class TemplateBuilderUtil {
                     .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
                 if (!isWsApi) {
                     addEndpoints(api, builder, gatewayAPIDTO);
-                } else {
+                }
+                if (isWsApi || isGraphQLSubscriptionAPI) {
                     addWebSocketResourceEndpoints(api, builder, gatewayAPIDTO);
                 }
             }
@@ -735,6 +739,35 @@ public class TemplateBuilderUtil {
         addWebsocketTopicResourceKeys(api);
     }
 
+    /**
+     * This method is used to add websocket topic mappings for GraphQL subscription. Here both production and sandbox
+     * endpoint urls are added under single wild card resource.
+     *
+     * @param api GraphQL API
+     */
+    public static void addGqlWebSocketTopicMappings(API api) {
+
+        org.json.JSONObject endpointConfiguration =
+                new org.json.JSONObject(api.getEndpointConfig()).getJSONObject(APIConstants.WS_PROTOCOL);
+        String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString(
+                        APIConstants.ENDPOINT_URL) : null;
+        String productionEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
+                        .getString(APIConstants.ENDPOINT_URL) : null;
+
+        Map<String, String> endpoints = new HashMap<>();
+        if (sandboxEndpointUrl != null) {
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEndpointUrl);
+        }
+        if (productionEndpointUrl != null) {
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl);
+        }
+        Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
+        perTopicMappings.put("/*", endpoints);
+        api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(perTopicMappings));
+        addWebsocketTopicResourceKeys(api);
+    }
     private static void setCustomSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
                                                     APIDTO apidto) throws APIManagementException {
 
@@ -811,6 +844,22 @@ public class TemplateBuilderUtil {
         }
     }
 
+    /**
+     * This method is used to merge the list of GatewayContentDTO with the existing array of GatewayContentDTOs.
+     *
+     * @param gatewayContentDTOList List of GatewayContentDTOs to add
+     * @param gatewayContents       Array of gateway contents to add
+     * @return An array of GatewayContentDTOs
+     */
+    private static GatewayContentDTO[] addGatewayContentsToList(List<GatewayContentDTO> gatewayContentDTOList,
+                                                                GatewayContentDTO[] gatewayContents) {
+
+        if (gatewayContents != null) {
+            Collections.addAll(gatewayContentDTOList, gatewayContents);
+        }
+        return gatewayContentDTOList.toArray(new GatewayContentDTO[gatewayContentDTOList.size()]);
+    }
+
     private static void addEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
             throws APITemplateException, XMLStreamException {
 
@@ -847,7 +896,7 @@ public class TemplateBuilderUtil {
                 .replaceAll("\\*", "wildcard");
     }
 
-    private static void addWebSocketResourceEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
+    public static void addWebSocketResourceEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
             throws APITemplateException, XMLStreamException {
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
@@ -872,8 +921,14 @@ public class TemplateBuilderUtil {
                     endpointsToAdd.add(endpoint);
                 }
             }
+            // Graphql APIs with subscriptions has only one wild card resource mapping to WS endpoints. Hence, iterating
+            // once through resources is enough.
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                break;
+            }
         }
-        gatewayAPIDTO.setEndpointEntriesToBeAdd(endpointsToAdd.toArray(new GatewayContentDTO[endpointsToAdd.size()]));
+        gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentsToList(endpointsToAdd,
+                gatewayAPIDTO.getEndpointEntriesToBeAdd()));
     }
 
     /**
@@ -1254,6 +1309,115 @@ public class TemplateBuilderUtil {
             }
         }
         return "";
+    }
+
+    public static JSONObject getModifiedProperties(JSONObject originalProperties) {
+        JSONObject modifiedProperties = new JSONObject();
+        if (originalProperties.size() > 0) {
+            for (Iterator iterator = originalProperties.keySet().iterator(); iterator.hasNext();) {
+                String key = (String) iterator.next();
+                String val = (String) originalProperties.get(key);
+                if (key.endsWith("__display")) {
+                    modifiedProperties.put(key.replace("__display", ""), val);
+                }
+                modifiedProperties.put(key, val);
+            }
+        }
+        return modifiedProperties;
+    }
+
+    /**
+     * This method is update the existing GraphQL API endpoint config with ws endpoint config and
+     * existing http endpoint config.
+     *
+     * @param endpointConfig Current endpoint config
+     * @return Updated endpoint config
+     * @throws APIManagementException if an error occurs
+     */
+    public static String populateSubscriptionEndpointConfig(String endpointConfig) throws APIManagementException {
+
+        try {
+            JSONObject newEndpointConfigJson = new JSONObject();
+            newEndpointConfigJson.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE,
+                    APIConstants.ENDPOINT_TYPE_GRAPHQL);
+            JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
+            newEndpointConfigJson.put(APIConstants.ENDPOINT_TYPE_HTTP, oldEndpointConfigJson);
+            JSONObject wsEndpointConfig = new JSONObject();
+            wsEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, APIConstants.WS_PROTOCOL);
+            // If production_endpoints exists
+            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
+                JSONObject prodWSEndpointConfig;
+                String prodWsEndpoint = "";
+                // If load_balanced endpoints get the first prod endpoint url from the list
+                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equals(
+                        oldEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    // get first load balanced endpoint
+                    prodWsEndpoint = (String) ((JSONObject) ((org.json.simple.JSONArray) oldEndpointConfigJson
+                            .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)).get(0)).get(APIConstants.ENDPOINT_URL);
+
+                } else if (((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
+                        .get(APIConstants.ENDPOINT_URL) != null) {
+                    prodWsEndpoint = (String)
+                            ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
+                                    .get(APIConstants.ENDPOINT_URL);
+                }
+                //Replace https:// prefix with wss:// and http:// with ws://. Skip for default endpoints
+                if (prodWsEndpoint.indexOf(APIConstants.HTTP_PROTOCOL_URL_PREFIX) == 0) {
+                    prodWsEndpoint = prodWsEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX,
+                            APIConstants.WS_PROTOCOL_URL_PREFIX);
+                } else if (prodWsEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
+                    prodWsEndpoint = prodWsEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
+                            APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equals(prodWsEndpoint)) {
+                    // supported uri schemes for url are https://, http:// or default
+                    throw new APIManagementException("Unsupported URI scheme present for Production endpoint: "
+                            + prodWsEndpoint);
+                }
+                prodWSEndpointConfig = new JSONObject();
+                prodWSEndpointConfig.put(APIConstants.ENDPOINT_URL, prodWsEndpoint);
+                wsEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, prodWSEndpointConfig);
+            }
+            // If sandbox_endpoints exists
+            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null) {
+                JSONObject sandboxWSEndpointConfig;
+                String sandboxWsEndpoint = "";
+                // If load_balanced endpoints get the first sandbox endpoint url from the list
+                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equals(
+                        oldEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    // get first load balanced endpoint
+                    sandboxWsEndpoint = (String) ((JSONObject) ((org.json.simple.JSONArray) oldEndpointConfigJson
+                            .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)).get(0)).get(APIConstants.ENDPOINT_URL);
+
+                } else if (((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
+                        .get(APIConstants.ENDPOINT_URL) != null) {
+                    sandboxWsEndpoint = (String)
+                            ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
+                                    .get(APIConstants.ENDPOINT_URL);
+                }
+                if (sandboxWsEndpoint.indexOf(APIConstants.HTTP_PROTOCOL_URL_PREFIX) == 0) {
+                    sandboxWsEndpoint = sandboxWsEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX,
+                            APIConstants.WS_PROTOCOL_URL_PREFIX);
+                } else if (sandboxWsEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
+                    sandboxWsEndpoint = sandboxWsEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
+                            APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equals(sandboxWsEndpoint)) {
+                    throw new APIManagementException("Unsupported URI scheme present for Sandbox endpoint: "
+                            + sandboxWsEndpoint);
+                }
+                sandboxWSEndpointConfig = new JSONObject();
+                sandboxWSEndpointConfig.put(APIConstants.ENDPOINT_URL, sandboxWsEndpoint);
+                wsEndpointConfig.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, sandboxWSEndpointConfig);
+            }
+            newEndpointConfigJson.put(APIConstants.WS_PROTOCOL, wsEndpointConfig);
+            if (log.isDebugEnabled()) {
+                log.debug("Derived endpoint config for GraphQL API with subscriptions: "
+                        + newEndpointConfigJson.toJSONString());
+            }
+            return newEndpointConfigJson.toJSONString();
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while deriving subscription endpoint from GraphQL API endpoint "
+                    + "config: " + endpointConfig, e);
+        }
     }
 
 }

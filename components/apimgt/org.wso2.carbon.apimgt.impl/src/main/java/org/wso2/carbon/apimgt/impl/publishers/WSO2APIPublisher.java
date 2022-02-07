@@ -145,7 +145,7 @@ public class WSO2APIPublisher implements APIPublisher {
             apiArchive = importExportAPI.exportAPI(api.getUuid(), api.getId().getName(), api.getId().getVersion(),
                     String.valueOf(api.getRevisionId()), api.getId().getProviderName(), Boolean.TRUE, ExportFormat.JSON,
                     Boolean.TRUE, Boolean.TRUE, Boolean.FALSE,
-                    getExternalStoreRedirectURLForAPI(tenantId, api.getUuid()));
+                    getExternalStoreRedirectURLForAPI(tenantId, api.getUuid()), api.getOrganization());
             if (log.isDebugEnabled()) {
                 log.debug("API successfully exported to file: " + apiArchive.getName());
             }
@@ -576,7 +576,6 @@ public class WSO2APIPublisher implements APIPublisher {
      */
     private String getExternalStoreRedirectURL(int tenantId) throws APIManagementException {
 
-        UserRegistry registry;
         String redirectURL;
         redirectURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration()
@@ -586,11 +585,8 @@ public class WSO2APIPublisher implements APIPublisher {
             return redirectURL;
         }
         try {
-            registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
-                String content = new String((byte[]) resource.getContent());
+            String content =
+                        ServiceReferenceHolder.getInstance().getApimConfigService().getExternalStoreConfig(APIUtil.getTenantDomainFromTenantId(tenantId));
                 OMElement element = AXIOMUtil.stringToOM(content);
                 OMElement storeURL = element.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORES_STORE_URL));
                 if (storeURL != null) {
@@ -600,12 +596,7 @@ public class WSO2APIPublisher implements APIPublisher {
                     log.error(msg);
                     throw new APIManagementException(msg);
                 }
-            }
             return redirectURL;
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
         } catch (XMLStreamException e) {
             String msg = "Malformed XML found in the External Stores Configuration resource";
             log.error(msg, e);

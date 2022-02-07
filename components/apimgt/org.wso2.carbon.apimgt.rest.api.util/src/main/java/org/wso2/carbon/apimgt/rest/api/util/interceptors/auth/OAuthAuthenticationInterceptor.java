@@ -19,16 +19,22 @@ package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AuthenticationException;
-import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
-import org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
+import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticationManager;
+import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
+import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
+import org.wso2.carbon.apimgt.rest.api.util.utils.JWTAuthenticationUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -42,90 +48,88 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
     private static final String OAUTH_AUTHENTICATOR = "OAuth";
     private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
     private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
-    private volatile WebAppAuthenticator authenticator;
+    private Map<String, AbstractOAuthAuthenticator> authenticatorMap = new HashMap<>();
+
+    {
+        authenticatorMap.put(RestApiConstants.JWT_AUTHENTICATION, new OAuthJwtAuthenticatorImpl());
+        authenticatorMap.put(RestApiConstants.OPAQUE_AUTHENTICATION, new OAuthOpaqueAuthenticatorImpl());
+    }
 
     public OAuthAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
     }
+
+    @Override
+    @MethodStats
     public void handleMessage(Message inMessage) {
+
         //by-passes the interceptor if user calls an anonymous api
         if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
             return;
         }
 
-        //check if "Authorization: Bearer" header is present in the request. If not, by-passes the interceptor. If yes,
-        //set the request_authentication_scheme property in the message as oauth2. 
-        if (RestApiUtil.extractOAuthAccessTokenFromMessage(inMessage,
-                RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME) == null) {
-            return;
-        }
+        HashMap<String, Object> authContext = JWTAuthenticationUtils.addToJWTAuthenticationContext(inMessage);
+        RestAPIAuthenticator authenticator = RestAPIAuthenticationManager.getAuthenticator(authContext);
 
-        inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.OAUTH2_AUTHENTICATION);
-
-        if(handleRequest(inMessage, null)){
-            /*String requestedTenant = ((ArrayList) ((TreeMap) (inMessage.get(Message.PROTOCOL_HEADERS))).get("X-WSO2_Tenant")).get(0).toString();
-            if(requestedTenant!=null){
-                RestApiUtil.setThreadLocalRequestedTenant(requestedTenant);
-            }
-            else {
-                RestApiUtil.unsetThreadLocalRequestedTenant();
-            }*/
-            if(logger.isDebugEnabled()) {
-                logger.debug("User logged into Web app using OAuth Authentication");
-            }
-        }
-        else{
-            throw new AuthenticationException("Unauthenticated request");
-        }
-    }
-
-    /**
-     * This method will initialize Web APP authenticator to validate incoming requests
-     * Here we will get implementation class and create object of it.
-     */
-    public void initializeAuthenticator() throws APIManagementException {
-        try {
-            //TODO Retrieve this class name from configuration and let it configurable.
-            //  authenticator = (WebAppAuthenticator) APIUtil.getClassForName(
-            //      RestApiConstants.REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME).newInstance();
-            authenticator = new WebAppAuthenticatorImpl();
-        } catch (Exception e) {
-            throw new APIManagementException("Error while initializing authenticator of " + "type: ",e);
-        }
-
-    }
-
-    /**
-     * authenticate requests received at the REST API endpoint, using HTTP OAuth headers as the authentication
-     * mechanism. This method returns a null value which indicates that the request to be processed.
-     */
-    public boolean handleRequest(Message message, ClassResourceInfo resourceInfo) {
-
-        if (authenticator == null) {
+        if (authenticator != null) {
             try {
-                initializeAuthenticator();
+                String authenticationType = authenticator.getAuthenticationType();
+                inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, authenticator.getAuthenticationType());
+                String basePath = (String) inMessage.get(RestApiConstants.BASE_PATH);
+                String version = (String) inMessage.get(RestApiConstants.API_VERSION);
+                authContext.put(RestApiConstants.URI_TEMPLATES, RestApiUtil.getURITemplatesForBasePath(basePath + version));
+                authContext.put(RestApiConstants.ORG_ID, RestApiUtil.resolveOrganization(inMessage));
+                if (authenticator.authenticate(authContext)) {
+                    inMessage = JWTAuthenticationUtils.addToMessageContext(inMessage, authContext);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Request has been Authenticated , authentication type : "+ authenticationType);
+                    }
+                } else {
+                    logger.error("Failed to Authenticate , authentication type : "+ authenticationType);
+                    throw new AuthenticationException("Unauthenticated request");
+                }
             } catch (APIManagementException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug(" Initializing the authenticator resulted in an exception", e);
-                }else{
-                    logger.error(e.getMessage());
-                }
-                return false;
+                logger.error("Authentication Failure " +  e.getMessage());
+                return;
             }
-          }
+        }
+
+        // Following logic will be moved to separate class in near future
+        if (authenticator == null) {
+             String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(inMessage,
+                    RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
+            //add masked token to the Message
+            inMessage.put(RestApiConstants.MASKED_TOKEN, APIUtil.getMaskedToken(accessToken));
+
+            if (accessToken == null) {
+                return;
+            }
+
+            if (accessToken.contains(RestApiConstants.DOT)) {
+                inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.JWT_AUTHENTICATION);
+            } else {
+                inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.OPAQUE_AUTHENTICATION);
+            }
+
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug(String.format("Authenticating request: " + message.getId()));
+                    logger.debug(String.format("Authenticating request with : "
+                            + inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME)) + "Authentication");
                 }
-                if (authenticator.authenticate(message)) {
-                    return true;
+                AbstractOAuthAuthenticator abstractOAuthAuthenticator = authenticatorMap
+                        .get(inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME));
+                logger.debug("Selected Authenticator for the token validation " + abstractOAuthAuthenticator);
+                if (abstractOAuthAuthenticator.authenticate(inMessage)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("User logged into Web app using OAuth Authentication");
+                    }
+                } else {
+                    throw new AuthenticationException("Unauthenticated request");
                 }
             } catch (APIManagementException e) {
                 logger.error("Error while authenticating incoming request to API Manager REST API", e);
             }
-        return false;
+        }
     }
-
-
 }

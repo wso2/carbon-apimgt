@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
@@ -53,6 +54,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -137,8 +141,9 @@ public class GatewayJMSMessageListener implements MessageListener {
                 }
             }
             if (tenantLoaded) {
-                gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
-                if (!gatewayEvent.getGatewayLabels().isEmpty()) {
+                Set<String> systemConfiguredGatewayLabels = new HashSet(gatewayEvent.getGatewayLabels());
+                systemConfiguredGatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+                if (!systemConfiguredGatewayLabels.isEmpty()) {
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
                     if (EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
                         boolean tenantFlowStarted = false;
@@ -288,6 +293,9 @@ public class GatewayJMSMessageListener implements MessageListener {
             } catch (APIManagementException e) {
                 log.error(e);
             }
+        } else if (EventType.UDATE_API_LOG_LEVEL.toString().equals(eventType)) {
+            APIEvent apiEvent = new Gson().fromJson(eventJson, APIEvent.class);
+            APILoggerManager.getInstance().updateLoggerMap(apiEvent.getApiContext(), apiEvent.getLogLevel());
         }
     }
 

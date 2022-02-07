@@ -44,6 +44,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.NAME AS APS_NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
+                    "   APP.ORGANIZATION AS ORGANIZATION," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
@@ -64,6 +65,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.NAME AS APS_NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
+                    "   APP.ORGANIZATION AS ORGANIZATION," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
                     "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE" +
@@ -195,7 +197,7 @@ public class SubscriptionValidationSQLConstants {
             "AM_APPLICATION_KEY_MAPPING,AM_KEY_MANAGER,AM_APPLICATION WHERE AM_KEY_MANAGER" +
             ".UUID = AM_APPLICATION_KEY_MAPPING.KEY_MANAGER AND AM_APPLICATION_KEY_MAPPING" +
             ".APPLICATION_ID = AM_APPLICATION.APPLICATION_ID AND AM_APPLICATION_KEY_MAPPING.CONSUMER_KEY = ? AND " +
-            "AM_KEY_MANAGER.NAME = ?  AND AM_KEY_MANAGER.TENANT_DOMAIN  = ? ";
+            "AM_KEY_MANAGER.NAME = ?  AND AM_KEY_MANAGER.ORGANIZATION  = ? ";
 
     public static final String GET_TENANT_SUBSCRIPTIONS_SQL =
             "SELECT " +
@@ -492,7 +494,7 @@ public class SubscriptionValidationSQLConstants {
                     "AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID = AM_REVISION.API_UUID " +
                     "LEFT JOIN AM_DEPLOYMENT_REVISION_MAPPING " +
                     "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID " +
-                    "WHERE AM_API.API_UUID = ? ";
+                    "WHERE AM_API.API_UUID = ? AND AM_DEPLOYMENT_REVISION_MAPPING.NAME = ? ";
 
     public static final String GET_DEFAULT_VERSION_API_SQL = "SELECT PUBLISHED_DEFAULT_API_VERSION FROM " +
             "AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER = ? AND PUBLISHED_DEFAULT_API_VERSION = ?";

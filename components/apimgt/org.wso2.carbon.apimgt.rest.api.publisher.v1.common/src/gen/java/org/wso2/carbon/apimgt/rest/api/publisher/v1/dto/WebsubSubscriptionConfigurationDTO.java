@@ -20,9 +20,28 @@ import javax.validation.Valid;
 
 public class WebsubSubscriptionConfigurationDTO   {
   
+    private Boolean enable = false;
     private String secret = null;
     private String signingAlgorithm = null;
     private String signatureHeader = null;
+
+  /**
+   * Toggle enable WebSub subscription configuration
+   **/
+  public WebsubSubscriptionConfigurationDTO enable(Boolean enable) {
+    this.enable = enable;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Toggle enable WebSub subscription configuration")
+  @JsonProperty("enable")
+  public Boolean isEnable() {
+    return enable;
+  }
+  public void setEnable(Boolean enable) {
+    this.enable = enable;
+  }
 
   /**
    * Secret key to be used for subscription
@@ -88,14 +107,15 @@ public class WebsubSubscriptionConfigurationDTO   {
       return false;
     }
     WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = (WebsubSubscriptionConfigurationDTO) o;
-    return Objects.equals(secret, websubSubscriptionConfiguration.secret) &&
+    return Objects.equals(enable, websubSubscriptionConfiguration.enable) &&
+        Objects.equals(secret, websubSubscriptionConfiguration.secret) &&
         Objects.equals(signingAlgorithm, websubSubscriptionConfiguration.signingAlgorithm) &&
         Objects.equals(signatureHeader, websubSubscriptionConfiguration.signatureHeader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(secret, signingAlgorithm, signatureHeader);
+    return Objects.hash(enable, secret, signingAlgorithm, signatureHeader);
   }
 
   @Override
@@ -103,6 +123,7 @@ public class WebsubSubscriptionConfigurationDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class WebsubSubscriptionConfigurationDTO {\n");
     
+    sb.append("    enable: ").append(toIndentedString(enable)).append("\n");
     sb.append("    secret: ").append(toIndentedString(secret)).append("\n");
     sb.append("    signingAlgorithm: ").append(toIndentedString(signingAlgorithm)).append("\n");
     sb.append("    signatureHeader: ").append(toIndentedString(signatureHeader)).append("\n");

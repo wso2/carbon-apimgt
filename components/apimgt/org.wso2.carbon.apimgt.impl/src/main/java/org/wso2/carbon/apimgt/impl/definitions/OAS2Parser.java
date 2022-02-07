@@ -688,6 +688,11 @@ public class OAS2Parser extends APIDefinition {
         return validationResponse;
     }
 
+    @Override
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url, boolean returnJsonContent) throws APIManagementException {
+        return null;
+    }
+
     /**
      * Populate definition with wso2 APIM specific information
      *
@@ -1720,4 +1725,13 @@ public class OAS2Parser extends APIDefinition {
         return getSwaggerJsonString(swagger);
     }
 
+    @Override
+    public String getVendorFromExtension(String swaggerContent) {
+        return null;
+    }
+
+    @Override
+    public String getType() {
+        return null;
+    }
 }

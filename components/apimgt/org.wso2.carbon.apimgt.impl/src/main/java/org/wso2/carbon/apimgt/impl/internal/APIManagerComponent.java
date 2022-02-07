@@ -18,8 +18,6 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -32,10 +30,16 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.carbon.apimgt.eventing.EventPublisherException;
+import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -44,9 +48,12 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -55,9 +62,9 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.issuers.SystemScopesIssuer;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
-import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
@@ -65,6 +72,8 @@ import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
@@ -73,7 +82,6 @@ import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
-import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
@@ -91,6 +99,7 @@ import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterExc
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth2.validators.scope.ScopeValidator;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -105,9 +114,7 @@ import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.api.AuthorizationManager;
-import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
@@ -117,15 +124,19 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.cache.Cache;
 
 @Component(
@@ -164,15 +175,8 @@ public class APIManagerComponent {
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
-            addTierPolicies();
             addApplicationsPermissionsToRegistry();
-            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
-            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            APIUtil.loadAndSyncTenantConf(tenantId);
-            APIUtil.loadTenantWorkFlowExtensions(tenantId);
-            // load self sigup configuration to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
@@ -181,8 +185,6 @@ public class APIManagerComponent {
             }
             CommonConfigDeployer configDeployer = new CommonConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
-            SignupObserver signupObserver = new SignupObserver();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
             TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
             KeyMgtConfigDeployer keyMgtConfigDeployer = new KeyMgtConfigDeployer();
@@ -198,8 +200,19 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            APIMgtDBUtil.initialize();
+            APIMConfigService apimConfigService = new APIMConfigServiceImpl();
+            bundleContext.registerService(APIMConfigService.class.getName(), apimConfigService, null);
+            APIUtil.loadAndSyncTenantConf(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            // load self sigup configuration to the registry
+            APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -223,7 +236,6 @@ public class APIManagerComponent {
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_LIFECYCLE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_LIFE_CYCLE_HISTORY), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_LIFECYCLE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_LIFE_CYCLE_HISTORY), APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION, null);
             setupImagePermissions();
-            APIMgtDBUtil.initialize();
             GatewayArtifactsMgtDBUtil.initialize();
             configureEventPublisherProperties();
             configureNotificationEventPublisher();
@@ -291,14 +303,14 @@ public class APIManagerComponent {
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
-
+            retrieveAndSetParentTrustStore();
             if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
-
+            bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -485,50 +497,6 @@ public class APIManagerComponent {
         }
     }
 
-    private void addTierPolicies() throws APIManagementException {
-        String apiTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
-        String appTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
-        String resTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
-        addTierPolicy(APIConstants.API_TIER_LOCATION, apiTierFilePath);
-        addTierPolicy(APIConstants.APP_TIER_LOCATION, appTierFilePath);
-        addTierPolicy(APIConstants.RES_TIER_LOCATION, resTierFilePath);
-    }
-
-    private void addTierPolicy(String tierLocation, String defaultTierFileName) throws APIManagementException {
-        File defaultTiers = new File(defaultTierFileName);
-        if (!defaultTiers.exists()) {
-            log.info("Default tier policies not found in : " + defaultTierFileName);
-            return;
-        }
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        InputStream inputStream = null;
-        try {
-            UserRegistry registry = registryService.getGovernanceSystemRegistry();
-            if (registry.resourceExists(tierLocation)) {
-                log.debug("Tier policies already uploaded to the registry");
-                return;
-            }
-            log.debug("Adding API tier policies to the registry");
-            inputStream = FileUtils.openInputStream(defaultTiers);
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = registry.newResource();
-            resource.setContent(data);
-            registry.put(tierLocation, resource);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving policy information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading policy file content", e);
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    log.error("Error when closing input stream", e);
-                }
-            }
-        }
-    }
-
     private void addDefinedSequencesToRegistry() throws APIManagementException {
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
@@ -539,59 +507,6 @@ public class APIManagerComponent {
             APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving defined sequences to the registry ", e);
-        }
-    }
-
-    private void setupSelfRegistration(APIManagerConfiguration config) throws APIManagementException {
-        boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
-        if (!enabled) {
-            return;
-        }
-        String role = config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
-        if (role == null) {
-            // Required parameter missing - Throw an exception and interrupt startup
-            throw new APIManagementException("Required subscriber role parameter missing " + "in the self sign up configuration");
-        }
-        try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            UserRealm realm = realmService.getBootstrapRealm();
-            UserStoreManager manager = realm.getUserStoreManager();
-            if (!manager.isExistingRole(role)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Creating subscriber role: " + role);
-                }
-                Permission[] subscriberPermissions = new Permission[] { new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION), new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION) };
-                String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
-                String[] userList = new String[] { superTenantName };
-                manager.addRole(role, userList, subscriberPermissions);
-            }
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while creating subscriber role: " + role + " - " + "Self registration might not function properly.", e);
-        }
-    }
-
-    /**
-     * Add the External API Stores Configuration to registry
-     * @throws APIManagementException
-     */
-    private void addExternalStoresConfigs() throws APIManagementException {
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getGovernanceSystemRegistry();
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                log.debug("External Stores configuration already uploaded to the registry");
-                return;
-            }
-            log.debug("Adding External Stores configuration to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/externalstores/default-external-api-stores.xml");
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = registry.newResource();
-            resource.setContent(data);
-            registry.put(APIConstants.EXTERNAL_API_STORES_LOCATION, resource);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving External Stores configuration information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading External Stores configuration file content", e);
         }
     }
 
@@ -865,6 +780,51 @@ public class APIManagerComponent {
     }
 
     @Reference(
+            name = "externalGatewayDeployer.component",
+            service = ExternalGatewayDeployer.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeExternalGatewayDeployers")
+    protected void addExternalGatewayDeployer(ExternalGatewayDeployer deployer) {
+        ServiceReferenceHolder.getInstance().addExternalGatewayDeployer(deployer.getType(), deployer);
+    }
+
+    protected void removeExternalGatewayDeployers(ExternalGatewayDeployer deployer) {
+
+        ServiceReferenceHolder.getInstance().removeExternalGatewayDeployer(deployer.getType());
+    }
+
+    @Reference(
+            name = "externalEnvironment.component",
+            service = ExternalEnvironment.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeExternalEnvironments")
+    protected void addExternalEnvironmentParser(ExternalEnvironment externalEnvironment) {
+        ServiceReferenceHolder.getInstance().addExternalEnvironment(externalEnvironment.getType(),
+                externalEnvironment);
+    }
+
+    protected void removeExternalEnvironments(ExternalEnvironment externalEnvironment) {
+
+        ServiceReferenceHolder.getInstance().removeExternalEnvironments(externalEnvironment.getType());
+    }
+
+    @Reference(
+            name = "apiDefinitionParser.component",
+            service = APIDefinition.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeAPIDefinitionParsers")
+    protected void addAPIDefinitionParser(APIDefinition apiDefinitionParser) {
+        ServiceReferenceHolder.getInstance().addAPIDefinitionParser(apiDefinitionParser.getType(), apiDefinitionParser);
+    }
+
+    protected void removeAPIDefinitionParsers(APIDefinition apiDefinitionParser) {
+        ServiceReferenceHolder.getInstance().removeAPIDefinitionParser(apiDefinitionParser.getType());
+    }
+
+    @Reference(
             name = "gateway.artifact.saver",
             service = ArtifactSaver.class,
             cardinality = ReferenceCardinality.OPTIONAL,
@@ -903,13 +863,9 @@ public class APIManagerComponent {
     /**
      * Method to configure wso2event type event adapter to be used for event notification.
      */
-    private void configureNotificationEventPublisher() {
+    private void configureNotificationEventPublisher() throws APIManagementException {
 
-        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER);
-        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
-        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-        Map<String, String> adapterParameters = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
             APIManagerConfiguration configuration =
                     ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -919,19 +875,22 @@ public class APIManagerComponent {
                 EventHubConfigurationDto eventHubConfigurationDto = configuration.getEventHubConfigurationDto();
                 EventHubConfigurationDto.EventHubPublisherConfiguration eventHubPublisherConfiguration =
                         eventHubConfigurationDto.getEventHubPublisherConfiguration();
-                adapterParameters.put(APIConstants.RECEIVER_URL, eventHubPublisherConfiguration.getReceiverUrlGroup());
-                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, eventHubPublisherConfiguration.getAuthUrlGroup());
-                adapterParameters.put(APIConstants.USERNAME, eventHubConfigurationDto.getUsername());
-                adapterParameters.put(APIConstants.PASSWORD, eventHubConfigurationDto.getPassword());
-                adapterParameters.put(APIConstants.PROTOCOL, eventHubPublisherConfiguration.getType());
-                adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
-                adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
-                adapterConfiguration.setStaticProperties(adapterParameters);
+                properties.put(APIConstants.RECEIVER_URL, eventHubPublisherConfiguration.getReceiverUrlGroup());
+                properties.put(APIConstants.AUTHENTICATOR_URL, eventHubPublisherConfiguration.getAuthUrlGroup());
+                properties.put(APIConstants.USERNAME, eventHubConfigurationDto.getUsername());
+                properties.put(APIConstants.PASSWORD, eventHubConfigurationDto.getPassword());
+                properties.put(APIConstants.PROTOCOL, eventHubPublisherConfiguration.getType());
+                properties.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+                properties.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+                for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
+                    properties.put(key, eventHubPublisherConfiguration.getProperties().get(key));
+                }
+                properties.put(APIConstants.IS_ENABLED,
+                        Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
                 try {
-                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
-                } catch (OutputEventAdapterException e) {
-                    log.warn("Exception occurred while creating WSO2 Event Adapter. Event notification may not work "
-                            + "properly", e);
+                    ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(properties);
+                } catch (EventPublisherException e) {
+                    throw new APIManagementException(e);
                 }
             } else {
                 log.info("Wso2Event Publisher not enabled.");
@@ -940,6 +899,7 @@ public class APIManagerComponent {
             log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
     }
+
     @Reference(
             name = "artifactGenerator.service",
             service = GatewayArtifactGenerator.class,
@@ -953,6 +913,75 @@ public class APIManagerComponent {
 
     protected void removeGatewayArtifactGenerator(GatewayArtifactGenerator gatewayArtifactGenerator) {
         ServiceReferenceHolder.getInstance().removeGatewayArtifactGenerator(gatewayArtifactGenerator);
+    }
+
+    private void retrieveAndSetParentTrustStore() throws APIManagementException {
+
+        char[] trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
+        String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
+        File trustStoreFile = new File(trustStoreLocation);
+        try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(localTrustStoreStream, trustStorePassword);
+            ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+        } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+            throw new APIManagementException("Error while Reading and set truststore", e);
+        }
+    }
+    
+    @Reference(
+            name = "organizationResolver.service",
+            service = OrganizationResolver.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeOrganizationResolver")
+    protected void addOrganizationResolver(OrganizationResolver resolver) {
+        ServiceReferenceHolder.getInstance().setOrganizationResolver(resolver);
+    }
+
+    protected void removeOrganizationResolver(OrganizationResolver resolver) {
+        ServiceReferenceHolder.getInstance().setOrganizationResolver(null);
+    }
+
+    @Reference(
+            name = "resourceQuotaLimiter.service",
+            service = ResourceQuotaLimiter.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeQuotaLimiter")
+    protected void addQuotaLimiter(ResourceQuotaLimiter rateLimiter) {
+        ServiceReferenceHolder.getInstance().setResourceQuotaLimiter(rateLimiter);
+    }
+
+    protected void removeQuotaLimiter(ResourceQuotaLimiter rateLimiter) {
+        ServiceReferenceHolder.getInstance().setResourceQuotaLimiter(null);
+    }
+
+    @Reference(
+            name = "event.publisher.factory",
+            service = org.wso2.carbon.apimgt.eventing.EventPublisherFactory.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEventPublisherFactory")
+    protected void setEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
+        ServiceReferenceHolder.getInstance().setEventPublisherFactory(eventPublisherFactory);
+    }
+
+    protected void unsetEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
+        ServiceReferenceHolder.getInstance().setEventPublisherFactory(null);
+    }
+    @Reference(
+            name = "apim.config.service",
+            service = org.wso2.carbon.apimgt.impl.config.APIMConfigService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIMConfigService")
+    protected void setAPIMConfigService(APIMConfigService apimConfigService) {
+        ServiceReferenceHolder.getInstance().setAPIMConfigService(apimConfigService);
+    }
+
+    protected void unsetAPIMConfigService(APIMConfigService apimConfigService) {
+        ServiceReferenceHolder.getInstance().setAPIMConfigService(null);
     }
 }
 

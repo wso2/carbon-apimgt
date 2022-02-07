@@ -68,64 +68,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                                                        MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             // validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
 
             if (currentSubscription == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
-            }
-
-            Application subscribedApp = currentSubscription.getApplication();
-            String applicationTokenType = "OAUTH";
-            if (subscribedApp != null) {
-                applicationTokenType = subscribedApp.getTokenType();
-            }
-
-            //in case of a JWT type application add a subscription blocking condition as well.
-            if (APIConstants.APPLICATION_TOKEN_TYPE_JWT.equals(applicationTokenType)) {
-                Identifier apiId = currentSubscription.getApiId();
-                if (apiId == null) {
-                    apiId = currentSubscription.getProductId();
-                }
-
-                String apiContext = "";
-                String apiVersion = "";
-                if (apiId instanceof APIIdentifier) {
-                    apiContext = apiProvider.getAPIContext((APIIdentifier) apiId);
-                    apiVersion = apiId.getVersion();
-                } else if (apiId instanceof APIProductIdentifier) {
-                    APIProduct product = apiProvider.getAPIProduct((APIProductIdentifier) apiId);
-                    apiContext = product.getContext();
-                    //until product versioning is supported, we will be adding default api product version to the
-                    // blacklist condition key
-                    apiVersion = APIConstants.API_PRODUCT_VERSION;
-                }
-
-                String appId = subscribedApp.getOwner() + "-" + subscribedApp.getName();
-                String substatus = currentSubscription.getSubStatus();
-
-                String productionBlockConditionKey =
-                        apiContext + ":" + apiVersion + ":" + appId + ":" + APIConstants.API_KEY_TYPE_PRODUCTION;
-                String sandboxBlockConditionKey =
-                        apiContext + ":" + apiVersion + ":" + appId + ":" + APIConstants.API_KEY_TYPE_SANDBOX;
-
-                //delete existing block conditions
-                apiProvider.deleteSubscriptionBlockCondition(productionBlockConditionKey);
-                apiProvider.deleteSubscriptionBlockCondition(sandboxBlockConditionKey);
-
-                if (APIConstants.SubscriptionStatus.BLOCKED.equals(substatus)) {
-                    /*In case all subscriptions blocked, add block conditions for both sandbox and production
-                    key types*/
-                    apiProvider.addBlockCondition(APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION,
-                            productionBlockConditionKey);
-                    apiProvider
-                            .addBlockCondition(APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION, sandboxBlockConditionKey);
-                } else {
-                    /*In case production only blocked add a blocking condition only for production type*/
-                    apiProvider.addBlockCondition(APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION,
-                            productionBlockConditionKey);
-                }
             }
 
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
@@ -161,21 +110,19 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             SubscriptionListDTO subscriptionListDTO;
             List<SubscribedAPI> apiUsages;
 
             if (apiId != null) {
-                APIIdentifier apiIdentifier;
+                String apiUuid = apiId;
                 APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
                 if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                    apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
-                } else {
-                    apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+                    apiUuid = apiRevision.getApiUUID();
                 }
-                apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+                apiUsages = apiProvider.getAPIUsageByAPIId(apiUuid, organization);
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 apiUsages = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToSubscribedAPIList(allApiUsage);
@@ -256,47 +203,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
             // validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
             if (currentSubscription == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
-            }
-
-            Application subscribedApp = currentSubscription.getApplication();
-            String applicationTokenType = "OAUTH";
-            if (subscribedApp != null) {
-                applicationTokenType = subscribedApp.getTokenType();
-            }
-
-            //in case of a JWT type application remove the subscription blocking conditions if exist
-            if (APIConstants.APPLICATION_TOKEN_TYPE_JWT.equals(applicationTokenType)) {
-                Identifier apiId = currentSubscription.getApiId();
-                if (apiId == null) {
-                    apiId = currentSubscription.getProductId();
-                }
-
-                String apiContext = "";
-                String apiVersion = "";
-                if (apiId instanceof APIIdentifier) {
-                    apiContext = apiProvider.getAPIContext((APIIdentifier) apiId);
-                    apiVersion = apiId.getVersion();
-                } else if (apiId instanceof  APIProductIdentifier) {
-                    APIProduct product = apiProvider.getAPIProduct((APIProductIdentifier) apiId);
-                    apiContext = product.getContext();
-                    apiVersion = APIConstants.API_PRODUCT_VERSION;
-                }
-
-                String appId = subscribedApp.getOwner() + "-" + subscribedApp.getName();
-
-                //delete existing block conditions
-                String productionBlockConditionKey =
-                        apiContext + ":" + apiVersion + ":" + appId + ":" + APIConstants.API_KEY_TYPE_PRODUCTION;
-                String sandboxBlockConditionKey =
-                        apiContext + ":" + apiVersion + ":" + appId + ":" + APIConstants.API_KEY_TYPE_SANDBOX;
-                apiProvider.deleteSubscriptionBlockCondition(productionBlockConditionKey);
-                apiProvider.deleteSubscriptionBlockCondition(sandboxBlockConditionKey);
             }
 
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);

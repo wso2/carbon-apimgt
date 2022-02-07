@@ -22,5 +22,6 @@ package org.wso2.carbon.apimgt.common.gateway.dto;
  */
 public enum ExtensionResponseStatus {
     RETURN_RESPONSE,
-    CONTINUE
+    CONTINUE,
+    RETURN_ERROR
 }

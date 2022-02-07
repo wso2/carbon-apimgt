@@ -52,8 +52,8 @@ public class MutualSSLCertificateHandler extends AbstractHandler {
             if (clientCertificate != null) {
                 byte[] encoded = Base64.encodeBase64(clientCertificate.getEncoded());
                 String base64EncodedString =
-                        APIConstants.BEGIN_CERTIFICATE_STRING
-                                .concat(new String(encoded)).concat("\n")
+                        APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator())
+                                .concat(new String(encoded)).concat(System.lineSeparator())
                                 .concat(APIConstants.END_CERTIFICATE_STRING);
                 base64EncodedString = Base64.encodeBase64URLSafeString(base64EncodedString.getBytes());
                 headers.put(Utils.getClientCertificateHeader(), base64EncodedString);

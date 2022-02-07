@@ -134,6 +134,17 @@ public abstract class APIDefinition {
      * @return APIDefinitionValidationResponse object with validation information
      */
     public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
+                                                                          boolean returnJsonContent) throws APIManagementException;
+
+    /**
+     * This method validates the given OpenAPI definition by content
+     *
+     * @param apiDefinition     OpenAPI Definition content
+     * @param url     OpenAPI Definition url
+     * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
+     * @return APIDefinitionValidationResponse object with validation information
+     */
+    public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url,
             boolean returnJsonContent) throws APIManagementException;
 
     /**
@@ -237,4 +248,19 @@ public abstract class APIDefinition {
      */
     public abstract String processDisableSecurityExtension(String swaggerContent)
             throws APIManagementException;
+
+    /**
+     * This method will extract the vendor provider or the API specification form the extensions list
+     *
+     * @param swaggerContent String
+     * @return String
+     */
+    public abstract String getVendorFromExtension(String swaggerContent);
+
+    /**
+     * Get parser Type
+     *
+     * @return String parserType
+     */
+    public abstract String getType();
 }

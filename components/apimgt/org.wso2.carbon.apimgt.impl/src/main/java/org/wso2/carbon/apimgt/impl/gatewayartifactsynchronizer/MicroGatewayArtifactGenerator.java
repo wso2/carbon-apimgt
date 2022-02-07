@@ -22,11 +22,13 @@ import org.apache.commons.io.FileUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiProjectDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.DeploymentDescriptorDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.EnvironmentDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecificproperty.Environment;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
@@ -40,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component(
         name = "microgateway.artifact.generator.service",
@@ -47,6 +50,8 @@ import java.util.Map;
         service = GatewayArtifactGenerator.class
 )
 public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
+    private static final EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDao =
+            EnvironmentSpecificAPIPropertyDAO.getInstance();
 
     @Override
     public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
@@ -72,6 +77,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         deploymentsMap.put(fileName, apiProjectDto);
                         apiProjectDto.setApiFile(fileName);
                         apiProjectDto.setEnvironments(new HashSet<>());
+                        apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
                     }
                     // environment is unique for a revision in a deployment
                     // create new environment
@@ -87,6 +93,16 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             CommonUtil.writeDtoToFile(descriptorFile, ExportFormat.JSON,
                     APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE_TYPE, descriptorDto);
 
+            // adding env_properties.json
+            Map<String, Map<String, Environment>> environmentSpecificAPIProperties =
+                    getEnvironmentSpecificAPIProperties(apiRuntimeArtifactDtoList);
+            String environmentSpecificAPIPropertyFile = Paths.get(tempDirectory.getAbsolutePath(),
+                    APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE).toString();
+            CommonUtil.writeDtoToFile(environmentSpecificAPIPropertyFile, ExportFormat.JSON,
+                    APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE,
+                    APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME,
+                    environmentSpecificAPIProperties);
+
             CommonUtil.archiveDirectory(tempDirectory.getAbsolutePath());
             FileUtils.deleteQuietly(tempDirectory);
             RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
@@ -98,6 +114,13 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         }
     }
 
+    private Map<String, Map<String, Environment>> getEnvironmentSpecificAPIProperties(
+            List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList) throws APIManagementException {
+        List<String> apiIds = apiRuntimeArtifactDtoList.stream()
+                .map(APIRuntimeArtifactDto::getApiId)
+                .collect(Collectors.toList());
+        return environmentSpecificAPIPropertyDao.getEnvironmentSpecificAPIPropertiesOfAPIs(apiIds);
+    }
 
     @Override
     public String getType() {

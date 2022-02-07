@@ -45,6 +45,17 @@ public interface KeyValidationHandler {
      * @param consumerKey
      */
     APIKeyValidationInfoDTO validateSubscription(String apiContext, String apiVersion, String consumerKey, String keyManager);
+
+    /**
+     * Validate Subscriptions by API context, API version and Application ID
+     *
+     * @param apiContext
+     * @param apiVersion
+     * @param appId
+     * @return APIKeyValidationInfoDTO instance containing key validation data
+     */
+    APIKeyValidationInfoDTO validateSubscription(String apiContext, String apiVersion, int appId);
+
     /**
      * Validate Scopes  by oAuth2TokenValidationMessageContext
      *

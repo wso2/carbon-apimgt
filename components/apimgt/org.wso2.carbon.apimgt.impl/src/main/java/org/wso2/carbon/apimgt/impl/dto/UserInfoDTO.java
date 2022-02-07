@@ -33,6 +33,8 @@ public class UserInfoDTO implements Serializable {
     private String dialectURI;
     @SerializedName("accessToken")
     private String accessToken;
+    @SerializedName("bindFederatedUserClaims")
+    private boolean bindFederatedUserClaims;
     
     public String getUsername() {
         return username;
@@ -57,5 +59,9 @@ public class UserInfoDTO implements Serializable {
     }
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+    public boolean isBindFederatedUserClaims() { return bindFederatedUserClaims; }
+    public void setBindFederatedUserClaims(Boolean bindFederatedUserClaims) {
+        this.bindFederatedUserClaims = bindFederatedUserClaims;
     }
 }

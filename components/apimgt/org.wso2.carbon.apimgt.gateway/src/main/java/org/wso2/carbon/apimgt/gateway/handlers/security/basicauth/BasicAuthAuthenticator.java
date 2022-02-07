@@ -31,7 +31,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
+import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
@@ -59,6 +64,7 @@ public class BasicAuthAuthenticator implements Authenticator {
     private String requestOrigin;
     private BasicAuthCredentialValidator basicAuthCredentialValidator;
     private OpenAPI openAPI = null;
+    private String apiLevelPolicy;
     private boolean isMandatory;
 
     /**
@@ -66,9 +72,11 @@ public class BasicAuthAuthenticator implements Authenticator {
      *
      * @param authorizationHeader the Authorization header
      */
-    public BasicAuthAuthenticator(String authorizationHeader, boolean isMandatory) {
+    public BasicAuthAuthenticator(String authorizationHeader, boolean isMandatory, String apiLevelPolicy) {
+
         this.securityHeader = authorizationHeader;
         this.isMandatory = isMandatory;
+        this.apiLevelPolicy = apiLevelPolicy;
     }
 
     /**
@@ -160,60 +168,6 @@ public class BasicAuthAuthenticator implements Authenticator {
             verbInfoList.add(verbInfoDTO);
         }
 
-
-        if (APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Basic Authentication: Found Resource Authentication Scheme: ".concat(authenticationScheme));
-            }
-            //using existing constant in Message context removing the additional constant in API Constants
-            String clientIP = null;
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
-                    getAxis2MessageContext();
-            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
-                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-            if (transportHeaderMap != null) {
-                clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-            }
-
-            //Setting IP of the client
-            if (clientIP != null && !clientIP.isEmpty()) {
-                if (clientIP.indexOf(",") > 0) {
-                    clientIP = clientIP.substring(0, clientIP.indexOf(","));
-                }
-            } else {
-                clientIP = (String) axis2MessageContext
-                        .getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-            }
-
-            //Create a dummy AuthenticationContext object with hard coded values for
-            // Tier and KeyType. This is because we cannot determine the Tier nor Key
-            // Type without subscription information..
-            AuthenticationContext authContext = new AuthenticationContext();
-            authContext.setAuthenticated(true);
-            authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
-            //Since we don't have details on unauthenticated tier we setting stop on quota reach true
-            authContext.setStopOnQuotaReach(true);
-            //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario,
-            //we will use the client's IP address for throttling.
-            authContext.setApiKey(clientIP);
-            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-            //This name is hardcoded as anonymous because there is no associated user token
-            authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
-            authContext.setCallerToken(null);
-            authContext.setApplicationName(null);
-            authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
-            authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
-            authContext.setConsumerKey(null);
-            APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
-
-            if (log.isDebugEnabled()) {
-                log.debug("Basic Authentication: Authentication succeeded by ignoring auth headers for API resource: "
-                        .concat(matchingResource));
-            }
-            return new AuthenticationResponse(true, isMandatory, false, 0, null);
-        }
-
         String[] credentials;
         try {
             credentials = extractBasicAuthCredentials(basicAuthHeader);
@@ -277,7 +231,9 @@ public class BasicAuthAuthenticator implements Authenticator {
                     authContext.setApplicationName(APIConstants.BASIC_AUTH_APPLICATION_NAME);
                     authContext.setApplicationId(domainQualifiedUserName); //Set username as application ID in basic auth scenario
                     authContext.setApplicationUUID(domainQualifiedUserName); //Set username as application ID in basic auth scenario
+                    authContext.setSubscriber(APIConstants.BASIC_AUTH_APPLICATION_OWNER); //Set application owner in basic auth scenario
                     authContext.setConsumerKey(null);
+                    authContext.setApiTier(apiLevelPolicy);
                     APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
                 }
                 log.debug("Basic Authentication: Scope validation passed");

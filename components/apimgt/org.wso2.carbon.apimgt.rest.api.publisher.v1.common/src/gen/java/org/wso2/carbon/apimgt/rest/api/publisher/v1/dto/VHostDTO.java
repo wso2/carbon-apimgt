@@ -26,6 +26,8 @@ public class VHostDTO   {
     private Integer httpsPort = null;
     private Integer wsPort = null;
     private Integer wssPort = null;
+    private Integer websubHttpPort = null;
+    private Integer websubHttpsPort = null;
 
   /**
    **/
@@ -129,6 +131,40 @@ public class VHostDTO   {
     this.wssPort = wssPort;
   }
 
+  /**
+   **/
+  public VHostDTO websubHttpPort(Integer websubHttpPort) {
+    this.websubHttpPort = websubHttpPort;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "9021", value = "")
+  @JsonProperty("websubHttpPort")
+  public Integer getWebsubHttpPort() {
+    return websubHttpPort;
+  }
+  public void setWebsubHttpPort(Integer websubHttpPort) {
+    this.websubHttpPort = websubHttpPort;
+  }
+
+  /**
+   **/
+  public VHostDTO websubHttpsPort(Integer websubHttpsPort) {
+    this.websubHttpsPort = websubHttpsPort;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "8021", value = "")
+  @JsonProperty("websubHttpsPort")
+  public Integer getWebsubHttpsPort() {
+    return websubHttpsPort;
+  }
+  public void setWebsubHttpsPort(Integer websubHttpsPort) {
+    this.websubHttpsPort = websubHttpsPort;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -144,12 +180,14 @@ public class VHostDTO   {
         Objects.equals(httpPort, vhost.httpPort) &&
         Objects.equals(httpsPort, vhost.httpsPort) &&
         Objects.equals(wsPort, vhost.wsPort) &&
-        Objects.equals(wssPort, vhost.wssPort);
+        Objects.equals(wssPort, vhost.wssPort) &&
+        Objects.equals(websubHttpPort, vhost.websubHttpPort) &&
+        Objects.equals(websubHttpsPort, vhost.websubHttpsPort);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(host, httpContext, httpPort, httpsPort, wsPort, wssPort);
+    return Objects.hash(host, httpContext, httpPort, httpsPort, wsPort, wssPort, websubHttpPort, websubHttpsPort);
   }
 
   @Override
@@ -163,6 +201,8 @@ public class VHostDTO   {
     sb.append("    httpsPort: ").append(toIndentedString(httpsPort)).append("\n");
     sb.append("    wsPort: ").append(toIndentedString(wsPort)).append("\n");
     sb.append("    wssPort: ").append(toIndentedString(wssPort)).append("\n");
+    sb.append("    websubHttpPort: ").append(toIndentedString(websubHttpPort)).append("\n");
+    sb.append("    websubHttpsPort: ").append(toIndentedString(websubHttpsPort)).append("\n");
     sb.append("}");
     return sb.toString();
   }

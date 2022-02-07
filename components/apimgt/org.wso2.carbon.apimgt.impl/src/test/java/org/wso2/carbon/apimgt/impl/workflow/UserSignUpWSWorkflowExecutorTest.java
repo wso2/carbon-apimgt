@@ -32,7 +32,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
@@ -45,14 +44,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.stream.XMLStreamException;
@@ -70,7 +68,6 @@ public class UserSignUpWSWorkflowExecutorTest {
     private ApiMgtDAO apiMgtDAO;
     private WorkflowDTO workflowDTO;
     private APIManagerConfiguration apiManagerConfiguration;
-    private UserAdminStub userAdminStub;
     private UserStoreManager userStoreManager;
     private String callBackURL = "https://localhost:8243/services/WorkflowCallbackService";
     private String tenantDomain = "carbon.super";
@@ -89,7 +86,6 @@ public class UserSignUpWSWorkflowExecutorTest {
         RealmService realmService = Mockito.mock(RealmService.class);
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         userStoreManager = Mockito.mock(UserStoreManager.class);
-        userAdminStub = Mockito.mock(UserAdminStub.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         serviceClient = Mockito.mock(ServiceClient.class);
@@ -112,7 +108,6 @@ public class UserSignUpWSWorkflowExecutorTest {
         Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
         Mockito.when(realmService.getTenantUserRealm(tenantID)).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
-        PowerMockito.whenNew(UserAdminStub.class).withAnyArguments().thenReturn(userAdminStub);
         apiMgtDAO = TestUtils.getApiMgtDAO();
         userSignUpWSWorkflowExecutor = new UserSignUpWSWorkflowExecutor();
         workflowDTO = new WorkflowDTO();
@@ -190,11 +185,10 @@ public class UserSignUpWSWorkflowExecutorTest {
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         PowerMockito.when(SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO)).thenCallRealMethod();
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_URL)).thenReturn
-                ("https://localhost:9443/services/");
         Mockito.when(userStoreManager.isExistingUser(testUsername)).thenReturn(true);
         Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(true);
-
+        PowerMockito.doNothing().when(userStoreManager).updateRoleListOfUser(testUsername, null, new String[]{
+                "Internal/" + signUpRole});
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         try {
@@ -218,44 +212,14 @@ public class UserSignUpWSWorkflowExecutorTest {
 
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
-
-        //Test failure to complete workflow execution when AuthManager server url is not configured
-        try {
-            userSignUpWSWorkflowExecutor.complete(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been thrown when auth manager url is not configured");
-        } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Can't connect to the authentication manager. serverUrl is missing");
-        }
-        //Set AuthManager endpoint url
-        PowerMockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_URL)).thenReturn
-                ("https://localhost:9443/services/");
-
-        //Test failure to complete workflow execution when tenant admin username is not found
-        try {
-            userSignUpWSWorkflowExecutor.complete(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been thrown when admin username is not found");
-        } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Can't connect to the authentication manager. adminUsername is " +
-                    "missing");
-        }
-
-        //Test failure to complete workflow execution when tenant admin password is not found
-        userRegistrationConfigDTO.setAdminUserName(username);
-        try {
-            userSignUpWSWorkflowExecutor.complete(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been occurred when admin password is not found");
-        } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Can't connect to the authentication manager. adminPassword is " +
-                    "missing");
-        }
-
+        workflowDTO.setTenantDomain(tenantDomain);
         //Set tenant admin credentials
         userRegistrationConfigDTO.setAdminUserName("admin");
         userRegistrationConfigDTO.setAdminPassword("admin");
 
         //Test failure to complete workflow execution, when error has been occurred while updating user with signup roles
-        Mockito.doThrow(new RemoteException()).when(userAdminStub).updateRolesOfUser(Mockito.anyString(), new
-                String[]{Mockito.anyString()});
+        Mockito.doThrow(UserStoreException.class).when(userStoreManager).updateRoleListOfUser(Mockito.anyString(),
+                Mockito.any(), new String[]{Mockito.anyString()});
         try {
             userSignUpWSWorkflowExecutor.complete(workflowDTO);
             Assert.fail("Expected WorkflowException has not been thrown when signup user role update failed");
@@ -293,8 +257,6 @@ public class UserSignUpWSWorkflowExecutorTest {
         userRegistrationConfigDTO.setRoles(roleMap);
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_URL)).thenReturn
-                ("https://localhost:9443/services/");
 
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.REJECTED);
@@ -315,13 +277,10 @@ public class UserSignUpWSWorkflowExecutorTest {
         userRegistrationConfigDTO.setRoles(roleMap);
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_URL)).thenReturn
-                ("https://localhost:9443/services/");
 
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.REJECTED);
-        Mockito.doThrow(new AxisFault("Error occurred while deleting user")).when(userAdminStub).deleteUser(Mockito
-                .anyString());
+        Mockito.doThrow(UserStoreException.class).when(userStoreManager).deleteUser(Mockito.anyString());
         try {
             userSignUpWSWorkflowExecutor.complete(workflowDTO);
             Assert.fail("Expected WorkflowException has not been thrown when user deletion failed");

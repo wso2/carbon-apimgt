@@ -34,10 +34,14 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String uuid;
     private String displayName;
     private String description;
-    private String tenantDomain;
+    private String organization;
     private Map<String,Object> additionalProperties = new HashMap();
+    private Map<String,String> endpoints = new HashMap<>();
     private String type;
     private boolean enabled;
+    private String tokenType;
+    private String externalReferenceId = null;
+    private String alias = null;
 
     public KeyManagerConfigurationDTO() {
 
@@ -49,10 +53,13 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.uuid = keyManagerConfigurationDTO.getUuid();
         this.displayName = keyManagerConfigurationDTO.getDisplayName();
         this.description = keyManagerConfigurationDTO.getDescription();
-        this.tenantDomain = keyManagerConfigurationDTO.getTenantDomain();
+        this.organization = keyManagerConfigurationDTO.getOrganization();
         this.additionalProperties = new HashMap<>(keyManagerConfigurationDTO.getAdditionalProperties());
         this.type = keyManagerConfigurationDTO.getType();
         this.enabled = keyManagerConfigurationDTO.isEnabled();
+        this.tokenType = keyManagerConfigurationDTO.getTokenType();
+        this.externalReferenceId = keyManagerConfigurationDTO.getExternalReferenceId();
+        this.endpoints = keyManagerConfigurationDTO.getEndpoints();
     }
     public String getName() {
 
@@ -84,14 +91,14 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.description = description;
     }
 
-    public String getTenantDomain() {
+    public String getOrganization() {
 
-        return tenantDomain;
+        return organization;
     }
 
-    public void setTenantDomain(String tenantDomain) {
+    public void setOrganization(String organization) {
 
-        this.tenantDomain = tenantDomain;
+        this.organization = organization;
     }
 
     public Map<String,Object> getAdditionalProperties() {
@@ -133,6 +140,31 @@ public class KeyManagerConfigurationDTO implements Serializable {
 
         this.enabled = enabled;
     }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public String getExternalReferenceId() {
+        return externalReferenceId;
+    }
+
+    public void setExternalReferenceId(String externalReferenceId) {
+        this.externalReferenceId = externalReferenceId;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
     public void addProperty(String key,Object value){
         additionalProperties.put(key,value);
     }
@@ -141,5 +173,15 @@ public class KeyManagerConfigurationDTO implements Serializable {
     }
     public void removeProperty(String key){
         additionalProperties.remove(key);
+    }
+
+    public Map<String, String> getEndpoints() {
+
+        return endpoints;
+    }
+
+    public void setEndpoints(Map<String, String> endpoints) {
+
+        this.endpoints = endpoints;
     }
 }

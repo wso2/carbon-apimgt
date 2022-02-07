@@ -71,7 +71,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             if (runTimeArtifact.isFile()) {
                 String tenantDomain = runTimeArtifact.getTenantDomain();
                 String label = runTimeArtifact.getLabel();
-                Environment environment = APIUtil.getEnvironments().get(label);
+                Environment environment = APIUtil.getEnvironments(tenantDomain).get(label);
                 GatewayAPIDTO gatewayAPIDTO = null;
                 if (environment != null) {
                     try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
@@ -112,7 +112,9 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                 } else if (api.getType() != null &&
                                         (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
-                                                || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
+                                                || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())
+                                                || APIConstants.APITransportType.WEBHOOK.toString()
+                                                        .equals(api.getType()))) {
                                     APIDefinitionValidationResponse apiDefinitionValidationResponse = ImportUtils
                                             .retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
                                     api.setSwaggerDefinition(apiDefinitionValidationResponse.getContent());
