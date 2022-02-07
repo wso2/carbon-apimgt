@@ -1057,8 +1057,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getAPISpecificOperationPolicyContentByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
-        return delegate.getAPISpecificOperationPolicyContentByPolicyId(apiId, operationPolicyId, securityContext);
+    public Response getAPISpecificOperationPolicyContentByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId,  @ApiParam(value = "Specify whether to return the policy specification for common policies as well.", defaultValue="false") @DefaultValue("false") @QueryParam("withCommonPolicies") Boolean withCommonPolicies) throws APIManagementException{
+        return delegate.getAPISpecificOperationPolicyContentByPolicyId(apiId, operationPolicyId, withCommonPolicies, securityContext);
     }
 
     @GET
@@ -1344,8 +1344,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = OperationPolicyDataDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getOperationPolicyForAPIByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
-        return delegate.getOperationPolicyForAPIByPolicyId(apiId, operationPolicyId, securityContext);
+    public Response getOperationPolicyForAPIByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId,  @ApiParam(value = "Specify whether to return the policy specification for common policies as well.", defaultValue="false") @DefaultValue("false") @QueryParam("withCommonPolicies") Boolean withCommonPolicies) throws APIManagementException{
+        return delegate.getOperationPolicyForAPIByPolicyId(apiId, operationPolicyId, withCommonPolicies, securityContext);
     }
 
     @GET
