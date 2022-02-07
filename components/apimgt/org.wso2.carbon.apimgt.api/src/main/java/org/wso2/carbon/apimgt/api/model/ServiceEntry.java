@@ -29,6 +29,7 @@ public class ServiceEntry {
     private String name = null;
     private String version = null;
     private String serviceUrl = null;
+    private String apiId = null;
     private int usage = 0;
 
     public enum DefinitionType {
@@ -126,8 +127,16 @@ public class ServiceEntry {
         return serviceUrl;
     }
 
+    public String getApiId() {
+        return apiId;
+    }
+
     public void setServiceUrl(String serviceUrl) {
         this.serviceUrl = serviceUrl;
+    }
+
+    public void setApiId(String apiId) {
+        this.apiId = apiId;
     }
 
     public DefinitionType getDefinitionType() {

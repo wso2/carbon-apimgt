@@ -418,17 +418,20 @@ public class ServiceCatalogDAO {
         boolean searchByDefinitionType = false;
         boolean exactNameSearch = false;
         boolean exactVersionSearch = false;
+        boolean exactApiIdSearch = false;
         StringBuilder querySb = new StringBuilder();
         querySb.append("SELECT UUID, SERVICE_KEY, MD5, SERVICE_NAME, SERVICE_VERSION," +
                 "   SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SECURITY_TYPE, MUTUAL_SSL_ENABLED," +
-                "   CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION FROM " +
+                "   CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION, API_ID FROM " +
                 "   AM_SERVICE_CATALOG WHERE TENANT_ID = ? ");
         String whereClauseForExactNameSearch = "AND SERVICE_NAME = ? ";
         String whereClauseForNameSearch = "AND SERVICE_NAME LIKE ? ";
         String whereClauseForExactVersionSearch = "AND SERVICE_VERSION = ? ";
         String whereClauseForVersionSearch = " AND SERVICE_VERSION LIKE ? ";
+        String whereClauseForApiIdSearch = " AND API_ID LIKE ? ";
         String whereClauseWithDefinitionType = " AND DEFINITION_TYPE = ? ";
         String whereClauseWithServiceKey = " AND SERVICE_KEY = ? ";
+        String whereClauseWithApiId = " AND API_ID = ? ";
         if (filterParams.getName().startsWith("\"") && filterParams.getName().endsWith("\"")) {
             exactNameSearch = true;
             filterParams.setName(filterParams.getName().replace("\"", "").trim());
@@ -442,6 +445,10 @@ public class ServiceCatalogDAO {
             querySb.append(whereClauseForExactVersionSearch);
         } else {
             querySb.append(whereClauseForVersionSearch);
+        }
+        if (StringUtils.isNotEmpty(filterParams.getApiId()) && StringUtils.isEmpty(filterParams.getKey())) {
+            exactApiIdSearch = true;
+            querySb.append(whereClauseWithApiId);
         }
         if (StringUtils.isNotEmpty(filterParams.getDefinitionType()) && StringUtils.isEmpty(filterParams.getKey())) {
             searchByDefinitionType = true;
@@ -557,12 +564,15 @@ public class ServiceCatalogDAO {
         boolean searchByDefinitionType = false;
         boolean exactNameSearch = false;
         boolean exactVersionSearch = false;
+        boolean exactApiIdSearch = false;
         String whereClauseForExactNameSearch = "AND SERVICE_NAME = ? ";
         String whereClauseForNameSearch = "AND SERVICE_NAME LIKE ? ";
         String whereClauseForExactVersionSearch = "AND SERVICE_VERSION = ? ";
         String whereClauseForVersionSearch = " AND SERVICE_VERSION LIKE ? ";
+        String whereClauseForApiIdSearch = " AND API_ID LIKE ? ";
         String whereClauseWithDefinitionType = " AND DEFINITION_TYPE = ? ";
         String whereClauseWithServiceKey = " AND SERVICE_KEY = ? ";
+        String whereClauseWithApiId = " AND API_ID = ? ";
         StringBuilder querySb = new StringBuilder();
         querySb.append("SELECT count(*) count FROM AM_SERVICE_CATALOG WHERE TENANT_ID = ? ");
         if (filterParams.getName().startsWith("\"") && filterParams.getName().endsWith("\"")) {
@@ -578,6 +588,10 @@ public class ServiceCatalogDAO {
             querySb.append(whereClauseForExactVersionSearch);
         } else {
             querySb.append(whereClauseForVersionSearch);
+        }
+        if (StringUtils.isNotEmpty(filterParams.getApiId()) && StringUtils.isEmpty(filterParams.getKey())) {
+            exactApiIdSearch = true;
+            querySb.append(whereClauseWithApiId);
         }
         if (StringUtils.isNotEmpty(filterParams.getDefinitionType()) && StringUtils.isEmpty(filterParams.getKey())) {
             searchByDefinitionType = true;
@@ -687,8 +701,10 @@ public class ServiceCatalogDAO {
         ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
         ps.setString(10, username);
         ps.setBinaryStream(11, service.getEndpointDef());
-        ps.setString(12, service.getKey());
-        ps.setInt(13, tenantId);
+        ps.setString(12, service.getApiId());
+        ps.setString(13, service.getKey());
+        ps.setInt(14, tenantId);
+
     }
 
     private String setServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)
@@ -711,6 +727,7 @@ public class ServiceCatalogDAO {
         ps.setString(15, username);
         ps.setString(16, username);
         ps.setBinaryStream(17, service.getEndpointDef());
+        ps.setString(18, service.getApiId());
         return uuid;
     }
 
@@ -724,6 +741,7 @@ public class ServiceCatalogDAO {
             service.setVersion(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_VERSION));
             if (!shrink) {
                 service.setServiceUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_URL));
+                service.setApiId(resultSet.getString(APIConstants.ServiceCatalogConstants.API_ID));
                 service.setDefinitionType(ServiceEntry.DefinitionType.valueOf(resultSet.getString(APIConstants
                         .ServiceCatalogConstants.DEFINITION_TYPE)));
                 service.setDefUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_URL));

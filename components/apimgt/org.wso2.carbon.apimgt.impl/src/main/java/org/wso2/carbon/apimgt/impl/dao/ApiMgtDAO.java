@@ -17610,13 +17610,22 @@ public class ApiMgtDAO {
      * @throws SQLException
      */
     public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, Connection connection)
-            throws SQLException {
-
-        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
-            statement.setString(1, serviceKey);
-            statement.setString(2, md5);
-            statement.setInt(3, apiId);
-            statement.executeUpdate();
+            throws SQLException, APIManagementException {
+        try {
+            if (!retrieveServiceKeyByApiId(apiId, -1234).isEmpty()) {
+                try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
+                    statement.setString(1, serviceKey);
+                    statement.setString(2, md5);
+                    statement.setInt(3, apiId);
+                    statement.executeUpdate();
+                }
+            } else {
+                addAPIServiceMapping(apiId, serviceKey, md5, -1234, connection);
+            }
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
     }
 
