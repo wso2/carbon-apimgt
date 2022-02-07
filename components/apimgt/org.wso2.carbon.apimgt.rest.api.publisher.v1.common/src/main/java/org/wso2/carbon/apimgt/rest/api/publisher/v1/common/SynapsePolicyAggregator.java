@@ -92,7 +92,7 @@ public class SynapsePolicyAggregator {
             if (flow.equals(policy.getDirection())) {
                 Map<String, Object> policyParameters = policy.getParameters();
                 String policyDefinition = ImportUtils.getOperationPolicyDefinitionFromFile(pathToAchieve,
-                        policy.getPolicyName());
+                        policy.getPolicyName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
                 if (policyDefinition != null) {
                     String renderedTemplate = renderPolicyTemplate(policyDefinition, policyParameters);
                     if (renderedTemplate != null && !renderedTemplate.isEmpty()) {

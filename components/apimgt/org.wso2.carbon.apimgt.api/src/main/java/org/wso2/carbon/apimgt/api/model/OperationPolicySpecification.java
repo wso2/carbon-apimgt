@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class OperationPolicySpecification {
 
@@ -31,6 +32,7 @@ public class OperationPolicySpecification {
 
     private PolicyCategory category = PolicyCategory.Mediation;
     private String name;
+    private String version = "v1";
     private String displayName;
     private String description;
     private List<String> applicableFlows = new ArrayList<>();
@@ -47,6 +49,16 @@ public class OperationPolicySpecification {
     public void setName(String name) {
 
         this.name = name;
+    }
+
+    public String getVersion() {
+
+        return version;
+    }
+
+    public void setVersion(String version) {
+
+        this.version = version;
     }
 
     public String getDisplayName() {
@@ -128,5 +140,30 @@ public class OperationPolicySpecification {
     public void setMultipleAllowed(boolean multipleAllowed) {
 
         this.multipleAllowed = multipleAllowed;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+        if (!(o instanceof OperationPolicySpecification)) return false;
+        OperationPolicySpecification that = (OperationPolicySpecification) o;
+        return multipleAllowed == that.multipleAllowed &&
+                category == that.category &&
+                name.equals(that.name) &&
+                displayName.equals(that.displayName) &&
+                Objects.equals(description, that.description) &&
+                applicableFlows.equals(that.applicableFlows) &&
+                supportedGateways.equals(that.supportedGateways) &&
+                supportedApiTypes.equals(that.supportedApiTypes) &&
+                Objects.equals(policyAttributes, that.policyAttributes);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects
+                .hash(category, name, displayName, description, applicableFlows, supportedGateways, supportedApiTypes,
+                        policyAttributes, multipleAllowed);
     }
 }

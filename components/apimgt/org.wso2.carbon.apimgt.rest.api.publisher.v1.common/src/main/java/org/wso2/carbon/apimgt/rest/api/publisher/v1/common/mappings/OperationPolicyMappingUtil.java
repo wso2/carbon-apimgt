@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -132,7 +132,7 @@ public class OperationPolicyMappingUtil {
     }
 
     public static OperationPolicyDataListDTO fromOperationPolicyDataListToDTO(
-            List<OperationPolicyDataHolder> policyDataList, int offset, int limit) {
+            List<OperationPolicyData> policyDataList, int offset, int limit) {
 
         List<OperationPolicyDataDTO> operationPolicyList = new ArrayList<>();
 
@@ -160,21 +160,21 @@ public class OperationPolicyMappingUtil {
         return dataListDTO;
     }
 
-    public static OperationPolicyDataDTO fromOperationPolicyDataToDTO(OperationPolicyDataHolder policyData) {
+    public static OperationPolicyDataDTO fromOperationPolicyDataToDTO(OperationPolicyData policyData) {
 
         OperationPolicyDataDTO policyDataDTO = new OperationPolicyDataDTO();
         OperationPolicySpecification policySpecification = policyData.getSpecification();
-        policyDataDTO.setPolicyId(policyData.getPolicyId());
+        policyDataDTO.setId(policyData.getPolicyId());
         policyDataDTO.setMd5(policyData.getMd5Hash());
         policyDataDTO.setIsAPISpecific(policyData.isApiSpecificPolicy());
-        policyDataDTO.setPolicyName(policySpecification.getName());
-        policyDataDTO.setPolicyDisplayName(policySpecification.getDisplayName());
-        policyDataDTO.setPolicyDescription(policySpecification.getDescription());
+        policyDataDTO.setName(policySpecification.getName());
+        policyDataDTO.setDisplayName(policySpecification.getDisplayName());
+        policyDataDTO.setDescription(policySpecification.getDescription());
         policyDataDTO.setSupportedGateways(policySpecification.getSupportedGateways());
         policyDataDTO.setSupportedApiTypes(policySpecification.getSupportedApiTypes());
         policyDataDTO.setApplicableFlows(policySpecification.getApplicableFlows());
         policyDataDTO.setMultipleAllowed(policySpecification.isMultipleAllowed());
-        policyDataDTO.setPolicyCategory(policySpecification.getCategory().toString());
+        policyDataDTO.setCategory(policySpecification.getCategory().toString());
 
         if (policySpecification.getPolicyAttributes() != null) {
             List<OperationPolicySpecAttributeDTO> specAttributeDtoList = new ArrayList<>();
@@ -183,7 +183,7 @@ public class OperationPolicyMappingUtil {
                         fromOperationPolicySpecAttributesToDTO(specAttribute);
                 specAttributeDtoList.add(specAttributeDTO);
             }
-            policyDataDTO.setPolictAttributes(specAttributeDtoList);
+            policyDataDTO.setPolicyAttributes(specAttributeDtoList);
         }
         return policyDataDTO;
     }

@@ -23,102 +23,102 @@ import javax.validation.Valid;
 
 public class OperationPolicyDataDTO   {
   
-    private String policyCategory = null;
-    private String policyId = null;
-    private String policyName = null;
-    private String policyDisplayName = null;
-    private String policyDescription = null;
+    private String category = null;
+    private String id = null;
+    private String name = null;
+    private String displayName = null;
+    private String description = null;
     private List<String> applicableFlows = new ArrayList<String>();
     private List<String> supportedGateways = new ArrayList<String>();
     private List<String> supportedApiTypes = new ArrayList<String>();
     private Boolean multipleAllowed = null;
     private Boolean isAPISpecific = null;
     private String md5 = null;
-    private List<OperationPolicySpecAttributeDTO> polictAttributes = new ArrayList<OperationPolicySpecAttributeDTO>();
+    private List<OperationPolicySpecAttributeDTO> policyAttributes = new ArrayList<OperationPolicySpecAttributeDTO>();
 
   /**
    **/
-  public OperationPolicyDataDTO policyCategory(String policyCategory) {
-    this.policyCategory = policyCategory;
+  public OperationPolicyDataDTO category(String category) {
+    this.category = category;
     return this;
   }
 
   
   @ApiModelProperty(example = "Mediation", value = "")
-  @JsonProperty("policyCategory")
-  public String getPolicyCategory() {
-    return policyCategory;
+  @JsonProperty("category")
+  public String getCategory() {
+    return category;
   }
-  public void setPolicyCategory(String policyCategory) {
-    this.policyCategory = policyCategory;
+  public void setCategory(String category) {
+    this.category = category;
   }
 
   /**
    **/
-  public OperationPolicyDataDTO policyId(String policyId) {
-    this.policyId = policyId;
+  public OperationPolicyDataDTO id(String id) {
+    this.id = id;
     return this;
   }
 
   
   @ApiModelProperty(example = "121223q41-24141-124124124-12414", value = "")
-  @JsonProperty("policyId")
-  public String getPolicyId() {
-    return policyId;
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
-  public void setPolicyId(String policyId) {
-    this.policyId = policyId;
+  public void setId(String id) {
+    this.id = id;
   }
 
   /**
    **/
-  public OperationPolicyDataDTO policyName(String policyName) {
-    this.policyName = policyName;
+  public OperationPolicyDataDTO name(String name) {
+    this.name = name;
     return this;
   }
 
   
   @ApiModelProperty(example = "removeHeaderPolicy", value = "")
-  @JsonProperty("policyName")
-  public String getPolicyName() {
-    return policyName;
+  @JsonProperty("name")
+  public String getName() {
+    return name;
   }
-  public void setPolicyName(String policyName) {
-    this.policyName = policyName;
+  public void setName(String name) {
+    this.name = name;
   }
 
   /**
    **/
-  public OperationPolicyDataDTO policyDisplayName(String policyDisplayName) {
-    this.policyDisplayName = policyDisplayName;
+  public OperationPolicyDataDTO displayName(String displayName) {
+    this.displayName = displayName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Remove Header Policy", value = "")
-  @JsonProperty("policyDisplayName")
-  public String getPolicyDisplayName() {
-    return policyDisplayName;
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
   }
-  public void setPolicyDisplayName(String policyDisplayName) {
-    this.policyDisplayName = policyDisplayName;
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
    **/
-  public OperationPolicyDataDTO policyDescription(String policyDescription) {
-    this.policyDescription = policyDescription;
+  public OperationPolicyDataDTO description(String description) {
+    this.description = description;
     return this;
   }
 
   
   @ApiModelProperty(example = "With this policy, user can add a new header to the request", value = "")
-  @JsonProperty("policyDescription")
-  public String getPolicyDescription() {
-    return policyDescription;
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
   }
-  public void setPolicyDescription(String policyDescription) {
-    this.policyDescription = policyDescription;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   /**
@@ -225,20 +225,20 @@ public class OperationPolicyDataDTO   {
 
   /**
    **/
-  public OperationPolicyDataDTO polictAttributes(List<OperationPolicySpecAttributeDTO> polictAttributes) {
-    this.polictAttributes = polictAttributes;
+  public OperationPolicyDataDTO policyAttributes(List<OperationPolicySpecAttributeDTO> policyAttributes) {
+    this.policyAttributes = policyAttributes;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("polictAttributes")
-  public List<OperationPolicySpecAttributeDTO> getPolictAttributes() {
-    return polictAttributes;
+  @JsonProperty("policyAttributes")
+  public List<OperationPolicySpecAttributeDTO> getPolicyAttributes() {
+    return policyAttributes;
   }
-  public void setPolictAttributes(List<OperationPolicySpecAttributeDTO> polictAttributes) {
-    this.polictAttributes = polictAttributes;
+  public void setPolicyAttributes(List<OperationPolicySpecAttributeDTO> policyAttributes) {
+    this.policyAttributes = policyAttributes;
   }
 
 
@@ -251,23 +251,23 @@ public class OperationPolicyDataDTO   {
       return false;
     }
     OperationPolicyDataDTO operationPolicyData = (OperationPolicyDataDTO) o;
-    return Objects.equals(policyCategory, operationPolicyData.policyCategory) &&
-        Objects.equals(policyId, operationPolicyData.policyId) &&
-        Objects.equals(policyName, operationPolicyData.policyName) &&
-        Objects.equals(policyDisplayName, operationPolicyData.policyDisplayName) &&
-        Objects.equals(policyDescription, operationPolicyData.policyDescription) &&
+    return Objects.equals(category, operationPolicyData.category) &&
+        Objects.equals(id, operationPolicyData.id) &&
+        Objects.equals(name, operationPolicyData.name) &&
+        Objects.equals(displayName, operationPolicyData.displayName) &&
+        Objects.equals(description, operationPolicyData.description) &&
         Objects.equals(applicableFlows, operationPolicyData.applicableFlows) &&
         Objects.equals(supportedGateways, operationPolicyData.supportedGateways) &&
         Objects.equals(supportedApiTypes, operationPolicyData.supportedApiTypes) &&
         Objects.equals(multipleAllowed, operationPolicyData.multipleAllowed) &&
         Objects.equals(isAPISpecific, operationPolicyData.isAPISpecific) &&
         Objects.equals(md5, operationPolicyData.md5) &&
-        Objects.equals(polictAttributes, operationPolicyData.polictAttributes);
+        Objects.equals(policyAttributes, operationPolicyData.policyAttributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyCategory, policyId, policyName, policyDisplayName, policyDescription, applicableFlows, supportedGateways, supportedApiTypes, multipleAllowed, isAPISpecific, md5, polictAttributes);
+    return Objects.hash(category, id, name, displayName, description, applicableFlows, supportedGateways, supportedApiTypes, multipleAllowed, isAPISpecific, md5, policyAttributes);
   }
 
   @Override
@@ -275,18 +275,18 @@ public class OperationPolicyDataDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class OperationPolicyDataDTO {\n");
     
-    sb.append("    policyCategory: ").append(toIndentedString(policyCategory)).append("\n");
-    sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
-    sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
-    sb.append("    policyDisplayName: ").append(toIndentedString(policyDisplayName)).append("\n");
-    sb.append("    policyDescription: ").append(toIndentedString(policyDescription)).append("\n");
+    sb.append("    category: ").append(toIndentedString(category)).append("\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    applicableFlows: ").append(toIndentedString(applicableFlows)).append("\n");
     sb.append("    supportedGateways: ").append(toIndentedString(supportedGateways)).append("\n");
     sb.append("    supportedApiTypes: ").append(toIndentedString(supportedApiTypes)).append("\n");
     sb.append("    multipleAllowed: ").append(toIndentedString(multipleAllowed)).append("\n");
     sb.append("    isAPISpecific: ").append(toIndentedString(isAPISpecific)).append("\n");
     sb.append("    md5: ").append(toIndentedString(md5)).append("\n");
-    sb.append("    polictAttributes: ").append(toIndentedString(polictAttributes)).append("\n");
+    sb.append("    policyAttributes: ").append(toIndentedString(policyAttributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

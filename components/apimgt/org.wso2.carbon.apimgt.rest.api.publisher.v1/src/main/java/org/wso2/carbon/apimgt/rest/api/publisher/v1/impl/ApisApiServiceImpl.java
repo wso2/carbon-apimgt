@@ -91,7 +91,8 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
@@ -2685,9 +2686,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response addAPISpecificOperationPolicy(String apiId, InputStream policySpecFileInputStream,
                                                   Attachment policySpecFileDetail,
-                                                  InputStream policyDefinitionFileInputStream,
-                                                  Attachment policyDefinitionFileDetail,
-                                                  MessageContext messageContext) {
+                                                  InputStream synapsePolicyDefinitionFileInputStream,
+                                                  Attachment synapsePolicyDefinitionFileDetail,
+                                                  InputStream ccDefinitionFileInputStream,
+                                                  Attachment ccDefinitionFileDetail, MessageContext messageContext) {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2695,13 +2697,21 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //validate if api exists
             validateAPIExistence(apiId);
-            String policySpec = "";
             String jsonContent = "";
-            String policyDefinition = "";
+            OperationPolicyDefinition synapseDefinition = null;
+            OperationPolicyDefinition ccPolicyDefinition = null;
             OperationPolicySpecification policySpecification;
             if (policySpecFileInputStream != null) {
-                policySpec = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
-                jsonContent = CommonUtil.yamlToJson(policySpec);
+                jsonContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
+
+                String fileName = policySpecFileDetail.getDataHandler().getName();
+                String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+                if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+                    fileContentType = policySpecFileDetail.getContentType().toString();
+                }
+                if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
+                    jsonContent = CommonUtil.yamlToJson(jsonContent);
+                }
 
                 Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
                 if (schema != null) {
@@ -2720,19 +2730,36 @@ public class ApisApiServiceImpl implements ApisApiService {
 
                 policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
 
-                if (policyDefinitionFileInputStream != null) {
-                    policyDefinition = RestApiPublisherUtils
-                            .readInputStream(policyDefinitionFileInputStream, policyDefinitionFileDetail);
-                }
-
-                OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
-                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpecification, policyDefinition));
+                OperationPolicyData operationPolicyData = new OperationPolicyData();
                 operationPolicyData.setOrganization(organization);
                 operationPolicyData.setApiUUID(apiId);
                 operationPolicyData.setSpecification(policySpecification);
-                operationPolicyData.setDefinition(policyDefinition);
 
-                OperationPolicyDataHolder existingPolicy =
+                if (synapsePolicyDefinitionFileInputStream != null) {
+                    String synapsePolicyDefinition =
+                            RestApiPublisherUtils.readInputStream(synapsePolicyDefinitionFileInputStream,
+                                    synapsePolicyDefinitionFileDetail);
+                    synapseDefinition = new OperationPolicyDefinition();
+                    synapseDefinition.setContent(synapsePolicyDefinition);
+                    synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                    synapseDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(synapseDefinition));
+                    operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                }
+
+                if (ccDefinitionFileInputStream != null) {
+                    String choreoConnectPolicyDefinition =
+                            RestApiPublisherUtils.readInputStream(ccDefinitionFileInputStream, ccDefinitionFileDetail);
+                    ccPolicyDefinition = new OperationPolicyDefinition();
+                    ccPolicyDefinition.setContent(choreoConnectPolicyDefinition);
+                    ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                    ccPolicyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(ccPolicyDefinition));
+                    operationPolicyData.setCcPolicyDefinition(ccPolicyDefinition);
+                }
+
+                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpecification,
+                        synapseDefinition, ccPolicyDefinition));
+
+                OperationPolicyData existingPolicy =
                         apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(), apiId,
                                 null, organization, false);
                 String policyID;
@@ -2791,7 +2818,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Lightweight API specific operation policy includes the policy ID and the policy specification.
             // Since policy definition is bit bulky, we don't query the definition unnecessarily.
-            List<OperationPolicyDataHolder> sharedOperationPolicyLIst = apiProvider
+            List<OperationPolicyData> sharedOperationPolicyLIst = apiProvider
                     .getAllAPISpecificOperationPolicies(apiId, organization);
             OperationPolicyDataListDTO policyListDTO = OperationPolicyMappingUtil
                     .fromOperationPolicyDataListToDTO(sharedOperationPolicyLIst, offset, limit);
@@ -2826,7 +2853,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate whether api exists or not
             validateAPIExistence(apiId);
 
-            OperationPolicyDataHolder existingPolicy =
+            OperationPolicyData existingPolicy =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
             if (existingPolicy != null) {
                 OperationPolicyDataDTO policyDataDTO =
@@ -2873,7 +2900,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             validateAPIExistence(apiId);
 
-            OperationPolicyDataHolder policyData =
+            OperationPolicyData policyData =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, true);
             if (policyData != null) {
                 File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
@@ -2919,7 +2946,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             validateAPIExistence(apiId);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            OperationPolicyDataHolder existingPolicy =
+            OperationPolicyData existingPolicy =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
             if (existingPolicy != null) {
                 apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
