@@ -1118,32 +1118,6 @@ public class PublisherCommonUtils {
         return null;
     }
 
-    public static String updateAPIDefinitionByLinkingServiceToAPI(String apiId,
-                                                                  APIDefinitionValidationResponse response,
-                                                                  ServiceEntry service, String organization)
-            throws APIManagementException, FaultGatewaysException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        //this will fail if user does not have access to the API or the API does not exist
-        API api = apiProvider.getAPIbyUUID(apiId, organization);
-        API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
-
-        JSONObject serviceInfo = new JSONObject();
-        serviceInfo.put("name", service.getName());
-        serviceInfo.put("version", service.getVersion());
-        serviceInfo.put("key", service.getKey());
-        serviceInfo.put("md5", service.getMd5());
-        api.setServiceInfo(serviceInfo);
-
-        if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
-                ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-
-            apiProvider.updateAPI(api, originalAPI);
-            return updateSwagger(apiId, response, false, organization);
-        }
-        return null;
-    }
-
     /**
      * update AsyncPI definition of the given api.
      *

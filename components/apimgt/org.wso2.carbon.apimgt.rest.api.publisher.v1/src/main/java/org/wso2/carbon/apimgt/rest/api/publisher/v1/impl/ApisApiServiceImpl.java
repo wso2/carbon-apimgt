@@ -2974,13 +2974,11 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileInputStream   Swagger definition input file content
      * @param fileDetail        file meta information as Attachment
      * @param ifMatch           If-match header value
-     * @param serviceKey        Service key of the service in the service catalog
      * @return updated swagger document of the API
      */
     @Override
     public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url,
-                                     InputStream fileInputStream, Attachment fileDetail,String serviceKey,
-                                     MessageContext messageContext) {
+                                     InputStream fileInputStream, Attachment fileDetail,MessageContext messageContext) {
         try {
             String updatedSwagger;
             //validate if api exists
@@ -3000,32 +2998,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
                 }
                 updatedSwagger = PublisherCommonUtils.updateSwagger(apiId, validationResponse, false, organization);
-            } else if (serviceKey != null) {
-                int tenantId = APIUtil.getInternalOrganizationId(organization);
-                ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
-                Map validationResponseMap = new HashMap();
-                APIDefinitionValidationResponse validationAPIResponse = null;
-                if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
-                        ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                    validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, null,
-                            true, true);
-
-                    validationAPIResponse =
-                            (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
-                    if (!validationAPIResponse.isValid()) {
-                        RestApiUtil.handleBadRequest(validationAPIResponse.getErrorItems(), log);
-                    }
-                } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
-                    RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot link service to " +
-                            "API using the service type " + service.getDefinitionType(), log);
-                } else if (!ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())) {
-                    RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot link service to " +
-                            "API using the service type " + service.getDefinitionType(), log);
-                }
-                updatedSwagger = PublisherCommonUtils.updateAPIDefinitionByLinkingServiceToAPI(apiId, validationAPIResponse,
-                        service, organization);
-
             } else {
                 updatedSwagger = updateSwagger(apiId, apiDefinition, organization);
             }
@@ -4891,56 +4863,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + apiDto.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-        return null;
-    }
-
-
-    public Response linkServiceToAPI(API originalAPI, APIDTO apiToUpdate, String serviceKey, APIDTO apiDto,
-                                     MessageContext messageContext) {
-        if (originalAPI.getServiceInfoObject() == null  && apiToUpdate.getServiceInfo() != null) {
-            if (StringUtils.isEmpty(serviceKey)) {
-                RestApiUtil.handleBadRequest("Required parameter serviceKey is missing", log);
-            }
-            try {
-                ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-                String username = RestApiCommonUtil.getLoggedInUsername();
-                int tenantId = APIUtil.getTenantId(username);
-                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
-                if (service == null) {
-                    RestApiUtil.handleResourceNotFoundError("Service", serviceKey, log);
-                }
-                String organization = RestApiUtil.getValidatedOrganization(messageContext);
-                if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
-                        ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                    apiToUpdate = importOpenAPIDefinition(service.getEndpointDef(), null, null, apiToUpdate, null, service,
-                            organization);
-                } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
-                    apiToUpdate = importAsyncAPISpecification(service.getEndpointDef(), null, apiToUpdate, null, service,
-                            organization);
-                } else if (ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())) {
-                    apiToUpdate.setProvider(RestApiCommonUtil.getLoggedInUsername());
-                    apiToUpdate.setType(APIDTO.TypeEnum.fromValue("SOAP"));
-                    //apiToUpdate.setServiceInfo("key");
-                    //apiToUpdate.setServiceInfo("key", service.getKey());
-                    //apiToUpdate.setServiceInfo("md5", service.getMd5());
-                    apiToUpdate.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
-                            .getServiceUrl(), null));
-                    ///API api = importSOAPAPI(service.getEndpointDef(), null, null,
-                            //apiToAdd, organization, service);
-                    //createdApiDTO = APIMappingUtil.fromAPItoDTO(api);
-                }
-
-            } catch (APIManagementException e) {
-                if (RestApiUtil.isDueToResourceNotFound(e)) {
-                    RestApiUtil.handleResourceNotFoundError("Service", serviceKey, e, log);
-                } else {
-                    String errorMessage = "Error while creating API using Service with Id : " + serviceKey
-                            + " from Service Catalog";
-                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
-                }
-            }
-        }
-
         return null;
     }
 

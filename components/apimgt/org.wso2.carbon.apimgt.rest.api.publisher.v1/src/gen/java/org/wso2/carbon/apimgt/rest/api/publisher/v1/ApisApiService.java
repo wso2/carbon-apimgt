@@ -143,7 +143,7 @@ public interface ApisApiService {
       public Response updateAPIGraphQLSchema(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIMediationPolicyContentByPolicyId(String apiId, String mediationPolicyId, String type, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId, ResourcePolicyInfoDTO resourcePolicyInfoDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, String serviceKey, MessageContext messageContext) throws APIManagementException;
+      public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateGraphQLPolicyComplexityOfAPI(String apiId, GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateTopics(String apiId, TopicListDTO topicListDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
