@@ -2817,6 +2817,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getOperationPolicyForAPIByPolicyId(String apiId, String operationPolicyId,
+                                                       Boolean withCommonPolicies,
                                                        MessageContext messageContext) {
 
         try {
@@ -2832,6 +2833,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                 OperationPolicyDataDTO policyDataDTO =
                         OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
                 return Response.ok().entity(policyDataDTO).build();
+            } else if (withCommonPolicies) {
+                existingPolicy =
+                        apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, false);
+                if (existingPolicy != null) {
+                    OperationPolicyDataDTO policyDataDTO =
+                            OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
+                    return Response.ok().entity(policyDataDTO).build();
+                }
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
                         + operationPolicyId + " for API " + apiId,
@@ -2864,6 +2873,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPISpecificOperationPolicyContentByPolicyId(String apiId, String operationPolicyId,
+                                                                   Boolean withCommonPolicies,
                                                                    MessageContext messageContext) {
 
         try {
@@ -2879,6 +2889,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
+            } else if (withCommonPolicies) {
+                policyData = apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, true);
+                if (policyData != null) {
+                    File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
+                    return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + file.getName() + "\"").build();
+                }
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
                         + operationPolicyId + " for API " + apiId,
