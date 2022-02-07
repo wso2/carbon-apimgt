@@ -17,13 +17,12 @@
  *  under the License.
  *
  */
-
 package org.wso2.carbon.apimgt.rest.api.devops.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.devops.impl.logging.PerAPILoggingImpl;
+import org.wso2.carbon.apimgt.devops.impl.logging.APILoggingImpl;
 import org.wso2.carbon.apimgt.impl.dto.APILogInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.DevopsAPIUtils;
 import org.wso2.carbon.apimgt.rest.api.devops.TenantLogsApiService;
@@ -38,8 +37,9 @@ import javax.ws.rs.core.Response;
  */
 public class TenantLogsApiServiceImpl implements TenantLogsApiService {
 
-    public Response tenantLogsTenantIdApisApiIdGet(String tenantId, String apiId, MessageContext messageContext) throws APIManagementException {
-        PerAPILoggingImpl perAPILogging = new PerAPILoggingImpl();
+    public Response tenantLogsTenantIdApisApiIdGet(String tenantId, String apiId, MessageContext messageContext)
+            throws APIManagementException {
+        APILoggingImpl perAPILogging = new APILoggingImpl();
         List<APILogInfoDTO> apiLogInfoDTOList = perAPILogging.getAPILoggerListByApiId(tenantId, apiId);
         LoggingApiOutputListDTO loggingApiOutputListDT = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
         return Response.ok().entity(loggingApiOutputListDT).build();
@@ -49,8 +49,8 @@ public class TenantLogsApiServiceImpl implements TenantLogsApiService {
             MessageContext messageContext) throws APIManagementException {
         if (apiId != null) {
             if (DevopsAPIUtils.validateLogLevel(loggingApiInputDTO.getLogLevel())) {
-                PerAPILoggingImpl perAPILogging = new PerAPILoggingImpl();
-                perAPILogging.addUpdateAPILogger(tenantId, apiId, loggingApiInputDTO.getLogLevel());
+                APILoggingImpl perAPILogging = new APILoggingImpl();
+                perAPILogging.addUpdateAPILogger(tenantId, apiId, loggingApiInputDTO.getLogLevel().toUpperCase());
                 return Response.ok().entity(loggingApiInputDTO).build();
             } else {
                 throw new APIManagementException("The input log level is incorrect: Input log level : " +
@@ -63,10 +63,10 @@ public class TenantLogsApiServiceImpl implements TenantLogsApiService {
         }
     }
 
-    public Response tenantLogsTenantIdApisGet(String tenantId, Boolean loggingEnabled, MessageContext messageContext)
+    public Response tenantLogsTenantIdApisGet(String tenantId, String logLevel, MessageContext messageContext)
             throws APIManagementException {
-        PerAPILoggingImpl perAPILogging = new PerAPILoggingImpl();
-        List<APILogInfoDTO> apiLogInfoDTOList = perAPILogging.getAPILoggerList(tenantId, loggingEnabled);
+        APILoggingImpl perAPILogging = new APILoggingImpl();
+        List<APILogInfoDTO> apiLogInfoDTOList = perAPILogging.getAPILoggerList(tenantId, logLevel);
         LoggingApiOutputListDTO loggingApiOutputListDTO = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
         return Response.ok().entity(loggingApiOutputListDTO).build();
     }

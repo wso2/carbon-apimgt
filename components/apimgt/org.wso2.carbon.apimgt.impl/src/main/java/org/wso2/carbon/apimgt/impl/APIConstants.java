@@ -2166,6 +2166,16 @@ public final class APIConstants {
     public static final String LOG_ALL_METHODS = "logAllMethods";
     public static final String AM_ACTIVITY_ID = "activityid";
 
+    /**
+     * Constants for API logging
+     */
+    public static final String API_LOGGER = "API_LOG";
+    public static final String LOG_LEVEL = "LOG_LEVEL";
+    public static final String LOG_LEVEL_OFF = "OFF";
+    public static final String LOG_LEVEL_BASIC = "BASIC";
+    public static final String LOG_LEVEL_STANDARD = "STANDARD";
+    public static final String LOG_LEVEL_FULL = "FULL";
+
     public static final String PDF_EXTENSION = "pdf";
     public static final String XLS_EXTENSION = "xls";
     public static final String XLSX_EXTENSION = "xlsx";
