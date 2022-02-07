@@ -50,7 +50,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -747,7 +747,7 @@ public class ExportUtils {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        OperationPolicyDataHolder policyData =
+                        OperationPolicyData policyData =
                                 apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
                                         tenantDomain, true);
                         if (policyData != null) {
@@ -760,8 +760,13 @@ public class ExportUtils {
                                         ImportExportConstants.TYPE_POLICY_SPECIFICATION,
                                         policyData.getSpecification());
                             }
-                            if (policyData.getDefinition() != null) {
-                                CommonUtil.writeFile(policyName + ".j2", policyData.getDefinition());
+                            if (policyData.getSynapsePolicyDefinition() != null) {
+                                CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
+                                        policyData.getSynapsePolicyDefinition().getContent());
+                            }
+                            if (policyData.getCcPolicyDefinition() != null) {
+                                CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
+                                        policyData.getCcPolicyDefinition().getContent());
                             }
                         }
                     }

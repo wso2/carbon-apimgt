@@ -8037,9 +8037,13 @@ paths:
                   type: string
                   description: Policy specification to upload
                   format: binary
-                policyDefinitionFile:
+                synapsePolicyDefinitionFile:
                   type: string
-                  description: Policy definition to upload
+                  description: Operation policy definition of synapse gateway to upload
+                  format: binary
+                ccDefinitionFile:
+                  type: string
+                  description: Operation policy definition of choreo connect to upload
                   format: binary
         required: true
       responses:
@@ -8253,9 +8257,13 @@ paths:
                   type: string
                   description: Operation policy specification to upload
                   format: binary
-                policyDefinitionFile:
+                synapsePolicyDefinitionFile:
                   type: string
-                  description: Operation policy definition to upload
+                  description: Operation policy definition of synapse gateway to upload
+                  format: binary
+                ccDefinitionFile:
+                  type: string
+                  description: Operation policy definition of choreo connect to upload
                   format: binary
         required: true
       responses:
@@ -12113,19 +12121,19 @@ components:
       title: Operation Policy Data
       type: object
       properties:
-        policyCategory:
+        category:
           type: string
           example: Mediation
-        policyId:
+        id:
           type: string
           example: 121223q41-24141-124124124-12414
-        policyName:
+        name:
           type: string
           example: removeHeaderPolicy
-        policyDisplayName:
+        displayName:
           type: string
           example: Remove Header Policy
-        policyDescription:
+        description:
           type: string
           example: With this policy, user can add a new header to the request
         applicableFlows:
@@ -12152,7 +12160,7 @@ components:
         md5:
           type: string
           example: 121223q41-24141-124124124-12414
-        polictAttributes:
+        policyAttributes:
           type: array
           items:
             $ref: '#/components/schemas/OperationPolicySpecAttribute'

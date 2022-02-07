@@ -62,7 +62,8 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -441,16 +442,38 @@ public class ImportUtils {
                             OperationPolicySpecification policySpec =
                                     getOperationPolicySpecificationFromFile(extractedFolderPath,
                                             policy.getPolicyName());
-                            String policyDefinition =
-                                    getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName());
+                            String synapsePolicyDefinition =
+                                    getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName(),
+                                            APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
 
-                            OperationPolicyDataHolder operationPolicyData = new OperationPolicyDataHolder();
+                            OperationPolicyDefinition synapseDefinition = null;
+                            OperationPolicyDefinition ccDefinition = null;
+                            if (synapsePolicyDefinition != null) {
+                                synapseDefinition = new OperationPolicyDefinition();
+                                synapseDefinition.setContent(synapsePolicyDefinition);
+                                synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                synapseDefinition.setMd5Hash(APIUtil
+                                        .getMd5OfOperationPolicyDefinition(synapseDefinition));
+                            }
+                            String ccPolicyDefinition =
+                                    getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName(),
+                                            APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                            if (ccPolicyDefinition != null) {
+                                ccDefinition = new OperationPolicyDefinition();
+                                ccDefinition.setContent(ccPolicyDefinition);
+                                ccDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                ccDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(ccDefinition));
+                            }
+
+                            OperationPolicyData operationPolicyData = new OperationPolicyData();
                             operationPolicyData.setApiUUID(api.getUuid());
-                            operationPolicyData.setDefinition(policyDefinition);
+                            operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                            operationPolicyData.setCcPolicyDefinition(ccDefinition);
                             operationPolicyData.setSpecification(policySpec);
                             operationPolicyData.setOrganization(tenantDomain);
                             operationPolicyData
-                                    .setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpec, policyDefinition));
+                                    .setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpec, synapseDefinition,
+                                            ccDefinition));
                             String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
                             policy.setPolicyId(policyID);
                             validatedOperationPolicies.add(policy);
@@ -498,12 +521,12 @@ public class ImportUtils {
         }
     }
 
-    public static String getOperationPolicyDefinitionFromFile(String extractedFolderPath, String policyName)
-            throws APIManagementException {
+    public static String getOperationPolicyDefinitionFromFile(String extractedFolderPath, String policyName,
+                                                              String extension) throws APIManagementException {
         String yamlContent = null;
         try {
             String fileName = extractedFolderPath + File.separator
-                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator + policyName + ".j2";
+                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator + policyName + extension;
 
             if (CommonUtil.checkFileExistence(fileName)) {
                 if (log.isDebugEnabled()) {

@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Objects;
+
 public class OperationPolicySpecAttribute {
 
     private String name;
@@ -86,5 +88,25 @@ public class OperationPolicySpecAttribute {
     public void setRequired(boolean required) {
 
         this.required = required;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+        if (!(o instanceof OperationPolicySpecAttribute)) return false;
+        OperationPolicySpecAttribute that = (OperationPolicySpecAttribute) o;
+        return required == that.required &&
+                name.equals(that.name) &&
+                Objects.equals(displayName, that.displayName) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(validationRegex, that.validationRegex) &&
+                type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(name, displayName, description, validationRegex, type, required);
     }
 }

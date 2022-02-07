@@ -1852,36 +1852,36 @@ public interface APIProvider extends APIManager {
      * Import an operation policy from the API CTL project. This will either create a new API specific policy,
      * update existing API specific policy or return the policyID of existing policy if policy content is not changed.
      *
-     * @param operationPolicyDataHolder Operation Policy Data
+     * @param operationPolicyData Operation Policy Data
      * @param organization              Organization name
      * @return UUID of the imported operation policy
      * @throws APIManagementException
      */
-    String importOperationPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String organization)
+    String importOperationPolicy(OperationPolicyData operationPolicyData, String organization)
             throws APIManagementException;
 
     /**
      * Add an API specific operation policy
      *
      * @param apiUUID                   UUID of the API which the policy should be added to
-     * @param operationPolicyDataHolder Operation Policy Data that includes policy specification and policy definition
+     * @param operationPolicyData Operation Policy Data that includes policy specification and policy definition
      * @param organization              Organization name
      * @return status of the policy storage
      * @throws APIManagementException
      */
-    String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder,
+    String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyData operationPolicyData,
                                          String organization)
             throws APIManagementException;
 
     /**
      * Add common operation policy.
      *
-     * @param operationPolicyDataHolder Operation Policy Data that includes policy specification and policy definition
+     * @param operationPolicyData Operation Policy Data that includes policy specification and policy definition
      * @param organization              Organization name
      * @return status of the policy storage
      * @throws APIManagementException
      */
-    String addCommonOperationPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String organization)
+    String addCommonOperationPolicy(OperationPolicyData operationPolicyData, String organization)
             throws APIManagementException;
 
     /**
@@ -1900,10 +1900,10 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
-                                                                        String revisionUUID,
-                                                                        String organization,
-                                                                        boolean isWithPolicyDefinition)
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
+                                                                  String revisionUUID,
+                                                                  String organization,
+                                                                  boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
@@ -1917,8 +1917,8 @@ public interface APIProvider extends APIManager {
      * @return Common Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getCommonOperationPolicyByPolicyName(String policyName, String organization,
-                                                                   boolean isWithPolicyDefinition)
+    OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String organization,
+                                                             boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
@@ -1933,9 +1933,9 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
-                                                                      String organization,
-                                                                      boolean isWithPolicyDefinition)
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
+                                                                String organization,
+                                                                boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
@@ -1949,8 +1949,8 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyDataHolder getCommonOperationPolicyByPolicyId(String policyId, String organization,
-                                                                 boolean isWithPolicyDefinition)
+    OperationPolicyData getCommonOperationPolicyByPolicyId(String policyId, String organization,
+                                                           boolean isWithPolicyDefinition)
             throws APIManagementException;
 
     /**
@@ -1962,30 +1962,30 @@ public interface APIProvider extends APIManager {
      * @return status of the policy update
      * @throws APIManagementException
      */
-    void updateOperationPolicy(String operationPolicyId, OperationPolicyDataHolder operationPolicyData,
+    void updateOperationPolicy(String operationPolicyId, OperationPolicyData operationPolicyData,
                                String organization) throws APIManagementException;
 
     /**
      * Get a light weight version of all the common policies for the tenant domain. This will not include the policy
-     * definition as it is bulky. Policy specification and policy UUID will be included in the policyDataHolder object.
+     * definition as it is bulky. Policy specification and policy UUID will be included in the policyData object.
      *
      * @param organization Organization name
      * @return List of Operation Policies
      * @throws APIManagementException
      */
-    List<OperationPolicyDataHolder> getAllCommonOperationPolicies(String organization)
+    List<OperationPolicyData> getAllCommonOperationPolicies(String organization)
             throws APIManagementException;
 
     /**
      * Get a light weight version of all the API Specific Operation policies. This will not include the policy
-     * definition as it is bulky. Policy specification and policy UUID will be included in the policyDataHolder object.
+     * definition as it is bulky. Policy specification and policy UUID will be included in the policyData object.
      *
      * @param apiUUID      UUID of the API
      * @param organization Organization name
      * @return List of Operation Policies
      * @throws APIManagementException
      */
-    List<OperationPolicyDataHolder> getAllAPISpecificOperationPolicies(String apiUUID, String organization)
+    List<OperationPolicyData> getAllAPISpecificOperationPolicies(String apiUUID, String organization)
             throws APIManagementException;
 
     /**

@@ -84,7 +84,7 @@ import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
@@ -2506,7 +2506,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (OperationPolicy policy : operationPolicies) {
                     String policyId = policy.getPolicyId();
                     // First check the API specific operation policy list
-                    OperationPolicyDataHolder policyData =
+                    OperationPolicyData policyData =
                             getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, true);
                     if (policyData != null) {
                         if (log.isDebugEnabled()) {
@@ -2524,7 +2524,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     } else {
                         //TODO: get policy based on the name
-                        OperationPolicyDataHolder commonPolicyData =
+                        OperationPolicyData commonPolicyData =
                                 getCommonOperationPolicyByPolicyId(policyId, tenantDomain, false);
                         if (commonPolicyData != null) {
                             // A common policy is found for specified policy. This will be validated according to the provided
@@ -9556,11 +9556,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to delete APIRevision
      */
     @Override
-    public String importOperationPolicy(OperationPolicyDataHolder importedPolicyData, String organization)
+    public String importOperationPolicy(OperationPolicyData importedPolicyData, String organization)
             throws APIManagementException {
 
         OperationPolicySpecification importedSpec = importedPolicyData.getSpecification();
-        OperationPolicyDataHolder existingOperationPolicy =
+        OperationPolicyData existingOperationPolicy =
                 getAPISpecificOperationPolicyByPolicyName(importedSpec.getName(), importedPolicyData.getApiUUID(),
                         null, organization, false);
         String policyId = null;
@@ -9590,8 +9590,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     importedSpec.setName(importedSpec.getName() + "_imported");
                     importedSpec.setDisplayName(importedSpec.getDisplayName() + " Imported");
                     importedPolicyData.setSpecification(importedSpec);
-                    importedPolicyData.setMd5Hash(
-                            APIUtil.getMd5OfOperationPolicy(importedSpec, importedPolicyData.getDefinition()));
+                    importedPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(importedSpec,
+                                    importedPolicyData.getSynapsePolicyDefinition(),
+                                    importedPolicyData.getCcPolicyDefinition()));
                     policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
                             organization);
                     if (log.isDebugEnabled()) {
@@ -9615,24 +9616,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyDataHolder operationPolicyDataHolder,
+    public String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyData operationPolicyData,
                                                 String tenantDomain)
             throws APIManagementException {
 
-        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, null, operationPolicyDataHolder);
+        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, null, operationPolicyData);
     }
 
     @Override
-    public String addCommonOperationPolicy(OperationPolicyDataHolder operationPolicyDataHolder, String tenantDomain)
+    public String addCommonOperationPolicy(OperationPolicyData operationPolicyData, String tenantDomain)
             throws APIManagementException {
 
-        return apiMgtDAO.addCommonOperationPolicy(operationPolicyDataHolder);
+        return apiMgtDAO.addCommonOperationPolicy(operationPolicyData);
     }
 
     @Override
-    public OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
-                                                                               String revisionUUID, String tenantDomain,
-                                                                               boolean isWithPolicyDefinition)
+    public OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
+                                                                         String revisionUUID, String tenantDomain,
+                                                                         boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         return apiMgtDAO.getAPISpecificOperationPolicyByPolicyName(policyName, apiUUID, revisionUUID, tenantDomain,
@@ -9640,17 +9641,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public OperationPolicyDataHolder getCommonOperationPolicyByPolicyName(String policyName, String tenantDomain,
-                                                                          boolean isWithPolicyDefinition)
+    public OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String tenantDomain,
+                                                                    boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         return apiMgtDAO.getCommonOperationPolicyByPolicyName(policyName, tenantDomain, isWithPolicyDefinition);
     }
 
     @Override
-    public OperationPolicyDataHolder getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
-                                                                             String organization,
-                                                                             boolean isWithPolicyDefinition)
+    public OperationPolicyData getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
+                                                                       String organization,
+                                                                       boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         return apiMgtDAO
@@ -9658,29 +9659,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public OperationPolicyDataHolder getCommonOperationPolicyByPolicyId(String policyId, String organization,
-                                                                        boolean isWithPolicyDefinition)
+    public OperationPolicyData getCommonOperationPolicyByPolicyId(String policyId, String organization,
+                                                                  boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         return apiMgtDAO.getCommonOperationPolicyByPolicyID(policyId, organization, isWithPolicyDefinition);
     }
 
     @Override
-    public void updateOperationPolicy(String operationPolicyId, OperationPolicyDataHolder operationPolicyDataHolder,
+    public void updateOperationPolicy(String operationPolicyId, OperationPolicyData operationPolicyData,
                                       String tenantDomain) throws APIManagementException {
 
-        apiMgtDAO.updateOperationPolicy(operationPolicyId, operationPolicyDataHolder);
+        apiMgtDAO.updateOperationPolicy(operationPolicyId, operationPolicyData);
     }
 
     @Override
-    public List<OperationPolicyDataHolder> getAllCommonOperationPolicies(String tenantDomain)
+    public List<OperationPolicyData> getAllCommonOperationPolicies(String tenantDomain)
             throws APIManagementException {
 
         return apiMgtDAO.getLightWeightVersionOfAllOperationPolicies(null, tenantDomain);
     }
 
     @Override
-    public List<OperationPolicyDataHolder> getAllAPISpecificOperationPolicies(String apiUUID, String tenantDomain)
+    public List<OperationPolicyData> getAllAPISpecificOperationPolicies(String apiUUID, String tenantDomain)
             throws APIManagementException {
 
         return apiMgtDAO.getLightWeightVersionOfAllOperationPolicies(apiUUID, tenantDomain);

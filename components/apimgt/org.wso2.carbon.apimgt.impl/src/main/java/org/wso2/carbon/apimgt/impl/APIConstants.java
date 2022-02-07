@@ -2862,6 +2862,9 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_REQUEST = "request";
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
+    public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
+    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmp";
+    public static final String YAML_CONTENT_TYPE = "text/yaml";
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
 

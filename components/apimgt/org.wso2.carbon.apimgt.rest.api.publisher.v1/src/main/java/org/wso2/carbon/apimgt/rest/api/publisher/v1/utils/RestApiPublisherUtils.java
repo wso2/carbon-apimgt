@@ -28,7 +28,7 @@ import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -253,7 +253,17 @@ public class RestApiPublisherUtils {
         return content;
     }
 
-    public static File exportOperationPolicyData(OperationPolicyDataHolder policyData)
+    public static String getContentType(Attachment fileDetail) {
+        String fileName = fileDetail.getDataHandler().getName();
+        String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+
+        if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+            fileContentType = fileDetail.getContentType().toString();
+        }
+        return fileContentType;
+    }
+
+    public static File exportOperationPolicyData(OperationPolicyData policyData)
             throws APIManagementException {
 
         File exportFolder = null;
@@ -269,8 +279,13 @@ public class RestApiPublisherUtils {
                         ImportExportConstants.TYPE_POLICY_SPECIFICATION,
                         policyData.getSpecification());
             }
-            if (policyData.getDefinition() != null) {
-                CommonUtil.writeFile(policyName + ".j2", policyData.getDefinition());
+            if (policyData.getSynapsePolicyDefinition() != null) {
+                CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
+                        policyData.getSynapsePolicyDefinition().getContent());
+            }
+            if (policyData.getCcPolicyDefinition() != null) {
+                CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
+                        policyData.getCcPolicyDefinition().getContent());
             }
 
             CommonUtil.archiveDirectory(exportAPIBasePath);

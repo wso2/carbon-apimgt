@@ -20,16 +20,17 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.Objects;
 
-public class OperationPolicyDataHolder {
+public class OperationPolicyData {
 
     private String policyId;
-    private String definition;
     private String organization;
     private String md5Hash;
     private String apiUUID;      // Null for common policies
     private String revisionUUID; // Null for common policies and API specific policies that are not revisioned yet
     private String clonedCommonPolicyId;    // Null for common policies and API specific policies that are not cloned.
     private OperationPolicySpecification specification;
+    private OperationPolicyDefinition synapsePolicyDefinition;
+    private OperationPolicyDefinition ccPolicyDefinition;
 
     public String getPolicyId() {
 
@@ -49,16 +50,6 @@ public class OperationPolicyDataHolder {
     public void setSpecification(OperationPolicySpecification specification) {
 
         this.specification = specification;
-    }
-
-    public String getDefinition() {
-
-        return definition;
-    }
-
-    public void setDefinition(String definition) {
-
-        this.definition = definition;
     }
 
     public String getOrganization() {
@@ -126,22 +117,43 @@ public class OperationPolicyDataHolder {
         return revisionUUID != null;
     }
 
+    public OperationPolicyDefinition getSynapsePolicyDefinition() {
+
+        return synapsePolicyDefinition;
+    }
+
+    public void setSynapsePolicyDefinition(OperationPolicyDefinition synapsePolicyDefinition) {
+
+        this.synapsePolicyDefinition = synapsePolicyDefinition;
+    }
+
+    public OperationPolicyDefinition getCcPolicyDefinition() {
+
+        return ccPolicyDefinition;
+    }
+
+    public void setCcPolicyDefinition(OperationPolicyDefinition ccPolicyDefinition) {
+
+        this.ccPolicyDefinition = ccPolicyDefinition;
+    }
+
     @Override
     public boolean equals(Object o) {
 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OperationPolicyDataHolder that = (OperationPolicyDataHolder) o;
-        return Objects.equals(policyId, that.policyId) &&
+        OperationPolicyData that = (OperationPolicyData) o;
+        return policyId.equals(that.policyId) &&
                 Objects.equals(specification, that.specification) &&
-                Objects.equals(definition, that.definition) &&
-                Objects.equals(md5Hash, that.md5Hash) &&
-                Objects.equals(organization, that.organization);
+                Objects.equals(synapsePolicyDefinition, that.synapsePolicyDefinition) &&
+                Objects.equals(ccPolicyDefinition, that.ccPolicyDefinition) &&
+                md5Hash.equals(that.md5Hash) &&
+                organization.equals(that.organization);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(policyId, specification, definition, md5Hash, organization);
+        return Objects.hash(policyId, specification, synapsePolicyDefinition, md5Hash, organization);
     }
 }

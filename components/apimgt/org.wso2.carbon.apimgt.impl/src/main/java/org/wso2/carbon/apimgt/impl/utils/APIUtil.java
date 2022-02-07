@@ -125,7 +125,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDataHolder;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -11538,8 +11538,39 @@ public final class APIUtil {
         }
         return policyParamsString;
     }
-    public static String getMd5OfOperationPolicy(OperationPolicySpecification policySpecification, String policyDefinition) {
-        String policySpecificationAsString = new Gson().toJson(policySpecification);
-        return DigestUtils.md5Hex(policySpecificationAsString + policyDefinition);
+
+
+    public static String getMd5OfOperationPolicy(OperationPolicySpecification policySpecification,
+                                                 OperationPolicyDefinition synapsePolicyDefinition,
+                                                 OperationPolicyDefinition ccPolicyDefinition) {
+
+        String policySpecificationAsString = "";
+        String synapsePolicyDefinitionAsString = "";
+        String ccPolicyDefinitionAsString = "";
+
+        if (policySpecification != null) {
+            policySpecificationAsString = new Gson().toJson(policySpecification);
+        }
+        if (synapsePolicyDefinition != null) {
+            synapsePolicyDefinitionAsString = new Gson().toJson(synapsePolicyDefinition);
+        }
+        if (ccPolicyDefinition != null) {
+            ccPolicyDefinitionAsString = new Gson().toJson(ccPolicyDefinition);
+        }
+
+        return DigestUtils.md5Hex(policySpecificationAsString + synapsePolicyDefinitionAsString
+                + ccPolicyDefinitionAsString);
+    }
+
+    public static String getMd5OfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition) {
+
+        String md5Hash= "";
+
+        if (policyDefinition != null) {
+            if (policyDefinition.getContent() != null) {
+                md5Hash = DigestUtils.md5Hex(policyDefinition.getContent());
+            }
+        }
+        return md5Hash;
     }
 }
