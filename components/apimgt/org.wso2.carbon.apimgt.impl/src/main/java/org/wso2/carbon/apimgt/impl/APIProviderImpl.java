@@ -5175,13 +5175,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         || endPoint != null && endPoint.trim().length() > 0
                         || api.isAdvertiseOnly() && (api.getApiExternalProductionEndpoint() != null
                         || api.getApiExternalSandboxEndpoint() != null)) {
-                    if ((isOauthProtected && (tiers == null || tiers.size() <= 0)) && !api.isAdvertiseOnly()) {
-                        throw new APIManagementException("Failed to publish service to API store while executing "
-                                + "APIExecutor. No Tiers selected");
+                    if ((isOauthProtected && (tiers == null || tiers.size() == 0)) && !api.isAdvertiseOnly()) {
+                        throw new APIManagementException("Failed to publish service to API store. No Tiers selected");
                     }
                 } else {
-                    throw new APIManagementException("Failed to publish service to API store while executing"
-                            + " APIExecutor. No endpoint selected");
+                    throw new APIManagementException("Failed to publish service to API store. No endpoint selected");
                 }
             }
 
