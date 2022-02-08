@@ -35,10 +35,10 @@ import java.util.List;
 /**
  * API logging implementation.
  */
-public class PerAPILoggingImpl {
+public class APILoggingImpl {
     private static final String PER_API_LOGGING_PERMISSION_PATH = "/permission/protected/configure/logging";
     private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
-    private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    private final ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     public void addUpdateAPILogger(String tenantId, String apiId, String logLevel) throws APIManagementException {
         if (apiMgtDAO.getAPIInfoByUUID(apiId) == null) {
@@ -59,12 +59,12 @@ public class PerAPILoggingImpl {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    public List<APILogInfoDTO> getAPILoggerList(String tenantId, boolean loggingEnabled) throws APIManagementException {
+    public List<APILogInfoDTO> getAPILoggerList(String tenantId, String logLevel) throws APIManagementException {
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), PER_API_LOGGING_PERMISSION_PATH)) {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
         }
-        return LoggingMgtDAO.getInstance().retrieveAPILoggerList(tenantId, loggingEnabled);
+        return LoggingMgtDAO.getInstance().retrieveAPILoggerList(tenantId, logLevel);
     }
 
     public List<APILogInfoDTO> getAPILoggerListByApiId(String tenantId, String apiId) throws APIManagementException {

@@ -128,11 +128,11 @@ public class LoggingMgtDAOTest {
         String apiId = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
         loggingMgtDAO.addAPILogger("org1", apiId, "FULL");
 
-        apiLogInfoDTOList = loggingMgtDAO.retrieveAPILoggerList("org1", false);
+        apiLogInfoDTOList = loggingMgtDAO.retrieveAPILoggerList("org1", "FULL");
         assertTrue(apiLogInfoDTOList.size() > 0);
         assertTrue(isContainGivenLoggingAPI(apiLogInfoDTOList, apiId, "FULL"));
 
-        apiLogInfoDTOList = loggingMgtDAO.retrieveAPILoggerList("org1", true);
+        apiLogInfoDTOList = loggingMgtDAO.retrieveAPILoggerList("org1", "FULL");
         assertTrue(apiLogInfoDTOList.size() == 1);
         assertTrue(isContainGivenLoggingAPI(apiLogInfoDTOList, apiId, "FULL"));
 
@@ -142,11 +142,11 @@ public class LoggingMgtDAOTest {
 
         loggingMgtDAO.addAPILogger("org1", apiId, "OFF");
 
-        apiLogInfoDTOList = loggingMgtDAO.retrieveAPILoggerList("org1", false);
+        apiLogInfoDTOList = loggingMgtDAO.retrieveAPILoggerList("org1", "OFF");
         assertTrue(apiLogInfoDTOList.size() > 0);
         assertTrue(isContainGivenLoggingAPI(apiLogInfoDTOList, apiId, "OFF"));
 
-        apiLogInfoDTOList = loggingMgtDAO.retrieveAPILoggerList("org1", true);
+        apiLogInfoDTOList = loggingMgtDAO.retrieveAPILoggerList("org1", "FULL");
         assertTrue(apiLogInfoDTOList.size() == 0);
         assertTrue(!isContainGivenLoggingAPI(apiLogInfoDTOList, apiId, "OFF"));
     }
