@@ -466,6 +466,7 @@
                             org.wso2.carbon.apimgt.common.gateway.*,
                             org.wso2.carbon.apimgt.common.jms.*,
                             org.wso2.carbon.apimgt.usage.publisher.*; version="${carbon.apimgt.imp.pkg.version}",
+                            javax.annotation;resolution:=optional,
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
