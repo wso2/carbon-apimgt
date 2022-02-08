@@ -6839,7 +6839,7 @@ public class ApiMgtDAO {
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             //Delete all comments associated with given API
-            deleteAPIComments(uuid, connection);
+            deleteAPIComments(id, uuid, connection);
 
             prepStmt = connection.prepareStatement(deleteRatingsQuery);
             prepStmt.setInt(1, id);
@@ -7709,23 +7709,18 @@ public class ApiMgtDAO {
         return false;
     }
 
-    private void deleteAPIComments(String uuid, Connection connection) throws APIManagementException {
-        int id = -1;
-        ResultSet resultSet = null;
+    private void deleteAPIComments(int apiId, String uuid, Connection connection) throws APIManagementException {
         try {
-            id = getAPIID(uuid, connection);
-            if (id == -1) {
-                String msg = "Could not load API record for API with UUID: " + uuid;
-                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
-            }
             connection.setAutoCommit(false);
-            String getParentCommentIdsQuery = SQLConstants.GET_PARENT_COMMENT_IDS_FOR_API;
-            try (PreparedStatement preparedStmt = connection.prepareStatement(getParentCommentIdsQuery)) {
-                preparedStmt.setInt(1, id);
-                resultSet = preparedStmt.executeQuery();
-                while (resultSet.next()) {
-                    deleteComment(uuid, resultSet.getString("COMMENT_ID"), connection);
-                }
+            String deleteChildComments = SQLConstants.DELETE_API_CHILD_COMMENTS;
+            String deleteParentComments = SQLConstants.DELETE_API_PARENT_COMMENTS;
+            try (PreparedStatement childCommentPreparedStmt = connection.prepareStatement(deleteChildComments);
+            PreparedStatement parentCommentPreparedStmt = connection.prepareStatement(deleteParentComments)) {
+                childCommentPreparedStmt.setInt(1, apiId);
+                childCommentPreparedStmt.execute();
+
+                parentCommentPreparedStmt.setInt(1, apiId);
+                parentCommentPreparedStmt.execute();
             }
         } catch (SQLException e) {
             handleException("Error while deleting comments for API " + uuid, e);
