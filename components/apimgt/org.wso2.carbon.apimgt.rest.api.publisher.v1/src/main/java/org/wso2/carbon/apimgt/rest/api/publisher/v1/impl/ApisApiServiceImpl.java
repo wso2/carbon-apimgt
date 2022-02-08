@@ -2675,12 +2675,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Add an API specific operation policy
      *
-     * @param apiId                           UUID of the API
-     * @param policySpecFileInputStream       Input stream of the policy specification file
-     * @param policySpecFileDetail            Operation policy specification
-     * @param policyDefinitionFileInputStream Input stream of the policy definition file
-     * @param policyDefinitionFileDetail      Definition of the Operation policy
-     * @param messageContext                  message context
+     * @param apiId                                  UUID of the API
+     * @param policySpecFileInputStream              Input stream of the policy specification file
+     * @param policySpecFileDetail                   Operation policy specification
+     * @param synapsePolicyDefinitionFileInputStream Input stream of the synapse policy definition file
+     * @param synapsePolicyDefinitionFileDetail      Synapse definition of the operation policy
+     * @param ccPolicyDefinitionFileInputStream      Input stream of the choreo connect policy definition file
+     * @param ccPolicyDefinitionFileDetail           Choreo connect definition of the operation policy
+     * @param messageContext                         message context
      * @return Added Operation operation policy DTO as response
      */
     @Override
@@ -2688,8 +2690,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                   Attachment policySpecFileDetail,
                                                   InputStream synapsePolicyDefinitionFileInputStream,
                                                   Attachment synapsePolicyDefinitionFileDetail,
-                                                  InputStream ccDefinitionFileInputStream,
-                                                  Attachment ccDefinitionFileDetail, MessageContext messageContext) {
+                                                  InputStream ccPolicyDefinitionFileInputStream,
+                                                  Attachment ccPolicyDefinitionFileDetail,
+                                                  MessageContext messageContext) {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2746,9 +2749,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
                 }
 
-                if (ccDefinitionFileInputStream != null) {
-                    String choreoConnectPolicyDefinition =
-                            RestApiPublisherUtils.readInputStream(ccDefinitionFileInputStream, ccDefinitionFileDetail);
+                if (ccPolicyDefinitionFileInputStream != null) {
+                    String choreoConnectPolicyDefinition = RestApiPublisherUtils
+                            .readInputStream(ccPolicyDefinitionFileInputStream, ccPolicyDefinitionFileDetail);
                     ccPolicyDefinition = new OperationPolicyDefinition();
                     ccPolicyDefinition.setContent(choreoConnectPolicyDefinition);
                     ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);

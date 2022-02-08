@@ -59,18 +59,21 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
     /**
      * Add a common operation policy that can be used by all the APIs
      *
-     * @param policySpecFileInputStream       Input stream of the common policy specification file
-     * @param policySpecFileDetail            Common policy specification
-     * @param policyDefinitionFileInputStream Input stream of the common policy definition file
-     * @param policyDefinitionFileDetail      Definition of the common policy
-     * @param messageContext                  message context
+     * @param policySpecFileInputStream              Input stream of the common policy specification file
+     * @param policySpecFileDetail                   Common policy specification
+     * @param synapsePolicyDefinitionFileInputStream Input stream of the synapse policy definition file
+     * @param synapsePolicyDefinitionFileDetail      Synapse definition of the operation policy
+     * @param ccPolicyDefinitionFileInputStream      Input stream of the choreo connect policy definition file
+     * @param ccPolicyDefinitionFileDetail           Choreo connect definition of the operation policy
+     * @param messageContext                         message context
      * @return Added common operation policy DTO as response
      */
     @Override
     public Response addCommonOperationPolicy(InputStream policySpecFileInputStream, Attachment policySpecFileDetail,
                                              InputStream synapsePolicyDefinitionFileInputStream,
                                              Attachment synapsePolicyDefinitionFileDetail,
-                                             InputStream ccDefinitionFileInputStream, Attachment ccDefinitionFileDetail,
+                                             InputStream ccPolicyDefinitionFileInputStream,
+                                             Attachment ccPolicyDefinitionFileDetail,
                                              MessageContext messageContext) throws APIManagementException {
 
         try {
@@ -124,9 +127,9 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                     operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
                 }
 
-                if (ccDefinitionFileInputStream != null) {
-                    String choreoConnectPolicyDefinition =
-                            RestApiPublisherUtils.readInputStream(ccDefinitionFileInputStream, ccDefinitionFileDetail);
+                if (ccPolicyDefinitionFileInputStream != null) {
+                    String choreoConnectPolicyDefinition = RestApiPublisherUtils
+                            .readInputStream(ccPolicyDefinitionFileInputStream, ccPolicyDefinitionFileDetail);
                     ccPolicyDefinition = new OperationPolicyDefinition();
                     ccPolicyDefinition.setContent(choreoConnectPolicyDefinition);
                     ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
