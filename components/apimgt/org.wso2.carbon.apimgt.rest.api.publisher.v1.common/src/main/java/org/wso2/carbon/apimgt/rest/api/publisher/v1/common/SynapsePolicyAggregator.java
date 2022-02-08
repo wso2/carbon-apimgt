@@ -23,10 +23,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileUtil;
 
@@ -85,16 +87,18 @@ public class SynapsePolicyAggregator {
         key = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(key));
 
         List<String> caseBody = new ArrayList<>();
+        String policyDirectory = pathToAchieve + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
 
         List<OperationPolicy> operationPolicies = template.getOperationPolicies();
         Collections.sort(operationPolicies, new OperationPolicyComparator());
         for (OperationPolicy policy : operationPolicies) {
             if (flow.equals(policy.getDirection())) {
                 Map<String, Object> policyParameters = policy.getParameters();
-                String policyDefinition = ImportUtils.getOperationPolicyDefinitionFromFile(pathToAchieve,
-                        policy.getPolicyName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                OperationPolicyDefinition policyDefinition =
+                        APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory, policy.getPolicyName(),
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
                 if (policyDefinition != null) {
-                    String renderedTemplate = renderPolicyTemplate(policyDefinition, policyParameters);
+                    String renderedTemplate = renderPolicyTemplate(policyDefinition.getContent(), policyParameters);
                     if (renderedTemplate != null && !renderedTemplate.isEmpty()) {
                         caseBody.add(renderedTemplate);
                     }

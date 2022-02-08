@@ -18502,9 +18502,7 @@ public class ApiMgtDAO {
                             revisionedPolicy.getSpecification()
                                     .setDisplayName(revisionedPolicy.getSpecification().getDisplayName()
                                             + " Restored from revision " + revisionId);
-                            revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(
-                                    revisionedPolicy.getSpecification(), revisionedPolicy.getSynapsePolicyDefinition(),
-                                            revisionedPolicy.getCcPolicyDefinition()));
+                            revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(revisionedPolicy));
                             revisionedPolicy.setRevisionUUID(null);
                             restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null,
                                     revisionedPolicy, null);
@@ -18918,6 +18916,9 @@ public class ApiMgtDAO {
                 policyData.setPolicyId(rs.getString("POLICY_UUID"));
                 policyData.setMd5Hash(rs.getString("POLICY_MD5"));
                 policyData.setSpecification(populatePolicySpecificationFromRS(rs));
+                if (apiUUID != null) {
+                    policyData.setApiUUID(apiUUID);
+                }
                 policyDataList.add(policyData);
             }
         } catch (SQLException e) {
@@ -18925,6 +18926,25 @@ public class ApiMgtDAO {
         }
         return policyDataList;
     }
+
+    public int getOperationPolicyCount(String organization) throws APIManagementException {
+
+        int count = -1;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_THE_COUNT_OF_OPERATION_POLICIES_FOR_ORGANIZATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, organization);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("POLICY_COUNT");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the count of operation policies for organization " + organization, e);
+        }
+        return count;
+    }
+
+
 
     /**
      * This method will return a list of all cloned policies for an API.

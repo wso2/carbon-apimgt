@@ -18,13 +18,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -95,22 +92,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
                     jsonContent = CommonUtil.yamlToJson(jsonContent);
                 }
-                Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
-                if (schema != null) {
-                    try {
-                        org.json.JSONObject uploadedConfig = new org.json.JSONObject(jsonContent);
-                        schema.validate(uploadedConfig);
-                    } catch (ValidationException e) {
-                        List<String> errors = e.getAllMessages();
-                        String errorMessage =
-                                errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
-                        throw new APIManagementException("Policy specification validation failure. " + errorMessage,
-                                ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
-                                        errorMessage));
-                    }
-                }
-
-                policySpecification = new Gson().fromJson(jsonContent, OperationPolicySpecification.class);
+                policySpecification = APIUtil.getValidatedOperationPolicySpecification(jsonContent);
 
                 OperationPolicyData operationPolicyData = new OperationPolicyData();
                 operationPolicyData.setOrganization(organization);
@@ -137,8 +119,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                     operationPolicyData.setCcPolicyDefinition(ccPolicyDefinition);
                 }
 
-                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpecification,
-                        synapseDefinition, ccPolicyDefinition));
+                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
 
                 OperationPolicyData existingPolicy =
                         apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(), organization,
