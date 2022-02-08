@@ -22,6 +22,8 @@ import graphql.language.Document;
 import graphql.language.OperationDefinition;
 import graphql.parser.InvalidSyntaxException;
 import graphql.parser.Parser;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLType;
 import graphql.validation.Validator;
 import org.apache.axiom.om.OMElement;
@@ -101,7 +103,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 } else {
                     RelayUtils.buildMessage(axis2MC);
                     OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
-                    if (body != null && body.getChildrenWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null){
+                    if (body != null && body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null){
                         payload = body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)).getText();
                     } else {
                         if (log.isDebugEnabled()) {
@@ -164,7 +166,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
      * @param messageContext message context of the request
      */
     private void supportForBasicAndAuthentication(MessageContext messageContext) {
-        ArrayList<String> roleArrayList = new ArrayList<>();
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         HashMap<String, String> operationThrottlingMappingList = new HashMap<>();
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
@@ -175,56 +176,37 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
         if (graphQLSchemaDTO.getGraphQLSchema() != null) {
             Set<GraphQLType> additionalTypes = graphQLSchemaDTO.getGraphQLSchema().getAdditionalTypes();
-            for (GraphQLType additionalType : additionalTypes) {
-                if (additionalType.getName().startsWith(APIConstants.GRAPHQL_ADDITIONAL_TYPE_PREFIX)) {
-                    String[] additionalTypeNameArray = additionalType.getName().split("_", 2);
-                    String additionalTypeName;
-                    if (additionalTypeNameArray.length > 1) {
-                        additionalTypeName = additionalTypeNameArray[1];
-                    } else {
-                        additionalTypeName = additionalTypeNameArray[0];
-                    }
-                    String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalTypeName));
-                    for (GraphQLType type : additionalType.getChildren()) {
-                        if (additionalType.getName().contains(APIConstants.SCOPE_ROLE_MAPPING)) {
-                            String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            roleArrayList = new ArrayList<>();
-                            roleArrayList.add(base64DecodedURLRole);
-                        } else if (additionalType.getName().contains(APIConstants.SCOPE_OPERATION_MAPPING)) {
-                            String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Added operation " + base64DecodedAdditionalType + "with scope "
-                                        + base64DecodedURLScope);
-                            }
-                        } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
-                            String base64DecodedURLThrottlingTier = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            operationThrottlingMappingList.put(base64DecodedAdditionalType, base64DecodedURLThrottlingTier);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Added operation " + base64DecodedAdditionalType + "with throttling "
-                                        + base64DecodedURLThrottlingTier);
-                            }
-
-                        } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
-                            boolean isSecurityEnabled = true;
-                            if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
-                                isSecurityEnabled = false;
-                            }
-                            operationAuthSchemeMappingList.put(base64DecodedAdditionalType, isSecurityEnabled);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Added operation " + base64DecodedAdditionalType + "with security "
-                                        + isSecurityEnabled);
-                            }
-
-                        } else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
-                            graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
+            for (Object additionalType : additionalTypes.toArray()) {
+                if (additionalType instanceof GraphQLObjectType) {
+                    String additionalTypeName = ((GraphQLObjectType) additionalType).getName();
+                    if (additionalTypeName.startsWith(APIConstants.GRAPHQL_ADDITIONAL_TYPE_PREFIX)) {
+                        ArrayList<String> roleArrayList = new ArrayList<>();
+                        String[] additionalTypeNameArray = additionalTypeName.split("_", 2);
+                        String typeValue;
+                        if (additionalTypeNameArray.length > 1) {
+                            typeValue = additionalTypeNameArray[1];
+                        } else {
+                            typeValue = additionalTypeNameArray[0];
                         }
-                    }
-                    if (!roleArrayList.isEmpty()) {
-                        scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Added scope " + base64DecodedAdditionalType + "with role list "
-                                    + String.join(",", roleArrayList));
+
+                        String base64DecodedTypeValue = new String(Base64.getUrlDecoder().decode(typeValue));
+                        for (GraphQLFieldDefinition fieldDefinition : ((GraphQLObjectType) additionalType)
+                                .getFieldDefinitions()) {
+                            if (additionalTypeName.contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                                graphQLAccessControlPolicy = new String(
+                                        Base64.getUrlDecoder().decode(fieldDefinition.getName()));
+                            }
+                            // Fill in each list according to the relevant field definition
+                            setMappingList(additionalTypeName, base64DecodedTypeValue, fieldDefinition,
+                                    operationThrottlingMappingList, operationAuthSchemeMappingList,
+                                    operationScopeMappingList, roleArrayList);
+                        }
+                        if (!roleArrayList.isEmpty()) {
+                            scopeRoleMappingList.put(base64DecodedTypeValue, roleArrayList);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Added scope " + base64DecodedTypeValue + "with role list " + String
+                                        .join(",", roleArrayList));
+                            }
                         }
                     }
                 }
@@ -238,6 +220,39 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, graphQLAccessControlPolicy);
         messageContext.setProperty(APIConstants.API_TYPE, GRAPHQL_API);
         messageContext.setProperty(APIConstants.GRAPHQL_SCHEMA, graphQLSchemaDTO.getGraphQLSchema());
+    }
+
+    private void setMappingList(String additionalTypeName, String base64DecodedTypeValue,
+            GraphQLFieldDefinition fieldDefinition, HashMap<String, String> operationThrottlingMappingList,
+            HashMap<String, Boolean> operationAuthSchemeMappingList, HashMap<String, String> operationScopeMappingList,
+            ArrayList<String> roleArrayList) {
+
+        String base64DecodedURLTypeName = new String(Base64.getUrlDecoder().decode(fieldDefinition.getName()));
+        if (additionalTypeName.contains(APIConstants.SCOPE_ROLE_MAPPING)) {
+            roleArrayList.add(base64DecodedURLTypeName);
+            if (log.isDebugEnabled()) {
+                log.debug("Added scope " + base64DecodedTypeValue + "with role " + base64DecodedURLTypeName);
+            }
+        } else if (additionalTypeName.contains(APIConstants.SCOPE_OPERATION_MAPPING)) {
+            operationScopeMappingList.put(base64DecodedTypeValue, base64DecodedURLTypeName);
+            if (log.isDebugEnabled()) {
+                log.debug("Added operation " + base64DecodedTypeValue + "with scope " + base64DecodedURLTypeName);
+            }
+        } else if (additionalTypeName.contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
+            operationThrottlingMappingList.put(base64DecodedTypeValue, base64DecodedURLTypeName);
+            if (log.isDebugEnabled()) {
+                log.debug("Added operation " + base64DecodedTypeValue + "with throttling " + base64DecodedURLTypeName);
+            }
+        } else if (additionalTypeName.contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
+            boolean isSecurityEnabled = true;
+            if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(fieldDefinition.getName())) {
+                isSecurityEnabled = false;
+            }
+            operationAuthSchemeMappingList.put(base64DecodedTypeValue, isSecurityEnabled);
+            if (log.isDebugEnabled()) {
+                log.debug("Added operation " + base64DecodedTypeValue + "with security " + isSecurityEnabled);
+            }
+        }
     }
 
     /**

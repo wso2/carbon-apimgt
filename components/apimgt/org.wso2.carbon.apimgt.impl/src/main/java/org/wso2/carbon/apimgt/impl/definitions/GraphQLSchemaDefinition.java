@@ -236,15 +236,14 @@ public class GraphQLSchemaDefinition {
             }
 
             if (scopeRoleMap.size() > 0) {
-                List<String> scopeRoles = new ArrayList<>();
                 String[] roleList;
                 String scopeType;
                 String base64EncodedURLScopeKey;
                 String scopeRoleMappingType;
                 String base64EncodedURLRole;
                 String roleField;
-
                 for (Map.Entry<String, String> entry : scopeRoleMap.entrySet()) {
+                    List<String> scopeRoles = new ArrayList<>();
                     base64EncodedURLScopeKey = Base64.getUrlEncoder().withoutPadding().
                             encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
                     scopeType = "type " + APIConstants.SCOPE_ROLE_MAPPING + "_" + base64EncodedURLScopeKey + "{\n";
