@@ -6810,7 +6810,7 @@ public class ApiMgtDAO {
         int id;
         String deleteLCEventQuery = SQLConstants.REMOVE_FROM_API_LIFECYCLE_SQL;
         String deleteAuditAPIMapping = SQLConstants.REMOVE_SECURITY_AUDIT_MAP_SQL;
-        String deleteCommentQuery = SQLConstants.REMOVE_FROM_API_COMMENT_SQL;
+//        String deleteCommentQuery = SQLConstants.REMOVE_FROM_API_COMMENT_SQL;
         String deleteRatingsQuery = SQLConstants.REMOVE_FROM_API_RATING_SQL;
         String deleteSubscriptionQuery = SQLConstants.REMOVE_FROM_API_SUBSCRIPTION_SQL;
         String deleteExternalAPIStoresQuery = SQLConstants.REMOVE_FROM_EXTERNAL_STORES_SQL;
@@ -6840,10 +6840,11 @@ public class ApiMgtDAO {
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             //Delete all comments associated with given API
-            prepStmt = connection.prepareStatement(deleteCommentQuery);
-            prepStmt.setInt(1, id);
-            prepStmt.execute();
-            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+            deleteAPIComments(uuid, connection);
+//            prepStmt = connection.prepareStatement(deleteCommentQuery);
+//            prepStmt.setInt(1, id);
+//            prepStmt.execute();
+//            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             prepStmt = connection.prepareStatement(deleteRatingsQuery);
             prepStmt.setInt(1, id);
@@ -7711,6 +7712,29 @@ public class ApiMgtDAO {
             handleException("Error while deleting comment " + commentId + " from the database", e);
         }
         return false;
+    }
+
+    private void deleteAPIComments(String uuid, Connection connection) throws APIManagementException {
+        int id = -1;
+        ResultSet resultSet = null;
+        try {
+            id = getAPIID(uuid, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for API with UUID: " + uuid;
+                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
+            }
+            connection.setAutoCommit(false);
+            String getParentCommentIdsQuery = SQLConstants.GET_PARENT_COMMENT_IDS_FOR_API;
+            try (PreparedStatement preparedStmt = connection.prepareStatement(getParentCommentIdsQuery)) {
+                preparedStmt.setInt(1,id);
+                resultSet = preparedStmt.executeQuery();
+                while (resultSet.next()) {
+                    deleteComment(uuid, resultSet.getString("COMMENT_ID"), connection);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while deleting comments for API "+uuid, e);
+        }
     }
 
     /**
