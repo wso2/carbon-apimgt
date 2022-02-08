@@ -7974,7 +7974,7 @@ paths:
   /apis/{apiId}/operation-policies:
     get:
       tags:
-        - API specific Operation Policies
+        - API Operation Policies
       summary: |
         Get all API specific operation policies for an API
       description: |
@@ -8019,7 +8019,7 @@ paths:
 
     post:
       tags:
-        - API specific Operation Policies
+        - API Operation Policies
       summary: Add an API specific operation policy
       description: |
         This operation can be used to add an API specifc operation policy. This policy cannot be used in other APIs.
@@ -8041,7 +8041,7 @@ paths:
                   type: string
                   description: Operation policy definition of synapse gateway to upload
                   format: binary
-                ccDefinitionFile:
+                ccPolicyDefinitionFile:
                   type: string
                   description: Operation policy definition of choreo connect to upload
                   format: binary
@@ -8087,7 +8087,7 @@ paths:
   /apis/{apiId}/operation-policies/{operationPolicyId}:
     get:
       tags:
-        - API specific Operation Policies
+        - API Operation Policies
       summary: Get policy details of an API specific policy
       description: |
         This operation can be used to retrieve a particular API specific operation policy.
@@ -8128,7 +8128,7 @@ paths:
 
     delete:
       tags:
-        - API specific Operation Policies
+        - API Operation Policies
       summary: Delete an API Specific Operation Policy
       description: |
         This operation can be used to delete an existing API specific opreation policy by providing the Id of the API and the Id of the policy.
@@ -8160,7 +8160,7 @@ paths:
   /apis/{apiId}/operation-policies/{operationPolicyId}/content:
     get:
       tags:
-        - API specific Operation Policies
+        - API Operation Policies
       summary: Download an API Specific Operation Policy
       description: |
         This operation can be used to download a particular API specific operation policy.
@@ -8261,7 +8261,7 @@ paths:
                   type: string
                   description: Operation policy definition of synapse gateway to upload
                   format: binary
-                ccDefinitionFile:
+                ccPolicyDefinitionFile:
                   type: string
                   description: Operation policy definition of choreo connect to upload
                   format: binary
