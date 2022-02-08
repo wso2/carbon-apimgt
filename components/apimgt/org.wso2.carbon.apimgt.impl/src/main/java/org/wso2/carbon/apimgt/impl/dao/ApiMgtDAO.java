@@ -17635,7 +17635,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      */
     public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, Connection connection)
-            throws SQLException, APIManagementException {
+            throws APIManagementException {
         try {
             if (!retrieveServiceKeyByApiId(apiId).isEmpty()) {
                 try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
@@ -17647,10 +17647,8 @@ public class ApiMgtDAO {
             } else {
                 addAPIServiceMapping(apiId, serviceKey, md5, -1234, connection);
             }
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            handleException("Error while updating the Service info associated with API " + apiId, e);
         }
     }
 

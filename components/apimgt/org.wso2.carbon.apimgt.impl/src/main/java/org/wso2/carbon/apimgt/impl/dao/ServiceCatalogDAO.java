@@ -418,7 +418,6 @@ public class ServiceCatalogDAO {
         boolean searchByDefinitionType = false;
         boolean exactNameSearch = false;
         boolean exactVersionSearch = false;
-        boolean exactApiIdSearch = false;
         StringBuilder querySb = new StringBuilder();
         querySb.append("SELECT UUID, SERVICE_KEY, MD5, SERVICE_NAME, SERVICE_VERSION," +
                 "   SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SECURITY_TYPE, MUTUAL_SSL_ENABLED," +
@@ -428,10 +427,8 @@ public class ServiceCatalogDAO {
         String whereClauseForNameSearch = "AND SERVICE_NAME LIKE ? ";
         String whereClauseForExactVersionSearch = "AND SERVICE_VERSION = ? ";
         String whereClauseForVersionSearch = " AND SERVICE_VERSION LIKE ? ";
-        String whereClauseForApiIdSearch = " AND API_ID LIKE ? ";
         String whereClauseWithDefinitionType = " AND DEFINITION_TYPE = ? ";
         String whereClauseWithServiceKey = " AND SERVICE_KEY = ? ";
-        String whereClauseWithApiId = " AND API_ID = ? ";
         if (filterParams.getName().startsWith("\"") && filterParams.getName().endsWith("\"")) {
             exactNameSearch = true;
             filterParams.setName(filterParams.getName().replace("\"", "").trim());
@@ -445,10 +442,6 @@ public class ServiceCatalogDAO {
             querySb.append(whereClauseForExactVersionSearch);
         } else {
             querySb.append(whereClauseForVersionSearch);
-        }
-        if (StringUtils.isNotEmpty(filterParams.getApiId()) && StringUtils.isEmpty(filterParams.getKey())) {
-            exactApiIdSearch = true;
-            querySb.append(whereClauseWithApiId);
         }
         if (StringUtils.isNotEmpty(filterParams.getDefinitionType()) && StringUtils.isEmpty(filterParams.getKey())) {
             searchByDefinitionType = true;
@@ -564,15 +557,12 @@ public class ServiceCatalogDAO {
         boolean searchByDefinitionType = false;
         boolean exactNameSearch = false;
         boolean exactVersionSearch = false;
-        boolean exactApiIdSearch = false;
         String whereClauseForExactNameSearch = "AND SERVICE_NAME = ? ";
         String whereClauseForNameSearch = "AND SERVICE_NAME LIKE ? ";
         String whereClauseForExactVersionSearch = "AND SERVICE_VERSION = ? ";
         String whereClauseForVersionSearch = " AND SERVICE_VERSION LIKE ? ";
-        String whereClauseForApiIdSearch = " AND API_ID LIKE ? ";
         String whereClauseWithDefinitionType = " AND DEFINITION_TYPE = ? ";
         String whereClauseWithServiceKey = " AND SERVICE_KEY = ? ";
-        String whereClauseWithApiId = " AND API_ID = ? ";
         StringBuilder querySb = new StringBuilder();
         querySb.append("SELECT count(*) count FROM AM_SERVICE_CATALOG WHERE TENANT_ID = ? ");
         if (filterParams.getName().startsWith("\"") && filterParams.getName().endsWith("\"")) {
@@ -588,10 +578,6 @@ public class ServiceCatalogDAO {
             querySb.append(whereClauseForExactVersionSearch);
         } else {
             querySb.append(whereClauseForVersionSearch);
-        }
-        if (StringUtils.isNotEmpty(filterParams.getApiId()) && StringUtils.isEmpty(filterParams.getKey())) {
-            exactApiIdSearch = true;
-            querySb.append(whereClauseWithApiId);
         }
         if (StringUtils.isNotEmpty(filterParams.getDefinitionType()) && StringUtils.isEmpty(filterParams.getKey())) {
             searchByDefinitionType = true;
