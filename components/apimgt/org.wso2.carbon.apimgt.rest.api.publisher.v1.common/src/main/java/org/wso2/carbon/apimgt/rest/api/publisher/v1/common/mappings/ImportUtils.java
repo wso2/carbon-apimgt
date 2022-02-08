@@ -31,8 +31,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
@@ -122,6 +120,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -430,6 +429,7 @@ public class ImportUtils {
                                                              Map<String, List<OperationPolicy>> extractedPoliciesMap,
                                                              String tenantDomain) {
 
+        String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         for (URITemplate uriTemplate : uriTemplates) {
             String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
@@ -440,40 +440,29 @@ public class ImportUtils {
                     for (OperationPolicy policy : operationPolicies) {
                         try {
                             OperationPolicySpecification policySpec =
-                                    getOperationPolicySpecificationFromFile(extractedFolderPath,
+                                    getOperationPolicySpecificationFromFile(policyDirectory,
                                             policy.getPolicyName());
-                            String synapsePolicyDefinition =
-                                    getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName(),
-                                            APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
-
-                            OperationPolicyDefinition synapseDefinition = null;
-                            OperationPolicyDefinition ccDefinition = null;
-                            if (synapsePolicyDefinition != null) {
-                                synapseDefinition = new OperationPolicyDefinition();
-                                synapseDefinition.setContent(synapsePolicyDefinition);
-                                synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-                                synapseDefinition.setMd5Hash(APIUtil
-                                        .getMd5OfOperationPolicyDefinition(synapseDefinition));
-                            }
-                            String ccPolicyDefinition =
-                                    getOperationPolicyDefinitionFromFile(extractedFolderPath, policy.getPolicyName(),
-                                            APIConstants.CC_POLICY_DEFINITION_EXTENSION);
-                            if (ccPolicyDefinition != null) {
-                                ccDefinition = new OperationPolicyDefinition();
-                                ccDefinition.setContent(ccPolicyDefinition);
-                                ccDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                                ccDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(ccDefinition));
-                            }
 
                             OperationPolicyData operationPolicyData = new OperationPolicyData();
-                            operationPolicyData.setApiUUID(api.getUuid());
-                            operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
-                            operationPolicyData.setCcPolicyDefinition(ccDefinition);
                             operationPolicyData.setSpecification(policySpec);
                             operationPolicyData.setOrganization(tenantDomain);
-                            operationPolicyData
-                                    .setMd5Hash(APIUtil.getMd5OfOperationPolicy(policySpec, synapseDefinition,
-                                            ccDefinition));
+                            operationPolicyData.setApiUUID(api.getUuid());
+
+                            OperationPolicyDefinition synapseDefinition =
+                                    APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                            policy.getPolicyName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                            if (synapseDefinition != null) {
+                                synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                            }
+                            OperationPolicyDefinition ccDefinition =
+                                    APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                            policy.getPolicyName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                            if (ccDefinition != null) {
+                                ccDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                operationPolicyData.setCcPolicyDefinition(ccDefinition);
+                            }
+                            operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
                             String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
                             policy.setPolicyId(policyID);
                             validatedOperationPolicies.add(policy);
@@ -492,54 +481,17 @@ public class ImportUtils {
                                                                                        String policyName)
             throws APIManagementException {
         try {
-            String jsonContent =  getFileContentAsJson(extractedFolderPath + File.separator
-                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator + policyName);
+            String jsonContent =  getFileContentAsJson(extractedFolderPath + File.separator + policyName);
             if (jsonContent == null) {
                 return null;
             }
             // Retrieving the field "data" in deployment_environments.yaml
             JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
-
-            Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
-            if (schema != null) {
-                try {
-                    org.json.JSONObject uploadedConfig = new org.json.JSONObject(configElement.toString());
-                    schema.validate(uploadedConfig);
-                } catch (ValidationException e) {
-                    List<String> errors = e.getAllMessages();
-                    String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
-                    throw new APIManagementException("Policy specification validation failure. " + errorMessage,
-                            ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
-                                    errorMessage));
-                }
-            }
-
-            return new Gson().fromJson(configElement, OperationPolicySpecification.class);
+            return APIUtil.getValidatedOperationPolicySpecification(configElement.toString());
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy specification info from path: "
                     + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
         }
-    }
-
-    public static String getOperationPolicyDefinitionFromFile(String extractedFolderPath, String policyName,
-                                                              String extension) throws APIManagementException {
-        String yamlContent = null;
-        try {
-            String fileName = extractedFolderPath + File.separator
-                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator + policyName + extension;
-
-            if (CommonUtil.checkFileExistence(fileName)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Found policy definition file " + fileName);
-                }
-                yamlContent = FileUtils.readFileToString(new File(fileName));
-
-            }
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading policy specification info from path: "
-                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
-        }
-        return yamlContent;
     }
 
     /**

@@ -3866,7 +3866,8 @@ public class SQLConstants {
         public static final String UPDATE_OPERATION_POLICY_DEFINITION =
                 "UPDATE AM_OPERATION_POLICY_DEFINITION SET DEFINITION_MD5 = ?, POLICY_DEFINITION = ? " +
                         " WHERE POLICY_UUID = ? AND GATEWAY_TYPE = ?";
-
+        public static final String GET_THE_COUNT_OF_OPERATION_POLICIES_FOR_ORGANIZATION =
+                "SELECT COUNT(POLICY_UUID) AS POLICY_COUNT FROM AM_OPERATION_POLICY WHERE ORGANIZATION = ?";
     }
 
     /**
