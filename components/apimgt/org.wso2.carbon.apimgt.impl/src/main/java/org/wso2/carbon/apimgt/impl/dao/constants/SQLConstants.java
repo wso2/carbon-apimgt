@@ -1831,12 +1831,13 @@ public class SQLConstants {
                 "AND AM_API_COMMENTS.COMMENT_ID = ?";
 
     public static final String GET_PARENT_COMMENT_IDS_FOR_API =
-            "SELECT AM_API_COMMENTS.COMMENT_ID "
-                    + "FROM "
-                    + "AM_API_COMMENTS "
-                    + "WHERE "
-                    + "API_ID = ? "
-                    + "AND PARENT_COMMENT_ID = NULL";
+            "SELECT " + 
+                "AM_API_COMMENTS.COMMENT_ID " +
+            "FROM " +
+                "AM_API_COMMENTS " +
+            "WHERE " +
+                "API_ID = ? " +
+                "AND PARENT_COMMENT_ID = NULL";
 
     public static final String GET_IDS_OF_REPLIES_SQL =
             "SELECT " +

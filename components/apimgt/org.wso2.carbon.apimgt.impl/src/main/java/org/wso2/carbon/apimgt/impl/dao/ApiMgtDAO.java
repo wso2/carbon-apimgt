@@ -7721,14 +7721,14 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             String getParentCommentIdsQuery = SQLConstants.GET_PARENT_COMMENT_IDS_FOR_API;
             try (PreparedStatement preparedStmt = connection.prepareStatement(getParentCommentIdsQuery)) {
-                preparedStmt.setInt(1,id);
+                preparedStmt.setInt(1, id);
                 resultSet = preparedStmt.executeQuery();
                 while (resultSet.next()) {
                     deleteComment(uuid, resultSet.getString("COMMENT_ID"), connection);
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while deleting comments for API "+uuid, e);
+            handleException("Error while deleting comments for API " + uuid, e);
         }
     }
 
