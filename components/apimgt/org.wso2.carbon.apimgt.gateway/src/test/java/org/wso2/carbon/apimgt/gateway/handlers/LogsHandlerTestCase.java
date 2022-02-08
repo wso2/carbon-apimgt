@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -36,7 +37,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogUtils.class, ThreadContext.class, System.class})
+@PrepareForTest({LogUtils.class, ThreadContext.class, System.class, LogsHandler.class})
 public class LogsHandlerTestCase {
 
     @Before
@@ -47,10 +48,11 @@ public class LogsHandlerTestCase {
     }
 
     @Test
-    public void testHandleRequestInFlow() {
+    public void testHandleRequestInFlow() throws Exception {
+        LogsHandler logsHandler = PowerMockito.spy(new LogsHandler());
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         PowerMockito.when(LogUtils.getTo(messageContext)).thenReturn("pizzashack/1.0.0/menu");
-        LogsHandler logsHandler = new LogsHandler();
+        PowerMockito.doReturn(null).when(logsHandler, "getAPILogLevel", messageContext);
         Assert.assertTrue(logsHandler.handleRequestInFlow(messageContext));
     }
 

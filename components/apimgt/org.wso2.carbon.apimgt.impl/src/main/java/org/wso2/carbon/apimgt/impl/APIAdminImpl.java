@@ -51,9 +51,12 @@ import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
@@ -1273,6 +1276,43 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public String getTenantConfigSchema(String organization) throws APIManagementException {
         return APIUtil.retrieveTenantConfigJsonSchema().toString();
+    }
+
+    @Override
+    public Policy[] getPolicies(int tenantId, String level) throws APIManagementException {
+
+        Policy[] policies = null;
+
+        if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
+            policies = apiMgtDAO.getAPIPolicies(tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
+            policies = apiMgtDAO.getApplicationPolicies(tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
+            policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
+            policies = apiMgtDAO.getGlobalPolicies(tenantId);
+        }
+
+        //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
+        // the tier from the array.
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ThrottleProperties throttleProperties = apiManagerConfiguration.getThrottleProperties();
+        List<Policy> policiesWithoutUnlimitedTier = new ArrayList<Policy>();
+
+        if (policies != null) {
+            for (Policy policy : policies) {
+                if (APIConstants.UNLIMITED_TIER.equals(policy.getPolicyName())) {
+                    if (throttleProperties.isEnableUnlimitedTier()) {
+                        policiesWithoutUnlimitedTier.add(policy);
+                    }
+                } else {
+                    policiesWithoutUnlimitedTier.add(policy);
+                }
+            }
+        }
+        policies = policiesWithoutUnlimitedTier.toArray(new Policy[0]);
+        return policies;
     }
 
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {

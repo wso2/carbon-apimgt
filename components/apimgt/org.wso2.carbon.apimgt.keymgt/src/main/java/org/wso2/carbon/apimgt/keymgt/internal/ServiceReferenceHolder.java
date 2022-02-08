@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServiceReferenceHolder {
-
     private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
@@ -95,6 +94,7 @@ public class ServiceReferenceHolder {
         keyValidationHandlerMap.put(tenantDomain, keyValidationHandler);
         return keyValidationHandler;
     }
+
     public RealmService getRealmService() {
         return realmService;
     }
@@ -102,5 +102,4 @@ public class ServiceReferenceHolder {
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
     }
-
 }

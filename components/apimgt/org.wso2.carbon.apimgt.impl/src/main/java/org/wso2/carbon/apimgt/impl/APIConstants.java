@@ -2577,7 +2577,8 @@ public final class APIConstants {
         ENDPOINT_CERTIFICATE_ADD,
         ENDPOINT_CERTIFICATE_UPDATE,
         ENDPOINT_CERTIFICATE_REMOVE,
-        GA_CONFIG_UPDATE
+        GA_CONFIG_UPDATE,
+        UDATE_API_LOG_LEVEL
     }
 
     public static class GatewayArtifactSynchronizer {
@@ -2872,4 +2873,13 @@ public final class APIConstants {
     public static final String SMF_TRANSPORT_PROTOCOL_VERSION = "smf";
     public static final String SMFS_TRANSPORT_PROTOCOL_NAME = "smfs";
     public static final String SMFS_TRANSPORT_PROTOCOL_VERSION = "smfs";
+
+    public static class APILogHandler {
+        public static final String DELETE = "delete";
+        public static final String DELETE_ALL = "deleteAll";
+        public static final String OFF = "OFF";
+        public static final String BASIC = "BASIC";
+        public static final String STANDARD = "STANDARD";
+        public static final String FULL = "FULL";
+    }
 }

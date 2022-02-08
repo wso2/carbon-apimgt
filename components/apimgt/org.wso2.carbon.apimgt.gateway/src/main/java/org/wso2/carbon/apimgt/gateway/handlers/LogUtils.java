@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers;
 
 import org.apache.http.HttpHeaders;
+import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -109,5 +110,25 @@ class LogUtils {
 
     protected static String getConsumerKey(org.apache.synapse.MessageContext messageContext){
         return (String) messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
+    }
+
+    protected static String getTransportInURL(org.apache.synapse.MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        String transportInURL = (String) axis2MsgContext.getProperty("TransportInURL");
+        return transportInURL.substring(1);
+    }
+
+    protected static String getMatchingLogLevel(MessageContext ctx, Map<String, String> logProperties) {
+        String apiCtx = LogUtils.getTransportInURL(ctx);
+        for (Map.Entry<String, String> entry : logProperties.entrySet()) {
+            String key = entry.getKey().substring(1);
+            if (apiCtx.startsWith(key + "/") || apiCtx.equals(key)) {
+                ctx.setProperty(LogsHandler.LOG_LEVEL, entry.getValue());
+                ctx.setProperty("API_TO", apiCtx);
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 }
