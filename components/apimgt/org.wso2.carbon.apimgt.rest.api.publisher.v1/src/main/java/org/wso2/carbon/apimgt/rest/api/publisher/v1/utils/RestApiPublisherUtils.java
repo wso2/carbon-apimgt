@@ -268,7 +268,8 @@ public class RestApiPublisherUtils {
 
         File exportFolder = null;
         try {
-            exportFolder = CommonUtil.createTempDirectory(null);
+            exportFolder = CommonUtil.createTempDirectoryFromName(policyData.getSpecification().getName()
+                    + "_" +policyData.getSpecification().getVersion());
             String exportAPIBasePath = exportFolder.toString();
             String archivePath =
                     exportAPIBasePath.concat(File.separator + policyData.getSpecification().getName());

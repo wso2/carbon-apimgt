@@ -145,8 +145,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @GET
     @Path("/{operationPolicyId}/content")
     
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Download a common operation policy", notes = "This operation can be used to download a selected common operation policy. ", response = Void.class, authorizations = {
+    @Produces({ "application/zip", "application/json" })
+    @ApiOperation(value = "Download a common operation policy", notes = "This operation can be used to download a selected common operation policy. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
@@ -156,7 +156,7 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
         })
     }, tags={ "Operation Policies" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = Void.class),
+        @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getCommonOperationPolicyContentByPolicyId(@ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
         return delegate.getCommonOperationPolicyContentByPolicyId(operationPolicyId, securityContext);

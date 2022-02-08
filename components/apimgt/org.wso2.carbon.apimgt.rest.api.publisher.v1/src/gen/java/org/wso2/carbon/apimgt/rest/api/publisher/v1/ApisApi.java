@@ -1044,8 +1044,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @GET
     @Path("/{apiId}/operation-policies/{operationPolicyId}/content")
     
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Download an API Specific Operation Policy", notes = "This operation can be used to download a particular API specific operation policy. ", response = Void.class, authorizations = {
+    @Produces({ "application/zip", "application/json" })
+    @ApiOperation(value = "Download an API Specific Operation Policy", notes = "This operation can be used to download a particular API specific operation policy. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
@@ -1055,7 +1055,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         })
     }, tags={ "API Operation Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = Void.class),
+        @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getAPISpecificOperationPolicyContentByPolicyId(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
         return delegate.getAPISpecificOperationPolicyContentByPolicyId(apiId, operationPolicyId, securityContext);
