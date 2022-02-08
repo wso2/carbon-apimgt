@@ -48,7 +48,7 @@ public class APILogHandler {
     public static synchronized void logAPI(String flow, MessageContext messageContext) {
         // Get the log level and exit if the log level is OFF
         String logLevel = (String) messageContext.getProperty(APIConstants.LOG_LEVEL);
-        if (logLevel.equals(APIConstants.LOG_LEVEL_OFF)) {
+        if (APIConstants.LOG_LEVEL_OFF.equals(logLevel)) {
             return;
         }
 
@@ -81,8 +81,11 @@ public class APILogHandler {
                 .getLogCorrelationID());
 
         // Log the logMessage and clear the ThreadContext
-        logger.info(logMessage);
-        ThreadContext.clearAll();
+        try {
+            logger.info(logMessage);
+        } finally {
+            ThreadContext.clearAll();
+        }
     }
 
     private static void addBasicProperties(JSONObject logMessage, MessageContext messageContext, String flow) {

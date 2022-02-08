@@ -39,8 +39,8 @@ public class TenantLogsApiServiceImpl implements TenantLogsApiService {
 
     public Response tenantLogsTenantIdApisApiIdGet(String tenantId, String apiId, MessageContext messageContext)
             throws APIManagementException {
-        APILoggingImpl perAPILogging = new APILoggingImpl();
-        List<APILogInfoDTO> apiLogInfoDTOList = perAPILogging.getAPILoggerListByApiId(tenantId, apiId);
+        APILoggingImpl apiLoggingImpl = new APILoggingImpl();
+        List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerListByApiId(tenantId, apiId);
         LoggingApiOutputListDTO loggingApiOutputListDT = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
         return Response.ok().entity(loggingApiOutputListDT).build();
     }
@@ -49,8 +49,8 @@ public class TenantLogsApiServiceImpl implements TenantLogsApiService {
             MessageContext messageContext) throws APIManagementException {
         if (apiId != null) {
             if (DevopsAPIUtils.validateLogLevel(loggingApiInputDTO.getLogLevel())) {
-                APILoggingImpl perAPILogging = new APILoggingImpl();
-                perAPILogging.addUpdateAPILogger(tenantId, apiId, loggingApiInputDTO.getLogLevel().toUpperCase());
+                APILoggingImpl apiLoggingImpl = new APILoggingImpl();
+                apiLoggingImpl.addUpdateAPILogger(tenantId, apiId, loggingApiInputDTO.getLogLevel().toUpperCase());
                 return Response.ok().entity(loggingApiInputDTO).build();
             } else {
                 throw new APIManagementException("The input log level is incorrect: Input log level : " +
@@ -65,8 +65,8 @@ public class TenantLogsApiServiceImpl implements TenantLogsApiService {
 
     public Response tenantLogsTenantIdApisGet(String tenantId, String logLevel, MessageContext messageContext)
             throws APIManagementException {
-        APILoggingImpl perAPILogging = new APILoggingImpl();
-        List<APILogInfoDTO> apiLogInfoDTOList = perAPILogging.getAPILoggerList(tenantId, logLevel);
+        APILoggingImpl apiLoggingImpl = new APILoggingImpl();
+        List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerList(tenantId, logLevel);
         LoggingApiOutputListDTO loggingApiOutputListDTO = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
         return Response.ok().entity(loggingApiOutputListDTO).build();
     }
