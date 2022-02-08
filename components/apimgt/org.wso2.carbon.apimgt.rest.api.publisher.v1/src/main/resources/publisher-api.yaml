@@ -8335,6 +8335,9 @@ components:
         gatewayVendor:
           type: string
           example: wso2
+        advertiseOnly:
+          type: boolean
+          example: true
     Topic:
       title: Topic object
       required:
@@ -8460,7 +8463,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
           example: HTTP
           default: HTTP
           enum:
@@ -8472,6 +8475,7 @@ components:
             - WEBSUB
             - SSE
             - WEBHOOK
+            - ASYNC
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -11050,6 +11054,9 @@ components:
             thumbnailUri:
               type: string
               example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+            advertiseOnly:
+              type: boolean
+              example: true
     APIProductSearchResult:
       title: API Result
       allOf:
@@ -11398,6 +11405,12 @@ components:
         advertised:
           type: boolean
           example: true
+        apiExternalProductionEndpoint:
+          type: string
+          example: https://localhost:9443/devportal
+        apiExternalSandboxEndpoint:
+          type: string
+          example: https://localhost:9443/devportal
         originalDevPortalUrl:
           type: string
           example: https://localhost:9443/devportal

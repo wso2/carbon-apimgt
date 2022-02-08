@@ -27,6 +27,7 @@ public class APISearchResultAllOfDTO   {
     private String provider = null;
     private String status = null;
     private String thumbnailUri = null;
+    private Boolean advertiseOnly = null;
 
   /**
    * A brief description about the API
@@ -153,6 +154,23 @@ public class APISearchResultAllOfDTO   {
     this.thumbnailUri = thumbnailUri;
   }
 
+  /**
+   **/
+  public APISearchResultAllOfDTO advertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("advertiseOnly")
+  public Boolean isAdvertiseOnly() {
+    return advertiseOnly;
+  }
+  public void setAdvertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -169,12 +187,13 @@ public class APISearchResultAllOfDTO   {
         Objects.equals(version, apISearchResultAllOf.version) &&
         Objects.equals(provider, apISearchResultAllOf.provider) &&
         Objects.equals(status, apISearchResultAllOf.status) &&
-        Objects.equals(thumbnailUri, apISearchResultAllOf.thumbnailUri);
+        Objects.equals(thumbnailUri, apISearchResultAllOf.thumbnailUri) &&
+        Objects.equals(advertiseOnly, apISearchResultAllOf.advertiseOnly);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri);
+    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly);
   }
 
   @Override
@@ -189,6 +208,7 @@ public class APISearchResultAllOfDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("}");
     return sb.toString();
   }

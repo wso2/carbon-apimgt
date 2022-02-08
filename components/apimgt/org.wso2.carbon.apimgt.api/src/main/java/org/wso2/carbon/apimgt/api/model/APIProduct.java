@@ -587,10 +587,8 @@ public class APIProduct {
     }
 
     public boolean isAsync() {
-        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
-            return true;
-        }
-        return false;
+        return getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")
+                || getType().equals("ASYNC");
     }
 
     public boolean isRevision() {

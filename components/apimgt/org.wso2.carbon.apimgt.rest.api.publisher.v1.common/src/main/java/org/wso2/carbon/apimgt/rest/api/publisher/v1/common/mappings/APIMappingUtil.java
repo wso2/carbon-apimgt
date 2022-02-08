@@ -207,6 +207,8 @@ public class APIMappingUtil {
         if (dto.getAdvertiseInfo() != null) {
             AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
             model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
+            model.setApiExternalProductionEndpoint(advertiseInfoDTO.getApiExternalProductionEndpoint());
+            model.setApiExternalSandboxEndpoint(advertiseInfoDTO.getApiExternalSandboxEndpoint());
             model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
             model.setApiOwner(advertiseInfoDTO.getApiOwner());
             model.setAdvertiseOnlyAPIVendor(dto.getAdvertiseInfo().getVendor().value());
@@ -657,6 +659,7 @@ public class APIMappingUtil {
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
         }
+        apiInfoDTO.setAdvertiseOnly(api.isAdvertiseOnly());
         if (api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
@@ -914,6 +917,8 @@ public class APIMappingUtil {
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
+        advertiseInfoDTO.setApiExternalProductionEndpoint(model.getApiExternalProductionEndpoint());
+        advertiseInfoDTO.setApiExternalSandboxEndpoint(model.getApiExternalSandboxEndpoint());
         advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
         advertiseInfoDTO.setApiOwner(model.getApiOwner());
         if (model.getAdvertiseOnlyAPIVendor() != null) {
@@ -1083,7 +1088,8 @@ public class APIMappingUtil {
 
         boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
                 || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())
-                || APIDTO.TypeEnum.SSE.toString().equals(model.getType());
+                || APIDTO.TypeEnum.SSE.toString().equals(model.getType())
+                || APIDTO.TypeEnum.ASYNC.toString().equals(model.getType());
 
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());

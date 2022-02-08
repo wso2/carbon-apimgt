@@ -147,6 +147,10 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(api.getCacheTimeout()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL, api.getRedirectURL());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT,
+                    api.getApiExternalProductionEndpoint());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT,
+                    api.getApiExternalSandboxEndpoint());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR, api.getAdvertiseOnlyAPIVendor());
             artifact.setAttribute(APIConstants.API_OVERVIEW_OWNER, api.getApiOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, Boolean.toString(api.isAdvertiseOnly()));
@@ -612,6 +616,10 @@ public class RegistryPersistenceUtil {
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
+                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
+            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
+                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setAdvertiseOnlyAPIVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
@@ -1367,6 +1375,8 @@ public class RegistryPersistenceUtil {
             api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
             api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));;
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+            api.setAdvertiseOnly(Boolean.parseBoolean(apiArtifact
+                    .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);
