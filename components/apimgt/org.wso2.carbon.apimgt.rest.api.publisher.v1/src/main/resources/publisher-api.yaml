@@ -8179,7 +8179,11 @@ paths:
                 The content type of the body.
               schema:
                 type: string
-          content: {}
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -8395,7 +8399,11 @@ paths:
                 The content type of the body.
               schema:
                 type: string
-          content: {}
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
         404:
           $ref: '#/components/responses/NotFound'
       security:
