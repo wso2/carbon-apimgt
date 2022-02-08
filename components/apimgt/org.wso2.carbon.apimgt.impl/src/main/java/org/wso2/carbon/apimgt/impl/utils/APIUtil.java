@@ -9555,14 +9555,12 @@ public final class APIUtil {
     public static String generateEndpointConfigForAdvertiseOnlyApi(API api) {
         JSONObject endpointConfig = new JSONObject();
         endpointConfig.put("endpoint_type", "http");
-        if (api.getApiExternalProductionEndpoint() != null
-                && !api.getApiExternalProductionEndpoint().isEmpty()) {
+        if (StringUtils.isNotEmpty(api.getApiExternalProductionEndpoint())) {
             JSONObject productionEndpoints = new JSONObject();
             productionEndpoints.put("url", api.getApiExternalProductionEndpoint());
             endpointConfig.put("production_endpoints", productionEndpoints);
         }
-        if (api.getApiExternalSandboxEndpoint() != null
-                && !api.getApiExternalSandboxEndpoint().isEmpty()) {
+        if (StringUtils.isNotEmpty(api.getApiExternalSandboxEndpoint())) {
             JSONObject sandboxEndpoints = new JSONObject();
             sandboxEndpoints.put("url", api.getApiExternalSandboxEndpoint());
             endpointConfig.put("sandbox_endpoints", sandboxEndpoints);
