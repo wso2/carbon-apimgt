@@ -92,9 +92,10 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
             // Check API product already exists in solace
             CloseableHttpResponse response4 = solaceAdminApis.apiProductGet(environment.getAdditionalProperties().get(
                     SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
+            boolean isDeploymentDeleted;
             if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 // API product already exists. Delete the existing product and deploy a new product.
-                boolean isDeploymentDeleted = undeploy(api.getId().getName(), api.getId().getVersion(),
+                isDeploymentDeleted = undeploy(api.getId().getName(), api.getId().getVersion(),
                         api.getContext(), environment);
                 if (isDeploymentDeleted) {
                     isDeployed = deployAPIAndAPIProduct(api, environment);
