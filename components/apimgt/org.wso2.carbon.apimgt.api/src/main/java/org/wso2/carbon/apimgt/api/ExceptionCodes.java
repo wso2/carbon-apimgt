@@ -112,10 +112,14 @@ public enum ExceptionCodes implements ErrorHandler {
     ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
     INVALID_ENV_API_PROP_CONFIG(900358, "Invalid environment specific api property config", 400,
             "Environment specific api property config is not valid. %s", false),
+    API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
+    API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
             "Updating the API is restricted as as it is %s."),
+    UNSUPPORTED_LIFECYCLE_ACTION(900381, "Unsupported state change action", 400, "Lifecycle state change action %s is not allowed"),
+    LIFECYCLE_STATE_INFORMATION_NOT_FOUND(900382, "Lifecycle state information not found", 500,"Lifecycle state change information for %s with %s cannot be found"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -287,6 +291,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Please provide the Authorization : Bearer <> token to proceed."),
     MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
             "Please provide the Authorization : Basic <> token to proceed."),
+    INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the resource."),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
     OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
@@ -479,12 +484,17 @@ public enum ExceptionCodes implements ErrorHandler {
             "Missing protocol in Async API Definition"),
     UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION(900912, "Unsupported protocol specified in Async API " +
                "Definition", 400, "Unsupported protocol specified in Async API Definition"),
+    LOGGING_API_NOT_FOUND(901400, "Requested Resource Not Found", 404, "Request API Not Found for context: %s"),
+    LOGGING_API_INCORRECT_LOG_LEVEL(901401, "Bad Request", 400, "Log level should be either OFF, BASIC, STANDARD or FULL"),
+    LOGGING_API_MISSING_DATA(901402, "Missing data", 400, "API context or log level is missing"),
 
     //Service Catalog related error codes
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
-    INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false);
+    INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
+    SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
+            " not allowed for user %s ", false);
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

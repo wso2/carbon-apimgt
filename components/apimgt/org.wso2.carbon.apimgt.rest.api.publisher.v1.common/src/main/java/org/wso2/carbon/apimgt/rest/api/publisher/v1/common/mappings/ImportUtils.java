@@ -309,7 +309,7 @@ public class ImportUtils {
                     apiProvider.changeAPILCCheckListItems(importedApi.getId(),
                             ImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
                 }
-                apiProvider.changeLifeCycleStatus(currentTenantDomain, importedApi.getUuid(), lifecycleAction,
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, new ApiTypeWrapper(importedApi), lifecycleAction,
                         new HashMap<>());
             }
             importedApi.setStatus(targetStatus);
@@ -319,7 +319,7 @@ public class ImportUtils {
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
             }
             List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
-                    tenantDomain, apiProvider);
+                    tenantDomain, apiProvider, organization);
             if (apiRevisionDeployments.size() > 0) {
                 String importedAPIUuid = importedApi.getUuid();
                 String revisionId;
@@ -439,12 +439,13 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs when validating the deployments list
      */
     private static List<APIRevisionDeployment> getValidatedDeploymentsList(JsonArray deploymentInfoArray,
-                                                                           String tenantDomain, APIProvider apiProvider)
+                                                                           String tenantDomain, APIProvider apiProvider,
+                                                                           String organization)
             throws APIManagementException {
 
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
-            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments();
+            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments(organization);
 
             for (int i = 0; i < deploymentInfoArray.size(); i++) {
                 JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
@@ -768,8 +769,62 @@ public class ImportUtils {
                     }
                 }
             }
+            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                if (endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).isJsonObject()) {
+                    JsonObject productionEndpoint = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).
+                            getAsJsonObject();
+                    endpointConfig.add(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                            getUpdatedEndpointConfig(productionEndpoint));
+                } else if (endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).isJsonArray()) {
+                    JsonArray productionEndpointArray = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).
+                            getAsJsonArray();
+                    JsonArray updatedArray = new JsonArray();
+                    for (JsonElement endpoint : productionEndpointArray) {
+                        updatedArray.add(getUpdatedEndpointConfig(endpoint.getAsJsonObject()));
+                    }
+                    endpointConfig.add(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, updatedArray);
+                }
+            }
+            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                if (endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).isJsonObject()) {
+                    JsonObject sandboxEndpoint = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).
+                            getAsJsonObject();
+                    endpointConfig.add(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                            getUpdatedEndpointConfig(sandboxEndpoint));
+                } else if (endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).isJsonArray()) {
+                    JsonArray sandboxEndpointArray = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).
+                            getAsJsonArray();
+                    JsonArray updatedArray = new JsonArray();
+                    for (JsonElement endpoint : sandboxEndpointArray) {
+                        updatedArray.add(getUpdatedEndpointConfig(endpoint.getAsJsonObject()));
+                    }
+                    endpointConfig.add(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, updatedArray);
+                }
+            }
         }
         return configObject;
+    }
+
+     /**
+     * This function will preprocess and get the updated Endpoint Config object from the API/API Product configuration
+     *
+     * @param endpointConfigObject Endpoint Config object from the API/API Product configuration
+     * @return JsonObject endpointConfigObject  with pre-processed endpoint config
+     */
+    public static JsonObject getUpdatedEndpointConfig(JsonObject endpointConfigObject) {
+
+        if (endpointConfigObject.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)) {
+            JsonObject config = endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
+                    getAsJsonObject();
+            if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
+                Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).
+                        getAsDouble();
+                Integer value = (int) Math.round(actionDuration);
+                config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
+                config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+            }
+        }
+        return endpointConfigObject;
     }
 
     /**
@@ -1874,6 +1929,9 @@ public class ImportUtils {
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
         APIProduct importedApiProduct = null;
         JsonArray deploymentInfoArray = null;
+        String currentStatus;
+        String targetStatus;
+        String lifecycleAction;
 
         try {
             JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
@@ -1900,6 +1958,8 @@ public class ImportUtils {
             checkAPIProductResourcesValid(extractedFolderPath, userName, apiProvider, importedApiProductDTO,
                     preserveProvider, organization);
 
+            targetStatus = importedApiProductDTO.getState().toString();
+
             if (importAPIs) {
                 // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
                 // fresh import happens)
@@ -1918,16 +1978,21 @@ public class ImportUtils {
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwriteAPIProduct) && targetApiProduct != null) {
                 log.info("Existing API Product found, attempting to update it...");
+                currentStatus = targetApiProduct.getState();
                 importedApiProduct = PublisherCommonUtils.updateApiProduct(targetApiProduct, importedApiProductDTO,
                         RestApiCommonUtil.getLoggedInUserProvider(), userName, currentTenantDomain);
             } else {
                 if (targetApiProduct == null && Boolean.TRUE.equals(overwriteAPIProduct)) {
                     log.info("Cannot find : " + importedApiProductDTO.getName() + ". Creating it.");
                 }
+                currentStatus = APIStatus.CREATED.toString();
                 importedApiProduct = PublisherCommonUtils
                         .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
                                 importedApiProductDTO.getProvider(), organization);
             }
+
+            // Retrieving the life cycle action to do the lifecycle state change explicitly later
+            lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
 
             // Add/update swagger of API Product
             importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct.getUuid(),
@@ -1945,12 +2010,21 @@ public class ImportUtils {
             addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
                     importedApiProduct.getId().getProviderName(), organization);
 
+            // Change API Product lifecycle if state transition is required
+            if (StringUtils.isNotEmpty(lifecycleAction)) {
+                apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+                log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, new ApiTypeWrapper(importedApiProduct),
+                        lifecycleAction, new HashMap<>());
+            }
+            importedApiProduct.setState(targetStatus);
+
             if (deploymentInfoArray == null) {
                 // If the params have not overwritten the deployment environments, yaml file will be read
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
             }
             List<APIRevisionDeployment> apiProductRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
-                    currentTenantDomain, apiProvider);
+                    currentTenantDomain, apiProvider, organization);
             if (apiProductRevisionDeployments.size() > 0) {
                 String importedAPIUuid = importedApiProduct.getUuid();
                 String revisionId;

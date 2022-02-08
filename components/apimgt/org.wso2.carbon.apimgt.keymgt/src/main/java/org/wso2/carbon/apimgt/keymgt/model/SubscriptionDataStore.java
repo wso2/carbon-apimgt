@@ -179,5 +179,7 @@ public interface SubscriptionDataStore {
     Subscription getSubscriptionByUUID(String apiUUID, String appUUID);
 
     List<ApplicationKeyMapping> getKeyMappingByApplicationId(int applicationId);
+
+    void destroy();
 }
 

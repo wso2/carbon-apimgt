@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -58,6 +57,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -414,6 +414,15 @@ public class APIMappingUtil {
         if (dto.getAudience() != null) {
             model.setAudience(dto.getAudience().toString());
         }
+        if (dto.getGatewayVendor() != null) {
+            model.setGatewayVendor(dto.getGatewayVendor());
+        }
+
+        if (dto.getAsyncTransportProtocols() != null) {
+            String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
+            model.setAsyncTransportProtocols(asyncTransports);
+        }
+
         return model;
     }
 
@@ -479,26 +488,6 @@ public class APIMappingUtil {
         return apiMonetizationInfoDTO;
     }
 
-    public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIProductIdentifier apiProductIdentifier)
-            throws APIManagementException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
-        //set the information related to monetization to the DTO
-        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
-        Map<String, String> monetizationPropertiesMap = new HashMap<>();
-        if (apiProduct.getMonetizationProperties() != null) {
-            JSONObject monetizationProperties = apiProduct.getMonetizationProperties();
-            for (Object propertyKey : monetizationProperties.keySet()) {
-                String key = (String) propertyKey;
-                monetizationPropertiesMap.put(key, (String) monetizationProperties.get(key));
-            }
-        }
-        apiMonetizationInfoDTO.setProperties(monetizationPropertiesMap);
-        return apiMonetizationInfoDTO;
-    }
-
     /**
      * Get map of monetized policies to plan mapping.
      *
@@ -516,18 +505,6 @@ public class APIMappingUtil {
         API api = apiProvider.getLightweightAPIByUUID(uuid, organization);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
-        apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
-        return apiMonetizationInfoDTO;
-    }
-
-    public static APIMonetizationInfoDTO getMonetizedTiersDTO(APIProductIdentifier apiProductIdentifier,
-                                                              Map<String, String> monetizedPoliciesToPlanMapping)
-            throws APIManagementException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
-        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
         apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
         return apiMonetizationInfoDTO;
     }
@@ -707,6 +684,7 @@ public class APIMappingUtil {
             }
             apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
             apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
+            apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         }
         return apiInfoDTO;
     }
@@ -1296,6 +1274,12 @@ public class APIMappingUtil {
         if (model.getAudience() != null) {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
+
+        dto.setGatewayVendor(StringUtils.toRootLowerCase(model.getGatewayVendor()));
+        if (model.getAsyncTransportProtocols() != null) {
+            dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
+        }
+
         return dto;
     }
 
@@ -1867,7 +1851,7 @@ public class APIMappingUtil {
     }
 
     public static AsyncAPISpecificationValidationResponseDTO getAsyncAPISpecificationValidationResponseFromModel(
-            APIDefinitionValidationResponse model, boolean returnContent) {
+            APIDefinitionValidationResponse model, boolean returnContent) throws APIManagementException {
 
         AsyncAPISpecificationValidationResponseDTO responseDTO = new AsyncAPISpecificationValidationResponseDTO();
         responseDTO.setIsValid(model.isValid());
@@ -1884,6 +1868,25 @@ public class APIMappingUtil {
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 infoDTO.setProtocol(model.getProtocol());
+
+                Map<String, APIDefinition> apiDefinitionMap = APIUtil.getApiDefinitionParsersMap();
+                apiDefinitionMap.remove(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+                if (!apiDefinitionMap.isEmpty()) {
+                    for (Map.Entry<String, APIDefinition> apiDefinitionEntry : apiDefinitionMap.entrySet()) {
+                        APIDefinition apiParser = apiDefinitionEntry.getValue();
+                        String gatewayVendor = apiParser.getVendorFromExtension(model.getContent());
+                        if (gatewayVendor != null) {
+                            infoDTO.setGatewayVendor(gatewayVendor);
+                            break;
+                        }
+                    }
+                    infoDTO.asyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI
+                            (model.getContent()));
+                }
+                // Set default value
+                if (infoDTO.getGatewayVendor() == null) {
+                    infoDTO.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+                }
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {
@@ -2150,6 +2153,7 @@ public class APIMappingUtil {
         productDto.setDescription(product.getDescription());
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
+        productDto.setGatewayVendor(product.getGatewayVendor());
 
         Set<String> apiTags = product.getTags();
         List<String> tagsToReturn = new ArrayList<>(apiTags);
@@ -2191,6 +2195,7 @@ public class APIMappingUtil {
         productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
+        productDto.setWorkflowStatus(product.getWorkflowStatus());
 
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
@@ -2413,7 +2418,6 @@ public class APIMappingUtil {
             product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
-        product.setState(APIStatus.PUBLISHED.toString());
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
 
@@ -2444,6 +2448,8 @@ public class APIMappingUtil {
         product.setAvailableTiers(apiTiers);
 
         product.setProductLevelPolicy(dto.getApiThrottlingPolicy());
+
+        product.setGatewayVendor(dto.getGatewayVendor());
 
         if (dto.getSubscriptionAvailability() != null) {
             product.setSubscriptionAvailability(

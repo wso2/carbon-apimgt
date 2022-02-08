@@ -63,15 +63,14 @@ public class GraphQLSchemaDefinition {
     protected Log log = LogFactory.getLog(getClass());
 
     /**
-     * Extract GraphQL Operations from given schema
+     * Extract GraphQL Operations from given schema.
      *
-     * @param schema graphQL Schema
-     * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
+     * @param typeRegistry graphQL Schema Type Registry
+     * @param type operation type string
+     * @return the arrayList of APIOperationsDTO
      */
-    public List<URITemplate> extractGraphQLOperationList(String schema, String type) {
+    public List<URITemplate> extractGraphQLOperationList(TypeDefinitionRegistry typeRegistry, String type) {
         List<URITemplate> operationArray = new ArrayList<>();
-        SchemaParser schemaParser = new SchemaParser();
-        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
         Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
         for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
             Optional<SchemaDefinition> schemaDefinition = typeRegistry.schemaDefinition();
@@ -99,6 +98,26 @@ public class GraphQLSchemaDefinition {
             }
         }
         return operationArray;
+    }
+
+    /**
+     * Check subscription operation availability from given graphql schema.
+     *
+     * @param schema graphQL Schema
+     * @return the boolean value of subscription operation availability
+     */
+    public boolean isSubscriptionAvailable(String schema) {
+        boolean isSubscriptionAvailable = false;
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+        Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
+        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
+            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
+                isSubscriptionAvailable = true;
+                break;
+            }
+        }
+        return isSubscriptionAvailable;
     }
 
     /**
@@ -156,6 +175,7 @@ public class GraphQLSchemaDefinition {
 
         String operationScopeType;
         StringBuilder schemaDefinitionBuilder = new StringBuilder(api.getGraphQLSchema());
+        schemaDefinitionBuilder.append("\n");
         StringBuilder operationScopeMappingBuilder = new StringBuilder();
         StringBuilder scopeRoleMappingBuilder = new StringBuilder();
         StringBuilder operationAuthSchemeMappingBuilder = new StringBuilder();
@@ -216,15 +236,14 @@ public class GraphQLSchemaDefinition {
             }
 
             if (scopeRoleMap.size() > 0) {
-                List<String> scopeRoles = new ArrayList<>();
                 String[] roleList;
                 String scopeType;
                 String base64EncodedURLScopeKey;
                 String scopeRoleMappingType;
                 String base64EncodedURLRole;
                 String roleField;
-
                 for (Map.Entry<String, String> entry : scopeRoleMap.entrySet()) {
+                    List<String> scopeRoles = new ArrayList<>();
                     base64EncodedURLScopeKey = Base64.getUrlEncoder().withoutPadding().
                             encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
                     scopeType = "type " + APIConstants.SCOPE_ROLE_MAPPING + "_" + base64EncodedURLScopeKey + "{\n";

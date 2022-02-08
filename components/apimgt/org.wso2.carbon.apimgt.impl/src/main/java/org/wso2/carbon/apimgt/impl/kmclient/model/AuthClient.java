@@ -36,6 +36,15 @@ public interface AuthClient {
             throws KeyManagerClientException;
 
     @RequestLine("POST ")
+    TokenInfo generate(@Param("client_id") String clientId,
+                       @Param("client_secret") String clientSecret,
+                       @Param("grant_type") String grantType,
+                       @Param("scope") String scope,
+                       @Param("subject_token") String subjectToken,
+                       @Param("subject_token_type") String subjectTokenType)
+            throws KeyManagerClientException;
+
+    @RequestLine("POST ")
     TokenInfo generateWithValidityPeriod(@Param("client_id") String clientId,
                                          @Param("client_secret") String clientSecret,
                                          @Param("grant_type") String grantType,

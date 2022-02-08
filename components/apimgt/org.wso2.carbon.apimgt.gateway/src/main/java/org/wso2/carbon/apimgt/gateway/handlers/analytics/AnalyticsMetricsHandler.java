@@ -91,7 +91,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {
             dataCollector.collectData();
-        } catch (AnalyticsException e) {
+        } catch (Exception e) {
             log.error("Error Occurred when collecting data", e);
         }
         return true;

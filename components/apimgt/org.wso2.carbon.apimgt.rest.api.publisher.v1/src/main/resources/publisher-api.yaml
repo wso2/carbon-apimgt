@@ -1334,6 +1334,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -1389,6 +1390,7 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_create
             - apim:api_manage
@@ -1461,6 +1463,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -1544,6 +1547,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -1617,6 +1621,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -1889,6 +1894,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
             - apim:comment_manage
       x-code-samples:
@@ -2014,6 +2020,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
             - apim:comment_manage
       x-code-samples:
@@ -2180,6 +2187,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:comment_view
             - apim:comment_manage
       x-code-samples:
@@ -2910,6 +2918,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -2960,6 +2969,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -3995,6 +4005,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -4066,6 +4077,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
             - apim:api_publish
@@ -4386,6 +4398,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_create
             - apim:api_import_export
@@ -4517,6 +4530,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -4576,6 +4590,7 @@ paths:
                 $ref: '#/components/schemas/Error'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -4606,6 +4621,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -5857,6 +5873,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6010,6 +6027,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6133,6 +6151,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6189,6 +6208,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       operationId: getIsAPIProductOutdated
@@ -6237,6 +6257,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6351,6 +6372,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6523,6 +6545,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_publish
             - apim:api_manage
       x-code-samples:
@@ -6640,6 +6663,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
@@ -6722,6 +6746,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
@@ -6794,6 +6819,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
@@ -7062,6 +7088,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
@@ -7253,6 +7280,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:publisher_settings
       x-code-samples:
         - lang: Curl
@@ -7640,6 +7668,7 @@ paths:
                 $ref: '#/components/schemas/KeyManagerList'
       security:
         - OAuth2Security:
+            - apim:api_view
             - apim:api_create
             - apim:api_manage
       x-code-samples:
@@ -7945,6 +7974,185 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+
+  /api-products/change-lifecycle:
+    post:
+      tags:
+        - API Product Lifecycle
+      summary: Change API Product LC Status
+      description: |
+        This operation is used to change the lifecycle of an API Product.
+        Eg: Publish an API Product which is in `CREATED` state. In order to change the lifecycle, we need to provide the
+        lifecycle `action` as a query parameter.
+
+        For example, to Publish an API Product, `action` should be `Publish`. Note that the `Re-publish` action is
+        available only after calling `Block`.
+
+        Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter.
+        Please see parameters table for more information.
+      parameters:
+        - name: action
+          in: query
+          description: |
+            The action to demote or promote the state of the API Product.
+
+            Supported actions are [ **Publish**, **Deploy as a Prototype**, **Demote to Created**, **Block**, **Deprecate**, **Re-Publish**, **Retire** ]
+          required: true
+          schema:
+            type: string
+            enum:
+              - Publish
+              - Deploy as a Prototype
+              - Demote to Created
+              - Block
+              - Deprecate
+              - Re-Publish
+              - Retire
+        - name: lifecycleChecklist
+          in: query
+          description: |
+            Supported checklist items are as follows.
+            1. **Deprecate old versions after publishing the API**: Setting this to true will deprecate older versions of a particular API Product when it is promoted to Published state from Created state.
+            2. **Requires re-subscription when publishing the API**: If you set this to true, users need to re subscribe to the API Products although they may have subscribed to an older version.
+            You can specify additional checklist items by using an **"attribute:"** modifier.
+            Eg: "Deprecate old versions after publishing the API:true" will deprecate older versions of a particular API Product when it is promoted to Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false" format.
+            **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v2/api-products/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate%20old%20versions%20after%20publishing%20the%20API%3Atrue,Requires%20re-subscription%20when%20publishing%20the%20API%3Afalse"
+          schema:
+            type: string
+        - $ref: '#/components/parameters/apiProductId-Q'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle changed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
+      operationId: changeAPIProductLifecycle
+
+  /api-products/{apiProductId}/lifecycle-history:
+    get:
+      tags:
+        - API Product Lifecycle
+      summary: Get Lifecycle State Change History of the API Products.
+      description: |
+        This operation can be used to retrieve Lifecycle state change history of the API Products.
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state change history returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleHistory'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
+      operationId: getAPIProductLifecycleHistory
+
+  /api-products/{apiProductId}/lifecycle-state:
+    get:
+      tags:
+        - API Product Lifecycle
+      summary: Get Lifecycle State Data of the API Product.
+      description: |
+        This operation can be used to retrieve Lifecycle state data of the API Product.
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleState'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
+      operationId: getAPIProductLifecycleState
+
+  /api-products/{apiProductId}/lifecycle-state/pending-tasks:
+    delete:
+      tags:
+        - API Product Lifecycle
+      summary: Delete Pending Lifecycle State Change Tasks
+      description: |
+        This operation can be used to remove pending lifecycle state change requests that are in pending state
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state change pending task removed successfully.
+          content: {}
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
+      operationId: deleteAPIProductLifecycleStatePendingTasks
+
 components:
   schemas:
     Comment:
@@ -8127,7 +8335,9 @@ components:
         updatedTime:
           type: string
           example : 2021-02-11 09:57:25
-
+        gatewayVendor:
+          type: string
+          example: wso2
     Topic:
       title: Topic object
       required:
@@ -8616,6 +8826,20 @@ components:
               example: false
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
+        gatewayVendor:
+          title: field to identify gateway vendor
+          type: string
+          example:
+            wso2
+        asyncTransportProtocols:
+          type: array
+          description: |
+            Supported transports for the async API (http and/or https).
+          example:
+            - http
+            - https
+          items:
+            type: string
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -8796,6 +9020,10 @@ components:
           enum:
             - CREATED
             - PUBLISHED
+            - DEPRECATED
+            - RETIRED
+            - BLOCKED
+            - PROTOTYPED
         securityScheme:
           type: array
           description: |
@@ -8805,6 +9033,9 @@ components:
             - oauth2
           items:
             type: string
+        gatewayVendor:
+          type: string
+          example: wso2
     APIProduct:
       title: API Product object
       required:
@@ -8845,9 +9076,14 @@ components:
           type: string
           description: |
             State of the API product. Only published api products are visible on the Developer Portal
+          default: CREATED
           enum:
             - CREATED
             - PUBLISHED
+            - DEPRECATED
+            - RETIRED
+            - BLOCKED
+            - PROTOTYPED
         enableSchemaValidation:
           type: boolean
           example: false
@@ -9009,6 +9245,11 @@ components:
           type: string
         lastUpdatedTime:
           type: string
+        gatewayVendor:
+          title: field to identify gateway vendor
+          type: string
+          example:
+            wso2
         apis:
           type: array
           description: |
@@ -9040,6 +9281,9 @@ components:
           example: []
           items:
             type: string
+        workflowStatus:
+          type: string
+          example: APPROVED
     ProductAPI:
       title: ProductAPI
       required:
@@ -9717,7 +9961,7 @@ components:
           type: object
           properties:
             policyId:
-              type: int
+              type: integer
               description: Id of policy
               example: 1
             uuid:
@@ -9745,7 +9989,7 @@ components:
               description: Indicates whether the policy is deployed successfully or not.
               default: false
             tenantId:
-              type: int
+              type: integer
               description: Throttling policy tenant domain id
               example: -1234
             tenantDomain:
@@ -9903,7 +10147,6 @@ components:
     Environment:
       title: Environment
       required:
-        - endpoints
         - id
         - name
         - serverUrl
@@ -9925,6 +10168,9 @@ components:
         serverUrl:
           type: string
           example: https://localhost:9443/services/
+        provider:
+          type: string
+          example: wso2
         showInApiConsole:
           type: boolean
           example: true
@@ -9932,6 +10178,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VHost'
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayEnvironmentProtocolURI'
+        additionalProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalProperty'
     EnvironmentList:
       title: Environment List
       type: object
@@ -9945,6 +10199,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    AdditionalProperty:
+      title: Additional Gateway Properties
+      type: object
+      properties:
+        key:
+          type: string
+          example: Organization
+        value:
+          type: string
+          example: wso2
     VHost:
       title: Virtual Host
       type: object
@@ -11285,6 +11549,15 @@ components:
               items:
                 type: string
                 example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            gatewayVendor:
+              type: string
+              example: wso2
+            asyncTransportProtocols:
+              type: array
+              description: contains available transports for an async API
+              items:
+                type: string
+                example: http
           description:
             API definition information
         errors:
@@ -11294,6 +11567,19 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
+    GatewayEnvironmentProtocolURI:
+      title: Gateway Environment protocols and URIs
+      required:
+        - protocol
+        - endpointURI
+      type: object
+      properties:
+        protocol:
+          type: string
+          example: default
+        endpointURI:
+          type: string
+          example: default
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -11807,6 +12093,16 @@ components:
       in: path
       description: |
         **Env ID** consisting of the **UUID** of the gateway environment.
+      required: true
+      schema:
+        type: string
+    apiProductId-Q:
+      name: apiProductId
+      in: query
+      description: |
+        **API Product ID** consisting of the **UUID** of the API Product.
+        The combination of the provider, name and the version of the API Product is also accepted as a valid API Product ID.
+        Should be formatted as **provider-name-version**.
       required: true
       schema:
         type: string

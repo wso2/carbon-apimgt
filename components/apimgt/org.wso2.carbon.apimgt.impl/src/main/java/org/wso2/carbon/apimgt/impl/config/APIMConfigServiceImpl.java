@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
+import org.wso2.carbon.apimgt.impl.dao.SystemConfigurationsDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -31,7 +33,6 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -46,6 +47,11 @@ import java.nio.charset.Charset;
 public class APIMConfigServiceImpl implements APIMConfigService {
 
     private static final Log log = LogFactory.getLog(APIMConfigServiceImpl.class);
+    protected SystemConfigurationsDAO systemConfigurationsDAO;
+
+    public APIMConfigServiceImpl() {
+        systemConfigurationsDAO = SystemConfigurationsDAO.getInstance();
+    }
 
     @Override
     public void addExternalStoreConfig(String organization, String externalStoreConfig) throws APIManagementException {
@@ -154,29 +160,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            if (!registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registry.newResource();
-                resource.setContent(IOUtils.toByteArray(new StringReader(tenantConfig)));
-                resource.setMediaType(APIConstants.API_TENANT_CONF_MEDIA_TYPE);
-                registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
-            }
-
-        } catch (RegistryException | IOException e) {
-            throw new APIManagementException("Error while adding tenant config to registry for organization: "
-                    + organization, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        systemConfigurationsDAO.addSystemConfig(organization, ConfigType.TENANT.toString(), tenantConfig);
     }
 
     @Override
@@ -185,28 +169,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                return new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            } else {
-                return null;
-            }
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while getting tenant config from registry for organization: "
-                    + organization, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        return systemConfigurationsDAO.getSystemConfig(organization, ConfigType.TENANT.toString());
     }
 
     @Override
@@ -215,27 +178,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                resource.setContent(IOUtils.toByteArray(new StringReader(tenantConfig)));
-                resource.setMediaType(APIConstants.API_TENANT_CONF_MEDIA_TYPE);
-                registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
-            }
-        } catch (RegistryException | IOException e) {
-            throw new APIManagementException("Error while updating tenant config to registry for organization: "
-                    + organization, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        systemConfigurationsDAO.updateSystemConfig(organization, ConfigType.TENANT.toString(), tenantConfig);
     }
 
     @Override

@@ -90,7 +90,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -530,6 +532,7 @@ public class GatewayUtils {
         authContext.setAuthenticated(true);
         authContext.setApiKey(jti);
         authContext.setUsername(getEndUserFromJWTValidationInfo(jwtValidationInfo, apiKeyValidationInfoDTO));
+        authContext.setRequestTokenScopes(jwtValidationInfo.getScopes());
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
@@ -548,6 +551,8 @@ public class GatewayUtils {
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
+            authContext.setGraphQLMaxDepth(apiKeyValidationInfoDTO.getGraphQLMaxDepth());
+            authContext.setGraphQLMaxComplexity(apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());
@@ -1389,5 +1394,14 @@ public class GatewayUtils {
 
     public static boolean isAllApisDeployed () {
         return DataHolder.getInstance().isAllApisDeployed();
+    }
+
+    public static List<String> getKeyManagers(org.apache.synapse.MessageContext messageContext) {
+
+        API api = getAPI(messageContext);
+        if (api != null) {
+            return DataHolder.getInstance().getKeyManagersFromUUID(api.getUuid());
+        }
+        return Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
     }
 }

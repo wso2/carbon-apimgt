@@ -1957,6 +1957,7 @@ paths:
               - AM_SUBSCRIPTION_DELETION
               - AM_APPLICATION_DELETION
               - AM_API_STATE
+              - AM_API_PRODUCT_STATE
       responses:
         200:
           description: |
@@ -3959,8 +3960,7 @@ components:
         subscriptionScopes:
           type: array
           items:
-            $ref: '#/definitions/ScopeInfo'
-          example: []
+            $ref: '#/components/schemas/ScopeInfo'
         owner:
           description: |
             Application created user
@@ -4036,6 +4036,9 @@ components:
           minLength: 1
           type: string
           example: US Region
+        provider:
+          type: string
+          example: wso2
         description:
           maxLength: 1023
           type: string
@@ -4049,6 +4052,14 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/VHost'
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayEnvironmentProtocolURI'
+        additionalProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalProperty'
     EnvironmentList:
       title: Environment List
       type: object
@@ -4094,6 +4105,29 @@ components:
         wssPort:
           type: integer
           example: 8099
+    AdditionalProperty:
+      title: Additional Gateway Properties
+      type: object
+      properties:
+        key:
+          type: string
+          example: Organization
+        value:
+          type: string
+          example: wso2
+    GatewayEnvironmentProtocolURI:
+      title: Gateway Environment protocols and URIs
+      required:
+        - protocol
+        - endpointURI
+      type: object
+      properties:
+        protocol:
+          type: string
+          example: default
+        endpointURI:
+          type: string
+          example: default
     PublishStatus:
       title: Usage publish status
       type: object
@@ -4262,6 +4296,10 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/KeyManagerConfiguration'
+              endpointConfigurations:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyManagerConfiguration'
         analyticsEnabled:
           type: boolean
           description: To determine whether analytics is enabled or not
@@ -4357,27 +4395,39 @@ components:
         introspectionEndpoint:
           type: string
           example: https://localhost:9444/oauth2/introspect
+          deprecated: true
         clientRegistrationEndpoint:
           type: string
           example: https://localhost:9444/keymanager-operations/dcr/register
+          deprecated: true
         tokenEndpoint:
           type: string
           example: https://localhost:9444/oauth2/token
+          deprecated: true
         displayTokenEndpoint:
           type: string
           example: https://localhost:9444/oauth2/token
+          deprecated: true
         revokeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/revoke
+          deprecated: true
         displayRevokeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/revoke
+          deprecated: true
         userInfoEndpoint:
           type: string
           example: https://localhost:9444/oauth2/userinfo?schema=openid
+          deprecated: true
         authorizeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/authorize
+          deprecated: true
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyManagerEndpoint'
         certificates:
           type: object
           properties:
@@ -4400,6 +4450,7 @@ components:
         scopeManagementEndpoint:
           type: string
           example: https://wso2is.com:9444/api/identity/oauth2/v1.0/scopes
+          deprecated: true
         availableGrantTypes:
           type: array
           items:
@@ -4455,13 +4506,27 @@ components:
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
-            Accepted values are EXCHANGED, ORIGINAL and BOTH.
+            Accepted values are EXCHANGED, DIRECT and BOTH.
           example: EXCHANGED
-          default: ORIGINAL
+          default: DIRECT
           enum:
             - EXCHANGED
-            - ORIGINAL
+            - DIRECT
             - BOTH
+
+    KeyManagerEndpoint:
+      title: Key Manager Endpoint.
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'token_endpoint'
+        value:
+          type: string
+          example: 'https://localhost:9443/oauth2/token'
     KeyManagerInfo:
       title: Key Manager Info
       required:
@@ -4487,12 +4552,12 @@ components:
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
-             Accepted values are EXCHANGED, ORIGINAL and BOTH.
+            Accepted values are EXCHANGED, DIRECT and BOTH.
           example: EXCHANGED
-          default: ORIGINAL
+          default: DIRECT
           enum:
             - EXCHANGED
-            - ORIGINAL
+            - DIRECT
             - BOTH
     KeyManagerConfiguration:
       title: Key Manager Configuration
@@ -4684,6 +4749,7 @@ components:
             - APPLICATION_REGISTRATION_SANDBOX
             - APPLICATION_DELETION
             - API_STATE
+            - API_PRODUCT_STATE
             - SUBSCRIPTION_DELETION
             - SUBSCRIPTION_UPDATE
         workflowStatus:

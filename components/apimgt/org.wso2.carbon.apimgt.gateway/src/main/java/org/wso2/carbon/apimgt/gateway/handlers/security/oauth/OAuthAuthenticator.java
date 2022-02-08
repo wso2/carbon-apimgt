@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -47,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -90,12 +92,10 @@ public class OAuthAuthenticator implements Authenticator {
     public OAuthAuthenticator() {
     }
 
-    public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader,
-                              List<String> keyManagerList) {
+    public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader) {
         this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
         this.isMandatory = isMandatory;
-        this.keyManagerList = keyManagerList;
     }
 
     public void init(SynapseEnvironment env) {
@@ -113,12 +113,10 @@ public class OAuthAuthenticator implements Authenticator {
         String accessToken = null;
         String remainingAuthHeader = "";
         boolean defaultVersionInvoked = false;
-        TracingSpan getClientDomainSpan = null;
-        TracingSpan authenticationSchemeSpan = null;
-        TracingSpan keyInfo = null;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String tenantDomain = GatewayUtils.getTenantDomain();
+        keyManagerList = GatewayUtils.getKeyManagers(synCtx);
         if (keyValidator == null) {
             this.keyValidator = new APIKeyValidator();
         }
@@ -242,13 +240,26 @@ public class OAuthAuthenticator implements Authenticator {
                     String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
                     if (StringUtils.isNotEmpty(keyManager)) {
+                        if (log.isDebugEnabled()){
+                            log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
+                        }
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
+                            }
                             isJwtToken = true;
                         } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
+                            }
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                        }
+                    }else{
+                        if (log.isDebugEnabled()) {
+                            log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
                         }
                     }
                 } catch ( ParseException | IllegalArgumentException e) {
@@ -267,56 +278,7 @@ public class OAuthAuthenticator implements Authenticator {
         }
         context.stop();
         APIKeyValidationInfoDTO info;
-        if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
-
-            if(log.isDebugEnabled()){
-                log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
-            }
-
-            //using existing constant in Message context removing the additinal constant in API Constants
-            String clientIP = null;
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
-                    getAxis2MessageContext();
-            Map<String, String> transportHeaderMap = (Map<String, String>)
-                                                         axis2MessageContext.getProperty
-                                                                 (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-            if (transportHeaderMap != null) {
-                clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-            }
-
-            //Setting IP of the client
-            if (clientIP != null && !clientIP.isEmpty()) {
-                if (clientIP.indexOf(",") > 0) {
-                    clientIP = clientIP.substring(0, clientIP.indexOf(","));
-                }
-            } else {
-                clientIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-            }
-
-            //Create a dummy AuthenticationContext object with hard coded values for
-            // Tier and KeyType. This is because we cannot determine the Tier nor Key
-            // Type without subscription information..
-            AuthenticationContext authContext = new AuthenticationContext();
-            authContext.setAuthenticated(true);
-            authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
-            authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
-            //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario,
-            //we will use the client's IP address for throttling.
-            authContext.setApiKey(clientIP);
-            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-            //This name is hardcoded as anonymous because there is no associated user token
-            authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
-            authContext.setCallerToken(null);
-            authContext.setApplicationName(null);
-            authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
-            authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
-            authContext.setConsumerKey(null);
-            String apiNameFromContextAndVersion = GatewayUtils.getAPINameFromContextAndVersion(synCtx);
-            synCtx.setProperty("API_NAME", apiNameFromContextAndVersion);
-            APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
-            return new AuthenticationResponse(true, isMandatory, false, 0, null);
-        } else if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
+        if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
             info = new APIKeyValidationInfoDTO();
             info.setAuthorized(false);
             info.setValidationStatus(900906);
