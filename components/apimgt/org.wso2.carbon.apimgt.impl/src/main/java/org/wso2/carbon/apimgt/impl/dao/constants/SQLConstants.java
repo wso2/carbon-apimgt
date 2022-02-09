@@ -1830,6 +1830,12 @@ public class SQLConstants {
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND AM_API_COMMENTS.COMMENT_ID = ?";
 
+    public static final String DELETE_API_CHILD_COMMENTS =
+            "DELETE FROM AM_API_COMMENTS WHERE API_ID = ? AND PARENT_COMMENT_ID IS NOT NULL";
+
+    public static final String DELETE_API_PARENT_COMMENTS =
+            "DELETE FROM AM_API_COMMENTS WHERE API_ID = ? AND PARENT_COMMENT_ID IS NULL";
+
     public static final String GET_IDS_OF_REPLIES_SQL =
             "SELECT " +
                 "AM_API_COMMENTS.COMMENT_ID " +
