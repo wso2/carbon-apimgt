@@ -285,22 +285,32 @@ public abstract class AbstractKeyManager implements KeyManager {
             List<ConfigurationDto> applicationConfigurationDtoList = keyManagerConnectorConfiguration
                     .getApplicationConfigurations();
             Object additionalProperties = oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
-            if (additionalProperties != null) {
-                JsonObject additionalPropertiesJson = (JsonObject) new JsonParser()
-                        .parse((String) additionalProperties);
-                for (ConfigurationDto configurationDto : applicationConfigurationDtoList) {
-                    JsonElement value = additionalPropertiesJson.get(configurationDto.getName());
-                    if (value == null) {
-                        if (configurationDto.isRequired()) {
-                            missedRequiredValues.add(configurationDto.getName());
+            try {
+                if (additionalProperties != null) {
+                    JSONObject additionalPropertiesJson;
+                    if (additionalProperties instanceof JSONObject) {
+                        additionalPropertiesJson = (JSONObject) additionalProperties;
+                    } else {
+                        additionalPropertiesJson =
+                                (JSONObject) new JSONParser().parse((String) additionalProperties);
+                    }
+                    for (ConfigurationDto configurationDto : applicationConfigurationDtoList) {
+                        Object value = additionalPropertiesJson.get(configurationDto.getName());
+                        if (value == null) {
+                            if (configurationDto.isRequired()) {
+                                missedRequiredValues.add(configurationDto.getName());
+                            }
                         }
                     }
+                    if (!missedRequiredValues.isEmpty()) {
+                        throw new APIManagementException("Missing required properties to create/update oauth " +
+                                "application",
+                                ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
+                    }
                 }
-                if (!missedRequiredValues.isEmpty()) {
-                    throw new APIManagementException(
-                            "Missing required properties to create/update oauth " + "application",
-                            ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
-                }
+            } catch (ParseException e) {
+                throw new APIManagementException("Error while parsing the addition properties of OAuth " +
+                        "application");
             }
         } else {
             throw new APIManagementException("Invalid Key Manager Type " + type, ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
