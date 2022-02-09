@@ -3918,17 +3918,6 @@ public final class APIUtil {
                 }
             }
 
-            // create IntegrationDeveloperRole role if it's creation is enabled in tenant-conf.json
-            JSONObject integrationDeveloperRoleConfig = (JSONObject) defaultRoles
-                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE);
-            if (isRoleCreationEnabled(integrationDeveloperRoleConfig)) {
-                String integrationDeveloperRoleName = String.valueOf(integrationDeveloperRoleConfig
-                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
-                if (!StringUtils.isBlank(integrationDeveloperRoleName)) {
-                    createIntegrationDeveloperRole(integrationDeveloperRoleName, tenantId);
-                }
-            }
-
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
@@ -4224,19 +4213,6 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
         };
         createRole(roleName, devOpsPermissions, tenantId);
-    }
-
-    /**
-     * Create Integration developer roles with the given name in specified tenant
-     *
-     * @param roleName role name
-     * @param tenantId id of the tenant
-     * @throws APIManagementException
-     */
-    public static void createIntegrationDeveloperRole(String roleName, int tenantId) throws APIManagementException {
-
-        Permission[] integrationDeveloperPermissions = new Permission[]{};
-        createRole(roleName, integrationDeveloperPermissions, tenantId);
     }
 
     /**
