@@ -30,7 +30,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.logging.PerAPILogHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.logging.APILogHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
@@ -61,10 +61,10 @@ public class LogsHandler extends AbstractSynapseHandler {
     private static final String REQUEST_EVENT_PUBLICATION_ERROR = "Cannot publish request event. ";
     private static final String RESPONSE_EVENT_PUBLICATION_ERROR = "Cannot publish response event. ";
 
-    private static final String REQUEST_IN = "request-in";
-    private static final String REQUEST_OUT = "request-out";
-    private static final String RESPONSE_IN = "response-in";
-    private static final String RESPONSE_OUT = "response-out";
+    private static final String REQUEST_IN = "REQUEST_IN";
+    private static final String REQUEST_OUT = "REQUEST_OUT";
+    private static final String RESPONSE_IN = "RESPONSE_IN";
+    private static final String RESPONSE_OUT = "RESPONSE_OUT";
 
     public LogsHandler() {
         log.info("Started log handler");
@@ -94,7 +94,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         String log = getAPILogLevel(messageContext);
         // If it presents log the details
         if ((log) != null) {
-            PerAPILogHandler.logAPI(REQUEST_IN, messageContext);
+            APILogHandler.logAPI(REQUEST_IN, messageContext);
         }
         return true;
     }
@@ -131,7 +131,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         }
         String log = (String) messageContext.getProperty(LOG_LEVEL);
         if (log != null) {
-            PerAPILogHandler.logAPI(REQUEST_OUT, messageContext);
+            APILogHandler.logAPI(REQUEST_OUT, messageContext);
         }
         return true;
     }
@@ -171,7 +171,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         // if PER API logging is available
         String log = (String) messageContext.getProperty(LOG_LEVEL);
         if (log != null) {
-            PerAPILogHandler.logAPI(RESPONSE_IN, messageContext);
+            APILogHandler.logAPI(RESPONSE_IN, messageContext);
         }
         return true;
     }
@@ -180,7 +180,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         // if PER API logging is available
         String log = (String) messageContext.getProperty(LOG_LEVEL);
         if (log != null) {
-            PerAPILogHandler.logAPI(RESPONSE_OUT, messageContext);
+            APILogHandler.logAPI(RESPONSE_OUT, messageContext);
         }
         return true;
     }

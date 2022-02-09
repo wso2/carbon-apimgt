@@ -4300,6 +4300,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //validate if api exists
             APIInfo apiInfo = validateAPIExistence(apiId);
+
+            //validate whether the API is advertise only
+            APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+            if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
+                throw new APIManagementException("Creating API Revisions is not supported for third party APIs: "
+                        + apiId);
+            }
+
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4392,6 +4400,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        //validate whether the API is advertise only
+        APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+        if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
+            throw new APIManagementException("Deploying API Revisions is not supported for third party APIs: "
+                    + apiId);
+        }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -4624,6 +4639,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+        }
+
+        // validate whether ASYNC APIs created without advertise only enabled
+        if (APIDTO.TypeEnum.ASYNC.equals(apiDTOFromProperties.getType()) &&
+                (apiDTOFromProperties.getAdvertiseInfo() == null ||
+                        !apiDTOFromProperties.getAdvertiseInfo().isAdvertised())) {
+            RestApiUtil.handleBadRequest("ASYNC type APIs only can be created as third party APIs", log);
         }
 
         //validate websocket url and change transport types

@@ -27,6 +27,7 @@ public class PublisherSearchContent implements SearchContent {
     String provider;
     String status;
     String thumbnailUri;
+    Boolean advertiseOnly;
 
     @Override
     public String getId() {
@@ -110,4 +111,11 @@ public class PublisherSearchContent implements SearchContent {
         this.type = type;
     }
 
+    public Boolean getAdvertiseOnly() {
+        return advertiseOnly;
+    }
+
+    public void setAdvertiseOnly(Boolean advertiseOnly) {
+        this.advertiseOnly = advertiseOnly;
+    }
 }
