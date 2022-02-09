@@ -6687,7 +6687,8 @@ public class ApiMgtDAO {
             String serviceKey = api.getServiceInfo("key");
             if (StringUtils.isNotEmpty(serviceKey)) {
                 int apiId = getAPIID(api.getUuid());
-                updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), connection);
+                int tenantID = APIUtil.getTenantId(username);
+                updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantID, connection);
             }
             connection.commit();
         } catch (SQLException e) {
@@ -17461,9 +17462,10 @@ public class ApiMgtDAO {
      * @param apiId      Unique Identifier of API
      * @param serviceKey Unique key of the Service
      * @param md5        MD5 value of the Service
+     * @param tenantID   tenantID of API
      * @throws SQLException
      */
-    public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, Connection connection)
+    public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, int tenantID, Connection connection)
             throws APIManagementException {
         try {
             if (!retrieveServiceKeyByApiId(apiId).isEmpty()) {
@@ -17474,7 +17476,7 @@ public class ApiMgtDAO {
                     statement.executeUpdate();
                 }
             } else {
-                addAPIServiceMapping(apiId, serviceKey, md5, -1234, connection);
+                addAPIServiceMapping(apiId, serviceKey, md5, tenantID, connection);
             }
         } catch (SQLException e) {
             handleException("Error while updating the Service info associated with API " + apiId, e);
