@@ -85,8 +85,6 @@
         "required": [
           "name",
           "displayName",
-          "description",
-          "validationRegex",
           "type",
           "required"
         ]
@@ -97,7 +95,6 @@
     "category",
     "name",
     "displayName",
-    "description",
     "multipleAllowed",
     "applicableFlows",
     "supportedGateways",
