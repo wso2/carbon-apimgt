@@ -17453,12 +17453,11 @@ public class ApiMgtDAO {
      * @return Service Key
      * @throws APIManagementException
      */
-    public String retrieveServiceKeyByApiId(int apiId) throws APIManagementException {
+    private String retrieveServiceKeyByApiId(int apiId, Connection connection) throws APIManagementException {
 
         String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL_WITHOUT_TENANT_ID;
         String serviceKey = StringUtils.EMPTY;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
             preparedStatement.setInt(1, apiId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
@@ -17480,10 +17479,10 @@ public class ApiMgtDAO {
      * @param tenantID   tenantID of API
      * @throws SQLException
      */
-    public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, int tenantID, Connection connection)
+    private void updateAPIServiceMapping(int apiId, String serviceKey, String md5, int tenantID, Connection connection)
             throws APIManagementException {
         try {
-            if (!retrieveServiceKeyByApiId(apiId).isEmpty()) {
+            if (!retrieveServiceKeyByApiId(apiId, connection).isEmpty()) {
                 try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
                     statement.setString(1, serviceKey);
                     statement.setString(2, md5);

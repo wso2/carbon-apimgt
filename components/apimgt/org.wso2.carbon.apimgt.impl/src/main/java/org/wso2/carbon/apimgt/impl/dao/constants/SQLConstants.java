@@ -3591,8 +3591,8 @@ public class SQLConstants {
                 "(UUID, SERVICE_KEY, MD5, SERVICE_NAME, SERVICE_VERSION, TENANT_ID, SERVICE_URL, " +
                 "DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, " +
                 "SECURITY_TYPE, MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, " +
-                "SERVICE_DEFINITION, API_ID) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "SERVICE_DEFINITION) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String UPDATE_SERVICE_BY_KEY = "UPDATE AM_SERVICE_CATALOG SET " +
                 "MD5 = ?," +
@@ -3605,8 +3605,7 @@ public class SQLConstants {
                 "MUTUAL_SSL_ENABLED = ?," +
                 "LAST_UPDATED_TIME = ?," +
                 "UPDATED_BY = ?," +
-                "SERVICE_DEFINITION = ?, " +
-                "API_ID = ? " +
+                "SERVICE_DEFINITION = ? " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
 
         public static final String DELETE_SERVICE_BY_SERVICE_ID = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
@@ -3614,8 +3613,7 @@ public class SQLConstants {
 
         public static final String GET_SERVICE_BY_SERVICE_KEY = "SELECT UUID, SERVICE_NAME, SERVICE_KEY, MD5, " +
                 "   SERVICE_VERSION, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SECURITY_TYPE, " +
-                "   MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION, " +
-                " API_ID " +
+                "   MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION " +
                 "   FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
 
         public static final String GET_SERVICE_MD5_BY_NAME_AND_VERSION = "SELECT MD5 FROM AM_SERVICE_CATALOG " +
@@ -3629,8 +3627,7 @@ public class SQLConstants {
 
         public static final String GET_SERVICE_BY_NAME_AND_VERSION = "SELECT UUID, SERVICE_NAME, SERVICE_KEY, MD5," +
                 " SERVICE_VERSION, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SECURITY_TYPE," +
-                " MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION, " +
-                " API_ID " +
+                " MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION " +
                 " FROM AM_SERVICE_CATALOG WHERE SERVICE_NAME = ? AND SERVICE_VERSION = ? AND TENANT_ID = ?";
 
         public static final String GET_SERVICE_BY_SERVICE_ID = "SELECT " +
@@ -3649,8 +3646,7 @@ public class SQLConstants {
                 "   LAST_UPDATED_TIME," +
                 "   CREATED_BY," +
                 "   UPDATED_BY," +
-                "   SERVICE_DEFINITION," +
-                "   API_ID" +
+                "   SERVICE_DEFINITION" +
                 "   FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
                 "   AND TENANT_ID = ?";
 

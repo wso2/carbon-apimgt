@@ -104,7 +104,6 @@ return null;
     private String lastUpdatedTime = null;
     private String md5 = null;
     private String definitionUrl = null;
-    private String apiId = null;
 
   /**
    **/
@@ -352,23 +351,6 @@ return null;
     this.definitionUrl = definitionUrl;
   }
 
-  /**
-   **/
-  public ServiceDTO apiId(String apiId) {
-    this.apiId = apiId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  @JsonProperty("apiId")
-  public String getApiId() {
-    return apiId;
-  }
-  public void setApiId(String apiId) {
-    this.apiId = apiId;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -392,13 +374,12 @@ return null;
         Objects.equals(createdTime, service.createdTime) &&
         Objects.equals(lastUpdatedTime, service.lastUpdatedTime) &&
         Objects.equals(md5, service.md5) &&
-        Objects.equals(definitionUrl, service.definitionUrl) &&
-        Objects.equals(apiId, service.apiId);
+        Objects.equals(definitionUrl, service.definitionUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, version, serviceKey, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl, apiId);
+    return Objects.hash(id, name, description, version, serviceKey, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
   }
 
   @Override
@@ -420,7 +401,6 @@ return null;
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    md5: ").append(toIndentedString(md5)).append("\n");
     sb.append("    definitionUrl: ").append(toIndentedString(definitionUrl)).append("\n");
-    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

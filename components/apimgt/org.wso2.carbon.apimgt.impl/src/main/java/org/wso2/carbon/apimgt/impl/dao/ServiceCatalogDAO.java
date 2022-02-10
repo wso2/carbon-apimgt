@@ -421,7 +421,7 @@ public class ServiceCatalogDAO {
         StringBuilder querySb = new StringBuilder();
         querySb.append("SELECT UUID, SERVICE_KEY, MD5, SERVICE_NAME, SERVICE_VERSION," +
                 "   SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SECURITY_TYPE, MUTUAL_SSL_ENABLED," +
-                "   CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION, API_ID FROM " +
+                "   CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION FROM " +
                 "   AM_SERVICE_CATALOG WHERE TENANT_ID = ? ");
         String whereClauseForExactNameSearch = "AND SERVICE_NAME = ? ";
         String whereClauseForNameSearch = "AND SERVICE_NAME LIKE ? ";
@@ -687,10 +687,8 @@ public class ServiceCatalogDAO {
         ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
         ps.setString(10, username);
         ps.setBinaryStream(11, service.getEndpointDef());
-        ps.setString(12, service.getApiId());
-        ps.setString(13, service.getKey());
-        ps.setInt(14, tenantId);
-
+        ps.setString(12, service.getKey());
+        ps.setInt(13, tenantId);
     }
 
     private String setServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)
@@ -713,7 +711,6 @@ public class ServiceCatalogDAO {
         ps.setString(15, username);
         ps.setString(16, username);
         ps.setBinaryStream(17, service.getEndpointDef());
-        ps.setString(18, service.getApiId());
         return uuid;
     }
 
@@ -727,7 +724,6 @@ public class ServiceCatalogDAO {
             service.setVersion(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_VERSION));
             if (!shrink) {
                 service.setServiceUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_URL));
-                service.setApiId(resultSet.getString(APIConstants.ServiceCatalogConstants.API_ID));
                 service.setDefinitionType(ServiceEntry.DefinitionType.valueOf(resultSet.getString(APIConstants
                         .ServiceCatalogConstants.DEFINITION_TYPE)));
                 service.setDefUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_URL));

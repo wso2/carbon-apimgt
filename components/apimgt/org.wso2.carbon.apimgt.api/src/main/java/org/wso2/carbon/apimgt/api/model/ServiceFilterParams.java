@@ -33,8 +33,6 @@ public class ServiceFilterParams {
 
     String key;
 
-    String apiId;
-
     String sortBy;
 
     String sortOrder;
@@ -66,11 +64,6 @@ public class ServiceFilterParams {
     public String getKey() {
 
         return key;
-    }
-
-    public String getApiId() {
-
-        return apiId;
     }
 
     public String getSortBy() {
@@ -116,11 +109,6 @@ public class ServiceFilterParams {
     public void setKey(String key) {
 
         this.key = key;
-    }
-
-    public void setApiId(String apiId) {
-
-        this.apiId = apiId;
     }
 
     public void setSortBy(String sortBy) {
