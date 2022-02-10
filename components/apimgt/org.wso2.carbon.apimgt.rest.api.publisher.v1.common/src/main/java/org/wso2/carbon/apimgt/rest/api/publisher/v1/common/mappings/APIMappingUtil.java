@@ -879,12 +879,14 @@ public class APIMappingUtil {
         return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider)
+            throws APIManagementException {
 
         return fromAPItoDTO(model, false, apiProvider);
     }
 
-    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials, APIProvider apiProviderParam)
+    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials,
+                                      APIProvider apiProviderParam)
             throws APIManagementException {
 
         APIProvider apiProvider;

@@ -320,6 +320,14 @@
       {
         "Name": "apim:admin_application_view",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:api_list_view",
+        "Roles": "Internal/integration_dev"
+      },
+      {
+        "Name": "apim:api_definition_view",
+        "Roles": "Internal/integration_dev"
       }
     ]
   },
@@ -354,6 +362,10 @@
     "DevOpsRole" : {
       "CreateOnTenantLoad" : true,
       "RoleName" : "Internal/devops"
+    },
+    "IntegrationDeveloperRole" : {
+      "CreateOnTenantLoad" : true,
+      "RoleName" : "Internal/integration_dev"
     }
   }
 }

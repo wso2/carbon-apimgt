@@ -164,6 +164,9 @@ public class SQLConstants {
     public static final String GET_SERVICE_KEY_BY_API_ID_SQL = "SELECT SERVICE_KEY FROM AM_API_SERVICE_MAPPING WHERE " +
             " API_ID = ? AND TENANT_ID = ?";
 
+    public static final String GET_SERVICE_KEY_BY_API_ID_SQL_WITHOUT_TENANT_ID = "SELECT SERVICE_KEY FROM " +
+            " AM_API_SERVICE_MAPPING WHERE API_ID = ?";
+
     public static final String UPDATE_API_SERVICE_MAPPING_SQL = "UPDATE AM_API_SERVICE_MAPPING SET " +
             "   SERVICE_KEY = ?, " +
             "   MD5 = ? " +

@@ -116,6 +116,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE = "DevOpsRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE = "IntegrationDeveloperRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
     public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
 
@@ -1637,6 +1638,7 @@ public final class APIConstants {
     public static final String ENDPOINT_TYPE_LOADBALANCE = "load_balance";
     public static final String ENDPOINT_CONFIG = "endpoint_config";
     public static final String ENDPOINT_TYPE_HTTP = "http";
+    public static final String ENDPOINT_TYPE_SERVICE = "service";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
     public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
