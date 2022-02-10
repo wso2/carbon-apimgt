@@ -15758,7 +15758,7 @@ public class ApiMgtDAO {
             while (resultSet.next()) {
                 String version = resultSet.getString("API_VERSION");
                 String status = resultSet.getString("STATUS");
-                String versionTimestamp = resultSet.getString("VERSION_TIMESTAMP");
+                String versionTimestamp = resultSet.getString("VERSION_COMPARABLE");
                 String context = resultSet.getString("CONTEXT");
                 String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
