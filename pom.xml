@@ -898,11 +898,6 @@
                 <version>${carbon.kernel.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.registry</groupId>
-                <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
-                <version>${carbon.registry.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.jaggeryjs</groupId>
@@ -943,7 +938,7 @@
 
             <dependency>
                 <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity</artifactId>
+                <artifactId>velocity-engine-core</artifactId>
                 <version>${velocity.version}</version>
             </dependency>
 
@@ -1117,6 +1112,12 @@
                 <groupId>org.wso2.carbon.identity.governance</groupId>
                 <artifactId>org.wso2.carbon.identity.recovery</artifactId>
                 <version>${carbon.identity.governance.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.velocity</groupId>
+                        <artifactId>velocity</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -2046,7 +2047,7 @@
         <commons-codec.version>1.14</commons-codec.version>
         <com.nimbusds.wso2.version>7.3.0.wso2v1</com.nimbusds.wso2.version>
         <json-smart.version>2.3</json-smart.version>
-        <org.apache.velocity.version>1.7</org.apache.velocity.version>
+        <org.apache.velocity.version>2.1</org.apache.velocity.version>
         <org.slf4j.version>1.7.0</org.slf4j.version>
         <slf4j.api.version>1.7.29</slf4j.api.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
@@ -2095,7 +2096,7 @@
         <google.guava.version>27.0-jre</google.guava.version>
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
         <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
-        <velocity.version>1.7</velocity.version>
+        <velocity.version>2.1</velocity.version>
         <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
         <fasterxml.jackson.databind.version>2.10.3</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.11.0.wso2v1</fasterxml.jackson.core.version>
