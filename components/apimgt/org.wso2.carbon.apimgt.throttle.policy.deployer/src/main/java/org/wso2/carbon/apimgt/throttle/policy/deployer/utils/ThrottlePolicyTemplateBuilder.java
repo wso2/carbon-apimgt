@@ -245,6 +245,7 @@ public class ThrottlePolicyTemplateBuilder {
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
@@ -307,6 +308,7 @@ public class ThrottlePolicyTemplateBuilder {
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
@@ -370,6 +372,7 @@ public class ThrottlePolicyTemplateBuilder {
         }
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
@@ -408,6 +411,7 @@ public class ThrottlePolicyTemplateBuilder {
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
@@ -447,6 +451,8 @@ public class ThrottlePolicyTemplateBuilder {
         try {
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
+            APIUtil.initializeVelocityContext(velocityengine);
+
             velocityengine.init();
             Template template;
             if (PolicyConstants.EVENT_COUNT_TYPE.equals(policy.getDefaultLimit().getQuotaType())) {
