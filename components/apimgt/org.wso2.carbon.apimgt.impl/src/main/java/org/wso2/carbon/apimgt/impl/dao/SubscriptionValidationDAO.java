@@ -358,7 +358,7 @@ public class SubscriptionValidationDAO {
      * @param tenantId : unique identifier of tenant
      * @return {@link List<API>}
      * */
-    public List<API> getAllApis(String organization) {
+    public List<API> getAllApis(String organization, boolean isExpand, String status) {
 
         String sql = SubscriptionValidationSQLConstants.GET_ALL_APIS_BY_ORGANIZATION;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
@@ -366,11 +366,15 @@ public class SubscriptionValidationDAO {
         } else {
             sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
         }
-
+        if (status != null) {
+            sql = sql.concat(" AND AM_API.STATUS = ?");
+        }
         List<API> apiList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setString(1, organization);
+                if (status != null) {
+                    preparedStatement.setString(1, status);
+                }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
@@ -388,20 +392,24 @@ public class SubscriptionValidationDAO {
                         api.setApiType(apiType);
                         api.setContext(resultSet.getString("CONTEXT"));
                         api.setStatus(resultSet.getString("STATUS"));
-                        String revision = resultSet.getString("REVISION_UUID");
-                        api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
-                        if (APIConstants.API_PRODUCT.equals(apiType)) {
-                            attachURlMappingDetailsOfApiProduct(connection, api);
-                            apiList.add(api);
-                        } else {
-                            if (StringUtils.isNotEmpty(deploymentName)) {
-                                attachURLMappingDetails(connection, revision, api);
-                                api.setEnvironment(deploymentName);
-                                api.setRevision(revision);
-                                apiList.add(api);
+                        if (isExpand) {
+                            String revision = resultSet.getString("REVISION_UUID");
+                            api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
+                            api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                                attachURlMappingDetailsOfApiProduct(connection, api);
+                            } else {
+                                if (StringUtils.isNotEmpty(deploymentName)) {
+                                    attachURLMappingDetails(connection, revision, api);
+                                    api.setEnvironment(deploymentName);
+                                    api.setRevision(revision);
+                                }
                             }
+                        } else {
+                            api.setPolicy(null);
+                            api.setIsDefaultVersion(null);
                         }
+                        apiList.add(api);
                     }
                 }
             }
@@ -1001,7 +1009,7 @@ public class SubscriptionValidationDAO {
         return null;
     }
 
-    public List<API> getAllApis(String organization, String deployment) {
+    public List<API> getAllApis(String organization, String deployment, boolean isExpand, String status) {
 
         String sql = SubscriptionValidationSQLConstants.GET_ALL_APIS_BY_ORGANIZATION_AND_DEPLOYMENT_SQL;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
@@ -1009,9 +1017,15 @@ public class SubscriptionValidationDAO {
         } else {
             sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
         }
+        if (status != null) {
+            sql = sql.concat(" AND AM_API.STATUS = ?");
+        }
         List<API> apiList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                if (status != null) {
+                    preparedStatement.setString(1, status);
+                }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
@@ -1030,17 +1044,22 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
-                        String revision = resultSet.getString("REVISION_UUID");
-                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
-                        api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                        if (APIConstants.API_PRODUCT.equals(apiType)) {
-                            attachURlMappingDetailsOfApiProduct(connection, api);
-                        } else {
-                            if (deployment.equals(deploymentName)) {
-                                attachURLMappingDetails(connection, revision, api);
-                                apiList.add(api);
+                        if (isExpand) {
+                            String revision = resultSet.getString("REVISION_UUID");
+                            api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                            api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
+                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                                attachURlMappingDetailsOfApiProduct(connection, api);
+                            } else {
+                                if (deployment.equals(deploymentName)) {
+                                    attachURLMappingDetails(connection, revision, api);
+                                }
                             }
+                        } else {
+                            api.setPolicy(null);
+                            api.setIsDefaultVersion(null);
                         }
+                        apiList.add(api);
                     }
                 }
             }
@@ -1079,13 +1098,20 @@ public class SubscriptionValidationDAO {
         }
     }
 
-    public API getAPIByContextAndVersion(String context, String version, String deployment) {
+    public API getAPIByContextAndVersion(String context, String version, String deployment, boolean isExpand,
+            String status) {
 
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_CONTEXT_AND_VERSION_SQL;
+        if (status != null) {
+            sql = sql.concat(" AND AM_API.STATUS = ?");
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, context);
                 preparedStatement.setString(2, version);
+                if (status != null) {
+                    preparedStatement.setString(3, status);
+                }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
@@ -1102,18 +1128,22 @@ public class SubscriptionValidationDAO {
                         api.setApiType(apiType);
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
-                        String revision = resultSet.getString("REVISION_UUID");
                         api.setStatus(resultSet.getString("STATUS"));
-                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
-                        api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                        if (deployment.equals(deploymentName)) {
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
-                                attachURlMappingDetailsOfApiProduct(connection, api);
-                                return api;
+                        if (isExpand) {
+                            String revision = resultSet.getString("REVISION_UUID");
+                            api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                            api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
+                            if (deployment.equals(deploymentName)) {
+                                if (APIConstants.API_PRODUCT.equals(apiType)) {
+                                    attachURlMappingDetailsOfApiProduct(connection, api);
+                                }
+                                attachURLMappingDetails(connection, revision, api);
                             }
-                            attachURLMappingDetails(connection, revision, api);
-                            return api;
+                        } else {
+                            api.setPolicy(null);
+                            api.setIsDefaultVersion(null);
                         }
+                        return api;
                     }
                 }
             }
@@ -1167,7 +1197,7 @@ public class SubscriptionValidationDAO {
         }
     }
 
-    public API getApiByUUID(String apiId, String deployment, String organization) {
+    public API getApiByUUID(String apiId, String deployment, String organization, boolean isExpand, String status) {
 
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_UUID_SQL;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
@@ -1175,10 +1205,16 @@ public class SubscriptionValidationDAO {
         } else {
             sql = sql.concat("AND AM_API.CONTEXT LIKE '/t/" + organization + "%'");
         }
+        if (status != null) {
+            sql = sql.concat(" AND AM_API.STATUS = ?");
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, apiId);
                 preparedStatement.setString(2, deployment);
+                if (status != null) {
+                    preparedStatement.setString(3, status);
+                }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
@@ -1197,18 +1233,22 @@ public class SubscriptionValidationDAO {
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
                         api.setStatus(resultSet.getString("STATUS"));
-                        String revision = resultSet.getString("REVISION_UUID");
-                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
-                        api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                        if (APIConstants.API_PRODUCT.equals(apiType)) {
-                            attachURlMappingDetailsOfApiProduct(connection, api);
-                            return api;
-                        } else {
-                            if (deployment.equals(deploymentName)) {
-                                attachURLMappingDetails(connection, revision, api);
-                                return api;
+                        if (isExpand) {
+                            String revision = resultSet.getString("REVISION_UUID");
+                            api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                            api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
+                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                                attachURlMappingDetailsOfApiProduct(connection, api);
+                            } else {
+                                if (deployment.equals(deploymentName)) {
+                                    attachURLMappingDetails(connection, revision, api);
+                                }
                             }
+                        } else {
+                            api.setPolicy(null);
+                            api.setIsDefaultVersion(null);
                         }
+                        return api;
                     }
                 }
             }
