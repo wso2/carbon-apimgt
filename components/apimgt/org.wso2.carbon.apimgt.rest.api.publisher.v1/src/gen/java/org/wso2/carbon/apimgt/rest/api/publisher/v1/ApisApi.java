@@ -210,7 +210,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_view_definition", description = "View, Retrieve API definition")
+            @AuthorizationScope(scope = "apim:api_definition_view", description = "View, Retrieve API definition")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1026,7 +1026,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_view_definition", description = "View, Retrieve API definition")
+            @AuthorizationScope(scope = "apim:api_definition_view", description = "View, Retrieve API definition")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1087,7 +1087,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
-            @AuthorizationScope(scope = "apim:api_view_list", description = "View, Retrieve API list")
+            @AuthorizationScope(scope = "apim:api_list_view", description = "View, Retrieve API list")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
