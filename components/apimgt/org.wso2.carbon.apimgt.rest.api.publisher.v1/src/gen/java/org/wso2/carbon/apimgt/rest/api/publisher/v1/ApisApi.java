@@ -1032,7 +1032,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.getAPIThumbnail(apiId, ifNoneMatch, securityContext);
     }
 
-
     @GET
     @Path("/{apiId}/operation-policies")
     
