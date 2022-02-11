@@ -29,8 +29,8 @@ public class OperationPolicyDefinition {
     }
 
     private GatewayType gatewayType = GatewayType.Synapse;
-    private String content;
-    private String md5Hash;
+    private String content = null;
+    private String md5Hash = null;
 
     public GatewayType getGatewayType() {
 
@@ -65,11 +65,12 @@ public class OperationPolicyDefinition {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) return true;
-        if (!(o instanceof OperationPolicyDefinition)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof OperationPolicyDefinition))
+            return false;
         OperationPolicyDefinition that = (OperationPolicyDefinition) o;
-        return gatewayType == that.gatewayType &&
-                content.equals(that.content);
+        return gatewayType == that.gatewayType && content.equals(that.content);
     }
 
     @Override

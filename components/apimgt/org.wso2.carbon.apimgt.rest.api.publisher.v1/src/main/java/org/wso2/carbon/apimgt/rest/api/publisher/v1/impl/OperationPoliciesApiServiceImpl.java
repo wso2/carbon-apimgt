@@ -74,7 +74,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                                              MessageContext messageContext) throws APIManagementException {
 
         try {
-            String jsonContent = "";
             OperationPolicyDefinition ccPolicyDefinition = null;
             OperationPolicyDefinition synapseDefinition = null;
             OperationPolicySpecification policySpecification;
@@ -82,6 +81,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             if (policySpecFileInputStream != null) {
+                String jsonContent = "";
                 jsonContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
 
                 String fileName = policySpecFileDetail.getDataHandler().getName();

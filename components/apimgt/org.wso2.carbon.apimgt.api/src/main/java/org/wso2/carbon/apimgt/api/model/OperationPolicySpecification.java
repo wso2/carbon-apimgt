@@ -31,15 +31,15 @@ public class OperationPolicySpecification {
     }
 
     private PolicyCategory category = PolicyCategory.Mediation;
-    private String name;
+    private String name = null;
     private String version = "v1";
-    private String displayName;
-    private String description;
+    private String displayName = null;
+    private String description = null;
     private List<String> applicableFlows = new ArrayList<>();
     private List<String> supportedGateways = new ArrayList<>();
     private List<String> supportedApiTypes = new ArrayList<>();
     private List<OperationPolicySpecAttribute> policyAttributes = new ArrayList<>();
-    private boolean multipleAllowed;
+    private boolean multipleAllowed = false;
 
     public String getName() {
 
@@ -116,8 +116,7 @@ public class OperationPolicySpecification {
         return policyAttributes;
     }
 
-    public void setPolicyAttributes(
-            List<OperationPolicySpecAttribute> policyAttributes) {
+    public void setPolicyAttributes(List<OperationPolicySpecAttribute> policyAttributes) {
 
         this.policyAttributes = policyAttributes;
     }
@@ -145,25 +144,22 @@ public class OperationPolicySpecification {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) return true;
-        if (!(o instanceof OperationPolicySpecification)) return false;
-        OperationPolicySpecification that = (OperationPolicySpecification) o;
-        return multipleAllowed == that.multipleAllowed &&
-                category == that.category &&
-                name.equals(that.name) &&
-                displayName.equals(that.displayName) &&
-                Objects.equals(description, that.description) &&
-                applicableFlows.equals(that.applicableFlows) &&
-                supportedGateways.equals(that.supportedGateways) &&
-                supportedApiTypes.equals(that.supportedApiTypes) &&
-                Objects.equals(policyAttributes, that.policyAttributes);
+        if (this == o)
+            return true;
+        if (!(o instanceof OperationPolicySpecification))
+            return false;
+        OperationPolicySpecification policySpecObj = (OperationPolicySpecification) o;
+        return multipleAllowed == policySpecObj.multipleAllowed && category == policySpecObj.category && name.equals(policySpecObj.name)
+                && displayName.equals(policySpecObj.displayName) && Objects.equals(description, policySpecObj.description)
+                && applicableFlows.equals(policySpecObj.applicableFlows) && supportedGateways.equals(policySpecObj.supportedGateways)
+                && supportedApiTypes.equals(policySpecObj.supportedApiTypes) && Objects.equals(policyAttributes,
+                policySpecObj.policyAttributes);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects
-                .hash(category, name, displayName, description, applicableFlows, supportedGateways, supportedApiTypes,
-                        policyAttributes, multipleAllowed);
+        return Objects.hash(category, name, displayName, description, applicableFlows, supportedGateways,
+                supportedApiTypes, policyAttributes, multipleAllowed);
     }
 }

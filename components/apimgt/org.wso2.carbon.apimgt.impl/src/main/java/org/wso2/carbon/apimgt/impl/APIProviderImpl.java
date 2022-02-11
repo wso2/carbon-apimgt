@@ -2514,7 +2514,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     policyData.getSpecification().getName()
                                     + ". Validating the policy");
                         }
-                        if (policyData.isARevision()) {
+                        if (policyData.isRevision()) {
                             throw new APIManagementException("Invalid policy selected. " + policyId
                                     + " policy is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
                         }

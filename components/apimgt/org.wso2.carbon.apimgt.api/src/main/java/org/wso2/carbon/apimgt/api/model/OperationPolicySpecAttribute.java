@@ -23,12 +23,12 @@ import java.util.Objects;
 
 public class OperationPolicySpecAttribute {
 
-    private String name;
-    private String displayName;
-    private String description;
-    private String validationRegex;
-    private String type;
-    private boolean required;
+    private String name = null;
+    private String displayName = null;
+    private String description = null;
+    private String validationRegex = null;
+    private String type = null;
+    private boolean required = false;
 
     public String getName() {
 
@@ -93,15 +93,15 @@ public class OperationPolicySpecAttribute {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) return true;
-        if (!(o instanceof OperationPolicySpecAttribute)) return false;
-        OperationPolicySpecAttribute that = (OperationPolicySpecAttribute) o;
-        return required == that.required &&
-                name.equals(that.name) &&
-                Objects.equals(displayName, that.displayName) &&
-                Objects.equals(description, that.description) &&
-                Objects.equals(validationRegex, that.validationRegex) &&
-                type.equals(that.type);
+        if (this == o)
+            return true;
+        if (!(o instanceof OperationPolicySpecAttribute))
+            return false;
+        OperationPolicySpecAttribute policySpecAttributeObj = (OperationPolicySpecAttribute) o;
+        return required == policySpecAttributeObj.required && name.equals(policySpecAttributeObj.name)
+                && Objects.equals(displayName, policySpecAttributeObj.displayName) && Objects.equals(description,
+                policySpecAttributeObj.description) && Objects.equals(validationRegex,
+                policySpecAttributeObj.validationRegex) && type.equals(policySpecAttributeObj.type);
     }
 
     @Override

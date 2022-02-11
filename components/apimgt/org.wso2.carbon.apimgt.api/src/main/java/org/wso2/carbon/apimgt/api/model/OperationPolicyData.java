@@ -22,12 +22,12 @@ import java.util.Objects;
 
 public class OperationPolicyData {
 
-    private String policyId;
-    private String organization;
-    private String md5Hash;
-    private String apiUUID;      // Null for common policies
-    private String revisionUUID; // Null for common policies and API specific policies that are not revisioned yet
-    private String clonedCommonPolicyId;    // Null for common policies and API specific policies that are not cloned.
+    private String policyId = null;
+    private String organization = null;
+    private String md5Hash = null;
+    private String apiUUID = null; // Null for common policies
+    private String revisionUUID = null; // Null for common policies and API specific policies that are not revisioned yet
+    private String clonedCommonPolicyId = null; // Null for common policies and API specific policies that are not cloned.
     private OperationPolicySpecification specification;
     private OperationPolicyDefinition synapsePolicyDefinition;
     private OperationPolicyDefinition ccPolicyDefinition;
@@ -112,7 +112,7 @@ public class OperationPolicyData {
         this.clonedCommonPolicyId = clonedCommonPolicyId;
     }
 
-    public boolean isARevision() {
+    public boolean isRevision() {
 
         return revisionUUID != null;
     }
@@ -140,15 +140,15 @@ public class OperationPolicyData {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OperationPolicyData that = (OperationPolicyData) o;
-        return policyId.equals(that.policyId) &&
-                Objects.equals(specification, that.specification) &&
-                Objects.equals(synapsePolicyDefinition, that.synapsePolicyDefinition) &&
-                Objects.equals(ccPolicyDefinition, that.ccPolicyDefinition) &&
-                md5Hash.equals(that.md5Hash) &&
-                organization.equals(that.organization);
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        OperationPolicyData policyObj = (OperationPolicyData) o;
+        return policyId.equals(policyObj.policyId) && Objects.equals(specification, policyObj.specification)
+                && Objects.equals(synapsePolicyDefinition, policyObj.synapsePolicyDefinition) && Objects.equals(
+                ccPolicyDefinition, policyObj.ccPolicyDefinition) && md5Hash.equals(policyObj.md5Hash)
+                && organization.equals(policyObj.organization);
     }
 
     @Override

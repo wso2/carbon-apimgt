@@ -24,9 +24,9 @@ import java.util.Objects;
 public class OperationPolicy implements Comparable<OperationPolicy> {
 
     private String policyName = "";
-    private String direction;
-    private Map<String, Object> parameters;
-    private String policyId;
+    private String direction = null;
+    private Map<String, Object> parameters = null;
+    private String policyId = null;
     private int order = 1;
 
     public String getPolicyName() {
@@ -86,10 +86,9 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        OperationPolicy that = (OperationPolicy) o;
-        return policyId == that.policyId && policyName == that.policyName && direction.equals(that.direction) &&
-                parameters
-                        .equals(that.parameters);
+        OperationPolicy policyObj = (OperationPolicy) o;
+        return policyId == policyObj.policyId && policyName == policyObj.policyName && direction.equals(
+                policyObj.direction) && parameters.equals(policyObj.parameters);
     }
 
     @Override
