@@ -82,6 +82,9 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -3932,6 +3935,17 @@ public final class APIUtil {
                 }
             }
 
+            // create IntegrationDeveloperRole role if it's creation is enabled in tenant-conf.json
+            JSONObject integrationDeveloperRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE);
+            if (isRoleCreationEnabled(integrationDeveloperRoleConfig)) {
+                String integrationDeveloperRoleName = String.valueOf(integrationDeveloperRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(integrationDeveloperRoleName)) {
+                    createIntegrationDeveloperRole(integrationDeveloperRoleName, tenantId);
+                }
+            }
+
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
@@ -4227,6 +4241,19 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
         };
         createRole(roleName, devOpsPermissions, tenantId);
+    }
+
+    /**
+     * Create Integration developer roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createIntegrationDeveloperRole(String roleName, int tenantId) throws APIManagementException {
+
+        Permission[] integrationDeveloperPermissions = new Permission[]{};
+        createRole(roleName, integrationDeveloperPermissions, tenantId);
     }
 
     /**
@@ -11531,7 +11558,6 @@ public final class APIUtil {
         return null;
     }
 
-
     /**
      * Load the common policies for the organization at the first startup. This will only copy the policies to the
      * database if the total policies for this organization is zero.
@@ -11726,5 +11752,11 @@ public final class APIUtil {
             }
         }
         return md5Hash;
+
+    public static void initializeVelocityContext(VelocityEngine velocityEngine){
+        velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
+        velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
+        velocityEngine.setProperty("runtime.conversion.handler", "none");
+
     }
 }

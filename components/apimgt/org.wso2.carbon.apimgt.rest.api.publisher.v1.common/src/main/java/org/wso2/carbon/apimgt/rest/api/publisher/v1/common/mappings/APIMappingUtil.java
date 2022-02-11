@@ -75,7 +75,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -546,16 +545,10 @@ public class APIMappingUtil {
      * Converts a List object of APIs into a DTO.
      *
      * @param apiList List of APIs
-     * @param expand  defines whether APIListDTO should contain APIINFODTOs or APIDTOs
      * @return APIListDTO object containing APIDTOs
      */
-    public static Object fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
-
-        if (expand) {
-            return fromAPIListToExpandedDTO(apiList);
-        } else {
-            return fromAPIListToInfoDTO(apiList);
-        }
+    public static Object fromAPIListToDTO(List<API> apiList) throws APIManagementException {
+        return fromAPIListToInfoDTO(apiList);
     }
 
     /**
@@ -605,23 +598,6 @@ public class APIMappingUtil {
         operation.setVerb(uriTemplate.getHTTPVerb());
         operation.setTarget(uriTemplate.getUriTemplate());
         return operation;
-    }
-
-    /**
-     * Converts a List object of APIs into a Expanded DTO List.
-     *
-     * @param apiList List of APIs
-     * @return APIListDTO object containing APIDTOs
-     */
-    public static APIListExpandedDTO fromAPIListToExpandedDTO(List<API> apiList) throws APIManagementException {
-
-        APIListExpandedDTO apiListDTO = new APIListExpandedDTO();
-        List<APIDTO> apiInfoDTOs = apiListDTO.getList();
-        for (API api : apiList) {
-            apiInfoDTOs.add(fromAPItoDTO(api));
-        }
-        apiListDTO.setCount(apiInfoDTOs.size());
-        return apiListDTO;
     }
 
     /**
@@ -793,11 +769,7 @@ public class APIMappingUtil {
 
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
-        if (apiListDTO instanceof APIListDTO) {
-            ((APIListDTO) apiListDTO).setPagination(paginationDTO);
-        } else if (apiListDTO instanceof APIListExpandedDTO) {
-            ((APIListExpandedDTO) apiListDTO).setPagination(paginationDTO);
-        }
+        ((APIListDTO) apiListDTO).setPagination(paginationDTO);
     }
 
     private static String checkAndSetVersionParam(String context) {
@@ -880,12 +852,14 @@ public class APIMappingUtil {
         return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider)
+            throws APIManagementException {
 
         return fromAPItoDTO(model, false, apiProvider);
     }
 
-    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials, APIProvider apiProviderParam)
+    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials,
+                                      APIProvider apiProviderParam)
             throws APIManagementException {
 
         APIProvider apiProvider;

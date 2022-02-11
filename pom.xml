@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>9.15.5-SNAPSHOT</version>
+    <version>9.16.5-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -898,11 +898,6 @@
                 <version>${carbon.kernel.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.registry</groupId>
-                <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
-                <version>${carbon.registry.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.jaggeryjs</groupId>
@@ -943,7 +938,7 @@
 
             <dependency>
                 <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity</artifactId>
+                <artifactId>velocity-engine-core</artifactId>
                 <version>${velocity.version}</version>
             </dependency>
 
@@ -1117,6 +1112,12 @@
                 <groupId>org.wso2.carbon.identity.governance</groupId>
                 <artifactId>org.wso2.carbon.identity.recovery</artifactId>
                 <version>${carbon.identity.governance.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.velocity</groupId>
+                        <artifactId>velocity</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -1915,25 +1916,25 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>9.15.5-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>9.16.5-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
         <carbon.analytics.common.version>5.2.37</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.6.3-m6</carbon.kernel.version>
-        <carbon.kernel.feature.version>4.6.3-m6</carbon.kernel.feature.version>
+        <carbon.kernel.version>4.6.3-m7</carbon.kernel.version>
+        <carbon.kernel.feature.version>4.6.3-m7</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.7.45</carbon.commons.version>
-        <carbon.registry.version>4.8.1</carbon.registry.version>
-        <carbon.mediation.version>4.7.99</carbon.mediation.version>
+        <carbon.registry.version>4.8.2</carbon.registry.version>
+        <carbon.mediation.version>4.7.114</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.18.236</carbon.identity.version>
+        <carbon.identity.version>5.18.238</carbon.identity.version>
         <carbon.identity.governance.version>1.4.98</carbon.identity.governance.version>
-        <carbon.identity-inbound-auth-oauth.version>6.4.166</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-inbound-auth-oauth.version>6.4.168</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-oauth2-grant-jwt.version>1.0.31</carbon.identity-oauth2-grant-jwt.version>
         <carbon.identity-user-ws.version>5.4.1</carbon.identity-user-ws.version>
         <carbon.identity-inbound-auth-saml2.version>5.5.2</carbon.identity-inbound-auth-saml2.version>
@@ -1948,7 +1949,7 @@
 
         <graphql.java.version>17.3.wso2v1</graphql.java.version>
 
-        <carbon.governance.version>4.8.27</carbon.governance.version>
+        <carbon.governance.version>4.8.28</carbon.governance.version>
         <carbon.deployment.version>4.11.1</carbon.deployment.version>
         <carbon.multitenancy.version>4.9.10</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
@@ -2010,7 +2011,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v232</synapse.version>
+	    <synapse.version>2.1.7-wso2v251</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -2046,7 +2047,7 @@
         <commons-codec.version>1.14</commons-codec.version>
         <com.nimbusds.wso2.version>7.3.0.wso2v1</com.nimbusds.wso2.version>
         <json-smart.version>2.3</json-smart.version>
-        <org.apache.velocity.version>1.7</org.apache.velocity.version>
+        <org.apache.velocity.version>2.1</org.apache.velocity.version>
         <org.slf4j.version>1.7.0</org.slf4j.version>
         <slf4j.api.version>1.7.29</slf4j.api.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
@@ -2095,7 +2096,7 @@
         <google.guava.version>27.0-jre</google.guava.version>
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
         <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
-        <velocity.version>1.7</velocity.version>
+        <velocity.version>2.1</velocity.version>
         <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
         <fasterxml.jackson.databind.version>2.10.3</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.11.0.wso2v1</fasterxml.jackson.core.version>
@@ -2166,7 +2167,7 @@
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
-        <analytics.event.publisher.client.version>1.0.1</analytics.event.publisher.client.version>
+        <analytics.event.publisher.client.version>1.0.5</analytics.event.publisher.client.version>
         <analytics.event.publisher.client.version.range>[1.0.0,2.0.0)</analytics.event.publisher.client.version.range>
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>

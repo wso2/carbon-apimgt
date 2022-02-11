@@ -230,7 +230,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getAllAPIs(Integer limit, Integer offset, String sortBy, String sortOrder, String xWSO2Tenant,
-                               String query, String ifNoneMatch, Boolean expand, String accept,
+                               String query, String ifNoneMatch, String accept,
                                MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
@@ -241,7 +241,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
-        expand = expand != null && expand;
         sortBy = sortBy != null ? sortBy : RestApiConstants.DEFAULT_SORT_CRITERION;
         sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
         try {
@@ -270,7 +269,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
 
             //Add pagination section in the response
             Object totalLength = result.get("length");
@@ -3255,7 +3254,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url,
-                                InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+                                     InputStream fileInputStream, Attachment fileDetail,MessageContext messageContext) {
         try {
             String updatedSwagger;
             //validate if api exists

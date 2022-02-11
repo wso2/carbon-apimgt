@@ -155,7 +155,6 @@ paths:
           schema:
             type: string
         - $ref: '#/components/parameters/If-None-Match'
-        - $ref: '#/components/parameters/expand'
         - $ref: '#/components/parameters/Accept'
       responses:
         200:
@@ -188,6 +187,7 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_import_export
+            - apim:api_list_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -575,6 +575,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:api_definition_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7839,6 +7840,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:api_definition_view
 
     put:
       tags:
@@ -8726,21 +8728,6 @@ components:
             $ref: '#/components/schemas/APIInfo'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    APIListExpanded:
-      title: API List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of APIs returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/API'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
 
     APIInfo:
       title: API Info object with basic API details.
@@ -9253,6 +9240,7 @@ components:
           enum:
             - INLINE
             - ENDPOINT
+            - MOCKED_OAS
         scopes:
           type: array
           items:
@@ -12645,13 +12633,6 @@ components:
       required: true
       schema:
         type: string
-    expand:
-      name: expand
-      in: query
-      description: |
-        Defines whether the returned response should contain full details of API
-      schema:
-        type: boolean
     threatProtectionPolicyId:
       name: policyId
       in: path
@@ -12788,3 +12769,5 @@ components:
             apim:comment_manage: Read and Write comments
             apim:tier_view: View throttling policies
             apim:tier_manage: View, update and delete throttling policies
+            apim:api_list_view: View, Retrieve API list
+            apim:api_definition_view: View, Retrieve API definition
