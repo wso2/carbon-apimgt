@@ -54,7 +54,6 @@
   </bean>
   <cxf:bus>
     <cxf:inInterceptors>
-      <ref bean="URLValidationInterceptor"/>
       <ref bean="TokenMergeInterceptor"/>
       <ref bean="PreAuthenticationInterceptor"/>
       <ref bean="AuthenticationInterceptor"/>
