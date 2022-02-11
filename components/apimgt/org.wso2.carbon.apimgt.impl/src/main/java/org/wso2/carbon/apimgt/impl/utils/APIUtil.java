@@ -11752,7 +11752,6 @@ public final class APIUtil {
             }
         }
         return md5Hash;
-    }
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
