@@ -74,16 +74,13 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         this.api = api;
     }
 
-    public APITemplateBuilderImpl(APIProduct apiProduct,
-                                  Map<String, APIDTO> associatedAPIMap) {
-
+    public APITemplateBuilderImpl(APIProduct apiProduct, Map<String, APIDTO> associatedAPIMap) {
         this.apiProduct = apiProduct;
         this.associatedAPIMap = associatedAPIMap;
     }
 
     public APITemplateBuilderImpl(API api, List<SoapToRestMediationDto> soapToRestInMediationDtoList,
-                                  List<SoapToRestMediationDto> soapToRestOutMediationDtoList) {
-
+            List<SoapToRestMediationDto> soapToRestOutMediationDtoList) {
         this(api);
         this.soapToRestInMediationDtoList = soapToRestInMediationDtoList;
         this.soapToRestOutMediationDtoList = soapToRestOutMediationDtoList;

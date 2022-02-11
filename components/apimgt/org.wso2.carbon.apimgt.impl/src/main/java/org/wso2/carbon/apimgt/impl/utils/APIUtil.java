@@ -40,6 +40,8 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -85,6 +87,7 @@ import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
@@ -127,6 +130,9 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -191,7 +197,6 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -379,6 +384,8 @@ public final class APIUtil {
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
     private static Schema tenantConfigJsonSchema;
+    private static Schema operationPolicySpecSchema;
+
 
     private APIUtil() {
 
@@ -396,6 +403,13 @@ public final class APIUtil {
             tenantConfigJsonSchema = SchemaLoader.load(tenantConfigSchema);
         } catch (IOException e) {
             log.error("Error occurred while reading tenant-config-schema.json", e);
+        }
+
+        try (InputStream inputStream = APIUtil.class.getResourceAsStream("/operationPolicy/operation-policy-specification-schema.json")) {
+            org.json.JSONObject operationPolicySpecificationSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
+            operationPolicySpecSchema = SchemaLoader.load(operationPolicySpecificationSchema);
+        } catch (IOException e) {
+            log.error("Error occurred while reading operation-policy-specification-schema.json", e);
         }
     }
 
@@ -11490,6 +11504,10 @@ public final class APIUtil {
         return tenantConfigJsonSchema;
     }
 
+    public static Schema retrieveOperationPolicySpecificationJsonSchema(){
+        return operationPolicySpecSchema;
+    }
+
     /**
      * Get gateway environments defined in the configuration: api-manager.xml
      *
@@ -11539,6 +11557,202 @@ public final class APIUtil {
         }
         return null;
     }
+
+    /**
+     * Load the common policies for the organization at the first startup. This will only copy the policies to the
+     * database if the total policies for this organization is zero.
+     *
+     * @param organization organization name
+     */
+    public static void loadCommonOperationPolicies(String organization) throws APIManagementException {
+
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+
+        int policyCount = apiMgtDAO.getOperationPolicyCount(organization);
+
+        if (policyCount == 0) {
+            String policySpecLocation = CarbonUtils.getCarbonHome() + File.separator
+                    + APIConstants.COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION;
+            String policyDefinitionLocation = CarbonUtils.getCarbonHome() + File.separator
+                    + APIConstants.COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION;
+            File policiesDir = new File(policySpecLocation);
+            File[] files = policiesDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    String jsonContent;
+                    try {
+                        jsonContent = FileUtils.readFileToString(file);
+                        OperationPolicySpecification policySpec = getValidatedOperationPolicySpecification(jsonContent);
+                        if (policySpec != null) {
+                            OperationPolicyData policyData = new OperationPolicyData();
+                            policyData.setSpecification(policySpec);
+                            policyData.setOrganization(organization);
+
+                            OperationPolicyDefinition synapsePolicyDefinition =
+                                    getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
+                                            policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                            if (synapsePolicyDefinition != null) {
+                                synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
+                            }
+                            OperationPolicyDefinition ccPolicyDefinition =
+                                    getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
+                                            policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                            if (ccPolicyDefinition != null) {
+                                ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                policyData.setCcPolicyDefinition(ccPolicyDefinition);
+                            }
+
+                            policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
+                            apiMgtDAO.addCommonOperationPolicy(policyData);
+                            log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
+                                    + " was added to the organization " + organization + " successfully");
+                        }
+                    } catch (IOException | APIManagementException e) {
+                        log.error("Invalid policy specification for file " + file.getName()
+                                + ".Hence skipped from importing as a common operation policy.", e);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Read the operation policy definition from the provided path and return the definition object
+     *
+     * @param extractedFolderPath   Location of the policy definition
+     * @param policyName            Name of the policy
+     * @param fileExtension         Since there can be both synapse and choreo connect definitons, fileExtension is used
+     *
+     * @return OperationPolicyDefinition
+     */
+    public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
+                                                                                 String policyName,
+                                                                                 String fileExtension)
+            throws APIManagementException {
+
+        OperationPolicyDefinition policyDefinition = null;
+        try {
+            String fileName = extractedFolderPath + File.separator + policyName + fileExtension;
+            if (checkFileExistence(fileName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found policy definition file " + fileName);
+                }
+                String yamlContent = FileUtils.readFileToString(new File(fileName));
+                policyDefinition = new OperationPolicyDefinition();
+                policyDefinition.setContent(yamlContent);
+                policyDefinition.setMd5Hash(getMd5OfOperationPolicyDefinition(policyDefinition));
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading policy specification from path: "
+                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return policyDefinition;
+    }
+
+    /**
+     * Check whether there exists a file for the provided location
+     *
+     * @param fileLocation   Location of the file
+     * @return True if file exists
+     */
+    public static boolean checkFileExistence(String fileLocation) {
+
+        File testFile = new File(fileLocation);
+        return testFile.exists();
+    }
+
+    /**
+     * Get the validated policy specification object from a provided policy string. Validation is done against the
+     * policy schema
+     *
+     * @param policySpecAsString  Policy specification as a string
+     * @return OperationPolicySpecification object
+     * @throws APIManagementException If the policy schema validation fails
+     */
+    public static OperationPolicySpecification getValidatedOperationPolicySpecification(String policySpecAsString)
+            throws APIManagementException {
+
+        Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
+        if (schema != null) {
+            try {
+                org.json.JSONObject uploadedConfig = new org.json.JSONObject(policySpecAsString);
+                schema.validate(uploadedConfig);
+            } catch (ValidationException e) {
+                List<String> errors = e.getAllMessages();
+                String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
+                throw new APIManagementException("Policy specification validation failure. " + errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
+                                errorMessage));
+            }
+            return new Gson().fromJson(policySpecAsString, OperationPolicySpecification.class);
+        }
+        return null;
+    }
+
+    /**
+     * Export the policy attribute object of the specification as a string
+     *
+     * @param policySpecification  Policy specification
+     * @return policy attributes string
+     * @throws APIManagementException If the policy schema validation fails
+     */
+    public static String getPolicyAttributesAsString(OperationPolicySpecification policySpecification) {
+
+        String policyParamsString = "";
+        if (policySpecification != null) {
+            if (policySpecification.getPolicyAttributes() != null) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                policyParamsString = gson.toJson(policySpecification.getPolicyAttributes());
+            }
+        }
+        return policyParamsString;
+    }
+
+    /**
+     * Return the md5 hash of the provided policy. To generate the md5 hash, policy Specification and the
+     * two definitions are used
+     *
+     * @param policyData  Operation policy data
+     * @return md5 hash
+     */
+    public static String getMd5OfOperationPolicy(OperationPolicyData policyData) {
+
+        String policySpecificationAsString = "";
+        String synapsePolicyDefinitionAsString = "";
+        String ccPolicyDefinitionAsString = "";
+
+        if (policyData.getSpecification() != null) {
+            policySpecificationAsString = new Gson().toJson(policyData.getSpecification());
+        }
+        if (policyData.getSynapsePolicyDefinition() != null) {
+            synapsePolicyDefinitionAsString = new Gson().toJson(policyData.getSynapsePolicyDefinition());
+        }
+        if (policyData.getCcPolicyDefinition() != null) {
+            ccPolicyDefinitionAsString = new Gson().toJson(policyData.getCcPolicyDefinition());
+        }
+
+        return DigestUtils.md5Hex(policySpecificationAsString + synapsePolicyDefinitionAsString
+                + ccPolicyDefinitionAsString);
+    }
+
+    /**
+     * Return the md5 hash of the policy definition string
+     *
+     * @param policyDefinition  Operation policy definition
+     * @return md5 hash of the definition content
+     */
+    public static String getMd5OfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition) {
+
+        String md5Hash = "";
+
+        if (policyDefinition != null) {
+            if (policyDefinition.getContent() != null) {
+                md5Hash = DigestUtils.md5Hex(policyDefinition.getContent());
+            }
+        }
+        return md5Hash;
+
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");

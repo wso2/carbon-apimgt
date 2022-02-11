@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -1081,6 +1082,11 @@ public class APIMappingUtil {
             //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
             //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
             apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+
+            //since the operation details goes missing after fetching operations list from the swagger definition, we
+            //have to set them back from the original API model.
+            setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
+
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1567,7 +1573,10 @@ public class APIMappingUtil {
                 template.setHttpVerbs(httpVerb.toUpperCase());
                 template.setAuthType(authType);
                 template.setAuthTypes(authType);
-
+                if (operation.getOperationPolicies() != null) {
+                    template.setOperationPolicies(OperationPolicyMappingUtil
+                            .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies()));
+                }
                 uriTemplates.add(template);
             } else {
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
@@ -2014,6 +2023,31 @@ public class APIMappingUtil {
     }
 
     /**
+     * Reads the operationPolicies from the API object passed in, and sets them back to the API Operations DTO
+     *
+     * @param api               API object
+     * @param apiOperationsDTO  List of API Operations DTO
+     */
+    private static void setOperationPoliciesToOperationsDTO(API api, List<APIOperationsDTO> apiOperationsDTO) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+        Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb();
+            uriTemplateMap.put(key, uriTemplate);
+        }
+
+        for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
+            String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
+            List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
+            if (!operationPolicies.isEmpty()) {
+                operationsDTO.setOperationPolicies(
+                        OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+            }
+        }
+    }
+
+    /**
      * Converts a URI template object to a REST API DTO.
      *
      * @param uriTemplate URI Template object
@@ -2038,6 +2072,8 @@ public class APIMappingUtil {
         operationsDTO.setTarget(uriTemplate.getUriTemplate());
         operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey).collect(
                 Collectors.toList()));
+        operationsDTO.setOperationPolicies(
+                OperationPolicyMappingUtil.fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
@@ -2469,8 +2505,11 @@ public class APIMappingUtil {
 
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getVerb());
+                template.setHttpVerbs(resourceItem.getVerb());
                 template.setResourceURI(resourceItem.getTarget());
                 template.setUriTemplate(resourceItem.getTarget());
+                template.setOperationPolicies(OperationPolicyMappingUtil
+                        .fromDTOToAPIOperationPoliciesList(resourceItem.getOperationPolicies()));
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());

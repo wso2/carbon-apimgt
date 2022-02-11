@@ -61,7 +61,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -90,6 +89,9 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -117,9 +119,9 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
@@ -136,6 +138,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.Documentatio
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStoreMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.OperationPolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
@@ -164,6 +167,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
@@ -196,7 +201,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -213,6 +217,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -2663,6 +2668,300 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return Response.serverError().build();
     }
+
+    /**
+     * Add an API specific operation policy
+     *
+     * @param apiId                                  UUID of the API
+     * @param policySpecFileInputStream              Input stream of the policy specification file
+     * @param policySpecFileDetail                   Operation policy specification
+     * @param synapsePolicyDefinitionFileInputStream Input stream of the synapse policy definition file
+     * @param synapsePolicyDefinitionFileDetail      Synapse definition of the operation policy
+     * @param ccPolicyDefinitionFileInputStream      Input stream of the choreo connect policy definition file
+     * @param ccPolicyDefinitionFileDetail           Choreo connect definition of the operation policy
+     * @param messageContext                         message context
+     * @return Added Operation operation policy DTO as response
+     */
+    @Override
+    public Response addAPISpecificOperationPolicy(String apiId, InputStream policySpecFileInputStream,
+                                                  Attachment policySpecFileDetail,
+                                                  InputStream synapsePolicyDefinitionFileInputStream,
+                                                  Attachment synapsePolicyDefinitionFileDetail,
+                                                  InputStream ccPolicyDefinitionFileInputStream,
+                                                  Attachment ccPolicyDefinitionFileDetail,
+                                                  MessageContext messageContext) {
+
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+            //validate if api exists
+            validateAPIExistence(apiId);
+            String jsonContent = "";
+            OperationPolicyDefinition synapseDefinition = null;
+            OperationPolicyDefinition ccPolicyDefinition = null;
+            OperationPolicySpecification policySpecification;
+            if (policySpecFileInputStream != null) {
+                jsonContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
+
+                String fileName = policySpecFileDetail.getDataHandler().getName();
+                String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+                if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+                    fileContentType = policySpecFileDetail.getContentType().toString();
+                }
+                if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
+                    jsonContent = CommonUtil.yamlToJson(jsonContent);
+                }
+
+                policySpecification = APIUtil.getValidatedOperationPolicySpecification(jsonContent);
+
+                OperationPolicyData operationPolicyData = new OperationPolicyData();
+                operationPolicyData.setOrganization(organization);
+                operationPolicyData.setApiUUID(apiId);
+                operationPolicyData.setSpecification(policySpecification);
+
+                if (synapsePolicyDefinitionFileInputStream != null) {
+                    String synapsePolicyDefinition =
+                            RestApiPublisherUtils.readInputStream(synapsePolicyDefinitionFileInputStream,
+                                    synapsePolicyDefinitionFileDetail);
+                    synapseDefinition = new OperationPolicyDefinition();
+                    synapseDefinition.setContent(synapsePolicyDefinition);
+                    synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                    synapseDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(synapseDefinition));
+                    operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                }
+
+                if (ccPolicyDefinitionFileInputStream != null) {
+                    String choreoConnectPolicyDefinition = RestApiPublisherUtils
+                            .readInputStream(ccPolicyDefinitionFileInputStream, ccPolicyDefinitionFileDetail);
+                    ccPolicyDefinition = new OperationPolicyDefinition();
+                    ccPolicyDefinition.setContent(choreoConnectPolicyDefinition);
+                    ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                    ccPolicyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(ccPolicyDefinition));
+                    operationPolicyData.setCcPolicyDefinition(ccPolicyDefinition);
+                }
+
+                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+
+                OperationPolicyData existingPolicy =
+                        apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(), apiId,
+                                null, organization, false);
+                String policyID;
+                if (existingPolicy != null) {
+                    policyID = existingPolicy.getPolicyId();
+                    apiProvider.updateOperationPolicy(policyID, operationPolicyData, organization);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Existing API specific operation policy with ID " + policyID + " and name "
+                                + policySpecification.getName() + " has been updated for the API " + apiId);
+                    }
+                } else {
+                    policyID = apiProvider.addAPISpecificOperationPolicy(apiId, operationPolicyData, organization);
+                    if (log.isDebugEnabled()) {
+                        log.debug("An API specific operation policy has been added for the API " + apiId +
+                                " with id " + policyID);
+                    }
+                }
+                operationPolicyData.setPolicyId(policyID);
+                OperationPolicyDataDTO operationPolicyDataDTO = OperationPolicyMappingUtil
+                        .fromOperationPolicyDataToDTO(operationPolicyData);
+                URI createdPolicyUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION
+                        + RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + "/"
+                        + RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES + "/" + policyID);
+                return Response.created(createdPolicyUri).entity(operationPolicyDataDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding an API specific operation policy." + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An error has occurred while adding an API specific " +
+                    "operation policy", e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Get the list of all API specific operation policies for a given API
+     *
+     * @param apiId          API UUID
+     * @param limit          max number of records returned
+     * @param offset         starting index
+     * @param messageContext message context
+     * @return A list of operation policies available for the API
+     */
+    @Override
+    public Response getAllAPISpecificOperationPolicies(String apiId, Integer limit, Integer offset, String query,
+                                                       MessageContext messageContext) {
+
+        try {
+            validateAPIExistence(apiId);
+            limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+            // Lightweight API specific operation policy includes the policy ID and the policy specification.
+            // Since policy definition is bit bulky, we don't query the definition unnecessarily.
+            List<OperationPolicyData> sharedOperationPolicyLIst = apiProvider
+                    .getAllAPISpecificOperationPolicies(apiId, organization);
+            OperationPolicyDataListDTO policyListDTO = OperationPolicyMappingUtil
+                    .fromOperationPolicyDataListToDTO(sharedOperationPolicyLIst, offset, limit);
+            return Response.ok().entity(policyListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage =
+                    "Error while retrieving the list of all API specific operation policies." + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An error has occurred while getting the list of API specific " +
+                    " operation policies", e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Get the API specific operation policy specification by providing the policy ID
+     *
+     * @param apiId             API UUID
+     * @param operationPolicyId UUID of the operation policy
+     * @param messageContext    message context
+     * @return Operation policy DTO as response
+     */
+    @Override
+    public Response getOperationPolicyForAPIByPolicyId(String apiId, String operationPolicyId,
+                                                       MessageContext messageContext) {
+
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+            //validate whether api exists or not
+            validateAPIExistence(apiId);
+
+            OperationPolicyData existingPolicy =
+                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
+            if (existingPolicy != null) {
+                OperationPolicyDataDTO policyDataDTO =
+                        OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
+                return Response.ok().entity(policyDataDTO).build();
+            } else {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
+                        + operationPolicyId + " for API " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
+                        operationPolicyId, e, log);
+            } else {
+                String errorMessage =
+                        "Error while getting an API specific operation policy with ID :" + operationPolicyId
+                                + " for API " + apiId + " " + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while getting the operation policy with ID " +
+                    operationPolicyId + "operation policy for API " + apiId, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Download the operation policy specification and definition for a given API specific policy
+     *
+     * @param apiId             API UUID
+     * @param operationPolicyId UUID of the operation policy
+     * @param messageContext    message context
+     * @return A zip file containing both (if exists) operation policy specification and policy definition
+     */
+    @Override
+    public Response getAPISpecificOperationPolicyContentByPolicyId(String apiId, String operationPolicyId,
+                                                                   MessageContext messageContext) {
+
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+            //validate if api exists
+            validateAPIExistence(apiId);
+
+            OperationPolicyData policyData =
+                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, true);
+            if (policyData != null) {
+                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
+                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"").build();
+            } else {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
+                        + operationPolicyId + " for API " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
+                        operationPolicyId, e, log);
+            } else {
+                String errorMessage =
+                        "Error while getting an API specific operation policy with ID :" + operationPolicyId
+                                + " for API " + apiId + " " + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while exporting the API specific" +
+                    " operation policy with ID" + operationPolicyId + " for API " + apiId, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Delete API specific operation policy by providing the policy ID
+     *
+     * @param apiId             API UUID
+     * @param operationPolicyId UUID of the operation policy
+     * @param messageContext    message context
+     * @return A zip file containing both (if exists) operation policy specification and policy definition
+     */
+    @Override
+    public Response deleteAPISpecificOperationPolicyByPolicyId(String apiId, String operationPolicyId,
+                                                               MessageContext messageContext) {
+
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+            //validate if api exists
+            validateAPIExistence(apiId);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OperationPolicyData existingPolicy =
+                    apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
+            if (existingPolicy != null) {
+                apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("The operation policy " + operationPolicyId + " has been deleted from the the API "
+                            + apiId);
+                }
+                return Response.ok().build();
+            } else {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
+                        + operationPolicyId + " for API " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
+                        operationPolicyId, e, log);
+            } else {
+                String errorMessage =
+                        "Error while deleting the API specific operation policy with ID :" + operationPolicyId
+                                + " for API " + apiId + " " + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An error has occurred while deleting the API specific " +
+                    " operation policy with ID" + operationPolicyId + " for API " + apiId, e, log);
+        }
+        return null;
+    }
+
 
     /**
      * Publish API to given external stores.
