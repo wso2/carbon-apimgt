@@ -90,10 +90,10 @@ info:
     Navigate through the API descriptions to find the required API, obtain an access token as described above and invoke the API with the authentication header.
     If you use a different authentication mechanism, this process may change.
 
-  version: '0.9'
+  version: '1.0'
 servers:
-  - url: 'https://apis.wso2.com/api/service-catalog/v0'
-  - url: 'http://apis.wso2.com/api/service-catalog/v0'
+  - url: 'https://apis.wso2.com/api/service-catalog/v1'
+  - url: 'http://apis.wso2.com/api/service-catalog/v1'
 
 paths:
   ######################################################
@@ -178,23 +178,23 @@ paths:
         - lang: Curl
           label: Exact search by name
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=%22Pet%20Service%22"'
+                    "https://127.0.0.1:9443/api/am/service-catalog/v1/services?name=%22Pet%20Service%22"'
         - lang: Curl
           label: Matching search by name
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=Pet%20Service"'
+                    "https://127.0.0.1:9443/api/am/service-catalog/v1/services?name=Pet%20Service"'
         - lang: Curl
           label: Exact search by version
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?version=%221.0.0%22"'
+                    "https://127.0.0.1:9443/api/am/service-catalog/v1/services?version=%221.0.0%22"'
         - lang: Curl
           label: Matching search by version
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?version=1.0.0"'
+                    "https://127.0.0.1:9443/api/am/service-catalog/v1/services?version=1.0.0"'
         - lang: Curl
           label: Get all versions of a service
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=%22Pet%20Service%22"'
+                    "https://127.0.0.1:9443/api/am/service-catalog/v1/services?name=%22Pet%20Service%22"'
 
     #-----------------------------------------------------
     # Adds new service to the service catalog
@@ -235,7 +235,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F "definitionFile=@definition.yaml" -F "serviceMetadata=@metadata.json;type=application/json" "https://127.0.0.1:9443/api/am/service-catalog/v0/services"'
+          -F "definitionFile=@definition.yaml" -F "serviceMetadata=@metadata.json;type=application/json" "https://127.0.0.1:9443/api/am/service-catalog/v1/services"'
 
   /services/{serviceId}:
     #-----------------------------------------------------
@@ -273,7 +273,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/service-catalog/v0/services"'
+                "https://127.0.0.1:9443/api/am/service-catalog/v1/services"'
 
     #-----------------------------------------------------
     # Update a service in the service catalog
@@ -316,7 +316,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F "definitionFile=@definition.yaml" -F "serviceMetadata=@metadata.json;type=application/json"
-           "https://127.0.0.1:9443/api/am/service-catalog/v0/services/7b3d976a-620a-4435-9649-e806f30dc7cf"'
+           "https://127.0.0.1:9443/api/am/service-catalog/v1/services/7b3d976a-620a-4435-9649-e806f30dc7cf"'
 
     #-----------------------------------------------------
     # Delete a service in the service catalog
@@ -350,7 +350,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/service-catalog/v0/services/32b4541f-ce7e-47a6-9c0c-c3db18128c50"'
+                "https://127.0.0.1:9443/api/am/service-catalog/v1/services/32b4541f-ce7e-47a6-9c0c-c3db18128c50"'
 
   #-----------------------------------------------------
   # Retrieve definition of a service in the service catalog
@@ -392,7 +392,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/service-catalog/v0/services/3784c2da-2f2a-4af9-8a43-ef207fb4d739/definition"'
+            "https://127.0.0.1:9443/api/am/service-catalog/v1/services/3784c2da-2f2a-4af9-8a43-ef207fb4d739/definition"'
 
   #-------------------------------------------------------------------
   # Retrieve the information of APIs that use a given service
@@ -430,7 +430,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/service-catalog/v0/services/3784c2da-2f2a-4af9-8a43-ef207fb4d739/usage"'
+                "https://127.0.0.1:9443/api/am/service-catalog/v1/services/3784c2da-2f2a-4af9-8a43-ef207fb4d739/usage"'
 
   #-------------------------------------------------------------------
   # Import a service into the service catalog from a zipped archive
@@ -490,7 +490,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-              -F "file=@services.zip" "https://127.0.0.1:9443/api/am/service-catalog/v0/services/import?overwrite=true"'
+              -F "file=@services.zip" "https://127.0.0.1:9443/api/am/service-catalog/v1/services/import?overwrite=true"'
                 
   #----------------------------------------------------------
   # Exporting a service as a zipped archive
@@ -546,7 +546,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/service-catalog/v0/services/export?name=Single1Curl&version=1.0.0" > services.zip'
+          "https://127.0.0.1:9443/api/am/service-catalog/v1/services/export?name=Single1Curl&version=1.0.0" > services.zip'
 
   ######################################################
   # The Service Catalog API settings
@@ -580,7 +580,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                  "https://127.0.0.1:9443/api/am/service-catalog/v0/settings"'
+                  "https://127.0.0.1:9443/api/am/service-catalog/v1/settings"'
 
 components:
   #-------------------------------------------------------
@@ -595,6 +595,7 @@ components:
           scopes:
             service_catalog:service_view: view access to services in service catalog
             service_catalog:service_write: write access to services in service catalog
+            apim:api_view: view access to services for read only users
 
   #-------------------------------------------------------
   # The definitions of resources used by some of the APIs

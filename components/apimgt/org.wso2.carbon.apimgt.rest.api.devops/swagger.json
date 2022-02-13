@@ -15,7 +15,7 @@
     }
   },
   "host" : "apis.wso2.com",
-  "basePath" : "/api/am/devops/v2",
+  "basePath" : "/api/am/devops/v0",
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
