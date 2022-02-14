@@ -815,7 +815,7 @@ public class TemplateBuilderUtil {
             }
             GatewayContentDTO gatewayFaultContentDTO =
                     retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
-            if (gatewayInContentDTO != null) {
+            if (gatewayFaultContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
