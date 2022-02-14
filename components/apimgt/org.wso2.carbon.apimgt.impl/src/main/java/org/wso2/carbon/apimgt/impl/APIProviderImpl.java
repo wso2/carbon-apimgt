@@ -2507,7 +2507,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String policyId = policy.getPolicyId();
                     // First check the API specific operation policy list
                     OperationPolicyData policyData =
-                            getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, true);
+                            getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, false);
                     if (policyData != null) {
                         if (log.isDebugEnabled()) {
                             log.debug("A policy is found for " + policyId + " as " +
