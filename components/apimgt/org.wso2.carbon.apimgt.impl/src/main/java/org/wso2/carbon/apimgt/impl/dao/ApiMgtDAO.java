@@ -5807,6 +5807,7 @@ public class ApiMgtDAO {
                         }
                     }
                 }
+                uriTemplate.setId(uriMappingId);
             } // end URITemplate list iteration
             uriScopeMappingPrepStmt.executeBatch();
             operationPolicyMappingPrepStmt.executeBatch();
@@ -17922,6 +17923,39 @@ public class ApiMgtDAO {
 
     }
 
+    public void addOperationPolicyMapping(Set<URITemplate> uriTemplates) throws APIManagementException {
+        if (uriTemplates != null && !uriTemplates.isEmpty()) {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                try (PreparedStatement preparedStatement =
+                             connection.prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING)) {
+                    for (URITemplate uriTemplate : uriTemplates){
+                        List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+                        if (operationPolicies != null && !operationPolicies.isEmpty()){
+                            for (OperationPolicy operationPolicy : operationPolicies){
+                                Gson gson = new Gson();
+                                String paramJSON = gson.toJson(operationPolicy.getParameters());
+                                preparedStatement.setInt(1, uriTemplate.getId());
+                                preparedStatement.setString(2,operationPolicy.getPolicyId());
+                                preparedStatement.setString(3, operationPolicy.getDirection());
+                                preparedStatement.setString(4, paramJSON);
+                                preparedStatement.setInt(5, operationPolicy.getOrder());
+                                preparedStatement.addBatch();
+                            }
+                        }
+                    }
+                    preparedStatement.executeBatch();
+                    connection.commit();
+                }catch(SQLException e){
+                    connection.rollback();
+                    throw e;
+                }
+            } catch (SQLException e) {
+                throw new APIManagementException("Error while updating operation Policy mapping for API", e);
+            }
+        }
+    }
+
     private class SubscriptionInfo {
 
         private int subscriptionId;
@@ -18404,6 +18438,34 @@ public class ApiMgtDAO {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Clone an operation policy to the API. This method is used to clone policy to a newly created api version.
+     * Cloning a common policy to API.
+     * Cloning a dependent policy of a product
+     * Each of these scenarios, original APIs' policy ID will be recorded as the cloned policy ID.
+     *
+     * @param apiUUID      UUID of the API
+     * @param operationPolicyData
+     * @return cloned policyID
+     * @throws APIManagementException
+     **/
+    public String cloneOperationPolicy(String apiUUID, OperationPolicyData operationPolicyData)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                String policyId = addAPISpecificOperationPolicy(connection, apiUUID, null, operationPolicyData, operationPolicyData.getClonedCommonPolicyId());
+                connection.commit();
+                return policyId;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while cloning Operation policies", e);
         }
     }
 
@@ -19176,4 +19238,5 @@ public class ApiMgtDAO {
         }
         return list;
     }
+
 }
