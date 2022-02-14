@@ -2743,7 +2743,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
         String existingContext = existingAPI.getContext();
         String existingVersionTimestamp = existingAPI.getVersionTimestamp();
-
         APIIdentifier newApiId = new APIIdentifier(existingAPI.getId().getProviderName(),
                 existingAPI.getId().getApiName(), newVersion);
         existingAPI.setUuid(null);
@@ -2756,10 +2755,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // This is a change that is coming with the context version strategy
         String existingAPIContextTemplate = existingAPI.getContextTemplate();
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
-
+        Map<String, List<OperationPolicy>> operationPoliciesMap = extractAndDropOperationPoliciesFromURITemplate(existingAPI.getUriTemplates());
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
-
+        if (!operationPoliciesMap.isEmpty()){
+            // clone common or API specific operation policy.
+            Map<String, String> clonedOperationPolicyMap = cloneOperationPoliciesToAPI(existingApiId,newAPI, operationPoliciesMap);
+            // attach policy to uri template.
+            attachOperationPoliciesToAPI(newAPI, clonedOperationPolicyMap, operationPoliciesMap);
+        }
         // copy docs
         List<Documentation> existingDocs = getAllDocumentation(existingApiId, organization);
 
@@ -2825,6 +2829,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while updating API details", e);
         }
         return getAPIbyUUID(newAPIId, organization);
+    }
+
+    private void attachOperationPoliciesToAPI(API newAPI, Map<String, String> clonedOperationPolicyMap,
+                                              Map<String, List<OperationPolicy>> operationPoliciesMap)
+            throws APIManagementException {
+        operationPoliciesMap.forEach((key, operationPolicies) ->
+                operationPolicies.forEach(operationPolicy ->
+                        operationPolicy.setPolicyId(clonedOperationPolicyMap.get(operationPolicy.getPolicyId()))));
+        Set<URITemplate> uriTemplates = newAPI.getUriTemplates();
+        if (uriTemplates != null) {
+            for (URITemplate uriTemplate : uriTemplates) {
+                List<OperationPolicy> operationPolicies =
+                        operationPoliciesMap.get(uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate());
+                uriTemplate.setOperationPolicies(operationPolicies);
+            }
+            apiMgtDAO.addOperationPolicyMapping(uriTemplates);
+        }
+    }
+
+    private Map<String, String> cloneOperationPoliciesToAPI(String oldAPIUuid, API newAPI, Map<String,
+            List<OperationPolicy>> operationPoliciesMap)
+            throws APIManagementException {
+        Map<String, String> clonedPolicies = new HashMap<>();
+        for (Map.Entry<String, List<OperationPolicy>> operationPolicyEntry : operationPoliciesMap.entrySet()) {
+            List<OperationPolicy> operationPolicyList = operationPolicyEntry.getValue();
+            for (OperationPolicy operationPolicy : operationPolicyList) {
+                if (!clonedPolicies.containsKey(operationPolicy.getPolicyId())) {
+                    OperationPolicyData apiSpecificOperationPolicy = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(operationPolicy.getPolicyId(), oldAPIUuid, newAPI.getOrganization(), true);
+                    String policyUUID = apiMgtDAO.cloneOperationPolicy(newAPI.getUuid(), apiSpecificOperationPolicy);
+                    clonedPolicies.put(operationPolicy.getPolicyId(), policyUUID);
+                }
+            }
+        }
+        return clonedPolicies;
     }
 
     public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
@@ -9689,5 +9727,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void deleteOperationPolicyById(String policyId, String tenantDomain) throws APIManagementException {
 
         apiMgtDAO.deleteOperationPolicyByPolicyId(policyId);
+    }
+
+    private static Map<String, List<OperationPolicy>> extractAndDropOperationPoliciesFromURITemplate
+            (Set<URITemplate> uriTemplates) {
+        Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+            List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+            if (!operationPolicies.isEmpty()) {
+                operationPoliciesMap.put(key, operationPolicies);
+            }
+            uriTemplate.setOperationPolicies(null);
+        }
+        return operationPoliciesMap;
     }
 }
