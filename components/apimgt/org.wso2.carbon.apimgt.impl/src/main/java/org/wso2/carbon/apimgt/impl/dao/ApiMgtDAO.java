@@ -18561,6 +18561,20 @@ public class ApiMgtDAO {
                                                 revisionedPolicy.getSpecification().getName());
                             }
                         }
+                    } else {
+                        // This means this is a clone of a deleted common policy. A new API specific policy will be created.
+                        revisionedPolicy.getSpecification().setName(revisionedPolicy.getSpecification().getName()
+                                + "_restored-" + revisionId);
+                        revisionedPolicy.getSpecification()
+                                .setDisplayName(revisionedPolicy.getSpecification().getDisplayName()
+                                        + " Restored from revision " + revisionId);
+                        revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(revisionedPolicy));
+                        revisionedPolicy.setRevisionUUID(null);
+                        restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null, revisionedPolicy, null);
+                        if (log.isDebugEnabled()) {
+                            log.debug("No matching operation policy found. A new API specific operation " +
+                                    "policy created by the name " + revisionedPolicy.getSpecification().getName());
+                        }
                     }
                 } else {
                     // This means this is a completely new policy and we don't have any reference of a previous state in
