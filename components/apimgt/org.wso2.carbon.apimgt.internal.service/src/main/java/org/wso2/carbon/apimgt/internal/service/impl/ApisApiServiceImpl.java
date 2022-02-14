@@ -68,7 +68,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
             } else {
                 // Retrieve API Detail according to Gateway label.
-                    apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
+                apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
                         subscriptionValidationDAO.getAllApis(xWSO2Tenant, gatewayLabel, expand));
             }
         } else {
