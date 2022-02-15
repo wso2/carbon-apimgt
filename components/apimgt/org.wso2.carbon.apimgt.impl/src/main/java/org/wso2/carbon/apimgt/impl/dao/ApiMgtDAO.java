@@ -1598,17 +1598,16 @@ public class ApiMgtDAO {
                 String[] groupIDArray = groupingId.split(",");
 
                 statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, organization);
                 for (String groupId : groupIDArray) {
                     statement.setString(++paramIndex, groupId);
                 }
                 statement.setString(++paramIndex, tenantDomain);
-                statement.setString(++paramIndex, organization);
                 statement.setString(++paramIndex, subscriber.getName());
-
             } else {
                 statement.setInt(++paramIndex, tenantId);
-                statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, organization);
+                statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
             }
         } else {
