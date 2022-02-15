@@ -3333,7 +3333,7 @@ public class SQLConstants {
         public static final String ADD_SUBSCRIPTION =
                 "INSERT INTO AM_WEBHOOKS_SUBSCRIPTION (API_UUID, APPLICATION_ID, TENANT_DOMAIN, " +
                         "HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS, UPDATED_AT, EXPIRY_AT, " +
-                        "DELIVERED_AT, DELIVERY_STATE) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                        "DELIVERY_STATE) VALUES (?,?,?,?,?,?,?,?,?,?)";
         public static final String UPDATE_EXISTING_SUBSCRIPTION = "UPDATE AM_WEBHOOKS_SUBSCRIPTION SET " +
                 "HUB_SECRET = ?, HUB_LEASE_SECONDS = ?, UPDATED_AT = ?, EXPIRY_AT = ?  WHERE WH_SUBSCRIPTION_ID = ?";
         public static final String DELETE_IF_EXISTS_SUBSCRIBER =
