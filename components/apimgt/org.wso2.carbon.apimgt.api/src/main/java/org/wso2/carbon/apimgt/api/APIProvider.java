@@ -1761,7 +1761,6 @@ public interface APIProvider extends APIManager {
     void deleteAPIRevision(String apiId, String apiRevisionId, String organization) throws APIManagementException;
 
     /**
-<<<<<<<<< Temporary merge branch 1
      * This method updates the AsyncApi definition in registry
      *
      * @param api   API
@@ -1839,4 +1838,163 @@ public interface APIProvider extends APIManager {
      * @return List of environments related to the given tenant
      */
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
+
+    /**
+     * Set existing operation policy mapping to the URI Templates
+     *
+     * @param apiId        API UUID
+     * @param uriTemplates Set of URI Templates
+     * @throws APIManagementException
+     */
+    void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
+
+    /**
+     * Import an operation policy from the API CTL project. This will either create a new API specific policy,
+     * update existing API specific policy or return the policyID of existing policy if policy content is not changed.
+     *
+     * @param operationPolicyData Operation Policy Data
+     * @param organization              Organization name
+     * @return UUID of the imported operation policy
+     * @throws APIManagementException
+     */
+    String importOperationPolicy(OperationPolicyData operationPolicyData, String organization)
+            throws APIManagementException;
+
+    /**
+     * Add an API specific operation policy
+     *
+     * @param apiUUID                   UUID of the API which the policy should be added to
+     * @param operationPolicyData Operation Policy Data that includes policy specification and policy definition
+     * @param organization              Organization name
+     * @return status of the policy storage
+     * @throws APIManagementException
+     */
+    String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyData operationPolicyData,
+                                         String organization)
+            throws APIManagementException;
+
+    /**
+     * Add common operation policy.
+     *
+     * @param operationPolicyData Operation Policy Data that includes policy specification and policy definition
+     * @param organization              Organization name
+     * @return status of the policy storage
+     * @throws APIManagementException
+     */
+    String addCommonOperationPolicy(OperationPolicyData operationPolicyData, String organization)
+            throws APIManagementException;
+
+    /**
+     * Get API specific operation policy for a given policy name and API UUID. This will only return the policy data
+     * if such policy with name is created as a API specific operation policy. This policy can be either a policy
+     * created only for API, a cloned policy from a common policy or a revisioned API specific operation policy.
+     * Policy data contains methods to identify whether returned policies is a cloned policy or a revisioned policy
+     * or not.
+     *
+     * @param policyName             API specific policy name
+     * @param apiUUID                Unique identifier for API
+     * @param revisionUUID           Unique identifier for API revision
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
+                                                                  String revisionUUID,
+                                                                  String organization,
+                                                                  boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Get the common operation policy for a given policy name. This will only return the policy data if there is
+     * a matching policy created as a common policy. If not, it will return null
+     *
+     * @param policyName             Common Policy name
+     * @param organization           Organization
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Common Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String organization,
+                                                             boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Get API specific operation policy for a given Policy UUID. Even though a policy ID is provided, this will only
+     * return policy if the policy is created for API. Otherwise it will return a null.
+     *
+     * @param policyId               Policy UUID
+     * @param apiUUID                Policy UUID
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
+                                                                String organization,
+                                                                boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Get common operation policy for a given Policy UUID. Even though a policy ID is provided, this will only
+     * return policy if the policy is created as a common policy. Otherwise it will return a null.
+     *
+     * @param policyId               Policy UUID
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getCommonOperationPolicyByPolicyId(String policyId, String organization,
+                                                           boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Update an existing operation policy
+     *
+     * @param operationPolicyId   Unique identifier of the operation policy
+     * @param operationPolicyData Operation Policy Data that needs to be updated.
+     * @param organization        Organization name
+     * @return status of the policy update
+     * @throws APIManagementException
+     */
+    void updateOperationPolicy(String operationPolicyId, OperationPolicyData operationPolicyData,
+                               String organization) throws APIManagementException;
+
+    /**
+     * Get a light weight version of all the common policies for the tenant domain. This will not include the policy
+     * definition as it is bulky. Policy specification and policy UUID will be included in the policyData object.
+     *
+     * @param organization Organization name
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    List<OperationPolicyData> getAllCommonOperationPolicies(String organization)
+            throws APIManagementException;
+
+    /**
+     * Get a light weight version of all the API Specific Operation policies. This will not include the policy
+     * definition as it is bulky. Policy specification and policy UUID will be included in the policyData object.
+     *
+     * @param apiUUID      UUID of the API
+     * @param organization Organization name
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    List<OperationPolicyData> getAllAPISpecificOperationPolicies(String apiUUID, String organization)
+            throws APIManagementException;
+
+    /**
+     * Delete an operation policy by providing the policy ID
+     *
+     * @param policyId     Operation Policy UUID
+     * @param organization Organization name
+     * @throws APIManagementException
+     */
+    void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
+
 }

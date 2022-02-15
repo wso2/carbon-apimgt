@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,12 @@ import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -39,6 +46,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class RestApiPublisherUtils {
@@ -219,4 +228,72 @@ public class RestApiPublisherUtils {
                 "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]}}}";
     }
 
+    /**
+     * This method is used to read input stream of a file and return the string content.
+     * @return String
+     * @throws IOException
+     * */
+    public static String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws IOException {
+
+        String content = null;
+        if (fileInputStream != null) {
+            String fileName = fileDetail.getDataHandler().getName();
+
+            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+
+            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+                fileContentType = fileDetail.getContentType().toString();
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            IOUtils.copy(fileInputStream, outputStream);
+            byte[] sequenceBytes = outputStream.toByteArray();
+            InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+            content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+        }
+        return content;
+    }
+
+    public static String getContentType(Attachment fileDetail) {
+        String fileName = fileDetail.getDataHandler().getName();
+        String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+
+        if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+            fileContentType = fileDetail.getContentType().toString();
+        }
+        return fileContentType;
+    }
+
+    public static File exportOperationPolicyData(OperationPolicyData policyData)
+            throws APIManagementException {
+
+        File exportFolder = null;
+        try {
+            exportFolder = CommonUtil.createTempDirectoryFromName(policyData.getSpecification().getName()
+                    + "_" +policyData.getSpecification().getVersion());
+            String exportAPIBasePath = exportFolder.toString();
+            String archivePath =
+                    exportAPIBasePath.concat(File.separator + policyData.getSpecification().getName());
+            CommonUtil.createDirectory(archivePath);
+            String policyName = archivePath + File.separator + policyData.getSpecification().getName();
+            if (policyData.getSpecification() != null) {
+                CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
+                        ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                        policyData.getSpecification());
+            }
+            if (policyData.getSynapsePolicyDefinition() != null) {
+                CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
+                        policyData.getSynapsePolicyDefinition().getContent());
+            }
+            if (policyData.getCcPolicyDefinition() != null) {
+                CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
+                        policyData.getCcPolicyDefinition().getContent());
+            }
+
+            CommonUtil.archiveDirectory(exportAPIBasePath);
+            FileUtils.deleteQuietly(new File(exportAPIBasePath));
+            return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
+        } catch (APIImportExportException | IOException e) {
+            throw new APIManagementException("Error while exporting operation policy", e);
+        }
+    }
 }

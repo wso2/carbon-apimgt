@@ -104,6 +104,20 @@ public class CommonUtil {
     }
 
     /**
+     * Create temporary directory in temporary location.
+     *
+     * @throws APIImportExportException If an error occurs while creating temporary location
+     */
+    public static File createTempDirectoryFromName(String directoryName) throws APIImportExportException {
+
+        String currentDirectory = System.getProperty(APIConstants.JAVA_IO_TMPDIR);
+        String createdDirectories = File.separator + directoryName + File.separator;
+        File tempDirectory = new File(currentDirectory + createdDirectories);
+        createDirectory(tempDirectory.getPath());
+        return tempDirectory;
+    }
+
+    /**
      * Archive a provided source directory to a zipped file.
      *
      * @param sourceDirectory Source directory
