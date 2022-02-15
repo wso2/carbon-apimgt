@@ -1125,13 +1125,13 @@ public class SubscriptionValidationDAO {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api);
-                                return api;
+                            } else {
+                                attachURLMappingDetails(connection, revision, api);
                             }
-                            attachURLMappingDetails(connection, revision, api);
-                            return api;
                         } else {
                             api.setPolicy(null);
                         }
+                        return api;
                     }
                 }
             }
