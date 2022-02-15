@@ -69,6 +69,8 @@ public class RegistrySearchUtil {
     public static final String API_DESCRIPTION = "Description";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
     public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
+    public static final String ADVERTISE_ONLY_SEARCH_TYPE_PREFIX = "thirdParty";
+    public static final String ADVERTISE_ONLY_ADVERTISED_PROPERTY = "advertiseOnly";
     public static final String ENABLE_STORE = "enableStore";
     public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
     public static final String NULL_USER_ROLE_LIST = "null";
@@ -78,8 +80,8 @@ public class RegistrySearchUtil {
             CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
             LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(), API_STATUS.toLowerCase(),
             CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX, CATEGORY_SEARCH_TYPE_PREFIX,
-            ENABLE_STORE.toLowerCase(), "sort", "group", "group.sort", "group.field",
-            "group.ngroups", "group.format" };
+            ENABLE_STORE.toLowerCase() , ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase(), "sort", "group", "group.sort"
+            , "group.field", "group.ngroups", "group.format" };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
@@ -273,6 +275,8 @@ public class RegistrySearchUtil {
                     } else if (searchKeys[0].equals(CATEGORY_SEARCH_TYPE_PREFIX)) {
                         searchKeys[0] = API_CATEGORIES_CATEGORY_NAME;
                         searchKeys[1] = searchKeys[1].replace("*", "");
+                    } else if (searchKeys[0].equals(ADVERTISE_ONLY_SEARCH_TYPE_PREFIX)) {
+                        searchKeys[0] = ADVERTISE_ONLY_ADVERTISED_PROPERTY;
                     }
 
                     if (filteredQuery.length() == 0) {

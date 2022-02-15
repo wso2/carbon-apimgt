@@ -80,6 +80,9 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -767,6 +770,8 @@ public final class APIUtil {
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants.API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
+            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants.API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(
@@ -1257,6 +1262,10 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(api.getCacheTimeout()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL, api.getRedirectURL());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT,
+                    api.getApiExternalProductionEndpoint());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT,
+                    api.getApiExternalSandboxEndpoint());
             artifact.setAttribute(APIConstants.API_OVERVIEW_OWNER, api.getApiOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, Boolean.toString(api.isAdvertiseOnly()));
 
@@ -3912,6 +3921,17 @@ public final class APIUtil {
                 }
             }
 
+            // create IntegrationDeveloperRole role if it's creation is enabled in tenant-conf.json
+            JSONObject integrationDeveloperRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE);
+            if (isRoleCreationEnabled(integrationDeveloperRoleConfig)) {
+                String integrationDeveloperRoleName = String.valueOf(integrationDeveloperRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(integrationDeveloperRoleName)) {
+                    createIntegrationDeveloperRole(integrationDeveloperRoleName, tenantId);
+                }
+            }
+
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
@@ -4207,6 +4227,19 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
         };
         createRole(roleName, devOpsPermissions, tenantId);
+    }
+
+    /**
+     * Create Integration developer roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createIntegrationDeveloperRole(String roleName, int tenantId) throws APIManagementException {
+
+        Permission[] integrationDeveloperPermissions = new Permission[]{};
+        createRole(roleName, integrationDeveloperPermissions, tenantId);
     }
 
     /**
@@ -9509,7 +9542,6 @@ public final class APIUtil {
 
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(resource.getApiId());
                 API api = getAPI(apiArtifact, registry);
-
                 resource.setEndpointConfig(api.getEndpointConfig());
                 resource.setEndpointSecurityMap(setEndpointSecurityForAPIProduct(api));
             }
@@ -9539,6 +9571,28 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return apiProduct;
+    }
+
+    /**
+     * Return the generated endpoint config JSON string for advertise only APIs
+     *
+     * @param api API object
+     * @return generated JSON string
+     */
+    public static String generateEndpointConfigForAdvertiseOnlyApi(API api) {
+        JSONObject endpointConfig = new JSONObject();
+        endpointConfig.put("endpoint_type", "http");
+        if (StringUtils.isNotEmpty(api.getApiExternalProductionEndpoint())) {
+            JSONObject productionEndpoints = new JSONObject();
+            productionEndpoints.put("url", api.getApiExternalProductionEndpoint());
+            endpointConfig.put("production_endpoints", productionEndpoints);
+        }
+        if (StringUtils.isNotEmpty(api.getApiExternalSandboxEndpoint())) {
+            JSONObject sandboxEndpoints = new JSONObject();
+            sandboxEndpoints.put("url", api.getApiExternalSandboxEndpoint());
+            endpointConfig.put("sandbox_endpoints", sandboxEndpoints);
+        }
+        return endpointConfig.toJSONString();
     }
 
     /**
@@ -10473,7 +10527,7 @@ public final class APIUtil {
         try {
             endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new EndpointSecurity());
             endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, new EndpointSecurity());
-            if (api.isEndpointSecured()) {
+            if (api.isEndpointSecured() && !api.isAdvertiseOnly()) {
                 EndpointSecurity productionEndpointSecurity = new EndpointSecurity();
                 productionEndpointSecurity.setEnabled(true);
                 productionEndpointSecurity.setUsername(api.getEndpointUTUsername());
@@ -10485,7 +10539,7 @@ public final class APIUtil {
                 }
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionEndpointSecurity);
-            } else {
+            } else if (!api.isAdvertiseOnly()) {
                 String endpointConfig = api.getEndpointConfig();
                 if (endpointConfig != null) {
                     JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
@@ -11324,13 +11378,15 @@ public final class APIUtil {
     public static boolean isStreamingApi(API api) {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(api.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(api.getType()) ||
-                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(api.getType());
+                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(api.getType()) ||
+                APIConstants.APITransportType.ASYNC.toString().equalsIgnoreCase(api.getType());
     }
 
     public static boolean isStreamingApi(APIProduct apiProduct) {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(apiProduct.getType()) ||
-                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType());
+                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType()) ||
+                APIConstants.APITransportType.ASYNC.toString().equalsIgnoreCase(apiProduct.getType());
     }
 
     /**
@@ -11482,5 +11538,11 @@ public final class APIUtil {
             }
         }
         return null;
+    }
+    public static void initializeVelocityContext(VelocityEngine velocityEngine){
+        velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
+        velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
+        velocityEngine.setProperty("runtime.conversion.handler", "none");
+
     }
 }

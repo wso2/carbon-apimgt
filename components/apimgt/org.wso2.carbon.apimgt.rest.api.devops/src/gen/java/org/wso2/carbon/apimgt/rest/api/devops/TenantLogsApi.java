@@ -67,12 +67,12 @@ TenantLogsApiService delegate = new TenantLogsApiServiceImpl();
     @Path("/{tenantId}/apis/")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "GET log enabled API data ", notes = "", response = LoggingApiOutputListDTO.class, tags={  })
+    @ApiOperation(value = "GET log level of APIs ", notes = "", response = LoggingApiOutputListDTO.class, tags={  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Logs enabled API details", response = LoggingApiOutputListDTO.class),
+        @ApiResponse(code = 200, message = "Log level of APIs", response = LoggingApiOutputListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Request API resource or external store Ids not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal server error while retrieving API data to be logged", response = ErrorDTO.class) })
-    public Response tenantLogsTenantIdApisGet(@ApiParam(value = "Tenant ID ",required=true) @PathParam("tenantId") String tenantId,  @ApiParam(value = "Query to select only logging enabled apis. By default, all the apis details will send ", defaultValue="true") @DefaultValue("true") @QueryParam("logging-enabled") Boolean loggingEnabled) throws APIManagementException{
-        return delegate.tenantLogsTenantIdApisGet(tenantId, loggingEnabled, securityContext);
+    public Response tenantLogsTenantIdApisGet(@ApiParam(value = "Tenant ID ",required=true) @PathParam("tenantId") String tenantId,  @ApiParam(value = "Log level of the APIs ")  @QueryParam("log-level") String logLevel) throws APIManagementException{
+        return delegate.tenantLogsTenantIdApisGet(tenantId, logLevel, securityContext);
     }
 }

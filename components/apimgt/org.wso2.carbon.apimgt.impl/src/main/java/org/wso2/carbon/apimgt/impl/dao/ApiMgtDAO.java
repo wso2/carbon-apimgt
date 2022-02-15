@@ -1592,17 +1592,16 @@ public class ApiMgtDAO {
                 String[] groupIDArray = groupingId.split(",");
 
                 statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, organization);
                 for (String groupId : groupIDArray) {
                     statement.setString(++paramIndex, groupId);
                 }
                 statement.setString(++paramIndex, tenantDomain);
-                statement.setString(++paramIndex, organization);
                 statement.setString(++paramIndex, subscriber.getName());
-
             } else {
                 statement.setInt(++paramIndex, tenantId);
-                statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, organization);
+                statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
             }
         } else {
@@ -6687,7 +6686,8 @@ public class ApiMgtDAO {
             String serviceKey = api.getServiceInfo("key");
             if (StringUtils.isNotEmpty(serviceKey)) {
                 int apiId = getAPIID(api.getUuid());
-                updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), connection);
+                int tenantID = APIUtil.getTenantId(username);
+                updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantID, connection);
             }
             connection.commit();
         } catch (SQLException e) {
@@ -6840,10 +6840,7 @@ public class ApiMgtDAO {
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             //Delete all comments associated with given API
-            prepStmt = connection.prepareStatement(deleteCommentQuery);
-            prepStmt.setInt(1, id);
-            prepStmt.execute();
-            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+            deleteAPIComments(id, uuid, connection);
 
             prepStmt = connection.prepareStatement(deleteRatingsQuery);
             prepStmt.setInt(1, id);
@@ -7711,6 +7708,24 @@ public class ApiMgtDAO {
             handleException("Error while deleting comment " + commentId + " from the database", e);
         }
         return false;
+    }
+
+    private void deleteAPIComments(int apiId, String uuid, Connection connection) throws APIManagementException {
+        try {
+            connection.setAutoCommit(false);
+            String deleteChildComments = SQLConstants.DELETE_API_CHILD_COMMENTS;
+            String deleteParentComments = SQLConstants.DELETE_API_PARENT_COMMENTS;
+            try (PreparedStatement childCommentPreparedStmt = connection.prepareStatement(deleteChildComments);
+                    PreparedStatement parentCommentPreparedStmt = connection.prepareStatement(deleteParentComments)) {
+                childCommentPreparedStmt.setInt(1, apiId);
+                childCommentPreparedStmt.execute();
+
+                parentCommentPreparedStmt.setInt(1, apiId);
+                parentCommentPreparedStmt.execute();
+            }
+        } catch (SQLException e) {
+            handleException("Error while deleting comments for API " + uuid, e);
+        }
     }
 
     /**
@@ -15742,7 +15757,7 @@ public class ApiMgtDAO {
             while (resultSet.next()) {
                 String version = resultSet.getString("API_VERSION");
                 String status = resultSet.getString("STATUS");
-                String versionTimestamp = resultSet.getString("VERSION_TIMESTAMP");
+                String versionTimestamp = resultSet.getString("VERSION_COMPARABLE");
                 String context = resultSet.getString("CONTEXT");
                 String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
@@ -17431,21 +17446,53 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieve the Unique Identifier of the Service used in API
+     *
+     * @param apiId    Unique Identifier of API
+     * @return Service Key
+     * @throws APIManagementException
+     */
+    private String retrieveServiceKeyByApiId(int apiId, Connection connection) throws APIManagementException {
+
+        String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL_WITHOUT_TENANT_ID;
+        String serviceKey = StringUtils.EMPTY;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
+            preparedStatement.setInt(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    serviceKey = resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Service Key associated with API " + apiId, e);
+        }
+        return serviceKey;
+    }
+
+    /**
      * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
      *
      * @param apiId      Unique Identifier of API
      * @param serviceKey Unique key of the Service
      * @param md5        MD5 value of the Service
+     * @param tenantID   tenantID of API
      * @throws SQLException
      */
-    public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, Connection connection)
-            throws SQLException {
-
-        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
-            statement.setString(1, serviceKey);
-            statement.setString(2, md5);
-            statement.setInt(3, apiId);
-            statement.executeUpdate();
+    private void updateAPIServiceMapping(int apiId, String serviceKey, String md5, int tenantID, Connection connection)
+            throws APIManagementException {
+        try {
+            if (!retrieveServiceKeyByApiId(apiId, connection).isEmpty()) {
+                try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
+                    statement.setString(1, serviceKey);
+                    statement.setString(2, md5);
+                    statement.setInt(3, apiId);
+                    statement.executeUpdate();
+                }
+            } else {
+                addAPIServiceMapping(apiId, serviceKey, md5, tenantID, connection);
+            }
+        } catch (SQLException e) {
+            handleException("Error while updating the Service info associated with API " + apiId, e);
         }
     }
 

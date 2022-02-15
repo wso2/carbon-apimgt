@@ -225,7 +225,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getAllAPIs(Integer limit, Integer offset, String sortBy, String sortOrder, String xWSO2Tenant,
-                               String query, String ifNoneMatch, Boolean expand, String accept,
+                               String query, String ifNoneMatch, String accept,
                                MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
@@ -236,7 +236,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
-        expand = expand != null && expand;
         sortBy = sortBy != null ? sortBy : RestApiConstants.DEFAULT_SORT_CRITERION;
         sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
         try {
@@ -265,7 +264,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
 
             //Add pagination section in the response
             Object totalLength = result.get("length");
@@ -2956,7 +2955,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url,
-                                InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+                                     InputStream fileInputStream, Attachment fileDetail,MessageContext messageContext) {
         try {
             String updatedSwagger;
             //validate if api exists
@@ -4302,6 +4301,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //validate if api exists
             APIInfo apiInfo = validateAPIExistence(apiId);
+
+            //validate whether the API is advertise only
+            APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+            if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
+                throw new APIManagementException("Creating API Revisions is not supported for third party APIs: "
+                        + apiId);
+            }
+
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4394,6 +4401,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        //validate whether the API is advertise only
+        APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+        if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
+            throw new APIManagementException("Deploying API Revisions is not supported for third party APIs: "
+                    + apiId);
+        }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -4626,6 +4640,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+        }
+
+        // validate whether ASYNC APIs created without advertise only enabled
+        if (APIDTO.TypeEnum.ASYNC.equals(apiDTOFromProperties.getType()) &&
+                (apiDTOFromProperties.getAdvertiseInfo() == null ||
+                        !apiDTOFromProperties.getAdvertiseInfo().isAdvertised())) {
+            RestApiUtil.handleBadRequest("ASYNC type APIs only can be created as third party APIs", log);
         }
 
         //validate websocket url and change transport types

@@ -109,6 +109,8 @@ public class API implements Serializable {
     private String oldFaultSequence;
 
     private boolean advertiseOnly;
+    private String apiExternalProductionEndpoint;
+    private String apiExternalSandboxEndpoint;
     private String apiOwner;
     private String redirectURL;
     private String vendor;
@@ -450,6 +452,22 @@ public class API implements Serializable {
 
     public void setAdvertiseOnly(boolean advertiseOnly) {
         this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getApiExternalProductionEndpoint() {
+        return apiExternalProductionEndpoint;
+    }
+
+    public void setApiExternalProductionEndpoint(String apiExternalProductionEndpoint) {
+        this.apiExternalProductionEndpoint = apiExternalProductionEndpoint;
+    }
+
+    public String getApiExternalSandboxEndpoint() {
+        return apiExternalSandboxEndpoint;
+    }
+
+    public void setApiExternalSandboxEndpoint(String apiExternalSandboxEndpoint) {
+        this.apiExternalSandboxEndpoint = apiExternalSandboxEndpoint;
     }
 
     public String getApiOwner() {
@@ -1274,7 +1292,7 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type) || "ASYNC".equals(type);
     }
 
     /**

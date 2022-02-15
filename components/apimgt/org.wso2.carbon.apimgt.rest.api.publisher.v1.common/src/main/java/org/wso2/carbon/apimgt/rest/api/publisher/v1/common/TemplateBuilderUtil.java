@@ -497,7 +497,11 @@ public class TemplateBuilderUtil {
             if (apidto != null) {
                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
                 productResource.setApiIdentifier(api.getId());
-                productResource.setEndpointConfig(api.getEndpointConfig());
+                if (api.isAdvertiseOnly()) {
+                    productResource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+                } else {
+                    productResource.setEndpointConfig(api.getEndpointConfig());
+                }
                 if (StringUtils.isNotEmpty(api.getInSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
                             apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
@@ -940,6 +944,9 @@ public class TemplateBuilderUtil {
     public static ArrayList<String> getEndpointType(API api) {
 
         ArrayList<String> arrayList = new ArrayList<>();
+        if (api.isAdvertiseOnly()) {
+            api.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+        }
         if (APIUtil.isProductionEndpointsExists(api.getEndpointConfig()) &&
                 !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig())) {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);

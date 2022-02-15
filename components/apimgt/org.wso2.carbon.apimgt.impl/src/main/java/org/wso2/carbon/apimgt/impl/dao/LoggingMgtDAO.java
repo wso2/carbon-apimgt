@@ -15,12 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.apimgt.impl.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ApiLoggingMgtException;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APILogInfoDTO;
@@ -37,10 +38,10 @@ import java.util.List;
  * Database access library for per API logging management feature.
  */
 public class LoggingMgtDAO {
-
     private static final Log log = LogFactory.getLog(LoggingMgtDAO.class);
-
-    private static LoggingMgtDAO loggingMgtDAO = new LoggingMgtDAO();
+    private static final LoggingMgtDAO loggingMgtDAO = new LoggingMgtDAO();
+    private static final String API_UUID = "API_UUID";
+    private static final String CONTEXT = "CONTEXT";
 
     private LoggingMgtDAO() {
 
@@ -56,18 +57,18 @@ public class LoggingMgtDAO {
     }
 
     public void addAPILogger(String organization, String apiId, String logLevel) throws APIManagementException {
-        try (Connection addlogginCon = APIMgtDBUtil.getConnection()) {
-            addlogginCon.setAutoCommit(false);
-            try (PreparedStatement preparedStatement = addlogginCon.prepareStatement(
+        try (Connection addLoggingCon = APIMgtDBUtil.getConnection()) {
+            addLoggingCon.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = addLoggingCon.prepareStatement(
                     SQLConstants.ADD_PER_API_LOGGING_SQL)) {
                 preparedStatement.setString(1, logLevel);
                 preparedStatement.setString(2, apiId);
                 preparedStatement.setString(3, organization);
 
                 preparedStatement.executeUpdate();
-                addlogginCon.commit();
+                addLoggingCon.commit();
             } catch (SQLException e) {
-                addlogginCon.rollback();
+                addLoggingCon.rollback();
                 throw new ApiLoggingMgtException("Error while adding new per API logger", e);
             }
         } catch (SQLException e) {
@@ -75,32 +76,48 @@ public class LoggingMgtDAO {
         }
     }
 
-    public List<APILogInfoDTO> retrieveAPILoggerList(String organization, boolean loggingEnabled) throws
+    public List<APILogInfoDTO> retrieveAPILoggerList(String organization, String logLevel) throws
             APIManagementException {
         List<APILogInfoDTO> apiLogInfoDTOList = new ArrayList<>();
-        String query = SQLConstants.RETRIEVE_PER_API_LOGGING_ALL_SQL;
-        if (loggingEnabled) {
-            query = SQLConstants.RETRIEVE_PER_API_LOGGING_SQL;
+        String query;
+        if (logLevel == null) {
+            query = SQLConstants.RETRIEVE_PER_API_LOGGING_ALL_SQL;
+        } else {
+            switch (logLevel.toUpperCase()) {
+                case APIConstants.LOG_LEVEL_OFF:
+                    query = SQLConstants.RETRIEVE_PER_API_LOGGING_OFF_SQL;
+                    break;
+                case APIConstants.LOG_LEVEL_BASIC:
+                    query = SQLConstants.RETRIEVE_PER_API_LOGGING_BASIC_SQL;
+                    break;
+                case APIConstants.LOG_LEVEL_STANDARD:
+                    query = SQLConstants.RETRIEVE_PER_API_LOGGING_STANDARD_SQL;
+                    break;
+                case APIConstants.LOG_LEVEL_FULL:
+                    query = SQLConstants.RETRIEVE_PER_API_LOGGING_FULL_SQL;
+                    break;
+                default:
+                    throw new APIManagementException("Invalid log level",
+                            ExceptionCodes.from(ExceptionCodes.LOGGING_API_INCORRECT_LOG_LEVEL));
+            }
         }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    String logLevel = "OFF";
-                    if (resultSet.getString("LOG_LEVEL") != null) {
-                        logLevel = resultSet.getString("LOG_LEVEL");
+                    String retrievedLogLevel = APIConstants.LOG_LEVEL_OFF;
+                    if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
+                        retrievedLogLevel = resultSet.getString(APIConstants.LOG_LEVEL);
                     }
-                    APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString("API_UUID"),
-                                                                    resultSet.getString("CONTEXT"),
-                                                                    logLevel);
+                    APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
+                            resultSet.getString(CONTEXT), retrievedLogLevel);
                     apiLogInfoDTOList.add(apiLogInfoDTO);
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve API logging for organization" + organization, e);
         }
-
         return apiLogInfoDTOList;
     }
 
@@ -111,13 +128,12 @@ public class LoggingMgtDAO {
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    String logLevel = "OFF";
-                    if (resultSet.getString("LOG_LEVEL") != null) {
-                        logLevel = resultSet.getString("LOG_LEVEL");
+                    String logLevel = APIConstants.LOG_LEVEL_OFF;
+                    if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
+                        logLevel = resultSet.getString(APIConstants.LOG_LEVEL);
                     }
-                    APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString("API_UUID"),
-                                                                    resultSet.getString("CONTEXT"),
-                                                                    logLevel);
+                    APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
+                            resultSet.getString(CONTEXT), logLevel);
                     apiLogInfoDTOList.add(apiLogInfoDTO);
                 }
             }
@@ -128,7 +144,6 @@ public class LoggingMgtDAO {
     }
 
     public List<APILogInfoDTO> retrieveAPILoggerByAPIID(String tenant, String apiId) throws APIManagementException {
-
         String query = SQLConstants.RETRIEVE_PER_API_LOGGING_BY_UUID_SQL;
         List<APILogInfoDTO> apiLogInfoDTOList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -137,20 +152,18 @@ public class LoggingMgtDAO {
             preparedStatement.setString(2, tenant);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    String logLevel = "OFF";
-                    if (resultSet.getString("LOG_LEVEL") != null) {
-                        logLevel = resultSet.getString("LOG_LEVEL");
+                    String logLevel = APIConstants.LOG_LEVEL_OFF;
+                    if (resultSet.getString(APIConstants.LOG_LEVEL) != null) {
+                        logLevel = resultSet.getString(APIConstants.LOG_LEVEL);
                     }
-                    APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString("API_UUID"),
-                                                                    resultSet.getString("CONTEXT"),
-                                                                    logLevel);
+                    APILogInfoDTO apiLogInfoDTO = new APILogInfoDTO(resultSet.getString(API_UUID),
+                            resultSet.getString(CONTEXT), logLevel);
                     apiLogInfoDTOList.add(apiLogInfoDTO);
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve organization", e);
         }
-
         return apiLogInfoDTOList;
     }
 }

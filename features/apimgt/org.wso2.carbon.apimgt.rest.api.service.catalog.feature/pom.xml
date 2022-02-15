@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.14.4-SNAPSHOT</version>
+        <version>9.17.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -83,7 +83,7 @@
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#service-catalog#v0.war</destFileName>
+                                    <destFileName>api#am#service-catalog#v1.war</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.yaml</groupId>
