@@ -589,13 +589,13 @@ public class TemplateBuilderUtil {
             }
             GatewayContentDTO gatewayOutContentDTO = retrieveOperationPolicySequenceForProducts(apiProduct, api,
                     extractedPath, APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
-            if (gatewayInContentDTO != null) {
+            if (gatewayOutContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
             GatewayContentDTO gatewayFaultContentDTO = retrieveOperationPolicySequenceForProducts(apiProduct, api,
                     extractedPath, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
-            if (gatewayInContentDTO != null) {
+            if (gatewayFaultContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
