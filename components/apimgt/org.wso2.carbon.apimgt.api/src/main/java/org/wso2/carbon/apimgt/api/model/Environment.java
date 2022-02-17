@@ -41,6 +41,7 @@ public class Environment implements Serializable {
     private String apiGatewayEndpoint;
     private String websocketGatewayEndpoint;
     private String webSubGatewayEndpoint;
+    private String graphQLGatewayEndpoint;
     private boolean isDefault;
 
     // New fields added with dynamic environments
@@ -76,6 +77,14 @@ public class Environment implements Serializable {
 
     public void setWebSubGatewayEndpoint(String webSubGatewayEndpoint) {
         this.webSubGatewayEndpoint = webSubGatewayEndpoint;
+    }
+
+    public String getGraphQLGatewayEndpoint() {
+        return graphQLGatewayEndpoint;
+    }
+
+    public void setGraphQLGatewayEndpoint(String graphQLGatewayEndpoint) {
+        this.graphQLGatewayEndpoint = graphQLGatewayEndpoint;
     }
 
     public boolean isShowInConsole() {
@@ -228,8 +237,13 @@ public class Environment implements Serializable {
         // Prefix websub endpoints with 'websub_', since API type will be identified with this URL.
         String modifiedWebSubGatewayEndpoint = webSubGatewayEndpoint.replaceAll("http://", "websub_http://")
                 .replaceAll("https://", "websub_https://");
-        String[] endpoints = (apiGatewayEndpoint + "," + websocketGatewayEndpoint + "," + modifiedWebSubGatewayEndpoint)
-                .split(",", 6);
+
+        // Prefix websub endpoints with 'graphQL_', since API type will be identified with this URL.
+        String modifiedGraphQLGatewayEndpoint = graphQLGatewayEndpoint.replaceAll("http://", "graphql_http://")
+                .replaceAll("https://", "graphql_https://");
+
+        String[] endpoints = (apiGatewayEndpoint + "," + websocketGatewayEndpoint + "," +
+                modifiedWebSubGatewayEndpoint + "," + modifiedGraphQLGatewayEndpoint).split(",", 8);
         getVhosts().add(VHost.fromEndpointUrls(endpoints));
     }
 

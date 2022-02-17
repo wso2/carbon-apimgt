@@ -114,6 +114,8 @@
                 <GatewayWSEndpoint>ws://${carbon.local.ip}:9099</GatewayWSEndpoint>
                 <!-- Endpoint of the WebSub APIs hosted in this API Gateway -->
                 <GatewayWebSubEndpoint>http://${carbon.local.ip}:9021</GatewayWebSubEndpoint>
+                <!-- Endpoint of the WebSub APIs hosted in this API Gateway -->
+                <GatewayGraphQLEndpoint>http://${carbon.local.ip}:9000</GatewayGraphQLEndpoint>
             </Environment>
         </Environments>
     </APIGateway>

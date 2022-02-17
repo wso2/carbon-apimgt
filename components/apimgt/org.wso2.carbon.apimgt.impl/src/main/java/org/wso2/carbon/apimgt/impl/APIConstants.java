@@ -686,6 +686,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_ENDPOINT = "GatewayEndpoint";
     public static final String API_WEBSOCKET_GATEWAY_ENDPOINT = "GatewayWSEndpoint";
     public static final String API_WEBSUB_GATEWAY_ENDPOINT = "GatewayWebSubEndpoint";
+    public static final String API_GRAPHQL_ENDPOINT = "GatewayGraphQLEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
     public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
@@ -696,6 +697,8 @@ public final class APIConstants {
     public static final String API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT = "WssEndpoint";
     public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT = "WebSubHttpEndpoint";
     public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT = "WebSubHttpsEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_GRAPHQL_HTTP_ENDPOINT = "GraphqlHttpEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_GRAPHQL_HTTPS_ENDPOINT = "GraphqlHttpsEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
     public static final String API_GATEWAY_PROVIDER = "Provider";
@@ -1690,6 +1693,10 @@ public final class APIConstants {
     public static final String WSS_PROTOCOL_URL_PREFIX = "wss://";
     public static final int WSS_PROTOCOL_PORT = 8099;
     public static final int WS_PROTOCOL_PORT = 9099;
+
+    // TODO finalize the netty port no
+    public static final int GRAPHQL_HTTPS_PROTOCOL_PORT = 8637;
+    public static final int GRAPHQL_HTTP_PROTOCOL_PORT = 9000;
 
     public static final String EMAIL_TRANSPORT = "mailto";
 

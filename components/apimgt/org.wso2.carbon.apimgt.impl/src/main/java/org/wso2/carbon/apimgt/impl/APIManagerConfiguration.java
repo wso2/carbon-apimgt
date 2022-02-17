@@ -97,6 +97,8 @@ public class APIManagerConfiguration {
     public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
     public static final String WEBSUB_DEFAULT_GATEWAY_URL = "http://localhost:9021";
+    // TODO finalize the netty port no
+    public static final String GRAPHQL_DEFAULT_GATEWAY_URL = "http://localhost:9000";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
@@ -602,6 +604,15 @@ public class APIManagerConfiguration {
         } else {
             environment.setWebSubGatewayEndpoint(WEBSUB_DEFAULT_GATEWAY_URL);
         }
+
+        OMElement graphqlGatewayEndpoint = environmentElem
+                .getFirstChildWithName(new QName(APIConstants.API_GRAPHQL_ENDPOINT));
+        if (graphqlGatewayEndpoint != null) {
+            environment.setGraphQLGatewayEndpoint(APIUtil.replaceSystemProperty(graphqlGatewayEndpoint.getText()));
+        } else {
+            environment.setGraphQLGatewayEndpoint(GRAPHQL_DEFAULT_GATEWAY_URL);
+        }
+
         OMElement description =
                 environmentElem.getFirstChildWithName(new QName("Description"));
         if (description != null) {
@@ -630,14 +641,21 @@ public class APIManagerConfiguration {
                     APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT)).getText());
             String webSubHttpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
                     APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT)).getText());
+            String graphqlHttpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_GRAPHQL_HTTP_ENDPOINT)).getText());
+            String graphqlHttpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_GRAPHQL_HTTPS_ENDPOINT)).getText());
 
             //Prefix websub endpoints with 'websub_' so that the endpoint URL
             // would begin with: 'websub_http://', since API type is identified by the URL protocol below.
             webSubHttpEp = "websub_" + webSubHttpEp;
             webSubHttpsEp = "websub_" + webSubHttpsEp;
 
-            VHost vhost = VHost.fromEndpointUrls(new String[]{
-                    httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
+            graphqlHttpEp = "graphql_"  + graphqlHttpEp;
+            graphqlHttpsEp = "graphql_" + graphqlHttpsEp;
+
+            VHost vhost = VHost.fromEndpointUrls(new String[]{ httpEp, httpsEp, wsEp, wssEp, webSubHttpEp,
+                    webSubHttpsEp, graphqlHttpEp, graphqlHttpsEp });
             vhosts.add(vhost);
         }
         OMElement properties = environmentElem.getFirstChildWithName(new

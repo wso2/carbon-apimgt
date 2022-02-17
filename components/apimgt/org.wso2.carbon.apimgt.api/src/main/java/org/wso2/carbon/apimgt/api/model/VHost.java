@@ -35,6 +35,8 @@ public class VHost {
     private Integer httpsPort = DEFAULT_HTTPS_PORT;
     private Integer wsPort = DEFAULT_WS_PORT;
     private Integer wssPort = DEFAULT_WSS_PORT;
+    private Integer graphqlHttpPort = DEFAULT_GRAPHQL_HTTP_PORT;
+    private Integer graphqlHttpsPort = DEFAULT_GRAPHQL_HTTPS_PORT;
     private Integer websubHttpPort = DEFAULT_WEBSUB_HTTP_PORT;
     private Integer websubHttpsPort = DEFAULT_WEBSUB_HTTPS_PORT;
 
@@ -44,6 +46,9 @@ public class VHost {
     public static final int DEFAULT_WSS_PORT = 8099;
     public static final int DEFAULT_WEBSUB_HTTP_PORT = 9021;
     public static final int DEFAULT_WEBSUB_HTTPS_PORT = 8021;
+    // TODO finalize the netty port no
+    public static final int DEFAULT_GRAPHQL_HTTP_PORT = 8637;
+    public static final int DEFAULT_GRAPHQL_HTTPS_PORT = 9000;
 
     public static final String HTTP_PROTOCOL = "http";
     public static final String HTTPS_PROTOCOL = "https";
@@ -53,6 +58,9 @@ public class VHost {
 
     private static final String WEBSUB_HTTP_PROTOCOL = "websub_http";
     private static final String WEBSUB_HTTPS_PROTOCOL = "websub_https";
+
+    private static final String GRAPHQL_HTTP_PROTOCOL = "graphql_http";
+    private static final String GRAPHQL_HTTPS_PROTOCOL = "graphql_https";
 
     public VHost() {
     }
@@ -103,6 +111,22 @@ public class VHost {
 
     public void setWssPort(Integer wssPort) {
         this.wssPort = wssPort;
+    }
+
+    public Integer getGraphQLHttpPort() {
+        return graphqlHttpPort;
+    }
+
+    public void setGraphQLHttpPort(Integer graphqlHttpPort) {
+        this.graphqlHttpPort = graphqlHttpPort;
+    }
+
+    public Integer getGraphQLHttpsPort() {
+        return graphqlHttpsPort;
+    }
+
+    public void setGraphQLHttpsPort(Integer graphqlHttpsPort) {
+        this.graphqlHttpsPort = graphqlHttpsPort;
     }
 
     public Integer getWebsubHttpPort() {
@@ -193,6 +217,14 @@ public class VHost {
                     case WEBSUB_HTTPS_PROTOCOL:
                         url = new URL(HTTPS_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
                         vhost.setWebsubHttpsPort(url.getPort() < 0 ? DEFAULT_WEBSUB_HTTPS_PORT : url.getPort());
+                        break;
+                    case GRAPHQL_HTTP_PROTOCOL:
+                        url = new URL(HTTP_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
+                        vhost.setGraphQLHttpPort(url.getPort() < 0 ? DEFAULT_GRAPHQL_HTTP_PORT : url.getPort());
+                        break;
+                    case GRAPHQL_HTTPS_PROTOCOL:
+                        url = new URL(HTTPS_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
+                        vhost.setGraphQLHttpsPort(url.getPort() < 0 ? DEFAULT_GRAPHQL_HTTPS_PORT : url.getPort());
                         break;
                 }
             } catch (MalformedURLException e) {

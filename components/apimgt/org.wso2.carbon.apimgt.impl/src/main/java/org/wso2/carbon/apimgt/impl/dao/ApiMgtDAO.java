@@ -13747,6 +13747,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(5, vhost.getHttpsPort().toString());
                 prepStmt.setString(6, vhost.getWsPort().toString());
                 prepStmt.setString(7, vhost.getWssPort().toString());
+                prepStmt.setString(8, vhost.getGraphQLHttpPort().toString());
+                prepStmt.setString(9, vhost.getGraphQLHttpsPort().toString());
                 prepStmt.addBatch();
             }
             prepStmt.executeBatch();
@@ -13793,6 +13795,8 @@ public class ApiMgtDAO {
                     Integer httpsPort = rs.getInt("HTTPS_PORT");
                     Integer wsPort = rs.getInt("WS_PORT");
                     Integer wssPort = rs.getInt("WSS_PORT");
+                    Integer graphqlHttpPort = rs.getInt("GRAPHQL_HTTP_PORT");
+                    Integer graphqlHttpsPort = rs.getInt("GRAPHQL_HTTPS_PORT");
 
                     VHost vhost = new VHost();
                     vhost.setHost(host);
@@ -13801,6 +13805,8 @@ public class ApiMgtDAO {
                     vhost.setHttpsPort(httpsPort);
                     vhost.setWsPort(wsPort);
                     vhost.setWssPort(wssPort);
+                    vhost.setGraphQLHttpPort(graphqlHttpPort);
+                    vhost.setGraphQLHttpsPort(graphqlHttpsPort);
                     vhosts.add(vhost);
                 }
             }

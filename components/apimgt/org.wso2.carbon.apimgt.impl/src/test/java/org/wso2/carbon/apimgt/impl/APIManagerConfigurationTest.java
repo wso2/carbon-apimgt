@@ -77,6 +77,8 @@ public class APIManagerConfigurationTest {
                 "                <GatewayWSEndpoint>ws://localhost:9099,wss://localhost:8099</GatewayWSEndpoint>\n" +
                 "                <!-- Endpoint URLs of the WebSub APIs hosted in this API Gateway -->\n" +
                 "                <GatewayWebSubEndpoint>http://localhost:9021,https://localhost:8021</GatewayWebSubEndpoint>\n" +
+                "                <!-- Endpoint URLs of the GraphQL APIs hosted in this API Gateway -->\n" +
+                "                <GatewayGraphQLEndpoint>http://localhost:9000,https://localhost:8637</GatewayGraphQLEndpoint>\n" +
                 "                <VirtualHosts>\n" +
                 "                </VirtualHosts>\n" +
                 "            </Environment>";
@@ -111,6 +113,8 @@ public class APIManagerConfigurationTest {
                 "                <GatewayWSEndpoint>ws://localhost:9099,wss://localhost:8099</GatewayWSEndpoint>\n" +
                 "                <!-- Endpoint URLs of the WebSub APIs hosted in this API Gateway -->\n" +
                 "                <GatewayWebSubEndpoint>http://localhost:9021,https://localhost:8021</GatewayWebSubEndpoint>\n" +
+                "                <!-- Endpoint URLs of the GraphQL APIs hosted in this API Gateway -->\n" +
+                "                <GatewayGraphQLEndpoint>http://localhost:9000,https://localhost:8637</GatewayGraphQLEndpoint>\n" +
                 "                <Properties>\n" +
                 "                    <Property name=\"Organization\">WSO2</Property>\n" +
                 "                    <Property name=\"DisplayName\">Development Environment</Property>\n" +

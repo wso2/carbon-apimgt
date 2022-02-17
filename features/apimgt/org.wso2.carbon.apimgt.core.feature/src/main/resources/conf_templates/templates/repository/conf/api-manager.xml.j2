@@ -165,6 +165,16 @@
                 {% else %}
                 <GatewayWebSubEndpoint></GatewayWebSubEndpoint>
                 {% endif %}
+                <!-- Endpoint URLs of the GraphQL APIs hosted in this API Gateway -->
+                {% if environment_name.graphql_http_endpoint is defined and environment_name.graphql_https_endpoint is defined %}
+                <GatewayGraphQLEndpoint>{{environment_name.graphql_http_endpoint}},{{environment_name.graphql_https_endpoint}}</GatewayGraphQLEndpoint>
+                {% elif environment_name.graphql_http_endpoint is not defined and environment_name.graphql_https_endpoint is defined %}
+                <GatewayGraphQLEndpoint>{{environment_name.graphql_https_endpoint}}</GatewayGraphQLEndpoint>
+                {% elif environment_name.graphql_http_endpoint is defined and environment_name.graphql_https_endpoint is not defined %}
+                <GatewayGraphQLEndpoint>{{environment_name.graphql_http_endpoint}}</GatewayGraphQLEndpoint>
+                {% else %}
+                <GatewayGraphQLEndpoint></GatewayGraphQLEndpoint>
+                {% endif %}
                 <VirtualHosts>
                     {% for vhost in environment_name.virtual_host %}
                     <VirtualHost>
@@ -174,6 +184,8 @@
                         <WssEndpoint>{{vhost.wss_endpoint}}</WssEndpoint>
                         <WebSubHttpEndpoint>{{vhost.websub_event_receiver_http_endpoint}}</WebSubHttpEndpoint>
                         <WebSubHttpsEndpoint>{{vhost.websub_event_receiver_https_endpoint}}</WebSubHttpsEndpoint>
+                        <GraphqlHttpEndpoint>{{vhost.graphql_http_endpoint}}</GraphqlHttpEndpoint>
+                        <GraphqlHttpsEndpoint>{{vhost.graphql_https_endpoint}}</GraphqlHttpsEndpoint>
                     </VirtualHost>
                     {% endfor %}
                 </VirtualHosts>
