@@ -2759,7 +2759,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, organization);
+            API api = provider.getAPIbyUUID(apiId, organization);
             if (api == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
