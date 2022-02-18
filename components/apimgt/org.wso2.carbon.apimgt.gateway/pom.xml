@@ -424,7 +424,7 @@
                             org.apache.synapse.core.axis2,
                             org.apache.synapse.endpoints.*,
                             org.apache.synapse.mediators.base,
-                            org.apache.axis2.transport.base,
+                            org.apache.axis2.transport.*,
                             io.swagger.parser.*; version="${swagger.parser.v3.version}",
                             io.swagger.v3.*; version="${swagger.parser.v3.version}",
                             org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",

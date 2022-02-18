@@ -10337,6 +10337,12 @@ components:
         websubHttpsPort:
           type: integer
           example: 8021
+        graphqlHttpPort:
+          type: integer
+          example: 9000
+        graphqlHttpsPort:
+          type: integer
+          example: 8637
     FileInfo:
       title: File Information including meta data
       type: object

@@ -35,7 +35,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.apache.synapse.transport.util.MessageHandlerProvider;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -101,7 +101,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 if (queryParams.length > 1) {
                     payload = URLDecoder.decode(queryParams[1], UNICODE_TRANSFORMATION_FORMAT);
                 } else {
-                    RelayUtils.buildMessage(axis2MC);
+                    MessageHandlerProvider.getMessageHandler(axis2MC).buildMessage(axis2MC);
                     OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
                     if (body != null && body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null){
                         payload = body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)).getText();

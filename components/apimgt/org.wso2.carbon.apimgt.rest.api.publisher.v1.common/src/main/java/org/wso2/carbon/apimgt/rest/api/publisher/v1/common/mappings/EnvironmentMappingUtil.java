@@ -120,6 +120,8 @@ public class EnvironmentMappingUtil {
         vHostDTO.setWssPort(vHost.getWssPort());
         vHostDTO.setWebsubHttpPort(vHost.getWebsubHttpPort());
         vHostDTO.setWebsubHttpsPort(vHost.getWebsubHttpsPort());
+        vHostDTO.setGraphqlHttpPort(vHost.getGraphQLHttpPort());
+        vHostDTO.setGraphqlHttpsPort(vHost.getGraphQLHttpsPort());
         return vHostDTO;
     }
 

@@ -28,6 +28,8 @@ public class VHostDTO   {
     private Integer wssPort = null;
     private Integer websubHttpPort = null;
     private Integer websubHttpsPort = null;
+    private Integer graphqlHttpPort = null;
+    private Integer graphqlHttpsPort = null;
 
   /**
    **/
@@ -165,6 +167,40 @@ public class VHostDTO   {
     this.websubHttpsPort = websubHttpsPort;
   }
 
+  /**
+   **/
+  public VHostDTO graphqlHttpPort(Integer graphqlHttpPort) {
+    this.graphqlHttpPort = graphqlHttpPort;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "9000", value = "")
+  @JsonProperty("graphqlHttpPort")
+  public Integer getGraphqlHttpPort() {
+    return graphqlHttpPort;
+  }
+  public void setGraphqlHttpPort(Integer graphqlHttpPort) {
+    this.graphqlHttpPort = graphqlHttpPort;
+  }
+
+  /**
+   **/
+  public VHostDTO graphqlHttpsPort(Integer graphqlHttpsPort) {
+    this.graphqlHttpsPort = graphqlHttpsPort;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "8637", value = "")
+  @JsonProperty("graphqlHttpsPort")
+  public Integer getGraphqlHttpsPort() {
+    return graphqlHttpsPort;
+  }
+  public void setGraphqlHttpsPort(Integer graphqlHttpsPort) {
+    this.graphqlHttpsPort = graphqlHttpsPort;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -182,12 +218,14 @@ public class VHostDTO   {
         Objects.equals(wsPort, vhost.wsPort) &&
         Objects.equals(wssPort, vhost.wssPort) &&
         Objects.equals(websubHttpPort, vhost.websubHttpPort) &&
-        Objects.equals(websubHttpsPort, vhost.websubHttpsPort);
+        Objects.equals(websubHttpsPort, vhost.websubHttpsPort) &&
+        Objects.equals(graphqlHttpPort, vhost.graphqlHttpPort) &&
+        Objects.equals(graphqlHttpsPort, vhost.graphqlHttpsPort);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(host, httpContext, httpPort, httpsPort, wsPort, wssPort, websubHttpPort, websubHttpsPort);
+    return Objects.hash(host, httpContext, httpPort, httpsPort, wsPort, wssPort, websubHttpPort, websubHttpsPort, graphqlHttpPort, graphqlHttpsPort);
   }
 
   @Override
@@ -203,6 +241,8 @@ public class VHostDTO   {
     sb.append("    wssPort: ").append(toIndentedString(wssPort)).append("\n");
     sb.append("    websubHttpPort: ").append(toIndentedString(websubHttpPort)).append("\n");
     sb.append("    websubHttpsPort: ").append(toIndentedString(websubHttpsPort)).append("\n");
+    sb.append("    graphqlHttpPort: ").append(toIndentedString(graphqlHttpPort)).append("\n");
+    sb.append("    graphqlHttpsPort: ").append(toIndentedString(graphqlHttpsPort)).append("\n");
     sb.append("}");
     return sb.toString();
   }

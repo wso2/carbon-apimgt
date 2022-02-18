@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import java.io.IOException;
 
 
-class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> {
+public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private static final Log log = LogFactory.getLog(URLValidationInterceptor.class);
     private static String majorVersion = "v3";

@@ -4105,6 +4105,12 @@ components:
         wssPort:
           type: integer
           example: 8099
+        graphqlHttpPort:
+          type: integer
+          example: 9000
+        graphqlHttpsPort:
+          type: integer
+          example: 8637
     AdditionalProperty:
       title: Additional Gateway Properties
       type: object
