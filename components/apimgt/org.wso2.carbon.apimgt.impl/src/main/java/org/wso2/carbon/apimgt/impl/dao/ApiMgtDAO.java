@@ -5194,8 +5194,6 @@ public class ApiMgtDAO {
                     tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
                     application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
                     APIConstants.SubscriptionStatus.UNBLOCKED));
-        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-
         return subscriptionId;
     }
 
