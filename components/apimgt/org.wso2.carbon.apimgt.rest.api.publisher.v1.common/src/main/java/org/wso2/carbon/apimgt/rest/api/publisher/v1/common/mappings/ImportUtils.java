@@ -200,8 +200,7 @@ public class ImportUtils {
             // Validate swagger content except for streaming APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                validationResponse = retrieveValidatedSwaggerDefinitionFromArchive(
-                        extractedFolderPath);
+                validationResponse = retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
             }
             // Validate the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
@@ -258,6 +257,12 @@ public class ImportUtils {
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
                                 importedApiDTO.getProvider(), organization);
+
+                // Set API definition to validationResponse if the API is imported with sample API definition
+                if (validationResponse.isInit()) {
+                    validationResponse.setContent(importedApi.getSwaggerDefinition());
+                    validationResponse.setJsonContent(importedApi.getSwaggerDefinition());
+                }
             }
 
             if (!extractedPoliciesMap.isEmpty()) {
@@ -1254,6 +1259,9 @@ public class ImportUtils {
                 throw new APIManagementException(
                         "Error occurred while importing the API. Invalid Swagger definition found. "
                                 + validationResponse.getErrorItems(), ExceptionCodes.ERROR_READING_META_DATA);
+            }
+            if (swaggerContent.contains("x-wso2-apictl-init")) {
+                validationResponse.setInit(true);
             }
             return validationResponse;
         } catch (IOException e) {
