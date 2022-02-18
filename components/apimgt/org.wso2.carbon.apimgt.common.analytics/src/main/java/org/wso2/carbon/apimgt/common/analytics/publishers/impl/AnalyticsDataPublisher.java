@@ -51,11 +51,14 @@ public class AnalyticsDataPublisher {
     public void initialize(AnalyticsCommonConfiguration commonConfig) {
         Map<String, String> configs = commonConfig.getConfigurations();
         String reporterClass = configs.get("publisher.reporter.class");
+        String reporterType = configs.get("type");
         try {
             MetricReporter metricReporter;
             if (reporterClass != null) {
                 metricReporter = MetricReporterFactory.getInstance()
                         .createMetricReporter(reporterClass, configs);
+            } else if(reporterType != null) {
+                metricReporter = MetricReporterFactory.getInstance().createLogMetricReporter(configs);
             } else {
                 metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
             }
