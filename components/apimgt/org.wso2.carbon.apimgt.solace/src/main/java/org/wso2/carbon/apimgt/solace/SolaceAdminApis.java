@@ -535,26 +535,28 @@ public class SolaceAdminApis {
         HashSet<String> parameters1 = new HashSet<>();
         org.json.JSONArray attributes1 = new org.json.JSONArray();
         for (AaiChannelItem channel : aai20Document.getChannels()) {
-            Set<String> parameterKeySet = channel.parameters.keySet();
-            for (String parameterName : parameterKeySet) {
-                if (!parameters1.contains(parameterName)) {
-                    AaiParameter parameterObject = channel.parameters.get(parameterName);
-                    if (parameterObject.schema != null) {
-                        org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName,
-                                parameterObject);
-                        if (attributeObj != null) {
-                            attributes1.put(attributeObj);
-                            parameters1.add(parameterName);
-                        }
-                    } else if (parameterObject.$ref != null) {
-                        if (aai20Document.components.parameters != null) {
-                            AaiParameter parameterObject1 = aai20Document.components.parameters.get(parameterName);
-                            if (parameterObject1.schema != null) {
-                                org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName,
-                                        parameterObject1);
-                                if (attributeObj != null) {
-                                    attributes1.put(attributeObj);
-                                    parameters1.add(parameterName);
+            if (channel.parameters != null) {
+                Set<String> parameterKeySet = channel.parameters.keySet();
+                for (String parameterName : parameterKeySet) {
+                    if (!parameters1.contains(parameterName)) {
+                        AaiParameter parameterObject = channel.parameters.get(parameterName);
+                        if (parameterObject.schema != null) {
+                            org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName,
+                                    parameterObject);
+                            if (attributeObj != null) {
+                                attributes1.put(attributeObj);
+                                parameters1.add(parameterName);
+                            }
+                        } else if (parameterObject.$ref != null) {
+                            if (aai20Document.components.parameters != null) {
+                                AaiParameter parameterObject1 = aai20Document.components.parameters.get(parameterName);
+                                if (parameterObject1.schema != null) {
+                                    org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName,
+                                            parameterObject1);
+                                    if (attributeObj != null) {
+                                        attributes1.put(attributeObj);
+                                        parameters1.add(parameterName);
+                                    }
                                 }
                             }
                         }

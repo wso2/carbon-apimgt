@@ -3821,7 +3821,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 // and fill out missing attributes before attaching the list to the api
                 List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfOrganization(organization);
 
-                // todo-category: optimize this loop with breaks
                 for (String categoryName : categoriesOfAPI) {
                     for (APICategory category : allCategories) {
                         if (categoryName.equals(category.getName())) {
@@ -3868,7 +3867,11 @@ public abstract class AbstractAPIManager implements APIManager {
             try {
                 PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, resourceAPIUUID);
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
-                resource.setEndpointConfig(api.getEndpointConfig());
+                if (api.isAdvertiseOnly()) {
+                    resource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+                } else {
+                    resource.setEndpointConfig(api.getEndpointConfig());
+                }
                 resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while retrieving the api for api product " + e);

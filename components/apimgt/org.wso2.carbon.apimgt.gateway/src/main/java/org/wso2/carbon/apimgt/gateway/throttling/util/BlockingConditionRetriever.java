@@ -73,23 +73,32 @@ public class BlockingConditionRetriever extends TimerTask {
             HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, protocol);
             HttpResponse httpResponse = null;
             int retryCount = 0;
-            boolean retry;
+            boolean retry = true;
             do {
                 try {
                     httpResponse = httpClient.execute(method);
-                    retry = false;
+                    if (httpResponse.getStatusLine().getStatusCode() == 200) {
+                        retry = false;
+                    }
                 } catch (IOException ex) {
-                    retryCount++;
-                    if (retryCount < blockConditionsDataRetrievalRetries) {
-                        retry = true;
+                    if (retryCount >= blockConditionsDataRetrievalRetries) {
+                        throw ex;
+                    }else{
                         log.warn("Failed retrieving Blocking Conditions from remote endpoint: " + ex.getMessage()
-                                 + ". Retrying after " + blockConditionsDataRetrievalTimeoutInSeconds + " seconds...");
+                                + ". Retrying after " + blockConditionsDataRetrievalTimeoutInSeconds + " seconds...");                    }
+                }
+                if (retry) {
+                    if (retryCount < blockConditionsDataRetrievalRetries) {
+                        log.warn("Failed retrieving Blocking Conditions from remote endpoint:. Retrying after "
+                                + blockConditionsDataRetrievalTimeoutInSeconds + " seconds...");
                         Thread.sleep(blockConditionsDataRetrievalTimeoutInSeconds * 1000);
                     } else {
-                        throw ex;
+                        retry = false;
                     }
+                    retryCount++;
                 }
-            } while(retry);
+
+            } while (retry);
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
@@ -109,16 +118,22 @@ public class BlockingConditionRetriever extends TimerTask {
     public void loadBlockingConditionsFromWebService() {
         BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
         if (blockConditionsDTO != null) {
-            getThrottleDataHolder().addAPIBlockingConditionsFromMap(
-                    GatewayUtils.generateMap(blockConditionsDTO.getApi()));
-            getThrottleDataHolder().addApplicationBlockingConditionsFromMap(
-                    GatewayUtils.generateMap(blockConditionsDTO.getApplication()));
-            getThrottleDataHolder().addUserBlockingConditionsFromMap(
-                    GatewayUtils.generateMap(blockConditionsDTO.getUser()));
-            getThrottleDataHolder()
-                    .addIplockingConditionsFromMap(GatewayUtils.generateIpRangeMap(blockConditionsDTO.getIp()));
-            getThrottleDataHolder().addSubscriptionBlockingConditionsFromMap(
-                    GatewayUtils.generateMap(blockConditionsDTO.getSubscription()));
+            if (!blockConditionsDTO.getApi().isEmpty()) {
+                getThrottleDataHolder().addAPIBlockingConditionsFromMap(
+                        GatewayUtils.generateMap(blockConditionsDTO.getApi()));
+            }
+            if (!blockConditionsDTO.getApplication().isEmpty()) {
+                getThrottleDataHolder().addApplicationBlockingConditionsFromMap(
+                        GatewayUtils.generateMap(blockConditionsDTO.getApplication()));
+            }
+            if (!blockConditionsDTO.getUser().isEmpty()) {
+                getThrottleDataHolder().addUserBlockingConditionsFromMap(
+                        GatewayUtils.generateMap(blockConditionsDTO.getUser()));
+            }
+            if (!blockConditionsDTO.getIp().isEmpty()) {
+                getThrottleDataHolder()
+                        .addIplockingConditionsFromMap(GatewayUtils.generateIpRangeMap(blockConditionsDTO.getIp()));
+            }
         }
     }
 

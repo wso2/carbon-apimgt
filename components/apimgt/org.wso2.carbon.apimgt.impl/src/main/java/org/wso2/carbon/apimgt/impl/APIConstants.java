@@ -116,6 +116,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE = "DevOpsRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE = "IntegrationDeveloperRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
     public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
 
@@ -357,6 +358,8 @@ public final class APIConstants {
     public static final String IMPLEMENTATION_TYPE_FILE = "FILE";
 
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";
+    public static final String API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT = "overview_apiExternalProductionEndpoint";
+    public static final String API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT = "overview_apiExternalSandboxEndpoint";
     public static final String API_OVERVIEW_OWNER = "overview_apiOwner";
     public static final String API_OVERVIEW_ADVERTISE_ONLY = "overview_advertiseOnly";
     public static final String API_OVERVIEW_ENDPOINT_CONFIG = "overview_endpointConfig";
@@ -1635,6 +1638,7 @@ public final class APIConstants {
     public static final String ENDPOINT_TYPE_LOADBALANCE = "load_balance";
     public static final String ENDPOINT_CONFIG = "endpoint_config";
     public static final String ENDPOINT_TYPE_HTTP = "http";
+    public static final String ENDPOINT_TYPE_SERVICE = "service";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
     public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
@@ -1877,7 +1881,7 @@ public final class APIConstants {
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
-            "SSE"};
+            "SSE", "ASYNC"};
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2069,7 +2073,7 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS, GRAPHQL, WEBSUB, SSE, WEBHOOK
+        HTTP, WS, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
     }
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
@@ -2165,6 +2169,16 @@ public final class APIConstants {
     public static final String CORRELATION_LOGGER = "correlation";
     public static final String LOG_ALL_METHODS = "logAllMethods";
     public static final String AM_ACTIVITY_ID = "activityid";
+
+    /**
+     * Constants for API logging
+     */
+    public static final String API_LOGGER = "API_LOG";
+    public static final String LOG_LEVEL = "LOG_LEVEL";
+    public static final String LOG_LEVEL_OFF = "OFF";
+    public static final String LOG_LEVEL_BASIC = "BASIC";
+    public static final String LOG_LEVEL_STANDARD = "STANDARD";
+    public static final String LOG_LEVEL_FULL = "FULL";
 
     public static final String PDF_EXTENSION = "pdf";
     public static final String XLS_EXTENSION = "xls";
@@ -2279,11 +2293,11 @@ public final class APIConstants {
 
     public static class RestApiConstants {
 
-        public static final String REST_API_DEFAULT_VERSION = "v2";
+        public static final String REST_API_PUBLISHER_DEFAULT_VERSION = "v3";
         public static final String REST_API_OLD_VERSION = "v0.17";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
-                REST_API_PUBLISHER_CONTEXT + REST_API_DEFAULT_VERSION;
+                REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_DEFAULT_VERSION;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
         public static final String REST_API_ADMIN_VERSION = "v0.17";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
@@ -2845,6 +2859,19 @@ public final class APIConstants {
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
+
+    //Constants related to Operation Policies
+    public static final String OPERATION_POLICIES = "operation policies";
+    public static final String OPERATION_SEQUENCE_TYPE_REQUEST = "request";
+    public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
+    public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
+    public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
+    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmp";
+    public static final String YAML_CONTENT_TYPE = "text/yaml";
+    public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator
+            + "resources" + File.separator + "operation_policies" + File.separator + "specifications";
+    public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
+            + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
 

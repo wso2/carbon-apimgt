@@ -59,6 +59,10 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -116,6 +120,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -223,6 +228,9 @@ public class ImportUtils {
                 processAdvertiseOnlyPropertiesInDTO(importedApiDTO, tokenScopes);
             }
 
+            Map<String, List<OperationPolicy>> extractedPoliciesMap =
+                    extractAndDropOperationPoliciesFromURITemplate(importedApiDTO.getOperations());
+
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
                 log.info("Existing API found, attempting to update it...");
@@ -250,6 +258,12 @@ public class ImportUtils {
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
                                 importedApiDTO.getProvider(), organization);
+            }
+
+            if (!extractedPoliciesMap.isEmpty()) {
+                importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath,
+                        extractedPoliciesMap, currentTenantDomain));
+                apiProvider.updateAPI(importedApi);
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
@@ -393,6 +407,90 @@ public class ImportUtils {
                                 + importedApi.getId().getVersion();
             }
             throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+        }
+    }
+
+    public static Map<String, List<OperationPolicy>> extractAndDropOperationPoliciesFromURITemplate
+            (List<APIOperationsDTO> operationsDTO) {
+        Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
+        for (APIOperationsDTO dto : operationsDTO) {
+            String key = dto.getVerb() + ":" + dto.getTarget();
+            List<OperationPolicy> operationPolicies =
+                    OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(dto.getOperationPolicies());
+            if (!operationPolicies.isEmpty()) {
+                operationPoliciesMap.put(key, operationPolicies);
+            }
+            dto.setOperationPolicies(null);
+        }
+        return operationPoliciesMap;
+    }
+
+    public static Set<URITemplate> validateOperationPolicies(API api, APIProvider provider, String extractedFolderPath,
+                                                             Map<String, List<OperationPolicy>> extractedPoliciesMap,
+                                                             String tenantDomain) {
+
+        String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+            if (extractedPoliciesMap.containsKey(key)) {
+                List<OperationPolicy> operationPolicies = extractedPoliciesMap.get(key);
+                List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
+                if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    for (OperationPolicy policy : operationPolicies) {
+                        try {
+                            OperationPolicySpecification policySpec =
+                                    getOperationPolicySpecificationFromFile(policyDirectory,
+                                            policy.getPolicyName());
+
+                            OperationPolicyData operationPolicyData = new OperationPolicyData();
+                            operationPolicyData.setSpecification(policySpec);
+                            operationPolicyData.setOrganization(tenantDomain);
+                            operationPolicyData.setApiUUID(api.getUuid());
+
+                            OperationPolicyDefinition synapseDefinition =
+                                    APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                            policy.getPolicyName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                            if (synapseDefinition != null) {
+                                synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                            }
+                            OperationPolicyDefinition ccDefinition =
+                                    APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                            policy.getPolicyName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                            if (ccDefinition != null) {
+                                ccDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                operationPolicyData.setCcPolicyDefinition(ccDefinition);
+                            }
+                            operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                            String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
+                            policy.setPolicyId(policyID);
+                            validatedOperationPolicies.add(policy);
+                        } catch (APIManagementException e) {
+                            log.error(e);
+                        }
+                    }
+                }
+                uriTemplate.setOperationPolicies(validatedOperationPolicies);
+            }
+        }
+        return uriTemplates;
+    }
+
+    public static OperationPolicySpecification getOperationPolicySpecificationFromFile(String extractedFolderPath,
+                                                                                       String policyName)
+            throws APIManagementException {
+        try {
+            String jsonContent =  getFileContentAsJson(extractedFolderPath + File.separator + policyName);
+            if (jsonContent == null) {
+                return null;
+            }
+            // Retrieving the field "data" in deployment_environments.yaml
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            return APIUtil.getValidatedOperationPolicySpecification(configElement.toString());
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading policy specification info from path: "
+                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
         }
     }
 

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.14.5-SNAPSHOT</version>
+        <version>9.18.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
+            <artifactId>velocity-engine-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
@@ -219,7 +219,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.apache.velocity:velocity:${velocity.version}</bundleDef>
+                                <bundleDef>org.apache.velocity:velocity-engine-core:${velocity.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-core:${openfeign.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-gson:${openfeign.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-okhttp:${openfeign.version}</bundleDef>

@@ -75,6 +75,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -95,8 +96,8 @@ public class TemplateBuilderUtil {
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        APITemplateBuilderImpl vtb =
-                new APITemplateBuilderImpl(api, soapToRestInMediationDtos, soapToRestMediationDtos);
+        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api, soapToRestInMediationDtos,
+                soapToRestMediationDtos);
         Map<String, String> latencyStatsProperties = new HashMap<String, String>();
         latencyStatsProperties.put(APIConstants.API_UUID, api.getUUID());
         if (!APIUtil.isStreamingApi(api)) {
@@ -254,7 +255,7 @@ public class TemplateBuilderUtil {
             if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.emptyMap(), 0);
+                        Collections.emptyMap(), 2);
             } else {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.emptyMap());
@@ -400,7 +401,7 @@ public class TemplateBuilderUtil {
             if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.emptyMap(), 0);
+                        Collections.emptyMap(), 2);
             } else {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.emptyMap());
@@ -437,8 +438,9 @@ public class TemplateBuilderUtil {
         // add new property for entires that has a __display suffix
         JSONObject modifiedProperties = getModifiedProperties(originalProperties);
         api.setAdditionalProperties(modifiedProperties);
-        APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
-                clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
+        APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil
+                .getAPITemplateBuilder(api, tenantDomain, clientCertificatesDTOList, soapToRestInMediationDtoList,
+                        soapToRestOutMediationDtoList);
         GatewayAPIDTO gatewaAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
                 extractedFolderPath, apidto, clientCertificatesDTOList);
         // Reset the additional properties to the original values
@@ -497,20 +499,27 @@ public class TemplateBuilderUtil {
             if (apidto != null) {
                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
                 productResource.setApiIdentifier(api.getId());
-                productResource.setEndpointConfig(api.getEndpointConfig());
+                if (api.isAdvertiseOnly()) {
+                    productResource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+                } else {
+                    productResource.setEndpointConfig(api.getEndpointConfig());
+                }
                 if (StringUtils.isNotEmpty(api.getInSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
-                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                            apiProduct.getId().getVersion()).concat("--").concat(productResource.getApiId())
+                            + APIConstants.API_CUSTOM_SEQ_IN_EXT;
                     productResource.setInSequenceName(sequenceName);
                 }
                 if (StringUtils.isNotEmpty(api.getOutSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
-                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+                            apiProduct.getId().getVersion()).concat("--").concat(productResource.getApiId())
+                            + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
                     productResource.setOutSequenceName(sequenceName);
                 }
                 if (StringUtils.isNotEmpty(api.getFaultSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
-                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                            apiProduct.getId().getVersion()).concat("--").concat(productResource.getApiId())
+                            + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
                     productResource.setFaultSequenceName(sequenceName);
                 }
                 productResource.setProductIdentifier(apiProduct.getId());
@@ -526,8 +535,7 @@ public class TemplateBuilderUtil {
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, APIProduct apiProduct,
-                                                                 APITemplateBuilder builder,
-                                                                 String tenantDomain,
+                                                                 APITemplateBuilder builder, String tenantDomain,
                                                                  Map<String, APIDTO> associatedAPIsMap,
                                                                  List<ClientCertificateDTO> clientCertificatesDTOList)
             throws APITemplateException, XMLStreamException, APIManagementException {
@@ -552,7 +560,6 @@ public class TemplateBuilderUtil {
         productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
                 productAPIDto.getLocalEntriesToBeAdd()));
         setClientCertificatesToBeAdded(tenantDomain, productAPIDto, clientCertificatesDTOList);
-        productAPIDto.setApiDefinition(builder.getConfigStringForTemplate(environment));
         for (Map.Entry<String, APIDTO> apidtoEntry : associatedAPIsMap.entrySet()) {
             String apiExtractedPath = apidtoEntry.getKey();
             APIDTO apidto = apidtoEntry.getValue();
@@ -566,31 +573,52 @@ public class TemplateBuilderUtil {
             String prefix = id.getName() + "--v" + id.getVersion();
             setSecureVaultPropertyToBeAdded(prefix, api, productAPIDto);
         }
-
+        productAPIDto.setApiDefinition(builder.getConfigStringForTemplate(environment));
         return productAPIDto;
     }
 
     private static void setCustomSequencesToBeAdded(APIProduct apiProduct, API api, GatewayAPIDTO gatewayAPIDTO,
                                                     String extractedPath, APIDTO apidto) throws APIManagementException {
 
-        GatewayContentDTO gatewayInContentDTO = retrieveSequence(apiProduct, extractedPath,
-                apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
-        if (gatewayInContentDTO != null) {
-            gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayInContentDTO,
-                    gatewayAPIDTO.getSequenceToBeAdd()));
-        }
-        GatewayContentDTO gatewayOutContentDTO = retrieveSequence(apiProduct, extractedPath,
-                apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT, api);
-        if (gatewayOutContentDTO != null) {
-            gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayOutContentDTO,
-                    gatewayAPIDTO.getSequenceToBeAdd()));
+        if (APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+            GatewayContentDTO gatewayInContentDTO = retrieveOperationPolicySequenceForProducts(apiProduct, api,
+                    extractedPath, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+            if (gatewayInContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO = retrieveOperationPolicySequenceForProducts(apiProduct, api,
+                    extractedPath, APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+            if (gatewayOutContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayFaultContentDTO = retrieveOperationPolicySequenceForProducts(apiProduct, api,
+                    extractedPath, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+            if (gatewayFaultContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+        } else {
+
+            GatewayContentDTO gatewayInContentDTO = retrieveSequence(apiProduct, extractedPath,
+                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
+            if (gatewayInContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayInContentDTO,
+                        gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(apiProduct, extractedPath,
+                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT, api);
+            if (gatewayOutContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayOutContentDTO,
+                        gatewayAPIDTO.getSequenceToBeAdd()));
+            }
         }
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, API api,
-                                                                 APITemplateBuilder builder,
-                                                                 String tenantDomain, String extractedPath,
-                                                                 APIDTO apidto,
+                                                                 APITemplateBuilder builder, String tenantDomain,
+                                                                 String extractedPath, APIDTO apidto,
                                                                  List<ClientCertificateDTO> clientCertificatesDTOList)
             throws APIManagementException, APITemplateException, XMLStreamException {
 
@@ -768,24 +796,43 @@ public class TemplateBuilderUtil {
         api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(perTopicMappings));
         addWebsocketTopicResourceKeys(api);
     }
+
     private static void setCustomSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
                                                     APIDTO apidto) throws APIManagementException {
 
-        GatewayContentDTO gatewayInContentDTO =
-                retrieveSequence(extractedPath, apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN
-                        , api);
-        if (gatewayInContentDTO != null) {
-            gatewayAPIDTO
-                    .setSequenceToBeAdd(
-                            addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
-        }
-        GatewayContentDTO gatewayOutContentDTO =
-                retrieveSequence(extractedPath, apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
-                        , api);
-        if (gatewayOutContentDTO != null) {
-            gatewayAPIDTO
-                    .setSequenceToBeAdd(
-                            addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+        if (APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+            GatewayContentDTO gatewayInContentDTO =
+                    retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+            if (gatewayInContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO =
+                    retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+            if (gatewayOutContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayFaultContentDTO =
+                    retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+            if (gatewayFaultContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+        } else {
+            GatewayContentDTO gatewayInContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
+            if (gatewayInContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
+                    , api);
+            if (gatewayOutContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
         }
     }
 
@@ -794,16 +841,17 @@ public class TemplateBuilderUtil {
             throws APIManagementException {
 
         String faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
-        gatewayAPIDTO
-                .setSequencesToBeRemove(
-                        GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
-        List<MediationPolicyDTO> mediationPolicies = apidto.getMediationPolicies();
-        GatewayContentDTO faultSequenceContent =
-                retrieveSequence(extractedPath, mediationPolicies, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
-                        api);
-        if (faultSequenceContent != null) {
-            gatewayAPIDTO.setSequenceToBeAdd(
-                    addGatewayContentToList(faultSequenceContent, gatewayAPIDTO.getSequenceToBeAdd()));
+        if (!APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+            gatewayAPIDTO.setSequencesToBeRemove(
+                    GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
+            List<MediationPolicyDTO> mediationPolicies = apidto.getMediationPolicies();
+            GatewayContentDTO faultSequenceContent =
+                    retrieveSequence(extractedPath, mediationPolicies, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
+                            api);
+            if (faultSequenceContent != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(faultSequenceContent, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
         }
         gatewayAPIDTO.setSequencesToBeRemove(
                 GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
@@ -940,6 +988,9 @@ public class TemplateBuilderUtil {
     public static ArrayList<String> getEndpointType(API api) {
 
         ArrayList<String> arrayList = new ArrayList<>();
+        if (api.isAdvertiseOnly()) {
+            api.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+        }
         if (APIUtil.isProductionEndpointsExists(api.getEndpointConfig()) &&
                 !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig())) {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
@@ -1174,6 +1225,108 @@ public class TemplateBuilderUtil {
         return null;
     }
 
+    private static GatewayContentDTO retrieveOperationPolicySequence(String pathToAchieve, API api, String flow)
+            throws APIManagementException {
+
+        GatewayContentDTO operationPolicySequenceContentDto = new GatewayContentDTO();
+
+        String policySequence = null;
+        String seqExt = APIUtil.getSequenceExtensionName(api) + SynapsePolicyAggregator.getSequenceExtensionFlow(flow);
+        try {
+            policySequence = SynapsePolicyAggregator.generatePolicySequenceForUriTemplateSet(api.getUriTemplates(),
+                    seqExt, flow, pathToAchieve);
+        } catch (IOException e) {
+            throw new APIManagementException(e);
+        }
+
+        if (StringUtils.isNotEmpty(policySequence)) {
+            try {
+                OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(policySequence.getBytes()));
+                if (omElement != null) {
+                    if (omElement.getAttribute(new QName("name")) != null) {
+                        omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
+                    }
+                    operationPolicySequenceContentDto.setName(seqExt);
+                    operationPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                    switch (flow) {
+                        case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+                            api.setInSequence(seqExt);
+                            break;
+                        case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+                            api.setOutSequence(seqExt);
+                            break;
+                        case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+                            api.setFaultSequence(seqExt);
+                            break;
+                    }
+                    return operationPolicySequenceContentDto;
+                }
+            } catch (Exception e) {
+                throw new APIManagementException(e);
+            }
+        }
+        return null;
+    }
+
+    private static GatewayContentDTO retrieveOperationPolicySequenceForProducts(APIProduct apiProduct, API api,
+                                                                                String extractedLocation, String flow)
+            throws APIManagementException {
+
+        Set<URITemplate> applicableURITemplates = new HashSet<>();
+        for (APIProductResource productResource : apiProduct.getProductResources()) {
+            if (productResource.getApiIdentifier().equals(api.getId())) {
+                applicableURITemplates.add(productResource.getUriTemplate());
+            }
+        }
+
+        String policySequence = null;
+        APIProductIdentifier apiProductIdentifier = apiProduct.getId();
+        String seqExt = APIUtil.getSequenceExtensionName(apiProductIdentifier.getName(),
+                apiProductIdentifier.getVersion())
+                .concat("--").concat(api.getUuid()).concat(SynapsePolicyAggregator.getSequenceExtensionFlow(flow));
+        try {
+            policySequence = SynapsePolicyAggregator.generatePolicySequenceForUriTemplateSet(applicableURITemplates,
+                    seqExt, flow, extractedLocation);
+        } catch (IOException e) {
+            throw new APIManagementException(e);
+        }
+
+        GatewayContentDTO operationPolicySequenceContentDto = new GatewayContentDTO();
+        if (StringUtils.isNotEmpty(policySequence)) {
+            try {
+                OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(policySequence.getBytes()));
+                if (omElement != null) {
+                    if (omElement.getAttribute(new QName("name")) != null) {
+                        omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
+                    }
+                    operationPolicySequenceContentDto.setName(seqExt);
+                    operationPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+
+                    for (APIProductResource productResource : apiProduct.getProductResources()) {
+                        if (productResource.getApiIdentifier().equals(api.getId())) {
+                            switch (flow) {
+                                case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+                                    productResource.setInSequenceName(seqExt);
+                                    break;
+                                case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+                                    productResource.setOutSequenceName(seqExt);
+                                    break;
+                                case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+                                    productResource.setFaultSequenceName(seqExt);
+                                    break;
+                            }
+                        }
+                    }
+
+                    return operationPolicySequenceContentDto;
+                }
+            } catch (Exception e) {
+                throw new APIManagementException(e);
+            }
+        }
+        return null;
+    }
+
     private static Map<String, APIDTO> retrieveAssociatedApis(String extractedPath) throws APIManagementException {
 
         Map<String, APIDTO> apidtoMap = new HashMap();
@@ -1312,9 +1465,10 @@ public class TemplateBuilderUtil {
     }
 
     public static JSONObject getModifiedProperties(JSONObject originalProperties) {
+
         JSONObject modifiedProperties = new JSONObject();
         if (originalProperties.size() > 0) {
-            for (Iterator iterator = originalProperties.keySet().iterator(); iterator.hasNext();) {
+            for (Iterator iterator = originalProperties.keySet().iterator(); iterator.hasNext(); ) {
                 String key = (String) iterator.next();
                 String val = (String) originalProperties.get(key);
                 if (key.endsWith("__display")) {

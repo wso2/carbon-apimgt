@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -74,7 +75,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -207,6 +207,8 @@ public class APIMappingUtil {
         if (dto.getAdvertiseInfo() != null) {
             AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
             model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
+            model.setApiExternalProductionEndpoint(advertiseInfoDTO.getApiExternalProductionEndpoint());
+            model.setApiExternalSandboxEndpoint(advertiseInfoDTO.getApiExternalSandboxEndpoint());
             model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
             model.setApiOwner(advertiseInfoDTO.getApiOwner());
             model.setAdvertiseOnlyAPIVendor(dto.getAdvertiseInfo().getVendor().value());
@@ -543,16 +545,10 @@ public class APIMappingUtil {
      * Converts a List object of APIs into a DTO.
      *
      * @param apiList List of APIs
-     * @param expand  defines whether APIListDTO should contain APIINFODTOs or APIDTOs
      * @return APIListDTO object containing APIDTOs
      */
-    public static Object fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
-
-        if (expand) {
-            return fromAPIListToExpandedDTO(apiList);
-        } else {
-            return fromAPIListToInfoDTO(apiList);
-        }
+    public static Object fromAPIListToDTO(List<API> apiList) throws APIManagementException {
+        return fromAPIListToInfoDTO(apiList);
     }
 
     /**
@@ -605,23 +601,6 @@ public class APIMappingUtil {
     }
 
     /**
-     * Converts a List object of APIs into a Expanded DTO List.
-     *
-     * @param apiList List of APIs
-     * @return APIListDTO object containing APIDTOs
-     */
-    public static APIListExpandedDTO fromAPIListToExpandedDTO(List<API> apiList) throws APIManagementException {
-
-        APIListExpandedDTO apiListDTO = new APIListExpandedDTO();
-        List<APIDTO> apiInfoDTOs = apiListDTO.getList();
-        for (API api : apiList) {
-            apiInfoDTOs.add(fromAPItoDTO(api));
-        }
-        apiListDTO.setCount(apiInfoDTOs.size());
-        return apiListDTO;
-    }
-
-    /**
      * Creates a minimal DTO representation of an API object.
      *
      * @param api API object
@@ -657,6 +636,7 @@ public class APIMappingUtil {
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
         }
+        apiInfoDTO.setAdvertiseOnly(api.isAdvertiseOnly());
         if (api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
@@ -789,11 +769,7 @@ public class APIMappingUtil {
 
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
-        if (apiListDTO instanceof APIListDTO) {
-            ((APIListDTO) apiListDTO).setPagination(paginationDTO);
-        } else if (apiListDTO instanceof APIListExpandedDTO) {
-            ((APIListExpandedDTO) apiListDTO).setPagination(paginationDTO);
-        }
+        ((APIListDTO) apiListDTO).setPagination(paginationDTO);
     }
 
     private static String checkAndSetVersionParam(String context) {
@@ -876,12 +852,14 @@ public class APIMappingUtil {
         return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider)
+            throws APIManagementException {
 
         return fromAPItoDTO(model, false, apiProvider);
     }
 
-    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials, APIProvider apiProviderParam)
+    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials,
+                                      APIProvider apiProviderParam)
             throws APIManagementException {
 
         APIProvider apiProvider;
@@ -914,6 +892,8 @@ public class APIMappingUtil {
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
+        advertiseInfoDTO.setApiExternalProductionEndpoint(model.getApiExternalProductionEndpoint());
+        advertiseInfoDTO.setApiExternalSandboxEndpoint(model.getApiExternalSandboxEndpoint());
         advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
         advertiseInfoDTO.setApiOwner(model.getApiOwner());
         if (model.getAdvertiseOnlyAPIVendor() != null) {
@@ -1083,7 +1063,8 @@ public class APIMappingUtil {
 
         boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
                 || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())
-                || APIDTO.TypeEnum.SSE.toString().equals(model.getType());
+                || APIDTO.TypeEnum.SSE.toString().equals(model.getType())
+                || APIDTO.TypeEnum.ASYNC.toString().equals(model.getType());
 
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
@@ -1101,6 +1082,11 @@ public class APIMappingUtil {
             //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
             //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
             apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+
+            //since the operation details goes missing after fetching operations list from the swagger definition, we
+            //have to set them back from the original API model.
+            setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
+
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1587,7 +1573,10 @@ public class APIMappingUtil {
                 template.setHttpVerbs(httpVerb.toUpperCase());
                 template.setAuthType(authType);
                 template.setAuthTypes(authType);
-
+                if (operation.getOperationPolicies() != null) {
+                    template.setOperationPolicies(OperationPolicyMappingUtil
+                            .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies()));
+                }
                 uriTemplates.add(template);
             } else {
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
@@ -2034,6 +2023,31 @@ public class APIMappingUtil {
     }
 
     /**
+     * Reads the operationPolicies from the API object passed in, and sets them back to the API Operations DTO
+     *
+     * @param api               API object
+     * @param apiOperationsDTO  List of API Operations DTO
+     */
+    private static void setOperationPoliciesToOperationsDTO(API api, List<APIOperationsDTO> apiOperationsDTO) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+        Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb();
+            uriTemplateMap.put(key, uriTemplate);
+        }
+
+        for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
+            String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
+            List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
+            if (!operationPolicies.isEmpty()) {
+                operationsDTO.setOperationPolicies(
+                        OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+            }
+        }
+    }
+
+    /**
      * Converts a URI template object to a REST API DTO.
      *
      * @param uriTemplate URI Template object
@@ -2058,6 +2072,8 @@ public class APIMappingUtil {
         operationsDTO.setTarget(uriTemplate.getUriTemplate());
         operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey).collect(
                 Collectors.toList()));
+        operationsDTO.setOperationPolicies(
+                OperationPolicyMappingUtil.fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
@@ -2489,8 +2505,11 @@ public class APIMappingUtil {
 
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getVerb());
+                template.setHttpVerbs(resourceItem.getVerb());
                 template.setResourceURI(resourceItem.getTarget());
                 template.setUriTemplate(resourceItem.getTarget());
+                template.setOperationPolicies(OperationPolicyMappingUtil
+                        .fromDTOToAPIOperationPoliciesList(resourceItem.getOperationPolicies()));
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());

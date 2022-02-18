@@ -18,13 +18,14 @@ package org.wso2.carbon.apimgt.impl.reportgen;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
+import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.reportgen.model.RowEntry;
 import org.wso2.carbon.apimgt.impl.reportgen.model.TableData;
@@ -68,15 +69,14 @@ public class ReportGenerator {
      * @param table object containing table headers and row data
      * @return InputStream pdf as a stream
      * @throws IOException
-     * @throws COSVisitorException
      */
-    public InputStream generateMGRequestSummeryPDF(TableData table) throws IOException, COSVisitorException {
+    public InputStream generateMGRequestSummeryPDF(TableData table) throws IOException {
 
         String[] columnHeaders = table.getColumnHeaders();
 
         PDDocument document = new PDDocument();
         PDPage page = new PDPage();
-        page.setMediaBox(PDPage.PAGE_SIZE_A4);
+        page.setMediaBox(PDRectangle.A4);
         page.setRotation(0);
         document.addPage(page);
 
@@ -84,7 +84,7 @@ public class ReportGenerator {
 
         // add logo
         InputStream in = APIManagerComponent.class.getResourceAsStream("/report/wso2-logo.jpg");
-        PDJpeg img = new PDJpeg(document, in);
+        PDImageXObject img = JPEGFactory.createFromStream(document, in);
         contentStream.drawImage(img, 375, 755);
 
         // Add topic
