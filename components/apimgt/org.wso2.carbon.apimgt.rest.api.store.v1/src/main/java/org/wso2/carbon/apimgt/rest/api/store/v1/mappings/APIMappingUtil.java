@@ -809,6 +809,7 @@ public class APIMappingUtil {
         String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
+        apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
 
         return apiInfoDTO;
     }

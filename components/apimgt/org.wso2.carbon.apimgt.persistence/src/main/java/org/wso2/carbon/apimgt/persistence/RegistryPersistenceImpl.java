@@ -1121,6 +1121,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
                 apiInfo.setSubscriptionAvailableOrgs(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+                apiInfo.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
                 devPortalAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1234,6 +1235,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                         artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
                                 apiInfo.setSubscriptionAvailableOrgs(artifact
                                         .getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+                                apiInfo.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
                                 devPortalAPIInfoList.add(apiInfo);
                             }
 

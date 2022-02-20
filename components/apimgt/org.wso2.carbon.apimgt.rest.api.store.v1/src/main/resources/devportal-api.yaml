@@ -3511,6 +3511,9 @@ components:
         monetizationLabel:
           type: string
           example: Free
+        gatewayVendor:
+          type: string
+          example: WSO2
     APIInfoList:
       title: API Info List
       type: object
