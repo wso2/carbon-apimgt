@@ -37,7 +37,7 @@ import org.wso2.carbon.context.CarbonContext;
 import java.util.Map;
 import java.util.Set;
 
-public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
+public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(ExternalGatewayNotifier.class);
 
@@ -56,15 +56,15 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
      * @param event related to deployments
      * @throws NotifierException if error occurs when casting event
      */
-    private void process (Event event) throws NotifierException {
+    private void process(Event event) throws NotifierException {
         DeployAPIInGatewayEvent deployAPIInGatewayEvent;
         deployAPIInGatewayEvent = (DeployAPIInGatewayEvent) event;
-
-        if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(event.getType())) {
-            deployApi(deployAPIInGatewayEvent);
-        } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())){
-            unDeployApi(deployAPIInGatewayEvent);
-        }
+        if (isExternalGatewayAvailableToDeployment(deployAPIInGatewayEvent))
+            if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(event.getType())) {
+                deployApi(deployAPIInGatewayEvent);
+            } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
+                unDeployApi(deployAPIInGatewayEvent);
+            }
     }
 
     /**
@@ -75,23 +75,23 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
      */
     private void deployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
 
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         boolean deployed;
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
 
         try {
+            Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
 
             for (String deploymentEnv : gateways) {
-                if (gatewayEnvironments.containsKey(deploymentEnv)) {
+                if (environments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (gatewayEnvironments.get(deploymentEnv).getProvider());
-                    if ( deployer!= null) {
+                            (environments.get(deploymentEnv).getProvider());
+                    if (deployer != null) {
                         try {
-                            deployed = deployer.deploy(api, gatewayEnvironments.get(deploymentEnv));
+                            deployed = deployer.deploy(api, environments.get(deploymentEnv));
                             if (!deployed) {
                                 throw new APIManagementException("Error while deploying API product to Solace broker");
                             }
@@ -114,24 +114,23 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
      */
     private void unDeployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
 
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         boolean deleted;
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
-
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
+            Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
+
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(deployAPIInGatewayEvent.getProvider());
             API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
 
             for (String deploymentEnv : gateways) {
-                if (gatewayEnvironments.containsKey(deploymentEnv)) {
+                if (environments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (gatewayEnvironments.get(deploymentEnv).getProvider());
+                            (environments.get(deploymentEnv).getProvider());
                     if (deployer != null) {
                         try {
                             deleted = deployer.undeploy(api.getId().getName(), api.getId().getVersion(),
-                                    api.getContext(), gatewayEnvironments.get(deploymentEnv));
+                                    api.getContext(), environments.get(deploymentEnv));
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
@@ -145,5 +144,22 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
             throw new NotifierException(e.getMessage());
         }
 
+    }
+
+    private boolean isExternalGatewayAvailableToDeployment(DeployAPIInGatewayEvent deployAPIInGatewayEvent)
+            throws NotifierException {
+        Set<String> gatewayLabels = deployAPIInGatewayEvent.getGatewayLabels();
+        try {
+            Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
+            for (String label : gatewayLabels) {
+                Environment environment = environments.get(label);
+                if (environment != null && !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (APIManagementException e) {
+            throw new NotifierException(e);
+        }
     }
 }
