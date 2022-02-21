@@ -1260,7 +1260,9 @@ public class ImportUtils {
                         "Error occurred while importing the API. Invalid Swagger definition found. "
                                 + validationResponse.getErrorItems(), ExceptionCodes.ERROR_READING_META_DATA);
             }
-            if (swaggerContent.contains("x-wso2-apictl-init")) {
+            JsonObject swaggerContentJson = new JsonParser().parse(swaggerContent).getAsJsonObject();
+            if (swaggerContentJson.has("info") && swaggerContentJson.getAsJsonObject("info").has("x-wso2-apictl-init")
+                    && swaggerContentJson.getAsJsonObject("info").get("x-wso2-apictl-init").getAsBoolean()) {
                 validationResponse.setInit(true);
             }
             return validationResponse;
