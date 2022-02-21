@@ -140,7 +140,7 @@ public class OperationPolicySpecAttributeDTO   {
   }
 
   /**
-   * Type of the attibute
+   * Default value for the attribute
    **/
   public OperationPolicySpecAttributeDTO defaultValue(String defaultValue) {
     this.defaultValue = defaultValue;
@@ -148,7 +148,7 @@ public class OperationPolicySpecAttributeDTO   {
   }
 
   
-  @ApiModelProperty(example = "string", value = "Type of the attibute")
+  @ApiModelProperty(example = "true", value = "Default value for the attribute")
   @JsonProperty("defaultValue")
   public String getDefaultValue() {
     return defaultValue;
@@ -158,6 +158,7 @@ public class OperationPolicySpecAttributeDTO   {
   }
 
   /**
+   * If the attribute type is enum, this array should contain all the possible values for the enum.
    **/
   public OperationPolicySpecAttributeDTO allowedValues(List<String> allowedValues) {
     this.allowedValues = allowedValues;
@@ -165,7 +166,7 @@ public class OperationPolicySpecAttributeDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "If the attribute type is enum, this array should contain all the possible values for the enum.")
   @JsonProperty("allowedValues")
   public List<String> getAllowedValues() {
     return allowedValues;
