@@ -40,6 +40,7 @@ public class APIInfoDTO   {
     private APIBusinessInformationDTO businessInformation = null;
     private Boolean isSubscriptionAvailable = null;
     private String monetizationLabel = null;
+    private String gatewayVendor = null;
 
   /**
    **/
@@ -318,6 +319,23 @@ public class APIInfoDTO   {
     this.monetizationLabel = monetizationLabel;
   }
 
+  /**
+   **/
+  public APIInfoDTO gatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "WSO2", value = "")
+  @JsonProperty("gatewayVendor")
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -343,12 +361,13 @@ public class APIInfoDTO   {
         Objects.equals(advertiseInfo, apIInfo.advertiseInfo) &&
         Objects.equals(businessInformation, apIInfo.businessInformation) &&
         Objects.equals(isSubscriptionAvailable, apIInfo.isSubscriptionAvailable) &&
-        Objects.equals(monetizationLabel, apIInfo.monetizationLabel);
+        Objects.equals(monetizationLabel, apIInfo.monetizationLabel) &&
+        Objects.equals(gatewayVendor, apIInfo.gatewayVendor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel);
+    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel, gatewayVendor);
   }
 
   @Override
@@ -372,6 +391,7 @@ public class APIInfoDTO   {
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
     sb.append("    monetizationLabel: ").append(toIndentedString(monetizationLabel)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("}");
     return sb.toString();
   }
