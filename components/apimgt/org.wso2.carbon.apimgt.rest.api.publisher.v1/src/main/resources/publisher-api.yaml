@@ -11812,6 +11812,15 @@ components:
           type: boolean
           description: Is this attibute mandetory for the policy
           example: true
+        defaultValue:
+          type: string
+          description: Type of the attibute
+          example: string
+        allowedValues:
+          type: array
+          items:
+            type: string
+            example: REST
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

@@ -76,7 +76,13 @@
           },
           "type": {
             "type": "string",
-            "minLength": 1
+            "enum": [
+              "String",
+              "Boolean",
+              "Integer",
+              "Enum",
+              "Map"
+            ]
           },
           "required": {
             "type": "boolean"

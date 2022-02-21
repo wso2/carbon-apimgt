@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -26,6 +28,8 @@ public class OperationPolicySpecAttributeDTO   {
     private String validationRegex = null;
     private String type = null;
     private Boolean required = null;
+    private String defaultValue = null;
+    private List<String> allowedValues = new ArrayList<String>();
 
   /**
    * Name of the attibute
@@ -135,6 +139,41 @@ public class OperationPolicySpecAttributeDTO   {
     this.required = required;
   }
 
+  /**
+   * Type of the attibute
+   **/
+  public OperationPolicySpecAttributeDTO defaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "string", value = "Type of the attibute")
+  @JsonProperty("defaultValue")
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+  }
+
+  /**
+   **/
+  public OperationPolicySpecAttributeDTO allowedValues(List<String> allowedValues) {
+    this.allowedValues = allowedValues;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("allowedValues")
+  public List<String> getAllowedValues() {
+    return allowedValues;
+  }
+  public void setAllowedValues(List<String> allowedValues) {
+    this.allowedValues = allowedValues;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -150,12 +189,14 @@ public class OperationPolicySpecAttributeDTO   {
         Objects.equals(description, operationPolicySpecAttribute.description) &&
         Objects.equals(validationRegex, operationPolicySpecAttribute.validationRegex) &&
         Objects.equals(type, operationPolicySpecAttribute.type) &&
-        Objects.equals(required, operationPolicySpecAttribute.required);
+        Objects.equals(required, operationPolicySpecAttribute.required) &&
+        Objects.equals(defaultValue, operationPolicySpecAttribute.defaultValue) &&
+        Objects.equals(allowedValues, operationPolicySpecAttribute.allowedValues);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, displayName, description, validationRegex, type, required);
+    return Objects.hash(name, displayName, description, validationRegex, type, required, defaultValue, allowedValues);
   }
 
   @Override
@@ -169,6 +210,8 @@ public class OperationPolicySpecAttributeDTO   {
     sb.append("    validationRegex: ").append(toIndentedString(validationRegex)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    required: ").append(toIndentedString(required)).append("\n");
+    sb.append("    defaultValue: ").append(toIndentedString(defaultValue)).append("\n");
+    sb.append("    allowedValues: ").append(toIndentedString(allowedValues)).append("\n");
     sb.append("}");
     return sb.toString();
   }
