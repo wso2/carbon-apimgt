@@ -1261,8 +1261,11 @@ public class ImportUtils {
                                 + validationResponse.getErrorItems(), ExceptionCodes.ERROR_READING_META_DATA);
             }
             JsonObject swaggerContentJson = new JsonParser().parse(swaggerContent).getAsJsonObject();
-            if (swaggerContentJson.has("info") && swaggerContentJson.getAsJsonObject("info").has("x-wso2-apictl-init")
-                    && swaggerContentJson.getAsJsonObject("info").get("x-wso2-apictl-init").getAsBoolean()) {
+            if (swaggerContentJson.has(APIConstants.SWAGGER_INFO)
+                    && swaggerContentJson.getAsJsonObject(APIConstants.SWAGGER_INFO)
+                    .has(ImportExportConstants.SWAGGER_X_WSO2_APICTL_INIT)
+                    && swaggerContentJson.getAsJsonObject(APIConstants.SWAGGER_INFO)
+                    .get(ImportExportConstants.SWAGGER_X_WSO2_APICTL_INIT).getAsBoolean()) {
                 validationResponse.setInit(true);
             }
             return validationResponse;

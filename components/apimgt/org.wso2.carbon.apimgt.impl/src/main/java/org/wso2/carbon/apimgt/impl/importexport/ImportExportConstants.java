@@ -298,5 +298,5 @@ public final class ImportExportConstants {
     public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
 
     public static final String POLICIES_DIRECTORY = "Policies";
-
+    public static final String SWAGGER_X_WSO2_APICTL_INIT = "x-wso2-apictl-init";
 }
