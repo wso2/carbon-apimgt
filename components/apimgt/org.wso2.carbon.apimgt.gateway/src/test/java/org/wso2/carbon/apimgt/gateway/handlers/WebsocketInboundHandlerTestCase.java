@@ -30,6 +30,7 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import org.apache.http.HttpHeaders;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -125,10 +126,12 @@ public class WebsocketInboundHandlerTestCase {
                 inboundMessageContext);
         String headerName = "test-header";
         String headerValue = "test-header-value";
+        String strWebSocket = "websocket";
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         FullHttpRequest fullHttpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
                 "ws://localhost:8080/graphql");
         fullHttpRequest.headers().set(headerName, headerValue);
+        fullHttpRequest.headers().set(HttpHeaders.UPGRADE, strWebSocket);
         Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
                 inboundMessageContext)).thenReturn(responseDTO);
         websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
@@ -147,6 +150,7 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
                 inboundMessageContext)).thenReturn(responseDTO);
         fullHttpRequest.headers().set(headerName, headerValue);
+        fullHttpRequest.headers().set(HttpHeaders.UPGRADE, strWebSocket);
         websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
         Assert.assertFalse(InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
                 .containsKey(channelIdString));  // Closing connection error has occurred
