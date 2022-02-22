@@ -2594,8 +2594,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate the API type
         if (!policySpecification.getSupportedApiTypes().contains(api.getType())) {
             if (log.isDebugEnabled()) {
-                log.debug("The policy " + policySpecification.getName()
-                        + " is not support in the " + appliedPolicy.getDirection() + " flow. Hence skipped.");
+                log.debug("The policy " + policySpecification.getName() + " cannot be used for the "
+                        + api.getType() + " API type.");
             }
             throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
                     + api.getType() + " API type.",
