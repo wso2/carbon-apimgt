@@ -3839,6 +3839,9 @@ public class SQLConstants {
                         " OP.ORGANIZATION = ? AND AOP.API_UUID = ? AND AOP.REVISION_UUID IS NULL " +
                         " AND AOP.CLONED_POLICY_UUID IS NULL";
 
+        public static final String GET_EXISTING_POLICY_USAGES_BY_POLICY_UUID =
+                "SELECT API_UUID FROM AM_API_OPERATION_POLICY WHERE POLICY_UUID = ? AND REVISION_UUID IS NULL ";
+
         public static final String DELETE_OPERATION_POLICY_BY_ID =
                 "DELETE FROM AM_OPERATION_POLICY WHERE POLICY_UUID = ?";
 
