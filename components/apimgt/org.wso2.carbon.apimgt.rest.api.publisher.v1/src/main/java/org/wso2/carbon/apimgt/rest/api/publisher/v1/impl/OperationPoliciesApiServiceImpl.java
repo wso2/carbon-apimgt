@@ -125,19 +125,14 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                         apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(), organization,
                                 false);
                 String policyID;
-                if (existingPolicy != null) {
-                    policyID = existingPolicy.getPolicyId();
-                    apiProvider.updateOperationPolicy(policyID, operationPolicyData, organization);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Existing common operation policy with name " + policySpecification.getName()
-                                + " has been updated");
-                    }
-                } else {
+                if (existingPolicy == null) {
                     policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
                     if (log.isDebugEnabled()) {
-                        log.debug(
-                                "A common operation policy has been added with name " + policySpecification.getName());
+                        log.debug("A common operation policy has been added with name "
+                                + policySpecification.getName());
                     }
+                } else {
+                    throw new APIManagementException("Existing common operation policy found for the same name.");
                 }
                 operationPolicyData.setPolicyId(policyID);
                 OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil

@@ -2385,19 +2385,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                         apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(), apiId,
                                 null, organization, false);
                 String policyID;
-                if (existingPolicy != null) {
-                    policyID = existingPolicy.getPolicyId();
-                    apiProvider.updateOperationPolicy(policyID, operationPolicyData, organization);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Existing API specific operation policy with ID " + policyID + " and name "
-                                + policySpecification.getName() + " has been updated for the API " + apiId);
-                    }
-                } else {
+                if (existingPolicy == null) {
                     policyID = apiProvider.addAPISpecificOperationPolicy(apiId, operationPolicyData, organization);
                     if (log.isDebugEnabled()) {
                         log.debug("An API specific operation policy has been added for the API " + apiId +
                                 " with id " + policyID);
                     }
+                } else {
+                    throw new APIManagementException("An API specific operation policy found for the same name.");
                 }
                 operationPolicyData.setPolicyId(policyID);
                 OperationPolicyDataDTO operationPolicyDataDTO = OperationPolicyMappingUtil
