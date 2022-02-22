@@ -162,6 +162,9 @@ public class OAuthClient {
             }
             if (jsonResponse.containsKey("expires_in")) {
                 tokenResponse.setExpiresIn(jsonResponse.get("expires_in").toString());
+                long currentTimeInSeconds = System.currentTimeMillis() / 1000;
+                long expiryTimeInSeconds = currentTimeInSeconds + Long.parseLong(tokenResponse.getExpiresIn());
+                tokenResponse.setValidTill(expiryTimeInSeconds);
             } else if (null != APIUtil.getMediationConfigurationFromAPIMConfig(
                     APIConstants.OAuthConstants.OAUTH_MEDIATION_CONFIG +
                             APIConstants.OAuthConstants.EXPIRES_IN_CONFIG)) {
