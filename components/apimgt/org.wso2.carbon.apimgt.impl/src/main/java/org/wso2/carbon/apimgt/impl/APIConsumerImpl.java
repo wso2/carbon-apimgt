@@ -5537,12 +5537,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     apiKey.setAdditionalProperties(
                             oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));
                 }
-
-                AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
-                if (tokenInfo != null) {
-                    apiKey.setAccessToken(tokenInfo.getAccessToken());
-                    apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
-                }
             }
         }
 
