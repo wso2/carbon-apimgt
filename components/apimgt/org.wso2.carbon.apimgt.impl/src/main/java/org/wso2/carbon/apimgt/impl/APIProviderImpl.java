@@ -2499,6 +2499,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             isOperationPoliciesAllowedForAPIType = false;
         }
 
+        Map<String, Integer> policyOccurrenceMap = new HashMap<>();
+
         for (URITemplate uriTemplate : uriTemplates) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
             List<OperationPolicy> validatedPolicies = new ArrayList<>();
@@ -2519,7 +2521,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     + " policy is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
                         }
                         OperationPolicySpecification policySpecification = policyData.getSpecification();
-                        if (validateAppliedPolicyWithSpecification(policySpecification, policy)) {
+                        if (validateAppliedPolicyWithSpecification(policySpecification, policy, api)) {
+                            String policyOccurrenceKey = uriTemplate.getUriTemplate() + "_" + policy.getDirection()
+                                    + "_" + policy.getPolicyName();
+                            int previousOccurrenceCount = 0;
+                            if (policyOccurrenceMap.get(policyOccurrenceKey) != null) {
+                                previousOccurrenceCount = policyOccurrenceMap.get(policyOccurrenceKey);
+                                if (previousOccurrenceCount > 0 && !policySpecification.isMultipleAllowed()) {
+                                    throw new APIManagementException("Policy multiple allowed property violated. "
+                                            + policySpecification.getDisplayName()
+                                            + " cannot be applied multiple times.",
+                                            ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+                                }
+                            }
+                            policyOccurrenceMap.put(policyOccurrenceKey, previousOccurrenceCount + 1);
                             validatedPolicies.add(policy);
                         }
                     } else {
@@ -2534,7 +2549,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         "A common policy is found for " + policyId + ". Validating the policy");
                             }
                             OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                            if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy)) {
+                            if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
+                                String policyOccurrenceKey = uriTemplate.getUriTemplate() + "_" + policy.getDirection()
+                                        + "_" + policy.getPolicyName();
+                                int previousOccurrenceCount = 0;
+                                if (policyOccurrenceMap.get(policyOccurrenceKey) != null) {
+                                    previousOccurrenceCount = policyOccurrenceMap.get(policyOccurrenceKey);
+                                    if (previousOccurrenceCount > 0 && !commonPolicySpec.isMultipleAllowed()) {
+                                        throw new APIManagementException("Policy multiple allowed property violated. "
+                                                + commonPolicySpec.getDisplayName() +
+                                                " cannot be applied multiple times.",
+                                                ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+                                    }
+                                }
+                                policyOccurrenceMap.put(policyOccurrenceKey, previousOccurrenceCount + 1);
                                 validatedPolicies.add(policy);
                             }
                         } else {
@@ -2549,7 +2577,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
-                                                           OperationPolicy appliedPolicy)
+                                                           OperationPolicy appliedPolicy, API api)
             throws APIManagementException {
 
         //Validate the policy applied direction
@@ -2563,24 +2591,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
         }
 
+        //Validate the API type
+        if (!policySpecification.getSupportedApiTypes().contains(api.getType())) {
+            if (log.isDebugEnabled()) {
+                log.debug("The policy " + policySpecification.getName() + " cannot be used for the "
+                        + api.getType() + " API type.");
+            }
+            throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
+                    + api.getType() + " API type.",
+                    ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+        }
+
         //Validate policy Attributes
         if (policySpecification.getPolicyAttributes() != null) {
             for (OperationPolicySpecAttribute attribute : policySpecification.getPolicyAttributes()) {
                 if (attribute.isRequired()) {
-                    Object policyAttribute = appliedPolicy.getParameters().get(attribute.getName());
-                    if (policyAttribute != null) {
-                        //TODO: Attribute Type validation is required
-                        //TODO: Do a API type, flow and gateway type validation
-                        //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
-                        //    log.error("Policy attribute type mismatched. Expected type is " +
-                        //            attribute.getAttributeType() +
-                        //            " but received " + policyAttribute.getClass().getName());
-                        //}
+                    Object appliedPolicyAttribute = appliedPolicy.getParameters().get(attribute.getName());
+                    if (appliedPolicyAttribute != null) {
+                        if (attribute.getValidationRegex() != null) {
+                            Pattern pattern = Pattern.compile(attribute.getValidationRegex(), Pattern.CASE_INSENSITIVE);
+                            Matcher matcher = pattern.matcher((String) appliedPolicyAttribute);
+                            if (!matcher.matches()) {
+                                throw new APIManagementException("Policy attribute " + attribute.getName()
+                                        + " regex validation error.",
+                                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
+                            }
+                        }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Required policy attribute " + attribute.getName()
-                                    + " is not found for the the policy " + policySpecification.getName()
-                                    + ". Hence skipped.");
+                                    + " is not found for the the policy " + policySpecification.getName());
                         }
                         throw new APIManagementException("Required policy attribute " + attribute.getName()
                                 + " is not found for the the policy " + policySpecification.getName()

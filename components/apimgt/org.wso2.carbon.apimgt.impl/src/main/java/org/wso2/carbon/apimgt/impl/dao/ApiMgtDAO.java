@@ -18222,7 +18222,14 @@ public class ApiMgtDAO {
     public void deleteOperationPolicyByPolicyId(String policyId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            deleteOperationPolicyByPolicyId(connection, policyId);
+            connection.setAutoCommit(false);
+            if (!getPolicyUsageByPolicyId(connection, policyId)) {
+                deleteOperationPolicyByPolicyId(connection, policyId);
+                connection.commit();
+            } else {
+                throw new APIManagementException("Cannot delete operation policy with id " + policyId
+                        + " as policy usages exists");
+            }
         } catch (SQLException e) {
             handleException("Failed to delete operation policy " + policyId, e);
         }
@@ -18235,6 +18242,22 @@ public class ApiMgtDAO {
         statement.setString(1, policyId);
         statement.execute();
         statement.close();
+    }
+
+    private boolean getPolicyUsageByPolicyId(Connection connection, String policyId) throws SQLException {
+
+        boolean result = false;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_EXISTING_POLICY_USAGES_BY_POLICY_UUID;
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, policyId);
+        ResultSet rs = statement.executeQuery();
+
+        if (rs.next()) {
+            result =  true;
+        }
+        rs.close();
+        statement.close();
+        return result;
     }
 
     /**
