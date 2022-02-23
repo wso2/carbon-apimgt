@@ -337,7 +337,11 @@ public class APIManagerConfiguration {
                     OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
                     String name = propertyElem.getAttributeValue(new QName("name"));
                     String value = propertyElem.getText();
-                    analyticsProps.put(name, value);
+                    if ("keystore_location".equals(name) || "truststore_location".equals(name)) {
+                        analyticsProps.put(name, APIUtil.replaceSystemProperty(value));
+                    } else {
+                        analyticsProps.put(name, value);
+                    }
                 }
                 OMElement authTokenElement = element.getFirstChildWithName(new QName("AuthToken"));
                 String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
