@@ -3046,10 +3046,11 @@ public class SQLConstants {
         public static final String DELETE_BLOCK_CONDITION_BY_UUID_SQL =
                 "DELETE FROM AM_BLOCK_CONDITIONS WHERE UUID=?";
         public static final String BLOCK_CONDITION_EXIST_SQL =
-                "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? AND TYPE =? " +
-                        "AND `VALUE` =?";
+                "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? "
+                        + "AND TYPE =? AND BLOCK_CONDITION =?";
         public static final String GET_SUBSCRIPTION_BLOCK_CONDITION_BY_VALUE_AND_DOMAIN_SQL =
-                "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE `VALUE` = ? AND DOMAIN = ? ";
+                "SELECT CONDITION_ID,TYPE,BLOCK_CONDITION,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE "
+                        + "BLOCK_CONDITION = ? AND DOMAIN = ? ";
 
         public static final String TIER_HAS_SUBSCRIPTION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
         		+ " where sub.TIER_ID = ? and api.API_PROVIDER like ? and sub.API_ID = api.API_ID ";
