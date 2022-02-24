@@ -1829,4 +1829,13 @@ public interface APIProvider extends APIManager {
      * @return List of environments related to the given tenant
      */
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
+
+    /**
+     * Get Operation Endpoint details by providing API UUID
+     *
+     * @param uuid      Unique Identifier of API
+     * @return List<Map<String, String>> Object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    List<Map<String, String>> getAllOpertationByUUID(String uuid) throws APIManagementException;
 }

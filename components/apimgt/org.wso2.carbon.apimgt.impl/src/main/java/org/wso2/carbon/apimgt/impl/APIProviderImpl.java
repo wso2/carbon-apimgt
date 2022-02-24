@@ -9380,4 +9380,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return env;
     }
+
+    @Override
+    public List<Map<String, String>> getAllOpertationByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getOperationEndpoints(uuid);
+    }
+
+
 }

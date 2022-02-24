@@ -3489,7 +3489,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-            - apim:api_manage 
+            - apim:api_manage
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
             - apim:api_mediation_policy_manage
@@ -8150,8 +8150,252 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
 
+
+    ######################################################
+  # The "API Collection" Endpoint APIs
+  ######################################################
+
+  /apis/{apiId}/operation-endpoints:
+    get:
+      tags:
+        - Operation Endpoints APIs
+      summary: Get All Available Operation Endpoints of an API
+      description: |
+        This operation can be used to get all the available resource endpoints of an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+
+      responses:
+        200:
+          description: |
+            OK.
+            Resource Endpoints list is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationEndpointList'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      operationId: getOperationEndpoints
+
+    post:
+      tags:
+        - Operation Endpoints APIs
+      summary: Add Operation Endpoint
+      description: |
+        This operation can be used to add a resource endpoint for an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        description: Resource Endpoint Object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationEndpoint'
+        required: true
+
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created Resource Endpoint object in the body.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the changed API. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the API lifecycle has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationEndpoint'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+      security:
+        - OAuth2Security:
+            - apim:api_manage
+            - apim:api_import_export
+
+      operationId: addOperationEndpoint
+
+  /apis/{apiId}/operation-endpoints/{endpointId}:
+    get:
+      tags:
+        - Operation Endpoints APIs
+      summary: Get Operation Endpoint
+      description: |
+        This operation can be used to get all the available resource endpoints of an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+
+      responses:
+        200:
+          description: |
+            OK.
+            Resource Endpoint object is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationEndpoint'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      operationId: getOperationEndpoint
+
+    put:
+      tags:
+        - Operation Endpoints APIs
+      summary: Update Operation Endpoint
+      description: |
+        This operation can be used to update a resource endpoint.
+      operationId: updateOperationEndpoint
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      requestBody:
+        description: Resource Endpoint object with updated details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationEndpoint'
+      responses:
+        200:
+          description: |
+            OK.
+            Updated Resource Endpoints is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationEndpoint'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+
+    delete:
+      tags:
+        - Operation Endpoints APIs
+      summary: Delete Operation Endpoint
+      description: |
+        This operation can be used to delete a resource endpoint.
+      operationId: deleteOperationEndpoint
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      responses:
+        200:
+          description: |
+            OK.
+            Updated Resource Endpoints is returned.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+
 components:
   schemas:
+    OperationEndpoint:
+      title: Operation Endpoints
+      required:
+        - name
+        - endpointType
+        - url
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        securityConfig:
+          type: object
+          $ref: '#/components/schemas/EndpointSecurity'
+        endpointConfig:
+          type: object
+          $ref: '#/components/schemas/EndpointConfig'
+
+    OperationEndpointList:
+      title: Operation Endpoints List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Resource Endpoints returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationEndpoint'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    EndpointSecurity:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          example: false
+        type:
+          type: string
+          example: basic
+        username:
+          type: string
+          example: user_name
+        password:
+          type: string
+          example: Test_1User
+
     Comment:
       title: Comment
       required:
@@ -10565,7 +10809,10 @@ components:
         payloadSchema:
           type: string
           example: ""
-        uriMapping:
+        sandBoxEndpointId:
+          type: string
+          example: ""
+        productionEndpointId:
           type: string
           example: ""
     ScopeList:

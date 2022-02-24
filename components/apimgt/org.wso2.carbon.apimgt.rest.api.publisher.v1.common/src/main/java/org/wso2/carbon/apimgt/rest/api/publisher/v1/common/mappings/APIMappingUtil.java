@@ -66,56 +66,9 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO.AudienceEnum;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
@@ -3051,5 +3004,24 @@ public class APIMappingUtil {
     private static Date parseStringToDate(String time) throws java.text.ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.parse(time);
+    }
+
+    public static OperationEndpointListDTO fromOperationListToDTO(List<Map<String, String>> operationEndpoints)
+            throws JsonProcessingException {
+        OperationEndpointListDTO operationEndpointListDTO = new OperationEndpointListDTO();
+        List<OperationEndpointDTO> operationEndpointDTOS = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (Map<String, String> operationEndpoint :
+             operationEndpoints) {
+            OperationEndpointDTO operationEndpointDTO = new OperationEndpointDTO();
+            operationEndpointDTO.setId(operationEndpoint.get("operationEndpointUuid"));
+            operationEndpointDTO.setName(operationEndpoint.get("operationEndpointName"));
+            EndpointConfigDTO endpointConfigDTO = mapper.readValue(operationEndpoint.get("operationEndpointConfig"),
+                    EndpointConfigDTO.class);
+            operationEndpointDTOS.add(operationEndpointDTO);
+        }
+        operationEndpointListDTO.setCount(operationEndpointDTOS.size());
+        operationEndpointListDTO.setList(operationEndpointDTOS);
+        return operationEndpointListDTO;
     }
 }

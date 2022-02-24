@@ -453,6 +453,10 @@
             <groupId>com.damnhandy.wso2</groupId>
             <artifactId>handy-uri-templates</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

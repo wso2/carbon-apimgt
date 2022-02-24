@@ -44,6 +44,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
@@ -70,6 +72,7 @@ public interface ApisApiService {
       public Response addAPIMediationPolicy(String apiId, String type, String ifMatch, InputStream mediationPolicyFileInputStream, Attachment mediationPolicyFileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response addAPIMonetization(String apiId, APIMonetizationInfoDTO apIMonetizationInfoDTO, MessageContext messageContext) throws APIManagementException;
       public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext messageContext) throws APIManagementException;
+      public Response addOperationEndpoint(String apiId, OperationEndpointDTO operationEndpointDTO, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAsyncapiGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiId, String envId, MessageContext messageContext) throws APIManagementException;
@@ -85,6 +88,7 @@ public interface ApisApiService {
       public Response deleteAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response deleteOperationEndpoint(String apiId, String endpointId, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, MessageContext messageContext) throws APIManagementException;
@@ -123,6 +127,8 @@ public interface ApisApiService {
       public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response getOperationEndpoint(String apiId, String endpointId, MessageContext messageContext) throws APIManagementException;
+      public Response getOperationEndpoints(String apiId, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLInfoOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -146,6 +152,7 @@ public interface ApisApiService {
       public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateGraphQLPolicyComplexityOfAPI(String apiId, GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO, MessageContext messageContext) throws APIManagementException;
+      public Response updateOperationEndpoint(String apiId, String endpointId, OperationEndpointDTO operationEndpointDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateTopics(String apiId, TopicListDTO topicListDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException;
       public Response validateAPI(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

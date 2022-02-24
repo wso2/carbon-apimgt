@@ -490,7 +490,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
-            " not allowed for user %s ", false);
+            " not allowed for user %s ", false),
+    ERROR_FETCHING_OPERATION_ENDPOINTS_API(902003, "Cannot find informations of operation endpoints", 400,
+            "Cannot find informations of operation endpoints."),;
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

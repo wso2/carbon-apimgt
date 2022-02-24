@@ -27,6 +27,7 @@ import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
 import com.amazonaws.services.lambda.model.ListFunctionsResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -137,45 +138,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStor
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -362,6 +325,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
         }
+        return null;
+    }
+
+    @Override
+    public Response addOperationEndpoint(String apiId, OperationEndpointDTO operationEndpointDTO, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
@@ -558,6 +526,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response deleteOperationEndpoint(String apiId, String endpointId, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
     /**
      * Get complexity details of a given API
      *
@@ -646,6 +619,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
+        return null;
+    }
+
+    @Override
+    public Response updateOperationEndpoint(String apiId, String endpointId, OperationEndpointDTO operationEndpointDTO, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
@@ -908,6 +886,40 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String msg = "Error while retrieving types and fields of the schema of API " + apiId;
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Response getOperationEndpoint(String apiId, String endpointId, MessageContext messageContext)
+            throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response getOperationEndpoints(String apiId, Integer limit, Integer offset, MessageContext messageContext)
+            throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            //validate if api exists
+            validateAPIExistence(apiId);
+            //get all operation endpoints
+            OperationEndpointListDTO operationEndpointListDTO =
+                    PublisherCommonUtils.getOperationEndpoints(apiId, apiProvider);
+            return Response.ok().entity(operationEndpointListDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving resource paths of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving operation endpoints of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while retrieving operation endpoints of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

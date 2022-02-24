@@ -32,6 +32,8 @@ public class APIOperationsDTO   {
     private String amznResourceName = null;
     private Integer amznResourceTimeout = null;
     private String payloadSchema = null;
+    private String sandBoxEndpointId = null;
+    private String productionEndpointId = null;
     private String uriMapping = null;
 
   /**
@@ -202,6 +204,40 @@ public class APIOperationsDTO   {
   }
   public void setPayloadSchema(String payloadSchema) {
     this.payloadSchema = payloadSchema;
+  }
+
+  /**
+   **/
+  public APIOperationsDTO productionEndpointId(String productionEndpointId) {
+    this.productionEndpointId = productionEndpointId;
+    return this;
+  }
+
+  @ApiModelProperty(value = "")
+  @JsonProperty("productionEndpointId")
+  public String getProductionEndpointId() {
+    return productionEndpointId;
+  }
+
+  public void setProductionEndpointId(String productionEndpointId) {
+    this.productionEndpointId = productionEndpointId;
+  }
+
+  /**
+   **/
+  public APIOperationsDTO sandBoxEndpointId(String sandBoxEndpointId) {
+    this.sandBoxEndpointId = sandBoxEndpointId;
+    return this;
+  }
+
+  public void setSandBoxEndpointId(String sandBoxEndpointId) {
+    this.sandBoxEndpointId = sandBoxEndpointId;
+  }
+
+  @ApiModelProperty(value = "")
+  @JsonProperty("sandBoxEndpointId")
+  public String getSandBoxEndpointId() {
+    return sandBoxEndpointId;
   }
 
   /**

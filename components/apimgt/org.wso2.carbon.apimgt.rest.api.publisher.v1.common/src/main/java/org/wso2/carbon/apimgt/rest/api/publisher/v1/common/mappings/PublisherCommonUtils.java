@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -78,16 +79,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -1883,4 +1875,24 @@ public class PublisherCommonUtils {
             return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
         }
     }
+
+    /**
+     * Get All operation Endpoints of an API
+     *
+     * @param uuid   Unique identifier of API
+     * @param apiProvider
+     * @return OperationEndpointListDTO object
+     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     */
+    public static OperationEndpointListDTO getOperationEndpoints(String uuid, APIProvider apiProvider) throws APIManagementException, JsonProcessingException {
+        List<Map<String,String>> operationEndpointsList = apiProvider.getAllOpertationByUUID(uuid);
+        if (operationEndpointsList == null) {
+            throw new APIManagementException("Error occurred while getting operation Endpoints of API " + uuid,
+                    ExceptionCodes.ERROR_FETCHING_OPERATION_ENDPOINTS_API);
+        } else {
+            return APIMappingUtil.fromOperationListToDTO(operationEndpointsList);
+        }
+
+    }
+
 }

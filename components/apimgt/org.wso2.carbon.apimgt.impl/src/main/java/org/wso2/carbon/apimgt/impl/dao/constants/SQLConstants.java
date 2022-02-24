@@ -3632,6 +3632,8 @@ public class SQLConstants {
 
     }
 
+
+
     /**
      * Static class to hold database queries related to AM_SYSTEM_CONFIGS table
      */
@@ -3642,6 +3644,24 @@ public class SQLConstants {
                 + "WHERE ORGANIZATION = ? AND CONFIG_TYPE = ?";
         public static final String UPDATE_SYSTEM_CONFIG_SQL = "UPDATE AM_SYSTEM_CONFIGS "
                 + "SET CONFIGURATION = ? WHERE ORGANIZATION = ? AND CONFIG_TYPE = ?";
+    }
+
+    /**
+     * Static class to hold database querie relation to AM_OPERATION_ENDPOINTS
+     */
+    public static class OperationEndpointsSQLConstants{
+        public static final String GET_ALL_OPERATION_ENDPOINTS_BY_API_UUID =
+                " SELECT " +
+                        "   AMOE.OPERATION_ENDPOINT_UUID ," +
+                        "   AMOE.REVISION_UUID" +
+                        "   AMOE.ENDPOINT_NAME" +
+                        "   AMOE.SECURITY_CONFIG" +
+                        "   AMOE.ENDPOINT_CONFIG" +
+                        "   AMOE.ORGANIZATION" +
+                        " FROM " +
+                        "   AM_API_OPERATION_ENDPOINTS  AMOE" +
+                        " WHERE " +
+                        "   AMOE.API_ID = ? ";
     }
 
 }

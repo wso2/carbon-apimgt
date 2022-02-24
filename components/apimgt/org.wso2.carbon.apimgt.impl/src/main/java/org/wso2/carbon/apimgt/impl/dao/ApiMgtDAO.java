@@ -100,12 +100,7 @@ import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -9948,7 +9943,6 @@ public class ApiMgtDAO {
      * Check whether the given scope key is already assigned locally to another API which are different from the given
      * API or its versioned APIs under given tenant.
      *
-     * @param uuid API uuid
      * @param scopeKey      candidate scope key
      * @param tenantId      tenant id
      * @param organization identifier of the organization
@@ -17567,6 +17561,57 @@ public class ApiMgtDAO {
         return subscribedAPIs;
 
     }
+
+    /**
+     * Get Operation Endpoint details by providing API UUID
+     *
+     * @param uuid      Unique Identifier of API
+     *
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public List<Map<String,String>> getOperationEndpoints(String uuid) throws APIManagementException{
+
+        List<Map<String,String>> operationEndpoints = null;
+        String sql = SQLConstants.OperationEndpointsSQLConstants.GET_ALL_OPERATION_ENDPOINTS_BY_API_UUID;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(true);
+            int apiId = getAPIID(uuid, conn);
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1,apiId);
+            rs = ps.executeQuery();
+
+            if(rs != null){
+                operationEndpoints = new ArrayList<>();
+                while (rs.next()) {
+                    Map<String, String> operationEndpoint = new HashMap<>();
+                    operationEndpoint.put("operationEndpointUuid", rs.getString("OPERATION_ENDPOINT_UUID"));
+                    operationEndpoint.put("operationRevisionUuid", rs.getString("REVISION_UUID"));
+                    operationEndpoint.put("operationEndpointName", rs.getString("ENDPOINT_NAME"));
+                    operationEndpoint.put("operationSecurityConfig", rs.getBlob("SECURITY_CONFIG").toString());
+                    operationEndpoint.put("operationEndpointConfig", rs.getBlob("ENDPOINT_CONFIG").toString());
+                    operationEndpoint.put("operationEndpointOrganization", rs.getString("ORGANIZATION"));
+                    operationEndpoints.add(operationEndpoint);
+                }
+                log.info(operationEndpoints);
+            }
+            return operationEndpoints;
+        } catch (SQLException e) {
+            log.error("Error occurred while fetching data: " + e.getMessage(), e);
+        } finally {
+            try {
+                conn.setAutoCommit(false);
+            } catch (SQLException e) {
+                log.error("Error occurred while fetching data: " + e.getMessage(), e);
+            }
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return null;
+    }
+
 
     private class SubscriptionInfo {
 
