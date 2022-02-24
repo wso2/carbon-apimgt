@@ -553,6 +553,7 @@ public class GatewayUtils {
         authContext.setApiKey(jti);
         authContext.setUsername(getEndUserFromJWTValidationInfo(jwtValidationInfo, apiKeyValidationInfoDTO));
         authContext.setRequestTokenScopes(jwtValidationInfo.getScopes());
+        authContext.setAccessToken(jwtValidationInfo.getRawPayload());
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());

@@ -53,6 +53,7 @@ public class AuthenticationContext {
     private List<String> requestTokenScopes;
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
+    private String accessToken;
 
     public List<String> getRequestTokenScopes() {
         return requestTokenScopes;
@@ -279,5 +280,15 @@ public class AuthenticationContext {
 
     public void setGraphQLMaxComplexity(int graphQLMaxComplexity) {
         this.graphQLMaxComplexity = graphQLMaxComplexity;
+    }
+
+    public String getAccessToken() {
+
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+
+        this.accessToken = accessToken;
     }
 }
