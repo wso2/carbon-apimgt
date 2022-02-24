@@ -34,6 +34,8 @@ import java.util.Map;
 public class APILogHandler {
     private static final Log log = LogFactory.getLog(APILogHandler.class);
     private static final Log logger = LogFactory.getLog(APIConstants.API_LOGGER);
+    private static final String API_TO = "API_TO";
+    private static final String SEPARATOR = "/";
 
     private APILogHandler() {
         throw new IllegalStateException("Utility class");
@@ -45,17 +47,35 @@ public class APILogHandler {
      * @param flow           Direction of the call (ex:- client to gateway = requestIn)
      * @param messageContext MessageContext of the request
      */
-    public static synchronized void logAPI(String flow, MessageContext messageContext) {
+    public static void logAPI(String flow, MessageContext messageContext) {
+        String apiContext = null;
+        String apiVersion = null;
+        String resourceName = null;
+
         // Get the log level and exit if the log level is OFF
         String logLevel = (String) messageContext.getProperty(APIConstants.LOG_LEVEL);
         if (APIConstants.LOG_LEVEL_OFF.equals(logLevel)) {
             return;
         }
 
-        // Get the API name
-        String apiName = ((String) messageContext.getProperty("API_TO")).split("/")[0];
+        // Get API related details
+        if (messageContext.getProperty(API_TO) != null) {
+            String[] apiTo = ((String) messageContext.getProperty(API_TO)).split(SEPARATOR);
+            if (apiTo.length >= 3) {
+                resourceName = SEPARATOR + apiTo[apiTo.length - 1];
+                apiVersion = apiTo[apiTo.length - 2];
+                if (apiTo.length == 5) {
+                    apiContext = apiTo[apiTo.length - 5] + SEPARATOR + apiTo[apiTo.length - 4] + SEPARATOR
+                            + apiTo[apiTo.length - 3];
+                } else {
+                    apiContext = apiTo[apiTo.length - 3];
+                }
+            }
+        }
+
+        // Print debug log
         if (log.isDebugEnabled()) {
-            log.debug("Initiating logging request for API " + apiName + " with log level " + logLevel);
+            log.debug("Initiating logging request for API " + apiContext + " with log level " + logLevel);
         }
 
         // Add properties to the logMessage according to the log level
@@ -75,7 +95,9 @@ public class APILogHandler {
         }
 
         // Adding custom properties to ThreadContext
-        ThreadContext.put("apiName", apiName);
+        ThreadContext.put("apiContext", apiContext);
+        ThreadContext.put("apiVersion", apiVersion);
+        ThreadContext.put("resourceName", resourceName);
         ThreadContext.put("tenantDomain", (String) messageContext.getProperty("tenant.info.domain"));
         ThreadContext.put("logCorrelationId", ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getLogCorrelationID());
@@ -89,7 +111,7 @@ public class APILogHandler {
     }
 
     private static void addBasicProperties(JSONObject logMessage, MessageContext messageContext, String flow) {
-        logMessage.put("apiTo", messageContext.getProperty("API_TO"));
+        logMessage.put("apiTo", messageContext.getProperty(API_TO));
         logMessage.put("correlationId", messageContext.getProperty("correlation_id"));
         logMessage.put("flow", flow);
         String verb = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
