@@ -49,6 +49,14 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
         }
     }
 
+    public WebsocketHandler(WebsocketInboundHandler websocketInboundHandler,
+            WebsocketOutboundHandler websocketOutboundHandler) {
+        super(websocketInboundHandler, websocketOutboundHandler);
+        if (APIUtil.isAnalyticsEnabled()) {
+            metricsHandler = new WebSocketAnalyticsMetricsHandler();
+        }
+    }
+
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
