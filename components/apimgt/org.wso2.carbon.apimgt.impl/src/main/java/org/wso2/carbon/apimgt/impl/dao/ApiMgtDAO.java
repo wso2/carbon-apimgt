@@ -18253,7 +18253,7 @@ public class ApiMgtDAO {
         ResultSet rs = statement.executeQuery();
 
         if (rs.next()) {
-            result =  true;
+            result = rs.getInt("POLICY_COUNT") != 0;
         }
         rs.close();
         statement.close();
