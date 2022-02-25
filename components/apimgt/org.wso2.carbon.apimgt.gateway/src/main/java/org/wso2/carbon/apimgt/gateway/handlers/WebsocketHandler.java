@@ -43,10 +43,7 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
     private WebSocketAnalyticsMetricsHandler metricsHandler;
 
     public WebsocketHandler() {
-        super(new WebsocketInboundHandler(), new WebsocketOutboundHandler());
-        if (APIUtil.isAnalyticsEnabled()) {
-            metricsHandler = new WebSocketAnalyticsMetricsHandler();
-        }
+        this(new WebsocketInboundHandler(), new WebsocketOutboundHandler());
     }
 
     public WebsocketHandler(WebsocketInboundHandler websocketInboundHandler,
