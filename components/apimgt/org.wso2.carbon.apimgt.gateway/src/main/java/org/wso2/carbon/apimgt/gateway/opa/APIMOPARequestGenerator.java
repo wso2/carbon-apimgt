@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.opa;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -38,16 +39,16 @@ public class APIMOPARequestGenerator implements OPARequestGenerator {
 
     public static final String HTTP_METHOD_STRING = "HTTP_METHOD";
     public static final String API_BASEPATH_STRING = "TransportInURL";
-    public static final String API_NAME_STRING = "API_NAME";
-    public static final String API_VERSION_STRING = "SYNAPSE_REST_API_VERSION";
+    public static final String ELECTED_RESOURCE_STRING = "API_ELECTED_RESOURCE";
 
     @Override
-    public String generateRequest(String policyName, String rule, Map<String, Object> advancedProperties,
+    public String generateRequest(String policyName, String rule, Map<String, Object> additionalParameters,
                                   MessageContext messageContext)
             throws OPASecurityException {
 
         JSONObject inputObject = new JSONObject();
         JSONObject opaPayload = new JSONObject();
+        JSONObject apiContext = new JSONObject();
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
@@ -57,40 +58,61 @@ public class APIMOPARequestGenerator implements OPARequestGenerator {
         String requestOriginIP = OPAUtils.getRequestIp(axis2MessageContext);
         String requestMethod = (String) axis2MessageContext.getProperty(HTTP_METHOD_STRING);
         String requestPath = (String) axis2MessageContext.getProperty(API_BASEPATH_STRING);
-        String apiName = (String) messageContext.getProperty(API_NAME_STRING);
-        String apiVersion = (String) messageContext.getProperty(API_VERSION_STRING);
-        String subscriberOrganization = "";
+        String electedResource = (String) axis2MessageContext.getProperty(ELECTED_RESOURCE_STRING);
 
         AuthenticationContext authContext = (AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT");
         if (authContext != null) {
-            apiName = authContext.getApiName();
-            apiVersion = authContext.getApiVersion();
-            subscriberOrganization = authContext.getSubscriberTenantDomain();
-            transportHeadersMap.computeIfAbsent("Authorization", k -> "Bearer " + authContext.getAccessToken());
+            apiContext.put("apiName", authContext.getApiName());
+            apiContext.put("apiVersion", authContext.getApiVersion());
+            apiContext.put("subscriberOrganization", authContext.getSubscriberTenantDomain());
+            apiContext.put("isAuthenticated", authContext.isAuthenticated());
+            apiContext.put("issuer", authContext.getIssuer());
+            apiContext.put("apiPublisher", authContext.getApiPublisher());
+            apiContext.put("keyType", authContext.getKeyType());
+            apiContext.put("subscriber", authContext.getSubscriber());
+            apiContext.put("consumerKey", authContext.getConsumerKey());
+            apiContext.put("applicationUUID", authContext.getApplicationUUID());
+            apiContext.put("applicationName", authContext.getApplicationName());
+            apiContext.put("username", authContext.getUsername());
+
+            if (additionalParameters.get("sendAccessToken") != null) {
+                if (JavaUtils.isTrueExplicitly(additionalParameters.get("sendAccessToken"))) {
+                    apiContext.put("accessToken", authContext.getAccessToken());
+                }
+            }
+
+            opaPayload.put("apiContext", apiContext);
         }
 
-        opaPayload.put("apiName", apiName);
-        opaPayload.put("apiVersion", apiVersion);
-        opaPayload.put("subscriberOrganization", subscriberOrganization);
-        opaPayload.put("requestBody", messageContext.getMessageString());
         opaPayload.put("requestOrigin", requestOriginIP);
         opaPayload.put("method", requestMethod);
         opaPayload.put("path", requestPath);
+        opaPayload.put("electedResource", electedResource);
         opaPayload.put("transportHeaders", new JSONObject(transportHeadersMap));
+
+        if (additionalParameters.get("additionalMCProperties") != null) {
+            String additionalMCPropertiesString = (String) additionalParameters.get("additionalMCProperties");
+            String[] additionalMCProperties = additionalMCPropertiesString.split(",");
+            for (String mcProperty : additionalMCProperties) {
+                if (messageContext.getProperty(mcProperty) != null) {
+                    opaPayload.put(mcProperty, messageContext.getProperty(mcProperty));
+                }
+            }
+        }
+
         inputObject.put("input", opaPayload);
         return inputObject.toString();
     }
 
     @Override
-    public boolean handleResponse(String policyName, String rule, String opaResponse, MessageContext messageContext)
+    public boolean handleResponse(String policyName, String rule, String opaResponse,
+                                  Map<String, Object> additionalParameters, MessageContext messageContext)
             throws OPASecurityException {
 
         if (opaResponse.equals("{}")) {
-            if (log.isDebugEnabled()) {
-                log.debug("Empty result received for the rule " + rule + " of policy " + policyName);
-            }
-            throw new OPASecurityException(OPASecurityException.OPA_RESPONSE_ERROR,
-                    "Empty result received for the OPA policy rule");
+            log.error("Empty result received for the OPA policy " + policyName + " for rule " + rule);
+            throw new OPASecurityException(OPASecurityException.INTERNAL_ERROR,
+                    "Empty result received for the OPA policy " + policyName + " for rule " + rule);
         } else {
             try {
                 org.json.JSONObject responseObject = new org.json.JSONObject(opaResponse);
@@ -103,8 +125,8 @@ public class APIMOPARequestGenerator implements OPARequestGenerator {
                 }
             } catch (JSONException e) {
                 log.error("Error parsing OPA JSON response, the field \"result\" not found or not a Boolean", e);
-                throw new OPASecurityException(OPASecurityException.OPA_RESPONSE_ERROR,
-                        OPASecurityException.OPA_RESPONSE_ERROR_MESSAGE, e);
+                throw new OPASecurityException(OPASecurityException.INTERNAL_ERROR,
+                        OPASecurityException.INTERNAL_ERROR_MESSAGE, e);
             }
         }
     }
