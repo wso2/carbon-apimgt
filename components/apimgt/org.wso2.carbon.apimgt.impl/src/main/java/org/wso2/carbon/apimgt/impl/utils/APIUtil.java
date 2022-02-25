@@ -450,6 +450,12 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
             eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            eventPublishers.putIfAbsent(EventPublisherType.BLOCKING_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.BLOCKING_EVENT));
+            eventPublishers.putIfAbsent(EventPublisherType.KEY_TEMPLATE,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.KEY_TEMPLATE));
+            eventPublishers.putIfAbsent(EventPublisherType.KEYMGT_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);
@@ -10637,24 +10643,6 @@ public final class APIUtil {
             tenantFlowStarted = true;
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
                     .publish(eventName, dynamicProperties, event);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
-    }
-
-    public static void publishEventToTrafficManager(Map dynamicProperties, Event event) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish(APIConstants.BLOCKING_EVENT_PUBLISHER, dynamicProperties, event);
         } finally {
             if (tenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
