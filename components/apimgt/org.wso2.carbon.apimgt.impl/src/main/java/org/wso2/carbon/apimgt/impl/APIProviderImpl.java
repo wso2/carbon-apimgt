@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
@@ -1382,6 +1383,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         validateResourceThrottlingTiers(api, tenantDomain);
 
+        migrateMediationPoliciesOfAPI(api, tenantDomain);
         //Validate Operation Policies
         validateOperationPolicyParameters(api, tenantDomain);
 
@@ -1400,7 +1402,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
         apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
-        loadMediationPoliciesToAPI(api, tenantDomain);
         try {
             api.setCreatedTime(existingAPI.getCreatedTime());
             apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
@@ -2054,6 +2055,289 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * This method is used to visualize migrated APIs that has mediation policies attached. A dummy policy is added
+     * to all the operations with the mediator's name as the policy name. Here policy Id is not set.
+     *
+     * @param api      API
+     */
+    private void loadMediationPoliciesAsOperationPoliciesToAPI(API api) {
+        // This method is used to handle the migration
+        OperationPolicy inFlowPolicy = null;
+        OperationPolicy outFlowPolicy = null;
+        OperationPolicy faultFlowPolicy = null;
+        // get all policies
+        if (APIUtil.isSequenceDefined(api.getInSequence())) {
+            inFlowPolicy = new OperationPolicy();
+            inFlowPolicy.setPolicyName(api.getInSequence());
+            inFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+            inFlowPolicy.setOrder(1);
+        }
+        if (APIUtil.isSequenceDefined(api.getOutSequence())) {
+            outFlowPolicy = new OperationPolicy();
+            outFlowPolicy.setPolicyName(api.getOutSequence());
+            outFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+            outFlowPolicy.setOrder(1);
+        }
+        if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
+            faultFlowPolicy = new OperationPolicy();
+            faultFlowPolicy.setPolicyName(api.getFaultSequence());
+            faultFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+            faultFlowPolicy.setOrder(1);
+        }
+        updateMigratedPolicyInOperations(api, inFlowPolicy, outFlowPolicy, faultFlowPolicy);
+    }
+
+    /**
+     * This method is used to migrate mediation policies of already migrated APIs. If a mediation policies are found
+     * for three sequences, they will be imported as an API specific policy and that policy Id will be used.
+     *
+     * @param api      API
+     * @param organization Organization Name
+     * @throws APIManagementException
+     */
+    private void migrateMediationPoliciesOfAPI(API api, String organization) throws APIManagementException {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
+                || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+            Organization org = new Organization(organization);
+            String apiUUID = api.getUuid();
+            OperationPolicy inFlowPolicy = null;
+            OperationPolicy outFlowPolicy = null;
+            OperationPolicy faultFlowPolicy = null;
+            // get all policies
+            try {
+                List<MediationInfo> localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
+                List<Mediation> globalPolicies = null;
+                if (APIUtil.isSequenceDefined(api.getInSequence())) {
+                    boolean found = false;
+                    String mediationPolicyName = null;
+                    String mediationPolicyDefinition = null;
+                    for (MediationInfo mediationInfo : localPolicies) {
+                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
+                                && api.getInSequence().equals(mediationInfo.getName())) {
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            mediationPolicyName = mediationPolicy.getName();
+                            mediationPolicyDefinition = mediationPolicy.getConfig();
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) { // global policy
+                        if (globalPolicies == null) {
+                            globalPolicies = getAllGlobalMediationPolicies();
+                        }
+                        for (Mediation m : globalPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(m.getType())
+                                    && api.getInSequence().equals(m.getName())) {
+                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                mediationPolicyName = mediation.getName();
+                                mediationPolicyDefinition = mediation.getConfig();
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (mediationPolicyName != null && mediationPolicyDefinition != null) {
+                        OperationPolicyData policyData = getOperationPolicyDataForMediation(api.getUuid(),
+                                APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, organization, mediationPolicyName,
+                                mediationPolicyDefinition);
+
+                        OperationPolicyData existingPolicy =
+                                getAPISpecificOperationPolicyByPolicyName(mediationPolicyName, api.getUuid(),
+                                        null, organization, false);
+                        String inFlowPolicyId;
+                        if (existingPolicy == null) {
+                            inFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, policyData, organization);
+                        } else {
+                            inFlowPolicyId = existingPolicy.getPolicyId();
+                        }
+
+                        inFlowPolicy = new OperationPolicy();
+                        inFlowPolicy.setPolicyId(inFlowPolicyId);
+                        inFlowPolicy.setPolicyName(mediationPolicyName);
+                        inFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+                        inFlowPolicy.setOrder(1);
+                        api.setInSequence(null);
+                    }
+                }
+                if (APIUtil.isSequenceDefined(api.getOutSequence())) {
+                    String mediationPolicyName = null;
+                    String mediationPolicyDefinition = null;
+                    boolean found = false;
+                    for (MediationInfo mediationInfo : localPolicies) {
+                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
+                                && api.getOutSequence().equals(mediationInfo.getName())) {
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            mediationPolicyName = mediationPolicy.getName();
+                            mediationPolicyDefinition = mediationPolicy.getConfig();
+
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) { // global policy
+                        if (globalPolicies == null) {
+                            globalPolicies = getAllGlobalMediationPolicies();
+                        }
+                        for (Mediation m : globalPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(m.getType())
+                                    && api.getOutSequence().equals(m.getName())) {
+                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                mediationPolicyName = mediation.getName();
+                                mediationPolicyDefinition = mediation.getConfig();
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (mediationPolicyName != null && mediationPolicyDefinition != null) {
+                        OperationPolicyData policyData = getOperationPolicyDataForMediation(api.getUuid(),
+                                APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE, organization, mediationPolicyName,
+                                mediationPolicyDefinition);
+
+                        OperationPolicyData existingPolicy =
+                                getAPISpecificOperationPolicyByPolicyName(mediationPolicyName, api.getUuid(),
+                                        null, organization, false);
+                        String outFlowPolicyId;
+                        if (existingPolicy == null) {
+                            outFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, policyData, organization);
+                        } else {
+                            outFlowPolicyId = existingPolicy.getPolicyId();
+                        }
+                        outFlowPolicy = new OperationPolicy();
+                        outFlowPolicy.setPolicyId(outFlowPolicyId);
+                        outFlowPolicy.setPolicyName(mediationPolicyName);
+                        outFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+                        outFlowPolicy.setOrder(1);
+                        api.setOutSequence(null);
+                    }
+                }
+                if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                    boolean found = false;
+                    String mediationPolicyName = null;
+                    String mediationPolicyDefinition = null;
+                    for (MediationInfo mediationInfo : localPolicies) {
+                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
+                                && api.getFaultSequence().equals(mediationInfo.getName())) {
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            mediationPolicyName = mediationPolicy.getName();
+                            mediationPolicyDefinition = mediationPolicy.getConfig();
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) { // global policy
+                        if (globalPolicies == null) {
+                            globalPolicies = getAllGlobalMediationPolicies();
+                        }
+                        for (Mediation m : globalPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(m.getType())
+                                    && api.getFaultSequence().equals(m.getName())) {
+                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                mediationPolicyName = mediation.getName();
+                                mediationPolicyDefinition = mediation.getConfig();
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (mediationPolicyName != null && mediationPolicyDefinition != null) {
+                        OperationPolicyData policyData = getOperationPolicyDataForMediation(api.getUuid(),
+                                APIConstants.OPERATION_SEQUENCE_TYPE_FAULT, organization, mediationPolicyName,
+                                mediationPolicyDefinition);
+
+                        OperationPolicyData existingPolicy =
+                                getAPISpecificOperationPolicyByPolicyName(mediationPolicyName, api.getUuid(),
+                                        null, organization, false);
+                        String faultFlowPolicyId;
+                        if (existingPolicy == null) {
+                            faultFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, policyData, organization);
+                        } else {
+                            faultFlowPolicyId = existingPolicy.getPolicyId();
+                        }
+
+                        faultFlowPolicy = new OperationPolicy();
+                        faultFlowPolicy.setPolicyId(faultFlowPolicyId);
+                        faultFlowPolicy.setPolicyName(mediationPolicyName);
+                        faultFlowPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+                        faultFlowPolicy.setOrder(1);
+                        api.setFaultSequence(null);
+                    }
+                }
+                updateMigratedPolicyInOperations(api, inFlowPolicy, outFlowPolicy, faultFlowPolicy);
+            } catch (MediationPolicyPersistenceException e) {
+                throw new APIManagementException("Error while loading mediation policies to convert as operation " +
+                        " policies", e);
+            }
+        }
+    }
+
+    private OperationPolicyData getOperationPolicyDataForMediation(String apiUuid, String flow, String organization,
+            String policyName, String policyDefinitionString) {
+
+        OperationPolicySpecification policySpecification = getPolicySpecificationForMediationSequence(policyName, flow);
+
+        OperationPolicyDefinition policyDefinition = new OperationPolicyDefinition();
+        policyDefinition.setContent(policyDefinitionString);
+        policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+        policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+
+        OperationPolicyData policyData = new OperationPolicyData();
+        policyData.setOrganization(organization);
+        policyData.setSpecification(policySpecification);
+        policyData.setSynapsePolicyDefinition(policyDefinition);
+        policyData.setApiUUID(apiUuid);
+        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+        return policyData;
+    }
+
+    private OperationPolicySpecification getPolicySpecificationForMediationSequence(String policyName, String flow) {
+
+        OperationPolicySpecification policySpecification = new OperationPolicySpecification();
+        policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
+        policySpecification.setName(policyName);
+        policySpecification.setDisplayName(policyName);
+        policySpecification.setDescription("This is a previous mediation policy migrated as an operation policy");
+
+        ArrayList<String> gatewayList = new ArrayList<>();
+        gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
+        policySpecification.setSupportedGateways(gatewayList);
+
+        ArrayList<String> supportedAPIList = new ArrayList<>();
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
+        policySpecification.setSupportedApiTypes(supportedAPIList);
+
+        ArrayList<String> applicableFlows = new ArrayList<>();
+        applicableFlows.add(flow);
+        policySpecification.setApplicableFlows(applicableFlows);
+        return policySpecification;
+    }
+
+    private void updateMigratedPolicyInOperations(API api, OperationPolicy inSeqPolicy, OperationPolicy outSeqPolicy,
+                                                  OperationPolicy faultSeqPolicy) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        for (URITemplate uriTemplate : uriTemplates) {
+            List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+            // Created policies are appended to the existing policies to preserve existing policies. Previously added
+            // dummy policies are also exists at this level and they will be dropped at the policy validation method as
+            // they don't have a valid policy id.
+            if (inSeqPolicy != null) {
+                operationPolicies.add(inSeqPolicy);
+            }
+            if (outSeqPolicy != null) {
+                operationPolicies.add(outSeqPolicy);
+            }
+            if (outSeqPolicy != null) {
+                operationPolicies.add(faultSeqPolicy);
+            }
+        }
+    }
+
+    /**
      * Update API Product in registry for lifecycle state change
      *
      * @param apiProduct    API Product Object
@@ -2507,41 +2791,43 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (operationPolicies != null && !operationPolicies.isEmpty() && isOperationPoliciesAllowedForAPIType) {
                 for (OperationPolicy policy : operationPolicies) {
                     String policyId = policy.getPolicyId();
-                    // First check the API specific operation policy list
-                    OperationPolicyData policyData =
-                            getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, false);
-                    if (policyData != null) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("A policy is found for " + policyId + " as " +
-                                    policyData.getSpecification().getName()
-                                    + ". Validating the policy");
-                        }
-                        if (policyData.isRevision()) {
-                            throw new APIManagementException("Invalid policy selected. " + policyId
-                                    + " policy is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
-                        }
-                        OperationPolicySpecification policySpecification = policyData.getSpecification();
-                        if (validateAppliedPolicyWithSpecification(policySpecification, policy, api)) {
-                            validatedPolicies.add(policy);
-                        }
-                    } else {
-                        //TODO: get policy based on the name
-                        OperationPolicyData commonPolicyData =
-                                getCommonOperationPolicyByPolicyId(policyId, tenantDomain, false);
-                        if (commonPolicyData != null) {
-                            // A common policy is found for specified policy. This will be validated according to the provided
-                            // attributes and added to API policy list
+                    if (policyId != null) {
+                        // First check the API specific operation policy list
+                        OperationPolicyData policyData =
+                                getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, false);
+                        if (policyData != null) {
                             if (log.isDebugEnabled()) {
-                                log.debug(
-                                        "A common policy is found for " + policyId + ". Validating the policy");
+                                log.debug("A policy is found for " + policyId + " as " +
+                                        policyData.getSpecification().getName()
+                                        + ". Validating the policy");
                             }
-                            OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                            if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
+                            if (policyData.isRevision()) {
+                                throw new APIManagementException("Invalid policy selected. " + policyId
+                                        + " policy is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
+                            }
+                            OperationPolicySpecification policySpecification = policyData.getSpecification();
+                            if (validateAppliedPolicyWithSpecification(policySpecification, policy, api)) {
                                 validatedPolicies.add(policy);
                             }
                         } else {
-                            throw new APIManagementException("Selected policy " + policyId + " is not found.",
-                                    ExceptionCodes.INVALID_OPERATION_POLICY);
+                            //TODO: get policy based on the name
+                            OperationPolicyData commonPolicyData =
+                                    getCommonOperationPolicyByPolicyId(policyId, tenantDomain, false);
+                            if (commonPolicyData != null) {
+                                // A common policy is found for specified policy. This will be validated according to the provided
+                                // attributes and added to API policy list
+                                if (log.isDebugEnabled()) {
+                                    log.debug(
+                                            "A common policy is found for " + policyId + ". Validating the policy");
+                                }
+                                OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
+                                if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
+                                    validatedPolicies.add(policy);
+                                }
+                            } else {
+                                throw new APIManagementException("Selected policy " + policyId + " is not found.",
+                                        ExceptionCodes.INVALID_OPERATION_POLICY);
+                            }
                         }
                     }
                 }
@@ -8249,7 +8535,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
-                loadMediationPoliciesToAPI(api, organization);
+                if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
+                        || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                    loadMediationPoliciesAsOperationPoliciesToAPI(api);
+                }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
                 return api;
