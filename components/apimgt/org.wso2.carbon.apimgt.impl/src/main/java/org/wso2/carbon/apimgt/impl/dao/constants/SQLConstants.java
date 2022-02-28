@@ -90,6 +90,9 @@ public class SQLConstants {
             "   AND API.API_ID = SP.API_ID" +
             "   AND SP.SUBS_CREATE_STATE = '" +APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_CONSUMER_SECRET_FROM_CONSUMER_KEY = "SELECT CONSUMER_SECRET FROM " +
+            "IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY = ?";
+
     public static final String GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL =
             " SELECT " +
                     "   API.API_ID " +

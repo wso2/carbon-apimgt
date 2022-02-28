@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -36,6 +37,7 @@ import org.wso2.carbon.context.CarbonContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -91,6 +93,11 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
             Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
+            Set<APIKey> consumerKeys = apiMgtDAO.getKeyMappingsFromApplicationId(application.getId());
+            for (APIKey apiKey : consumerKeys) {
+                apiKey.setConsumerSecret(apiMgtDAO.getConsumerSecretFromConsumerKey(apiKey.getConsumerKey()));
+                application.addKey(apiKey);
+            }
 
             //Check whether the subscription is belongs to an API deployed in Solace
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
@@ -143,6 +150,11 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
             Application application = apiProvider.getApplicationByUUID(applicationUUID);
+            Set<APIKey> consumerKeys = apiMgtDAO.getKeyMappingsFromApplicationId(application.getId());
+            for (APIKey apiKey : consumerKeys) {
+                apiKey.setConsumerSecret(apiMgtDAO.getConsumerSecretFromConsumerKey(apiKey.getConsumerKey()));
+                application.addKey(apiKey);
+            }
 
             //Check whether the subscription is belongs to an API deployed in Solace
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {

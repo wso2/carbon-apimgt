@@ -372,6 +372,10 @@ public class SolaceNotifierUtils {
                 }
             } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 
+                // If application keys are not generated we are not doing anything in Solace.
+                if (application.getKeys().isEmpty()) {
+                    return;
+                }
                 String responseString = EntityUtils.toString(response2.getEntity());
                 if (responseString.contains(String.valueOf(HttpStatus.SC_NOT_FOUND))) {
                     // create new app

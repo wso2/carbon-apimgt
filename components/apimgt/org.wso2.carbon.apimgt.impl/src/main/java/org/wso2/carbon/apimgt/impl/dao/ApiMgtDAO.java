@@ -9151,6 +9151,29 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Retrieve the consumer secret key from Consumer key,
+     * @param consumerKey   Consumer key of the Application
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public String getConsumerSecretFromConsumerKey(String consumerKey)throws APIManagementException {
+
+        String consumerSecret = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.GET_CONSUMER_SECRET_FROM_CONSUMER_KEY)) {
+            statement.setString(1, consumerKey);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    consumerSecret = rs.getString("VHOST");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get consumer secret", e);
+        }
+        return consumerSecret;
+    }
+
     public void deleteApplicationKeyMappingByMappingId(String keyMappingId) throws APIManagementException {
 
         Connection connection = null;

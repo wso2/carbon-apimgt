@@ -104,14 +104,19 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
             }
             // Patching consumerKey to Solace application using Admin Apis
             if (isContainsSolaceApis) {
-                String consumerSecret = application.getName() + "-application-secret";
-                for (APIKey key : application.getKeys()) {
-                    if (key.getConsumerKey().equals(event.getConsumerKey())) {
-                        consumerSecret = key.getConsumerSecret();
+                if (application.getKeys() != null) {
+                    String consumerSecret = null;
+                    for (APIKey key : application.getKeys()) {
+                        if (key.getConsumerKey().equals(event.getConsumerKey())) {
+                            consumerSecret = apiMgtDAO.getConsumerSecretFromConsumerKey(key.getConsumerKey());
+                        }
                     }
+                    SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
+                            application, event.getConsumerKey(), consumerSecret);
+                } else {
+                    throw new NotifierException("Application keys are not found in the application : " +
+                            application.getName());
                 }
-                SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
-                        application, event.getConsumerKey(), consumerSecret);
             }
         } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
