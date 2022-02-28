@@ -1275,8 +1275,7 @@ public class APIConsumerImplTest {
                 Mockito.anyString())).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
         Assert.assertEquals(apiConsumer.addSubscription(apiTypeWrapper, "user1",application).getSubscriptionUUID(),
                 subscribedAPI.getUUID());
         try {
@@ -1303,8 +1302,7 @@ public class APIConsumerImplTest {
                 Mockito.anyString())).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
         try {
             apiConsumer.addSubscription(apiTypeWrapper, "sub1", application);
             Assert.fail("Invalid Tier error not thrown.");

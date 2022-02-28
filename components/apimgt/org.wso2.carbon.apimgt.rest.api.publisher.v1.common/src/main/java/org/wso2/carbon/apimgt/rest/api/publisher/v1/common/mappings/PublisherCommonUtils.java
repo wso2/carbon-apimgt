@@ -41,7 +41,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -1811,26 +1810,20 @@ public class PublisherCommonUtils {
      * Change the lifecycle state of an API or API Product identified by UUID
      *
      * @param action       LC state change action
-     * @param uuid         UUID of API or API Product
+     * @param apiTypeWrapper API Type Wrapper (API or API Product)
      * @param lcChecklist  LC state change check list
      * @param organization Organization of logged-in user
      * @return APIStateChangeResponse
      * @throws APIManagementException Exception if there is an error when changing the LC state of API or API Product
      */
-    public static APIStateChangeResponse changeApiOrApiProductLifecycle(String action, String uuid,
+    public static APIStateChangeResponse changeApiOrApiProductLifecycle(String action, ApiTypeWrapper apiTypeWrapper,
                                                                         String lcChecklist, String organization)
             throws APIManagementException {
 
         String[] checkListItems = lcChecklist != null ? lcChecklist.split(APIConstants.DELEM_COMMA) : new String[0];
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(uuid, organization);
 
-        if (apiTypeWrapper == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API or API Product with UUID: "
-                    + uuid, ExceptionCodes.from(ExceptionCodes.API_OR_API_PRODUCT_NOT_FOUND, uuid));
-        }
-
-        Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(uuid, organization);
+        Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiTypeWrapper.getUuid(), organization);
 
         String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
         if (!ArrayUtils.contains(nextAllowedStates, action)) {

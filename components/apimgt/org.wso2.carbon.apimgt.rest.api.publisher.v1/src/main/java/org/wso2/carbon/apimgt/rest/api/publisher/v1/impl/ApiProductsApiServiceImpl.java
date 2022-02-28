@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -1055,8 +1056,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper productWrapper = new ApiTypeWrapper(apiProvider.getAPIProductbyUUID(apiProductId, organization));
         APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
-                apiProductId, lifecycleChecklist, organization);
+                productWrapper, lifecycleChecklist, organization);
 
         LifecycleStateDTO stateDTO = getLifecycleState(apiProductId, organization);
         WorkflowResponseDTO workflowResponseDTO = APIMappingUtil.toWorkflowResponseDTO(stateDTO, stateChangeResponse);
