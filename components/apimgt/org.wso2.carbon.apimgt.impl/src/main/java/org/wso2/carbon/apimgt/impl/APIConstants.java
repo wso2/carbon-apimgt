@@ -2909,4 +2909,7 @@ public final class APIConstants {
         public static final String STANDARD = "STANDARD";
         public static final String FULL = "FULL";
     }
+
+    // Constants related to basic health check APIs
+    public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 }
