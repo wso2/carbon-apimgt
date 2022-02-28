@@ -106,6 +106,8 @@ import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
@@ -6512,24 +6514,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 conditionValue, state, tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
-
-        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            APIUtil.publishEventToTrafficManager(Collections.EMPTY_MAP, blockingMessage);
-        }
+        EventPublisherEvent blockingEvent = new EventPublisherEvent(APIConstants.BLOCKING_CONDITIONS_STREAM_ID,
+                System.currentTimeMillis(), objects, blockingMessage.toString());
+        APIUtil.publishEvent(EventPublisherType.BLOCKING_EVENT, blockingEvent, blockingMessage.toString());
     }
 
     private void publishKeyTemplateEvent(String templateValue, String state) {
-        Object[] objects = new Object[]{templateValue,state};
+        Object[] objects = new Object[]{templateValue, state};
         Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
                 null, null, objects);
 
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
 
-
-        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            APIUtil.publishEventToTrafficManager(Collections.EMPTY_MAP, keyTemplateMessage);
-        }
+        EventPublisherEvent keyTemplateEvent = new EventPublisherEvent(APIConstants.KEY_TEMPLATE_STREM_ID,
+                System.currentTimeMillis(), objects, keyTemplateMessage.toString());
+        APIUtil.publishEvent(EventPublisherType.KEY_TEMPLATE, keyTemplateEvent, keyTemplateMessage.toString());
     }
 
     public String getLifecycleConfiguration(String tenantDomain) throws APIManagementException {
