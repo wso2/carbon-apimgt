@@ -580,7 +580,20 @@ public class TemplateBuilderUtil {
     private static void setCustomSequencesToBeAdded(APIProduct apiProduct, API api, GatewayAPIDTO gatewayAPIDTO,
                                                     String extractedPath, APIDTO apidto) throws APIManagementException {
 
-        if (APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())) {
+            GatewayContentDTO gatewayInContentDTO = retrieveSequence(apiProduct, extractedPath,
+                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
+            if (gatewayInContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayInContentDTO,
+                        gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(apiProduct, extractedPath,
+                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT, api);
+            if (gatewayOutContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayOutContentDTO,
+                        gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+        } else {
             GatewayContentDTO gatewayInContentDTO = retrieveOperationPolicySequenceForProducts(apiProduct, api,
                     extractedPath, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             if (gatewayInContentDTO != null) {
@@ -598,20 +611,6 @@ public class TemplateBuilderUtil {
             if (gatewayFaultContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
-            }
-        } else {
-
-            GatewayContentDTO gatewayInContentDTO = retrieveSequence(apiProduct, extractedPath,
-                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
-            if (gatewayInContentDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayInContentDTO,
-                        gatewayAPIDTO.getSequenceToBeAdd()));
-            }
-            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(apiProduct, extractedPath,
-                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT, api);
-            if (gatewayOutContentDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayOutContentDTO,
-                        gatewayAPIDTO.getSequenceToBeAdd()));
             }
         }
     }
@@ -800,7 +799,23 @@ public class TemplateBuilderUtil {
     private static void setCustomSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
                                                     APIDTO apidto) throws APIManagementException {
 
-        if (APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())) {
+            // This is to preserve the previous non migrated API project. Mediation files are used and they will be
+            // deployed in the gateway as it is.
+            GatewayContentDTO gatewayInContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
+            if (gatewayInContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
+                    , api);
+            if (gatewayOutContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+        } else {
             GatewayContentDTO gatewayInContentDTO =
                     retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             if (gatewayInContentDTO != null) {
@@ -819,20 +834,6 @@ public class TemplateBuilderUtil {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
-        } else {
-            GatewayContentDTO gatewayInContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
-                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
-            if (gatewayInContentDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(
-                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
-            }
-            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
-                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
-                    , api);
-            if (gatewayOutContentDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(
-                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
-            }
         }
     }
 
@@ -841,7 +842,7 @@ public class TemplateBuilderUtil {
             throws APIManagementException {
 
         String faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
-        if (!APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+        if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
             gatewayAPIDTO.setSequencesToBeRemove(
                     GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
             List<MediationPolicyDTO> mediationPolicies = apidto.getMediationPolicies();
