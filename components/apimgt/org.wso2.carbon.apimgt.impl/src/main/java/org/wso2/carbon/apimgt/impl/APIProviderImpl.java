@@ -5155,6 +5155,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                 targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
                 apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
+                sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
+                        apiOrApiProductId, uuid);
                 if (!isApiProduct) {
                     API api = apiTypeWrapper.getApi();
                     api.setOrganization(orgId);
@@ -5174,8 +5176,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             + ", version " + apiVersion + ", New Status : " + targetStatus;
                     log.debug(logMessage);
                 }
-                sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
-                        apiOrApiProductId, uuid);
                 extractRecommendationDetails(apiTypeWrapper);
                 return response;
             }

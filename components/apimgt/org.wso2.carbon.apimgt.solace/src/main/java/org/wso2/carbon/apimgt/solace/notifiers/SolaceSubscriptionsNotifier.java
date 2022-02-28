@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.solace.notifiers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -92,10 +93,12 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
+
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
             Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
-            Set<APIKey> consumerKeys = apiMgtDAO.getKeyMappingsFromApplicationId(application.getId());
+            Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
             for (APIKey apiKey : consumerKeys) {
-                apiKey.setConsumerSecret(apiMgtDAO.getConsumerSecretFromConsumerKey(apiKey.getConsumerKey()));
                 application.addKey(apiKey);
             }
 
@@ -149,10 +152,12 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
-            Application application = apiProvider.getApplicationByUUID(applicationUUID);
-            Set<APIKey> consumerKeys = apiMgtDAO.getKeyMappingsFromApplicationId(application.getId());
+
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
+            Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
+            Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
             for (APIKey apiKey : consumerKeys) {
-                apiKey.setConsumerSecret(apiMgtDAO.getConsumerSecretFromConsumerKey(apiKey.getConsumerKey()));
                 application.addKey(apiKey);
             }
 
