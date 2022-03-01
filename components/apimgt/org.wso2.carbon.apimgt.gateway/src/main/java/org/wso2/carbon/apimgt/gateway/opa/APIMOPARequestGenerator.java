@@ -34,6 +34,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * APIM implementation of the {@link OPARequestGenerator}.
+ */
 public class APIMOPARequestGenerator implements OPARequestGenerator {
 
     private static final Log log = LogFactory.getLog(APIMOPARequestGenerator.class);
@@ -106,7 +109,7 @@ public class APIMOPARequestGenerator implements OPARequestGenerator {
                                   Map<String, String> additionalParameters, MessageContext messageContext)
             throws OPASecurityException {
 
-        if (opaResponse.equals(OPAConstants.EMPTY_OPA_RESPONSE)) {
+        if (OPAConstants.EMPTY_OPA_RESPONSE.equals(opaResponse)) {
             log.error("Empty result received for the OPA policy " + policyName + " for rule " + rule);
             throw new OPASecurityException(OPASecurityException.INTERNAL_ERROR,
                     "Empty result received for the OPA policy " + policyName + " for rule " + rule);
