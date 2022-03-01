@@ -10827,13 +10827,11 @@ public final class APIUtil {
             }
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.KeyManager.ISSUER)) {
-                if (openIdConnectConfigurations != null) {
-                    keyManagerConfigurationDTO
-                            .addProperty(APIConstants.KeyManager.ISSUER, openIdConnectConfigurations.getIssuer());
-                } else {
-                    keyManagerConfigurationDTO
-                            .addProperty(APIConstants.KeyManager.ISSUER, issuerIdentifier);
+                if (openIdConnectConfigurations == null) {
+                    throw new APIMgtInternalException("Error in fetching Open ID configuration.");
                 }
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ISSUER,
+                        openIdConnectConfigurations.getIssuer());
             }
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.KeyManager.CLAIM_MAPPING)) {
