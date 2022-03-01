@@ -15,7 +15,7 @@
  */
 package org.wso2.carbon.apimgt.solace.utils;
 
-import com.hazelcast.aws.utility.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -112,8 +112,8 @@ public class SolaceNotifierUtils {
             if (additionalProperties.isEmpty()) {
                 return false;
             } else {
-                if (StringUtil.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION)) ||
-                        StringUtil.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME))) {
+                if (StringUtils.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION)) ||
+                        StringUtils.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME))) {
                     return false;
                 }
             }
