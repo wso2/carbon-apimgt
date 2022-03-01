@@ -372,6 +372,10 @@ public class SolaceNotifierUtils {
                 }
             } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 
+                // If application keys are not generated we are not doing anything in Solace.
+                if (application.getKeys().isEmpty()) {
+                    return;
+                }
                 String responseString = EntityUtils.toString(response2.getEntity());
                 if (responseString.contains(String.valueOf(HttpStatus.SC_NOT_FOUND))) {
                     // create new app
@@ -545,30 +549,33 @@ public class SolaceNotifierUtils {
             CloseableHttpResponse response = solaceAdminApis.applicationPatchRemoveSubscription(
                     applicationOrganizationName, application, solaceApiProducts);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                log.info("API product unsubscribed from Solace application '" + application.getName() + "'");
                 try {
                     String responseString = EntityUtils.toString(response.getEntity());
                     org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                    String applicationName = String.valueOf(jsonObject.get("displayName"));
+                    log.info("API product unsubscribed from Solace application '" + applicationName + "'");
                     if (jsonObject.getJSONArray("apiProducts") != null) {
+
                         if (jsonObject.getJSONArray("apiProducts").length() == 0) {
                             // delete application in Solace because of 0 number of api products
                             CloseableHttpResponse response2 = solaceAdminApis.deleteApplication(
                                     applicationOrganizationName, application.getUUID());
                             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                                log.info("Successfully deleted application '" + application.getName() + "' in " +
+                                log.info("Successfully deleted application '" + applicationName + "' in " +
                                         "Solace Broker");
                             } else {
                                 if (log.isDebugEnabled()) {
-                                    log.error("Error while deleting application '" + application.getName() + "' " +
+                                    log.error("Error while deleting application '" + applicationName + "' " +
                                             "in Solace. : " + response2.getStatusLine().toString());
                                 }
                                 throw new APIManagementException("Error while deleting application '" +
-                                        application.getName() + "' in Solace");
+                                        applicationName + "' in Solace");
                             }
                         }
                     }
                 } catch (IOException e) {
                     log.error(e.getMessage());
+                    throw new APIManagementException("Error while deleting application in Solace");
                 }
             } else {
                 if (log.isDebugEnabled()) {
