@@ -83,7 +83,7 @@
             ]
           },
           "defaultValue": {
-            "type": "string"
+            "type": ["integer", "string", "boolean"]
           },
           "allowedValues": {
             "type": "array",
