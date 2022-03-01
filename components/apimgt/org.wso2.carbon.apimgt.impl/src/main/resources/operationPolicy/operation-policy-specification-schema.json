@@ -82,6 +82,15 @@
               "Map"
             ]
           },
+          "defaultValue": {
+            "type": "string"
+          },
+          "allowedValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "required": {
             "type": "boolean"
           }
