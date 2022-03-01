@@ -11688,8 +11688,6 @@ components:
           type: string
         policyId:
           type: string
-        order:
-          type: int
         parameters:
           type: object
           additionalProperties:
