@@ -2501,8 +2501,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             isOperationPoliciesAllowedForAPIType = false;
         }
 
-        Map<String, Integer> policyOccurrenceMap = new HashMap<>();
-
         for (URITemplate uriTemplate : uriTemplates) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
             List<OperationPolicy> validatedPolicies = new ArrayList<>();
@@ -2524,19 +2522,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                         OperationPolicySpecification policySpecification = policyData.getSpecification();
                         if (validateAppliedPolicyWithSpecification(policySpecification, policy, api)) {
-                            String policyOccurrenceKey = uriTemplate.getUriTemplate() + "_" + policy.getDirection()
-                                    + "_" + policy.getPolicyName();
-                            int previousOccurrenceCount = 0;
-                            if (policyOccurrenceMap.get(policyOccurrenceKey) != null) {
-                                previousOccurrenceCount = policyOccurrenceMap.get(policyOccurrenceKey);
-                                if (previousOccurrenceCount > 0 && !policySpecification.isMultipleAllowed()) {
-                                    throw new APIManagementException("Policy multiple allowed property violated. "
-                                            + policySpecification.getDisplayName()
-                                            + " cannot be applied multiple times.",
-                                            ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
-                                }
-                            }
-                            policyOccurrenceMap.put(policyOccurrenceKey, previousOccurrenceCount + 1);
                             validatedPolicies.add(policy);
                         }
                     } else {
@@ -2552,19 +2537,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             }
                             OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
                             if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
-                                String policyOccurrenceKey = uriTemplate.getUriTemplate() + "_" + policy.getDirection()
-                                        + "_" + policy.getPolicyName();
-                                int previousOccurrenceCount = 0;
-                                if (policyOccurrenceMap.get(policyOccurrenceKey) != null) {
-                                    previousOccurrenceCount = policyOccurrenceMap.get(policyOccurrenceKey);
-                                    if (previousOccurrenceCount > 0 && !commonPolicySpec.isMultipleAllowed()) {
-                                        throw new APIManagementException("Policy multiple allowed property violated. "
-                                                + commonPolicySpec.getDisplayName() +
-                                                " cannot be applied multiple times.",
-                                                ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
-                                    }
-                                }
-                                policyOccurrenceMap.put(policyOccurrenceKey, previousOccurrenceCount + 1);
                                 validatedPolicies.add(policy);
                             }
                         } else {

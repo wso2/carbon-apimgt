@@ -11771,9 +11771,6 @@ components:
           items:
             type: string
             example: REST
-        multipleAllowed:
-          type: boolean
-          example: true
         isAPISpecific:
           type: boolean
           example: true

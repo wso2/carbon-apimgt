@@ -173,7 +173,6 @@ public class OperationPolicyMappingUtil {
         policyDataDTO.setSupportedGateways(policySpecification.getSupportedGateways());
         policyDataDTO.setSupportedApiTypes(policySpecification.getSupportedApiTypes());
         policyDataDTO.setApplicableFlows(policySpecification.getApplicableFlows());
-        policyDataDTO.setMultipleAllowed(policySpecification.isMultipleAllowed());
         policyDataDTO.setCategory(policySpecification.getCategory().toString());
 
         if (policySpecification.getPolicyAttributes() != null) {
