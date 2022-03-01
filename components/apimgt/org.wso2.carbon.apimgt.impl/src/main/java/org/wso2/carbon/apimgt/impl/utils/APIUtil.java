@@ -5501,6 +5501,12 @@ public final class APIUtil {
             if (config.containsKey("sandbox_endpoints")) {
                 return true;
             }
+            if (StringUtils.equals(config.get("endpoint_type").toString(),"graphql")) {
+                JSONObject httpConfig =(JSONObject) parser.parse(config.get("http").toString());
+                if (httpConfig.containsKey("sandbox_endpoints")) {
+                    return true;
+                }
+            }
         } catch (ParseException e) {
             log.error(APIConstants.MSG_JSON_PARSE_ERROR, e);
         } catch (ClassCastException e) {
@@ -5518,6 +5524,12 @@ public final class APIUtil {
 
             if (config.containsKey("production_endpoints")) {
                 return true;
+            }
+            if (StringUtils.equals(config.get("endpoint_type").toString(),"graphql")) {
+                JSONObject httpConfig =(JSONObject) parser.parse(config.get("http").toString());
+                if (httpConfig.containsKey("production_endpoints")) {
+                    return true;
+                }
             }
         } catch (ParseException e) {
             log.error(APIConstants.MSG_JSON_PARSE_ERROR, e);
