@@ -18137,8 +18137,7 @@ public class ApiMgtDAO {
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
         statement.setString(9, policyData.getOrganization());
         statement.setString(10, policySpecification.getCategory().toString());
-        statement.setBoolean(11, policySpecification.isMultipleAllowed());
-        statement.setString(12, policyData.getMd5Hash());
+        statement.setString(11, policyData.getMd5Hash());
         statement.executeUpdate();
         statement.close();
 
@@ -18196,9 +18195,8 @@ public class ApiMgtDAO {
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
         statement.setString(8, policyData.getOrganization());
         statement.setString(9, policySpecification.getCategory().toString());
-        statement.setBoolean(10, policySpecification.isMultipleAllowed());
-        statement.setString(11, policyData.getMd5Hash());
-        statement.setString(12, policyId);
+        statement.setString(10, policyData.getMd5Hash());
+        statement.setString(11, policyId);
         statement.executeUpdate();
         statement.close();
 
@@ -19239,7 +19237,6 @@ public class ApiMgtDAO {
         policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory
                 .valueOf(rs.getString("POLICY_CATEGORY")));
-        policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
         List<OperationPolicySpecAttribute> policySpecAttributes = null;
 
         try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {

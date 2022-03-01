@@ -3755,9 +3755,9 @@ public class SQLConstants {
         public static final String ADD_OPERATION_POLICY =
                 "INSERT INTO AM_OPERATION_POLICY " +
                         " (POLICY_UUID, POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, APPLICABLE_FLOWS, GATEWAY_TYPES, " +
-                        " API_TYPES, POLICY_PARAMETERS, ORGANIZATION, POLICY_CATEGORY, MULTIPLE_ALLOWED, " +
+                        " API_TYPES, POLICY_PARAMETERS, ORGANIZATION, POLICY_CATEGORY, " +
                         " POLICY_MD5) " +
-                        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                        " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
         public static final String UPDATE_API_OPERATION_POLICY_BY_POLICY_ID =
                 "UPDATE  AM_API_OPERATION_POLICY SET CLONED_POLICY_UUID = ?  WHERE  POLICY_UUID = ?";
@@ -3768,14 +3768,14 @@ public class SQLConstants {
                         " SET " +
                         " POLICY_NAME = ?, DISPLAY_NAME = ?, POLICY_DESCRIPTION = ?, APPLICABLE_FLOWS = ?, GATEWAY_TYPES = ?, " +
                         " API_TYPES = ?, POLICY_PARAMETERS = ?, ORGANIZATION = ?, POLICY_CATEGORY = ?, " +
-                        " MULTIPLE_ALLOWED = ?, POLICY_MD5 = ? " +
+                        " POLICY_MD5 = ? " +
                         " WHERE " +
                         " POLICY_UUID = ?";
 
         public static final String GET_OPERATION_POLICY_FROM_POLICY_ID =
                 "SELECT " +
                         " POLICY_NAME, DISPLAY_NAME, POLICY_DESCRIPTION, APPLICABLE_FLOWS, GATEWAY_TYPES, API_TYPES, " +
-                        " POLICY_PARAMETERS, POLICY_CATEGORY, MULTIPLE_ALLOWED, POLICY_MD5, ORGANIZATION " +
+                        " POLICY_PARAMETERS, POLICY_CATEGORY, POLICY_MD5, ORGANIZATION " +
                         " FROM " +
                         " AM_OPERATION_POLICY " +
                         " WHERE " +
@@ -3784,7 +3784,7 @@ public class SQLConstants {
         public static final String GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
-                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5, " +
+                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5, " +
                         " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_POLICY_UUID " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
@@ -3794,7 +3794,7 @@ public class SQLConstants {
         public static final String GET_COMMON_OPERATION_POLICY_WITH_OUT_DEFINITION_FROM_POLICY_ID =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
-                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5 " +
+                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5 " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_COMMON_OPERATION_POLICY COP ON OP.POLICY_UUID = COP.POLICY_UUID " +
                         " WHERE " +
@@ -3804,7 +3804,7 @@ public class SQLConstants {
         public static final String GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_NAME =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
-                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5, " +
+                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5, " +
                         " AOP.API_UUID, AOP.REVISION_UUID, AOP.CLONED_POLICY_UUID " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
@@ -3814,7 +3814,7 @@ public class SQLConstants {
         public static final String GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
-                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5 " +
+                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5 " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_COMMON_OPERATION_POLICY COP ON OP.POLICY_UUID = COP.POLICY_UUID " +
                         " WHERE " +
@@ -3823,7 +3823,7 @@ public class SQLConstants {
         public static final String GET_ALL_COMMON_OPERATION_POLICIES =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, " +
-                        " OP.API_TYPES, OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5 " +
+                        " OP.API_TYPES, OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5 " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_COMMON_OPERATION_POLICY COP ON OP.POLICY_UUID = COP.POLICY_UUID " +
                         " WHERE " +
@@ -3832,7 +3832,7 @@ public class SQLConstants {
         public static final String GET_ALL_API_SPECIFIC_OPERATION_POLICIES_WITHOUT_CLONED_POLICIES =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, " +
-                        " OP.API_TYPES, OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.MULTIPLE_ALLOWED, OP.POLICY_MD5 " +
+                        " OP.API_TYPES, OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5 " +
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
                         " WHERE " +

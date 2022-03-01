@@ -20,9 +20,6 @@
     "description": {
       "type": "string"
     },
-    "multipleAllowed": {
-      "type": "boolean"
-    },
     "applicableFlows": {
       "type": "array",
       "items": {
@@ -108,7 +105,6 @@
     "category",
     "name",
     "displayName",
-    "multipleAllowed",
     "applicableFlows",
     "supportedGateways",
     "supportedApiTypes"
