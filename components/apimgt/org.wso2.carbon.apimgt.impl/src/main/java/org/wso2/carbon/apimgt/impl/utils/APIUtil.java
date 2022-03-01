@@ -11568,56 +11568,61 @@ public final class APIUtil {
      *
      * @param organization organization name
      */
-    public static void loadCommonOperationPolicies(String organization) throws APIManagementException {
+    public static void loadCommonOperationPolicies(String organization) {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
-        int policyCount = apiMgtDAO.getOperationPolicyCount(organization);
+        int policyCount = 0;
+        try {
+            policyCount = apiMgtDAO.getOperationPolicyCount(organization);
+            if (policyCount == 0) {
+                String policySpecLocation = CarbonUtils.getCarbonHome() + File.separator
+                        + APIConstants.COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION;
+                String policyDefinitionLocation = CarbonUtils.getCarbonHome() + File.separator
+                        + APIConstants.COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION;
+                File policiesDir = new File(policySpecLocation);
+                File[] files = policiesDir.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        String jsonContent;
+                        try {
+                            jsonContent = FileUtils.readFileToString(file);
+                            OperationPolicySpecification policySpec = getValidatedOperationPolicySpecification(jsonContent);
+                            if (policySpec != null) {
+                                OperationPolicyData policyData = new OperationPolicyData();
+                                policyData.setSpecification(policySpec);
+                                policyData.setOrganization(organization);
 
-        if (policyCount == 0) {
-            String policySpecLocation = CarbonUtils.getCarbonHome() + File.separator
-                    + APIConstants.COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION;
-            String policyDefinitionLocation = CarbonUtils.getCarbonHome() + File.separator
-                    + APIConstants.COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION;
-            File policiesDir = new File(policySpecLocation);
-            File[] files = policiesDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    String jsonContent;
-                    try {
-                        jsonContent = FileUtils.readFileToString(file);
-                        OperationPolicySpecification policySpec = getValidatedOperationPolicySpecification(jsonContent);
-                        if (policySpec != null) {
-                            OperationPolicyData policyData = new OperationPolicyData();
-                            policyData.setSpecification(policySpec);
-                            policyData.setOrganization(organization);
+                                OperationPolicyDefinition synapsePolicyDefinition =
+                                        getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
+                                                policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                                if (synapsePolicyDefinition != null) {
+                                    synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                    policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
+                                }
+                                OperationPolicyDefinition ccPolicyDefinition =
+                                        getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
+                                                policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                                if (ccPolicyDefinition != null) {
+                                    ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                    policyData.setCcPolicyDefinition(ccPolicyDefinition);
+                                }
 
-                            OperationPolicyDefinition synapsePolicyDefinition =
-                                    getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                            policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
-                            if (synapsePolicyDefinition != null) {
-                                synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-                                policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
+                                policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
+                                apiMgtDAO.addCommonOperationPolicy(policyData);
+                                log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
+                                        + " was added to the organization " + organization + " successfully");
                             }
-                            OperationPolicyDefinition ccPolicyDefinition =
-                                    getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                            policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
-                            if (ccPolicyDefinition != null) {
-                                ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                                policyData.setCcPolicyDefinition(ccPolicyDefinition);
-                            }
-
-                            policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
-                            apiMgtDAO.addCommonOperationPolicy(policyData);
-                            log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
-                                    + " was added to the organization " + organization + " successfully");
+                        } catch (IOException | APIManagementException e) {
+                            log.error("Invalid policy specification for file " + file.getName()
+                                    + ".Hence skipped from importing as a common operation policy.", e);
                         }
-                    } catch (IOException | APIManagementException e) {
-                        log.error("Invalid policy specification for file " + file.getName()
-                                + ".Hence skipped from importing as a common operation policy.", e);
                     }
                 }
             }
+        } catch (Exception e) {
+            log.error("Exception when loading " + APIConstants.OPERATION_POLICIES + " for organization "
+                    + organization, e);
         }
     }
 
