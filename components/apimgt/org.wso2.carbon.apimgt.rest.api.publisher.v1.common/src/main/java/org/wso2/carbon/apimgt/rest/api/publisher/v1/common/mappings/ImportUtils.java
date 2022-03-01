@@ -58,7 +58,6 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
@@ -309,8 +308,6 @@ public class ImportUtils {
             }
 
             if (!isAdvertiseOnlyAPI(importedApiDTO)) {
-                addAPISequences(extractedFolderPath, importedApi, apiProvider);
-                addAPISpecificSequences(extractedFolderPath, importedApi, apiProvider);
                 addEndpointCertificates(extractedFolderPath, importedApi, apiProvider, tenantId);
 
                 if (log.isDebugEnabled()) {
@@ -1486,45 +1483,6 @@ public class ImportUtils {
         }
     }
 
-    /**
-     * This method adds API sequences to the imported API. If the sequence is a newly defined one, it is added.
-     *
-     * @param pathToArchive Location of the extracted folder of the API
-     * @param importedApi   The imported API object
-     * @param apiProvider   API Provider
-     * @throws APIManagementException If an error occurs while adding the mediation policy
-     */
-    private static void addAPISequences(String pathToArchive, API importedApi, APIProvider apiProvider)
-            throws APIManagementException {
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        List<Mediation> existingMediationsList = apiProvider.getAllGlobalMediationPolicies();
-
-        try {
-            // Adding in-sequence, if any
-            String sequenceContent = retrieveSequenceContent(pathToArchive, false,
-                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, importedApi.getInSequence());
-            PublisherCommonUtils
-                    .addMediationPolicyFromFile(sequenceContent, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
-                            apiProvider, importedApi.getUuid(), tenantDomain, existingMediationsList, Boolean.FALSE);
-
-            // Adding out-sequence, if any
-            sequenceContent = retrieveSequenceContent(pathToArchive, false, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
-                    importedApi.getOutSequence());
-            PublisherCommonUtils
-                    .addMediationPolicyFromFile(sequenceContent, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
-                            apiProvider, importedApi.getUuid(), tenantDomain, existingMediationsList, Boolean.FALSE);
-
-            // Adding fault-sequence, if any
-            sequenceContent = retrieveSequenceContent(pathToArchive, false, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
-                    importedApi.getFaultSequence());
-            PublisherCommonUtils
-                    .addMediationPolicyFromFile(sequenceContent, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
-                            apiProvider, importedApi.getUuid(), tenantDomain, existingMediationsList, Boolean.FALSE);
-        } catch (Exception e) {
-            throw new APIManagementException(
-                    "An Error has occurred while adding mediation policy" + StringUtils.SPACE + e.getMessage(), e);
-        }
-    }
 
     public static String retrieveSequenceContent(String pathToArchive, boolean specific, String type,
                                                  String sequenceName) {
@@ -1570,72 +1528,6 @@ public class ImportUtils {
             }
         }
         return null;
-    }
-
-    /**
-     * This method adds API Specific sequences added through the Publisher to the imported API. If the specific
-     * sequence already exists, it is updated.
-     *
-     * @param pathToArchive Location of the extracted folder of the API
-     * @param importedApi   Imported API
-     * @param apiProvider   API Provider
-     * @throws APIManagementException If an error occurs while adding the mediation policy
-     */
-    private static void addAPISpecificSequences(String pathToArchive, API importedApi, APIProvider apiProvider)
-            throws APIManagementException {
-        String sequencesDirectoryPath = pathToArchive + File.separator + ImportExportConstants.SEQUENCES_RESOURCE;
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        List<Mediation> existingAPISpecificMediationsList =
-                apiProvider.getAllApiSpecificMediationPolicies(importedApi.getUuid(), tenantDomain);
-
-        // Add multiple custom sequences to registry for each type in/out/fault
-        addCustomSequencesToRegistry(sequencesDirectoryPath, ImportExportConstants.IN_SEQUENCE_PREFIX, importedApi,
-                apiProvider, tenantDomain, existingAPISpecificMediationsList);
-        addCustomSequencesToRegistry(sequencesDirectoryPath, ImportExportConstants.OUT_SEQUENCE_PREFIX, importedApi,
-                apiProvider, tenantDomain, existingAPISpecificMediationsList);
-        addCustomSequencesToRegistry(sequencesDirectoryPath, ImportExportConstants.FAULT_SEQUENCE_PREFIX, importedApi,
-                apiProvider, tenantDomain, existingAPISpecificMediationsList);
-    }
-
-    /**
-     * @param sequencesDirectoryPath            Location of the sequences directory in the extracted folder of the API
-     * @param type                              Sequence type (in/out/fault)
-     * @param importedApi                       Imported API
-     * @param apiProvider                       API Provider
-     * @param tenantDomain                      Tenant domain of the API
-     * @param existingAPISpecificMediationsList Existing API specific mediations list
-     * @throws APIManagementException If an error occurs while adding the mediation policy
-     */
-    private static void addCustomSequencesToRegistry(String sequencesDirectoryPath, String type, API importedApi,
-            APIProvider apiProvider, String tenantDomain, List<Mediation> existingAPISpecificMediationsList)
-            throws APIManagementException {
-        String apiSpecificSequenceFilePath =
-                sequencesDirectoryPath + File.separator + type + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX
-                        + File.separator + ImportExportConstants.CUSTOM_TYPE;
-        if (CommonUtil.checkFileExistence(apiSpecificSequenceFilePath)) {
-            File apiSpecificSequencesDirectory = new File(apiSpecificSequenceFilePath);
-            File[] apiSpecificSequencesDirectoryListing = apiSpecificSequencesDirectory.listFiles();
-            if (apiSpecificSequencesDirectoryListing != null) {
-                for (File apiSpecificSequence : apiSpecificSequencesDirectoryListing) {
-                    String individualSequenceLocation =
-                            apiSpecificSequenceFilePath + File.separator + apiSpecificSequence.getName();
-                    try {
-                        String sequenceContent = retrieveSequenceContentFromLocation(individualSequenceLocation);
-                        PublisherCommonUtils
-                                .addMediationPolicyFromFile(sequenceContent, type, apiProvider, importedApi.getUuid(),
-                                        tenantDomain, existingAPISpecificMediationsList, Boolean.TRUE);
-                    } catch (IOException e) {
-                        log.error(
-                                "I/O error while writing sequence data to the registry : " + individualSequenceLocation,
-                                e);
-                    } catch (Exception e) {
-                        throw new APIManagementException(
-                                "An Error has occurred while adding mediation policy" + StringUtils.SPACE + e
-                                        .getMessage(), e);
-                    }
-                }
-            }
-        }
     }
 
     /**

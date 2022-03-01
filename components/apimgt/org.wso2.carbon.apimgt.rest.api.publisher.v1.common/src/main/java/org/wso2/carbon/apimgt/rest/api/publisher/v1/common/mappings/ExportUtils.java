@@ -208,10 +208,6 @@ public class ExportUtils {
 
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
-            addRuntimeSequencesToArchive(archivePath, api);
-            if (preserveDocs) {
-                addMultipleAPISpecificSequencesToArchive(archivePath, api, apiProvider);
-            }
             // Export mTLS authentication related certificates
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Exporting client certificates.");
@@ -523,117 +519,6 @@ public class ExportUtils {
     }
 
     /**
-     * Retrieve available custom sequences and API specific sequences for API export, and store it in the archive
-     * directory.
-     *
-     * @param archivePath File path to export the sequences
-     * @throws APIImportExportException If an error occurs while exporting sequences
-     */
-    public static void addRuntimeSequencesToArchive(String archivePath, API api)
-            throws APIImportExportException, APIManagementException {
-
-        String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
-        Mediation inSequenceMediation = api.getInSequenceMediation();
-        Mediation outSequenceMediation = api.getOutSequenceMediation();
-        Mediation faultSequenceMediation = api.getFaultSequenceMediation();
-        if (inSequenceMediation != null || outSequenceMediation != null || faultSequenceMediation != null) {
-            CommonUtil.createDirectory(seqArchivePath);
-            if (inSequenceMediation != null) {
-                String individualSequenceExportPath;
-                if (inSequenceMediation.isGlobal()) {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX +
-                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
-                } else {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX
-                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
-                                    + ImportExportConstants.CUSTOM_TYPE;
-                }
-                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                    CommonUtil.createDirectory(individualSequenceExportPath);
-                }
-                writeSequenceToArchive(inSequenceMediation.getConfig(), individualSequenceExportPath,
-                        inSequenceMediation.getName());
-            }
-            if (outSequenceMediation != null) {
-                String individualSequenceExportPath;
-                if (outSequenceMediation.isGlobal()) {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.OUT_SEQUENCE_PREFIX +
-                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
-                } else {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.OUT_SEQUENCE_PREFIX
-                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
-                                    + ImportExportConstants.CUSTOM_TYPE;
-                }
-                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                    CommonUtil.createDirectory(individualSequenceExportPath);
-                }
-                writeSequenceToArchive(outSequenceMediation.getConfig(), individualSequenceExportPath,
-                        outSequenceMediation.getName());
-            }
-            if (faultSequenceMediation != null) {
-                String individualSequenceExportPath;
-                if (faultSequenceMediation.isGlobal()) {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX +
-                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
-                } else {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX
-                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
-                                    + ImportExportConstants.CUSTOM_TYPE;
-
-                }
-                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                    CommonUtil.createDirectory(individualSequenceExportPath);
-                }
-                writeSequenceToArchive(faultSequenceMediation.getConfig(), individualSequenceExportPath,
-                        faultSequenceMediation.getName());
-            }
-        }
-    }
-
-    /**
-     * Retrieve multiple API specific sequences for API export, and store it in the archive
-     * directory.
-     *
-     * @param archivePath File path to export the sequences
-     * @param api         API
-     * @param apiProvider API Provider
-     * @throws APIManagementException   If an error occurs while retrieving sequences and writing those
-     * @throws APIImportExportException If an error occurs while creating the directory to export sequences
-     */
-    private static void addMultipleAPISpecificSequencesToArchive(String archivePath, API api, APIProvider apiProvider)
-            throws APIManagementException, APIImportExportException {
-        String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (!CommonUtil.checkFileExistence(seqArchivePath)) {
-            CommonUtil.createDirectory(seqArchivePath);
-        }
-        // Getting list of API specific custom mediation policies
-        List<Mediation> apiSpecificMediationList = apiProvider
-                .getAllApiSpecificMediationPolicies(api.getUuid(), tenantDomain);
-        if (!apiSpecificMediationList.isEmpty()) {
-            for (Mediation mediation : apiSpecificMediationList) {
-                Mediation mediationResource = apiProvider
-                        .getApiSpecificMediationPolicyByPolicyId(api.getUuid(), mediation.getUuid(), tenantDomain);
-                String individualSequenceExportPath =
-                        seqArchivePath + File.separator + mediation.getType().toLowerCase()
-                                + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
-                                + ImportExportConstants.CUSTOM_TYPE;
-                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                    CommonUtil.createDirectory(individualSequenceExportPath);
-                }
-                writeSequenceToArchive(mediationResource.getConfig(), individualSequenceExportPath,
-                        mediation.getName());
-            }
-        }
-    }
-
-    /**
      * Write the sequence to API archive.
      *
      * @param mediation                    Mediation content
@@ -747,27 +632,31 @@ public class ExportUtils {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        OperationPolicyData policyData =
-                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
-                                        tenantDomain, true);
-                        if (policyData != null) {
-                            String policyName = archivePath + File.separator
-                                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
-                                    policyData.getSpecification().getName();
-                            // Policy specification and definition will have the same name
-                            if (policyData.getSpecification() != null) {
-                                CommonUtil.writeDtoToFile(policyName, exportFormat,
-                                        ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                                        policyData.getSpecification());
+                        if (policy.getPolicyId() != null) {
+                            OperationPolicyData policyData =
+                                    apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
+                                            tenantDomain, true);
+                            if (policyData != null) {
+                                String policyName = archivePath + File.separator
+                                        + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
+                                        policyData.getSpecification().getName();
+                                // Policy specification and definition will have the same name
+                                if (policyData.getSpecification() != null) {
+                                    CommonUtil.writeDtoToFile(policyName, exportFormat,
+                                            ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                                            policyData.getSpecification());
+                                }
+                                if (policyData.getSynapsePolicyDefinition() != null) {
+                                    CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
+                                            policyData.getSynapsePolicyDefinition().getContent());
+                                }
+                                if (policyData.getCcPolicyDefinition() != null) {
+                                    CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
+                                            policyData.getCcPolicyDefinition().getContent());
+                                }
                             }
-                            if (policyData.getSynapsePolicyDefinition() != null) {
-                                CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
-                                        policyData.getSynapsePolicyDefinition().getContent());
-                            }
-                            if (policyData.getCcPolicyDefinition() != null) {
-                                CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
-                                        policyData.getCcPolicyDefinition().getContent());
-                            }
+                        } else {
+                            log.info("Policy Id is null " + policy.getPolicyName());
                         }
                     }
                 }
