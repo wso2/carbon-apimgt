@@ -40,7 +40,7 @@
         "type": "string",
         "enum": [
           "Synapse",
-          "ChoreoConnect"
+          "CC"
         ]
       }
     },
