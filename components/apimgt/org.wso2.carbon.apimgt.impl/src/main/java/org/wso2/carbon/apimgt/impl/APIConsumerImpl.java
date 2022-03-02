@@ -4810,7 +4810,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private boolean getTenantConfigValue(String tenantDomain, JSONObject apiTenantConfig, String configKey) throws APIManagementException {
-        if (apiTenantConfig != null) {
+        if (apiTenantConfig.size() != 0 ) {
             Object value = apiTenantConfig.get(configKey);
 
             if (value != null) {
