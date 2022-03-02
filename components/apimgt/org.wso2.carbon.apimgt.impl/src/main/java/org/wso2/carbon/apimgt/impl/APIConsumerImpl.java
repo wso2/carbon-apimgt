@@ -5668,6 +5668,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
                     mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
+                    Set<String> tierNameSet = devPortalAPIInfo.getAvailableTierNames();
+                    String tiers = null;
+                    if (tierNameSet != null) {
+                        tiers = String.join("||", tierNameSet);
+                    }
+                    Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                    Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers,
+                            mappedAPI.getId().getApiName());
+                    mappedAPI.removeAllTiers();
+                    mappedAPI.setAvailableTiers(availableTiers);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -5837,6 +5847,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if(api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
                 }
+                String tiers = null;
+                Set<Tier> apiTiers = api.getAvailableTiers();
+                Set<String> tierNameSet = new HashSet<String>();
+                for (Tier t : apiTiers) {
+                    tierNameSet.add(t.getName());
+                }
+                if (api.getAvailableTiers() != null) {
+                    tiers = String.join("||", tierNameSet);
+                }
+                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+                api.removeAllTiers();
+                api.setAvailableTiers(availableTiers);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -5908,6 +5931,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
                 api.setOrganization(orgId);
+                String tiers = null;
+                Set<Tier> apiTiers = api.getAvailableTiers();
+                Set<String> tierNameSet = new HashSet<String>();
+                for (Tier t : apiTiers) {
+                    tierNameSet.add(t.getName());
+                }
+                if (api.getAvailableTiers() != null) {
+                    tiers = String.join("||", tierNameSet);
+                }
+                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+                api.removeAllTiers();
+                api.setAvailableTiers(availableTiers);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";

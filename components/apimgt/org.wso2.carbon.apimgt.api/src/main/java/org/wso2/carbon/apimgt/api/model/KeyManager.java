@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.util.Collections;
@@ -33,6 +35,7 @@ import java.util.Set;
  * needs to be implemented.
  */
 public interface KeyManager {
+    Log log = LogFactory.getLog(KeyManager.class);
 
     /**
      * Create a new OAuth application in the Authorization Server.
@@ -59,7 +62,8 @@ public interface KeyManager {
     default OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest appInfoDTO, String owner)
             throws APIManagementException {
 
-        throw new APIManagementException("This is not supported");
+        log.warn("Application owner update operation is not supported");
+        return null;
     }
 
     /**

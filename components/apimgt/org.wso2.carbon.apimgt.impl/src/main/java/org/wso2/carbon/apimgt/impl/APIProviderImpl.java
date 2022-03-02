@@ -8510,6 +8510,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
                 }
                 api.setOrganization(organization);
+                String tiers = null;
+                Set<Tier> apiTiers = api.getAvailableTiers();
+                Set<String> tierNameSet = new HashSet<String>();
+                for (Tier t : apiTiers) {
+                    tierNameSet.add(t.getName());
+                }
+                if (api.getAvailableTiers() != null) {
+                    tiers = String.join("||", tierNameSet);
+                }
+                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+                api.removeAllTiers();
+                api.setAvailableTiers(availableTiers);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
