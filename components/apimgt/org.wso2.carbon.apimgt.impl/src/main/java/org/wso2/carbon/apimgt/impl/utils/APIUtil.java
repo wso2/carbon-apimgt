@@ -600,10 +600,10 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setVersionTimestamp(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
-
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -753,7 +753,7 @@ public final class APIUtil {
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
+            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
             if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
                     .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
                 api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
@@ -1253,7 +1253,7 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, api.getVersionTimestamp());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, api.getVersionTimestamp());
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
@@ -9490,7 +9490,7 @@ public final class APIUtil {
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
             apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-            apiProduct.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
+            apiProduct.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             apiProduct.setTenantDomain(tenantDomainName);
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()

@@ -36,7 +36,7 @@
             <name>Version Type</name>
         </field>
         <field type="text" required="true">
-            <name>Version Timestamp</name>
+            <name>Version Comparable</name>
         </field>
         <field type="text">
             <name>Type</name>
@@ -167,6 +167,12 @@
         <field type="text-area">
             <name>Cors Configuration</name>
         </field>
+        <field type="text">
+            <name>Gateway Vendor</name>
+        </field>
+        <field type="text">
+            <name>Async Transport Protocols</name>
+        </field>
         <field type="text-area">
             <name>Websub Subscription Configuration</name>
         </field>
@@ -177,7 +183,7 @@
             <name label="Response Caching">Response Caching</name>
             <values>
                 <value>Enabled</value>
-                <value>Disabled</value>             
+                <value>Disabled</value>
             </values>
         </field>
         <field type="text">
