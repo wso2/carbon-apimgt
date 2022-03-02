@@ -84,6 +84,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
@@ -1694,7 +1695,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 defaultApp.getTokenType(),
                 defaultApp.getTier(), defaultApp.getGroupId(), defaultApp.getApplicationAttributes(),
                 subscriber.getName());
-        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        try {
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        } catch (NotifierException e) {
+            throw new APIManagementException("Error while sending Application event ", e);
+        }
     }
 
     public void updateSubscriber(Subscriber subscriber)
