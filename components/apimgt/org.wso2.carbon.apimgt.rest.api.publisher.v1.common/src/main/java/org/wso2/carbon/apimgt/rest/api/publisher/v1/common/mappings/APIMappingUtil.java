@@ -48,7 +48,6 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -1000,54 +999,6 @@ public class APIMappingUtil {
             }
         }
         dto.setHasThumbnail(!StringUtils.isBlank(model.getThumbnailUrl()));
-        List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
-        String inMedPolicyName = model.getInSequence();
-        if (inMedPolicyName != null && !inMedPolicyName.isEmpty()) {
-            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN;
-            Mediation mediation = model.getInSequenceMediation();
-            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
-            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
-
-            MediationPolicyDTO inMedPolicy = new MediationPolicyDTO();
-            inMedPolicy.setName(inMedPolicyName);
-            inMedPolicy.setType(type.toUpperCase());
-            inMedPolicy.setShared(sharedStatus);
-            inMedPolicy.setId(mediationPolicyUUID);
-            mediationPolicies.add(inMedPolicy);
-        }
-
-        String outMedPolicyName = model.getOutSequence();
-        if (outMedPolicyName != null && !outMedPolicyName.isEmpty()) {
-            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
-            Mediation mediation = model.getOutSequenceMediation();
-            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
-            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
-
-            MediationPolicyDTO outMedPolicy = new MediationPolicyDTO();
-            outMedPolicy.setName(outMedPolicyName);
-            outMedPolicy.setType(type.toUpperCase());
-            outMedPolicy.setShared(sharedStatus);
-            outMedPolicy.setId(mediationPolicyUUID);
-            mediationPolicies.add(outMedPolicy);
-        }
-
-        String faultSequenceName = model.getFaultSequence();
-        if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
-            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
-            Mediation mediation = model.getFaultSequenceMediation();
-            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
-            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
-
-            MediationPolicyDTO faultMedPolicy = new MediationPolicyDTO();
-            faultMedPolicy.setName(faultSequenceName);
-            faultMedPolicy.setType(type.toUpperCase());
-            faultMedPolicy.setShared(sharedStatus);
-            faultMedPolicy.setId(mediationPolicyUUID);
-            mediationPolicies.add(faultMedPolicy);
-        }
-
-        dto.setMediationPolicies(mediationPolicies);
-
         dto.setLifeCycleStatus(model.getStatus());
 
         String subscriptionAvailability = model.getSubscriptionAvailability();

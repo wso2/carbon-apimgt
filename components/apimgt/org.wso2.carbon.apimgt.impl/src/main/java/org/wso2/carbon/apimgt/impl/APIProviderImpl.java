@@ -1937,7 +1937,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedGateways;
     }
 
-    private void loadMediationPoliciesToAPI(API api, String organization) throws APIManagementException {
+    @Override
+    public void loadMediationPoliciesToAPI(API api, String organization) throws APIManagementException {
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             Organization org = new Organization(organization);
@@ -2138,7 +2139,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
                     if (mediationPolicyName != null && mediationPolicyDefinition != null) {
-                        OperationPolicyData policyData = getOperationPolicyDataForMediation(api.getUuid(),
+                        OperationPolicyData policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
                                 APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, organization, mediationPolicyName,
                                 mediationPolicyDefinition);
 
@@ -2193,7 +2194,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     if (mediationPolicyName != null && mediationPolicyDefinition != null) {
-                        OperationPolicyData policyData = getOperationPolicyDataForMediation(api.getUuid(),
+                        OperationPolicyData policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
                                 APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE, organization, mediationPolicyName,
                                 mediationPolicyDefinition);
 
@@ -2246,7 +2247,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     if (mediationPolicyName != null && mediationPolicyDefinition != null) {
-                        OperationPolicyData policyData = getOperationPolicyDataForMediation(api.getUuid(),
+                        OperationPolicyData policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
                                 APIConstants.OPERATION_SEQUENCE_TYPE_FAULT, organization, mediationPolicyName,
                                 mediationPolicyDefinition);
 
@@ -2274,47 +2275,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         " policies", e);
             }
         }
-    }
-
-    private OperationPolicyData getOperationPolicyDataForMediation(String apiUuid, String flow, String organization,
-            String policyName, String policyDefinitionString) {
-
-        OperationPolicySpecification policySpecification = getPolicySpecificationForMediationSequence(policyName, flow);
-
-        OperationPolicyDefinition policyDefinition = new OperationPolicyDefinition();
-        policyDefinition.setContent(policyDefinitionString);
-        policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-        policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
-
-        OperationPolicyData policyData = new OperationPolicyData();
-        policyData.setOrganization(organization);
-        policyData.setSpecification(policySpecification);
-        policyData.setSynapsePolicyDefinition(policyDefinition);
-        policyData.setApiUUID(apiUuid);
-        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
-        return policyData;
-    }
-
-    private OperationPolicySpecification getPolicySpecificationForMediationSequence(String policyName, String flow) {
-
-        OperationPolicySpecification policySpecification = new OperationPolicySpecification();
-        policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
-        policySpecification.setName(policyName);
-        policySpecification.setDisplayName(policyName);
-        policySpecification.setDescription("This is a previous mediation policy migrated as an operation policy");
-
-        ArrayList<String> gatewayList = new ArrayList<>();
-        gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
-        policySpecification.setSupportedGateways(gatewayList);
-
-        ArrayList<String> supportedAPIList = new ArrayList<>();
-        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
-        policySpecification.setSupportedApiTypes(supportedAPIList);
-
-        ArrayList<String> applicableFlows = new ArrayList<>();
-        applicableFlows.add(flow);
-        policySpecification.setApplicableFlows(applicableFlows);
-        return policySpecification;
     }
 
     private void updateMigratedPolicyInOperations(API api, OperationPolicy inSeqPolicy, OperationPolicy outSeqPolicy,

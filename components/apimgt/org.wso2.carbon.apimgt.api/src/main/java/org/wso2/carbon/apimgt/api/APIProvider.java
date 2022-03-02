@@ -1997,4 +1997,6 @@ public interface APIProvider extends APIManager {
      */
     void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
 
+    void loadMediationPoliciesToAPI(API api, String organization) throws APIManagementException;
+
 }

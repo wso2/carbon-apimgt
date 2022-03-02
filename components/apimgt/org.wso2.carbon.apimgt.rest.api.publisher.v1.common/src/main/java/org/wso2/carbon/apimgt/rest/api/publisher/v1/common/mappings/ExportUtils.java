@@ -628,42 +628,97 @@ public class ExportUtils {
         try {
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
             Set<URITemplate> uriTemplates = api.getUriTemplates();
+            Set<String> exportedPolicies = new HashSet<>();
+            boolean mediationPoliciesLoaded = false;
             for (URITemplate uriTemplate : uriTemplates) {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        if (policy.getPolicyId() != null) {
-                            OperationPolicyData policyData =
-                                    apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
-                                            tenantDomain, true);
-                            if (policyData != null) {
-                                String policyName = archivePath + File.separator
-                                        + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
-                                        policyData.getSpecification().getName();
-                                // Policy specification and definition will have the same name
-                                if (policyData.getSpecification() != null) {
-                                    CommonUtil.writeDtoToFile(policyName, exportFormat,
-                                            ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                                            policyData.getSpecification());
+                        if (!exportedPolicies.contains(policy.getPolicyName())) {
+                            if (policy.getPolicyId() != null) {
+                                OperationPolicyData policyData =
+                                        apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
+                                                tenantDomain, true);
+                                if (policyData != null) {
+                                    exportPolicyData(policyData, archivePath, exportFormat);
+                                    exportedPolicies.add(policy.getPolicyName());
                                 }
-                                if (policyData.getSynapsePolicyDefinition() != null) {
-                                    CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
-                                            policyData.getSynapsePolicyDefinition().getContent());
-                                }
-                                if (policyData.getCcPolicyDefinition() != null) {
-                                    CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
-                                            policyData.getCcPolicyDefinition().getContent());
+                            } else {
+                                // This path is to handle migrated APIs with mediation policies attached
+                                OperationPolicyData policyData = null;
+                                if (APIUtil.isSequenceDefined(api.getInSequence())
+                                        || APIUtil.isSequenceDefined(api.getOutSequence())
+                                        || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                                    log.info("Mediation policy " + policy.getPolicyName()
+                                            + " will be converted to an operation policy");
+                                    if (!mediationPoliciesLoaded) {
+                                        apiProvider.loadMediationPoliciesToAPI(api, tenantDomain);
+                                        mediationPoliciesLoaded = true;
+                                    }
+                                    if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection()) &&
+                                            api.getInSequenceMediation() != null) {
+                                        Mediation inSequenceMediation = api.getInSequenceMediation();
+                                        policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
+                                                APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, tenantDomain,
+                                                inSequenceMediation.getName(), inSequenceMediation.getConfig());
+                                    }
+                                    if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(policy.getDirection()) &&
+                                            api.getInSequenceMediation() != null) {
+                                        Mediation inSequenceMediation = api.getInSequenceMediation();
+                                        policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
+                                                APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE, tenantDomain,
+                                                inSequenceMediation.getName(), inSequenceMediation.getConfig());
+                                    }
+                                    if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection()) &&
+                                            api.getInSequenceMediation() != null) {
+                                        Mediation inSequenceMediation = api.getInSequenceMediation();
+                                        policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
+                                                APIConstants.OPERATION_SEQUENCE_TYPE_FAULT, tenantDomain,
+                                                inSequenceMediation.getName(), inSequenceMediation.getConfig());
+                                    }
+                                    if (policyData != null) {
+                                        exportPolicyData(policyData, archivePath, exportFormat);
+                                        exportedPolicies.add(policy.getPolicyName());
+                                    }
                                 }
                             }
-                        } else {
-                            log.info("Policy Id is null " + policy.getPolicyName());
                         }
                     }
                 }
             }
+            if (APIUtil.isSequenceDefined(api.getInSequence())
+                    || APIUtil.isSequenceDefined(api.getOutSequence())
+                    || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                api.setInSequence(null);
+                api.setInSequenceMediation(null);
+                api.setOutSequence(null);
+                api.setOutSequenceMediation(null);
+                api.setFaultSequence(null);
+                api.setFaultSequenceMediation(null);
+            }
         } catch (IOException | APIImportExportException e) {
             throw new APIManagementException(
                     "Error while adding operation policy details for API: " + apiID, e);
+        }
+    }
+
+    public static void exportPolicyData(OperationPolicyData policyData, String archivePath, ExportFormat exportFormat)
+            throws APIImportExportException, IOException {
+
+        String policyName = archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
+                policyData.getSpecification().getName();
+        // Policy specification and definition will have the same name
+        if (policyData.getSpecification() != null) {
+            CommonUtil.writeDtoToFile(policyName, exportFormat, ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                    policyData.getSpecification());
+        }
+        if (policyData.getSynapsePolicyDefinition() != null) {
+            CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
+                    policyData.getSynapsePolicyDefinition().getContent());
+        }
+        if (policyData.getCcPolicyDefinition() != null) {
+            CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
+                    policyData.getCcPolicyDefinition().getContent());
         }
     }
 

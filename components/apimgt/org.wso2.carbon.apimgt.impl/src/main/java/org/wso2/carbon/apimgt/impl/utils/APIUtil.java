@@ -11763,6 +11763,47 @@ public final class APIUtil {
         return md5Hash;
     }
 
+    public static OperationPolicyData getOperationPolicyDataForMediation(String apiUuid, String flow, String organization,
+                                                                   String policyName, String policyDefinitionString) {
+
+        OperationPolicySpecification policySpecification = getPolicySpecificationForMediationSequence(policyName, flow);
+
+        OperationPolicyDefinition policyDefinition = new OperationPolicyDefinition();
+        policyDefinition.setContent(policyDefinitionString);
+        policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+        policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+
+        OperationPolicyData policyData = new OperationPolicyData();
+        policyData.setOrganization(organization);
+        policyData.setSpecification(policySpecification);
+        policyData.setSynapsePolicyDefinition(policyDefinition);
+        policyData.setApiUUID(apiUuid);
+        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+        return policyData;
+    }
+
+    public static OperationPolicySpecification getPolicySpecificationForMediationSequence(String policyName, String flow) {
+
+        OperationPolicySpecification policySpecification = new OperationPolicySpecification();
+        policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
+        policySpecification.setName(policyName);
+        policySpecification.setDisplayName(policyName);
+        policySpecification.setDescription("This is a previous mediation policy migrated as an operation policy");
+
+        ArrayList<String> gatewayList = new ArrayList<>();
+        gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
+        policySpecification.setSupportedGateways(gatewayList);
+
+        ArrayList<String> supportedAPIList = new ArrayList<>();
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
+        policySpecification.setSupportedApiTypes(supportedAPIList);
+
+        ArrayList<String> applicableFlows = new ArrayList<>();
+        applicableFlows.add(flow);
+        policySpecification.setApplicableFlows(applicableFlows);
+        return policySpecification;
+    }
+
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
