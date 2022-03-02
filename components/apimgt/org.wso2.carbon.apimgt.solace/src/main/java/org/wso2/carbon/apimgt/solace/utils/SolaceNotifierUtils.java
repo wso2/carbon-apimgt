@@ -376,7 +376,7 @@ public class SolaceNotifierUtils {
                 if (application.getKeys().isEmpty()) {
                     return;
                 }
-                // create new app
+                String responseString = EntityUtils.toString(response2.getEntity());
                 if (log.isDebugEnabled()) {
                     log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
                             "Creating new application......");
