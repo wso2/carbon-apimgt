@@ -19069,21 +19069,21 @@ public class ApiMgtDAO {
         return policyDataList;
     }
 
-    public int getOperationPolicyCount(String organization) throws APIManagementException {
+    public Set<String> getCommonOperationPolicyNames(String organization) throws APIManagementException {
 
-        int count = -1;
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_THE_COUNT_OF_OPERATION_POLICIES_FOR_ORGANIZATION;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_NAMES_FOR_ORGANIZATION;
+        Set<String> policyNames = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, organization);
             ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt("POLICY_COUNT");
+            while (rs.next()) {
+                policyNames.add(rs.getString("POLICY_NAME"));
             }
         } catch (SQLException e) {
             handleException("Failed to get the count of operation policies for organization " + organization, e);
         }
-        return count;
+        return policyNames;
     }
 
 

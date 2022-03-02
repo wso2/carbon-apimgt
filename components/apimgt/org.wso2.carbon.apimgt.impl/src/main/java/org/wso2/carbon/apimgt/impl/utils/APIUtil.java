@@ -11572,19 +11572,19 @@ public final class APIUtil {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
-        int policyCount = 0;
         try {
-            policyCount = apiMgtDAO.getOperationPolicyCount(organization);
-            if (policyCount == 0) {
-                String policySpecLocation = CarbonUtils.getCarbonHome() + File.separator
-                        + APIConstants.COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION;
-                String policyDefinitionLocation = CarbonUtils.getCarbonHome() + File.separator
-                        + APIConstants.COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION;
-                File policiesDir = new File(policySpecLocation);
-                File[] files = policiesDir.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        String jsonContent;
+            Set<String> existingPolicies = apiMgtDAO.getCommonOperationPolicyNames(organization);
+            String policySpecLocation = CarbonUtils.getCarbonHome() + File.separator
+                    + APIConstants.COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION;
+            String policyDefinitionLocation = CarbonUtils.getCarbonHome() + File.separator
+                    + APIConstants.COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION;
+            File policiesDir = new File(policySpecLocation);
+            File[] files = policiesDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    String jsonContent;
+                    String fileName = file.getName();
+                    if (!existingPolicies.contains(fileName.substring(0, fileName.lastIndexOf('.')))) {
                         try {
                             jsonContent = FileUtils.readFileToString(file);
                             OperationPolicySpecification policySpec = getValidatedOperationPolicySpecification(jsonContent);
