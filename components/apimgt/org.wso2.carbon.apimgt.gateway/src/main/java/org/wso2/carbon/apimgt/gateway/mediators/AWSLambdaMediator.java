@@ -214,6 +214,10 @@ public class AWSLambdaMediator extends AbstractMediator {
         return secretKey;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
     public String getResourceName() {
         return resourceName;
     }
@@ -228,6 +232,10 @@ public class AWSLambdaMediator extends AbstractMediator {
 
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public void setResourceName(String resourceName) {
