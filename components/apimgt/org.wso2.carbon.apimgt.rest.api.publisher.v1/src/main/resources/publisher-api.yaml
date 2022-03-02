@@ -11688,8 +11688,6 @@ components:
           type: string
         policyId:
           type: string
-        order:
-          type: int
         parameters:
           type: object
           additionalProperties:
@@ -11771,9 +11769,6 @@ components:
           items:
             type: string
             example: REST
-        multipleAllowed:
-          type: boolean
-          example: true
         isAPISpecific:
           type: boolean
           example: true

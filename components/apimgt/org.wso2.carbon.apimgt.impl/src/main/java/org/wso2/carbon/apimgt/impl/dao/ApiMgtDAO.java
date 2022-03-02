@@ -18138,8 +18138,7 @@ public class ApiMgtDAO {
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
         statement.setString(9, policyData.getOrganization());
         statement.setString(10, policySpecification.getCategory().toString());
-        statement.setBoolean(11, policySpecification.isMultipleAllowed());
-        statement.setString(12, policyData.getMd5Hash());
+        statement.setString(11, policyData.getMd5Hash());
         statement.executeUpdate();
         statement.close();
 
@@ -18197,9 +18196,8 @@ public class ApiMgtDAO {
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
         statement.setString(8, policyData.getOrganization());
         statement.setString(9, policySpecification.getCategory().toString());
-        statement.setBoolean(10, policySpecification.isMultipleAllowed());
-        statement.setString(11, policyData.getMd5Hash());
-        statement.setString(12, policyId);
+        statement.setString(10, policyData.getMd5Hash());
+        statement.setString(11, policyId);
         statement.executeUpdate();
         statement.close();
 
@@ -19071,21 +19069,21 @@ public class ApiMgtDAO {
         return policyDataList;
     }
 
-    public int getOperationPolicyCount(String organization) throws APIManagementException {
+    public Set<String> getCommonOperationPolicyNames(String organization) throws APIManagementException {
 
-        int count = -1;
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_THE_COUNT_OF_OPERATION_POLICIES_FOR_ORGANIZATION;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_NAMES_FOR_ORGANIZATION;
+        Set<String> policyNames = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, organization);
             ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt("POLICY_COUNT");
+            while (rs.next()) {
+                policyNames.add(rs.getString("POLICY_NAME"));
             }
         } catch (SQLException e) {
             handleException("Failed to get the count of operation policies for organization " + organization, e);
         }
-        return count;
+        return policyNames;
     }
 
 
@@ -19240,7 +19238,6 @@ public class ApiMgtDAO {
         policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory
                 .valueOf(rs.getString("POLICY_CATEGORY")));
-        policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
         List<OperationPolicySpecAttribute> policySpecAttributes = null;
 
         try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {
