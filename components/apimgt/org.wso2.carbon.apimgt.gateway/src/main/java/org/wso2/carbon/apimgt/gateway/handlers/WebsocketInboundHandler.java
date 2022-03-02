@@ -86,6 +86,15 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         String channelId = ctx.channel().id().asLongText();
+
+        // This block is for the health check of the ports 8099 and 9099
+        if (msg instanceof FullHttpRequest && ((FullHttpRequest) msg).headers() != null
+                && !((FullHttpRequest) msg).headers().contains(HttpHeaders.UPGRADE)
+                && ((FullHttpRequest) msg).uri().equals(APIConstants.WEB_SOCKET_HEALTH_CHECK_PATH)) {
+            ctx.fireChannelRead(msg);
+            return;
+        }
+
         InboundMessageContext inboundMessageContext;
         if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
             inboundMessageContext = InboundMessageContextDataHolder.getInstance()

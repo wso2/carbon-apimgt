@@ -405,12 +405,14 @@ public class OAS3Parser extends APIDefinition {
                     if (!opScopes.isEmpty()) {
                         if (opScopes.size() == 1) {
                             String firstScope = opScopes.get(0);
-                            Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
-                            if (scope == null) {
-                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                            if (StringUtils.isNoneBlank(firstScope)) {
+                                Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                                if (scope == null) {
+                                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                }
+                                template.setScope(scope);
+                                template.setScopes(scope);
                             }
-                            template.setScope(scope);
-                            template.setScopes(scope);
                         } else {
                             template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
@@ -1158,7 +1160,11 @@ public class OAS3Parser extends APIDefinition {
             authType = "Application";
         }
         operation.addExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
-        operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
+        if (resource.getPolicy() != null) {
+            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
+        } else {
+            operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, APIConstants.DEFAULT_API_POLICY_UNLIMITED);
+        }
         // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {
             operation.addExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());

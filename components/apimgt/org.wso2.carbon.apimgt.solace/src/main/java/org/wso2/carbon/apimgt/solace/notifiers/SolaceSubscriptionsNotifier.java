@@ -17,9 +17,11 @@ package org.wso2.carbon.apimgt.solace.notifiers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -36,6 +38,7 @@ import org.wso2.carbon.context.CarbonContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -61,13 +64,10 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @param event related to subscription handling
      * @throws NotifierException if error occurs when casting event
      */
-    private void process(Event event) throws NotifierException {
-        SubscriptionEvent subscriptionEvent;
-        subscriptionEvent = (SubscriptionEvent) event;
-
-
+    private void process(Event event) throws NotifierException  {
+        SubscriptionEvent subscriptionEvent = (SubscriptionEvent) event;
         if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
-            crateSubscription(subscriptionEvent);
+            createSubscription(subscriptionEvent);
         } else if (APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name().equals(event.getType())) {
             updateSubscription(subscriptionEvent);
         } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
@@ -81,7 +81,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @param event SubscriptionEvent to create Solace API subscriptions
      * @throws NotifierException if error occurs when creating subscription for Solace APIs
      */
-    private void crateSubscription(SubscriptionEvent event) throws NotifierException {
+    private void createSubscription(SubscriptionEvent event) throws NotifierException {
 
         String apiUUID = event.getApiUUID();
         String applicationUUID = event.getApplicationUUID();
@@ -90,7 +90,14 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
+
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
             Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
+            Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
+            for (APIKey apiKey : consumerKeys) {
+                application.addKey(apiKey);
+            }
 
             //Check whether the subscription is belongs to an API deployed in Solace
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
@@ -112,7 +119,10 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                                     applicationOrganizationName);
                         }
                     } catch (IOException e) {
-                        log.error(e.getMessage());
+                        log.error("Cannot create solace application " + application.getName() +
+                                " in Solace Broker.");
+                        throw new APIManagementException("Cannot create solace application " + application.getName() +
+                                " in Solace Broker.", e);
                     }
                 } else {
                     if (log.isDebugEnabled()) {
@@ -142,7 +152,14 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
-            Application application = apiProvider.getApplicationByUUID(applicationUUID);
+
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
+            Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
+            Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
+            for (APIKey apiKey : consumerKeys) {
+                application.addKey(apiKey);
+            }
 
             //Check whether the subscription is belongs to an API deployed in Solace
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
@@ -164,7 +181,12 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                                     applicationOrganizationName);
                         }
                     } catch (IOException e) {
-                        log.error(e.getMessage());
+                        if (log.isDebugEnabled()) {
+                            log.error("Cannot create solace application " + application.getName() +
+                                    "with API product deployed in different organizations...");
+                        }
+                        throw new APIManagementException("Cannot create solace application " + application.getName() +
+                                "with API product deployed in different organizations...", e);
                     }
                 } else {
                     if (log.isDebugEnabled()) {

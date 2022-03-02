@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LoggingMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APILogInfoDTO;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
@@ -56,7 +57,11 @@ public class APILoggingImpl {
     private void publishLogAPIData(String tenantId, String apiId, String logLevel) throws APIManagementException {
         APIEvent apiEvent = new APIEvent(apiId, logLevel, APIConstants.EventType.UDATE_API_LOG_LEVEL.name(),
                 apiMgtDAO.getAPIContext(apiId));
-        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+        try {
+            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+        } catch (NotifierException e) {
+            throw new APIManagementException("Error while sending API event ", e);
+        }
     }
 
     public List<APILogInfoDTO> getAPILoggerList(String tenantId, String logLevel) throws APIManagementException {

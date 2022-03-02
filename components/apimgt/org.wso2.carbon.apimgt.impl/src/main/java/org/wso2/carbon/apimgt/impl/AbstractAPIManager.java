@@ -84,6 +84,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
@@ -181,6 +182,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
+    protected String organization;
     protected String username;
     protected static final GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
     // Property to indicate whether access control restriction feature is enabled.
@@ -196,6 +198,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username) throws APIManagementException {
+        this(username, StringUtils.isNoneBlank(username) ? MultitenantUtils.getTenantDomain(username)
+                : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+    }
+
+    public AbstractAPIManager(String username, String organization) throws APIManagementException {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
@@ -210,11 +217,12 @@ public abstract class AbstractAPIManager implements APIManager {
                 this.username = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
-                String tenantDomainName = MultitenantUtils.getTenantDomain(username);
+                String tenantDomainName = APIUtil.getInternalOrganizationDomain(organization);
                 String tenantUserName = getTenantAwareUsername(username);
                 int tenantId = getTenantManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
+                this.organization = organization;
                 this.username = tenantUserName;
 
                 loadTenantRegistry(tenantId);
@@ -1687,7 +1695,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 defaultApp.getTokenType(),
                 defaultApp.getTier(), defaultApp.getGroupId(), defaultApp.getApplicationAttributes(),
                 subscriber.getName());
-        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        try {
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        } catch (NotifierException e) {
+            throw new APIManagementException("Error while sending Application event ", e);
+        }
     }
 
     public void updateSubscriber(Subscriber subscriber)

@@ -95,6 +95,7 @@ public class APIManagerConfiguration {
     public static final String AUTH_URL_PORT = "auth.url.port";
     public static final String JMS_PORT = "jms.port";
     public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
+    public static final String DEFAULT_PROVIDER = "wso2";
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
     public static final String WEBSUB_DEFAULT_GATEWAY_URL = "http://localhost:9021";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
@@ -336,7 +337,11 @@ public class APIManagerConfiguration {
                     OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
                     String name = propertyElem.getAttributeValue(new QName("name"));
                     String value = propertyElem.getText();
-                    analyticsProps.put(name, value);
+                    if ("keystore_location".equals(name) || "truststore_location".equals(name)) {
+                        analyticsProps.put(name, APIUtil.replaceSystemProperty(value));
+                    } else {
+                        analyticsProps.put(name, value);
+                    }
                 }
                 OMElement authTokenElement = element.getFirstChildWithName(new QName("AuthToken"));
                 String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
@@ -584,8 +589,12 @@ public class APIManagerConfiguration {
         OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_PASSWORD));
         String resolvedPassword = MiscellaneousUtil.resolve(passwordElement, secretResolver);
         environment.setPassword(APIUtil.replaceSystemProperty(resolvedPassword));
-        environment.setProvider(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
-                        APIConstants.API_GATEWAY_PROVIDER)).getText()));
+        String provider = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_PROVIDER)).getText();
+        if (StringUtils.isNotEmpty(provider)) {
+            environment.setProvider(APIUtil.replaceSystemProperty(provider));
+        } else {
+            environment.setProvider(APIUtil.replaceSystemProperty(DEFAULT_PROVIDER));
+        }
         environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_ENDPOINT)).getText()));
         OMElement websocketGatewayEndpoint = environmentElem.getFirstChildWithName(new QName(

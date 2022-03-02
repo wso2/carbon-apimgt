@@ -34,6 +34,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 
@@ -45,7 +47,13 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
     }
 
     public APIConsumerImplWrapper(ApiMgtDAO apiMgtDAO) throws APIManagementException {
+        this(apiMgtDAO, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+    }
+
+    public APIConsumerImplWrapper(ApiMgtDAO apiMgtDAO, String organization) throws APIManagementException {
         this.apiMgtDAO = apiMgtDAO;
+        this.tenantDomain = organization;
+        this.organization = organization;
     }
 
     public APIConsumerImplWrapper(Registry registry, ApiMgtDAO apiMgtDAO) throws APIManagementException {

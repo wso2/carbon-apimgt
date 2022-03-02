@@ -114,6 +114,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Environment specific api property config is not valid. %s", false),
     API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
+    SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -497,18 +498,18 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
 
     //Operation Policies related error codes
-    INVALID_OPERATION_POLICY(900915, "Cannot find the selected operation policy", 400,
+    INVALID_OPERATION_POLICY(902005, "Cannot find the selected operation policy", 400,
             "Selected operation policy is not found"),
-    INVALID_OPERATION_POLICY_SPECIFICATION(900916, "Invalid operation policy specification found", 400,
+    INVALID_OPERATION_POLICY_SPECIFICATION(902006, "Invalid operation policy specification found", 400,
             "Invalid operation policy specification. %s", false),
 
-    INVALID_OPERATION_POLICY_PARAMETERS(900917, "Missing required parameters for operation policy specification", 400,
+    INVALID_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for operation policy specification", 400,
             "Required parameter(s) %s for operation policy specification %s are either missing or empty"),
-    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(900918, "Operation policy is not allowed in the applied flow", 400,
+    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(902008, "Operation policy is not allowed in the applied flow", 400,
             "%s policy is not allowed in response flow"),
-    MISSING_MANDATORY_POLICY_ATTRIBUTES(900919, "Missing mandatory operation policy attribute", 400,
+    MISSING_MANDATORY_POLICY_ATTRIBUTES(902009, "Missing mandatory operation policy attribute", 400,
             "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
-    OPERATION_POLICY_NOT_FOUND(900920, "Operation Policy Not Found", 404,
+    OPERATION_POLICY_NOT_FOUND(902010, "Operation Policy Not Found", 404,
             "Requested operation policy with id '%s' not found"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +

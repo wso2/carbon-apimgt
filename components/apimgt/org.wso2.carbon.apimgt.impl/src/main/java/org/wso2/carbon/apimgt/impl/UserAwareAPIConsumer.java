@@ -44,15 +44,22 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     UserAwareAPIConsumer() throws APIManagementException {
         super();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        isAccessControlRestrictionEnabled = Boolean
-                .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
+        readAccessControlConfig();
     }
 
     UserAwareAPIConsumer(String username) throws APIManagementException {
         super(username);
         this.username = username;
+        readAccessControlConfig();
+    }
+
+    UserAwareAPIConsumer(String username, String organization) throws APIManagementException {
+        super(username, organization);
+        this.username = username;
+        readAccessControlConfig();
+    }
+
+    private void readAccessControlConfig() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         isAccessControlRestrictionEnabled = Boolean

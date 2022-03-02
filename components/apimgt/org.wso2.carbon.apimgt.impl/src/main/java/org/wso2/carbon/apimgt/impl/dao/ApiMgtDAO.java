@@ -3337,7 +3337,7 @@ public class ApiMgtDAO {
                 blockCondition = new BlockConditionsDTO();
                 blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
                 blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
@@ -4227,11 +4227,11 @@ public class ApiMgtDAO {
                 sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate " +
                         "SQL_Latin1_General_CP1_CI_AS as NAME");
                 blockingFilerSql = " select distinct x.*,bl.ENABLED from ( " + sqlQuery + " )x left join " +
-                        "AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x" +
+                        "AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x" +
                         ".name)";
             } else {
                 blockingFilerSql = " select distinct x.*,bl.ENABLED from ( " + sqlQuery
-                        + " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = "
+                        + " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = "
                         + "concat(concat(x.USER_ID,':'),x.name))";
             }
 
@@ -12874,7 +12874,7 @@ public class ApiMgtDAO {
                 blockCondition = new BlockConditionsDTO();
                 blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockCondition.setConditionId(conditionId);
                 blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
@@ -12918,7 +12918,7 @@ public class ApiMgtDAO {
                 blockCondition = new BlockConditionsDTO();
                 blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
                 blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
@@ -12955,7 +12955,7 @@ public class ApiMgtDAO {
                 BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
                 blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
-                blockConditionsDTO.setConditionValue(resultSet.getString("VALUE"));
+                blockConditionsDTO.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
                 blockConditionsDTO.setUUID(resultSet.getString("UUID"));
                 blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
@@ -13905,7 +13905,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 applicationAttributes.put(rs.getString("NAME"),
-                        rs.getString("VALUE"));
+                        rs.getString("APP_ATTRIBUTE"));
             }
 
         } catch (SQLException e) {
@@ -18138,8 +18138,7 @@ public class ApiMgtDAO {
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
         statement.setString(9, policyData.getOrganization());
         statement.setString(10, policySpecification.getCategory().toString());
-        statement.setBoolean(11, policySpecification.isMultipleAllowed());
-        statement.setString(12, policyData.getMd5Hash());
+        statement.setString(11, policyData.getMd5Hash());
         statement.executeUpdate();
         statement.close();
 
@@ -18197,9 +18196,8 @@ public class ApiMgtDAO {
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
         statement.setString(8, policyData.getOrganization());
         statement.setString(9, policySpecification.getCategory().toString());
-        statement.setBoolean(10, policySpecification.isMultipleAllowed());
-        statement.setString(11, policyData.getMd5Hash());
-        statement.setString(12, policyId);
+        statement.setString(10, policyData.getMd5Hash());
+        statement.setString(11, policyId);
         statement.executeUpdate();
         statement.close();
 
@@ -18222,7 +18220,14 @@ public class ApiMgtDAO {
     public void deleteOperationPolicyByPolicyId(String policyId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            deleteOperationPolicyByPolicyId(connection, policyId);
+            connection.setAutoCommit(false);
+            if (!getPolicyUsageByPolicyId(connection, policyId)) {
+                deleteOperationPolicyByPolicyId(connection, policyId);
+                connection.commit();
+            } else {
+                throw new APIManagementException("Cannot delete operation policy with id " + policyId
+                        + " as policy usages exists");
+            }
         } catch (SQLException e) {
             handleException("Failed to delete operation policy " + policyId, e);
         }
@@ -18235,6 +18240,22 @@ public class ApiMgtDAO {
         statement.setString(1, policyId);
         statement.execute();
         statement.close();
+    }
+
+    private boolean getPolicyUsageByPolicyId(Connection connection, String policyId) throws SQLException {
+
+        boolean result = false;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_EXISTING_POLICY_USAGES_BY_POLICY_UUID;
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, policyId);
+        ResultSet rs = statement.executeQuery();
+
+        if (rs.next()) {
+            result = rs.getInt("POLICY_COUNT") != 0;
+        }
+        rs.close();
+        statement.close();
+        return result;
     }
 
     /**
@@ -19048,21 +19069,21 @@ public class ApiMgtDAO {
         return policyDataList;
     }
 
-    public int getOperationPolicyCount(String organization) throws APIManagementException {
+    public Set<String> getCommonOperationPolicyNames(String organization) throws APIManagementException {
 
-        int count = -1;
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_THE_COUNT_OF_OPERATION_POLICIES_FOR_ORGANIZATION;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_NAMES_FOR_ORGANIZATION;
+        Set<String> policyNames = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, organization);
             ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt("POLICY_COUNT");
+            while (rs.next()) {
+                policyNames.add(rs.getString("POLICY_NAME"));
             }
         } catch (SQLException e) {
             handleException("Failed to get the count of operation policies for organization " + organization, e);
         }
-        return count;
+        return policyNames;
     }
 
 
@@ -19217,7 +19238,6 @@ public class ApiMgtDAO {
         policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory
                 .valueOf(rs.getString("POLICY_CATEGORY")));
-        policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
         List<OperationPolicySpecAttribute> policySpecAttributes = null;
 
         try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {

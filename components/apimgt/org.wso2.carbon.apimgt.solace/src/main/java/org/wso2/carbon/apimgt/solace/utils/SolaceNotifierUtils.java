@@ -15,7 +15,7 @@
  */
 package org.wso2.carbon.apimgt.solace.utils;
 
-import com.hazelcast.aws.utility.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -112,8 +112,8 @@ public class SolaceNotifierUtils {
             if (additionalProperties.isEmpty()) {
                 return false;
             } else {
-                if (StringUtil.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION)) ||
-                        StringUtil.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME))) {
+                if (StringUtils.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION)) ||
+                        StringUtils.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME))) {
                     return false;
                 }
             }
@@ -372,31 +372,25 @@ public class SolaceNotifierUtils {
                 }
             } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 
-                String responseString = EntityUtils.toString(response2.getEntity());
-                if (responseString.contains(String.valueOf(HttpStatus.SC_NOT_FOUND))) {
-                    // create new app
-                    if (log.isDebugEnabled()) {
-                        log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
-                                "Creating new application......");
-                    }
-                    CloseableHttpResponse response4 = solaceAdminApis.createApplication(organization, application,
-                            apiProducts);
-                    if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-                        log.info("Solace application '" + application.getName() + "' created successfully");
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.error("Error while creating Solace application '" + application.getName() + ". : " +
-                                    response4.getStatusLine().toString());
-                        }
-                        throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.
-                                getStatusLine().getReasonPhrase());
-                    }
+                // If application keys are not generated we are not doing anything in Solace.
+                if (application.getKeys().isEmpty()) {
+                    return;
+                }
+                // create new app
+                if (log.isDebugEnabled()) {
+                    log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
+                            "Creating new application......");
+                }
+                CloseableHttpResponse response4 = solaceAdminApis.createApplication(organization, application,
+                        apiProducts);
+                if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                    log.info("Solace application '" + application.getName() + "' created successfully");
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.error("Error while searching for application '" + application.getName() + ". : " +
-                                response2.getStatusLine().toString());
+                        log.error("Error while creating Solace application '" + application.getName() + ". : " +
+                                response4.getStatusLine().toString());
                     }
-                    throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.
+                    throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.
                             getStatusLine().getReasonPhrase());
                 }
             } else {
@@ -545,30 +539,33 @@ public class SolaceNotifierUtils {
             CloseableHttpResponse response = solaceAdminApis.applicationPatchRemoveSubscription(
                     applicationOrganizationName, application, solaceApiProducts);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                log.info("API product unsubscribed from Solace application '" + application.getName() + "'");
                 try {
                     String responseString = EntityUtils.toString(response.getEntity());
                     org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                    String applicationName = String.valueOf(jsonObject.get("displayName"));
+                    log.info("API product unsubscribed from Solace application '" + applicationName + "'");
                     if (jsonObject.getJSONArray("apiProducts") != null) {
+
                         if (jsonObject.getJSONArray("apiProducts").length() == 0) {
                             // delete application in Solace because of 0 number of api products
                             CloseableHttpResponse response2 = solaceAdminApis.deleteApplication(
                                     applicationOrganizationName, application.getUUID());
                             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                                log.info("Successfully deleted application '" + application.getName() + "' in " +
+                                log.info("Successfully deleted application '" + applicationName + "' in " +
                                         "Solace Broker");
                             } else {
                                 if (log.isDebugEnabled()) {
-                                    log.error("Error while deleting application '" + application.getName() + "' " +
+                                    log.error("Error while deleting application '" + applicationName + "' " +
                                             "in Solace. : " + response2.getStatusLine().toString());
                                 }
                                 throw new APIManagementException("Error while deleting application '" +
-                                        application.getName() + "' in Solace");
+                                        applicationName + "' in Solace");
                             }
                         }
                     }
                 } catch (IOException e) {
                     log.error(e.getMessage());
+                    throw new APIManagementException("Error while deleting application in Solace");
                 }
             } else {
                 if (log.isDebugEnabled()) {

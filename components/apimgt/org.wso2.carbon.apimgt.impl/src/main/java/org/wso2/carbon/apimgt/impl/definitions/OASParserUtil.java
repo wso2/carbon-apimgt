@@ -1185,11 +1185,13 @@ public class OASParserUtil {
                                                   Set<Scope> apiScopes) throws APIManagementException {
 
         for (String scopeName : resourceScopes) {
-            Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
-            if (scope == null) {
-                throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+            if (StringUtils.isNotBlank(scopeName)) {
+                Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+                if (scope == null) {
+                    throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                }
+                template.setScopes(scope);
             }
-            template.setScopes(scope);
         }
         return template;
     }

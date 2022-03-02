@@ -19,11 +19,13 @@ package org.wso2.carbon.apimgt.impl.handlers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ResourceImpl;
@@ -58,7 +60,11 @@ public class GAConfigMediaTypeHandler extends Handler {
         GoogleAnalyticsConfigEvent googleAnalyticsConfigEvent =
                 new GoogleAnalyticsConfigEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                         APIConstants.EventType.GA_CONFIG_UPDATE.toString(), tenantId, tenantDomain);
-        APIUtil.sendNotification(googleAnalyticsConfigEvent, APIConstants.NotifierType.GA_CONFIG.name());
+        try {
+            APIUtil.sendNotification(googleAnalyticsConfigEvent, APIConstants.NotifierType.GA_CONFIG.name());
+        } catch (NotifierException e) {
+            throw new RegistryException("Error while sending google analytics event ", e);
+        }
     }
 
 }

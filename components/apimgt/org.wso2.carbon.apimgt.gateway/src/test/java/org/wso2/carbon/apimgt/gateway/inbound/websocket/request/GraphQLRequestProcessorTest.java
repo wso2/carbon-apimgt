@@ -284,6 +284,13 @@ public class GraphQLRequestProcessorTest {
         GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
         inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
 
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        verbInfoDTO.setAuthType("Any");
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("liftStatusChange",
+                inboundMessageContext)).thenReturn(verbInfoDTO);
+
         GraphQLProcessorResponseDTO graphQLProcessorResponseDTO = new GraphQLProcessorResponseDTO();
         graphQLProcessorResponseDTO.setError(true);
         graphQLProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR);
@@ -313,6 +320,59 @@ public class GraphQLRequestProcessorTest {
         Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
                 String.valueOf(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR));
         Assert.assertFalse(processorResponseDTO.isCloseConnection());
+    }
+
+    @Test
+    public void testHandleRequestScopeValidationSkipWhenSecurityDisabled() throws Exception  {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "liftStatusChange {\\n    id\\n    name\\n }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        // Get schema and parse
+        String graphqlDirPath = "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
+        String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        // VerbInfoDTO with security disabled
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        verbInfoDTO.setAuthType("None");
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("liftStatusChange",
+                inboundMessageContext)).thenReturn(verbInfoDTO);
+
+        // Creating response for scope validation
+        GraphQLProcessorResponseDTO graphQLProcessorResponseDTO = new GraphQLProcessorResponseDTO();
+        graphQLProcessorResponseDTO.setError(true);
+        graphQLProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR);
+        graphQLProcessorResponseDTO.setErrorMessage("User is NOT authorized to access the Resource");
+        graphQLProcessorResponseDTO.setCloseConnection(false);
+        graphQLProcessorResponseDTO.setId("1");
+
+        PowerMockito.when(InboundWebsocketProcessorUtil.validateScopes(inboundMessageContext,
+                "liftStatusChange", "1")).thenReturn(graphQLProcessorResponseDTO);
+        PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
+                inboundMessageContext, "1")).thenReturn(responseDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isError());
+        Assert.assertNull(processorResponseDTO.getErrorMessage());
+        Assert.assertNotEquals(processorResponseDTO.getErrorMessage(),
+                "User is NOT authorized to access the Resource");
     }
 
     @Test

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.inbound.websocket.response;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -166,6 +167,7 @@ public class GraphQLResponseProcessorTest {
         VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
         verbInfoDTO.setHttpVerb("SUBSCRIPTION");
         verbInfoDTO.setThrottling("Unlimited");
+        verbInfoDTO.setAuthType("Any");
         GraphQLOperationDTO graphQLOperationDTO = new GraphQLOperationDTO(verbInfoDTO, "liftStatusChange");
         inboundMessageContext.addVerbInfoForGraphQLMsgId("1", graphQLOperationDTO);
 
@@ -189,5 +191,49 @@ public class GraphQLResponseProcessorTest {
                 graphQLProcessorResponseDTO.getErrorResponseString());
         Assert.assertEquals(processorResponseDTO.getErrorMessage(), graphQLProcessorResponseDTO.getErrorMessage());
         Assert.assertEquals(processorResponseDTO.getErrorCode(), graphQLProcessorResponseDTO.getErrorCode());
+    }
+
+    @Test
+    public void testHandleResponseScopeValidationSkipWhenSecurityDisabled() {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"type\":\"data\",\"id\":\"1\",\"payload\":{\"data\":"
+                + "{\"liftStatusChange\":{\"name\":\"Astra Express\"}}}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        // VerbInfoDTO with security disabled
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        verbInfoDTO.setAuthType("None");
+        GraphQLOperationDTO graphQLOperationDTO = new GraphQLOperationDTO(verbInfoDTO, "liftStatusChange");
+        inboundMessageContext.addVerbInfoForGraphQLMsgId("1", graphQLOperationDTO);
+
+        // Creating response for scope validation
+        GraphQLProcessorResponseDTO graphQLProcessorResponseDTO = new GraphQLProcessorResponseDTO();
+        graphQLProcessorResponseDTO.setError(true);
+        graphQLProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR);
+        graphQLProcessorResponseDTO.setErrorMessage("User is NOT authorized to access the Resource");
+        graphQLProcessorResponseDTO.setCloseConnection(false);
+        graphQLProcessorResponseDTO.setId("1");
+
+        PowerMockito.when(InboundWebsocketProcessorUtil.validateScopes(inboundMessageContext,
+                "liftStatusChange", "1"))
+                .thenReturn(graphQLProcessorResponseDTO);
+        PowerMockito.when(InboundWebsocketProcessorUtil
+                .doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext, "1"))
+                .thenReturn(responseDTO);
+
+        GraphQLResponseProcessor responseProcessor = new GraphQLResponseProcessor();
+        InboundProcessorResponseDTO processorResponseDTO = responseProcessor
+                .handleResponse(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isError());
+        Assert.assertNull(processorResponseDTO.getErrorMessage());
+        Assert.assertNotEquals(processorResponseDTO.getErrorMessage(),
+                "User is NOT authorized to access the Resource");
     }
 }

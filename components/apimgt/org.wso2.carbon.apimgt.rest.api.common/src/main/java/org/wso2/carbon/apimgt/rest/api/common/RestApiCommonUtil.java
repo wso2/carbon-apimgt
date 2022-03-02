@@ -418,6 +418,11 @@ public class RestApiCommonUtil {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
 
+    public static APIConsumer getConsumer(String subscriberName, String organization) throws APIManagementException {
+
+        return APIManagerFactory.getInstance().getAPIConsumer(subscriberName, organization);
+    }
+
     /**
      * This method retrieves the Swagger Definition for an API to be displayed
      *

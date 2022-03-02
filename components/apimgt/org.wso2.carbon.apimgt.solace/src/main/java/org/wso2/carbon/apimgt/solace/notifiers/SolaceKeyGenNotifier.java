@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.solace.notifiers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
@@ -24,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
@@ -32,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.util.List;
 import java.util.Map;
@@ -104,14 +107,22 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
             }
             // Patching consumerKey to Solace application using Admin Apis
             if (isContainsSolaceApis) {
-                String consumerSecret = application.getName() + "-application-secret";
-                for (APIKey key : application.getKeys()) {
-                    if (key.getConsumerKey().equals(event.getConsumerKey())) {
-                        consumerSecret = key.getConsumerSecret();
+                if (application.getKeys() != null) {
+                    String consumerSecret = null;
+                    APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
+                            getThreadLocalCarbonContext().getUsername());
+                    Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
+                    for (APIKey key : consumerKeys) {
+                        if (key.getConsumerKey().equals(event.getConsumerKey())) {
+                            consumerSecret = key.getConsumerSecret();
+                        }
                     }
+                    SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
+                            application, event.getConsumerKey(), consumerSecret);
+                } else {
+                    throw new NotifierException("Application keys are not found in the application : " +
+                            application.getName());
                 }
-                SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
-                        application, event.getConsumerKey(), consumerSecret);
             }
         } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());

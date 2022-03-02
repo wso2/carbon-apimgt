@@ -2866,12 +2866,14 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
-    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmp";
+    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
     public static final String YAML_CONTENT_TYPE = "text/yaml";
     public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "specifications";
     public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
+    public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
+
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
 
@@ -2907,4 +2909,7 @@ public final class APIConstants {
         public static final String STANDARD = "STANDARD";
         public static final String FULL = "FULL";
     }
+
+    // Constants related to basic health check APIs
+    public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 }

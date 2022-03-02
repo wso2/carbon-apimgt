@@ -20,9 +20,6 @@
     "description": {
       "type": "string"
     },
-    "multipleAllowed": {
-      "type": "boolean"
-    },
     "applicableFlows": {
       "type": "array",
       "items": {
@@ -49,9 +46,7 @@
       "items": {
         "type": "string",
         "enum": [
-          "REST",
-          "GRAPHQL",
-          "STREAMING"
+          "HTTP"
         ]
       }
     },
@@ -76,7 +71,22 @@
           },
           "type": {
             "type": "string",
-            "minLength": 1
+            "enum": [
+              "String",
+              "Boolean",
+              "Integer",
+              "Enum",
+              "Map"
+            ]
+          },
+          "defaultValue": {
+            "type": ["integer", "string", "boolean"]
+          },
+          "allowedValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "required": {
             "type": "boolean"
@@ -95,7 +105,6 @@
     "category",
     "name",
     "displayName",
-    "multipleAllowed",
     "applicableFlows",
     "supportedGateways",
     "supportedApiTypes"
