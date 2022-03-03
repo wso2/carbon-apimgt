@@ -3877,7 +3877,7 @@ public class SQLConstants {
 
         public static final String GET_COMMON_OPERATION_POLICY_NAMES_FOR_ORGANIZATION =
                 "SELECT OP.POLICY_NAME FROM AM_OPERATION_POLICY OP INNER JOIN AM_COMMON_OPERATION_POLICY COP " +
-                        " WHERE OP.POLICY_UUID = COP.POLICY_UUID AND OP.ORGANIZATION = ?";
+                        " ON OP.POLICY_UUID = COP.POLICY_UUID WHERE OP.ORGANIZATION = ?";
     }
 
     /**
