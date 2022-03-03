@@ -67,7 +67,7 @@ public class EnvironmentMappingUtil {
         if (parser != null) {
             List<GatewayEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
             List<AsyncProtocolEndpoint> endpointUrlsList = parser.getExternalEndpointURLs(environment);
-            if (endpointUrlsList != null) {
+            if (endpointUrlsList != null || endpointUrlsList.size() > 0) {
                 for (AsyncProtocolEndpoint asyncProtocolEndpoint : endpointUrlsList) {
                     GatewayEnvironmentProtocolURIDTO gatewayEnvironmentProtocolURIDTO =
                             new GatewayEnvironmentProtocolURIDTO();

@@ -99,7 +99,6 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
@@ -2852,24 +2851,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
                             tenantDomain, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                             application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
-                    try {
-                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                    } catch (NotifierException e) {
-                        apiMgtDAO.removeSubscriptionById(subscriptionId);
-                        throw new APIManagementException("Error while sending Subscription event ", e);
-                    }
+                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
                         tenantDomain, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
                         application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
-                try {
-                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                } catch (NotifierException e) {
-                    apiMgtDAO.removeSubscriptionById(subscriptionId);
-                    throw new APIManagementException("Error while sending Subscription event ", e);
-                }
+                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
             if (log.isDebugEnabled()) {
@@ -3045,22 +3034,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
                             tenantDomain, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
                             application.getId(), application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
-                    try {
-                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                    } catch (NotifierException e) {
-                        throw new APIManagementException("Error while sending Subscription event ", e);
-                    }
+                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
                         tenantDomain, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
                         application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
-                try {
-                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                } catch (NotifierException e) {
-                    throw new APIManagementException("Error while sending Subscription event ", e);
-                }
+                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
             if (log.isDebugEnabled()) {
@@ -3289,11 +3270,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             tenantDomain, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                             identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                             subscription.getSubStatus());
-                    try {
-                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                    } catch (NotifierException e) {
-                        throw new APIManagementException("Error while sending Subscription event ", e);
-                    }
+                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
@@ -3301,11 +3278,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         tenantDomain, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
                         identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                         subscription.getSubStatus());
-                try {
-                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                } catch (NotifierException e) {
-                    throw new APIManagementException("Error while sending Subscription event ", e);
-                }
+                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
             throw new APIManagementException(String.format("Subscription for UUID:%s does not exist.",
@@ -3532,11 +3505,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         organization, applicationId, application.getUUID(), application.getName(),
                         application.getTokenType(),
                         application.getTier(), application.getGroupId(), application.getApplicationAttributes(), userId);
-                try {
-                    APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
-                } catch (NotifierException e) {
-                    throw new APIManagementException("Error while sending Application event ", e);
-                }
+                APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
@@ -3544,11 +3513,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     organization, applicationId, application.getUUID(), application.getName(),
                     application.getTokenType(), application.getTier(), application.getGroupId(),
                     application.getApplicationAttributes(), userId);
-            try {
-                APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
-            } catch (NotifierException e) {
-                throw new APIManagementException("Error while sending Application event ", e);
-            }
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return applicationId;
     }
@@ -3726,11 +3691,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 existingApp.getOrganization(), application.getId(), application.getUUID(), application.getName(),
                 application.getTokenType(), application.getTier(), application.getGroupId(),
                 application.getApplicationAttributes(), existingApp.getSubscriber().getName());
-        try {
-            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
-        } catch (NotifierException e) {
-            throw new APIManagementException("Error while sending Application event ", e);
-        }
+        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
     /**
@@ -3941,11 +3902,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         application.getOrganization(), applicationId, application.getUUID(), application.getName(),
                         application.getTokenType(),
                         application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
-                try {
-                    APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
-                } catch (NotifierException e) {
-                    throw new APIManagementException("Error while sending Application event ", e);
-                }
+                APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
@@ -3953,11 +3910,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     application.getOrganization(), applicationId, application.getUUID(), application.getName(),
                     application.getTokenType(),
                     application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
-            try {
-                APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
-            } catch (NotifierException e) {
-                throw new APIManagementException("Error while sending Application event ", e);
-            }
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         if (consumerKeysOfApplication != null && consumerKeysOfApplication.size() > 0) {
             for (Map.Entry<String, Pair<String, String>> entry : consumerKeysOfApplication.entrySet()) {
@@ -3970,11 +3923,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         APIUtil.getTenantIdFromTenantDomain(keyManagerTenantDomain), keyManagerTenantDomain,
                         application.getId(), application.getUUID(), consumerKey, application.getKeyType(),
                         keyManagerName);
-                try {
-                    APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
-                } catch (NotifierException e) {
-                    throw new APIManagementException("Error while sending Application event ", e);
-                }
+                APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
             }
         }
     }
@@ -4241,9 +4190,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (WorkflowException e) {
             log.error("Could not execute Workflow", e);
             throw new APIManagementException(e);
-        } catch (NotifierException e) {
-            log.error("Error while sending Application Registration event", e);
-            throw new APIManagementException("Error while sending Application Registration event ", e);
         } finally {
             if (isTenantFlowStarted) {
                 endTenantFlow();
