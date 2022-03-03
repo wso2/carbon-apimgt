@@ -2770,7 +2770,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 validatedPolicies.add(policy);
                             }
                         } else {
-                            //TODO: get policy based on the name
                             OperationPolicyData commonPolicyData =
                                     getCommonOperationPolicyByPolicyId(policyId, tenantDomain, false);
                             if (commonPolicyData != null) {
@@ -2787,6 +2786,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             } else {
                                 throw new APIManagementException("Selected policy " + policyId + " is not found.",
                                         ExceptionCodes.INVALID_OPERATION_POLICY);
+                            }
+                        }
+                    } else {
+                        // check the API specific operation policy list
+                        OperationPolicyData policyData =
+                                getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(), api.getUuid(), null,
+                                        tenantDomain, false);
+                        if (policyData != null) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Policy Id is not defined and an API specific policy is found for "
+                                        + policy.getPolicyName() + ". Validating the policy");
+                            }
+                            OperationPolicySpecification policySpecification = policyData.getSpecification();
+                            if (validateAppliedPolicyWithSpecification(policySpecification, policy, api)) {
+                                policy.setPolicyId(policyData.getPolicyId());
+                                validatedPolicies.add(policy);
+                            }
+                        } else {
+                            OperationPolicyData commonPolicyData =
+                                    getCommonOperationPolicyByPolicyName(policy.getPolicyName(), tenantDomain, false);
+                            if (commonPolicyData != null) {
+                                // A common policy is found for specified policy. This will be validated according to the provided
+                                // attributes and added to API policy list
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Policy Id is not defined and a common policy is found for "
+                                            + policy.getPolicyName() + ". Validating the policy");
+                                }
+                                OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
+                                if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
+                                    policy.setPolicyId(policyData.getPolicyId());
+                                    validatedPolicies.add(policy);
+                                }
+                            } else {
+                                log.warn("Selected policy " + policy.getPolicyName() + " is not found. Hence dropped");
                             }
                         }
                     }
