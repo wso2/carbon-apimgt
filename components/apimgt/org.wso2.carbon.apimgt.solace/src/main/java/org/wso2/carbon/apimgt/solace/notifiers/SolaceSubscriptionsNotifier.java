@@ -64,10 +64,13 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @param event related to subscription handling
      * @throws NotifierException if error occurs when casting event
      */
-    private void process(Event event) throws NotifierException  {
-        SubscriptionEvent subscriptionEvent = (SubscriptionEvent) event;
+    private void process(Event event) throws NotifierException {
+        SubscriptionEvent subscriptionEvent;
+        subscriptionEvent = (SubscriptionEvent) event;
+
+
         if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
-            createSubscription(subscriptionEvent);
+            crateSubscription(subscriptionEvent);
         } else if (APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name().equals(event.getType())) {
             updateSubscription(subscriptionEvent);
         } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
@@ -81,7 +84,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @param event SubscriptionEvent to create Solace API subscriptions
      * @throws NotifierException if error occurs when creating subscription for Solace APIs
      */
-    private void createSubscription(SubscriptionEvent event) throws NotifierException {
+    private void crateSubscription(SubscriptionEvent event) throws NotifierException {
 
         String apiUUID = event.getApiUUID();
         String applicationUUID = event.getApplicationUUID();
@@ -119,10 +122,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                                     applicationOrganizationName);
                         }
                     } catch (IOException e) {
-                        log.error("Cannot create solace application " + application.getName() +
-                                " in Solace Broker.");
-                        throw new APIManagementException("Cannot create solace application " + application.getName() +
-                                " in Solace Broker.", e);
+                        log.error(e.getMessage());
                     }
                 } else {
                     if (log.isDebugEnabled()) {
@@ -181,12 +181,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                                     applicationOrganizationName);
                         }
                     } catch (IOException e) {
-                        if (log.isDebugEnabled()) {
-                            log.error("Cannot create solace application " + application.getName() +
-                                    "with API product deployed in different organizations...");
-                        }
-                        throw new APIManagementException("Cannot create solace application " + application.getName() +
-                                "with API product deployed in different organizations...", e);
+                        log.error(e.getMessage());
                     }
                 } else {
                     if (log.isDebugEnabled()) {

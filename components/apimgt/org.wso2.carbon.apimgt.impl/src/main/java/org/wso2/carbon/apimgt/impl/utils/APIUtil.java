@@ -679,18 +679,17 @@ public final class APIUtil {
      * @param event        Event object
      * @param notifierType eventType
      */
-    public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType)
-            throws NotifierException {
+    public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
 
         if (ServiceReferenceHolder.getInstance().getNotifiersMap().containsKey(notifierType)) {
             List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
-            for (Notifier notifier : notifierList) {
+            notifierList.forEach((notifier) -> {
                 try {
                     notifier.publishEvent(event);
                 } catch (NotifierException e) {
-                    throw new NotifierException(e.getMessage());
+                    log.error("Error when publish " + event + " through notifier:" + notifierType + ". Error:" + e);
                 }
-            }
+            });
         }
 
     }
@@ -7627,11 +7626,7 @@ public final class APIUtil {
                             retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                             retrievedPolicy.getPolicyName(),
                             retrievedPolicy.getDefaultQuotaPolicy().getType());
-                    try {
-                        APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
-                    } catch (NotifierException e) {
-                        throw new APIManagementException("Error while processing Aplication Policy event");
-                    }
+                    APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
                 }
             }
         }
@@ -7830,18 +7825,13 @@ public final class APIUtil {
                             retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                             retrievedPolicy.getPolicyName(),
                             retrievedPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, null);
-                    try {
-                        APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
-                    } catch (NotifierException e) {
-                        throw new APIManagementException("Error while sending API Policy event ", e);
-                    }
+                    APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
                 }
             }
         }
     }
 
-    private static void deployRetrievedSubscriptionPolicy(int tenantId, SubscriptionPolicy retrievedPolicy)
-            throws APIManagementException {
+    private static void deployRetrievedSubscriptionPolicy(int tenantId, SubscriptionPolicy retrievedPolicy) {
 
         SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(
                 UUID.randomUUID().toString(),
@@ -7852,11 +7842,7 @@ public final class APIUtil {
                 retrievedPolicy.isStopOnQuotaReach(),
                 retrievedPolicy.getGraphQLMaxDepth(), retrievedPolicy.getGraphQLMaxComplexity(),
                 retrievedPolicy.getSubscriberCount());
-        try {
-            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
-        } catch (NotifierException e) {
-            throw new APIManagementException("Error while sending Subscription Policy event ", e);
-        }
+        APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
     }
 
     /**

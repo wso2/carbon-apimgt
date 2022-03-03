@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -65,8 +64,7 @@ public class APIGatewayManager {
         return instance;
     }
 
-    private void sendDeploymentEvent(API api, String tenantDomain, Set<String> publishedGateways)
-            throws APIManagementException {
+    private void sendDeploymentEvent(API api, String tenantDomain, Set<String> publishedGateways) {
 
         APIIdentifier apiIdentifier = api.getId();
         DeployAPIInGatewayEvent
@@ -74,18 +72,14 @@ public class APIGatewayManager {
                 System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), api.getOrganization(),
                 api.getId().getId(), api.getUuid(), publishedGateways, apiIdentifier.getName(), apiIdentifier.getVersion(),
                 apiIdentifier.getProviderName(),api.getType(),api.getContext());
-        try {
-            APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-        } catch (NotifierException e) {
-            throw new APIManagementException("Error while sending Deploy API gateway event ", e);
-        }
+        APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
             log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
                     + "with apiID " + api + " at " + deployAPIInGatewayEvent.getTimeStamp());
         }
     }
 
-    private void sendDeploymentEvent(APIProduct api, String tenantDomain, Set<String> publishedGateways) throws APIManagementException {
+    private void sendDeploymentEvent(APIProduct api, String tenantDomain, Set<String> publishedGateways) {
 
         APIProductIdentifier apiIdentifier = api.getId();
         DeployAPIInGatewayEvent
@@ -93,18 +87,14 @@ public class APIGatewayManager {
                 System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
                 api.getProductId(),api.getUuid(), publishedGateways, apiIdentifier.getName(), apiIdentifier.getVersion(),
                 PRODUCT_PREFIX, api.getType(),api.getContext());
-        try {
-            APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-        } catch (NotifierException e) {
-            throw new APIManagementException("Error while sending Certificate event ", e);
-        }
+        APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
             log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
                     + "with apiID " + api + " at " + deployAPIInGatewayEvent.getTimeStamp());
         }
     }
 
-    private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways) throws APIManagementException {
+    private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways) {
         APIIdentifier apiIdentifier = api.getId();
 
         DeployAPIInGatewayEvent
@@ -112,16 +102,13 @@ public class APIGatewayManager {
                 System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
                 api.getOrganization(), api.getId().getId(), api.getUuid(), removedGateways, apiIdentifier.getName(),
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName(), api.getType(), api.getContext());
-        try {
-            APIUtil.sendNotification(deployAPIInGatewayEvent,
-                    APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-        } catch (NotifierException e) {
-            throw new APIManagementException("Error while sending Deploy API event ", e);
-        }
+        APIUtil.sendNotification(deployAPIInGatewayEvent,
+                APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+
     }
 
     private void sendUnDeploymentEvent(APIProduct apiProduct, String tenantDomain, Set<String> removedGateways,
-                                       Set<API> associatedAPIs) throws APIManagementException {
+                                       Set<API> associatedAPIs) {
 
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
         Set<APIEvent> apiEvents = transformAPIToAPIEvent(associatedAPIs);
@@ -131,15 +118,10 @@ public class APIGatewayManager {
                 apiProduct.getProductId(),apiProduct.getUuid(), removedGateways, apiProductIdentifier.getName(),
                 apiProductIdentifier.getVersion(), PRODUCT_PREFIX, APIConstants.API_PRODUCT, apiProduct.getContext(),
                 apiEvents);
-        try {
-            APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-        } catch (NotifierException e) {
-            throw new APIManagementException("Error while sending Deploy API event ", e);
-        }
+        APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
     }
 
-    public void deployToGateway(API api, String tenantDomain, Set<String> gatewaysToPublish)
-            throws APIManagementException {
+    public void deployToGateway(API api, String tenantDomain, Set<String> gatewaysToPublish) {
 
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
@@ -147,16 +129,14 @@ public class APIGatewayManager {
         sendDeploymentEvent(api, tenantDomain, gatewaysToPublish);
     }
 
-    public void deployToGateway(APIProduct api, String tenantDomain, Set<String> gatewaysToPublish)
-            throws APIManagementException {
+    public void deployToGateway(APIProduct api, String tenantDomain, Set<String> gatewaysToPublish) {
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
         sendDeploymentEvent(api, tenantDomain, gatewaysToPublish);
     }
 
-    public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove)
-            throws APIManagementException {
+    public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove) {
 
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
