@@ -16567,10 +16567,17 @@ public class ApiMgtDAO {
      */
     public List<APIRevisionDeployment> getAPIRevisionDeploymentByApiUUID(String apiUUID) throws APIManagementException {
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.
-                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID)) {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement statement;
+            if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                statement = connection
+                        .prepareStatement(SQLConstants.
+                                APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID_POSTGRES);
+            } else {
+                statement = connection
+                        .prepareStatement(SQLConstants.
+                                APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID);
+            }
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs);
