@@ -4072,6 +4072,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             api.setOrganization(organization);
             return APIMappingUtil.fromAPItoDTO(api, apiProvider);
+        } catch(APIMgtResourceNotFoundException e) {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
