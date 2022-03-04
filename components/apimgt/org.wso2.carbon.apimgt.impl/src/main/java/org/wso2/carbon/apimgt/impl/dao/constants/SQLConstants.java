@@ -2621,8 +2621,8 @@ public class SQLConstants {
             "WHERE ORGANIZATION = ? AND UUID = ?";
 
     public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
-            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION, PROVIDER, ORGANIZATION) " +
-            "VALUES (?,?,?,?,?,?,?)";
+            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, DISPLAY_NAME, DESCRIPTION, PROVIDER, ORGANIZATION) " +
+            "VALUES (?,?,?,?,?,?)";
 
     public static final String INSERT_GATEWAY_VHOSTS_SQL = "INSERT INTO " +
             "AM_GW_VHOST (GATEWAY_ENV_ID, HOST, HTTP_CONTEXT, HTTP_PORT, HTTPS_PORT, WS_PORT, WSS_PORT) " +
