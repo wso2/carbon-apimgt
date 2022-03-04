@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -11803,6 +11804,33 @@ public final class APIUtil {
         policySpecification.setApplicableFlows(applicableFlows);
         return policySpecification;
     }
+
+    public static OperationPolicyData getCorrectPolicyDataForMediationFlow(API api, String policyDirection, String organization) {
+        OperationPolicyData policyData = null;
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policyDirection) &&
+                api.getInSequenceMediation() != null) {
+            Mediation inSequenceMediation = api.getInSequenceMediation();
+            policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
+                    APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, organization,
+                    inSequenceMediation.getName(), inSequenceMediation.getConfig());
+        }
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(policyDirection) &&
+                api.getInSequenceMediation() != null) {
+            Mediation outSequenceMediation = api.getOutSequenceMediation();
+            policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
+                    APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE, organization,
+                    outSequenceMediation.getName(), outSequenceMediation.getConfig());
+        }
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policyDirection) &&
+                api.getInSequenceMediation() != null) {
+            Mediation faultSequenceMediation = api.getFaultSequenceMediation();
+            policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
+                    APIConstants.OPERATION_SEQUENCE_TYPE_FAULT, organization,
+                    faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
+        }
+        return policyData;
+    }
+
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
