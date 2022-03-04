@@ -201,7 +201,7 @@ public enum ExceptionCodes implements ErrorHandler {
     IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
             + "identity provider"),
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
-
+    DUPLICATE_ISSUER(900615, "Unable to add identity provider. The issuer is already registered.", 409, "Error while adding the identity provider. The issuer is already registered."),
 
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +

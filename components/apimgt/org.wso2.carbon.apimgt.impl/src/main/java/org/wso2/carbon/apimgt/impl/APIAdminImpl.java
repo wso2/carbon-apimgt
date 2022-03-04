@@ -537,8 +537,12 @@ public class APIAdminImpl implements APIAdmin {
                                 APIUtil.getInternalOrganizationDomain(keyManagerConfigurationDTO.getOrganization()));
                 keyManagerConfigurationDTO.setExternalReferenceId(identityProvider.getResourceId());
             } catch (IdentityProviderManagementException e) {
+                ExceptionCodes exceptionCode = ExceptionCodes.IDP_ADDING_FAILED;
+                if (e.getMessage().contains("has already been registered")) {
+                    exceptionCode = ExceptionCodes.DUPLICATE_ISSUER;
+                }
                 throw new APIManagementException("IdP adding failed. " + e.getMessage(), e,
-                        ExceptionCodes.IDP_ADDING_FAILED);
+                        exceptionCode);
             }
         }
 
