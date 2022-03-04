@@ -48,7 +48,6 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -645,7 +644,6 @@ public class ExportUtils {
                                 }
                             } else {
                                 // This path is to handle migrated APIs with mediation policies attached
-                                OperationPolicyData policyData = null;
                                 if (APIUtil.isSequenceDefined(api.getInSequence())
                                         || APIUtil.isSequenceDefined(api.getOutSequence())
                                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
@@ -655,27 +653,9 @@ public class ExportUtils {
                                         apiProvider.loadMediationPoliciesToAPI(api, tenantDomain);
                                         mediationPoliciesLoaded = true;
                                     }
-                                    if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection()) &&
-                                            api.getInSequenceMediation() != null) {
-                                        Mediation inSequenceMediation = api.getInSequenceMediation();
-                                        policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
-                                                APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, tenantDomain,
-                                                inSequenceMediation.getName(), inSequenceMediation.getConfig());
-                                    }
-                                    if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(policy.getDirection()) &&
-                                            api.getInSequenceMediation() != null) {
-                                        Mediation inSequenceMediation = api.getInSequenceMediation();
-                                        policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
-                                                APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE, tenantDomain,
-                                                inSequenceMediation.getName(), inSequenceMediation.getConfig());
-                                    }
-                                    if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection()) &&
-                                            api.getInSequenceMediation() != null) {
-                                        Mediation inSequenceMediation = api.getInSequenceMediation();
-                                        policyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
-                                                APIConstants.OPERATION_SEQUENCE_TYPE_FAULT, tenantDomain,
-                                                inSequenceMediation.getName(), inSequenceMediation.getConfig());
-                                    }
+
+                                    OperationPolicyData policyData = APIUtil.getCorrectPolicyDataForMediationFlow(api,
+                                            policy.getDirection(), tenantDomain);
                                     if (policyData != null) {
                                         exportPolicyData(policyData, archivePath, exportFormat);
                                         exportedPolicies.add(policy.getPolicyName());
