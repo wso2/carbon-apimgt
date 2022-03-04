@@ -211,6 +211,7 @@ public enum ExceptionCodes implements ErrorHandler {
     USERSTORE_INITIALIZATION_FAILED(900615, "Unable to get the user store manager", 500,
             "Error while getting the user store manager from the realm"),
 
+    DUPLICATE_ISSUER(900616, "Unable to add identity provider. The issuer is already registered.", 409, "Error while adding the identity provider. The issuer is already registered."),
 
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
