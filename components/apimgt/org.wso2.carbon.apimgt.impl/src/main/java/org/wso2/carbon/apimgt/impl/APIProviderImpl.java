@@ -37,7 +37,6 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.osgi.service.dmt.Uri;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -86,7 +85,6 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
@@ -1387,7 +1385,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
-            migrateMediationPoliciesOfAPI(api, tenantDomain);
+            migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
         //Validate Operation Policies
         validateOperationPolicyParameters(api, tenantDomain);
@@ -2135,11 +2133,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * This method is used to migrate mediation policies of already migrated APIs. If a mediation policies are found
      * for three sequences, they will be imported as an API specific policy and that policy Id will be used.
      *
-     * @param api      API
+     * @param api          API
      * @param organization Organization Name
      * @throws APIManagementException
      */
-    private void migrateMediationPoliciesOfAPI(API api, String organization) throws APIManagementException {
+    private void migrateMediationPoliciesOfAPI(API api, String organization, boolean updatePolicyURLMapping)
+            throws APIManagementException {
 
         Map<String, String> clonedPoliciesMap = new HashMap<>();
         String apiUUID = api.getUuid();
@@ -2153,9 +2152,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             null, organization, false);
             String inFlowPolicyId;
             if (existingPolicy == null) {
-                OperationPolicyData inSeqPolicyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
-                        APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, organization,
-                        inSequenceMediation.getName(), inSequenceMediation.getConfig());
+                OperationPolicyData inSeqPolicyData =
+                        APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST,
+                                organization);
                 inFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, inSeqPolicyData, organization);
             } else {
                 inFlowPolicyId = existingPolicy.getPolicyId();
@@ -2172,9 +2171,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             null, organization, false);
             String outFlowPolicyId;
             if (existingPolicy == null) {
-                OperationPolicyData outSeqPolicyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
-                        APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE, organization,
-                        outSequenceMediation.getName(), outSequenceMediation.getConfig());
+                OperationPolicyData outSeqPolicyData =
+                        APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE,
+                                organization);
                 outFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, outSeqPolicyData, organization);
             } else {
                 outFlowPolicyId = existingPolicy.getPolicyId();
@@ -2191,9 +2190,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             null, organization, false);
             String faultFlowPolicyId;
             if (existingPolicy == null) {
-                OperationPolicyData faultSeqPolicyData = APIUtil.getOperationPolicyDataForMediation(api.getUuid(),
-                        APIConstants.OPERATION_SEQUENCE_TYPE_FAULT, organization,
-                        faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
+                OperationPolicyData faultSeqPolicyData =
+                        APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT,
+                                organization);
                 faultFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, faultSeqPolicyData, organization);
             } else {
                 faultFlowPolicyId = existingPolicy.getPolicyId();
@@ -2204,10 +2203,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setFaultSequenceMediation(null);
         }
 
-        updateMigratedPolicyInOperations(api, clonedPoliciesMap);
+        setMigratedPolicyIdsToPolicies(api, clonedPoliciesMap, updatePolicyURLMapping);
     }
 
-    private void updateMigratedPolicyInOperations(API api, Map<String, String> clonedPoliciesMap)
+    /**
+     * This method will update the policy Id of the selected operations policy from the given cloned policies map.
+     *
+     * @param api                    API
+     * @param clonedPoliciesMap      Cloned policies map
+     * @param updatePolicyURLMapping whether to update policy url mapping table or not
+     * @throws APIManagementException
+     */
+    private void setMigratedPolicyIdsToPolicies(API api, Map<String, String> clonedPoliciesMap,
+                                                boolean updatePolicyURLMapping)
             throws APIManagementException {
 
         boolean policyUpdated = false;
@@ -2222,7 +2230,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-        if (policyUpdated) {
+        if (policyUpdated && updatePolicyURLMapping) {
             apiMgtDAO.addOperationPolicyMapping(uriTemplates);
         }
     }
@@ -2961,7 +2969,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         if (APIUtil.isSequenceDefined(existingAPI.getInSequence()) || APIUtil.isSequenceDefined(existingAPI.getOutSequence())
                 || APIUtil.isSequenceDefined(existingAPI.getFaultSequence())) {
-            migrateMediationPoliciesOfAPI(existingAPI, organization);
+            migrateMediationPoliciesOfAPI(existingAPI, organization, true);
         }
 
         existingAPI.setOrganization(organization);

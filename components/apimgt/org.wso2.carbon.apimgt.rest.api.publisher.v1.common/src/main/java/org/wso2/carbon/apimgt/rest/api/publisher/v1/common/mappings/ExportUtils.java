@@ -654,7 +654,7 @@ public class ExportUtils {
                                         mediationPoliciesLoaded = true;
                                     }
 
-                                    OperationPolicyData policyData = APIUtil.getCorrectPolicyDataForMediationFlow(api,
+                                    OperationPolicyData policyData = APIUtil.getPolicyDataForMediationFlow(api,
                                             policy.getDirection(), tenantDomain);
                                     if (policyData != null) {
                                         exportPolicyData(policyData, archivePath, exportFormat);
