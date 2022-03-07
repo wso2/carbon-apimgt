@@ -524,11 +524,15 @@ public class APIAdminImpl implements APIAdmin {
                             keyManagerConfigurationDTO.getOrganization(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
         }
 
-        if (keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY) != null) {
+        String issuer = keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY).toString();
+        if (StringUtils.isEmpty(issuer)) {
             try {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Checking whether an Idp with issuer %s is registered.", issuer));
+                }
                 IdentityProvider idp = IdentityProviderManager.getInstance().getIdPByMetadataProperty(
                         IDP_ISSUER_NAME,
-                        keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY).toString(),
+                        issuer,
                         APIUtil.getInternalOrganizationDomain(keyManagerConfigurationDTO.getOrganization()),
                         false);
                 if (idp != null) {
@@ -538,13 +542,14 @@ public class APIAdminImpl implements APIAdmin {
                                     keyManagerConfigurationDTO.getOrganization()), ExceptionCodes.DUPLICATE_ISSUER);
                 }
             } catch (IdentityProviderManagementException e) {
-                throw new APIManagementException(String.format("IdP adding failed. %s", e.getMessage()),
+                throw new APIManagementException(
+                        String.format("Getting idp for issuer %s is failed. %s", issuer, e.getMessage()),
                         e,
-                        ExceptionCodes.IDP_ADDING_FAILED);
+                        ExceptionCodes.IDP_RETRIEVAL_FAILED);
             }
         } else {
             throw new APIManagementException("IdP adding failed. The issuer cannot be empty.",
-                    ExceptionCodes.IDP_ADDING_FAILED);
+                    ExceptionCodes.EMPTY_ISSUER);
         }
 
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
