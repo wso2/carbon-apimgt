@@ -107,6 +107,8 @@ import javax.xml.transform.stream.StreamResult;
 public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
+    private static final String IDP_ISSUER_NAME = "idpIssuerName";
+    private static final String ISSUER_KEY = "issuer";
     protected ApiMgtDAO apiMgtDAO;
 
     public APIAdminImpl() {
@@ -521,6 +523,30 @@ public class APIAdminImpl implements APIAdmin {
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
                             keyManagerConfigurationDTO.getOrganization(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
         }
+
+        if (keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY) != null) {
+            try {
+                IdentityProvider idp = IdentityProviderManager.getInstance().getIdPByMetadataProperty(
+                        IDP_ISSUER_NAME,
+                        keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY).toString(),
+                        APIUtil.getInternalOrganizationDomain(keyManagerConfigurationDTO.getOrganization()),
+                        false);
+                if (idp != null) {
+                    throw new APIManagementException(
+                            String.format("Key Manager with issuer %s is already registered in tenant %s",
+                                    keyManagerConfigurationDTO.getAdditionalProperties().get("issuer").toString(),
+                                    keyManagerConfigurationDTO.getOrganization()), ExceptionCodes.DUPLICATE_ISSUER);
+                }
+            } catch (IdentityProviderManagementException e) {
+                throw new APIManagementException(String.format("IdP adding failed. %s", e.getMessage()),
+                        e,
+                        ExceptionCodes.IDP_ADDING_FAILED);
+            }
+        } else {
+            throw new APIManagementException("IdP adding failed. The issuer cannot be empty.",
+                    ExceptionCodes.IDP_ADDING_FAILED);
+        }
+
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
@@ -537,12 +563,8 @@ public class APIAdminImpl implements APIAdmin {
                                 APIUtil.getInternalOrganizationDomain(keyManagerConfigurationDTO.getOrganization()));
                 keyManagerConfigurationDTO.setExternalReferenceId(identityProvider.getResourceId());
             } catch (IdentityProviderManagementException e) {
-                ExceptionCodes exceptionCode = ExceptionCodes.IDP_ADDING_FAILED;
-                if (e.getMessage().contains("has already been registered")) {
-                    exceptionCode = ExceptionCodes.DUPLICATE_ISSUER;
-                }
                 throw new APIManagementException("IdP adding failed. " + e.getMessage(), e,
-                        exceptionCode);
+                        ExceptionCodes.IDP_ADDING_FAILED);
             }
         }
 
