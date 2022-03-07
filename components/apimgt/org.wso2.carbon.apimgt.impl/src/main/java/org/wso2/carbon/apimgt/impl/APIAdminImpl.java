@@ -534,7 +534,7 @@ public class APIAdminImpl implements APIAdmin {
                 if (idp != null) {
                     throw new APIManagementException(
                             String.format("Key Manager with issuer %s is already registered in tenant %s",
-                                    keyManagerConfigurationDTO.getAdditionalProperties().get("issuer").toString(),
+                                    keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY).toString(),
                                     keyManagerConfigurationDTO.getOrganization()), ExceptionCodes.DUPLICATE_ISSUER);
                 }
             } catch (IdentityProviderManagementException e) {
