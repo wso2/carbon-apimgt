@@ -345,6 +345,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setCallerToken(info.getEndUserToken());
             authContext.setApplicationId(info.getApplicationId());
             authContext.setApplicationUUID(info.getApplicationUUID());
+            authContext.setApplicationGroupIds(info.getApplicationGroupIds());
             authContext.setApplicationName(info.getApplicationName());
             authContext.setApplicationTier(info.getApplicationTier());
             authContext.setSubscriber(info.getSubscriber());
