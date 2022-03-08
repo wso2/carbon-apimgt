@@ -27,7 +27,7 @@
 
     <artifactId>org.wso2.carbon.apimgt.tracing.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Api management Tracing Feature</name>
+    <name>WSO2 Carbon - Api Management Tracing Feature</name>
     <url>http://wso2.org</url>
 
     <description>
