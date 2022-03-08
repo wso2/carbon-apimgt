@@ -78,35 +78,36 @@ return null;
     @XmlType(name="GatewayTypeEnum")
     @XmlEnum(String.class)
     public enum GatewayTypeEnum {
-        WSO2_SYNAPSE("WSO2_SYNAPSE"),
-        WSO2_CHOREO_CONNECT("WSO2_CHOREO_CONNECT"),
-        NOT_SELECTED("NOT_SELECTED");
-        private String value;
+      WSO2_SYNAPSE("WSO2_SYNAPSE"),
+      WSO2_CHOREO_CONNECT("WSO2_CHOREO_CONNECT"),
+      NOT_SELECTED("NOT_SELECTED");
+      private String value;
 
-        GatewayTypeEnum (String v) {
-            value = v;
-        }
+      GatewayTypeEnum(String v) {
+        value = v;
+      }
 
-        public String value() {
-            return value;
-        }
+      public String value() {
+        return value;
+      }
 
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
+      @Override
+      public String toString() {
+        return String.valueOf(value);
+      }
 
-        @JsonCreator
-        public static GatewayTypeEnum fromValue(String v) {
-            for (GatewayTypeEnum b : GatewayTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
+      @JsonCreator
+      public static GatewayTypeEnum fromValue(String v) {
+        for (GatewayTypeEnum b : GatewayTypeEnum.values()) {
+          if (String.valueOf(b.value).equals(v)) {
+            return b;
+          }
         }
+        return null;
+      }
     }
-    private GatewayTypeEnum gatewayType = GatewayTypeEnum.NOT_SELECTED;
+
+  private GatewayTypeEnum gatewayType = GatewayTypeEnum.NOT_SELECTED;
     private Boolean advertiseOnly = null;
 
   /**

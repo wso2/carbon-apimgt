@@ -238,7 +238,7 @@ return null;
         NOT_SELECTED("NOT_SELECTED");
         private String value;
 
-        GatewayTypeEnum (String v) {
+        GatewayTypeEnum(String v) {
             value = v;
         }
 
@@ -258,7 +258,7 @@ return null;
                     return b;
                 }
             }
-return null;
+            return null;
         }
     }
     private GatewayTypeEnum gatewayType = GatewayTypeEnum.NOT_SELECTED;
