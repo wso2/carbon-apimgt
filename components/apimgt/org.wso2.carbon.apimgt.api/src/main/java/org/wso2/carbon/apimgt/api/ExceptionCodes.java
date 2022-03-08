@@ -195,13 +195,14 @@ public enum ExceptionCodes implements ErrorHandler {
     MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
             "users with the same username exist in the system"),
     INVALID_USER_ROLES(900610, "Invalid user roles found", 400, "Invalid user roles found"),
-    IDP_ADDING_FAILED(900611, "Unable to add the identity provider", 400, "Error while adding the identity provider"),
-    IDP_RETRIEVAL_FAILED(900612, "Unable to retrieve the identity provider", 400, "Error while retrieving the "
+    IDP_ADDING_FAILED(900611, "Unable to add the identity provider", 500, "Error while adding the identity provider"),
+    IDP_RETRIEVAL_FAILED(900612, "Unable to retrieve the identity provider", 500, "Error while retrieving the "
             + "identity provider details"),
-    IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
+    IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 500, "Error while deleting the "
             + "identity provider"),
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
-
+    DUPLICATE_ISSUER(900615, "Unable to add Identity provider", 409, "An Identity provider with issuer has already registered"),
+    EMPTY_ISSUER(600616, "Unable to add Identity Provider", 400, "Issuer is empty"),
 
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +

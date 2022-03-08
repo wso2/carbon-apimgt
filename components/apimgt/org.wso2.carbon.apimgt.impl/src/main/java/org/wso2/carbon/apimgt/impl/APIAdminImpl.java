@@ -107,6 +107,8 @@ import javax.xml.transform.stream.StreamResult;
 public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
+    private static final String IDP_ISSUER_NAME = "idpIssuerName";
+    private static final String ISSUER_KEY = "issuer";
     protected ApiMgtDAO apiMgtDAO;
 
     public APIAdminImpl() {
@@ -521,6 +523,35 @@ public class APIAdminImpl implements APIAdmin {
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
                             keyManagerConfigurationDTO.getOrganization(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
         }
+
+        String issuer = keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY).toString();
+        if (StringUtils.isEmpty(issuer)) {
+            try {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Checking whether an Idp with issuer %s is registered.", issuer));
+                }
+                IdentityProvider idp = IdentityProviderManager.getInstance().getIdPByMetadataProperty(
+                        IDP_ISSUER_NAME,
+                        issuer,
+                        APIUtil.getInternalOrganizationDomain(keyManagerConfigurationDTO.getOrganization()),
+                        false);
+                if (idp != null) {
+                    throw new APIManagementException(
+                            String.format("Key Manager with issuer %s is already registered in tenant %s",
+                                    keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY).toString(),
+                                    keyManagerConfigurationDTO.getOrganization()), ExceptionCodes.DUPLICATE_ISSUER);
+                }
+            } catch (IdentityProviderManagementException e) {
+                throw new APIManagementException(
+                        String.format("Getting idp for issuer %s is failed. %s", issuer, e.getMessage()),
+                        e,
+                        ExceptionCodes.IDP_RETRIEVAL_FAILED);
+            }
+        } else {
+            throw new APIManagementException("IdP adding failed. The issuer cannot be empty.",
+                    ExceptionCodes.EMPTY_ISSUER);
+        }
+
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
