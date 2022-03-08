@@ -33,6 +33,39 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     private String protocol = null;
     private List<String> endpoints = new ArrayList<String>();
     private String gatewayVendor = null;
+
+    @XmlType(name="GatewayTypeEnum")
+    @XmlEnum(String.class)
+    public enum GatewayTypeEnum {
+        WSO2_SYNAPSE("WSO2_SYNAPSE"),
+        WSO2_CHOREO_CONNECT("WSO2_CHOREO_CONNECT"),
+        NOT_SELECTED("NOT_SELECTED");
+        private String value;
+
+        GatewayTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static GatewayTypeEnum fromValue(String v) {
+            for (GatewayTypeEnum b : GatewayTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private GatewayTypeEnum gatewayType = GatewayTypeEnum.NOT_SELECTED;
     private List<String> asyncTransportProtocols = new ArrayList<String>();
 
   /**
@@ -173,6 +206,24 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
   }
 
   /**
+   * The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.
+   **/
+  public AsyncAPISpecificationValidationResponseInfoDTO gatewayType(GatewayTypeEnum gatewayType) {
+    this.gatewayType = gatewayType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "WSO2_SYNAPSE", value = "The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.")
+  @JsonProperty("gatewayType")
+  public GatewayTypeEnum getGatewayType() {
+    return gatewayType;
+  }
+  public void setGatewayType(GatewayTypeEnum gatewayType) {
+    this.gatewayType = gatewayType;
+  }
+
+  /**
    * contains available transports for an async API
    **/
   public AsyncAPISpecificationValidationResponseInfoDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
@@ -208,12 +259,13 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
         Objects.equals(protocol, asyncAPISpecificationValidationResponseInfo.protocol) &&
         Objects.equals(endpoints, asyncAPISpecificationValidationResponseInfo.endpoints) &&
         Objects.equals(gatewayVendor, asyncAPISpecificationValidationResponseInfo.gatewayVendor) &&
+        Objects.equals(gatewayType, asyncAPISpecificationValidationResponseInfo.gatewayType) &&
         Objects.equals(asyncTransportProtocols, asyncAPISpecificationValidationResponseInfo.asyncTransportProtocols);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints, gatewayVendor, asyncTransportProtocols);
+    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -229,6 +281,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
