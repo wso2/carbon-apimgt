@@ -1545,9 +1545,10 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext) {
+        String organization = null;
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
             boolean isAPIExistDB = false;
@@ -1599,6 +1600,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 apiProvider.deleteAPI(apiId, organization);
                 isDeleted = true;
+            } catch (APIMgtResourceNotFoundException e) {
+                log.error(String.format("Error while deleting the API %s : and org : %s", apiId, organization));
+                RestApiUtil.handleResourceNotFoundError(e.getMessage(), log);
             } catch (APIManagementException e) {
                 log.error("Error while deleting API " + apiId + "on organization " + organization, e);
             }
