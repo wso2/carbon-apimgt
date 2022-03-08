@@ -202,7 +202,7 @@ public enum ExceptionCodes implements ErrorHandler {
             + "identity provider"),
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
     DUPLICATE_ISSUER(900615, "Unable to add Identity provider", 409, "An Identity provider with issuer has already registered"),
-    EMPTY_ISSUER(600161, "Unable to add Identity Provider", 400, "Issuer is empty"),
+    EMPTY_ISSUER(600616, "Unable to add Identity Provider", 400, "Issuer is empty"),
 
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
