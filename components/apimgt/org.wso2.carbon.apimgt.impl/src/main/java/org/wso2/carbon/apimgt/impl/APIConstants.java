@@ -2593,6 +2593,10 @@ public final class APIConstants {
         UDATE_API_LOG_LEVEL
     }
 
+    public enum EventAction {
+        DEFAULT_VERSION
+    }
+
     public static class GatewayArtifactSynchronizer {
 
         public static final String SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG = "SyncRuntimeArtifactsPublisher";

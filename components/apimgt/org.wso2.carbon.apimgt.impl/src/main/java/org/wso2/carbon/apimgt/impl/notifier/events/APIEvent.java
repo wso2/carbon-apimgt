@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 import java.util.Objects;
 
 /**
@@ -34,6 +36,7 @@ public class APIEvent extends Event {
     private String apiType;
     private String apiStatus;
     private String logLevel;
+    private APIConstants.EventAction action;
 
     public APIEvent(String uuid, String logLevel, String type, String apiContext) {
         this.uuid = uuid;
@@ -71,6 +74,25 @@ public class APIEvent extends Event {
         this.tenantDomain = tenantDomain;
     }
 
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
+                    int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
+                    String apiStatus, APIConstants.EventAction action) {
+        this.eventId = eventId;
+        this.timeStamp = timestamp;
+        this.type = type;
+        this.tenantId = tenantId;
+        this.apiId = apiId;
+        this.uuid = uuid;
+        this.apiVersion = apiVersion;
+        this.apiName = apiName;
+        this.apiType = apiType;
+        this.apiContext = apiContext;
+        this.apiProvider = apiProvider;
+        this.apiStatus = apiStatus;
+        this.tenantDomain = tenantDomain;
+        this.action = action;
+    }
+
     @Override
     public String toString() {
 
@@ -83,6 +105,7 @@ public class APIEvent extends Event {
                 ", apiProvider='" + apiProvider + '\'' +
                 ", apiType='" + apiType + '\'' +
                 ", apiStatus='" + apiStatus + '\'' +
+                ", action='" + action + '\'' +
                 '}';
     }
 
@@ -190,5 +213,13 @@ public class APIEvent extends Event {
 
     public String getLogLevel() {
         return logLevel;
+    }
+
+    public APIConstants.EventAction getAction() {
+        return action;
+    }
+
+    public void setAction(APIConstants.EventAction action) {
+        this.action = action;
     }
 }

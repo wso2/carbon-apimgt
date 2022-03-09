@@ -1223,6 +1223,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
+        String prevDefaultVersion = getDefaultVersion(api.getId());
 
         //Update WSDL in the registry
         if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {
@@ -1310,11 +1311,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
             }
         }
+        APIConstants.EventAction action = null;
+        if (api.isDefaultVersion() ^ api.getId().getVersion().equals(prevDefaultVersion)) {
+            action = APIConstants.EventAction.DEFAULT_VERSION;
+        }
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                api.getStatus());
+                api.getStatus(), action);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
@@ -1332,7 +1337,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                api.getStatus());
+                api.getStatus(), APIConstants.EventAction.DEFAULT_VERSION);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
@@ -1348,6 +1353,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetAPISecurity(api);
         validateKeyManagers(api);
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
+        String prevDefaultVersion = getDefaultVersion(api.getId());
 
         Gson gson = new Gson();
         String organization = api.getOrganization();
@@ -1433,10 +1439,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
+        APIConstants.EventAction action = null;
+        if (api.isDefaultVersion() ^ api.getId().getVersion().equals(prevDefaultVersion)) {
+            action = APIConstants.EventAction.DEFAULT_VERSION;
+        }
+
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
