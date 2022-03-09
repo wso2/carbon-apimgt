@@ -432,6 +432,7 @@ public class ImportUtils {
                                                              String tenantDomain) {
 
         String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
+        Map<String, String> importedPolicies = new HashMap<>();
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         for (URITemplate uriTemplate : uriTemplates) {
             String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
@@ -443,34 +444,43 @@ public class ImportUtils {
                         try {
                             String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
                                     policy.getPolicyVersion());
-                            OperationPolicySpecification policySpec =
-                                    getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
+                            String policyID;
+                            if (!importedPolicies.containsKey(policyFileName)) {
+                                OperationPolicySpecification policySpec =
+                                        getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
 
-                            OperationPolicyData operationPolicyData = new OperationPolicyData();
-                            operationPolicyData.setSpecification(policySpec);
-                            operationPolicyData.setOrganization(tenantDomain);
-                            operationPolicyData.setApiUUID(api.getUuid());
+                                OperationPolicyData operationPolicyData = new OperationPolicyData();
+                                operationPolicyData.setSpecification(policySpec);
+                                operationPolicyData.setOrganization(tenantDomain);
+                                operationPolicyData.setApiUUID(api.getUuid());
 
-                            OperationPolicyDefinition synapseDefinition =
-                                    APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
-                                            policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
-                            if (synapseDefinition != null) {
-                                synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-                                operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                                OperationPolicyDefinition synapseDefinition =
+                                        APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                                policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                                if (synapseDefinition != null) {
+                                    synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                    operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                                }
+                                OperationPolicyDefinition ccDefinition =
+                                        APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                                policyFileName, APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                                if (ccDefinition != null) {
+                                    ccDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                    operationPolicyData.setCcPolicyDefinition(ccDefinition);
+                                }
+                                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                                policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
+                                importedPolicies.put(policyFileName, policyID);
+                            } else {
+                                policyID = importedPolicies.get(policyFileName);
                             }
-                            OperationPolicyDefinition ccDefinition =
-                                    APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
-                                            policyFileName, APIConstants.CC_POLICY_DEFINITION_EXTENSION);
-                            if (ccDefinition != null) {
-                                ccDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                                operationPolicyData.setCcPolicyDefinition(ccDefinition);
-                            }
-                            operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
-                            String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
+
                             policy.setPolicyId(policyID);
                             validatedOperationPolicies.add(policy);
                         } catch (APIManagementException e) {
-                            log.error(e);
+                            log.error("An error occurred when validating the operation policy "
+                                    + policy.getPolicyName() + "_" + policy.getPolicyVersion() + " for url template "
+                                    + uriTemplate.getUriTemplate() + ". Hence skipped.", e);
                         }
                     }
                 }
