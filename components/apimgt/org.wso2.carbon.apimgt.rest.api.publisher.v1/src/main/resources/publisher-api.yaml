@@ -7787,7 +7787,7 @@ paths:
           headers:
             Location:
               description: |
-                The URL of the uploaded mediation policy of the API.
+                The URL of the uploaded common operation policy of the API.
               schema:
                 type: string
             Content-Type:
@@ -9569,62 +9569,6 @@ components:
             - name
           items:
             type: string
-    MediationList:
-      title: Mediation List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of mediation sequences returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/MediationInfo'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-    MediationInfo:
-      title: MediationInfo
-      required:
-        - id
-        - name
-        - type
-      type: object
-      properties:
-        name:
-          type: string
-          example: json_fault.xml
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-        type:
-          type: string
-          example: in
-          enum:
-            - in
-            - out
-            - fault
-    Mediation:
-      title: Mediation
-      required:
-        - name
-        - type
-      type: object
-      properties:
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-        name:
-          type: string
-          example: json_fault.xml
-        type:
-          type: string
-          example: in
-          enum:
-            - in
-            - out
-            - fault
     ThrottlingPolicyList:
       title: Throttling policy list
       type: object
@@ -11957,14 +11901,6 @@ components:
       in: path
       description: |
         Subscription Id
-      required: true
-      schema:
-        type: string
-    mediationPolicyId:
-      name: mediationPolicyId
-      in: path
-      description: |
-        Mediation policy Id
       required: true
       schema:
         type: string

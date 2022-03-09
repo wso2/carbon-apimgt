@@ -2588,78 +2588,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public Mediation addMediationPolicy(Organization org, String apiId, Mediation mediation)
-            throws MediationPolicyPersistenceException {
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = org.getName();
-            RegistryHolder holder = getRegistry(tenantDomain);
-            Registry registry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-            BasicAPI api = getbasicAPIInfo(apiId, registry);
-            if (api == null) {
-                throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
-            }
-            String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
-                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR + api.apiVersion
-                    + RegistryConstants.PATH_SEPARATOR + mediation.getType() + RegistryConstants.PATH_SEPARATOR
-                    + mediation.getName();
-
-            if (registry.resourceExists(resourcePath)) {
-                throw new MediationPolicyPersistenceException(
-                        "Mediation policy already exists for the given name " + mediation.getName(),
-                        ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
-            }
-            Resource policy = registry.newResource();
-            policy.setContent(mediation.getConfig());
-            policy.setMediaType("application/xml");
-            registry.put(resourcePath, policy);
-            
-            mediation.setId(policy.getUUID());
-            return mediation;
-        } catch (RegistryException | APIPersistenceException e) {
-            String msg = "Error while adding the mediation to the registry";
-            throw new MediationPolicyPersistenceException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-    }
-
-    @Override
-    public Mediation updateMediationPolicy(Organization org, String apiId, Mediation mediation)
-            throws MediationPolicyPersistenceException {
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = org.getName();
-            RegistryHolder holder = getRegistry(tenantDomain);
-            Registry registry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-            BasicAPI api = getbasicAPIInfo(apiId, registry);
-            if (api == null) {
-                throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
-            }
-            String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
-                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR + api.apiVersion
-                    + RegistryConstants.PATH_SEPARATOR + mediation.getType() + RegistryConstants.PATH_SEPARATOR
-                    + mediation.getName();
-
-            Resource policy = registry.get(resourcePath);
-            policy.setContent(mediation.getConfig());
-            registry.put(resourcePath, policy);
-            return mediation;
-        } catch (RegistryException | APIPersistenceException e) {
-            String msg = "Error while adding the mediation to the registry";
-            throw new MediationPolicyPersistenceException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-    }
-
-    @Override
     public Mediation getMediationPolicy(Organization org, String apiId, String mediationPolicyId)
             throws MediationPolicyPersistenceException {
         boolean isTenantFlowStarted = false;
@@ -2794,39 +2722,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
         return mediationList;
-    }
-
-    @Override
-    public void deleteMediationPolicy(Organization org, String apiId, String mediationPolicyId)
-            throws MediationPolicyPersistenceException {
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = org.getName();
-            RegistryHolder holder = getRegistry(tenantDomain);
-            Registry registry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-            BasicAPI api = getbasicAPIInfo(apiId, registry);
-            if (api == null) {
-                throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
-            }
-            String apiResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
-                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR
-                    + api.apiVersion;
-            String policyPath = GovernanceUtils.getArtifactPath(registry, mediationPolicyId);
-            if (!policyPath.startsWith(apiResourcePath)) {
-                throw new MediationPolicyPersistenceException("Policy not foud ", ExceptionCodes.POLICY_NOT_FOUND);
-            }
-            if (registry.resourceExists(policyPath)) {
-                registry.delete(policyPath);
-            }
-        } catch (RegistryException | APIPersistenceException e) {
-            String msg = "Error occurred  while getting Api Specific mediation policies ";
-            throw new MediationPolicyPersistenceException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
     }
 
     @Override
