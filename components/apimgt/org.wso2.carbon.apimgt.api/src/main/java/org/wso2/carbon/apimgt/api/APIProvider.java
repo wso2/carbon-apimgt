@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -516,14 +517,13 @@ public interface APIProvider extends APIManager {
     void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException;
 
     /**
-     * Returns the details of all the life-cycle changes done per API.
+     * Returns the details of all the life-cycle changes done per API or API Product
      *
-     * @param apiId     id of the APIIdentifier
-     * @param organization Organization
-     * @return List of life-cycle events per given API
+     * @param uuid     Unique UUID of the API or API Product
+     * @return List of life-cycle events per given API or API Product
      * @throws APIManagementException if failed to copy docs
      */
-    List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException;
+    List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException;
 
     /**
      * Search API
@@ -770,15 +770,6 @@ public interface APIProvider extends APIManager {
     void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException;
 
     /**
-     * This method updates Swagger 2.0 resources in the registry
-     *
-     * @param apiId    id of the APIProductIdentifier
-     * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException
-     */
-    void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException;
-
-    /**
      * This method updates the swagger definition in registry
      *
      * @param api           API
@@ -897,13 +888,14 @@ public interface APIProvider extends APIManager {
      * This method is to change registry lifecycle states for an API artifact
      *
      * @param orgId UUID of the organization
-     * @param  uuid uuid of the API
+     * @param  apiTypeWrapper API Type Wrapper
      * @param  action  Action which need to execute from registry lifecycle
      * @param  checklist checklist items
      * @return APIStateChangeResponse API workflow state and WorkflowResponse
      * */
-    APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action, Map<String, Boolean> checklist)
-            throws APIManagementException, FaultGatewaysException;
+    APIStateChangeResponse changeLifeCycleStatus(String orgId, ApiTypeWrapper apiTypeWrapper, String action,
+                                                 Map<String, Boolean> checklist) throws APIManagementException,
+            FaultGatewaysException;
 
     /**
      * This method is to set checklist item values for a particular life-cycle state of an API
@@ -1384,12 +1376,12 @@ public interface APIProvider extends APIManager {
     void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 
     /**
-     * Remove pending lifecycle state change task for the given api.
+     * Remove pending lifecycle state change task for the given api or api product.
      *
-     * @param uuid api uuid
+     * @param  identifier Identifier object of api or api product
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    void deleteWorkflowTask(String uuid) throws APIManagementException;
+    void deleteWorkflowTask(Identifier identifier) throws APIManagementException;
 
     /**
      * This method returns the security audit properties
@@ -1689,6 +1681,16 @@ public interface APIProvider extends APIManager {
             deployedAPIRevisions) throws APIManagementException;
 
     /**
+     * Adds a new DeployedAPIRevision to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionUUID API Revision UUID
+     * @param environment - Un-deployed environment
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void removeUnDeployedAPIRevision(String apiId, String apiRevisionUUID, String environment) throws APIManagementException;
+
+    /**
      * Update the displayOnDevportal field in an existing deployments of an API
      *
      * @param apiId API UUID
@@ -1759,7 +1761,6 @@ public interface APIProvider extends APIManager {
     void deleteAPIRevision(String apiId, String apiRevisionId, String organization) throws APIManagementException;
 
     /**
-<<<<<<<<< Temporary merge branch 1
      * This method updates the AsyncApi definition in registry
      *
      * @param api   API
@@ -1784,8 +1785,8 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @throws APIManagementException if failed to add APIRevision
      */
-    void deployAPIProductRevision(String apiProductId, String apiRevisionId,
-                                  List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void deployAPIProductRevision(String apiProductId, String apiRevisionId, List<APIRevisionDeployment>
+            apiRevisionDeployments) throws APIManagementException;
 
     /**
      * Undeploy revision from provided gateway environments
@@ -1823,4 +1824,177 @@ public interface APIProvider extends APIManager {
     String generateApiKey(String apiId) throws APIManagementException;
 
     List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
+
+    void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
+            EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException;
+
+    EnvironmentPropertiesDTO getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid)
+            throws APIManagementException;
+
+    /**
+     * Returns environment of a given uuid
+     *
+     * @param organization Organization
+     * @return List of environments related to the given tenant
+     */
+    Environment getEnvironment(String organization, String uuid) throws APIManagementException;
+
+    /**
+     * Set existing operation policy mapping to the URI Templates
+     *
+     * @param apiId        API UUID
+     * @param uriTemplates Set of URI Templates
+     * @throws APIManagementException
+     */
+    void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
+
+    /**
+     * Import an operation policy from the API CTL project. This will either create a new API specific policy,
+     * update existing API specific policy or return the policyID of existing policy if policy content is not changed.
+     *
+     * @param operationPolicyData Operation Policy Data
+     * @param organization              Organization name
+     * @return UUID of the imported operation policy
+     * @throws APIManagementException
+     */
+    String importOperationPolicy(OperationPolicyData operationPolicyData, String organization)
+            throws APIManagementException;
+
+    /**
+     * Add an API specific operation policy
+     *
+     * @param apiUUID                   UUID of the API which the policy should be added to
+     * @param operationPolicyData Operation Policy Data that includes policy specification and policy definition
+     * @param organization              Organization name
+     * @return status of the policy storage
+     * @throws APIManagementException
+     */
+    String addAPISpecificOperationPolicy(String apiUUID, OperationPolicyData operationPolicyData,
+                                         String organization)
+            throws APIManagementException;
+
+    /**
+     * Add common operation policy.
+     *
+     * @param operationPolicyData Operation Policy Data that includes policy specification and policy definition
+     * @param organization              Organization name
+     * @return status of the policy storage
+     * @throws APIManagementException
+     */
+    String addCommonOperationPolicy(OperationPolicyData operationPolicyData, String organization)
+            throws APIManagementException;
+
+    /**
+     * Get API specific operation policy for a given policy name and API UUID. This will only return the policy data
+     * if such policy with name is created as a API specific operation policy. This policy can be either a policy
+     * created only for API, a cloned policy from a common policy or a revisioned API specific operation policy.
+     * Policy data contains methods to identify whether returned policies is a cloned policy or a revisioned policy
+     * or not.
+     *
+     * @param policyName             API specific policy name
+     * @param apiUUID                Unique identifier for API
+     * @param revisionUUID           Unique identifier for API revision
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
+                                                                  String revisionUUID,
+                                                                  String organization,
+                                                                  boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Get the common operation policy for a given policy name. This will only return the policy data if there is
+     * a matching policy created as a common policy. If not, it will return null
+     *
+     * @param policyName             Common Policy name
+     * @param organization           Organization
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Common Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String organization,
+                                                             boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Get API specific operation policy for a given Policy UUID. Even though a policy ID is provided, this will only
+     * return policy if the policy is created for API. Otherwise it will return a null.
+     *
+     * @param policyId               Policy UUID
+     * @param apiUUID                Policy UUID
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
+                                                                String organization,
+                                                                boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Get common operation policy for a given Policy UUID. Even though a policy ID is provided, this will only
+     * return policy if the policy is created as a common policy. Otherwise it will return a null.
+     *
+     * @param policyId               Policy UUID
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Operation Policy
+     * @throws APIManagementException
+     */
+    OperationPolicyData getCommonOperationPolicyByPolicyId(String policyId, String organization,
+                                                           boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
+     * Update an existing operation policy
+     *
+     * @param operationPolicyId   Unique identifier of the operation policy
+     * @param operationPolicyData Operation Policy Data that needs to be updated.
+     * @param organization        Organization name
+     * @return status of the policy update
+     * @throws APIManagementException
+     */
+    void updateOperationPolicy(String operationPolicyId, OperationPolicyData operationPolicyData,
+                               String organization) throws APIManagementException;
+
+    /**
+     * Get a light weight version of all the common policies for the tenant domain. This will not include the policy
+     * definition as it is bulky. Policy specification and policy UUID will be included in the policyData object.
+     *
+     * @param organization Organization name
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    List<OperationPolicyData> getAllCommonOperationPolicies(String organization)
+            throws APIManagementException;
+
+    /**
+     * Get a light weight version of all the API Specific Operation policies. This will not include the policy
+     * definition as it is bulky. Policy specification and policy UUID will be included in the policyData object.
+     *
+     * @param apiUUID      UUID of the API
+     * @param organization Organization name
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    List<OperationPolicyData> getAllAPISpecificOperationPolicies(String apiUUID, String organization)
+            throws APIManagementException;
+
+    /**
+     * Delete an operation policy by providing the policy ID
+     *
+     * @param policyId     Operation Policy UUID
+     * @param organization Organization name
+     * @throws APIManagementException
+     */
+    void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
+
 }

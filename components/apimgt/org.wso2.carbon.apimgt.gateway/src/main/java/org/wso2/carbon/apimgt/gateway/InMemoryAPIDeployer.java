@@ -19,6 +19,10 @@
 package org.wso2.carbon.apimgt.gateway;
 
 import com.google.gson.Gson;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
@@ -29,6 +33,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.transport.dynamicconfigurations.DynamicProfileReloaderHolder;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
+import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -61,7 +66,7 @@ import java.util.UUID;
  */
 public class InMemoryAPIDeployer {
 
-    private static Log log = LogFactory.getLog(InMemoryAPIDeployer.class);
+    private static final Log log = LogFactory.getLog(InMemoryAPIDeployer.class);
     ArtifactRetriever artifactRetriever;
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
     private boolean debugEnabled = log.isDebugEnabled();
@@ -87,10 +92,13 @@ public class InMemoryAPIDeployer {
             GatewayAPIDTO gatewayAPIDTO = retrieveArtifact(apiId, gatewayLabels);
             if (gatewayAPIDTO != null) {
                 APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
-                MessageContext.setCurrentMessageContext(org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+                MessageContext.setCurrentMessageContext(
+                        org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
                 unDeployAPI(apiGatewayAdmin, gatewayEvent);
                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
+                addDeployedGraphqlQLToAPI(gatewayAPIDTO);
+                DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
                 if (debugEnabled) {
                     log.debug("API with " + apiId + " is deployed in gateway with the labels " + String.join(",",
                             gatewayLabels));
@@ -160,8 +168,8 @@ public class InMemoryAPIDeployer {
                     MessageContext.setCurrentMessageContext(org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                    List<String> gatewayRuntimeArtifacts =
-                            ServiceReferenceHolder.getInstance().getArtifactRetriever().retrieveAllArtifacts(encodedString, tenantDomain);
+                    List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder.getInstance().getArtifactRetriever()
+                            .retrieveAllArtifacts(encodedString, tenantDomain);
                     if (gatewayRuntimeArtifacts.size() == 0) {
                         return true;
                     }
@@ -173,6 +181,9 @@ public class InMemoryAPIDeployer {
                                 log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
                                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
+                                addDeployedGraphqlQLToAPI(gatewayAPIDTO);
+                                DataHolder.getInstance().addKeyManagerToAPIMapping(gatewayAPIDTO.getApiId(),
+                                        gatewayAPIDTO.getKeyManagers());
                             }
                         } catch (AxisFault axisFault) {
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
@@ -191,9 +202,9 @@ public class InMemoryAPIDeployer {
                         return false;
                     }
                 } catch (ArtifactSynchronizerException | AxisFault e) {
-                    String msg = "Error  deploying APIs to the Gateway ";
+                    String msg = "Error deploying APIs to the Gateway ";
                     log.error(msg, e);
-                    throw new ArtifactSynchronizerException(msg, e);
+                    return false;
                 } finally {
                     MessageContext.destroyCurrentMessageContext();
                     PrivilegedCarbonContext.endTenantFlow();
@@ -235,6 +246,7 @@ public class InMemoryAPIDeployer {
                                 org.wso2.carbon.apimgt.impl.utils.GatewayUtils
                                         .addStringToList(gatewayEvent.getUuid().concat(
                                                 "_graphQL"), gatewayAPIDTO.getLocalEntriesToBeRemove()));
+                        DataHolder.getInstance().getApiToGraphQLSchemaDTOMap().remove(gatewayEvent.getUuid());
                     }
                     if (APIConstants.APITransportType.WS.toString().equalsIgnoreCase(gatewayEvent.getApiType())) {
                         org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.setWebsocketEndpointsToBeRemoved(
@@ -251,6 +263,7 @@ public class InMemoryAPIDeployer {
                                 .addStringToList(gatewayEvent.getUuid(), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
                 DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
+                DataHolder.getInstance().removeKeyManagerToAPIMapping(gatewayAPIDTO.getApiId());
             }
     }
 
@@ -316,6 +329,23 @@ public class InMemoryAPIDeployer {
                 }
             }
             DataHolder.getInstance().addApiToAliasList(apiId, aliasList);
+        }
+    }
+
+    /**
+     * Add GraphQLSchemaDTO of deployed GraphQL API to Gateway internal data holder.
+     *
+     * @param gatewayAPIDTO GatewayAPIDTO
+     */
+    private void addDeployedGraphqlQLToAPI(GatewayAPIDTO gatewayAPIDTO) {
+
+        if (gatewayAPIDTO != null && gatewayAPIDTO.getGraphQLSchema() != null) {
+            String apiId = gatewayAPIDTO.getApiId();
+            SchemaParser schemaParser = new SchemaParser();
+            TypeDefinitionRegistry registry = schemaParser.parse(gatewayAPIDTO.getGraphQLSchema());
+            GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+            GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+            DataHolder.getInstance().addApiToGraphQLSchemaDTO(apiId, schemaDTO);
         }
     }
 

@@ -195,6 +195,8 @@ public final class ImportExportConstants {
 
     public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
 
+    public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
+
     public static final String APIM_VERSION = "v4.1.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
@@ -295,4 +297,6 @@ public final class ImportExportConstants {
     public static final String DEPLOYMENT_VHOST = "deploymentVhost";
     public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
 
+    public static final String POLICIES_DIRECTORY = "Policies";
+    public static final String SWAGGER_X_WSO2_APICTL_INIT = "x-wso2-apictl-init";
 }

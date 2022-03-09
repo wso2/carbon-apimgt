@@ -583,6 +583,27 @@ paths:
             Created.
         default:
           $ref: '#/definitions/Error'
+  #--------------------------------------------
+  # UnDeployed revision information
+  #--------------------------------------------
+  /apis/undeployed-revision:
+    post:
+      tags:
+        - UnDeployed API Revision
+      summary: Remove undeployed revision
+      description: Remove undeployed Revision entry from the database
+      operationId: unDeployedAPIRevision
+      parameters:
+        - name: unDeployedAPIRevisionDTO
+          in: body
+          description: 'Notification event payload'
+          schema:
+            $ref: '#/definitions/UnDeployedAPIRevision'
+      responses:
+        200:
+          description: Fetch un-deployed revision
+        default:
+          $ref: '#/definitions/Error'
   /ga-config:
     get:
       summary: Get Google analytics config related to tenant.
@@ -649,6 +670,22 @@ paths:
           description: 'Event Received success'
           schema:
             type: object
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api-logging-configs:
+    get:
+      summary: Retrieve persisted per API logging data.
+      description: |
+        This retrieve the persisted API logging data for API logging support.
+      tags:
+        - 'Logging'
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            $ref: '#/definitions/APILoggingConfigList'
         default:
           description: Unexpected error
           schema:
@@ -830,6 +867,24 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/DeployedEnvInfo'
+  UnDeployedAPIRevision:
+    title: UnDeployed revision information
+    properties:
+      apiUUID:
+        maxLength: 255
+        minLength: 0
+        type: string
+        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+      revisionUUID:
+        maxLength: 255
+        minLength: 0
+        type: string
+        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+      environment:
+        maxLength: 255
+        minLength: 0
+        type: string
+        example: Default
   DeployedEnvInfo:
     title: Environment information
     properties:
@@ -959,6 +1014,9 @@ definitions:
         type: object
         additionalProperties:
           type: string
+      organization:
+        type: string
+        description: organization of application.
 
 
   #-----------------------------------------------------
@@ -987,12 +1045,13 @@ definitions:
       tokenType:
         type: string
         description: The type of the tokens to be used (exchanged or without exchanged).
-          Accepted values are EXCHANGED and ORIGINAL.
+          Accepted values are EXCHANGED, DIRECT or BOTH.
         example: EXCHANGED
-        default: ORIGINAL
+        default: DIRECT
         enum:
           - EXCHANGED
-          - ORIGINAL
+          - DIRECT
+          - BOTH
 
   #-----------------------------------------------------
   # The Subscription List resource
@@ -1501,4 +1560,22 @@ definitions:
             description: Maximum number of events allowed
             format: int64
             example: 3000
-
+  #-----------------------------------------------------
+  # API Logging detail list
+  #-----------------------------------------------------
+  APILoggingConfigList:
+    title: apis
+    properties:
+      apis:
+        type: array
+        items:
+          $ref: '#/definitions/APILoggingConfig'
+  APILoggingConfig:
+    title: API Info object with log details
+    properties:
+      context:
+        type: string
+        example: pizashack/v1.0.0
+      logLevel:
+        type: string
+        example: all

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -32,7 +33,8 @@ import org.wso2.carbon.core.ServerStartupObserver;
 /**
  * This Class used to properly start and Close JMS listeners
  */
-public class JMSListenerStartupShutdownListener implements ServerStartupObserver, ServerShutdownHandler {
+public class JMSListenerStartupShutdownListener implements ServerStartupObserver, ServerShutdownHandler,
+        JMSListenerShutDownService {
 
     private Log log = LogFactory.getLog(JMSListenerStartupShutdownListener.class);
     private JMSTransportHandler jmsTransportHandlerForEventHub;
@@ -70,6 +72,15 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
 
     @Override
     public void invoke() {
+
+        if (jmsTransportHandlerForEventHub != null) {
+            log.debug("Unsubscribe from JMS Events...");
+            jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+        }
+    }
+
+    @Override
+    public void shutDownListener() {
 
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");

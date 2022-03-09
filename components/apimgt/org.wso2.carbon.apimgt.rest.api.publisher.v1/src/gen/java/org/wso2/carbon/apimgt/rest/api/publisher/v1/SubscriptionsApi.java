@@ -63,6 +63,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of a Subscriber", notes = "This operation can be used to get details of a user who subscribed to the API. ", response = SubscriberInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription"),
             @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })
@@ -80,6 +81,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of a Pending Invoice for a Monetized Subscription with Metered Billing.", notes = "This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing. ", response = APIMonetizationUsageDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription"),
             @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })
@@ -96,8 +98,9 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of  1. Retrieving all subscriptions for the user's APIs. `GET https://127.0.0.1:9443/api/am/publisher/v2/subscriptions`  2. Retrieving subscriptions for a specific API. `GET https://127.0.0.1:9443/api/am/publisher/v2/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed` ", response = SubscriptionListDTO.class, authorizations = {
+    @ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of  1. Retrieving all subscriptions for the user's APIs. `GET https://127.0.0.1:9443/api/am/publisher/v3/subscriptions`  2. Retrieving subscriptions for a specific API. `GET https://127.0.0.1:9443/api/am/publisher/v3/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed` ", response = SubscriptionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription"),
             @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })

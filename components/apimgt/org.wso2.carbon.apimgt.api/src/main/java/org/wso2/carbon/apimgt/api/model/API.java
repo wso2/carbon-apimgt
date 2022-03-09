@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +69,7 @@ public class API implements Serializable {
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
     private String organization;
+    private String versionTimestamp;
 
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
@@ -109,6 +109,8 @@ public class API implements Serializable {
     private String oldFaultSequence;
 
     private boolean advertiseOnly;
+    private String apiExternalProductionEndpoint;
+    private String apiExternalSandboxEndpoint;
     private String apiOwner;
     private String redirectURL;
     private String vendor;
@@ -452,6 +454,22 @@ public class API implements Serializable {
         this.advertiseOnly = advertiseOnly;
     }
 
+    public String getApiExternalProductionEndpoint() {
+        return apiExternalProductionEndpoint;
+    }
+
+    public void setApiExternalProductionEndpoint(String apiExternalProductionEndpoint) {
+        this.apiExternalProductionEndpoint = apiExternalProductionEndpoint;
+    }
+
+    public String getApiExternalSandboxEndpoint() {
+        return apiExternalSandboxEndpoint;
+    }
+
+    public void setApiExternalSandboxEndpoint(String apiExternalSandboxEndpoint) {
+        this.apiExternalSandboxEndpoint = apiExternalSandboxEndpoint;
+    }
+
     public String getApiOwner() {
         return apiOwner;
     }
@@ -646,6 +664,7 @@ public class API implements Serializable {
     }
 
     public void setAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.removeAll(availableTiers);
         this.availableTiers.addAll(availableTiers);
     } 
     /**
@@ -1247,6 +1266,16 @@ public class API implements Serializable {
         this.organization = organization;
     }
 
+    public String getVersionTimestamp() {
+
+        return versionTimestamp;
+    }
+
+    public void setVersionTimestamp(String versionTimestamp) {
+
+        this.versionTimestamp = versionTimestamp;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
@@ -1264,6 +1293,32 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type) || "ASYNC".equals(type);
+    }
+
+    /**
+     * Property to indicate the gateway vendor to deploy API
+     */
+    private String gatewayVendor;
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    /**
+     * Property to hold Async API transport protocols
+     */
+    private String asyncTransportProtocols;
+
+    public String getAsyncTransportProtocols() {
+        return asyncTransportProtocols;
+    }
+
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
     }
 }

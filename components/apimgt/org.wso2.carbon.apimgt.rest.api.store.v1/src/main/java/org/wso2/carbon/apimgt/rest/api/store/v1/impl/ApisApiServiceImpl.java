@@ -70,7 +70,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AsyncAPIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -104,7 +103,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, organization);
             //Add pagination section in the response
             Object totalLength = allMatchedApisMap.get("length");
             Integer totalAvailableAPis = 0;
@@ -687,7 +686,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // gets the first available environment if environment is not provided
             if (StringUtils.isEmpty(environmentName)) {
-                Map<String, Environment> existingEnvironments = APIUtil.getEnvironments();
+                Map<String, Environment> existingEnvironments = APIUtil.getEnvironments(organization);
 
                 // find a valid environment name from API
                 // gateway environment may be invalid due to inconsistent state of the API
@@ -965,7 +964,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByAPIId(apiId, organization);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
+                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), organization);
 
         if (apiInfo != null ) {
             List<APITiersDTO> apiTiers = apiInfo.getTiers();

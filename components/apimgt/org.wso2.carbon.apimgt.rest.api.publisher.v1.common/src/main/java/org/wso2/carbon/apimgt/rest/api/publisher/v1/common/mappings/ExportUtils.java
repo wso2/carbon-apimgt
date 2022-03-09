@@ -49,7 +49,10 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
@@ -198,7 +201,9 @@ public class ExportUtils {
         if (!preserveStatus) {
             apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
         }
-
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        addOperationPoliciesToArchive(archivePath, apiDtoToReturn.getId(), tenantDomain, exportFormat, apiProvider,
+                api);
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
@@ -271,12 +276,15 @@ public class ExportUtils {
             addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider);
             addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
                     APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
-
+        }
+        // Set API Product status to created if the status is not preserved
+        if (!preserveStatus) {
+            apiProductDtoToReturn.setState(APIProductDTO.StateEnum.CREATED);
         }
         addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
         addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                preserveStatus, preserveDocs, preserveCredentials, organization);
+                Boolean.TRUE, preserveDocs, preserveCredentials, organization);
 
         // Export mTLS authentication related certificates
         if (log.isDebugEnabled()) {
@@ -662,6 +670,8 @@ public class ExportUtils {
 
         List<String> productionEndpoints;
         List<String> sandboxEndpoints;
+        List<String> productionFailovers;
+        List<String> sandboxFailovers;
         Set<String> uniqueEndpointURLs = new HashSet<>();
         JsonArray endpointCertificatesDetails = new JsonArray();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -684,8 +694,14 @@ public class ExportUtils {
                     apiDto.getName());
             sandboxEndpoints = getEndpointURLs(endpointConfig, API_DATA_SANDBOX_ENDPOINTS,
                     apiDto.getName());
+            productionFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS,
+                    apiDto.getName());
+            sandboxFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_SANDBOX_FAILOVERS,
+                    apiDto.getName());
             uniqueEndpointURLs.addAll(productionEndpoints); // Remove duplicate and append result
             uniqueEndpointURLs.addAll(sandboxEndpoints);
+            uniqueEndpointURLs.addAll(productionFailovers);
+            uniqueEndpointURLs.addAll(sandboxFailovers);
 
             for (String url : uniqueEndpointURLs) {
                 JsonArray certificateListOfUrl = getEndpointCertificateContentAndMetaData(tenantId, url,
@@ -708,6 +724,57 @@ public class ExportUtils {
             throw new APIImportExportException(
                     "Error while retrieving saving endpoint certificate details for API: " + apiDto.getName()
                             + " as YAML", e);
+        }
+    }
+
+    /**
+     * Retrieve the operation policies and store those in the archive directory.
+     *
+     * @param archivePath  File path to export the endpoint certificates
+     * @param apiID        UUID of the API/ API Product
+     * @param exportFormat Export format of file
+     * @param apiProvider  API Provider
+     * @throws APIImportExportException If an error occurs while exporting operation policies
+     */
+    public static void addOperationPoliciesToArchive(String archivePath, String apiID, String tenantDomain,
+                                                     ExportFormat exportFormat, APIProvider apiProvider, API api)
+            throws APIManagementException {
+
+        try {
+            CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            for (URITemplate uriTemplate : uriTemplates) {
+                List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+                if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    for (OperationPolicy policy : operationPolicies) {
+                        OperationPolicyData policyData =
+                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
+                                        tenantDomain, true);
+                        if (policyData != null) {
+                            String policyName = archivePath + File.separator
+                                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
+                                    policyData.getSpecification().getName();
+                            // Policy specification and definition will have the same name
+                            if (policyData.getSpecification() != null) {
+                                CommonUtil.writeDtoToFile(policyName, exportFormat,
+                                        ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                                        policyData.getSpecification());
+                            }
+                            if (policyData.getSynapsePolicyDefinition() != null) {
+                                CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
+                                        policyData.getSynapsePolicyDefinition().getContent());
+                            }
+                            if (policyData.getCcPolicyDefinition() != null) {
+                                CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
+                                        policyData.getCcPolicyDefinition().getContent());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException | APIImportExportException e) {
+            throw new APIManagementException(
+                    "Error while adding operation policy details for API: " + apiID, e);
         }
     }
 

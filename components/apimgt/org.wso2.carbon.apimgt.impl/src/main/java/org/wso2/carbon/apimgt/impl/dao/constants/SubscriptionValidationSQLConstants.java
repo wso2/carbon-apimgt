@@ -29,7 +29,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
-                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE" +
+                    "   ATTRIBUTES.APP_ATTRIBUTE AS ATTRIBUTE_VALUE" +
                     " FROM " +
                     "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP" +
@@ -44,10 +44,11 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.NAME AS APS_NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
+                    "   APP.ORGANIZATION AS ORGANIZATION," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
-                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE" +
+                    "   ATTRIBUTES.APP_ATTRIBUTE AS ATTRIBUTE_VALUE" +
                     " FROM " +
                     "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP" +
@@ -64,9 +65,10 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.NAME AS APS_NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
+                    "   APP.ORGANIZATION AS ORGANIZATION," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
-                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE" +
+                    "   ATTRIBUTES.APP_ATTRIBUTE AS ATTRIBUTE_VALUE" +
                     " FROM " +
                     "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP" +

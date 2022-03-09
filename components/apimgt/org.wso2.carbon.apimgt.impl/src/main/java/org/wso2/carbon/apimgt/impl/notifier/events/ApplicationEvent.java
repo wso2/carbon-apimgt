@@ -37,7 +37,8 @@ public class ApplicationEvent extends Event {
 
     public ApplicationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
                             int applicationId, String uuid, String applicationName, String tokenType,
-            String applicationPolicy, String groupId, Map<String, String> attributes, String subscriber) {
+                            String applicationPolicy, String groupId, Map<String, String> attributes,
+                            String subscriber) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;

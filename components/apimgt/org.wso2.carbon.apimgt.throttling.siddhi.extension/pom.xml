@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.0.393-SNAPSHOT</version>
+        <version>9.20.19-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -28,19 +28,6 @@
     <artifactId>org.wso2.carbon.apimgt.throttling.siddhi.extension</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 API Manager Throttling Siddhi Extension</name>
-
-    <repositories>
-        <repository>
-            <id>wso2</id>
-            <name>WSO2 Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>

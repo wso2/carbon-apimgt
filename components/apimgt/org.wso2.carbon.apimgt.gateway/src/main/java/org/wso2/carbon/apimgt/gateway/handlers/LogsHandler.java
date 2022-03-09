@@ -23,12 +23,14 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.apache.log4j.MDC;
+import org.apache.logging.log4j.ThreadContext;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.logging.APILogHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
@@ -38,24 +40,13 @@ import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * This Handler can be used to log all external calls done by the api manager via synapse
+ * This Handler can be used to log all external calls done by the api manager via synapse.
  */
 public class LogsHandler extends AbstractSynapseHandler {
     private static final Log log = LogFactory.getLog(APIConstants.CORRELATION_LOGGER);
     private static boolean isEnabled = false;
     private static boolean isSet = false;
-    private String apiName = null;
-    private String apiCTX = null;
-    private String apiMethod = null;
     private String apiTo = null;
-    private long requestSize = 0;
-    private String apiElectedRsrc = null;
-    private String apiRestReqFullPath = null;
-    private String apiResponseSC = null;
-    private String apiMsgUUID = null;
-    private String apiRsrcCacheKey = null;
-    private String applicationName = null;
-    private String apiConsumerKey = null;
 
     private static final String AUTH_HEADER = "AUTH_HEADER";
     private static final String ORG_ID_HEADER = "ORG_ID_HEADER";
@@ -63,11 +54,21 @@ public class LogsHandler extends AbstractSynapseHandler {
     private static final String APP_ID_HEADER = "APP_ID_HEADER";
     private static final String UUID_HEADER = "UUID_HEADER";
     private static final String CORRELATION_ID_HEADER = "CORRELATION_ID_HEADER";
+    protected static final String LOG_LEVEL = "LOG_LEVEL";
 
     private static final String REQUEST_BODY_SIZE_ERROR = "Error occurred while building the message to calculate" +
             " the response body size";
     private static final String REQUEST_EVENT_PUBLICATION_ERROR = "Cannot publish request event. ";
     private static final String RESPONSE_EVENT_PUBLICATION_ERROR = "Cannot publish response event. ";
+
+    private static final String REQUEST_IN = "REQUEST_IN";
+    private static final String REQUEST_OUT = "REQUEST_OUT";
+    private static final String RESPONSE_IN = "RESPONSE_IN";
+    private static final String RESPONSE_OUT = "RESPONSE_OUT";
+
+    public LogsHandler() {
+        log.info("Started log handler");
+    }
 
     private boolean isEnabled() {
         if(!isSet) {
@@ -89,43 +90,48 @@ public class LogsHandler extends AbstractSynapseHandler {
                 return false;
             }
         }
+        // Get the log level of if logs are enabled to the API belongs to current API request
+        String log = getAPILogLevel(messageContext);
+        // If it presents log the details
+        if ((log) != null) {
+            APILogHandler.logAPI(REQUEST_IN, messageContext);
+        }
         return true;
     }
 
     public boolean handleRequestOutFlow(MessageContext messageContext) {
         if (isEnabled()) {
             try {
-                requestSize = getContentLength(messageContext);
                 Map headers = LogUtils.getTransportHeaders(messageContext);
-                Set<String> key = headers.keySet();
-                String authHeader = LogUtils.getAuthorizationHeader(headers);
-                String orgIdHeader = LogUtils.getOrganizationIdHeader(headers);
-                String SrcIdHeader = LogUtils.getSourceIdHeader(headers);
-                String applIdHeader = LogUtils.getApplicationIdHeader(headers);
-                String uuIdHeader = LogUtils.getUuidHeader(headers);
-                String correlationIdHeader = LogUtils.getCorrelationHeader(headers);
-                messageContext.setProperty(AUTH_HEADER, authHeader);
-                messageContext.setProperty(ORG_ID_HEADER, orgIdHeader);
-                messageContext.setProperty(SRC_ID_HEADER, SrcIdHeader);
-                messageContext.setProperty(APP_ID_HEADER, applIdHeader);
-                messageContext.setProperty(UUID_HEADER, uuIdHeader);
+                String correlationIdHeader = null;
+                if (headers != null) {
+                    Set<String> key = headers.keySet();
+                    String authHeader = LogUtils.getAuthorizationHeader(headers);
+                    String orgIdHeader = LogUtils.getOrganizationIdHeader(headers);
+                    String SrcIdHeader = LogUtils.getSourceIdHeader(headers);
+                    String applIdHeader = LogUtils.getApplicationIdHeader(headers);
+                    String uuIdHeader = LogUtils.getUuidHeader(headers);
+                    correlationIdHeader = LogUtils.getCorrelationHeader(headers);
+                    messageContext.setProperty(AUTH_HEADER, authHeader);
+                    messageContext.setProperty(ORG_ID_HEADER, orgIdHeader);
+                    messageContext.setProperty(SRC_ID_HEADER, SrcIdHeader);
+                    messageContext.setProperty(APP_ID_HEADER, applIdHeader);
+                    messageContext.setProperty(UUID_HEADER, uuIdHeader);
+                }
 
-                if (MDC.get(APIConstants.CORRELATION_ID) != null) {
-                    correlationIdHeader = (String) MDC.get(APIConstants.CORRELATION_ID);
+                if (ThreadContext.get(APIConstants.CORRELATION_ID) != null) {
+                    correlationIdHeader = ThreadContext.get(APIConstants.CORRELATION_ID);
                 }
                 messageContext.setProperty(CORRELATION_ID_HEADER, correlationIdHeader);
-                apiName = LogUtils.getAPIName(messageContext);
-                apiCTX = LogUtils.getAPICtx(messageContext);
-                apiMethod = LogUtils.getRestMethod(messageContext);
                 // apiTo = LogUtils.getTo(messageContext);
-                apiElectedRsrc = LogUtils.getElectedResource(messageContext);
-                apiRestReqFullPath = LogUtils.getRestReqFullPath(messageContext);
-                apiMsgUUID = (String) messageContext.getMessageID();
-                apiRsrcCacheKey = LogUtils.getResourceCacheKey(messageContext);
             } catch (Exception e) {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
                 return false;
             }
+        }
+        String log = (String) messageContext.getProperty(LOG_LEVEL);
+        if (log != null) {
+            APILogHandler.logAPI(REQUEST_OUT, messageContext);
         }
         return true;
     }
@@ -141,31 +147,41 @@ public class LogsHandler extends AbstractSynapseHandler {
                     long responseTime = getResponseTime(messageContext);
                     long beTotalLatency = getBackendLatency(messageContext);
                     long responseSize = getContentLength(messageContext);
-                    apiResponseSC = LogUtils.getRestHttpResponseStatusCode(messageContext);
-                    applicationName = LogUtils.getApplicationName(messageContext);
-                    apiConsumerKey = LogUtils.getConsumerKey(messageContext);
                     String authHeader = (String) messageContext.getProperty(AUTH_HEADER);
                     String orgIdHeader = (String) messageContext.getProperty(ORG_ID_HEADER);
                     String SrcIdHeader = (String) messageContext.getProperty(SRC_ID_HEADER);
                     String applIdHeader = (String) messageContext.getProperty(APP_ID_HEADER);
                     String uuIdHeader = (String) messageContext.getProperty(UUID_HEADER);
                     String correlationIdHeader = (String) messageContext.getProperty(CORRELATION_ID_HEADER);
-                    MDC.put(APIConstants.CORRELATION_ID, correlationIdHeader);
-                    log.info(beTotalLatency + "|HTTP|" + apiName + "|" + apiMethod + "|" + apiCTX + apiElectedRsrc
-                            + "|" + apiTo + "|" + authHeader + "|" + orgIdHeader + "|" + SrcIdHeader
-                            + "|" + applIdHeader + "|" + uuIdHeader + "|" + requestSize
-                            + "|" + responseSize + "|" + apiResponseSC + "|"
-                            + applicationName + "|" + apiConsumerKey + "|" + responseTime);
+                    ThreadContext.put(APIConstants.CORRELATION_ID, correlationIdHeader);
+                    log.info(beTotalLatency + "|HTTP|" + LogUtils.getAPIName(messageContext) + "|"
+                            + LogUtils.getRestMethod(messageContext) + "|" + LogUtils.getAPICtx(messageContext)
+                            + LogUtils.getElectedResource(messageContext) + "|" + apiTo + "|" + authHeader + "|"
+                            + orgIdHeader + "|" + SrcIdHeader + "|" + applIdHeader + "|" + uuIdHeader + "|"
+                            + getContentLength(messageContext) + "|" + responseSize + "|"
+                            + LogUtils.getRestHttpResponseStatusCode(messageContext) + "|"
+                            + LogUtils.getApplicationName(messageContext) + "|"
+                            + LogUtils.getConsumerKey(messageContext) + "|" + responseTime);
                 } catch (Exception e) {
                     log.error(RESPONSE_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
                     return false;
                 }
             }
         }
+        // if PER API logging is available
+        String log = (String) messageContext.getProperty(LOG_LEVEL);
+        if (log != null) {
+            APILogHandler.logAPI(RESPONSE_IN, messageContext);
+        }
         return true;
     }
 
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        // if PER API logging is available
+        String log = (String) messageContext.getProperty(LOG_LEVEL);
+        if (log != null) {
+            APILogHandler.logAPI(RESPONSE_OUT, messageContext);
+        }
         return true;
     }
 
@@ -225,11 +241,77 @@ public class LogsHandler extends AbstractSynapseHandler {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
+        String contentLength = null;
+        if (headers != null) {
+            contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
+        }
         if (contentLength != null) {
             requestSize = Integer.parseInt(contentLength);
             // request size is left as -1 if chunking is enabled. this is to avoid building the message
         }
         return requestSize;
+    }
+
+    private long buildResponseMessage(org.apache.synapse.MessageContext messageContext) {
+        long responseSize = 0;
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
+        if (contentLength != null) {
+            responseSize = Integer.parseInt(contentLength);
+        } else {
+            // When chunking is enabled
+            try {
+                RelayUtils.buildMessage(axis2MC);
+            } catch (IOException | XMLStreamException ex) {
+                // In case of an exception, it won't be propagated up,and set response size to 0
+                log.error(REQUEST_BODY_SIZE_ERROR, ex);
+            }
+        }
+        SOAPEnvelope env = messageContext.getEnvelope();
+        if (env != null) {
+            SOAPBody soapbody = env.getBody();
+            if (soapbody != null) {
+                byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
+                responseSize = size.length;
+            }
+
+        }
+        return responseSize;
+
+    }
+    /**
+     * Sync the node's map based on the user given values.
+     *
+     * @param map Map containing API context and logLevel
+     */
+    public static Map<String, String> syncAPILogData(Map<String, Object> map) {
+        String apictx = (String) map.get("context");
+        String logLevel = (String) map.get("value");
+        log.debug("Log level for " + apictx + " is changed to " + logLevel);
+        return APILoggerManager.getInstance().getPerAPILoggerList();
+    }
+    public static String getLogData(String context) {
+        return APILoggerManager.getInstance().getPerAPILoggerList().get(context);
+    }
+
+    public static Map<String, String> getLogData() {
+        return APILoggerManager.getInstance().getPerAPILoggerList();
+    }
+
+    /**
+     * Check if the incoming API need to be logged, if yes return the loglevel, if not return null
+     *
+     * @param ctx MessageContext of the incoming request
+     * @return log level of the API or null if not
+     */
+    private String getAPILogLevel(MessageContext ctx) {
+        Map<String, String> logProperties = APILoggerManager.getInstance().getPerAPILoggerList();
+        // if the logging API data holder is empty or null return null
+        if (!logProperties.isEmpty()) {
+            return LogUtils.getMatchingLogLevel(ctx, logProperties);
+        }
+        return null;
     }
 }

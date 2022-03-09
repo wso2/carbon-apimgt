@@ -21,623 +21,220 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.http.HttpHeaders;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.service.APIKeyValidationService;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.databridge.agent.DataPublisher;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.SocketAddress;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-
-import static org.junit.Assert.fail;
-import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
+import java.util.UUID;
 
 /**
- * Test class for WebsocketInboundHandler
+ * Test class for WebsocketInboundHandler.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WebsocketInboundHandler.class, MultitenantUtils.class, DataPublisherUtil.class,
-        PrivilegedCarbonContext.class, ServiceReferenceHolder.class, Caching.class,
-        APISecurityUtils.class, WebsocketUtil.class, ThrottleDataPublisher.class, APIUtil.class, RegistryService.class,
-        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class})
-@PowerMockIgnore("javax.net.ssl.SSLContext")
+@PrepareForTest({WebSocketUtils.class, InboundWebsocketProcessorUtil.class})
 public class WebsocketInboundHandlerTestCase {
-    private String TENANT_URL = "https://localhost/t/abc.com/1.0";
-    private String SUPER_TENANT_URL = "https://localhost/abc/1.0";
-    private String TENANT_DOMAIN = "abc.com";
-    private String SUPER_TENANT_DOMAIN = "carbon.super";
-    private String AUTHORIZATION = "Authorization: 587hfbt4i8ydno87ywq";
-    private String USER_AGENT = "Mozilla";
-    private String TOKEN_CACHE_EXPIRY = "900";
-    private String API_KEY_VALIDATOR_URL = "https://localhost:9000/";
-    private String API_KEY_VALIDATOR_USERNAME = "IsharaC";
-    private String API_KEY_VALIDATOR_PASSWORD = "abc123";
-    private String CACHE_KEY = "587hfbt4i8ydno87ywq:https://localhost/t/abc.com/1.0";
-    //    private String GATEWAY_TOKEN_CACHE_ENABLED = "true";
-    private String API_KEY = "587hfbt4i8ydno87ywq";
+
+    private static final String channelIdString = "11111";
+    private static final String remoteIP = "192.168.0.100";
     private ChannelHandlerContext channelHandlerContext;
-    private FullHttpRequest fullHttpRequest;
-    private APIManagerConfiguration apiManagerConfiguration;
-    private HttpHeaders headers;
-    private Cache gatewayCache;
-    private RegistryService registryService;
-    private ServiceReferenceHolder serviceReferenceHolder;
+    private InboundWebSocketProcessor inboundWebSocketProcessor;
+    private WebsocketInboundHandler websocketInboundHandler;
+    private org.wso2.carbon.apimgt.keymgt.model.entity.API websocketAPI;
 
     @Before
-    public void setup() throws RegistryException {
-        System.setProperty("carbon.home", "jhkjn");
-
+    public void setup() throws Exception {
+        inboundWebSocketProcessor = Mockito.mock(InboundWebSocketProcessor.class);
         channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
-        fullHttpRequest = Mockito.mock(FullHttpRequest.class);
-        PowerMockito.mockStatic(MultitenantUtils.class);
-        PowerMockito.mockStatic(DataPublisherUtil.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(Caching.class);
-
-        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
-        ServiceReferenceHolder serviceReferenceHolder;
-        serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        APIManagerAnalyticsConfiguration apiManagerAnalyticsConfiguration =
-                Mockito.mock(APIManagerAnalyticsConfiguration.class);
-        gatewayCache = Mockito.mock(Cache.class);
-        headers = Mockito.mock(HttpHeaders.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        CacheBuilder cacheBuilder = Mockito.mock(CacheBuilder.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
-        PowerMockito.when(cacheManager.createCacheBuilder(APIConstants.GATEWAY_KEY_CACHE_NAME)).thenReturn(cacheBuilder);
-        PowerMockito.when(DataPublisherUtil.getHostAddress()).thenReturn("192.168.0.1:18000");
-        Mockito.when(fullHttpRequest.getUri()).thenReturn(TENANT_URL);
-        Mockito.when(fullHttpRequest.headers()).thenReturn(headers);
-        Mockito.when(headers.get(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn(AUTHORIZATION);
-        Mockito.when(headers.get(org.apache.http.HttpHeaders.USER_AGENT)).thenReturn(USER_AGENT);
-        Mockito.when(fullHttpRequest.headers()).thenReturn(headers);
-        Mockito.when(apiManagerConfigurationService.getAPIAnalyticsConfiguration()).thenReturn(apiManagerAnalyticsConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY)).thenReturn("900");
-        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        CacheConfiguration.Duration duration = new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                Long.parseLong(TOKEN_CACHE_EXPIRY));
-        Mockito.when(gatewayCache.get(API_KEY)).thenReturn("fhgvjhhhjkghj");
-        Mockito.when(gatewayCache.get(CACHE_KEY)).thenReturn(null);
-        Mockito.when(cacheManager.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME)).thenReturn(gatewayCache);
-        Mockito.when(cacheBuilder.setExpiry(CacheConfiguration.ExpiryType.MODIFIED, duration)).thenReturn(cacheBuilder);
-        Mockito.when(cacheBuilder.setExpiry(CacheConfiguration.ExpiryType.ACCESSED, duration)).thenReturn(cacheBuilder);
-        Mockito.when(cacheBuilder.setStoreByValue(false)).thenReturn(cacheBuilder);
-        Mockito.when(cacheBuilder.build()).thenReturn(gatewayCache);
-        PowerMockito.mockStatic(ThrottleDataPublisher.class);
-        DataPublisher dataPublisher = Mockito.mock(DataPublisher.class);
-        PowerMockito.when(ThrottleDataPublisher.getDataPublisher()).thenReturn(dataPublisher);
-        PowerMockito.mockStatic(WebsocketUtil.class);
-
-        PowerMockito.mockStatic(RegistryService.class);
-        registryService = Mockito.mock(RegistryService.class);
-
-
-    }
-
-    /*
-    * Tests channelRead method for tenant when msg is FullHttpRequest
-    * */
-    @Test
-    public void testChannelRead() throws AxisFault {
-        PowerMockito.mockStatic(DataPublisherUtil.class);
-        //test when the request is a handshake
-        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler() {
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return "192.168.0.100";
-            }
-        };
-        ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
-        FullHttpRequest fullHttpRequest = Mockito.mock(FullHttpRequest.class);
-        try {
-            websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected exception is not thrown. Hence test fails.");
-        } catch (Exception e) {
-//            test for exception
-        }
-        Mockito.when(fullHttpRequest.getUri()).thenReturn(TENANT_URL);
-        Mockito.when(fullHttpRequest.headers()).thenReturn(headers);
-        Mockito.when(headers.get(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn(AUTHORIZATION);
-        Mockito.when(headers.get(org.apache.http.HttpHeaders.USER_AGENT)).thenReturn(USER_AGENT);
-        Mockito.when(fullHttpRequest.headers()).thenReturn(headers);
-        WebsocketInboundHandler websocketInboundHandler1 = new WebsocketInboundHandler() {
-
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return "192.168.0.100";
-            }
-
-            @Override
-            protected String getInboundName(ChannelHandlerContext ctx) {
-                return WS_ENDPOINT_NAME;
-            }
-
-            @Override
-            protected String getMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req) {
-                return "";
-            }
-
-            @Override
-            protected void setApiPropertiesToChannel(ChannelHandlerContext ctx) {
-                // do nothing
-            }
-
-            @Override
-            protected void setUris(FullHttpRequest req) {
-                // do nothing
-            }
-
-            @Override
-            protected void setTenantDomain(String uri) {
-                // do nothing
-            }
-        };
-        CacheConfiguration.Duration duration = new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                Long.parseLong(TOKEN_CACHE_EXPIRY));
-        Mockito.when(gatewayCache.get(API_KEY)).thenReturn("fhgvjhhhjkghj");
-        Mockito.when(gatewayCache.get(CACHE_KEY)).thenReturn(null);
-        PowerMockito.when(MultitenantUtils.getTenantDomainFromUrl(TENANT_URL)).thenReturn(TENANT_DOMAIN);
-        Whitebox.setInternalState(websocketInboundHandler1, "fullRequestPath", "dummy/url");
-        //test for Invalid Credentials error
-        try {
-            websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected APISecurityException is not thrown (Invalid Credentials)");
-        } catch (Exception e) {
-            if (e instanceof APISecurityException) {
-                Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
-            } else {
-                e.printStackTrace();
-                fail(e.getMessage());
-            }
-        }
-
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).
-                thenReturn(API_KEY_VALIDATOR_URL);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).
-                thenReturn(API_KEY_VALIDATOR_USERNAME);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).
-                thenReturn(API_KEY_VALIDATOR_PASSWORD);
-        Mockito.when(headers.get(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn("Bearer 587hfbt4i8ydno87ywq");
-
-        //test when CONSUMER_KEY_SEGMENT is not present
-        Mockito.when(headers.contains(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn(true);
-        try {
-            websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected APISecurityException is not thrown(Error while accessing backend services for API key " +
-                    "validation");
-        } catch (Exception e) {
-            if (e instanceof APISecurityException) {
-                Assert.assertTrue(e.getMessage().startsWith("Error while accessing backend services for API key " +
-                        "validation"));
-            } else {
-                e.printStackTrace();
-                fail(e.getMessage());
-            }
-        }
-
-        // Test when api key validation client type is invalid it should throw Invalid Credentials Exception
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = Mockito.mock(APIKeyValidationInfoDTO.class);
-        Mockito.when(gatewayCache.get(CACHE_KEY)).thenReturn(apiKeyValidationInfoDTO);
-        PowerMockito.mockStatic(APISecurityUtils.class);
-        Mockito.when(headers.contains(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn(true);
-
-        ConfigurationContext ctx = ConfigurationContextFactory
-                .createConfigurationContextFromFileSystem(null, null);
-        APIKeyValidationService apiKeyValidationService = Mockito.mock(APIKeyValidationService.class);
-        WebsocketWSClient websocketWSClient = Mockito.mock(WebsocketWSClient.class);
-        try {
-            PowerMockito.when(websocketWSClient.getAPIKeyData(TENANT_URL, "1.0", "587hfbt4i8ydno87ywq", "abc.com"))
-                    .thenReturn(apiKeyValidationInfoDTO);
-            PowerMockito.whenNew(WebsocketWSClient.class).withNoArguments().thenReturn(websocketWSClient);
-            websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected APISecurityException is not thrown (Invalid Credentials) when KeyValidatorClientType is provided.");
-        } catch (Exception e) {
-            if (e instanceof APISecurityException) {
-                Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
-            } else {
-                e.printStackTrace();
-                fail(e.getMessage());
-            }
-        }
-
-    }
-
-    /*
-   * Tests channelRead method for tenant when msg is WebSocketFrame
-   * */
-    @Test
-    public void testChannelRead1() throws Exception {
-        PowerMockito.mockStatic(DataPublisherUtil.class);
-        //test when the request is a handshake
-        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler() {
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return "192.168.0.100";
-            }
-        };
-        ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
-        WebSocketFrame webSocketFrame = Mockito.mock(WebSocketFrame.class);
-        CacheConfiguration.Duration duration = new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                Long.parseLong(TOKEN_CACHE_EXPIRY));
-        Mockito.when(gatewayCache.get(API_KEY)).thenReturn("fhgvjhhhjkghj");
-        Mockito.when(gatewayCache.get(CACHE_KEY)).thenReturn(null);
-
-        ByteBuf content = Mockito.mock(ByteBuf.class);
-        Mockito.when(webSocketFrame.content()).thenReturn(content);
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.isAnalyticsEnabled()).thenReturn(false);
-        //test for happy path
-        websocketInboundHandler.channelRead(channelHandlerContext, webSocketFrame);
-    }
-
-    /*
-    * Tests channelRead method for super tenant
-    * */
-    @Test
-    public void testChannelReadForSuperTenant() throws Exception {
-        PowerMockito.mockStatic(DataPublisherUtil.class);
-        //test when the request is a handshake
-        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler() {
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return "192.168.0.100";
-            }
-        };
-        PowerMockito.when(MultitenantUtils.getTenantDomainFromUrl(SUPER_TENANT_URL)).thenReturn(SUPER_TENANT_DOMAIN);
-        try {
-            websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected exception is not thrown. Hence test fails.");
-        } catch (Exception e) {
-//            test for exception
-        }
-
-        WebsocketInboundHandler websocketInboundHandler1 = new WebsocketInboundHandler() {
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return "192.168.0.100";
-            }
-
-            @Override
-            protected String getInboundName(ChannelHandlerContext ctx) {
-                return WS_ENDPOINT_NAME;
-            }
-
-            @Override
-            protected String getMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req) {
-                return "";
-            }
-
-            @Override
-            protected void setUris(FullHttpRequest req) {
-                // do nothing
-            }
-
-            @Override
-            protected void setTenantDomain(String uri) {
-                // do nothing
-            }
-        };
-        //test for Invalid Credentials error
-        try {
-            Whitebox.setInternalState(websocketInboundHandler1, "fullRequestPath", "dummy/url");
-            websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected APISecurityException is not thrown (Invalid Credentials)");
-        } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
-        }
-
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).
-                thenReturn(API_KEY_VALIDATOR_URL);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).
-                thenReturn(API_KEY_VALIDATOR_USERNAME);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).
-                thenReturn(API_KEY_VALIDATOR_PASSWORD);
-        Mockito.when(headers.get(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn("Bearer 587hfbt4i8ydno87ywq");
-
-        //test when CONSUMER_KEY_SEGMENT is not present
-        Mockito.when(headers.contains(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn(true);
-        try {
-            websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected APISecurityException is not thrown(Error while accessing backend services for API key " +
-                    "validation");
-        } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Error while accessing backend services for API key " +
-                    "validation"));
-        }
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = Mockito.mock(APIKeyValidationInfoDTO.class);
-        Mockito.when(apiKeyValidationInfoDTO.isAuthorized()).thenReturn(false);
-        PowerMockito.when(WebsocketUtil.isGatewayTokenCacheEnabled()).thenReturn(true);
-        PowerMockito.when(WebsocketUtil.getAccessTokenCacheKey(API_KEY, TENANT_URL, "")).thenReturn(CACHE_KEY);
-        PowerMockito.when(WebsocketUtil.validateCache(API_KEY, CACHE_KEY)).thenReturn(apiKeyValidationInfoDTO);
-        PowerMockito.when(WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()).thenReturn(true);
-//        PowerMockito.when(WebsocketUtil.validateCache(api)).thenReturn(true);
-        // Test when api key validation client type is invalid it should throw Invalid Credentials Exception
-//        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = Mockito.mock(APIKeyValidationInfoDTO.class);
-        Mockito.when(gatewayCache.get(CACHE_KEY)).thenReturn(apiKeyValidationInfoDTO);
-        PowerMockito.mockStatic(APISecurityUtils.class);
-        ConfigurationContext ctx = ConfigurationContextFactory
-                .createConfigurationContextFromFileSystem(null, null);
-        APIKeyValidationService apiKeyValidationServiceStub = Mockito.mock(APIKeyValidationService.class);
-        WebsocketWSClient websocketWSClient = Mockito.mock(WebsocketWSClient.class);
-        try {
-            PowerMockito.when(
-                    websocketWSClient.getAPIKeyData(SUPER_TENANT_URL, "1.0", "587hfbt4i8ydno87ywq", "carbon.super"))
-                    .thenReturn(apiKeyValidationInfoDTO);
-            PowerMockito.whenNew(WebsocketWSClient.class).withAnyArguments().thenReturn(websocketWSClient);
-            websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected APISecurityException is not thrown (Invalid Credentials) when KeyValidatorClientType is provided.");
-
-        } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
-        }
-        WebsocketInboundHandler websocketInboundHandler2 = new WebsocketInboundHandler() {
-            APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
-
-            @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
-                                                                       String apiVersion) {
-                return info;
-            }
-
-            @Override
-            protected String getInboundName(ChannelHandlerContext ctx) {
-                return WS_ENDPOINT_NAME;
-            }
-
-            @Override
-            protected String getMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req) {
-                return "";
-            }
-
-            @Override
-            protected void setUris(FullHttpRequest req) throws URISyntaxException {
-                // do nothing
-            }
-
-            @Override
-            protected void setTenantDomain(String uri) {
-                // do nothing
-            }
-        };
-
-        // keyValidatorClientType = wsclient
-        PowerMockito.when(WebsocketUtil.isGatewayTokenCacheEnabled()).thenReturn(false);
-
-        try {
-            Whitebox.setInternalState(websocketInboundHandler1,"fullRequestPath", "dummy/url");
-            websocketInboundHandler2.channelRead(channelHandlerContext, fullHttpRequest);
-            fail("Expected APISecurityException is not thrown (Invalid Credentials)");
-        } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
-        }
-
-        WebsocketInboundHandler websocketInboundHandler3 = new WebsocketInboundHandler() {
-            APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
-
-            @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiKey,
-                                                                       String tenantDomain)
-                    throws APISecurityException {
-                info.setAuthorized(true);
-                info.setApiName("Phoneverify*1.0");
-                info.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
-                return info;
-            }
-
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return "192.168.0.100";
-            }
-
-            @Override
-            protected String getInboundName(ChannelHandlerContext ctx) {
-                return WS_ENDPOINT_NAME;
-            }
-
-            @Override
-            protected String getMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req)
-                    throws WebSocketApiException, AxisFault, URISyntaxException {
-                return "";
-            }
-
-            @Override
-            protected void setApiPropertiesToChannel(ChannelHandlerContext ctx) {
-                // do nothing
-            }
-
-            @Override
-            protected void setUris(FullHttpRequest req) throws URISyntaxException {
-                // do nothing
-            }
-
-            @Override
-            protected void setTenantDomain(String uri) {
-                // do nothing
-            }
-        };
-        PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
-        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder
-                = Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
-        PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance())
-                .thenReturn(serviceReferenceHolder);
-
         Channel channel = Mockito.mock(Channel.class);
-        SocketAddress socketAddress = Mockito.mock(SocketAddress.class);
+        ChannelId channelId = Mockito.mock(ChannelId.class);
         Mockito.when(channelHandlerContext.channel()).thenReturn(channel);
-        Attribute<Map<String, Object>> properties = new Attribute<Map<String, Object>>() {
+        Mockito.when(channel.id()).thenReturn(channelId);
+        Mockito.when(channelId.asLongText()).thenReturn(channelIdString);
+        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
+        PowerMockito.mockStatic(WebSocketUtils.class);
+        SocketAddress socketAddress = Mockito.mock(SocketAddress.class);
+        Mockito.when(channel.remoteAddress()).thenReturn(socketAddress);
+        PowerMockito.when(WebSocketUtils.getApiProperties(channelHandlerContext)).thenReturn(new HashMap<>());
+        APIMgtGoogleAnalyticsUtils apiMgtGoogleAnalyticsUtils = Mockito.mock(APIMgtGoogleAnalyticsUtils.class);
+        PowerMockito.whenNew(APIMgtGoogleAnalyticsUtils.class).withAnyArguments()
+                .thenReturn(apiMgtGoogleAnalyticsUtils);
+        Mockito.doNothing().when(apiMgtGoogleAnalyticsUtils).init("carbon.super");
+        Mockito.doNothing().when(apiMgtGoogleAnalyticsUtils).publishGATrackingData(Mockito.anyObject(),
+                Mockito.anyObject(), Mockito.anyObject());
+        websocketInboundHandler = new WebsocketInboundHandler() {
+            @Override
+            protected String getRemoteIP(ChannelHandlerContext ctx) {
+                return remoteIP;
+            }
+
+            @Override
+            public InboundWebSocketProcessor initializeWebSocketProcessor() {
+                return inboundWebSocketProcessor;
+            }
+        };
+        websocketAPI = new API(UUID.randomUUID().toString(), 1, "admin", "WSAPI", "1.0.0", "/wscontext", "Unlimited",
+                APIConstants.API_TYPE_WS, APIConstants.PUBLISHED_STATUS, false);
+    }
+
+    @Test
+    public void testWSCloseFrameResponse() throws Exception {
+
+        Object msg = "msg";
+        websocketInboundHandler.channelRead(channelHandlerContext, msg);
+        Assert.assertTrue((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                .containsKey(channelIdString))); // No error has occurred context exists in data-holder map.
+
+        CloseWebSocketFrame closeWebSocketFrame = Mockito.mock(CloseWebSocketFrame.class);
+        websocketInboundHandler.channelRead(channelHandlerContext, closeWebSocketFrame);
+        Assert.assertFalse((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                .containsKey(channelIdString))); // Closing connection. Remove context from data-holder map.
+    }
+
+    @Test
+    public void testWSHandshakeResponse() throws Exception {
+
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        InboundMessageContextDataHolder.getInstance().addInboundMessageContextForConnection(channelIdString,
+                inboundMessageContext);
+        String headerName = "test-header";
+        String headerValue = "test-header-value";
+        String strWebSocket = "websocket";
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        FullHttpRequest fullHttpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
+                "ws://localhost:8080/graphql");
+        fullHttpRequest.headers().set(headerName, headerValue);
+        fullHttpRequest.headers().set(HttpHeaders.UPGRADE, strWebSocket);
+        Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
+                inboundMessageContext)).thenReturn(responseDTO);
+        websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
+        Assert.assertTrue((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                .containsKey(channelIdString)));// No error has occurred context exists in data-holder map.
+        Assert.assertEquals(inboundMessageContext.getRequestHeaders().get(headerName), headerValue);
+        Assert.assertEquals(inboundMessageContext.getToken(), fullHttpRequest.headers()
+                .get(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER));
+        Assert.assertEquals(inboundMessageContext.getUserIP(), remoteIP);
+
+        //error response
+        responseDTO.setError(true);
+        responseDTO.setErrorMessage("error");
+        fullHttpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
+                "ws://localhost:8080/graphql");
+        Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
+                inboundMessageContext)).thenReturn(responseDTO);
+        fullHttpRequest.headers().set(headerName, headerValue);
+        fullHttpRequest.headers().set(HttpHeaders.UPGRADE, strWebSocket);
+        websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
+        Assert.assertFalse(InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                .containsKey(channelIdString));  // Closing connection error has occurred
+        Assert.assertFalse(fullHttpRequest.headers().contains(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER));
+    }
+
+    @Test
+    public void testWSFrameResponse() throws Exception {
+
+        InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        InboundMessageContextDataHolder.getInstance().addInboundMessageContextForConnection(channelIdString,
+                inboundMessageContext);
+        ByteBuf content = Mockito.mock(ByteBuf.class);
+        WebSocketFrame msg = Mockito.mock(WebSocketFrame.class);
+        Mockito.when(msg.content()).thenReturn(content);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        Mockito.when(inboundWebSocketProcessor.handleRequest(msg, inboundMessageContext)).thenReturn(responseDTO);
+        websocketInboundHandler.channelRead(channelHandlerContext, msg);
+        Assert.assertTrue((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                .containsKey(channelIdString)));// No error has occurred context exists in data-holder map.
+
+        //error response
+        responseDTO.setError(true);
+        websocketInboundHandler.channelRead(channelHandlerContext, msg);
+        Assert.assertTrue((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                .containsKey(channelIdString)));
+
+        //close connection error response
+        responseDTO.setCloseConnection(true);
+        websocketInboundHandler.channelRead(channelHandlerContext, msg);
+        Assert.assertFalse((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
+                .containsKey(channelIdString)));
+    }
+
+    private InboundMessageContext createWebSocketApiMessageContext() {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        inboundMessageContext.setTenantDomain("carbon.super");
+        inboundMessageContext.setElectedAPI(websocketAPI);
+        inboundMessageContext.setToken("test-backend-jwt-token");
+        return inboundMessageContext;
+    }
+
+    private Attribute<Map<String, Object>> getChannelAttributeMap() {
+        return new Attribute<Map<String, Object>>() {
             @Override
             public AttributeKey<Map<String, Object>> key() {
-                return AttributeKey.valueOf("WSO2_PROPERTIES");
+                return null;
             }
 
             @Override
             public Map<String, Object> get() {
-                return new HashMap<>();
+                return null;
             }
 
             @Override
             public void set(Map<String, Object> stringObjectMap) {
-                // Ignore
+
             }
 
             @Override
             public Map<String, Object> getAndSet(Map<String, Object> stringObjectMap) {
-                return new HashMap<>();
+                return null;
             }
 
             @Override
             public Map<String, Object> setIfAbsent(Map<String, Object> stringObjectMap) {
-                return new HashMap<>();
+                return null;
             }
 
             @Override
             public Map<String, Object> getAndRemove() {
-                return new HashMap<>();
+                return null;
             }
 
             @Override
             public boolean compareAndSet(Map<String, Object> stringObjectMap, Map<String, Object> t1) {
-                return true;
+                return false;
             }
 
             @Override
             public void remove() {
-                // Ignore
+
             }
         };
-        Mockito.when(channelHandlerContext.channel().attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(properties);
-        Mockito.when(channel.remoteAddress()).thenReturn(socketAddress);
-        String configKey = "/apimgt/statistics/ga-config.xml";
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getGovernanceSystemRegistry()).thenReturn(userRegistry);
-        Resource resource = Mockito.mock(Resource.class);
-        InputStream is = new ByteArrayInputStream(Charset.forName("UTF-16").encode("<test>ishara</test>").array());
-        Mockito.when(resource.getContentStream()).thenReturn(is);
-        Mockito.when(userRegistry.get(configKey)).thenReturn(resource);
-
-        APIMgtGoogleAnalyticsUtils apiMgtGoogleAnalyticsUtils = Mockito.mock(APIMgtGoogleAnalyticsUtils.class);
-        Mockito.doNothing().when(apiMgtGoogleAnalyticsUtils).init("");
-        PowerMockito.whenNew(APIMgtGoogleAnalyticsUtils.class).withAnyArguments().thenReturn(apiMgtGoogleAnalyticsUtils);
-
-        Whitebox.setInternalState(websocketInboundHandler1,"fullRequestPath", "dummy/url");
-        websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
-        PowerMockito.when(WebsocketUtil.isGatewayTokenCacheEnabled()).thenReturn(false);
-        websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
-
-        //When gateway token cache is enabled
-        PowerMockito.when(WebsocketUtil.isGatewayTokenCacheEnabled()).thenReturn(true);
-        Mockito.when(apiKeyValidationInfoDTO.isAuthorized()).thenReturn(true);
-
-        websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
-
-        //when Bearer token is not provided Invalid Credentials exception should be thrown
-        Mockito.when(headers.get(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn(AUTHORIZATION);
-        try {
-            websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
-        } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
-        }
-
-    }
-
-    /*
-    *  Test for doThrottle() happy path
-    *
-    * */
-    @Test
-    public void testDoThrottle() throws APIManagementException {
-        PowerMockito.mockStatic(DataPublisherUtil.class);
-        //todo
-        ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
-        WebSocketFrame webSocketFrame = Mockito.mock(WebSocketFrame.class);
-        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler() {
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return "192.168.0.100";
-            }
-        };
-        ByteBuf content = Mockito.mock(ByteBuf.class);
-        Mockito.when(webSocketFrame.content()).thenReturn(content);
-
-        websocketInboundHandler.doThrottle(channelHandlerContext, webSocketFrame);
-    }
-
-
-    /*
-    *  Test for NumberFormatException throws when remoteIP is mis formatted
-    *
-    * */
-    @Test
-    public void testDoThrottle1() {
-        PowerMockito.mockStatic(DataPublisherUtil.class);
-        //todo
-        ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
-        WebSocketFrame webSocketFrame = Mockito.mock(WebSocketFrame.class);
-        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler() {
-            @Override
-            protected String getRemoteIP(ChannelHandlerContext ctx) {
-                return "localhost";
-            }
-        };
-        try {
-            websocketInboundHandler.doThrottle(channelHandlerContext, webSocketFrame);
-            fail("Expected NumberFormatException is not thrown.");
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof NumberFormatException);
-        }
     }
 }

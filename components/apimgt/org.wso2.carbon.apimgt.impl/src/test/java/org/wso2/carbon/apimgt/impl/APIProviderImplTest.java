@@ -23,7 +23,9 @@ import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
+import org.apache.synapse.unittest.testcase.data.classes.AssertNotNull;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,10 +48,13 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -104,13 +109,15 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBean;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
@@ -164,7 +171,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_URI;
 
 @RunWith(PowerMockRunner.class)
@@ -174,7 +180,8 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         APIProviderImpl.class, APIManagerFactory.class, RegistryUtils.class,
         LifecycleBeanPopulator.class, Caching.class, PaginationContext.class, MultitenantUtils.class,
         AbstractAPIManager.class, OASParserUtil.class, KeyManagerHolder.class, CertificateManagerImpl.class ,
-        ScopesDAO.class, PublisherAPI.class, Organization.class, APIPersistence.class, GatewayArtifactsMgtDAO.class})
+        ScopesDAO.class, PublisherAPI.class, Organization.class, APIPersistence.class, GatewayArtifactsMgtDAO.class,
+        RegistryPersistenceUtil.class})
 public class APIProviderImplTest {
 
     private static String EP_CONFIG_WSDL = "{\"production_endpoints\":{\"url\":\"http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl\""
@@ -193,6 +200,7 @@ public class APIProviderImplTest {
     private APIPersistence apiPersistenceInstance;
     private String superTenantDomain;
     private String apiUUID = "12640983654";
+    private final String artifactPath = "artifact/path";
 
     @Before
     public void init() throws Exception {
@@ -211,6 +219,7 @@ public class APIProviderImplTest {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(APIGatewayManager.class);
         PowerMockito.mockStatic(CertificateManagerImpl.class);
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
         apimgtDAO = Mockito.mock(ApiMgtDAO.class);
         gatewayArtifactsMgtDAO = Mockito.mock(GatewayArtifactsMgtDAO.class);
         scopesDAO = Mockito.mock(ScopesDAO.class);
@@ -1105,7 +1114,27 @@ public class APIProviderImplTest {
         WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
         Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1111),
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(workflowDTO);
-        apiProvider.deleteWorkflowTask(apiUUID);
+        APIIdentifier identifier = new APIIdentifier("admin", "API1", "1.0.0", apiUUID);
+        apiProvider.deleteWorkflowTask(identifier);
+        Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiUUID);
+    }
+
+    @Test
+    public void testDeleteAPIProductWorkflowTask() throws APIManagementException, WorkflowException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1111);
+        WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
+        Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
+        WorkflowExecutor productStateChangeWorkflowExecutor = Mockito.mock(WorkflowExecutor.class);
+        Mockito.when(wfe.getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE))
+                .thenReturn(productStateChangeWorkflowExecutor);
+        WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
+        Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1111),
+                WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE)).thenReturn(workflowDTO);
+        APIProductIdentifier identifier = new APIProductIdentifier("admin", "APIProduct", "1.0.0",
+                apiUUID);
+        apiProvider.deleteWorkflowTask(identifier);
         Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiUUID);
     }
 
@@ -1115,6 +1144,7 @@ public class APIProviderImplTest {
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
+        api.setOrganization("carbon.super");
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
 
@@ -1319,6 +1349,7 @@ public class APIProviderImplTest {
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
+        api.setOrganization("carbon.super");
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
@@ -1355,8 +1386,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         PowerMockito.when(APIUtil.replaceEmailDomain(apiId.getProviderName())).thenReturn("admin");
@@ -1403,6 +1433,8 @@ public class APIProviderImplTest {
         api.setVisibility("Public");
         api.setStatus(APIConstants.CREATED);
         api.setWsdlUrl("https://localhost:9443/services/echo?wsdl");
+        api.setOrganization("carbon.super");
+        long time = System.currentTimeMillis();
 
         String newVersion = "1.0.1";
         //Create new API object
@@ -1434,11 +1466,13 @@ public class APIProviderImplTest {
 
         GenericArtifact artifactNew = Mockito.mock(GenericArtifact.class);
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, newApi)).thenReturn(artifactNew);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
-        apiProvider.addAPI(api);
+        Mockito.when(publisherAPI.getVersionTimestamp()).thenReturn(String.valueOf(time));
+
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
+        API returnedAPI = apiProvider.addAPI(api);
+        Assert.assertTrue(StringUtils.isNotEmpty(returnedAPI.getVersionTimestamp()));
         
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 api.getId().getProviderName() +
@@ -1525,7 +1559,6 @@ public class APIProviderImplTest {
         Mockito.doNothing().when(apiProvider.registry).addAssociation("/dummy/provider/path",
                 targetPath, APIConstants.PROVIDER_ASSOCIATION);
 
-        String artifactPath = "artifact/path";
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, artifact.getId())).
                 thenReturn(artifactPath);
         PowerMockito.doNothing().when(APIUtil.class);
@@ -1574,6 +1607,7 @@ public class APIProviderImplTest {
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
         PowerMockito.when(userRealm.getAuthorizationManager()).thenReturn(authManager);
+
     }
 
     @Ignore
@@ -1619,8 +1653,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1688,7 +1721,6 @@ public class APIProviderImplTest {
         Mockito.doNothing().when(apiProvider.registry).addAssociation("/dummy/provider/path",
                 targetPath, APIConstants.PROVIDER_ASSOCIATION);
 
-        String artifactPath = "artifact/path";
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, artifact.getId())).
                 thenReturn(artifactPath);
         PowerMockito.doNothing().when(APIUtil.class);
@@ -1763,8 +1795,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1901,8 +1932,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         
         apiProvider.addAPI(oldApi);
 
@@ -1955,6 +1985,7 @@ public class APIProviderImplTest {
         api.setContext("/test");
         api.setEnvironments(environments);
         api.setUriTemplates(newUriTemplates);
+        api.setOrganization("carbon.super");
 
         API oldApi = new API(identifier);
         oldApi.setStatus(APIConstants.CREATED);
@@ -1963,6 +1994,7 @@ public class APIProviderImplTest {
         oldApi.setContext("/test");
         oldApi.setEnvironments(environments);
         api.setUriTemplates(uriTemplates);
+        oldApi.setOrganization("carbon.super");
 
 
         List<Documentation> documentationList = getDocumentationList();
@@ -1977,7 +2009,6 @@ public class APIProviderImplTest {
         GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
         Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
-        String artifactPath = "artifact/path";
         Mockito.when(docArtifact.getPath()).thenReturn(artifactPath);
         PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
                 Mockito.anyInt());
@@ -2003,8 +2034,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         
         apiProvider.addAPI(oldApi);
 
@@ -2114,6 +2144,8 @@ public class APIProviderImplTest {
         api.setContext("/test");
         api.setEnvironments(newEnvironments);
         api.setUriTemplates(newUriTemplates);
+        api.setOrganization("carbon.super");
+
 
         API oldApi = new API(identifier);
         oldApi.setStatus(APIConstants.PUBLISHED);
@@ -2121,6 +2153,8 @@ public class APIProviderImplTest {
         oldApi.setAccessControl("all");
         oldApi.setContext("/test");
         oldApi.setEnvironments(environments);
+        oldApi.setOrganization("carbon.super");
+
         api.setUriTemplates(uriTemplates);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("test", "new_test");
@@ -2143,7 +2177,6 @@ public class APIProviderImplTest {
         GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
         Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
-        String artifactPath = "artifact/path";
         Mockito.when(docArtifact.getPath()).thenReturn(artifactPath);
         PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
                 Mockito.anyInt());
@@ -2169,8 +2202,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(oldApi);
 
         RegistryAuthorizationManager registryAuthorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
@@ -2346,6 +2378,7 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setAsDefaultVersion(true);
         api.setEnvironments(environments);
+        api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
         Map<String, String> failedGWEnv = new HashMap<String, String>();
@@ -2365,8 +2398,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         //Mock Updating API
@@ -2382,7 +2414,7 @@ public class APIProviderImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
-        apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.PUBLISHED, failedGWEnv);
+        apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.PUBLISHED);
         //From the 2 environments, only 1 was successful
         Assert.assertEquals(2, api.getEnvironments().size());
     }
@@ -2401,6 +2433,7 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setAsDefaultVersion(true);
         api.setEnvironments(environments);
+        api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
         Map<String, String> failedGWEnv = new HashMap<String, String>();
@@ -2420,8 +2453,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         //Mock Updating API
@@ -2439,8 +2471,7 @@ public class APIProviderImplTest {
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
         WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
         Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
-        boolean status = apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.RETIRED,
-                failedGWEnv);
+        boolean status = apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.RETIRED);
         Assert.assertEquals(2, api.getEnvironments().size());
         Assert.assertEquals(true, status);
     }
@@ -2458,11 +2489,10 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setAsDefaultVersion(true);
         api.setEnvironments(environments);
+        api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
 
-        Map<String, String> failedGWEnv = new HashMap<String, String>();
-        failedGWEnv.put("Production", "Failed to publish");
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
                 null, null);
         Mockito.when(artifactManager.newGovernanceArtifact(any(QName.class))).thenReturn(artifact);
@@ -2479,8 +2509,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         //Mock Updating API
@@ -2497,12 +2526,11 @@ public class APIProviderImplTest {
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
         try {
-            apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.PUBLISHED, failedGWEnv);
+            apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.PUBLISHED);
         } catch(FaultGatewaysException e) {
             Assert.assertTrue(e.getFaultMap().contains("Failed to publish"));
         }
-        //From the 2 environments, only 1 was successful
-        Assert.assertEquals(1, api.getEnvironments().size());
+        Assert.assertEquals(2, api.getEnvironments().size());
     }
 
     @Test
@@ -2517,11 +2545,9 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setAsDefaultVersion(true);
         api.setEnvironments(environments);
+        api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
-
-        Map<String, String> failedGWEnv = new HashMap<String, String>();
-        failedGWEnv.put("Sandbox", "Failed to un-publish");
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
                 null, null);
@@ -2539,8 +2565,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         //Mock Updating API
@@ -2558,14 +2583,12 @@ public class APIProviderImplTest {
         WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
         Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
         try {
-            apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.RETIRED, failedGWEnv);
+            apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.RETIRED);
         } catch(FaultGatewaysException e) {
             Assert.assertTrue(e.getFaultMap().contains("Failed to un-publish"));
         }
 
-        //API was going to be removed from 1 gateway, but removal has failed. Therefore API is available
-        // in both environments
-        Assert.assertEquals(2, api.getEnvironments().size());
+        Assert.assertEquals(1, api.getEnvironments().size());
     }
 
 
@@ -3082,6 +3105,68 @@ public class APIProviderImplTest {
         }
     }
 
+    @Test
+    public void testUpdateAPIProductForStateChange() throws Exception {
+
+        String provider = "admin";
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        Mockito.when(MultitenantUtils.getTenantDomain(provider)).thenReturn(APIConstants.SUPER_TENANT_DOMAIN);
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
+                null, null);
+
+        APIProduct apiProduct = createMockAPIProduct(provider);
+        prepareForLCStateChangeOfAPIProduct(apiProvider, apiProduct);
+
+        PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
+        Organization organization = new Organization(APIConstants.SUPER_TENANT_DOMAIN);
+
+        Mockito.when(apiPersistenceInstance.updateAPIProduct(organization, publisherAPIProduct))
+                .thenReturn(publisherAPIProduct);
+        apiProvider.updateAPIProductForStateChange(apiProduct, APIConstants.CREATED, APIConstants.PUBLISHED);
+    }
+
+    private void prepareForLCStateChangeOfAPIProduct(APIProviderImplWrapper apiProvider, APIProduct apiProduct)
+            throws Exception {
+
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+
+        PrivilegedCarbonContext prContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(prContext);
+
+        PowerMockito.doNothing().when(prContext).setUsername(Mockito.anyString());
+        PowerMockito.doNothing().when(prContext).setTenantDomain(Mockito.anyString(), Mockito.anyBoolean());
+
+        Mockito.when(artifactManager.getGenericArtifact(any(String.class))).thenReturn(artifact);
+        PowerMockito.when(RegistryPersistenceUtil.createAPIProductArtifactContent(artifact, apiProduct))
+                .thenReturn(artifact);
+        PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, artifact.getId()))
+                .thenReturn(artifactPath);
+        Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
+        Mockito.when(apiProvider.registry.resourceExists(artifactPath)).thenReturn(false);
+    }
+
+    private APIProduct createMockAPIProduct(String provider) {
+
+        APIProductIdentifier productIdentifier = new APIProductIdentifier(provider, APIConstants.API_PRODUCT,
+                APIConstants.API_PRODUCT_VERSION);
+        APIProduct apiProduct = new APIProduct(productIdentifier);
+        apiProduct.setContext("/test");
+        apiProduct.setState(APIConstants.CREATED);
+        apiProduct.setType(APIConstants.API_PRODUCT);
+        apiProduct.setOrganization(APIConstants.SUPER_TENANT_DOMAIN);
+        return apiProduct;
+    }
+
     private void mockSequences(String seqLoc, String apiSeqLoc, APIIdentifier apiId) throws Exception {
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
@@ -3501,6 +3586,7 @@ public class APIProviderImplTest {
         api.setContext("/test");
         api.setEnvironments(environments);
         api.setUriTemplates(uriTemplates);
+        api.setOrganization("carbon.super");
 
 
         List<Documentation> documentationList = getDocumentationList();
@@ -3523,8 +3609,7 @@ public class APIProviderImplTest {
         
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
  
         apiProvider.addAPI(api);
 
@@ -3774,6 +3859,7 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
         try {
             apiProvider.addAPIRevision(apiRevision, superTenantDomain);
         } catch (Exception e) {
@@ -3810,6 +3896,7 @@ public class APIProviderImplTest {
 
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
         try {
             apiProvider.addAPIRevision(apiRevision, superTenantDomain);
             apiProvider.getAPIRevision("b55e0fc3-9829-4432-b99e-02056dc91838");
@@ -3845,6 +3932,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
@@ -3883,6 +3971,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
@@ -3927,6 +4016,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
@@ -3943,5 +4033,29 @@ public class APIProviderImplTest {
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testChangeLifeCycleStatusOfAPIProduct() throws APIManagementException, FaultGatewaysException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        String provider = "admin";
+        PrivilegedCarbonContext carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+
+        PowerMockito.doNothing().when(carbonContext).setUsername(Mockito.anyString());
+        PowerMockito.doNothing().when(carbonContext).setTenantDomain(Mockito.anyString(), Mockito.anyBoolean());
+
+        APIProduct product = createMockAPIProduct(provider);
+        Mockito.when(apimgtDAO.getAPIProductId(product.getId())).thenReturn(1);
+
+        WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
+        Mockito.when(workflowDTO.getStatus()).thenReturn(WorkflowStatus.CREATED);
+        Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1),
+                WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE)).thenReturn(workflowDTO);
+
+        APIStateChangeResponse response = apiProvider.changeLifeCycleStatus("carbon.super",
+                new ApiTypeWrapper(product), "Publish", null);
+        Assert.assertNotNull(response);
     }
 }

@@ -147,6 +147,10 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(api.getCacheTimeout()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL, api.getRedirectURL());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT,
+                    api.getApiExternalProductionEndpoint());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT,
+                    api.getApiExternalSandboxEndpoint());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR, api.getAdvertiseOnlyAPIVendor());
             artifact.setAttribute(APIConstants.API_OVERVIEW_OWNER, api.getApiOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, Boolean.toString(api.isAdvertiseOnly()));
@@ -168,6 +172,7 @@ public class RegistryPersistenceUtil {
                                             Boolean.toString(api.isEnableSchemaValidation()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(api.isEnableStore()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_TESTKEY, api.getTestKey());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, api.getVersionTimestamp());
 
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -279,6 +284,12 @@ public class RegistryPersistenceUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
 
+            //set gateway vendor for the API
+            artifact.setAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR, api.getGatewayVendor());
+
+            //set async transport protocols for the API
+            artifact.setAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS, api.getAsyncTransportProtocols());
+
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUDIENCE, api.getAudience());
 
         } catch (GovernanceException e) {
@@ -312,7 +323,8 @@ public class RegistryPersistenceUtil {
     /**
      * This method used to set environment values to governance artifact of API .
      *
-     * @param environment set
+     * @param apiEnvironments
+     * @return
      */
     public static String writeEnvironmentsToArtifact(Set<String> apiEnvironments) {
 
@@ -340,7 +352,7 @@ public class RegistryPersistenceUtil {
      * @param registry Registry
      * @param key      , key name of the key
      * @return GenericArtifactManager
-     * @throws APIManagementException if failed to initialized GenericArtifactManager
+     * @throws APIPersistenceException if failed to initialized GenericArtifactManager
      */
     public static GenericArtifactManager getArtifactManager(Registry registry, String key)
             throws APIPersistenceException {
@@ -378,8 +390,7 @@ public class RegistryPersistenceUtil {
 
     /**
      * Utility method to get API provider path
-     *
-     * @param api provider
+     * @param provider API provider
      * @return API provider path
      */
     public static String getAPIProviderPath(String provider) {
@@ -585,6 +596,8 @@ public class RegistryPersistenceUtil {
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
             api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
+            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
+            api.setAsyncTransportProtocols(artifact.getAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS));
 
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
@@ -604,6 +617,10 @@ public class RegistryPersistenceUtil {
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants
+                    .API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
+            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants
+                    .API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setAdvertiseOnlyAPIVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
@@ -658,6 +675,7 @@ public class RegistryPersistenceUtil {
 
             api.setWsUriMapping(getWsUriMappingFromArtifact(artifact));
             api.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
+            api.setVersionTimestamp(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE));
 
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
@@ -723,7 +741,7 @@ public class RegistryPersistenceUtil {
      * To set the resource properties to the API.
      *
      * @param api          API that need to set the resource properties.
-     * @param registry     Registry to get the resource from.
+     * @param apiResource     Registry to get the resource from.
      * @param artifactPath Path of the API artifact.
      * @return Updated API.
      * @throws RegistryException Registry Exception.
@@ -1356,8 +1374,10 @@ public class RegistryPersistenceUtil {
             api.setId(apiArtifact.getId());
             api.setStatus(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
             api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
-            api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));;
+            api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+            api.setAdvertiseOnly(Boolean.parseBoolean(apiArtifact
+                    .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);
@@ -1374,7 +1394,7 @@ public class RegistryPersistenceUtil {
             api.setId(apiArtifact.getId());
             api.setStatus(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
             api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
-            api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));;
+            api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
 
         } catch (GovernanceException e) {
@@ -1465,6 +1485,7 @@ public class RegistryPersistenceUtil {
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, apiProduct.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
+            artifact.setAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR, apiProduct.getGatewayVendor());
 
             //set monetization status (i.e - enabled or disabled)
             artifact.setAttribute(
@@ -1483,6 +1504,9 @@ public class RegistryPersistenceUtil {
                     artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
                 }
             }
+
+            //set version timestamp
+            artifact.addAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, apiProduct.getVersionTimestamp());
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -1517,7 +1541,7 @@ public class RegistryPersistenceUtil {
             apiProduct.setUuid(artifact.getId());
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
-            apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setState(getLcStateFromArtifact(artifact));
             apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             apiProduct.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -1538,6 +1562,7 @@ public class RegistryPersistenceUtil {
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
             apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            apiProduct.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             apiProduct.setTenantDomain(tenantDomainName);
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -1545,7 +1570,7 @@ public class RegistryPersistenceUtil {
 
             
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            Set<Tier> availableTiers = new HashSet<Tier>();
+            Set<Tier> availableTiers = new HashSet<>();
             if(tiers != null) {
                 String[] tiersArray = tiers.split("\\|\\|");
                 for(String tierName : tiersArray) {
@@ -1573,7 +1598,7 @@ public class RegistryPersistenceUtil {
             }
             apiProduct.setCacheTimeout(cacheTimeout);
 
-            Set<String> tags = new HashSet<String>();
+            Set<String> tags = new HashSet<>();
             Tag[] tag = registry.getTags(artifactPath);
             for (Tag tag1 : tag) {
                 tags.add(tag1.getTagName());
@@ -1628,5 +1653,4 @@ public class RegistryPersistenceUtil {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
-
 }

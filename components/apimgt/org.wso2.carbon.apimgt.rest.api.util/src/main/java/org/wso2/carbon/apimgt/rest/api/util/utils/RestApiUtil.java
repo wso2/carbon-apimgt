@@ -1417,6 +1417,22 @@ public class RestApiUtil {
         return organization;
     }
 
+
+    /**
+     * Method to extract the validated organization
+     * @param ctx MessageContext
+     * @return organization
+     */
+
+    public static String getValidatedSubjectOrganization(MessageContext ctx) throws APIManagementException{
+        String organization = (String) ctx.get(RestApiConstants.SUB_ORGANIZATION);
+        if (organization == null) {
+            throw new APIManagementException(
+                    "User's organization is not identified", ExceptionCodes.SUB_ORGANIZATION_NOT_IDENTIFIED);
+        }
+        return organization;
+    }
+
     /**
      * Method to resolve the organization
      * @param message Message
@@ -1424,6 +1440,16 @@ public class RestApiUtil {
      */
 
     public static String resolveOrganization (Message message) throws APIManagementException{
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+        // populate properties needed for the resolver.
+        HashMap<String, Object> properties = new HashMap<String, Object>();
+        properties.put(APIConstants.PROPERTY_HEADERS_KEY, message.get(Message.PROTOCOL_HEADERS));
+        properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
+        String organization = resolver.resolve(properties);
+        return  organization;
+    }
+
+    public static String resolveOrganization (HashMap<String,Object> message) throws APIManagementException{
         OrganizationResolver resolver = APIUtil.getOrganizationResolver();
         // populate properties needed for the resolver.
         HashMap<String, Object> properties = new HashMap<String, Object>();

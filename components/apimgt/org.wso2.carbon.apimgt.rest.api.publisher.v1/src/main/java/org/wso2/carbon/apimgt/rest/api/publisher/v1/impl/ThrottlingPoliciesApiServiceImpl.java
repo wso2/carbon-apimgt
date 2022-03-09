@@ -142,7 +142,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
 
             //retrieves the tier based on the given tier-level
             if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
-                foundTier = APIUtil.getTierFromCache(policyName, tenantDomain);
+                foundTier = APIUtil.getPolicyByName(PolicyConstants.POLICY_LEVEL_SUB, policyName, tenantDomain);
                 policyLevelEnum = ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION;
             } else if (ThrottlingPolicyDTO.PolicyLevelEnum.API.toString().equals(policyLevel)) {
                 Map<String, Tier> resourceTiersMap =

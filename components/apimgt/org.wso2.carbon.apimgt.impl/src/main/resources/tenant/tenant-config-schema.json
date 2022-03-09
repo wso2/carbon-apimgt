@@ -657,6 +657,10 @@
           "DevOpsRole": {
             "CreateOnTenantLoad": true,
             "RoleName": "Internal/devops"
+          },
+          "IntegrationDeveloperRole": {
+            "CreateOnTenantLoad": true,
+            "RoleName": "Internal/integration_dev"
           }
         }
       ],
@@ -664,7 +668,8 @@
         "PublisherRole",
         "CreatorRole",
         "SubscriberRole",
-        "DevOpsRole"
+        "DevOpsRole",
+        "IntegrationDeveloperRole"
       ],
       "properties": {
         "PublisherRole": {
@@ -810,6 +815,46 @@
               "default": "",
               "examples": [
                 "Internal/devops"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "IntegrationDeveloperRole": {
+          "$id": "#/properties/DefaultRoles/properties/IntegrationDeveloperRole",
+          "type": "object",
+          "title": "The IntegrationDeveloperRole schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "CreateOnTenantLoad": true,
+              "RoleName": "Internal/integration_dev"
+            }
+          ],
+          "required": [
+            "CreateOnTenantLoad",
+            "RoleName"
+          ],
+          "properties": {
+            "CreateOnTenantLoad": {
+              "$id": "#/properties/DefaultRoles/properties/IntegrationDeveloperRole/properties/CreateOnTenantLoad",
+              "type": "boolean",
+              "title": "The CreateOnTenantLoad schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": false,
+              "examples": [
+                true
+              ]
+            },
+            "RoleName": {
+              "$id": "#/properties/DefaultRoles/properties/IntegrationDeveloperRole/properties/RoleName",
+              "type": "string",
+              "title": "The RoleName schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "Internal/integration_dev"
               ]
             }
           },

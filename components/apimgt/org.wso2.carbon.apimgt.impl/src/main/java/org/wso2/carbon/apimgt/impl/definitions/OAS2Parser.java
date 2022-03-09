@@ -355,12 +355,14 @@ public class OAS2Parser extends APIDefinition {
                 if (!opScopes.isEmpty()) {
                     if (opScopes.size() == 1) {
                         String firstScope = opScopes.get(0);
-                        Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
-                        if (scope == null) {
-                            throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                        if (StringUtils.isNotBlank(firstScope)) {
+                            Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                            if (scope == null) {
+                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                            }
+                            template.setScope(scope);
+                            template.setScopes(scope);
                         }
-                        template.setScope(scope);
-                        template.setScopes(scope);
                     } else {
                         template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                     }
@@ -675,7 +677,7 @@ public class OAS2Parser extends APIDefinition {
             if (returnJsonContent) {
                 if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
                     try {
-                        JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition);
+                        JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
                         validationResponse.setJsonContent(jsonNode.toString());
                     } catch (IOException e) {
                         throw new APIManagementException("Error while reading API definition yaml", e);
@@ -1725,4 +1727,13 @@ public class OAS2Parser extends APIDefinition {
         return getSwaggerJsonString(swagger);
     }
 
+    @Override
+    public String getVendorFromExtension(String swaggerContent) {
+        return null;
+    }
+
+    @Override
+    public String getType() {
+        return null;
+    }
 }

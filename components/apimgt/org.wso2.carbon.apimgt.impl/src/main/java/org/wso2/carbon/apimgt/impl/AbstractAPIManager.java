@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -162,6 +163,7 @@ import java.util.UUID;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
 import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_STATE;
 
 /**
@@ -175,9 +177,11 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Registry registry;
     protected UserRegistry configRegistry;
     protected ApiMgtDAO apiMgtDAO;
+    protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
+    protected String organization;
     protected String username;
     protected static final GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
     // Property to indicate whether access control restriction feature is enabled.
@@ -193,9 +197,16 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username) throws APIManagementException {
+        this(username, StringUtils.isNoneBlank(username) ? MultitenantUtils.getTenantDomain(username)
+                : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+    }
+
+    public AbstractAPIManager(String username, String organization) throws APIManagementException {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
+        environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
+
         try {
             if (username == null) {
 
@@ -205,11 +216,12 @@ public abstract class AbstractAPIManager implements APIManager {
                 this.username = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
-                String tenantDomainName = MultitenantUtils.getTenantDomain(username);
+                String tenantDomainName = APIUtil.getInternalOrganizationDomain(organization);
                 String tenantUserName = getTenantAwareUsername(username);
                 int tenantId = getTenantManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
+                this.organization = organization;
                 this.username = tenantUserName;
 
                 loadTenantRegistry(tenantId);
@@ -252,6 +264,7 @@ public abstract class AbstractAPIManager implements APIManager {
         
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
+        properties.put(APIConstants.ALLOW_MULTIPLE_VERSIONS, APIUtil.isAllowDisplayMultipleVersions());
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance(configMap, properties);
 
     }
@@ -615,49 +628,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return APIUtil.getAPIInformation(apiArtifact, registry);
     }
 
-    /**
-     * Get minimal details of API by API identifier
-     *
-     * @param identifier APIIdentifier object
-     * @return API of the provided APIIdentifier
-     * @throws APIManagementException
-     */
-    public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
-
-        String apiPath = APIUtil.getAPIPath(identifier);
-
-        boolean tenantFlowStarted = false;
-
-        try {
-            String tenantDomain = getTenantDomain(identifier);
-
-            startTenantFlow(tenantDomain);
-            tenantFlowStarted = true;
-
-            Registry registry = getRegistry(identifier, apiPath);
-            if (registry != null) {
-                Resource apiResource = registry.get(apiPath);
-                String artifactId = apiResource.getUUID();
-                if (artifactId == null) {
-                    throw new APIManagementException("artifact id is null for : " + apiPath);
-                }
-                GenericArtifactManager artifactManager = getAPIGenericArtifactManager(identifier, registry);
-                GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-                return getApiInformation(registry, apiArtifact);
-            } else {
-                String msg = "Failed to get registry from api identifier: " + identifier;
-                throw new APIManagementException(msg);
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (tenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-    }
-
     protected void endTenantFlow() {
 
         PrivilegedCarbonContext.endTenantFlow();
@@ -667,52 +637,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-    }
-
-    private GenericArtifactManager getAPIGenericArtifactManager(APIIdentifier identifier, Registry registry)
-            throws APIManagementException {
-
-        String tenantDomain = getTenantDomain(identifier);
-        GenericArtifactManager manager = genericArtifactCache.get(tenantDomain);
-        if (manager != null) {
-            return manager;
-        }
-        manager = getAPIGenericArtifactManagerFromUtil(registry, APIConstants.API_KEY);
-        genericArtifactCache.put(tenantDomain, manager);
-        return manager;
-    }
-
-    private Registry getRegistry(APIIdentifier identifier, String apiPath)
-            throws APIManagementException {
-
-        Registry passRegistry;
-        try {
-            String tenantDomain = getTenantDomain(identifier);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                int id = getTenantManager()
-                        .getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(id);
-                passRegistry = getRegistryService()
-                        .getGovernanceSystemRegistry(id);
-            } else {
-                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
-                    // explicitly load the tenant's registry
-                    APIUtil.loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
-                    passRegistry = getRegistryService().getGovernanceUserRegistry(
-                            identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
-                } else {
-                    passRegistry = this.registry;
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from registry on path of : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API from registry on path of : " + apiPath;
-            throw new APIManagementException(msg, e);
-        }
-        return passRegistry;
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier, String organization) throws APIManagementException {
@@ -1891,6 +1815,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
                 application.addKey(key);
             }
+            int subscriptionCount = apiMgtDAO.getSubscriptionCountByApplicationId(application, tenantDomain);
+            application.setSubscriptionCount(subscriptionCount);
+
         }
         return application;
     }
@@ -3291,7 +3218,14 @@ public abstract class AbstractAPIManager implements APIManager {
 
             GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiProductArtifact != null) {
-                return getApiProduct(registry, apiProductArtifact);
+                APIProduct apiProduct = getApiProduct(registry, apiProductArtifact);
+                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(apiProduct.getUuid(),
+                        WF_TYPE_AM_API_PRODUCT_STATE);
+                if (workflowDTO != null) {
+                    WorkflowStatus status = workflowDTO.getStatus();
+                    apiProduct.setWorkflowStatus(status.toString());
+                }
+                return apiProduct;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
@@ -3623,7 +3557,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getEnvironments() != null) {
             environmentString = String.join(",", api.getEnvironments());
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
         // workflow status
         APIIdentifier apiId = api.getId();
         WorkflowDTO workflow;
@@ -3658,8 +3592,9 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getAvailableTiers() != null) {
             tiers = String.join("||", tierNameSet);
         }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getInternalOrganizationId(organization));
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+        api.removeAllTiers();
         api.setAvailableTiers(availableTier);
 
         //Scopes
@@ -3781,7 +3716,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getEnvironments() != null) {
             environmentString = String.join(",", api.getEnvironments());
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
         // workflow status
         APIIdentifier apiId = api.getId();
         String currentApiUuid = uuid;
@@ -3807,7 +3742,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getAvailableTiers() != null) {
             tiers = String.join("||", tierNameSet);
         }
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getInternalOrganizationId(organization));
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
         api.setAvailableTiers(availableTier);
 
@@ -3894,7 +3829,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 // and fill out missing attributes before attaching the list to the api
                 List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfOrganization(organization);
 
-                // todo-category: optimize this loop with breaks
                 for (String categoryName : categoriesOfAPI) {
                     for (APICategory category : allCategories) {
                         if (categoryName.equals(category.getName())) {
@@ -3941,7 +3875,11 @@ public abstract class AbstractAPIManager implements APIManager {
             try {
                 PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, resourceAPIUUID);
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
-                resource.setEndpointConfig(api.getEndpointConfig());
+                if (api.isAdvertiseOnly()) {
+                    resource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
+                } else {
+                    resource.setEndpointConfig(api.getEndpointConfig());
+                }
                 resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while retrieving the api for api product " + e);
@@ -3959,7 +3897,20 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiProduct.getEnvironments() != null) {
             environmentString = String.join(",", apiProduct.getEnvironments());
         }
-        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+
+        // workflow status
+        APIProductIdentifier productIdentifier = apiProduct.getId();
+        WorkflowDTO workflow;
+        String currentApiProductUuid = uuid;
+        if (apiProduct.isRevision() && apiProduct.getRevisionedApiProductId() != null) {
+            currentApiProductUuid = apiProduct.getRevisionedApiProductId();
+        }
+        workflow = APIUtil.getAPIWorkflowStatus(currentApiProductUuid, WF_TYPE_AM_API_PRODUCT_STATE);
+        if (workflow != null) {
+            WorkflowStatus status = workflow.getStatus();
+            apiProduct.setWorkflowStatus(status.toString());
+        }
 
         // available tier
         String tiers = null;

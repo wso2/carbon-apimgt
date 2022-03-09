@@ -132,6 +132,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             CORSRequestHandlerSpan =
                     Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
         }
+        if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping GraphQL subscription handshake request.");
+            }
+            return true;
+        }
         try {
             if (!initializeHeaderValues) {
                 initializeHeaders();
@@ -196,6 +202,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     .getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
             messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+            messageContext.setProperty(APIConstants.REST_METHOD, httpMethod);
 
             //If this is an OPTIONS request
             if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {

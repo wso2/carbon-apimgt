@@ -60,15 +60,18 @@ public class RegistrySearchUtil {
     public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
     public static final String API_OVERVIEW_STATUS = "overview_status";
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
+    public static final String API_RELATED_CUSTOM_PROPERTIES_DISPLAY_DEV = "__display";
     public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
     public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
-    public static final String CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX = "contextTemplate";
+    private static final String CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX = "contextTemplate";
     public static final String API_DESCRIPTION = "Description";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
     public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
+    public static final String ADVERTISE_ONLY_SEARCH_TYPE_PREFIX = "thirdParty";
+    public static final String ADVERTISE_ONLY_ADVERTISED_PROPERTY = "advertiseOnly";
     public static final String ENABLE_STORE = "enableStore";
     public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
     public static final String NULL_USER_ROLE_LIST = "null";
@@ -78,7 +81,8 @@ public class RegistrySearchUtil {
             CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
             LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(), API_STATUS.toLowerCase(),
             CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX, CATEGORY_SEARCH_TYPE_PREFIX,
-            ENABLE_STORE.toLowerCase() };
+            ENABLE_STORE.toLowerCase() , ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase(), "sort", "group", "group.sort"
+            , "group.field", "group.ngroups", "group.format" };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
@@ -238,7 +242,7 @@ public class RegistrySearchUtil {
     }
     
 
-    private static String extractQuery(String searchQuery) {
+    private static String extractQuery(String searchQuery, boolean isDevPortal) {
         String[] searchQueries = searchQuery.split("&");
         StringBuilder filteredQuery = new StringBuilder();
 
@@ -258,7 +262,13 @@ public class RegistrySearchUtil {
                             log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
                                     + " appending " + API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
                         }
-                        searchKeys[0] = (API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
+                        if (isDevPortal) {
+                            searchKeys[0] = (API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]
+                                    + API_RELATED_CUSTOM_PROPERTIES_DISPLAY_DEV);
+                        } else {
+                            searchKeys[0] = (API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
+                        }
+
                     }
 
                     // Ideally query keys for label and  category searchs are as below
@@ -272,6 +282,8 @@ public class RegistrySearchUtil {
                     } else if (searchKeys[0].equals(CATEGORY_SEARCH_TYPE_PREFIX)) {
                         searchKeys[0] = API_CATEGORIES_CATEGORY_NAME;
                         searchKeys[1] = searchKeys[1].replace("*", "");
+                    } else if (searchKeys[0].equals(ADVERTISE_ONLY_SEARCH_TYPE_PREFIX)) {
+                        searchKeys[0] = ADVERTISE_ONLY_ADVERTISED_PROPERTY;
                     }
 
                     if (filteredQuery.length() == 0) {
@@ -393,7 +405,8 @@ public class RegistrySearchUtil {
         return null;
     }
     
-    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus) throws APIPersistenceException {
+    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus,
+                            boolean isAllowDisplayMultipleVersions) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
         if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery)) {
             
@@ -402,9 +415,15 @@ public class RegistrySearchUtil {
                 statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                         APIConstants.DEPRECATED };
             }
-            if ("".equals(searchQuery)) { // normal listing
+            if (StringUtils.isEmpty(searchQuery)) { // normal listing
                 String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
-                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
+                if (isAllowDisplayMultipleVersions) {
+                    modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
+                } else {
+                    // solr result grouping is used when displayMultipleVersions is not enabled(default).
+                    modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria +
+                            "&group=true&group.field=name&group.ngroups=true&group.sort=versionComparable desc";
+                }
             }
             
             String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
@@ -412,7 +431,7 @@ public class RegistrySearchUtil {
 
             modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
         }
-        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery), ctx);
+        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery, true), ctx);
         return modifiedQuery;
     }
 
@@ -432,7 +451,7 @@ public class RegistrySearchUtil {
                     + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST);
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
         }
-        newSearchQuery = extractQuery(newSearchQuery);
+        newSearchQuery = extractQuery(newSearchQuery, false);
 
         newSearchQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(newSearchQuery, ctx);
         return newSearchQuery;

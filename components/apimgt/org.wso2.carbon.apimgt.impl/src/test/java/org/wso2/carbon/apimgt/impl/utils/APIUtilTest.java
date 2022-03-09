@@ -1932,7 +1932,8 @@ public class APIUtilTest {
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
             Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
                     .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
-            String gatewayEndpoint = APIUtil.getGatewayEndpoint("http,https", "Production", "Production");
+            String gatewayEndpoint = APIUtil.getGatewayEndpoint("http,https", "Production",
+                    "Production", "61416403c40f086ad2dc5eed");
             Assert.assertEquals("https://localhost:8243", gatewayEndpoint);
         } catch (APIManagementException ex) {
             Assert.assertTrue(ex.getMessage().contains("Failed to create API for :"));
@@ -2472,7 +2473,7 @@ public class APIUtilTest {
 
         String searchQuery = "status:PUBLISHED";
         String expectedQuery =
-                "status=*published*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR WEBSUB OR SSE)";
+                "status=*published*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR WEBSUB OR SSE OR ASYNC)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
     }
 
@@ -2481,7 +2482,8 @@ public class APIUtilTest {
 
         String searchQuery = "status PUBLISHED";
         String expectedQuery =
-                "name=*status*&name=*PUBLISHED*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR WEBSUB OR SSE)";
+                "name=*status*&name=*PUBLISHED*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR WEBSUB OR SSE " +
+                        "OR ASYNC)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
     }
 
@@ -2489,7 +2491,8 @@ public class APIUtilTest {
     public void testConstructApisGetQuery3() throws APIManagementException {
 
         String searchQuery = "status:PUBLISHED provider:wso2";
-        String expectedQuery = "status=*published*&provider=*wso2*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR WEBSUB OR SSE)";
+        String expectedQuery = "status=*published*&provider=*wso2*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP " +
+                "OR WEBSUB OR SSE OR ASYNC)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
     }
 
@@ -2539,7 +2542,7 @@ public class APIUtilTest {
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
             Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
                     .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
-            String tokenEndpointType = APIUtil.getTokenEndpointsByType("production");
+            String tokenEndpointType = APIUtil.getTokenEndpointsByType("production", "61416403c40f086ad2dc5eef");
             Assert.assertEquals("https://localhost:8243", tokenEndpointType);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();

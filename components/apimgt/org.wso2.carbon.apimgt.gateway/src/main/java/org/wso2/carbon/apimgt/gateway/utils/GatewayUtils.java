@@ -90,7 +90,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -103,6 +105,7 @@ import java.util.regex.Pattern;
 public class GatewayUtils {
 
     private static final Log log = LogFactory.getLog(GatewayUtils.class);
+    private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
     public static boolean isClusteringEnabled() {
 
@@ -112,6 +115,25 @@ public class GatewayUtils {
             return true;
         }
         return false;
+    }
+
+    public static String getClientIp(org.apache.synapse.MessageContext synCtx) {
+        String clientIp;
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        Map headers =
+                (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String xForwardForHeader = (String) headers.get(HEADER_X_FORWARDED_FOR);
+        if (!StringUtils.isEmpty(xForwardForHeader)) {
+            clientIp = xForwardForHeader;
+            int idx = xForwardForHeader.indexOf(',');
+            if (idx > -1) {
+                clientIp = clientIp.substring(0, idx);
+            }
+        } else {
+            clientIp = (String) axis2MsgContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+        }
+        return clientIp;
     }
 
     public static <T> Map<String, T> generateMap(Collection<T> list) {
@@ -530,6 +552,8 @@ public class GatewayUtils {
         authContext.setAuthenticated(true);
         authContext.setApiKey(jti);
         authContext.setUsername(getEndUserFromJWTValidationInfo(jwtValidationInfo, apiKeyValidationInfoDTO));
+        authContext.setRequestTokenScopes(jwtValidationInfo.getScopes());
+        authContext.setAccessToken(jwtValidationInfo.getRawPayload());
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
@@ -548,6 +572,8 @@ public class GatewayUtils {
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
+            authContext.setGraphQLMaxDepth(apiKeyValidationInfoDTO.getGraphQLMaxDepth());
+            authContext.setGraphQLMaxComplexity(apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());
@@ -1389,5 +1415,14 @@ public class GatewayUtils {
 
     public static boolean isAllApisDeployed () {
         return DataHolder.getInstance().isAllApisDeployed();
+    }
+
+    public static List<String> getKeyManagers(org.apache.synapse.MessageContext messageContext) {
+
+        API api = getAPI(messageContext);
+        if (api != null) {
+            return DataHolder.getInstance().getKeyManagersFromUUID(api.getUuid());
+        }
+        return Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
     }
 }

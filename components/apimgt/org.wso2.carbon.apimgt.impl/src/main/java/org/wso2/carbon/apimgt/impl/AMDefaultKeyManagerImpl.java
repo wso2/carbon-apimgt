@@ -377,7 +377,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, true);
         ClientInfo createdClient;
         try {
-            createdClient = dcrClient.updateApplication(oAuthApplicationInfo.getClientId(), request);
+            createdClient = dcrClient.updateApplication(Base64.getUrlEncoder().encodeToString(
+                    oAuthApplicationInfo.getClientId().getBytes(StandardCharsets.UTF_8)), request);
             return buildDTOFromClientInfo(createdClient, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
@@ -394,7 +395,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo updatedClient;
         try {
-            updatedClient = dcrClient.updateApplicationOwner(owner, oAuthApplicationInfo.getClientId());
+            updatedClient = dcrClient.updateApplicationOwner(owner, Base64.getUrlEncoder().encodeToString(
+                    oAuthApplicationInfo.getClientId().getBytes(StandardCharsets.UTF_8)));
             return buildDTOFromClientInfo(updatedClient, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
@@ -410,7 +412,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            dcrClient.deleteApplication(consumerKey);
+            dcrClient.deleteApplication(Base64.getUrlEncoder().encodeToString(
+                    consumerKey.getBytes(StandardCharsets.UTF_8)));
         } catch (KeyManagerClientException e) {
             handleException("Cannot remove service provider for the given consumer key : " + consumerKey, e);
         }
@@ -424,7 +427,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            ClientInfo clientInfo = dcrClient.getApplication(consumerKey);
+            ClientInfo clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
+                    consumerKey.getBytes(StandardCharsets.UTF_8)));
             return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             if (e.getStatusCode() == 404) {
@@ -460,7 +464,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             String credentials = tokenRequest.getClientId() + ':' + tokenRequest.getClientSecret();
             String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
-            tokenResponse = authClient.generate(authToken, GRANT_TYPE_VALUE, scopes);
+            if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(tokenRequest.getGrantType())) {
+                tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
+                        tokenRequest.getGrantType(), scopes, (String) tokenRequest.getRequestParam(APIConstants
+                                .OAuthConstants.SUBJECT_TOKEN), APIConstants.OAuthConstants.JWT_TOKEN_TYPE);
+            } else {
+                tokenResponse = authClient.generate(authToken, GRANT_TYPE_VALUE, scopes);
+            }
+
         } catch (KeyManagerClientException e) {
             throw new APIManagementException("Error occurred while calling token endpoint - " + e.getReason(), e);
         }
@@ -481,8 +492,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException {
 
         ClientInfo updatedClient;
+        String encodedClientId =
+                Base64.getUrlEncoder().encodeToString(tokenRequest.getClientId().getBytes(StandardCharsets.UTF_8));
         try {
-            updatedClient = dcrClient.updateApplicationSecret(tokenRequest.getClientId());
+            updatedClient = dcrClient.updateApplicationSecret(encodedClientId);
             return updatedClient.getClientSecret();
 
         } catch (KeyManagerClientException e) {
@@ -565,7 +578,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
         ClientInfo clientInfo;
         try {
-            clientInfo = dcrClient.getApplication(consumerKey);
+            clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
+                    consumerKey.getBytes(StandardCharsets.UTF_8)));
             buildDTOFromClientInfo(clientInfo, oAuthApplicationInfo);
         } catch (KeyManagerClientException e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
@@ -1152,6 +1166,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         if (properties.containsKey(APIConstants.KeyManager.CLAIM_DIALECT)) {
             userinfo.setDialectURI(properties.get(APIConstants.KeyManager.CLAIM_DIALECT).toString());
+        }
+        if (properties.containsKey(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS)) {
+            userinfo.setBindFederatedUserClaims(Boolean.valueOf(properties.
+                    get(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS).toString()));
         }
 
         try {

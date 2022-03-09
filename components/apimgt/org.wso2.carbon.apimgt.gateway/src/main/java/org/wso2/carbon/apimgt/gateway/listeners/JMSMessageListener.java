@@ -103,7 +103,7 @@ public class JMSMessageListener implements MessageListener {
                             handleKeyTemplateMessage(payloadData);
                         }
                     }
-                } else {
+                }else{
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
                 }
             } else {

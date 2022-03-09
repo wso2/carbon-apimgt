@@ -4,7 +4,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.0.393-SNAPSHOT</version>
+        <version>9.20.19-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -28,6 +28,10 @@
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -49,7 +53,7 @@
                             javax.transaction.*,
                             org.apache.axis2.*,
                             org.apache.commons.*,
-                            org.wso2.carbon.apimgt.impl.dto.*,
+                            org.wso2.carbon.apimgt.impl.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",

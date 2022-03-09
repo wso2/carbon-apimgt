@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.0.393-SNAPSHOT</version>
+        <version>9.20.19-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -65,16 +65,8 @@
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -94,7 +86,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
-            <artifactId>jempbox</artifactId>
+            <artifactId>xmpbox</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache.wso2</groupId>
@@ -171,6 +163,11 @@
         <dependency>
             <groupId>com.damnhandy.wso2</groupId>
             <artifactId>handy-uri-templates</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
+            <version>${carbon.apimgt.version}</version>
         </dependency>
     </dependencies>
     <reporting>
@@ -289,23 +286,9 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client</bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
                                     org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
                                 </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
+
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.output.adapter.http:${carbon.apimgt.version}
                                 </bundleDef>
@@ -328,6 +311,7 @@
                                 <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
                                 <bundleDef>commons-codec:commons-codec</bundleDef>
                                 <bundleDef>com.damnhandy.wso2:handy-uri-templates</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.solace:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}
@@ -349,7 +333,7 @@
                                 </importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>
-                                <importBundleDef>org.apache.pdfbox:jempbox:${pdfbox.version}</importBundleDef>
+                                <importBundleDef>org.apache.pdfbox:xmpbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>
                                     org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}
                                 </importBundleDef>

@@ -23,8 +23,6 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.log.CommonsLogLogChute;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -34,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -75,16 +74,13 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         this.api = api;
     }
 
-    public APITemplateBuilderImpl(APIProduct apiProduct,
-                                  Map<String, APIDTO> associatedAPIMap) {
-
+    public APITemplateBuilderImpl(APIProduct apiProduct, Map<String, APIDTO> associatedAPIMap) {
         this.apiProduct = apiProduct;
         this.associatedAPIMap = associatedAPIMap;
     }
 
     public APITemplateBuilderImpl(API api, List<SoapToRestMediationDto> soapToRestInMediationDtoList,
-                                  List<SoapToRestMediationDto> soapToRestOutMediationDtoList) {
-
+            List<SoapToRestMediationDto> soapToRestOutMediationDtoList) {
         this(api);
         this.soapToRestInMediationDtoList = soapToRestInMediationDtoList;
         this.soapToRestOutMediationDtoList = soapToRestOutMediationDtoList;
@@ -120,12 +116,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
-                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
-                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-            }
+            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);
@@ -145,6 +136,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                     context.put("signatureHeader", api.getWebsubSubscriptionConfiguration().getSignatureHeader());
                     context.put("isSecurityEnabled", !StringUtils.isEmpty(api.getWebsubSubscriptionConfiguration().
                             getSecret()));
+                } else if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                    boolean isSubscriptionAvailable = false;
+                    if (api.getWebSocketTopicMappingConfiguration() != null) {
+                        isSubscriptionAvailable = true;
+                        context.put(APIConstants.VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS,
+                                this.api.getWebSocketTopicMappingConfiguration().getMappings());
+                    }
+                    context.put(APIConstants.VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE, isSubscriptionAvailable);
                 }
             } else {
                 t = velocityengine.getTemplate(getApiProductTemplatePath());
@@ -188,12 +187,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
-                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
-                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-            }
+            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);
@@ -233,12 +227,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
-                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
-                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-            }
+            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);
@@ -276,12 +265,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
-                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
-                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-            }
+            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);

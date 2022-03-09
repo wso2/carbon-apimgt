@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "Mediation",
+        "Security"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "applicableFlows": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "request",
+          "response",
+          "fault"
+        ]
+      }
+    },
+    "supportedGateways": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Synapse",
+          "ChoreoConnect"
+        ]
+      }
+    },
+    "supportedApiTypes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "HTTP"
+        ]
+      }
+    },
+    "policyAttributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string"
+          },
+          "validationRegex": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "String",
+              "Boolean",
+              "Integer",
+              "Enum",
+              "Map"
+            ]
+          },
+          "defaultValue": {
+            "type": ["integer", "string", "boolean"]
+          },
+          "allowedValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "displayName",
+          "type",
+          "required"
+        ]
+      }
+    }
+  },
+  "required": [
+    "category",
+    "name",
+    "displayName",
+    "applicableFlows",
+    "supportedGateways",
+    "supportedApiTypes"
+  ]
+}

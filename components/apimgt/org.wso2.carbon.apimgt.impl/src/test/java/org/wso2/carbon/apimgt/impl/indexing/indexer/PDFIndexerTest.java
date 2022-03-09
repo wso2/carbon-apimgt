@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.impl.indexing.indexer;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.solr.common.SolrException;
 import org.junit.Assert;
 import org.junit.Before;

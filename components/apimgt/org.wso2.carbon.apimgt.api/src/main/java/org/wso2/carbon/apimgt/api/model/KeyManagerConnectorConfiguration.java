@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.APIConstants;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,25 +30,29 @@ import java.util.List;
 public interface KeyManagerConnectorConfiguration {
 
     /**
-     *  This method returns the KeyManager implementation class name
+     * This method returns the KeyManager implementation class name
+     *
      * @return keymanager implementation class name
      */
     public String getImplementation();
 
     /**
-     *  This method returns JWTValidator class name if defined.
+     * This method returns JWTValidator class name if defined.
+     *
      * @return JWTValidator class name
      */
     public String getJWTValidator();
 
     /**
      * This method returns the Configurations related to keymanager registration
+     *
      * @return
      */
     public List<ConfigurationDto> getConnectionConfigurations();
 
     /**
      * This method returns the Configurations related to Oauth Application Creation
+     *
      * @return
      */
     public List<ConfigurationDto> getApplicationConfigurations();
@@ -77,6 +84,29 @@ public interface KeyManagerConnectorConfiguration {
      * This method returns keymanager endpoint configurations.
      */
     public default List<ConfigurationDto> getEndpointConfigurations() {
-        return Collections.emptyList();
+
+        List<ConfigurationDto> configurationDtos = new ArrayList<>();
+        configurationDtos.add(new ConfigurationDto("client_registration_endpoint", "Client Registration Endpoint",
+                "input", String.format("E.g.,%s/client-registration/v0.17/register",
+                APIConstants.DEFAULT_KEY_MANAGER_HOST), "", true, false, Collections.EMPTY_LIST, false));
+        configurationDtos.add(new ConfigurationDto("introspection_endpoint", "Introspection Endpoint", "input",
+                String.format("E.g., %s/oauth2/introspect", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", true, false, Collections.EMPTY_LIST, false));
+        configurationDtos.add(new ConfigurationDto("token_endpoint", "Token Endpoint", "input",
+                String.format("E.g., %s/oauth2/token", APIConstants.DEFAULT_KEY_MANAGER_HOST), ""
+                , true, false, Collections.EMPTY_LIST, false));
+        configurationDtos.add(new ConfigurationDto("revoke_endpoint", "Revoke Endpoint", "input",
+                String.format("E.g., %s/oauth2/revoke", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", true, false,
+                Collections.EMPTY_LIST, false));
+        configurationDtos.add(new ConfigurationDto("userinfo_endpoint", "UserInfo Endpoint", "input",
+                String.format("E.g., %s/oauth2/userinfo", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false,
+                Collections.EMPTY_LIST, false));
+        configurationDtos.add(new ConfigurationDto("authorize_endpoint", "Authorize Endpoint", "input",
+                String.format("E.g., %s/oauth2/authorize",APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false, Collections.EMPTY_LIST, false));
+        configurationDtos.add(new ConfigurationDto("display_token_endpoint", "Display Token Endpoint", "input",
+                String.format("E.g., %s/oauth2/token",APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false, Collections.EMPTY_LIST, false));
+        configurationDtos.add(new ConfigurationDto("display_revoke_endpoint", "Display Revoke Endpoint", "input",
+                String.format("E.g., %s/oauth2/authorize", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false,
+                Collections.EMPTY_LIST, false));
+        return configurationDtos;
     }
 }

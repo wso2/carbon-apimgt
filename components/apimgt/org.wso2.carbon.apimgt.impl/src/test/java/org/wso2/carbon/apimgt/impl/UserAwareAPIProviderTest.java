@@ -43,6 +43,7 @@ import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ApiMgtDAO.class, ServiceReferenceHolder.class, APIUtil.class, RegistryUtils.class,
@@ -93,6 +94,8 @@ public class UserAwareAPIProviderTest {
         PowerMockito.when(APIUtil.getAPIPath(Mockito.any(APIIdentifier.class))).thenReturn("test");
         PowerMockito.when(APIUtil.getArtifactManager(Mockito.any(Registry.class), Mockito.anyString()))
                 .thenReturn(artifactManager);
+        PowerMockito.when(APIUtil.getInternalOrganizationDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
+                .thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         PowerMockito.doNothing().when(ServiceReferenceHolder.class, "setUserRealm", Mockito.any());
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         PowerMockito.when(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName())).
@@ -305,7 +308,7 @@ public class UserAwareAPIProviderTest {
      */
     @Test
     public void testGetLifeCycleEvents() throws APIManagementException {
-        Assert.assertTrue("Lifeyclce events is not null for a non-existing API",
-                userAwareAPIProvider.getLifeCycleEvents(apiIdentifier, "org1").isEmpty());
+        Assert.assertTrue("Lifecycle events is not null for a non-existing API",
+                userAwareAPIProvider.getLifeCycleEvents(apiIdentifier.getUUID()).isEmpty());
     }
 }

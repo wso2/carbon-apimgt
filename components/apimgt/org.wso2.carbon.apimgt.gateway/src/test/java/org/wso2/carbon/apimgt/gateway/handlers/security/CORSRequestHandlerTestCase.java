@@ -71,12 +71,11 @@ public class CORSRequestHandlerTestCase {
         apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        PowerMockito.mockStatic(Utils.class);
-
     }
 
     @Test
     public void testHandleRequest() throws Exception {
+        PowerMockito.mockStatic(Utils.class);
         SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MsgCntxt =
@@ -203,5 +202,24 @@ public class CORSRequestHandlerTestCase {
             }
 
         };
+    }
+
+    /**
+     * This method will test request flow when "isGraphqlSubscriptionRequest" property is set in axis2 message context
+     * when incoming transport is websocket. This occurs during Graphql Subscription request flow.
+     */
+    @Test
+    public void testHandleRequestForGraphQLSubscriptions() {
+        Axis2MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(messageContext.getAxis2MessageContext()).thenReturn(axis2MessageContext);
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("ws");
+        Mockito.when(messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)).thenReturn(true);
+        CORSRequestHandler corsRequestHandler = createCORSRequestHandler();
+        Assert.assertTrue(corsRequestHandler.handleRequest(messageContext));
+
+        Mockito.when(axis2MessageContext.getIncomingTransportName()).thenReturn("wss");
+        Assert.assertTrue(corsRequestHandler.handleRequest(messageContext));
     }
 }

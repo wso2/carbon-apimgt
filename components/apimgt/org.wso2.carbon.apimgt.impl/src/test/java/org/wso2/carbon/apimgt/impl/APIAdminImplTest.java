@@ -139,7 +139,6 @@ public class APIAdminImplTest {
             Assert.fail("Method successfully invoked");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "tenant-config validation failure");
-            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.INVALID_TENANT_CONFIG);
         }
     }
 
@@ -159,7 +158,28 @@ public class APIAdminImplTest {
             Assert.fail("Method successfully invoked");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "tenant-config validation failure");
-            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.INVALID_TENANT_CONFIG);
+        }
+    }
+
+    @Test
+    public void getTenantConfigSchema() throws Exception {
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        Schema schema = Mockito.mock(Schema.class);
+        PowerMockito.when(APIUtil.class, "retrieveTenantConfigJsonSchema").thenReturn(schema);
+        Assert.assertEquals(apiAdmin.getTenantConfigSchema("abc.com"), schema.toString());
+    }
+
+    @Test
+    public void getTenantConfigSchemaException() throws Exception {
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        PowerMockito.when(APIUtil.class, "retrieveTenantConfigJsonSchema").thenThrow(APIManagementException.class);
+        try {
+            apiAdmin.getTenantConfigSchema("abc.com");
+            Assert.fail("Method successfully invoked");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(true);
         }
     }
 }

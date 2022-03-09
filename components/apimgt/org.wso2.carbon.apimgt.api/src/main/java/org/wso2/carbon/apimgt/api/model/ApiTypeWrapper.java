@@ -61,6 +61,14 @@ public class ApiTypeWrapper {
         }
     }
 
+    public String getTier() {
+        if (isAPIProduct) {
+            return apiProduct.getId().getTier();
+        } else {
+            return api.getId().getTier();
+        }
+    }
+
     public void setContext(String context) {
         if (isAPIProduct) {
             apiProduct.setContext(context);
@@ -89,6 +97,14 @@ public class ApiTypeWrapper {
         return isAPIProduct ? apiProduct.getId() : api.getId();
     }
 
+    public String getUuid() {
+        if (isAPIProduct) {
+            return apiProduct.getUuid();
+        } else {
+            return api.getUuid();
+        }
+    }
+
     public void setThumbnailUrl(String thumbnailUrl) {
         if (isAPIProduct) {
             apiProduct.setThumbnailUrl(thumbnailUrl);
@@ -103,5 +119,14 @@ public class ApiTypeWrapper {
 
     public String getVisibility() {
         return isAPIProduct ? apiProduct.getVisibility() : api.getVisibility();
+    }
+
+    public String getOrganization() {
+
+        if (isAPIProduct) {
+            return apiProduct.getOrganization();
+        } else {
+            return api.getOrganization();
+        }
     }
 }
