@@ -19,15 +19,27 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class OperationPolicySpecAttribute {
+
+    public enum AttributeType {
+        String,
+        Integer,
+        Boolean,
+        Enum,
+        Map
+    }
 
     private String name = null;
     private String displayName = null;
     private String description = null;
     private String validationRegex = null;
-    private String type = null;
+    private AttributeType type = null;
+    private String defaultValue;
+    private List<String> allowedValues = new ArrayList<>();
     private boolean required = false;
 
     public String getName() {
@@ -70,14 +82,34 @@ public class OperationPolicySpecAttribute {
         this.validationRegex = validationRegex;
     }
 
-    public String getType() {
+    public AttributeType getType() {
 
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(AttributeType type) {
 
         this.type = type;
+    }
+
+    public String getDefaultValue() {
+
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+
+        this.defaultValue = defaultValue;
+    }
+
+    public List<String> getAllowedValues() {
+
+        return allowedValues;
+    }
+
+    public void setAllowedValues(List<String> allowedValues) {
+
+        this.allowedValues = allowedValues;
     }
 
     public boolean isRequired() {

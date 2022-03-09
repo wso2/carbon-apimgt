@@ -352,9 +352,9 @@ public class SolaceAdminApis {
         HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
         StringEntity params = null;
         try {
+            org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
             params = new StringEntity(requestBody.toString());
             httpPost.setEntity(params);
             return APIUtil.executeHTTPRequest(httpPost, httpClient);
@@ -658,7 +658,8 @@ public class SolaceAdminApis {
      * @param apiProducts List of API products to add as subscriptions
      * @return org.json.JSON Object of request body
      */
-    private org.json.JSONObject buildRequestBodyForCreatingApp(Application application, ArrayList<String> apiProducts) {
+    private org.json.JSONObject buildRequestBodyForCreatingApp(Application application, ArrayList<String> apiProducts)
+            throws APIManagementException {
         org.json.JSONObject requestBody = new org.json.JSONObject();
         String appName = application.getName();
 
@@ -680,8 +681,7 @@ public class SolaceAdminApis {
         org.json.JSONObject credentialsSecret = new org.json.JSONObject();
         // Set consumer key and secret for new application
         if (application.getKeys().isEmpty()) {
-            credentialsSecret.put("consumerKey", appName + "-application-key");
-            credentialsSecret.put("consumerSecret", appName + "-application-secret");
+            throw new APIManagementException("Application keys are not generated for " + appName);
         } else {
             credentialsSecret.put("consumerKey", application.getKeys().get(0).getConsumerKey());
             credentialsSecret.put("consumerSecret", application.getKeys().get(0).getConsumerSecret());

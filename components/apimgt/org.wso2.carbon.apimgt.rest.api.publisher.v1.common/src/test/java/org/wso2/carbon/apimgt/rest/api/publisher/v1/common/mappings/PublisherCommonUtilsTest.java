@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -80,8 +79,6 @@ public class PublisherCommonUtilsTest {
     public void testChangeApiOrApiProductLifecycleToInvalidState() throws Exception {
 
         APIProvider apiProvider = Mockito.mock(APIProvider.class);
-        Mockito.when(apiProvider.getAPIorAPIProductByUUID(Mockito.anyString(), eq(ORGANIZATION)))
-                .thenReturn(createMockAPIProduct());
         Map<String, Object> apiLcData = new HashMap<>();
         String[] nextStates = new String[]{"Block", "Deploy as a Prototype", "Demote to Created", "Deprecate"};
         apiLcData.put(APIConstants.LC_NEXT_STATES, nextStates);
@@ -90,7 +87,8 @@ public class PublisherCommonUtilsTest {
         PowerMockito.mockStatic(RestApiCommonUtil.class);
         when(RestApiCommonUtil.getLoggedInUserProvider()).thenReturn(apiProvider);
         try {
-            PublisherCommonUtils.changeApiOrApiProductLifecycle("Retire", UUID, StringUtils.EMPTY, ORGANIZATION);
+            PublisherCommonUtils.changeApiOrApiProductLifecycle("Retire", createMockAPIProduct(),
+                    StringUtils.EMPTY, ORGANIZATION);
         } catch (APIManagementException e) {
             Assert.assertNotNull(e.getMessage());
             Assert.assertTrue(e.getMessage().contains("Action 'Retire' is not allowed"));

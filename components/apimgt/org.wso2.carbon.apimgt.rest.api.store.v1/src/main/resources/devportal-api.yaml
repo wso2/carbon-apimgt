@@ -104,7 +104,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: v2
+  version: v2.1
 servers:
   - url: https://apis.wso2.com/api/am/devportal/v2
 ######################################################
@@ -3511,6 +3511,9 @@ components:
         monetizationLabel:
           type: string
           example: Free
+        gatewayVendor:
+          type: string
+          example: WSO2
     APIInfoList:
       title: API Info List
       type: object

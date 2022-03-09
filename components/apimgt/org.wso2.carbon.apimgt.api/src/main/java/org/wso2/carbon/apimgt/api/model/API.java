@@ -664,6 +664,7 @@ public class API implements Serializable {
     }
 
     public void setAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.removeAll(availableTiers);
         this.availableTiers.addAll(availableTiers);
     } 
     /**

@@ -936,9 +936,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                         String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                         String region = (String) endpointConfig.get(APIConstants.AMZN_REGION);
                         AWSCredentialsProvider credentialsProvider;
+                        AWSLambda awsLambda;
                         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey) &&
                             StringUtils.isEmpty(region)) {
                             credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
+                            awsLambda = AWSLambdaClientBuilder.standard().withCredentials(credentialsProvider).build();
                         } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey) &&
                                     !StringUtils.isEmpty(region)) {
                             if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
@@ -948,14 +950,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                             }
                             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                             credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+                            awsLambda = AWSLambdaClientBuilder.standard()
+                                    .withCredentials(credentialsProvider)
+                                    .withRegion(region)
+                                    .build();
                         } else {
                             log.error("Missing AWS Credentials");
                             return null;
                         }
-                        AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
-                                .withCredentials(credentialsProvider)
-                                .withRegion(region)
-                                .build();
                         ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
                         List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
                         arns.put("count", functionConfigurations.size());
@@ -2385,19 +2387,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                         apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(), apiId,
                                 null, organization, false);
                 String policyID;
-                if (existingPolicy != null) {
-                    policyID = existingPolicy.getPolicyId();
-                    apiProvider.updateOperationPolicy(policyID, operationPolicyData, organization);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Existing API specific operation policy with ID " + policyID + " and name "
-                                + policySpecification.getName() + " has been updated for the API " + apiId);
-                    }
-                } else {
+                if (existingPolicy == null) {
                     policyID = apiProvider.addAPISpecificOperationPolicy(apiId, operationPolicyData, organization);
                     if (log.isDebugEnabled()) {
                         log.debug("An API specific operation policy has been added for the API " + apiId +
                                 " with id " + policyID);
                     }
+                } else {
+                    throw new APIManagementException("An API specific operation policy found for the same name.");
                 }
                 operationPolicyData.setPolicyId(policyID);
                 OperationPolicyDataDTO operationPolicyDataDTO = OperationPolicyMappingUtil
@@ -3639,8 +3636,10 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            ApiTypeWrapper apiWrapper = new ApiTypeWrapper(apiProvider.getAPIbyUUID(apiId, organization));
             APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
-                    apiId, lifecycleChecklist, organization);
+                    apiWrapper, lifecycleChecklist, organization);
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call

@@ -24,11 +24,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileUtil;
 
@@ -94,16 +96,24 @@ public class SynapsePolicyAggregator {
         for (OperationPolicy policy : operationPolicies) {
             if (flow.equals(policy.getDirection())) {
                 Map<String, Object> policyParameters = policy.getParameters();
-                OperationPolicyDefinition policyDefinition =
-                        APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory, policy.getPolicyName(),
-                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
-                if (policyDefinition != null) {
-                    String renderedTemplate = renderPolicyTemplate(policyDefinition.getContent(), policyParameters);
-                    if (renderedTemplate != null && !renderedTemplate.isEmpty()) {
-                        caseBody.add(renderedTemplate);
+                OperationPolicySpecification policySpecification = ImportUtils
+                        .getOperationPolicySpecificationFromFile(policyDirectory, policy.getPolicyName());
+                if (policySpecification.getSupportedGateways()
+                        .contains(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE)) {
+                    OperationPolicyDefinition policyDefinition =
+                            APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory, policy.getPolicyName(),
+                                    APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                    if (policyDefinition != null) {
+                        String renderedTemplate = renderPolicyTemplate(policyDefinition.getContent(), policyParameters);
+                        if (renderedTemplate != null && !renderedTemplate.isEmpty()) {
+                            caseBody.add(renderedTemplate);
+                        }
+                    } else {
+                        log.error("Policy definition for " + policy.getPolicyName() + " is not found in the artifact");
                     }
                 } else {
-                    log.error("Policy definition for " + policy.getPolicyName() + " is not found in the artifact");
+                    log.error("Policy " + policy.getPolicyName() + " does not support Synapse gateway. " +
+                            "Hence skipped");
                 }
             }
         }

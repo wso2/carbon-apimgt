@@ -106,6 +106,8 @@ import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
@@ -2519,7 +2521,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     + " policy is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
                         }
                         OperationPolicySpecification policySpecification = policyData.getSpecification();
-                        if (validateAppliedPolicyWithSpecification(policySpecification, policy)) {
+                        if (validateAppliedPolicyWithSpecification(policySpecification, policy, api)) {
                             validatedPolicies.add(policy);
                         }
                     } else {
@@ -2534,7 +2536,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         "A common policy is found for " + policyId + ". Validating the policy");
                             }
                             OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                            if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy)) {
+                            if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
                                 validatedPolicies.add(policy);
                             }
                         } else {
@@ -2549,7 +2551,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
-                                                           OperationPolicy appliedPolicy)
+                                                           OperationPolicy appliedPolicy, API api)
             throws APIManagementException {
 
         //Validate the policy applied direction
@@ -2563,24 +2565,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
         }
 
+        //Validate the API type
+        if (!policySpecification.getSupportedApiTypes().contains(api.getType())) {
+            if (log.isDebugEnabled()) {
+                log.debug("The policy " + policySpecification.getName() + " cannot be used for the "
+                        + api.getType() + " API type.");
+            }
+            throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
+                    + api.getType() + " API type.",
+                    ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+        }
+
         //Validate policy Attributes
         if (policySpecification.getPolicyAttributes() != null) {
             for (OperationPolicySpecAttribute attribute : policySpecification.getPolicyAttributes()) {
                 if (attribute.isRequired()) {
-                    Object policyAttribute = appliedPolicy.getParameters().get(attribute.getName());
-                    if (policyAttribute != null) {
-                        //TODO: Attribute Type validation is required
-                        //TODO: Do a API type, flow and gateway type validation
-                        //if (policyAttribute.getClass().getName() != attribute.getAttributeType()) {
-                        //    log.error("Policy attribute type mismatched. Expected type is " +
-                        //            attribute.getAttributeType() +
-                        //            " but received " + policyAttribute.getClass().getName());
-                        //}
+                    Object appliedPolicyAttribute = appliedPolicy.getParameters().get(attribute.getName());
+                    if (appliedPolicyAttribute != null) {
+                        if (attribute.getValidationRegex() != null) {
+                            Pattern pattern = Pattern.compile(attribute.getValidationRegex(), Pattern.CASE_INSENSITIVE);
+                            Matcher matcher = pattern.matcher((String) appliedPolicyAttribute);
+                            if (!matcher.matches()) {
+                                throw new APIManagementException("Policy attribute " + attribute.getName()
+                                        + " regex validation error.",
+                                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
+                            }
+                        }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Required policy attribute " + attribute.getName()
-                                    + " is not found for the the policy " + policySpecification.getName()
-                                    + ". Hence skipped.");
+                                    + " is not found for the the policy " + policySpecification.getName());
                         }
                         throw new APIManagementException("Required policy attribute " + attribute.getName()
                                 + " is not found for the the policy " + policySpecification.getName()
@@ -5113,6 +5127,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                 targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
                 apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
+                sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
+                        apiOrApiProductId, uuid);
                 if (!isApiProduct) {
                     API api = apiTypeWrapper.getApi();
                     api.setOrganization(orgId);
@@ -5132,8 +5148,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             + ", version " + apiVersion + ", New Status : " + targetStatus;
                     log.debug(logMessage);
                 }
-                sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
-                        apiOrApiProductId, uuid);
                 extractRecommendationDetails(apiTypeWrapper);
                 return response;
             }
@@ -6472,24 +6486,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 conditionValue, state, tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
-
-        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            APIUtil.publishEventToTrafficManager(Collections.EMPTY_MAP, blockingMessage);
-        }
+        EventPublisherEvent blockingEvent = new EventPublisherEvent(APIConstants.BLOCKING_CONDITIONS_STREAM_ID,
+                System.currentTimeMillis(), objects, blockingMessage.toString());
+        APIUtil.publishEvent(EventPublisherType.BLOCKING_EVENT, blockingEvent, blockingMessage.toString());
     }
 
     private void publishKeyTemplateEvent(String templateValue, String state) {
-        Object[] objects = new Object[]{templateValue,state};
+        Object[] objects = new Object[]{templateValue, state};
         Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
                 null, null, objects);
 
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
 
-
-        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            APIUtil.publishEventToTrafficManager(Collections.EMPTY_MAP, keyTemplateMessage);
-        }
+        EventPublisherEvent keyTemplateEvent = new EventPublisherEvent(APIConstants.KEY_TEMPLATE_STREM_ID,
+                System.currentTimeMillis(), objects, keyTemplateMessage.toString());
+        APIUtil.publishEvent(EventPublisherType.KEY_TEMPLATE, keyTemplateEvent, keyTemplateMessage.toString());
     }
 
     public String getLifecycleConfiguration(String tenantDomain) throws APIManagementException {
@@ -8425,6 +8436,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
                 }
                 api.setOrganization(organization);
+                String tiers = null;
+                Set<Tier> apiTiers = api.getAvailableTiers();
+                Set<String> tierNameSet = new HashSet<String>();
+                for (Tier t : apiTiers) {
+                    tierNameSet.add(t.getName());
+                }
+                if (api.getAvailableTiers() != null) {
+                    tiers = String.join("||", tierNameSet);
+                }
+                Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+                Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+                api.removeAllTiers();
+                api.setAvailableTiers(availableTiers);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";

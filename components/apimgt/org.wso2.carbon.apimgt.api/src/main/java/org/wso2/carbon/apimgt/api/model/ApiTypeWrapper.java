@@ -97,6 +97,14 @@ public class ApiTypeWrapper {
         return isAPIProduct ? apiProduct.getId() : api.getId();
     }
 
+    public String getUuid() {
+        if (isAPIProduct) {
+            return apiProduct.getUuid();
+        } else {
+            return api.getUuid();
+        }
+    }
+
     public void setThumbnailUrl(String thumbnailUrl) {
         if (isAPIProduct) {
             apiProduct.setThumbnailUrl(thumbnailUrl);

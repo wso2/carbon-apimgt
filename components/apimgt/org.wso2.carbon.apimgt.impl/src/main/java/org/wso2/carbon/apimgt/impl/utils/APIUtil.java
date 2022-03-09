@@ -450,6 +450,12 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
             eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            eventPublishers.putIfAbsent(EventPublisherType.BLOCKING_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.BLOCKING_EVENT));
+            eventPublishers.putIfAbsent(EventPublisherType.KEY_TEMPLATE,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.KEY_TEMPLATE));
+            eventPublishers.putIfAbsent(EventPublisherType.KEYMGT_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);
@@ -594,10 +600,10 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setVersionTimestamp(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
-
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -747,7 +753,7 @@ public final class APIUtil {
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
+            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
             if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
                     .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
                 api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
@@ -1247,7 +1253,7 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, api.getVersionTimestamp());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, api.getVersionTimestamp());
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
@@ -5495,6 +5501,12 @@ public final class APIUtil {
             if (config.containsKey("sandbox_endpoints")) {
                 return true;
             }
+            if (StringUtils.equals(config.get("endpoint_type").toString(),"graphql")) {
+                JSONObject httpConfig =(JSONObject) parser.parse(config.get("http").toString());
+                if (httpConfig.containsKey("sandbox_endpoints")) {
+                    return true;
+                }
+            }
         } catch (ParseException e) {
             log.error(APIConstants.MSG_JSON_PARSE_ERROR, e);
         } catch (ClassCastException e) {
@@ -5512,6 +5524,12 @@ public final class APIUtil {
 
             if (config.containsKey("production_endpoints")) {
                 return true;
+            }
+            if (StringUtils.equals(config.get("endpoint_type").toString(),"graphql")) {
+                JSONObject httpConfig =(JSONObject) parser.parse(config.get("http").toString());
+                if (httpConfig.containsKey("production_endpoints")) {
+                    return true;
+                }
             }
         } catch (ParseException e) {
             log.error(APIConstants.MSG_JSON_PARSE_ERROR, e);
@@ -9472,7 +9490,7 @@ public final class APIUtil {
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
             apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-            apiProduct.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
+            apiProduct.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             apiProduct.setTenantDomain(tenantDomainName);
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -10645,24 +10663,6 @@ public final class APIUtil {
 
     }
 
-    public static void publishEventToTrafficManager(Map dynamicProperties, Event event) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish(APIConstants.BLOCKING_EVENT_PUBLISHER, dynamicProperties, event);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
-    }
-
     /**
      * Returns the user claims for the given user.
      *
@@ -10827,13 +10827,11 @@ public final class APIUtil {
             }
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.KeyManager.ISSUER)) {
-                if (openIdConnectConfigurations != null) {
-                    keyManagerConfigurationDTO
-                            .addProperty(APIConstants.KeyManager.ISSUER, openIdConnectConfigurations.getIssuer());
-                } else {
-                    keyManagerConfigurationDTO
-                            .addProperty(APIConstants.KeyManager.ISSUER, issuerIdentifier);
+                if (openIdConnectConfigurations == null) {
+                    throw new APIMgtInternalException("Error in fetching Open ID configuration.");
                 }
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ISSUER,
+                        openIdConnectConfigurations.getIssuer());
             }
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.KeyManager.CLAIM_MAPPING)) {
@@ -11070,6 +11068,9 @@ public final class APIUtil {
         String formattedTenantConf = gson.toJson(existingTenantConfObject);
         ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(tenantDomain,
                 formattedTenantConf);
+        Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
+        String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+        tenantConfigCache.remove(cacheName);
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
@@ -11157,6 +11158,9 @@ public final class APIUtil {
         String formattedTenantConf = gson.toJson(existingTenantConfObject);
         ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(tenantDomain,
                 formattedTenantConf);
+        Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
+        String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+        tenantConfigCache.remove(cacheName);
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
@@ -11460,7 +11464,7 @@ public final class APIUtil {
             String[] definedTypesArr = supportedTypes.trim().split("\\s*,\\s*");
             list = Arrays.asList(definedTypesArr);
         } else {
-            String[] defaultType = { "pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods" };
+            String[] defaultType = { "pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods", "json", "yaml", "md" };
             list = Arrays.asList(defaultType);
         }
         return list.contains(fileType.toLowerCase());
@@ -11564,13 +11568,12 @@ public final class APIUtil {
      *
      * @param organization organization name
      */
-    public static void loadCommonOperationPolicies(String organization) throws APIManagementException {
+    public static void loadCommonOperationPolicies(String organization) {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
-        int policyCount = apiMgtDAO.getOperationPolicyCount(organization);
-
-        if (policyCount == 0) {
+        try {
+            Set<String> existingPolicies = apiMgtDAO.getCommonOperationPolicyNames(organization);
             String policySpecLocation = CarbonUtils.getCarbonHome() + File.separator
                     + APIConstants.COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION;
             String policyDefinitionLocation = CarbonUtils.getCarbonHome() + File.separator
@@ -11580,40 +11583,46 @@ public final class APIUtil {
             if (files != null) {
                 for (File file : files) {
                     String jsonContent;
-                    try {
-                        jsonContent = FileUtils.readFileToString(file);
-                        OperationPolicySpecification policySpec = getValidatedOperationPolicySpecification(jsonContent);
-                        if (policySpec != null) {
-                            OperationPolicyData policyData = new OperationPolicyData();
-                            policyData.setSpecification(policySpec);
-                            policyData.setOrganization(organization);
+                    String fileName = file.getName();
+                    if (!existingPolicies.contains(fileName.substring(0, fileName.lastIndexOf('.')))) {
+                        try {
+                            jsonContent = FileUtils.readFileToString(file);
+                            OperationPolicySpecification policySpec = getValidatedOperationPolicySpecification(jsonContent);
+                            if (policySpec != null) {
+                                OperationPolicyData policyData = new OperationPolicyData();
+                                policyData.setSpecification(policySpec);
+                                policyData.setOrganization(organization);
 
-                            OperationPolicyDefinition synapsePolicyDefinition =
-                                    getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                            policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
-                            if (synapsePolicyDefinition != null) {
-                                synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-                                policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
-                            }
-                            OperationPolicyDefinition ccPolicyDefinition =
-                                    getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                            policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
-                            if (ccPolicyDefinition != null) {
-                                ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                                policyData.setCcPolicyDefinition(ccPolicyDefinition);
-                            }
+                                OperationPolicyDefinition synapsePolicyDefinition =
+                                        getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
+                                                policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                                if (synapsePolicyDefinition != null) {
+                                    synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                    policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
+                                }
+                                OperationPolicyDefinition ccPolicyDefinition =
+                                        getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
+                                                policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                                if (ccPolicyDefinition != null) {
+                                    ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                    policyData.setCcPolicyDefinition(ccPolicyDefinition);
+                                }
 
-                            policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
-                            apiMgtDAO.addCommonOperationPolicy(policyData);
-                            log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
-                                    + " was added to the organization " + organization + " successfully");
+                                policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
+                                apiMgtDAO.addCommonOperationPolicy(policyData);
+                                log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
+                                        + " was added to the organization " + organization + " successfully");
+                            }
+                        } catch (IOException | APIManagementException e) {
+                            log.error("Invalid policy specification for file " + file.getName()
+                                    + ".Hence skipped from importing as a common operation policy.", e);
                         }
-                    } catch (IOException | APIManagementException e) {
-                        log.error("Invalid policy specification for file " + file.getName()
-                                + ".Hence skipped from importing as a common operation policy.", e);
                     }
                 }
             }
+        } catch (Exception e) {
+            log.error("Exception when loading " + APIConstants.OPERATION_POLICIES + " for organization "
+                    + organization, e);
         }
     }
 

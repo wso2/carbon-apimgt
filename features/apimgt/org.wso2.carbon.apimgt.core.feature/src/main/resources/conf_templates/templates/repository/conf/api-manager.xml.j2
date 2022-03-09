@@ -1362,6 +1362,7 @@
             <Sequence>webhooksFaultSequence.xml</Sequence>
             <Sequence>_block_api_handler_.xml</Sequence>
             <Sequence>_backend_failure_handler_.xml</Sequence>
+            <Sequence>_opa_policy_failure_handler_.xml</Sequence>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
             {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
             <Sequence>{{sequence}}</Sequence>

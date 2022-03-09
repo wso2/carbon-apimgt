@@ -283,7 +283,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_NAME = "overview_name";
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
-    public static final String API_OVERVIEW_VERSION_TIMESTAMP = "overview_versionTimestamp";
+    public static final String API_OVERVIEW_VERSION_COMPARABLE = "overview_versionComparable";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
@@ -310,7 +310,7 @@ public final class APIConstants {
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
-    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
+    public static final String API_OVERVIEW_GATEWAY_VENDOR = "overview_gatewayVendor";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
     public static final String API_OVERVIEW_TAG = "tags";
@@ -2866,12 +2866,14 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
-    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmp";
+    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
     public static final String YAML_CONTENT_TYPE = "text/yaml";
     public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "specifications";
     public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
+    public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
+
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
 
@@ -2907,4 +2909,7 @@ public final class APIConstants {
         public static final String STANDARD = "STANDARD";
         public static final String FULL = "FULL";
     }
+
+    // Constants related to basic health check APIs
+    public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 }

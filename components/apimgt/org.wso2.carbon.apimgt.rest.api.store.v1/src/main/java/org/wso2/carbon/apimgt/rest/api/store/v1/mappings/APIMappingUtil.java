@@ -809,6 +809,7 @@ public class APIMappingUtil {
         String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
+        apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
 
         return apiInfoDTO;
     }
@@ -941,11 +942,21 @@ public class APIMappingUtil {
     }
 
     public static void setThrottlePoliciesAndMonetization(API api, APIInfoDTO apiInfoDTO, Set<String> deniedTiers,
-                                                          Map<String, Tier> tierMap) {
+                                                          Map<String, Tier> tierMap) throws APIManagementException {
         Set<Tier> throttlingPolicies = new HashSet<Tier>();
         List<String> throttlingPolicyNames = new ArrayList<>();
+        String tiers = null;
         Set<Tier> apiTiers = api.getAvailableTiers();
-        for (Tier currentTier : apiTiers) {
+        Set<String> tierNameSet = new HashSet<String>();
+        for (Tier t : apiTiers) {
+            tierNameSet.add(t.getName());
+        }
+        if (api.getAvailableTiers() != null) {
+            tiers = String.join("||", tierNameSet);
+        }
+        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername()));
+        Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+        for (Tier currentTier : availableTiers) {
             if (!deniedTiers.contains(currentTier.getName())) {
                 throttlingPolicies.add(currentTier);
                 throttlingPolicyNames.add(currentTier.getName());
@@ -972,11 +983,21 @@ public class APIMappingUtil {
     }
 
     public static void setThrottlePoliciesAndMonetization(APIProduct apiProduct, APIInfoDTO apiInfoDTO,
-                                                          Set<String> deniedTiers, Map<String, Tier> tierMap) {
+            Set<String> deniedTiers, Map<String, Tier> tierMap) throws APIManagementException {
         Set<Tier> throttlingPolicies = new HashSet<Tier>();
         List<String> throttlingPolicyNames = new ArrayList<>();
+        String tiers = null;
         Set<Tier> apiTiers = apiProduct.getAvailableTiers();
-        for (Tier currentTier : apiTiers) {
+        Set<String> tierNameSet = new HashSet<String>();
+        for (Tier t : apiTiers) {
+            tierNameSet.add(t.getName());
+        }
+        if (apiProduct.getAvailableTiers() != null) {
+            tiers = String.join("||", tierNameSet);
+        }
+        Map<String, Tier> definedTiers = APIUtil.getTiers(APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername()));
+        Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, apiProduct.getId().getName());
+        for (Tier currentTier : availableTiers) {
             if (!deniedTiers.contains(currentTier.getName())) {
                 throttlingPolicies.add(currentTier);
                 throttlingPolicyNames.add(currentTier.getName());

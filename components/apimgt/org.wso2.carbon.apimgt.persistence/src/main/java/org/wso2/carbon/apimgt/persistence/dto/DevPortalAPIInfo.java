@@ -37,7 +37,15 @@ public class DevPortalAPIInfo {
     private String subscriptionAvailableOrgs;
     private String createdTime;
     private String description;
+    private String gatewayVendor;
 
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
 
     public String getDescription() {
         return description;

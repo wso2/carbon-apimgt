@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -180,7 +181,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            apiConsumer = RestApiCommonUtil.getConsumer(username);
+            String userOrganization = RestApiUtil.getValidatedSubjectOrganization(messageContext);
+            apiConsumer = RestApiCommonUtil.getConsumer(username, userOrganization);
             String applicationId = body.getApplicationId();
 
             //check whether user is permitted to access the API. If the API does not exist,

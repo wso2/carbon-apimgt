@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.18.4-SNAPSHOT</version>
+        <version>9.20.18-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.core.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Api management Core Feature</name>
+    <name>WSO2 Carbon - Api Management Core Feature</name>
     <url>http://wso2.org</url>
 
     <description>
@@ -106,7 +106,7 @@
                                     <path refid="maven.compile.classpath" />
                                 </path>
                                 <echo message="########### Creating API Manager Database ##############" />
-                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
                                     <classpath>
                                         <path refid="h2.classpath" />
                                     </classpath>

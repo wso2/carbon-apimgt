@@ -53,6 +53,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String resourceMisMatchSequenceName = "_resource_mismatch_handler_";
     private static final String blockingSequence = "_block_api_handler_";
     private String authFailureHandlerSequenceName = "_auth_failure_handler_";
+    private String opaPolicyFailureHandlerSequenceName = "_opa_policy_failure_handler_";
     private String graphqlAuthFailureHandlerSequenceName = "_graphql_failure_handler_";
     private String sandboxKeyErrorSequenceName = "_sandbox_key_error_";
     private String productionKeyErrorSequenceName = "_production_key_error_";
@@ -160,6 +161,17 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                         new File(synapseConfigDir.getAbsolutePath() + File.separator +
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
                                 backendFailureSequenceName + ".xml"));
+            }
+            String opaPolicyFailureSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + opaPolicyFailureHandlerSequenceName
+                    + ".xml";
+            File opaPolicyFailureSequenceXml = new File(opaPolicyFailureSequence);
+            if (!opaPolicyFailureSequenceXml.exists()) {
+                FileUtils.copyFile(new File(synapseConfigRootPath + opaPolicyFailureHandlerSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                opaPolicyFailureHandlerSequenceName + ".xml"));
             }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);

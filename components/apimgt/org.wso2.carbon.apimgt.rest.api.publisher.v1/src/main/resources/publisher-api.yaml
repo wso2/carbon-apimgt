@@ -11688,8 +11688,6 @@ components:
           type: string
         policyId:
           type: string
-        order:
-          type: int
         parameters:
           type: object
           additionalProperties:
@@ -11771,9 +11769,6 @@ components:
           items:
             type: string
             example: REST
-        multipleAllowed:
-          type: boolean
-          example: true
         isAPISpecific:
           type: boolean
           example: true
@@ -11812,6 +11807,16 @@ components:
           type: boolean
           description: Is this attibute mandetory for the policy
           example: true
+        defaultValue:
+          type: string
+          description: Default value for the attribute
+          example: true
+        allowedValues:
+          type: array
+          description: If the attribute type is enum, this array should contain all the possible values for the enum.
+          items:
+            type: string
+            example: ["GET","POST","PUT"]
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
