@@ -867,6 +867,25 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Validate whether the given API with UUID exists under provided organization in the DB
+     *
+     * @param apiId API UUID
+     * @param organization organizationId
+     * @return API details
+     * @throws APIManagementException if the API doesn't exists in the DB
+     */
+    private APIInfo validateAPIExistence(String apiId, String organization) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId, organization);
+        if (apiInfo == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiId));
+        }
+        return apiInfo;
+    }
+
+    /**
      * Get all types and fields of the GraphQL Schema of a given API
      *
      * @param apiId          apiId
@@ -1556,7 +1575,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIInfo apiInfo = null;
             try {
                 //validate if api exists
-                apiInfo = validateAPIExistence(apiId);
+                apiInfo = validateAPIExistence(apiId, organization);
                 isAPIExistDB = true;
             } catch (APIManagementException e) {
                 log.error("Error while validating API existence for deleting API " + apiId + " on organization "
@@ -1600,9 +1619,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 apiProvider.deleteAPI(apiId, organization);
                 isDeleted = true;
-            } catch (APIMgtResourceNotFoundException e) {
-                log.error(String.format("Error while deleting the API %s : and org : %s", apiId, organization));
-                RestApiUtil.handleResourceNotFoundError(e.getMessage(), log);
             } catch (APIManagementException e) {
                 log.error("Error while deleting API " + apiId + "on organization " + organization, e);
             }
@@ -4076,8 +4092,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             api.setOrganization(organization);
             return APIMappingUtil.fromAPItoDTO(api, apiProvider);
-        } catch(APIMgtResourceNotFoundException e) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource

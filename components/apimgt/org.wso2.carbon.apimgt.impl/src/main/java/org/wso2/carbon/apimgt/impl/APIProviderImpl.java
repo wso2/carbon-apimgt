@@ -3263,7 +3263,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "the recommendation system. "
             );
             isError = true;
-            throw e;
         }
 
         // get api id from db
@@ -3311,6 +3310,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         log.error("Error while deleting Resource Registration for API " + apiUuid +
                                 " on organization " + organization + " in Key Manager "
                                 + keyManagerDtoEntry.getKey(), e);
+                        isError = true;
                     }
                 }
             }
@@ -7896,9 +7896,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (APIPersistenceException e) {
-            if (e.getMessage().contains("does not exist")) {
-                throw new APIMgtResourceNotFoundException(e);
-            }
             throw new APIManagementException("Failed to get API", e);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
