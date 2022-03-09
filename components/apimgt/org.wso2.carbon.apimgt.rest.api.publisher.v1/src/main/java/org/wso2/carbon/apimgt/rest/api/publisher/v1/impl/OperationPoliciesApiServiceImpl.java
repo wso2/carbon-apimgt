@@ -122,8 +122,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
 
                 OperationPolicyData existingPolicy =
-                        apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(), organization,
-                                false);
+                        apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(),
+                                policySpecification.getVersion(), organization, false);
                 String policyID;
                 if (existingPolicy == null) {
                     policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);

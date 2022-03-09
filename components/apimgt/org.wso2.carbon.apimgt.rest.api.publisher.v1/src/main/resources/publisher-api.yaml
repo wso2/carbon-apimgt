@@ -11513,6 +11513,9 @@ components:
       properties:
         policyName:
           type: string
+        policyVersion:
+          type: string
+          default: v1
         policyId:
           type: string
         parameters:

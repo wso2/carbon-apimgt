@@ -441,9 +441,10 @@ public class ImportUtils {
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
                         try {
+                            String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                                    policy.getPolicyVersion());
                             OperationPolicySpecification policySpec =
-                                    getOperationPolicySpecificationFromFile(policyDirectory,
-                                            policy.getPolicyName());
+                                    getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
 
                             OperationPolicyData operationPolicyData = new OperationPolicyData();
                             operationPolicyData.setSpecification(policySpec);
@@ -452,14 +453,14 @@ public class ImportUtils {
 
                             OperationPolicyDefinition synapseDefinition =
                                     APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
-                                            policy.getPolicyName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                                            policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
                             if (synapseDefinition != null) {
                                 synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
                                 operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
                             }
                             OperationPolicyDefinition ccDefinition =
                                     APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
-                                            policy.getPolicyName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                                            policyFileName, APIConstants.CC_POLICY_DEFINITION_EXTENSION);
                             if (ccDefinition != null) {
                                 ccDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
                                 operationPolicyData.setCcPolicyDefinition(ccDefinition);

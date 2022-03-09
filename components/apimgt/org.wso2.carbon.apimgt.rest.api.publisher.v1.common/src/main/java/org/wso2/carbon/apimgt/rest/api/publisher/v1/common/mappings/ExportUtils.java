@@ -634,12 +634,14 @@ public class ExportUtils {
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
                         if (!exportedPolicies.contains(policy.getPolicyName())) {
+                            String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                                    policy.getPolicyVersion());
                             if (policy.getPolicyId() != null) {
                                 OperationPolicyData policyData =
                                         apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
                                                 tenantDomain, true);
                                 if (policyData != null) {
-                                    exportPolicyData(policyData, archivePath, exportFormat);
+                                    exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
                                     exportedPolicies.add(policy.getPolicyName());
                                 }
                             } else {
@@ -657,7 +659,7 @@ public class ExportUtils {
                                     OperationPolicyData policyData = APIUtil.getPolicyDataForMediationFlow(api,
                                             policy.getDirection(), tenantDomain);
                                     if (policyData != null) {
-                                        exportPolicyData(policyData, archivePath, exportFormat);
+                                        exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
                                         exportedPolicies.add(policy.getPolicyName());
                                     }
                                 }
@@ -682,11 +684,11 @@ public class ExportUtils {
         }
     }
 
-    public static void exportPolicyData(OperationPolicyData policyData, String archivePath, ExportFormat exportFormat)
+    public static void exportPolicyData(String policyFileName, OperationPolicyData policyData, String archivePath, ExportFormat exportFormat)
             throws APIImportExportException, IOException {
 
         String policyName = archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
-                policyData.getSpecification().getName();
+                policyFileName;
         // Policy specification and definition will have the same name
         if (policyData.getSpecification() != null) {
             CommonUtil.writeDtoToFile(policyName, exportFormat, ImportExportConstants.TYPE_POLICY_SPECIFICATION,
@@ -928,7 +930,7 @@ public class ExportUtils {
             JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
             JsonObject apiJson = (JsonObject) apiObj;
             apiJson.addProperty("organizationId", organization);
-            
+
             CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API, apiJson);
         } catch (APIManagementException e) {

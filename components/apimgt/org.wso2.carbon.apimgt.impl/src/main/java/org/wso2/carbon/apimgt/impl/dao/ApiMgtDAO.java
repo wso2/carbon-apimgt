@@ -18135,16 +18135,17 @@ public class ApiMgtDAO {
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyUUID);
         statement.setString(2, policySpecification.getName());
-        statement.setString(3, policySpecification.getDisplayName());
-        statement.setString(4, policySpecification.getDescription());
-        statement.setString(5, policySpecification.getApplicableFlows().toString());
-        statement.setString(6, policySpecification.getSupportedGateways().toString());
-        statement.setString(7, policySpecification.getSupportedApiTypes().toString());
-        statement.setBinaryStream(8,
+        statement.setString(3, policySpecification.getVersion());
+        statement.setString(4, policySpecification.getDisplayName());
+        statement.setString(5, policySpecification.getDescription());
+        statement.setString(6, policySpecification.getApplicableFlows().toString());
+        statement.setString(7, policySpecification.getSupportedGateways().toString());
+        statement.setString(8, policySpecification.getSupportedApiTypes().toString());
+        statement.setBinaryStream(9,
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
-        statement.setString(9, policyData.getOrganization());
-        statement.setString(10, policySpecification.getCategory().toString());
-        statement.setString(11, policyData.getMd5Hash());
+        statement.setString(10, policyData.getOrganization());
+        statement.setString(11, policySpecification.getCategory().toString());
+        statement.setString(12, policyData.getMd5Hash());
         statement.executeUpdate();
         statement.close();
 
@@ -18193,17 +18194,18 @@ public class ApiMgtDAO {
                 SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_CONTENT);
 
         statement.setString(1, policySpecification.getName());
-        statement.setString(2, policySpecification.getDisplayName());
-        statement.setString(3, policySpecification.getDescription());
-        statement.setString(4, policySpecification.getApplicableFlows().toString());
-        statement.setString(5, policySpecification.getSupportedGateways().toString());
-        statement.setString(6, policySpecification.getSupportedApiTypes().toString());
-        statement.setBinaryStream(7,
+        statement.setString(2, policySpecification.getVersion());
+        statement.setString(3, policySpecification.getDisplayName());
+        statement.setString(4, policySpecification.getDescription());
+        statement.setString(5, policySpecification.getApplicableFlows().toString());
+        statement.setString(6, policySpecification.getSupportedGateways().toString());
+        statement.setString(7, policySpecification.getSupportedApiTypes().toString());
+        statement.setBinaryStream(8,
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
-        statement.setString(8, policyData.getOrganization());
-        statement.setString(9, policySpecification.getCategory().toString());
-        statement.setString(10, policyData.getMd5Hash());
-        statement.setString(11, policyId);
+        statement.setString(9, policyData.getOrganization());
+        statement.setString(10, policySpecification.getCategory().toString());
+        statement.setString(11, policyData.getMd5Hash());
+        statement.setString(12, policyId);
         statement.executeUpdate();
         statement.close();
 
@@ -18594,8 +18596,8 @@ public class ApiMgtDAO {
             // First check whether there exists a API specific policy for same policy name with revision uuid null
             // This is the state where we record the policies applied in the working copy.
             OperationPolicyData apiSpecificPolicy = getAPISpecificOperationPolicyByPolicyName(connection,
-                    revisionedPolicy.getSpecification().getName(), revisionedPolicy.getApiUUID(), null,
-                    organization, false);
+                    revisionedPolicy.getSpecification().getName(), revisionedPolicy.getSpecification().getVersion(),
+                    revisionedPolicy.getApiUUID(), null, organization, false);
             if (apiSpecificPolicy != null) {
                 if (apiSpecificPolicy.getMd5Hash().equals(revisionedPolicy.getMd5Hash())) {
                     if (log.isDebugEnabled()) {
@@ -18908,17 +18910,19 @@ public class ApiMgtDAO {
      * Retrieve a common operation policy by providing the policy name and organization
      *
      * @param policyName             Policy name
+     * @param policyVersion          Policy version
      * @param organization           Organization name
      * @param isWithPolicyDefinition Include the policy definition to the output or not
      * @return operation policy
      * @throws APIManagementException
      */
-    public OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String organization,
-                                                                    boolean isWithPolicyDefinition)
+    public OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String policyVersion,
+                                                                    String organization, boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getCommonOperationPolicyByPolicyName(connection, policyName, organization, isWithPolicyDefinition);
+            return getCommonOperationPolicyByPolicyName(connection, policyName, policyVersion, organization,
+                    isWithPolicyDefinition);
         } catch (SQLException e) {
             handleException("Failed to get common operation policy for name " + policyName + "for organization "
                     + organization, e);
@@ -18927,7 +18931,7 @@ public class ApiMgtDAO {
     }
 
     private OperationPolicyData getCommonOperationPolicyByPolicyName(Connection connection, String policyName,
-                                                                     String tenantDomain,
+                                                                     String policyVersion, String tenantDomain,
                                                                      boolean isWithPolicyDefinition)
             throws SQLException {
 
@@ -18936,7 +18940,8 @@ public class ApiMgtDAO {
 
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyName);
-        statement.setString(2, tenantDomain);
+        statement.setString(2, policyVersion);
+        statement.setString(3, tenantDomain);
         ResultSet rs = statement.executeQuery();
         OperationPolicyData policyData = null;
         if (rs.next()) {
@@ -18970,15 +18975,14 @@ public class ApiMgtDAO {
      * @return operation policy
      * @throws APIManagementException
      */
-    public OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
-                                                                         String revisionUUID, String organization,
-                                                                         boolean isWithPolicyDefinition)
+    public OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String policyVersion,
+                                                                         String apiUUID, String revisionUUID,
+                                                                         String organization, boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getAPISpecificOperationPolicyByPolicyName(connection, policyName, apiUUID, revisionUUID,
-                    organization,
-                    isWithPolicyDefinition);
+            return getAPISpecificOperationPolicyByPolicyName(connection, policyName, policyVersion, apiUUID,
+                    revisionUUID, organization, isWithPolicyDefinition);
         } catch (SQLException e) {
             handleException("Failed to get API specific operation policy for name " + policyName + " with API UUID "
                     + apiUUID + " revision UUID " + revisionUUID, e);
@@ -18987,8 +18991,8 @@ public class ApiMgtDAO {
     }
 
     private OperationPolicyData getAPISpecificOperationPolicyByPolicyName(Connection connection,
-                                                                          String policyName, String apiUUID,
-                                                                          String revisionUUID,
+                                                                          String policyName, String policyVersion,
+                                                                          String apiUUID, String revisionUUID,
                                                                           String tenantDomain,
                                                                           boolean isWithPolicyDefinition)
             throws SQLException {
@@ -19002,10 +19006,11 @@ public class ApiMgtDAO {
 
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyName);
-        statement.setString(2, tenantDomain);
-        statement.setString(3, apiUUID);
+        statement.setString(2, policyVersion);
+        statement.setString(3, tenantDomain);
+        statement.setString(4, apiUUID);
         if (revisionUUID != null) {
-            statement.setString(4, revisionUUID);
+            statement.setString(5, revisionUUID);
         }
         ResultSet rs = statement.executeQuery();
         OperationPolicyData policyData = null;
@@ -19084,7 +19089,9 @@ public class ApiMgtDAO {
             statement.setString(1, organization);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                policyNames.add(rs.getString("POLICY_NAME"));
+                String policyName = rs.getString("POLICY_NAME");
+                String policyVersion = rs.getString("POLICY_VERSION");
+                policyNames.add(APIUtil.getOperationPolicyFileName(policyName, policyVersion));
             }
         } catch (SQLException e) {
             handleException("Failed to get the count of operation policies for organization " + organization, e);
@@ -19218,6 +19225,7 @@ public class ApiMgtDAO {
 
         OperationPolicy operationPolicy = new OperationPolicy();
         operationPolicy.setPolicyName(rs.getString("POLICY_NAME"));
+        operationPolicy.setPolicyVersion(rs.getString("POLICY_VERSION"));
         operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
         operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
         operationPolicy.setDirection(rs.getString("DIRECTION"));
@@ -19237,6 +19245,7 @@ public class ApiMgtDAO {
 
         OperationPolicySpecification policySpecification = new OperationPolicySpecification();
         policySpecification.setName(rs.getString("POLICY_NAME"));
+        policySpecification.setVersion(rs.getString("POLICY_VERSION"));
         policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
         policySpecification.setDescription(rs.getString("POLICY_DESCRIPTION"));
         policySpecification.setApplicableFlows(getListFromString(rs.getString("APPLICABLE_FLOWS")));
