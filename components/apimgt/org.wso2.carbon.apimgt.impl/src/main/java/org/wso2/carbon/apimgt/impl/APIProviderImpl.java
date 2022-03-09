@@ -2064,7 +2064,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param api      API
      */
-    private void loadMediationPoliciesAsOperationPoliciesToAPI(API api, String organization) throws APIManagementException {
+    protected void loadMediationPoliciesAsOperationPoliciesToAPI(API api, String organization) throws APIManagementException {
         // This method is used to handle the migration
         OperationPolicy inFlowPolicy = null;
         OperationPolicy outFlowPolicy = null;
@@ -2107,17 +2107,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-        for (URITemplate uriTemplate : uriTemplates) {
-            List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
-            if (inFlowPolicy != null) {
-                operationPolicies.add(cloneOperationPolicy(inFlowPolicy));
-            }
-            if (outFlowPolicy != null) {
-                operationPolicies.add(cloneOperationPolicy(outFlowPolicy));
-            }
-            if (faultFlowPolicy != null) {
-                operationPolicies.add(cloneOperationPolicy(faultFlowPolicy));
+        if (inFlowPolicy != null || outFlowPolicy != null || faultFlowPolicy != null) {
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            for (URITemplate uriTemplate : uriTemplates) {
+                List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+                if (inFlowPolicy != null) {
+                    operationPolicies.add(cloneOperationPolicy(inFlowPolicy));
+                }
+                if (outFlowPolicy != null) {
+                    operationPolicies.add(cloneOperationPolicy(outFlowPolicy));
+                }
+                if (faultFlowPolicy != null) {
+                    operationPolicies.add(cloneOperationPolicy(faultFlowPolicy));
+                }
             }
         }
     }
@@ -2137,7 +2139,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param organization Organization Name
      * @throws APIManagementException
      */
-    private void migrateMediationPoliciesOfAPI(API api, String organization, boolean updatePolicyURLMapping)
+    protected void migrateMediationPoliciesOfAPI(API api, String organization, boolean updatePolicyURLMapping)
             throws APIManagementException {
 
         Map<String, String> clonedPoliciesMap = new HashMap<>();
