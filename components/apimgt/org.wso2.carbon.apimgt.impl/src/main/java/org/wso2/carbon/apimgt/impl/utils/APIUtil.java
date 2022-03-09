@@ -5310,7 +5310,7 @@ public final class APIUtil {
      */
     public static boolean isSequenceDefined(String sequence) {
 
-        return sequence != null && !"none".equals(sequence);
+        return sequence != null && !"none".equals(sequence) && !StringUtils.isEmpty(sequence) ;
     }
 
     /**
@@ -11780,24 +11780,21 @@ public final class APIUtil {
             case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
                 if (isSequenceDefined(api.getInSequence()) && api.getInSequenceMediation() != null) {
                     Mediation inSequenceMediation = api.getInSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(),
-                            APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, organization,
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
                             inSequenceMediation.getName(), inSequenceMediation.getConfig());
                 }
                 break;
             case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
                 if (isSequenceDefined(api.getOutSequence()) && api.getOutSequenceMediation() != null) {
                     Mediation outSequenceMediation = api.getOutSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(),
-                            APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE, organization,
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
                             outSequenceMediation.getName(), outSequenceMediation.getConfig());
                 }
                 break;
             case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
                 if (isSequenceDefined(api.getFaultSequence()) && api.getFaultSequenceMediation() != null) {
                     Mediation faultSequenceMediation = api.getFaultSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(),
-                            APIConstants.OPERATION_SEQUENCE_TYPE_FAULT, organization,
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
                             faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
                 }
                 break;
@@ -11805,8 +11802,7 @@ public final class APIUtil {
         return policyData;
     }
 
-    public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String flow,
-                                                                        String organization,
+    public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String organization,
                                                                         String policyName,
                                                                         String policyDefinitionString) {
 
@@ -11825,7 +11821,9 @@ public final class APIUtil {
         policySpecification.setSupportedApiTypes(supportedAPIList);
 
         ArrayList<String> applicableFlows = new ArrayList<>();
-        applicableFlows.add(flow);
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
         policySpecification.setApplicableFlows(applicableFlows);
 
         OperationPolicyData policyData = new OperationPolicyData();
