@@ -7516,7 +7516,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
+            - apim:api_view    #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
             - apim:api_manage
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
@@ -7581,7 +7581,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
             - apim:api_manage
             - apim:mediation_policy_create
             - apim:mediation_policy_manage
@@ -7625,7 +7624,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
+            - apim:api_view   #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
             - apim:api_manage
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
@@ -7657,8 +7656,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
             - apim:api_manage
+            - apim:mediation_policy_create
             - apim:mediation_policy_manage
             - apim:api_mediation_policy_manage
       x-code-samples:
@@ -7697,7 +7696,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_view
+            - apim:api_view  #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
             - apim:api_manage
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
@@ -7742,11 +7741,8 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_view
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7805,11 +7801,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
-            - apim:api_manage
-            - apim:mediation_policy_create
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7847,11 +7839,8 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_view
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7878,10 +7867,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7917,11 +7903,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_view
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7959,10 +7942,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-            - apim:api_manage
             - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_view
       x-code-samples:
         - lang: Shell
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
