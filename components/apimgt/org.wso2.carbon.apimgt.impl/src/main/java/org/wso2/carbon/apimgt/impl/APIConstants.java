@@ -2877,6 +2877,7 @@ public final class APIConstants {
     public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
     public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP = "HTTP";
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";

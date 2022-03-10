@@ -1047,7 +1047,6 @@ public class APIMappingUtil {
         }
 
         dto.setMediationPolicies(mediationPolicies);
-
         dto.setLifeCycleStatus(model.getStatus());
 
         String subscriptionAvailability = model.getSubscriptionAvailability();

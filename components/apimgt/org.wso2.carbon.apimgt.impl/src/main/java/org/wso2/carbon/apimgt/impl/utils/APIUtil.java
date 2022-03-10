@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -5309,7 +5310,7 @@ public final class APIUtil {
      */
     public static boolean isSequenceDefined(String sequence) {
 
-        return sequence != null && !"none".equals(sequence);
+        return sequence != null && !"none".equals(sequence) && !StringUtils.isEmpty(sequence) ;
     }
 
     /**
@@ -11762,6 +11763,87 @@ public final class APIUtil {
         }
         return md5Hash;
     }
+
+    /**
+     * This method will generate a operation policy data object if a mediation policy is found for the selected flow.
+     *
+     * @param api             API
+     * @param policyDirection Request, response of fault flow
+     * @param organization    organization
+     * @throws APIManagementException
+     */
+    public static OperationPolicyData getPolicyDataForMediationFlow(API api, String policyDirection,
+                                                                    String organization) {
+
+        OperationPolicyData policyData = null;
+        switch (policyDirection) {
+            case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+                if (isSequenceDefined(api.getInSequence()) && api.getInSequenceMediation() != null) {
+                    Mediation inSequenceMediation = api.getInSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            inSequenceMediation.getName(), inSequenceMediation.getConfig());
+                }
+                break;
+            case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+                if (isSequenceDefined(api.getOutSequence()) && api.getOutSequenceMediation() != null) {
+                    Mediation outSequenceMediation = api.getOutSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            outSequenceMediation.getName(), outSequenceMediation.getConfig());
+                }
+                break;
+            case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+                if (isSequenceDefined(api.getFaultSequence()) && api.getFaultSequenceMediation() != null) {
+                    Mediation faultSequenceMediation = api.getFaultSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
+                }
+                break;
+        }
+        return policyData;
+    }
+
+    public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String organization,
+                                                                        String policyName,
+                                                                        String policyDefinitionString) {
+
+        OperationPolicySpecification policySpecification = new OperationPolicySpecification();
+        policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
+        policySpecification.setName(policyName);
+        policySpecification.setDisplayName(policyName);
+        policySpecification.setDescription("This is a mediation policy migrated to an operation policy.");
+
+        ArrayList<String> gatewayList = new ArrayList<>();
+        gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
+        policySpecification.setSupportedGateways(gatewayList);
+
+        ArrayList<String> supportedAPIList = new ArrayList<>();
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
+        policySpecification.setSupportedApiTypes(supportedAPIList);
+
+        ArrayList<String> applicableFlows = new ArrayList<>();
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+        policySpecification.setApplicableFlows(applicableFlows);
+
+        OperationPolicyData policyData = new OperationPolicyData();
+        policyData.setOrganization(organization);
+        policyData.setSpecification(policySpecification);
+        policyData.setApiUUID(apiUuid);
+
+        if (policyDefinitionString != null) {
+            OperationPolicyDefinition policyDefinition = new OperationPolicyDefinition();
+            policyDefinition.setContent(policyDefinitionString);
+            policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+            policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+            policyData.setSynapsePolicyDefinition(policyDefinition);
+        }
+
+        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+
+        return policyData;
+    }
+
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);

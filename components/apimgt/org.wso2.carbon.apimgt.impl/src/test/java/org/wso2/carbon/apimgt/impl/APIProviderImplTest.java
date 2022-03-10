@@ -43,6 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
@@ -64,6 +65,8 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -107,10 +110,12 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -1170,7 +1175,7 @@ public class APIProviderImplTest {
 
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
-        
+
         try {
             apiProvider.addAPI(api);
         } catch (Exception e) {
@@ -1384,7 +1389,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
@@ -1473,7 +1478,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         API returnedAPI = apiProvider.addAPI(api);
         Assert.assertTrue(StringUtils.isNotEmpty(returnedAPI.getVersionTimestamp()));
-        
+
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 api.getId().getProviderName() +
                 RegistryConstants.PATH_SEPARATOR + api.getId().getApiName() +
@@ -1651,7 +1656,7 @@ public class APIProviderImplTest {
         Mockito.when(rs.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(ur);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
@@ -1793,7 +1798,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
@@ -1930,10 +1935,10 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
-        
+
         apiProvider.addAPI(oldApi);
 
         //mock has permission
@@ -2032,10 +2037,10 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
-        
+
         apiProvider.addAPI(oldApi);
 
         //mock has permission
@@ -2091,7 +2096,7 @@ public class APIProviderImplTest {
 
         PowerMockito.when(apiPersistenceInstance.getPublisherAPI(any(Organization.class), any(String.class)))
                 .thenReturn(publisherAPI);
-        
+
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
         apiProvider.updateAPI(api, oldApi);
         Assert.assertEquals(0, api.getEnvironments().size());
@@ -2200,7 +2205,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(oldApi);
@@ -2396,7 +2401,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
@@ -2451,7 +2456,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
@@ -2507,7 +2512,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
@@ -2563,7 +2568,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
@@ -3553,7 +3558,7 @@ public class APIProviderImplTest {
 
     /**
      * This method tests adding file to documentation method.
-     * @throws Exception 
+     * @throws Exception
      *
      * @throws GovernanceException    Governance Exception.
      */
@@ -3562,7 +3567,7 @@ public class APIProviderImplTest {
         String apiUUID = "xxxxxxxx";
         String docUUID = "yyyyyyyy";
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
-       
+
         Set<String> environments = new HashSet<String>();
 
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -3606,11 +3611,11 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
-        
+
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
- 
+
         apiProvider.addAPI(api);
 
         String fileName = "test.txt";
@@ -4057,5 +4062,272 @@ public class APIProviderImplTest {
         APIStateChangeResponse response = apiProvider.changeLifeCycleStatus("carbon.super",
                 new ApiTypeWrapper(product), "Publish", null);
         Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void testOperationPolicyListingWhenMediationPoliciesExists() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate1);
+
+        URITemplate uriTemplate2 = new URITemplate();
+        uriTemplate2.setHTTPVerb("PUT");
+        uriTemplate2.setAuthType("Application");
+        uriTemplate2.setUriTemplate("/update");
+        uriTemplate2.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate2);
+
+        api.setUriTemplates(uriTemplates);
+        api.setInSequence("test-sequence");
+        api.setOutSequence("test-sequence");
+        api.setFaultSequence("test-sequence");
+
+        Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getInSequence(),
+                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+        Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getOutSequence(),
+                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+        Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getFaultSequence(),
+                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+
+        PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
+        apiProvider.loadMediationPoliciesAsOperationPoliciesToAPI(api, superTenantDomain);
+
+        Assert.assertNotNull(uriTemplate1.getOperationPolicies());
+        Assert.assertNotNull(uriTemplate2.getOperationPolicies());
+        Assert.assertEquals(uriTemplate1.getOperationPolicies().size(), 3);
+        Assert.assertEquals(uriTemplate2.getOperationPolicies().size(), 3);
+        Assert.assertEquals(uriTemplate1.getOperationPolicies().get(0).getPolicyName(), "test-sequence");
+    }
+
+    @Test
+    public void testOperationPolicyListingWhenMediationPoliciesExistsAndPolicyAlreadyMigrated() throws APIManagementException {
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate1);
+
+        URITemplate uriTemplate2 = new URITemplate();
+        uriTemplate2.setHTTPVerb("PUT");
+        uriTemplate2.setAuthType("Application");
+        uriTemplate2.setUriTemplate("/update");
+        uriTemplate2.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate2);
+
+        api.setUriTemplates(uriTemplates);
+        api.setInSequence("in-sequence");
+        api.setOutSequence("out-sequence");
+        api.setFaultSequence("fault-sequence");
+
+        String policyId = "11111";
+        OperationPolicyData policyData = new OperationPolicyData();
+        policyData.setPolicyId(policyId);
+
+        Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getInSequence(),
+                api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
+        Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getOutSequence(),
+                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+        Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getFaultSequence(),
+                api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
+
+        PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
+        apiProvider.loadMediationPoliciesAsOperationPoliciesToAPI(api, superTenantDomain);
+
+        for (URITemplate template : api.getUriTemplates()) {
+            for (OperationPolicy policy : template.getOperationPolicies()) {
+                if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
+                    Assert.assertEquals(policy.getPolicyId(), policyId);
+                }
+                if (APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE.equals(policy.getDirection())) {
+                    Assert.assertNull(policy.getPolicyId());
+                }
+                if (APIConstants.OPERATION_SEQUENCE_TYPE_FAULT.equals(policy.getDirection())) {
+                    Assert.assertEquals(policy.getPolicyId(), policyId);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testMigrationOfMediationPoliciesToOperationPolicies()
+            throws APIManagementException, MediationPolicyPersistenceException {
+
+        String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
+        List<MediationInfo> localPolicies = new ArrayList<>();
+        MediationInfo mediationInfo = new MediationInfo();
+        mediationInfo.setId("1");
+        mediationInfo.setName("in-policy");
+        mediationInfo.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+        localPolicies.add(mediationInfo);
+
+        org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy
+                = new org.wso2.carbon.apimgt.persistence.dto.Mediation();
+        mediationPolicy.setId("1");
+        mediationPolicy.setName("in-policy");
+        mediationPolicy.setConfig("<sequence/>");
+        mediationPolicy.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+
+        OperationPolicyData policyData = new OperationPolicyData();
+        policyData.setPolicyId("11111");
+
+        PowerMockito.when(apiPersistenceInstance.getAllMediationPolicies(any(Organization.class), any(String.class))).thenReturn(localPolicies);
+        PowerMockito.when(apiPersistenceInstance.getMediationPolicy(any(Organization.class), any(String.class), any(String.class))).thenReturn(mediationPolicy);
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0", apiuuid);
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setUuid(apiuuid);
+        api.setStatus(APIConstants.CREATED);
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        OperationPolicy appliedPolicy = new OperationPolicy();
+        appliedPolicy.setPolicyName("in-policy");
+        appliedPolicy.setOrder(1);
+        appliedPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplate1.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
+        uriTemplates.add(uriTemplate1);
+
+        URITemplate uriTemplate2 = new URITemplate();
+        uriTemplate2.setHTTPVerb("PUT");
+        uriTemplate2.setAuthType("Application");
+        uriTemplate2.setUriTemplate("/update");
+        uriTemplate2.setThrottlingTier("Gold");
+        uriTemplate2.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
+        uriTemplates.add(uriTemplate2);
+
+        api.setUriTemplates(uriTemplates);
+        api.setInSequence("in-policy");
+
+        PowerMockito.when(APIUtil.isSequenceDefined(api.getInSequence())).thenReturn(true);
+
+        Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName("in-policy",
+                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+        PowerMockito.when(APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST,
+                superTenantDomain)).thenReturn(policyData);
+        Mockito.when(apiProvider.addAPISpecificOperationPolicy(apiuuid, policyData, superTenantDomain)).thenReturn("11111");
+
+        apiProvider.migrateMediationPoliciesOfAPI(api, superTenantDomain, false);
+
+        for (URITemplate template : api.getUriTemplates()) {
+            for (OperationPolicy policy : template.getOperationPolicies()) {
+                if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
+                    Assert.assertEquals(policy.getPolicyId(), "11111");
+                } else {
+                    Assert.fail("template " + template.getUriTemplate() + " should not contain other paths for operation policies");
+                }
+            }
+        }
+        Assert.assertNull(api.getInSequence());
+        Assert.assertNull(api.getInSequenceMediation());
+    }
+
+
+    @Test
+    public void testMigrationOfMediationPoliciesToOperationPoliciesIfPoliciesAlreadyMigrated()
+            throws APIManagementException, MediationPolicyPersistenceException {
+
+        String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
+        List<MediationInfo> localPolicies = new ArrayList<>();
+        MediationInfo mediationInfo = new MediationInfo();
+        mediationInfo.setId("1");
+        mediationInfo.setName("in-policy");
+        mediationInfo.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+        localPolicies.add(mediationInfo);
+
+        org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy
+                = new org.wso2.carbon.apimgt.persistence.dto.Mediation();
+        mediationPolicy.setId("1");
+        mediationPolicy.setName("in-policy");
+        mediationPolicy.setConfig("<sequence/>");
+        mediationPolicy.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+
+        OperationPolicyData policyData = new OperationPolicyData();
+        policyData.setPolicyId("11111");
+
+        PowerMockito.when(apiPersistenceInstance.getAllMediationPolicies(any(Organization.class), any(String.class))).thenReturn(localPolicies);
+        PowerMockito.when(apiPersistenceInstance.getMediationPolicy(any(Organization.class), any(String.class), any(String.class))).thenReturn(mediationPolicy);
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0", apiuuid);
+        API api = new API(apiId);
+        api.setUuid(apiuuid);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        OperationPolicy appliedPolicy = new OperationPolicy();
+        appliedPolicy.setPolicyName("in-policy");
+        appliedPolicy.setOrder(1);
+        appliedPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplate1.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
+        uriTemplates.add(uriTemplate1);
+
+        URITemplate uriTemplate2 = new URITemplate();
+        uriTemplate2.setHTTPVerb("PUT");
+        uriTemplate2.setAuthType("Application");
+        uriTemplate2.setUriTemplate("/update");
+        uriTemplate2.setThrottlingTier("Gold");
+        uriTemplate2.addOperationPolicy(APIProviderImpl.cloneOperationPolicy(appliedPolicy));
+        uriTemplates.add(uriTemplate2);
+
+        api.setUriTemplates(uriTemplates);
+        api.setInSequence("in-policy");
+
+        PowerMockito.when(APIUtil.isSequenceDefined(api.getInSequence())).thenReturn(true);
+
+        Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName("in-policy",
+                api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
+
+        apiProvider.migrateMediationPoliciesOfAPI(api, superTenantDomain, false);
+
+        for (URITemplate template : api.getUriTemplates()) {
+            for (OperationPolicy policy : template.getOperationPolicies()) {
+                if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
+                    Assert.assertEquals(policy.getPolicyId(), "11111");
+                } else {
+                    Assert.fail("template " + template.getUriTemplate() + " should not contain other paths for operation policies");
+                }
+            }
+        }
+
+        Assert.assertNull(api.getInSequence());
+        Assert.assertNull(api.getInSequenceMediation());
     }
 }
