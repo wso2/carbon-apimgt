@@ -346,6 +346,9 @@ public class APIManagerConfiguration {
                 OMElement authTokenElement = element.getFirstChildWithName(new QName("AuthToken"));
                 String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
                 analyticsProps.put("auth.api.token", resolvedAuthToken);
+
+                OMElement analyticsType = element.getFirstChildWithName(new QName("Type"));
+                analyticsProps.put("type", analyticsType.getText());
                 analyticsProperties = analyticsProps;
             } else if ("PersistenceConfigs".equals(localName)) {
                 OMElement properties = element.getFirstChildWithName(new QName("Properties"));
