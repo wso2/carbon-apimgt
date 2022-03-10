@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
@@ -121,11 +122,26 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+
         boolean flag = false;
+        long waitTime = System.currentTimeMillis() + 60 * 1000;
+        long retryDuration = 5000;
+
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-            flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties
-                    .getGatewayLabels(), tenantDomain);
+
+            while (waitTime > System.currentTimeMillis() && !flag) {
+                flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
+                        gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
+                if (!flag) {
+                    log.error("Unable to deploy synapse artifacts at gateway. Next retry in " + (retryDuration / 1000)
+                            + " seconds");
+                    try {
+                        Thread.sleep(retryDuration);
+                    } catch (InterruptedException ignore) {
+                    }
+                }
+            }
         }
         return flag;
     }
@@ -165,6 +181,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA,
                 new GatewayJMSMessageListener());
         copyTenantArtifacts();
+        APILoggerManager.getInstance().initializeAPILoggerList();
     }
 
     private void copyTenantArtifacts() {

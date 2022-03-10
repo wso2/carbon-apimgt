@@ -47,25 +47,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
-import org.wso2.carbon.apimgt.api.model.ServiceEntry;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
@@ -132,7 +114,8 @@ public class PublisherCommonUtils {
         boolean isAsyncAPI = originalAPI.getType() != null
                 && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType()));
+                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -234,8 +217,9 @@ public class PublisherCommonUtils {
         String originalStatus = originalAPI.getStatus();
         if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
                 .contains(APIConstants.API_SECURITY_API_KEY)) {
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty() && !(APIConstants.CREATED.equals(originalStatus)
-                    || APIConstants.PROTOTYPED.equals(originalStatus))) {
+            if ((tiersFromDTO == null || tiersFromDTO.isEmpty() && !(APIConstants.CREATED.equals(originalStatus)
+                    || APIConstants.PROTOTYPED.equals(originalStatus)))
+                    && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised()) {
                 throw new APIManagementException(
                         "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
                         ExceptionCodes.TIER_CANNOT_BE_NULL);
@@ -301,7 +285,26 @@ public class PublisherCommonUtils {
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
             apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
             if (!isGraphql) {
-                apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
+                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
+
+                //set operation policies from the original API Payload
+                Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
+                Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
+                for (URITemplate uriTemplate : uriTemplatesFromPayload) {
+                    if (!uriTemplate.getOperationPolicies().isEmpty()) {
+                        String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                        operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                    }
+                }
+
+                for (URITemplate uriTemplate : uriTemplates) {
+                    String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                    if (operationPoliciesPerURITemplate.containsKey(key)) {
+                        uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
+                    }
+                }
+
+                apiToUpdate.setUriTemplates(uriTemplates);
             }
         } else {
             String oldDefinition = apiProvider
@@ -744,10 +747,14 @@ public class PublisherCommonUtils {
             //replace all white spaces in the API Name
             apiDto.setName(name.replaceAll("\\s+", ""));
         }
+        if (APIDTO.TypeEnum.ASYNC.equals(apiDto.getType())) {
+            throw new APIManagementException("ASYNC API type does not support API creation from scratch",
+                    ExceptionCodes.API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS);
+        }
         boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
         boolean isAsyncAPI =
                 isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
-                        APIDTO.TypeEnum.SSE.equals(apiDto.getType());
+                        APIDTO.TypeEnum.SSE.equals(apiDto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apiDto.getType());
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -1223,6 +1230,9 @@ public class PublisherCommonUtils {
                             existingAPI.getId().getVersion()));
         }
 
+        //set existing operation policies to URI templates
+        apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
+
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
         PublisherCommonUtils.validateScopes(existingAPI);
@@ -1634,7 +1644,7 @@ public class PublisherCommonUtils {
     public static boolean isStreamingAPI(APIDTO apidto) {
 
         return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
-                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
+                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apidto.getType());
     }
 
     /**
@@ -1885,14 +1895,84 @@ public class PublisherCommonUtils {
      * @throws APIManagementException if there is en error while retrieving the lifecycle state information
      */
     public static OperationEndpointListDTO getOperationEndpoints(String uuid, APIProvider apiProvider) throws APIManagementException, JsonProcessingException {
-        List<Map<String,String>> operationEndpointsList = apiProvider.getAllOpertationByUUID(uuid);
+        List<OperationEndpoint> operationEndpointsList = apiProvider.getAllOperationEndpointsByUUID(uuid);
         if (operationEndpointsList == null) {
             throw new APIManagementException("Error occurred while getting operation Endpoints of API " + uuid,
                     ExceptionCodes.ERROR_FETCHING_OPERATION_ENDPOINTS_API);
         } else {
-            return APIMappingUtil.fromOperationListToDTO(operationEndpointsList);
+            return APIMappingUtil.fromOperationEndpointListToDTO(operationEndpointsList);
         }
 
     }
 
+    /**
+     * Get operation Endpoint of an API By operation UUID
+     *
+     * @param apiUUID   Unique identifier of API
+     * @param endpointUUID   Unique identifier of API
+     * @param apiProvider
+     * @return OperationEndpointDTO object
+     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     */
+    public static OperationEndpointDTO getOperationEndpoint(
+            String apiUUID, String endpointUUID, APIProvider apiProvider) throws APIManagementException, JsonProcessingException {
+        OperationEndpoint operationEndpoint = apiProvider.getOperationEndpointByUUID(apiUUID, endpointUUID);
+        if (operationEndpoint == null) {
+            throw new APIManagementException("Error occurred while getting operation Endpoint of API " + apiUUID +
+                    "endpoint UUID" + endpointUUID,
+                    ExceptionCodes.ERROR_FETCHING_OPERATION_ENDPOINT_API);
+        } else {
+            return APIMappingUtil.fromOperationEndpointToDTO(operationEndpoint);
+        }
+
+    }
+
+    /**
+     * Get operation Endpoint of an API By operation UUID
+     *
+     * @param apiId   Unique identifier of API
+     * @param endpointId   Unique identifier of API
+     * @param operationEndpointDTO   Unique identifier of API
+     * @param organization
+     * @return OperationEndpointDTO object
+     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     */
+    public static OperationEndpointDTO updateOperationEndpoint(String apiId, String endpointId,
+                                                               OperationEndpointDTO operationEndpointDTO,
+                                                               String organization,
+                                                               APIProvider apiProvider)
+            throws APIManagementException, JsonProcessingException {
+        OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(apiId, operationEndpointDTO, organization);
+        OperationEndpoint operationEndpointUpdated = apiProvider.updateOperationEndpoint(endpointId, operationEndpoint);
+        if (operationEndpointUpdated == null) {
+            throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
+                    "endpoint UUID" + endpointId,
+                    ExceptionCodes.ERROR_UPDATING_OPERATION_ENDPOINT_API);
+        } else {
+            return APIMappingUtil.fromOperationEndpointToDTO(operationEndpointUpdated);
+        }
+    }
+
+    /**
+     * Insert new operation endpoint for an API
+     *
+     * @param apiId
+     * @param operationEndpointDTO
+     * @param organization
+     * @param apiProvider
+     * @return
+     * @throws APIManagementException
+     * @throws JsonProcessingException
+     */
+    public static String addOperationEndpoint(String apiId, OperationEndpointDTO operationEndpointDTO,
+                                              String organization, APIProvider apiProvider)
+            throws APIManagementException, JsonProcessingException {
+        OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(apiId, operationEndpointDTO, organization);
+        String operationEndpointId = apiProvider.addOperationEndpoint(operationEndpoint);
+        if (operationEndpointId == null) {
+            throw new APIManagementException("Error occurred while getting operation Endpoint of API " + apiId,
+                    ExceptionCodes.ERROR_INSERTING_OPERATION_ENDPOINT_API);
+        }
+        return operationEndpointId;
+    }
 }

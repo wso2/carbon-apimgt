@@ -103,9 +103,9 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: v2
+  version: v3
 servers:
-  - url: https://apis.wso2.com/api/am/publisher/v2
+  - url: https://apis.wso2.com/api/am/publisher/v3
 security:
   - OAuth2Security:
       - apim:api_view
@@ -155,7 +155,6 @@ paths:
           schema:
             type: string
         - $ref: '#/components/parameters/If-None-Match'
-        - $ref: '#/components/parameters/expand'
         - $ref: '#/components/parameters/Accept'
       responses:
         200:
@@ -188,10 +187,11 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_import_export
+            - apim:api_list_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis"'
       x-examples:
         $ref: docs/examples/apis/apis_get.yaml
       operationId: getAllAPIs
@@ -258,7 +258,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis"'
       x-examples:
         $ref: docs/examples/apis/apis_post.yaml
       operationId: createAPI
@@ -321,7 +321,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
       x-examples:
         $ref: docs/examples/apis/apis_id_get.yaml
       operationId: getAPI
@@ -392,7 +392,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: updateAPI
 
     delete:
@@ -426,7 +426,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: deleteAPI
 
   /apis/{apiId}/topics:
@@ -523,7 +523,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/ecb5b300-422d-4ee8-88d2-364a0a122238/reimport-service"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/ecb5b300-422d-4ee8-88d2-364a0a122238/reimport-service"'
 
   /apis/{apiId}/swagger:
     get:
@@ -575,10 +575,11 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:api_definition_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f/swagger"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f/swagger"'
       operationId: getAPISwagger
 
     put:
@@ -652,7 +653,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F apiDefinition=@swagger.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/swagger"'
+          -F apiDefinition=@swagger.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/swagger"'
       operationId: updateAPISwagger
 
   /apis/{apiId}/generate-mock-scripts:
@@ -709,7 +710,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-mock-scripts"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-mock-scripts"'
 
 
   /apis/{apiId}/generated-mock-scripts:
@@ -765,7 +766,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f/generated-mock-scripts"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f/generated-mock-scripts"'
 
   /apis/{apiId}/resource-policies:
     get:
@@ -835,7 +836,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/resource-policies?resourcePath=checkPhoneNumber&verb=post&sequenceType=in"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/resource-policies?resourcePath=checkPhoneNumber&verb=post&sequenceType=in"'
       operationId: getAPIResourcePolicies
 
   /apis/{apiId}/resource-policies/{resourcePolicyId}:
@@ -894,7 +895,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/resource-policies/8efc32a4-c7f1-4bee-b860-b7566e2bc0d5"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/resource-policies/8efc32a4-c7f1-4bee-b860-b7566e2bc0d5"'
       operationId: getAPIResourcePoliciesByPolicyId
 
     put:
@@ -961,7 +962,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/resource-policies/8efc32a4-c7f1-4bee-b860-b7566e2bc0d5"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/resource-policies/8efc32a4-c7f1-4bee-b860-b7566e2bc0d5"'
       operationId: updateAPIResourcePoliciesByPolicyId
 
   /apis/{apiId}/thumbnail:
@@ -1014,7 +1015,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
       operationId: getAPIThumbnail
 
     put:
@@ -1085,7 +1086,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=image.jpeg "https://127.0.0.1:9443/api/am/publisher/v2/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
+          -F file=image.jpeg "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
 
   /apis/{apiId}/subscription-policies:
     get:
@@ -1139,7 +1140,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/subscription-policies"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/subscription-policies"'
       operationId: getAPISubscriptionPolicies
 
   /apis/copy-api:
@@ -1196,7 +1197,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/copy-api?newVersion=2.0&defaultVersion=false&apiId=2fd14eb8-b828-4013-b448-0739d2e76bf7"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/copy-api?newVersion=2.0&defaultVersion=false&apiId=2fd14eb8-b828-4013-b448-0739d2e76bf7"'
       x-examples:
         $ref: docs/examples/apis/apis_copyapi.yaml#/post
       operationId: createNewAPIVersion
@@ -1239,7 +1240,7 @@ paths:
             2. **Requires re-subscription when publishing the API**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
             You can specify additional checklist items by using an **"attribute:"** modifier.
             Eg: "Deprecate old versions after publishing the API:true" will deprecate older versions of a particular API when it is promoted to Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false" format.
-            **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v2/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate%20old%20versions%20after%20publishing%20the%20API%3Atrue,Requires%20re-subscription%20when%20publishing%20the%20API%3Afalse"
+            **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v3/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate%20old%20versions%20after%20publishing%20the%20API%3Atrue,Requires%20re-subscription%20when%20publishing%20the%20API%3Afalse"
           schema:
             type: string
         - $ref: '#/components/parameters/apiId-Q'
@@ -1289,7 +1290,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
       operationId: changeAPILifecycle
 
   /apis/{apiId}/lifecycle-history:
@@ -1338,7 +1339,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
       operationId: getAPILifecycleHistory
 
   /apis/{apiId}/lifecycle-state:
@@ -1395,7 +1396,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
       operationId: getAPILifecycleState
 
   /apis/{apiId}/lifecycle-state/pending-tasks:
@@ -1424,7 +1425,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPILifecycleStatePendingTasks
 
   ######################################################
@@ -1469,7 +1470,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
 
     #--------------------------------------------
     # Create a new API revision
@@ -1512,7 +1513,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: application/json" -d @data.json
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
 
   ######################################################
   # The "API Revisions" individual resource API
@@ -1552,7 +1553,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
     #--------------------------------------------
     # Delete a revision
@@ -1591,7 +1592,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/deployments:
     #--------------------------------------------
@@ -1626,7 +1627,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"'
+                "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"'
 
   /apis/{apiId}/deployments/{deploymentId}:
     #--------------------------------------------
@@ -1667,7 +1668,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
-                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments/UHJvZHVjdGlvbiBhbmQgU2FuZGJveA"'
+                "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments/UHJvZHVjdGlvbiBhbmQgU2FuZGJveA"'
 
   /apis/{apiId}/deploy-revision:
     #--------------------------------------------
@@ -1714,7 +1715,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/undeploy-revision:
     #--------------------------------------------
@@ -1771,7 +1772,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+                "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/restore-revision:
 
@@ -1807,7 +1808,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/import-service:
     post:
@@ -1861,7 +1862,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/import-service?serviceKey=Pizzashack-1.0.0"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/import-service?serviceKey=Pizzashack-1.0.0"'
 
   /apis/{apiId}/comments:
     get:
@@ -2258,7 +2259,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@openapi.json -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/import-openapi"'
+          -F file=@openapi.json -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/import-openapi"'
       x-examples:
         $ref: docs/examples/apis/import_openapi_post.yaml
 
@@ -2286,11 +2287,11 @@ paths:
 
                     **Sample cURL to Upload WSDL File**
 
-                    curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@api.wsdl -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/import-wsdl"
+                    curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@api.wsdl -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/import-wsdl"
 
                     **Sample cURL to Upload WSDL Archive**
 
-                    curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file="@wsdl.zip;type=application/zip" -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/import-wsdl"
+                    curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file="@wsdl.zip;type=application/zip" -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/import-wsdl"
                   format: binary
                 url:
                   type: string
@@ -2348,7 +2349,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@api.wsdl -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/import-wsdl"'
+          -F file=@api.wsdl -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/import-wsdl"'
       x-examples:
         $ref: docs/examples/apis/wsdl/import_wsdl_post.yaml
 
@@ -2421,7 +2422,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@schema.graphql -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/import-graphql-schema"'
+          -F file=@schema.graphql -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/import-graphql-schema"'
       operationId: importGraphQLSchema
 
   /apis/validate-openapi:
@@ -2483,7 +2484,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@openapi.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/validate-openapi"'
+          -F file=@openapi.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate-openapi"'
       x-examples:
         $ref: docs/examples/apis/validate_openapi_post.yaml
 
@@ -2532,7 +2533,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/validate-endpoint?apiId=e0824883-3e86-403a-aec1-22bbc454eb7c&endpointUrl=https%3A%2F%2Flocalhost%3A9443%2Fam%2Fsample%2Fpizzashack%2Fv1%2Fapi%2F"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate-endpoint?apiId=e0824883-3e86-403a-aec1-22bbc454eb7c&endpointUrl=https%3A%2F%2Flocalhost%3A9443%2Fam%2Fsample%2Fpizzashack%2Fv1%2Fapi%2F"'
 
   /apis/validate:
     post:
@@ -2584,7 +2585,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/validate?query=name%3Awso2"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate?query=name%3Awso2"'
       x-examples:
         $ref: docs/examples/apis/apis_validate.yaml
 
@@ -2635,7 +2636,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@api.wsdl "https://127.0.0.1:9443/api/am/publisher/v2/apis/validate-wsdl"'
+          -F file=@api.wsdl "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate-wsdl"'
       x-examples:
         $ref: docs/examples/apis/wsdl/validate_wsdl_post.yaml
 
@@ -2684,7 +2685,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@schema.graphql "https://127.0.0.1:9443/api/am/publisher/v2/apis/validate-graphql-schema"'
+          -F file=@schema.graphql "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate-graphql-schema"'
       operationId: validateGraphQLSchema
 
   /apis/{apiId}/graphql-schema:
@@ -2740,7 +2741,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/graphql-schema"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/graphql-schema"'
       operationId: getAPIGraphQLSchema
 
     put:
@@ -2806,7 +2807,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F schemaDefinition=@schema.graphql "https://127.0.0.1:9443/api/am/publisher/v2/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/graphql-schema"'
+          -F schemaDefinition=@schema.graphql "https://127.0.0.1:9443/api/am/publisher/v3/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/graphql-schema"'
       operationId: updateAPIGraphQLSchema
 
   /apis/{apiId}/amznResourceNames:
@@ -2850,7 +2851,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/amznResourceNames"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/amznResourceNames"'
       x-examples:
         $ref: docs/examples/apis/apis_id_amznresourcenames_get.yaml
       operationId: getAmazonResourceNamesOfAPI
@@ -2890,7 +2891,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize'
+          -H "Content-Type: application/json" -d @data.json https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize'
       operationId: addAPIMonetization
 
   /apis/{apiId}/monetization:
@@ -2922,7 +2923,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize"'
       operationId: getAPIMonetization
 
   /apis/{apiId}/revenue:
@@ -2973,7 +2974,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/revenue"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/revenue"'
       operationId: getAPIRevenue
 
   /apis/{apiId}/documents:
@@ -3025,7 +3026,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/documents"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/documents"'
       operationId: getAPIDocuments
 
     post:
@@ -3084,7 +3085,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents"'
       operationId: addAPIDocument
 
   /apis/{apiId}/documents/{documentId}:
@@ -3142,7 +3143,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
       operationId: getAPIDocumentByDocumentId
 
     put:
@@ -3208,7 +3209,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @doc.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
+          -H "Content-Type: application/json" -d @doc.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
       operationId: updateAPIDocument
 
     delete:
@@ -3239,7 +3240,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
       operationId: deleteAPIDocument
 
   /apis/{apiId}/documents/{documentId}/content:
@@ -3255,7 +3256,7 @@ paths:
         1. **Inline type**:
            The content of the document will be retrieved in `text/plain` content type
 
-           _Sample cURL_ : `curl -k -H "Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51" -F inlineContent=@"docs.txt" -X POST "https://localhost:9443/api/am/publisher/v2/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content`
+           _Sample cURL_ : `curl -k -H "Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51" -F inlineContent=@"docs.txt" -X POST "https://localhost:9443/api/am/publisher/v3/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content`
         2. **FILE type**:
            The file will be downloaded with the related content type (eg. `application/pdf`)
         3. **URL type**:
@@ -3319,7 +3320,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"'
       operationId: getAPIDocumentContentByDocumentId
 
     post:
@@ -3396,7 +3397,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@sample.pdf "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"'
+          -F file=@sample.pdf "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"'
       operationId: addAPIDocumentContent
 
   /apis/{apiId}/documents/validate:
@@ -3437,385 +3438,9 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name=CalculatorDoc"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name=CalculatorDoc"'
       x-examples:
         $ref: docs/examples/apis/apis_id_document_validate.yaml
-
-  /apis/{apiId}/mediation-policies:
-    get:
-      tags:
-        - API Mediation Policies
-      summary: |
-        Get All Mediation Policies of an API
-      description: |
-        This operation provides you a list of available mediation policies of an API.
-      operationId: getAllAPIMediationPolicies
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
-        - name: query
-          in: query
-          description: -Not supported yet-
-          schema:
-            type: string
-        - $ref: '#/components/parameters/If-None-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            List of qualifying APIs is returned.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MediationList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
-
-    post:
-      tags:
-        - API Mediation Policies
-      summary: Add an API Specific Mediation Policy
-      description: |
-        This operation can be used to add an API specifc mediation policy.
-      operationId: addAPIMediationPolicy
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/If-Match'
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              required:
-                - type
-              properties:
-                mediationPolicyFile:
-                  type: string
-                  description: Mediation Policy to upload
-                  format: binary
-                inlineContent:
-                  type: string
-                  description: Inline content of the Mediation Policy
-                type:
-                  type: string
-                  description: Type of the mediation sequence
-        required: true
-      responses:
-        201:
-          description: |
-            OK.
-            mediation policy uploaded
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Location:
-              description: |
-                The URL of the uploaded mediation policy of the API.
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Mediation'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
-      security:
-        - OAuth2Security:
-            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
-            - apim:api_manage
-            - apim:mediation_policy_create
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: multipart/form-data" -F mediationPolicyFile=@TokenExchange.xml
-          -F type=in "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
-
-  /apis/{apiId}/mediation-policies/{mediationPolicyId}:
-    get:
-      tags:
-        - API Mediation Policy
-      summary: Get an API Specific Mediation Policy
-      description: |
-        This operation can be used to retrieve a particular API specific mediation policy.
-      operationId: getAPIMediationPolicyByPolicyId
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/mediationPolicyId'
-        - $ref: '#/components/parameters/If-None-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            Mediation policy returned.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Mediation'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
-        404:
-          $ref: '#/components/responses/NotFound'
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_get.yaml
-
-    delete:
-      tags:
-        - API Mediation Policy
-      summary: Delete an API Specific Mediation Policy
-      description: |
-        This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy.
-      operationId: deleteAPIMediationPolicyByPolicyId
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/mediationPolicyId'
-        - $ref: '#/components/parameters/If-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            Resource successfully deleted.
-          content: {}
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
-      security:
-        - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
-
-  /apis/{apiId}/mediation-policies/{mediationPolicyId}/content:
-    get:
-      tags:
-        - API Mediation Policy
-      summary: Download an API Specific Mediation Policy
-      description: |
-        This operation can be used to download a particular API specific mediation policy.
-      operationId: getAPIMediationPolicyContentByPolicyId
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/mediationPolicyId'
-        - $ref: '#/components/parameters/If-None-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            Mediation policy returned.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content: {}
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
-
-    put:
-      tags:
-        - API Mediation Policy
-      summary: Update an API Specific Mediation Policy
-      description: |
-        This operation can be used to update an existing mediation policy of an API.
-      operationId: updateAPIMediationPolicyContentByPolicyId
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/mediationPolicyId'
-        - $ref: '#/components/parameters/If-Match'
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              required:
-                - type
-              properties:
-                file:
-                  type: string
-                  description: Mediation Policy to upload
-                  format: binary
-                inlineContent:
-                  type: string
-                  description: Inline content of the Mediation Policy
-                type:
-                  type: string
-                  description: Type of the mediation sequence(in/out/fault)
-        required: true
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with updated API object
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Location:
-              description: |
-                The URL of the newly created resource.
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Mediation'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
-      security:
-        - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@TokenExchange.xml -F type=@type.txt "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
-      x-examples:
-        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_put.yaml
 
   /apis/{apiId}/wsdl-info:
     get:
@@ -3848,7 +3473,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/wsdl-info"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/wsdl-info"'
       x-examples:
         $ref: docs/examples/apis/wsdl/apiId_wsdl_info_get.yaml
 
@@ -3899,7 +3524,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/wsdl"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/wsdl"'
       x-examples:
         $ref: docs/examples/apis/wsdl/apiId_wsdl_get.yaml
 
@@ -3970,7 +3595,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@api.wsdl "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/wsdl"'
+          -F file=@api.wsdl "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/wsdl"'
       x-examples:
         $ref: docs/examples/apis/wsdl/apiId_wsdl_put.yaml
 
@@ -4010,7 +3635,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/graphql-policies/complexity"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/graphql-policies/complexity"'
       operationId: getGraphQLPolicyComplexityOfAPI
 
 
@@ -4043,7 +3668,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/graphql-policies/complexity"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/graphql-policies/complexity"'
       operationId: updateGraphQLPolicyComplexityOfAPI
 
   /apis/{apiId}/graphql-policies/complexity/types:
@@ -4082,7 +3707,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/graphql-policies/complexity/types"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/graphql-policies/complexity/types"'
       operationId: getGraphQLPolicyComplexityTypesOfAPI
 
   /apis/{apiId}/resource-paths:
@@ -4140,7 +3765,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/resource-paths"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/resource-paths"'
       operationId: getAPIResourcePaths
 
   /apis/{apiId}/auditapi:
@@ -4178,7 +3803,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/auditapi"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/auditapi"'
       x-examples:
         $ref: "docs/examples/apis/apis_id_auditapi_get.yaml"
       operationId: getAuditReportOfAPI
@@ -4225,7 +3850,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/external-stores"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/external-stores"'
       x-examples:
         $ref: docs/examples/external-stores/external_stores.yaml#/getPublishedExternalStoresByAPI
 
@@ -4279,7 +3904,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=Store123#"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=Store123#"'
       x-examples:
         $ref: docs/examples/external-stores/external_stores.yaml#/publishToExternalStore
 
@@ -4313,7 +3938,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-key"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-key"'
 
   /apis/export:
     get:
@@ -4404,7 +4029,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/export?apiId=96077508-fd01-4fae-bc64-5de0e2baf43c&name=PizzaShackAPI&version=1.0&provider=admin&format=YAML"
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/export?apiId=96077508-fd01-4fae-bc64-5de0e2baf43c&name=PizzaShackAPI&version=1.0&provider=admin&format=YAML"
           > exportAPI.zip'
       operationId: exportAPI
 
@@ -4468,7 +4093,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=@admin-PizzaShackAPI-1.0.0.zip "https://127.0.0.1:9443/api/am/publisher/v2/apis/import?preserveProvider=false&overwrite=false"'
+          -F file=@admin-PizzaShackAPI-1.0.0.zip "https://127.0.0.1:9443/api/am/publisher/v3/apis/import?preserveProvider=false&overwrite=false"'
       operationId: importAPI
 
   ######################################################
@@ -4483,10 +4108,10 @@ paths:
         This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
         1. Retrieving all subscriptions for the user's APIs.
-        `GET https://127.0.0.1:9443/api/am/publisher/v2/subscriptions`
+        `GET https://127.0.0.1:9443/api/am/publisher/v3/subscriptions`
 
         2. Retrieving subscriptions for a specific API.
-        `GET https://127.0.0.1:9443/api/am/publisher/v2/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
+        `GET https://127.0.0.1:9443/api/am/publisher/v3/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
       parameters:
         - $ref: '#/components/parameters/apiId-Q-Opt'
         - $ref: '#/components/parameters/limit'
@@ -4534,7 +4159,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/subscriptions?apiId=96077508-fd01-4fae-bc64-5de0e2baf43c"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/subscriptions?apiId=96077508-fd01-4fae-bc64-5de0e2baf43c"'
       operationId: getSubscriptions
 
   ######################################################
@@ -4594,7 +4219,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage"'
       operationId: getSubscriptionUsage
 
   /subscriptions/{subscriptionId}/subscriber-info:
@@ -4625,7 +4250,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/subscriber-info"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/subscriber-info"'
       operationId: getSubscriberInfoBySubscriptionId
 
   /subscriptions/block-subscription:
@@ -4683,7 +4308,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED"'
       operationId: blockSubscription
 
   /subscriptions/unblock-subscription:
@@ -4728,7 +4353,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809"'
       operationId: unBlockSubscription
 
 
@@ -4784,7 +4409,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/throttling-policies/api"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/throttling-policies/api"'
 
   ######################################################
   # The "Subscription Throttling Based on Quota Type" resource APIs
@@ -4836,7 +4461,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/throttling-policies/subscription?tierQuotaType=RequestCountLimit"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/throttling-policies/subscription?tierQuotaType=RequestCountLimit"'
 
   ######################################################
   # The "Individual Throttling Tier" resource APIs
@@ -4897,7 +4522,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/throttling-policies/api/Platinum"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/throttling-policies/api/Platinum"'
 
   ######################################################
   # The "Mediation Policy Collection" resource APIs
@@ -4955,7 +4580,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/mediation-policies"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/mediation-policies"'
       x-examples:
         $ref: docs/examples/mediation-policies/mediation_policies_get.yaml
 
@@ -5013,7 +4638,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/mediation-policies/d48a3412-1b85-49be-99f4-b81a3722ae73/content"
+          "https://127.0.0.1:9443/api/am/publisher/v3/mediation-policies/d48a3412-1b85-49be-99f4-b81a3722ae73/content"
           > mediation.xml'
 
   /apis/{apiId}/client-certificates:
@@ -5059,7 +4684,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates?alias=wso2carbon"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates?alias=wso2carbon"'
       operationId: getAPIClientCertificates
 
     post:
@@ -5126,7 +4751,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon
-          -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates"'
+          -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates"'
       operationId: addAPIClientCertificate
 
   /apis/{apiId}/client-certificates/{alias}:
@@ -5172,7 +4797,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
       operationId: getAPIClientCertificateByAlias
 
     put:
@@ -5239,7 +4864,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon
-          -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
+          -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
       operationId: updateAPIClientCertificateByAlias
 
     delete:
@@ -5283,7 +4908,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
       operationId: deleteAPIClientCertificateByAlias
 
   /apis/{apiId}/client-certificates/{alias}/content:
@@ -5326,7 +4951,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon/content"'
       operationId: getAPIClientCertificateContentByAlias
 
   ######################################################
@@ -5382,7 +5007,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/endpoint-certificates?alias=wso2carbon&endpoint=www.abc.com"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates?alias=wso2carbon&endpoint=www.abc.com"'
       operationId: getEndpointCertificates
 
     post:
@@ -5447,7 +5072,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=alias
-          -F "endpoint=endpoint=https://www.abc.com" "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/endpoint-certificates"'
+          -F "endpoint=endpoint=https://www.abc.com" "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/endpoint-certificates"'
       operationId: addEndpointCertificate
 
   /endpoint-certificates/{alias}:
@@ -5492,7 +5117,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/endpoint-certificates/wso2carbon"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates/wso2carbon"'
       operationId: getEndpointCertificateByAlias
 
     put:
@@ -5557,7 +5182,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: multipart/form-data" -F certificate=@test.crt "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/endpoint-certificates/wso2carbon"'
+          -H "Content-Type: multipart/form-data" -F certificate=@test.crt "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/endpoint-certificates/wso2carbon"'
       operationId: updateEndpointCertificateByAlias
 
     delete:
@@ -5601,7 +5226,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/endpoint-certificates/wso2carbon"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates/wso2carbon"'
       operationId: deleteEndpointCertificateByAlias
 
   /endpoint-certificates/{alias}/content:
@@ -5643,7 +5268,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/endpoint-certificates/wso2carbon/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates/wso2carbon/content"'
       operationId: getEndpointCertificateContentByAlias
 
   ######################################################
@@ -5704,7 +5329,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/search?query=pizza"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/search?query=pizza"'
       x-examples:
         $ref: docs/examples/apis/search_get.yaml
       operationId: search
@@ -5764,7 +5389,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products?query=PizzaAPIProduct"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products?query=PizzaAPIProduct"'
       operationId: getAllAPIProducts
 
     post:
@@ -5817,7 +5442,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/api-products"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/api-products"'
       operationId: createAPIProduct
 
   ################################################################
@@ -5877,7 +5502,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
       operationId: getAPIProduct
 
     put:
@@ -5943,7 +5568,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
       operationId: updateAPIProduct
 
 
@@ -5976,7 +5601,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
       operationId: deleteAPIProduct
 
   /api-products/{apiProductId}/thumbnail:
@@ -6031,7 +5656,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/thumbnail"
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/thumbnail"
           > image.jpeg'
       operationId: getAPIProductThumbnail
 
@@ -6101,7 +5726,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: multipart/form-data" -F file=@image.jpeg "https://127.0.0.1:9443/api/am/publisher/v2/api-products/d48a3412-1b85-49be-99f4-b81a3722ae73/thumbnail"'
+          -H "Content-Type: multipart/form-data" -F file=@image.jpeg "https://127.0.0.1:9443/api/am/publisher/v3/api-products/d48a3412-1b85-49be-99f4-b81a3722ae73/thumbnail"'
       operationId: updateAPIProductThumbnail
 
   /api-products/{apiProductId}/swagger:
@@ -6155,7 +5780,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/swagger"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/swagger"'
       operationId: getAPIProductSwagger
 
   /api-products/{apiProductId}/is-outdated:
@@ -6261,7 +5886,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
       operationId: getAPIProductDocuments
 
     post:
@@ -6317,7 +5942,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
       operationId: addAPIProductDocument
 
   /api-products/{apiProductId}/documents/{documentId}:
@@ -6376,7 +6001,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
       operationId: getAPIProductDocument
 
     put:
@@ -6441,7 +6066,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
       operationId: updateAPIProductDocument
 
     delete:
@@ -6471,7 +6096,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
       operationId: deleteAPIProductDocument
 
   /api-products/{apiProductId}/documents/{documentId}/content:
@@ -6487,7 +6112,7 @@ paths:
         1. **Inline type**:
            The content of the document will be retrieved in `text/plain` content type
 
-           _Sample cURL_ : `curl -k -H "Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51" -F inlineContent=@"docs.txt" -X POST "https://localhost:9443/api/am/publisher/v2/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content`
+           _Sample cURL_ : `curl -k -H "Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51" -F inlineContent=@"docs.txt" -X POST "https://localhost:9443/api/am/publisher/v3/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content`
         2. **FILE type**:
            The file will be downloaded with the related content type (eg. `application/pdf`)
         3. **URL type**:
@@ -6549,7 +6174,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
       operationId: getAPIProductDocumentContent
 
     post:
@@ -6624,7 +6249,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: multipart/form-data" -F file=@sample.pdf "https://127.0.0.1:9443/api/am/publisher/v2/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
+          -H "Content-Type: multipart/form-data" -F file=@sample.pdf "https://127.0.0.1:9443/api/am/publisher/v3/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
       operationId: addAPIProductDocumentContent
 
   ######################################################
@@ -6669,7 +6294,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
 
     #--------------------------------------------
     # Create a new API Product revision
@@ -6711,7 +6336,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: application/json" -d @data.json
-            "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
 
   ######################################################
   # The "API Revisions" individual resource API Product
@@ -6751,7 +6376,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
     #--------------------------------------------
     # Delete a revision
@@ -6789,7 +6414,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /api-products/{apiProductId}/deployments:
     #--------------------------------------------
@@ -6824,7 +6449,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"'
+                "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"'
 
   /api-products/{apiProductId}/deployments/{deploymentId}:
     #--------------------------------------------
@@ -6865,7 +6490,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
-                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments/UHJvZHVjdGlvbiBhbmQgU2FuZGJveA"'
+                "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments/UHJvZHVjdGlvbiBhbmQgU2FuZGJveA"'
 
   /api-products/{apiProductId}/deploy-revision:
     #--------------------------------------------
@@ -6915,7 +6540,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /api-products/{apiProductId}/undeploy-revision:
     #--------------------------------------------
@@ -6972,7 +6597,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+                "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /api-products/{apiProductId}/restore-revision:
 
@@ -7008,7 +6633,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /api-products/export:
     get:
@@ -7091,7 +6716,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/export?name=LeasingAPIProduct&version=1.0.0&revisionNumber=2&provider=admin&format=YAML"
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/export?name=LeasingAPIProduct&version=1.0.0&revisionNumber=2&provider=admin&format=YAML"
           > exportAPIProduct.zip'
       operationId: exportAPIProduct
 
@@ -7167,7 +6792,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -F file=@admin-PizzaShackAPIProduct.zip "https://127.0.0.1:9443/api/am/admin/v2/api-products/importt?preserveProvider=false&overwriteAPIProduct=false&overwriteAPIs=false&importAPIs=false"'
+            -F file=@admin-PizzaShackAPIProduct.zip "https://127.0.0.1:9443/api/am/admin/v3/api-products/importt?preserveProvider=false&overwriteAPIProduct=false&overwriteAPIs=false&importAPIs=false"'
       operationId: importAPIProduct
 
   ######################################################
@@ -7197,7 +6822,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/roles/SW50ZXJuYWwvcHVibGlzaGVyCQ"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/roles/SW50ZXJuYWwvcHVibGlzaGVyCQ"'
 
   /me/roles/{roleId}:
     head:
@@ -7222,7 +6847,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/me/roles/SW50ZXJuYWwvcHVibGlzaGVyCQ"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/me/roles/SW50ZXJuYWwvcHVibGlzaGVyCQ"'
 
   ######################################################
   # The "ExternalStore Collection" resource APIs
@@ -7253,7 +6878,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/external-stores"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/external-stores"'
 
   ######################################################
   # The Publisher settings resource APIs
@@ -7283,7 +6908,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/settings"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/settings"'
       operationId: getSettings
 
   ######################################################
@@ -7339,7 +6964,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/tenants?state=active"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/tenants?state=active"'
 
   /tenants/{tenantDomain}:
     head:
@@ -7364,7 +6989,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/tenants/wso2.com"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/tenants/wso2.com"'
       x-examples:
         $ref: docs/examples/tenants/tenants.yaml
 
@@ -7394,7 +7019,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-categories"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-categories"'
       operationId: getAllAPICategories
 
   ######################################################
@@ -7435,7 +7060,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/scopes"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/scopes"'
 
     post:
       tags:
@@ -7476,7 +7101,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/scopes"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/scopes"'
 
   /scopes/{scopeId}:
     get:
@@ -7512,7 +7137,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/scopes/01234567-0123-0123-0123-012345678901"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/scopes/01234567-0123-0123-0123-012345678901"'
 
     put:
       tags:
@@ -7555,7 +7180,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/scopes/01234567-0123-0123-0123-012345678901"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v3/scopes/01234567-0123-0123-0123-012345678901"'
 
     delete:
       tags:
@@ -7580,7 +7205,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/scopes/01234567-0123-0123-0123-012345678901"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/scopes/01234567-0123-0123-0123-012345678901"'
 
     head:
       tags:
@@ -7606,7 +7231,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/scopes/YXBpbTphcGlfdmlldw"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/scopes/YXBpbTphcGlfdmlldw"'
 
   /scopes/{scopeId}/usage:
     get:
@@ -7643,7 +7268,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/scopes/01234567-0123-0123-0123-012345678901/usage"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/scopes/01234567-0123-0123-0123-012345678901/usage"'
 
   ######################################################
   # The "Key Managers Collection" resource API
@@ -7672,7 +7297,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/key-managers"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/key-managers"'
       operationId: getAllKeyManagers
 
   /apis/validate-asyncapi:
@@ -7839,6 +7464,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:api_definition_view
 
     put:
       tags:
@@ -7971,6 +7597,494 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+  /apis/{apiId}/operation-policies:
+    get:
+      tags:
+        - API Operation Policies
+      summary: |
+        Get all API specific operation policies for an API
+      description: |
+        This operation provides you a list of all applicabale operation policies for an API
+      operationId: getAllAPISpecificOperationPolicies
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          description: -Not supported yet-
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying policies is returned.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyDataList'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
+
+    post:
+      tags:
+        - API Operation Policies
+      summary: Add an API specific operation policy
+      description: |
+        This operation can be used to add an API specifc operation policy. This policy cannot be used in other APIs.
+      operationId: addAPISpecificOperationPolicy
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - type
+              properties:
+                policySpecFile:
+                  type: string
+                  description: Policy specification to upload
+                  format: binary
+                synapsePolicyDefinitionFile:
+                  type: string
+                  description: Operation policy definition of synapse gateway to upload
+                  format: binary
+                ccPolicyDefinitionFile:
+                  type: string
+                  description: Operation policy definition of choreo connect to upload
+                  format: binary
+        required: true
+      responses:
+        201:
+          description: |
+            OK.
+            Operation policy uploaded
+          headers:
+            Location:
+              description: |
+                The URL of the uploaded operation policy of the API.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyData'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
+            - apim:api_manage
+            - apim:mediation_policy_create
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
+
+
+  /apis/{apiId}/operation-policies/{operationPolicyId}:
+    get:
+      tags:
+        - API Operation Policies
+      summary: Get policy details of an API specific policy
+      description: |
+        This operation can be used to retrieve a particular API specific operation policy.
+      operationId: getOperationPolicyForAPIByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyData'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+
+    delete:
+      tags:
+        - API Operation Policies
+      summary: Delete an API Specific Operation Policy
+      description: |
+        This operation can be used to delete an existing API specific opreation policy by providing the Id of the API and the Id of the policy.
+      operationId: deleteAPISpecificOperationPolicyByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: {}
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+
+  /apis/{apiId}/operation-policies/{operationPolicyId}/content:
+    get:
+      tags:
+        - API Operation Policies
+      summary: Download an API Specific Operation Policy
+      description: |
+        This operation can be used to download a particular API specific operation policy.
+      operationId: getAPISpecificOperationPolicyContentByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+
+  /operation-policies:
+    get:
+      tags:
+        - Operation Policies
+      summary: |
+        Get all common operation policies to all the APIs
+      description: |
+        This operation provides you a list of all common operation policies that can be used by any API
+      operationId: getAllCommonOperationPolicies
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          description: -Not supported yet-
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying policies is returned.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyDataList'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies"'
+
+    post:
+      tags:
+        - Operation Policies
+      summary: Add a new common operation policy
+      description: |
+        This operation can be used to add a new common operation policy.
+      operationId: addCommonOperationPolicy
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - type
+              properties:
+                policySpecFile:
+                  type: string
+                  description: Operation policy specification to upload
+                  format: binary
+                synapsePolicyDefinitionFile:
+                  type: string
+                  description: Operation policy definition of synapse gateway to upload
+                  format: binary
+                ccPolicyDefinitionFile:
+                  type: string
+                  description: Operation policy definition of choreo connect to upload
+                  format: binary
+        required: true
+      responses:
+        201:
+          description: |
+            OK.
+            Shared operation policy uploaded
+          headers:
+            Location:
+              description: |
+                The URL of the uploaded mediation policy of the API.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyData'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
+            - apim:api_manage
+            - apim:mediation_policy_create
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies"'
+
+  /operation-policies/{operationPolicyId}:
+    get:
+      tags:
+        - Operation Policies
+      summary: Get the details of a common operation policy by providing policy ID
+      description: |
+        This operation can be used to retrieve a particular common operation policy.
+      operationId: getCommonOperationPolicyByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationPolicyData'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+
+    delete:
+      tags:
+        - Operation Policies
+      summary: Delete a common operation policy
+      description: |
+        This operation can be used to delete an existing common opreation policy by providing the Id of the policy.
+      operationId: deleteCommonOperationPolicyByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: {}
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+
+  /operation-policies/{operationPolicyId}/content:
+    get:
+      tags:
+        - Operation Policies
+      summary: Download a common operation policy
+      description: |
+        This operation can be used to download a selected common operation policy.
+      operationId: getCommonOperationPolicyContentByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/operationPolicyId'
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+
+  /operation-policies/specification/schema:
+    get:
+      tags:
+        - Operation Policies
+      summary: Export the operation policies specification schema.
+      description: |
+        This operation can be used to export the operation-policy-specification-schema.json used in deployment.
+      operationId: exportOperationPolicySpecificationSchema
+      responses:
+        200:
+          description: |
+            OK.
+            Operation policy specification schema exported successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:mediation_policy_view
+            - apim:mediation_policy_manage
+            - apim:api_mediation_policy_manage
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/v2/operation-policies/specification/schema" > operation-policy-specification-schema.json'
+
 
   /api-products/change-lifecycle:
     post:
@@ -8013,7 +8127,7 @@ paths:
             2. **Requires re-subscription when publishing the API**: If you set this to true, users need to re subscribe to the API Products although they may have subscribed to an older version.
             You can specify additional checklist items by using an **"attribute:"** modifier.
             Eg: "Deprecate old versions after publishing the API:true" will deprecate older versions of a particular API Product when it is promoted to Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false" format.
-            **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v2/api-products/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate%20old%20versions%20after%20publishing%20the%20API%3Atrue,Requires%20re-subscription%20when%20publishing%20the%20API%3Afalse"
+            **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v3/api-products/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate%20old%20versions%20after%20publishing%20the%20API%3Atrue,Requires%20re-subscription%20when%20publishing%20the%20API%3Afalse"
           schema:
             type: string
         - $ref: '#/components/parameters/apiProductId-Q'
@@ -8045,7 +8159,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
       operationId: changeAPIProductLifecycle
 
   /api-products/{apiProductId}/lifecycle-history:
@@ -8080,7 +8194,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
       operationId: getAPIProductLifecycleHistory
 
   /api-products/{apiProductId}/lifecycle-state:
@@ -8116,7 +8230,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
       operationId: getAPIProductLifecycleState
 
   /api-products/{apiProductId}/lifecycle-state/pending-tasks:
@@ -8147,7 +8261,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
 
 
@@ -8483,21 +8597,6 @@ components:
             $ref: '#/components/schemas/APIInfo'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    APIListExpanded:
-      title: API List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of APIs returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/API'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
 
     APIInfo:
       title: API Info object with basic API details.
@@ -8579,6 +8678,9 @@ components:
         gatewayVendor:
           type: string
           example: wso2
+        advertiseOnly:
+          type: boolean
+          example: true
     Topic:
       title: Topic object
       required:
@@ -8704,7 +8806,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
           example: HTTP
           default: HTTP
           enum:
@@ -8716,6 +8818,7 @@ components:
             - WEBSUB
             - SSE
             - WEBHOOK
+            - ASYNC
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -9006,6 +9109,7 @@ components:
           enum:
             - INLINE
             - ENDPOINT
+            - MOCKED_OAS
         scopes:
           type: array
           items:
@@ -10815,6 +10919,11 @@ components:
         productionEndpointId:
           type: string
           example: ""
+        uriMapping:
+          type: string
+          example: ""
+        operationPolicies:
+          $ref: '#/components/schemas/APIOperationPolicies'
     ScopeList:
       title: Scope List
       type: object
@@ -11297,6 +11406,9 @@ components:
             thumbnailUri:
               type: string
               example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+            advertiseOnly:
+              type: boolean
+              example: true
     APIProductSearchResult:
       title: API Result
       allOf:
@@ -11645,6 +11757,12 @@ components:
         advertised:
           type: boolean
           example: true
+        apiExternalProductionEndpoint:
+          type: string
+          example: https://localhost:9443/devportal
+        apiExternalSandboxEndpoint:
+          type: string
+          example: https://localhost:9443/devportal
         originalDevPortalUrl:
           type: string
           example: https://localhost:9443/devportal
@@ -11811,6 +11929,37 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
+    OperationPolicy:
+      title: API Operation Policy
+      type: object
+      required:
+        - policyName
+      properties:
+        policyName:
+          type: string
+        policyId:
+          type: string
+        order:
+          type: integer
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+    APIOperationPolicies:
+      title: API Operation Level Policies
+      properties:
+        request:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        fault:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
     GatewayEnvironmentProtocolURI:
       title: Gateway Environment protocols and URIs
       required:
@@ -11824,6 +11973,106 @@ components:
         endpointURI:
           type: string
           example: default
+    OperationPolicyDataList:
+      title: Operation policy List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of operation policies returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicyData'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    OperationPolicyData:
+      title: Operation Policy Data
+      type: object
+      properties:
+        category:
+          type: string
+          example: Mediation
+        id:
+          type: string
+          example: 121223q41-24141-124124124-12414
+        name:
+          type: string
+          example: removeHeaderPolicy
+        displayName:
+          type: string
+          example: Remove Header Policy
+        description:
+          type: string
+          example: With this policy, user can add a new header to the request
+        applicableFlows:
+          type: array
+          items:
+            type: string
+            example: in
+        supportedGateways:
+          type: array
+          items:
+            type: string
+            example: Synapse
+        supportedApiTypes:
+          type: array
+          items:
+            type: string
+            example: REST
+        multipleAllowed:
+          type: boolean
+          example: true
+        isAPISpecific:
+          type: boolean
+          example: true
+        md5:
+          type: string
+          example: 121223q41-24141-124124124-12414
+        policyAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicySpecAttribute'
+    OperationPolicySpecAttribute:
+      title: OperationPolicySpecAttribute
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the attibute
+          example: headerName
+        displayName:
+          type: string
+          description: Display name of the attibute
+          example: Header Name
+        description:
+          type: string
+          description: Description of the attibute
+          example: Name of the header to be removed
+        validationRegex:
+          type: string
+          description: UI validation regex for the attibute
+          example: /^[a-z\s]{0,255}$/i
+        type:
+          type: string
+          description: Type of the attibute
+          example: string
+        required:
+          type: boolean
+          description: Is this attibute mandetory for the policy
+          example: true
+        defaultValue:
+          type: string
+          description: Default value for the attribute
+          example: true
+        allowedValues:
+          type: array
+          description: If the attribute type is enum, this array should contain all the possible values for the enum.
+          items:
+            type: string
+            example: ["GET","POST","PUT"]
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -12108,6 +12357,14 @@ components:
       required: true
       schema:
         type: string
+    operationPolicyId:
+      name: operationPolicyId
+      in: path
+      description: |
+        Operation policy Id
+      required: true
+      schema:
+        type: string
 
     # API Revision Identifier
     # Specified as part of the path expression
@@ -12261,13 +12518,6 @@ components:
       required: true
       schema:
         type: string
-    expand:
-      name: expand
-      in: query
-      description: |
-        Defines whether the returned response should contain full details of API
-      schema:
-        type: boolean
     threatProtectionPolicyId:
       name: policyId
       in: path
@@ -12404,3 +12654,5 @@ components:
             apim:comment_manage: Read and Write comments
             apim:tier_view: View throttling policies
             apim:tier_manage: View, update and delete throttling policies
+            apim:api_list_view: View, Retrieve API list
+            apim:api_definition_view: View, Retrieve API definition

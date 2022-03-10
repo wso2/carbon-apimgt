@@ -71,7 +71,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             if (runTimeArtifact.isFile()) {
                 String tenantDomain = runTimeArtifact.getTenantDomain();
                 String label = runTimeArtifact.getLabel();
-                Environment environment = APIUtil.getEnvironments().get(label);
+                Environment environment = APIUtil.getEnvironments(tenantDomain).get(label);
                 GatewayAPIDTO gatewayAPIDTO = null;
                 if (environment != null) {
                     try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {

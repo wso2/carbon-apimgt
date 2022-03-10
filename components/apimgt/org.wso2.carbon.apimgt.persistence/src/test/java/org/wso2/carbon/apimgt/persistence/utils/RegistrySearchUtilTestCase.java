@@ -40,24 +40,28 @@ public class RegistrySearchUtilTestCase {
 
         String searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
 
-        String expected = "name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK)";
+        String expected = "name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR "
+                + "ASYNC)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
         inputQuery = "description:test";
-        expected = "description=*test*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK)";
+        expected = "description=*test*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK "
+                + "OR ASYNC)";
         searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
         Assert.assertEquals("Generated query mismatched for description search. ", expected, searchQuery);
         
         // search for provider 'pubuser'
         inputQuery = "provider:pubuser";
-        expected = "provider=*pubuser*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK)";
+        expected = "provider=*pubuser*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK "
+                + "OR ASYNC)";
         searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
         Assert.assertEquals("Generated query mismatched for provider search. ", expected, searchQuery);
         
         // search for propertyname 'test'
         inputQuery = "property_name:test";
-        expected =   "api_meta.property_name=*test*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK)";
+        expected =   "api_meta.property_name=*test*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR "
+                + "WEBSUB OR WEBHOOK OR ASYNC)";
         searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
         Assert.assertEquals("Generated query mismatched for property search. ", expected, searchQuery);
     }
@@ -70,13 +74,14 @@ public class RegistrySearchUtilTestCase {
         
         String searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
         String expected = "publisher_roles=(null OR internal\\/creator OR internal\\/publisher OR internal\\/everyone)"
-                + "&name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK)";
+                + "&name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
         inputQuery = "description:test";
         expected = "publisher_roles=(null OR internal\\/creator OR internal\\/publisher OR internal\\/everyone)"
-                + "&description=*test*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK)";
+                + "&description=*test*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK "
+                + "OR ASYNC)";
         searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
         Assert.assertEquals("Generated query mismatched for description search. ", expected, searchQuery);
     }

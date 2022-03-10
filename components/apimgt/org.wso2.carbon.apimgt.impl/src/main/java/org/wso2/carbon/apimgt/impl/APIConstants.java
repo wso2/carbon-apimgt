@@ -116,6 +116,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE = "DevOpsRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE = "IntegrationDeveloperRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
     public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
 
@@ -357,6 +358,8 @@ public final class APIConstants {
     public static final String IMPLEMENTATION_TYPE_FILE = "FILE";
 
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";
+    public static final String API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT = "overview_apiExternalProductionEndpoint";
+    public static final String API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT = "overview_apiExternalSandboxEndpoint";
     public static final String API_OVERVIEW_OWNER = "overview_apiOwner";
     public static final String API_OVERVIEW_ADVERTISE_ONLY = "overview_advertiseOnly";
     public static final String API_OVERVIEW_ENDPOINT_CONFIG = "overview_endpointConfig";
@@ -431,6 +434,7 @@ public final class APIConstants {
     public static final String JWT_CONFIGS = "JWTConfiguration";
     public static final String JWT_HEADER = "JWTHeader";
     public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
+    public static final String BINDING_FEDERATED_USER_CLAIMS = "EnableBindingFederatedUserClaims";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
     public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
@@ -544,6 +548,7 @@ public final class APIConstants {
     public static final String PUBLISHING_MODE = "publishingMode";
     public static final String PUBLISHING_TIME_OUT = "publishTimeout";
     public static final String NON_BLOCKING = "non-blocking";
+    public static final String IS_ENABLED = "is_enabled";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
@@ -1633,6 +1638,7 @@ public final class APIConstants {
     public static final String ENDPOINT_TYPE_LOADBALANCE = "load_balance";
     public static final String ENDPOINT_CONFIG = "endpoint_config";
     public static final String ENDPOINT_TYPE_HTTP = "http";
+    public static final String ENDPOINT_TYPE_SERVICE = "service";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
     public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
@@ -1875,7 +1881,7 @@ public final class APIConstants {
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
-            "SSE"};
+            "SSE", "ASYNC"};
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2067,7 +2073,7 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS, GRAPHQL, WEBSUB, SSE, WEBHOOK
+        HTTP, WS, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
     }
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
@@ -2163,6 +2169,16 @@ public final class APIConstants {
     public static final String CORRELATION_LOGGER = "correlation";
     public static final String LOG_ALL_METHODS = "logAllMethods";
     public static final String AM_ACTIVITY_ID = "activityid";
+
+    /**
+     * Constants for API logging
+     */
+    public static final String API_LOGGER = "API_LOG";
+    public static final String LOG_LEVEL = "LOG_LEVEL";
+    public static final String LOG_LEVEL_OFF = "OFF";
+    public static final String LOG_LEVEL_BASIC = "BASIC";
+    public static final String LOG_LEVEL_STANDARD = "STANDARD";
+    public static final String LOG_LEVEL_FULL = "FULL";
 
     public static final String PDF_EXTENSION = "pdf";
     public static final String XLS_EXTENSION = "xls";
@@ -2277,11 +2293,11 @@ public final class APIConstants {
 
     public static class RestApiConstants {
 
-        public static final String REST_API_DEFAULT_VERSION = "v2";
+        public static final String REST_API_PUBLISHER_DEFAULT_VERSION = "v3";
         public static final String REST_API_OLD_VERSION = "v0.17";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
-                REST_API_PUBLISHER_CONTEXT + REST_API_DEFAULT_VERSION;
+                REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_DEFAULT_VERSION;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
         public static final String REST_API_ADMIN_VERSION = "v0.17";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
@@ -2485,6 +2501,7 @@ public final class APIConstants {
         public static final String ACCESS_TOKEN = "accessToken";
         public static final String AUTH_CODE = "authCode";
         public static final String CLAIM_DIALECT = "dialect";
+        public static final String BINDING_FEDERATED_USER_CLAIMS = "bindFederatedUserClaims";
         public static final String DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT = "/oauth2/token/.well-known/openid-configuration";
         public static final String DEFAULT_JWKS_ENDPOINT = "/oauth2/jwks";
         public static final String PRODUCTION_TOKEN_ENDPOINT = "production_token_endpoint";
@@ -2572,7 +2589,8 @@ public final class APIConstants {
         ENDPOINT_CERTIFICATE_ADD,
         ENDPOINT_CERTIFICATE_UPDATE,
         ENDPOINT_CERTIFICATE_REMOVE,
-        GA_CONFIG_UPDATE
+        GA_CONFIG_UPDATE,
+        UDATE_API_LOG_LEVEL
     }
 
     public static class GatewayArtifactSynchronizer {
@@ -2842,6 +2860,21 @@ public final class APIConstants {
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
+    //Constants related to Operation Policies
+    public static final String OPERATION_POLICIES = "operation policies";
+    public static final String OPERATION_SEQUENCE_TYPE_REQUEST = "request";
+    public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
+    public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
+    public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
+    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmp";
+    public static final String YAML_CONTENT_TYPE = "text/yaml";
+    public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator
+            + "resources" + File.separator + "operation_policies" + File.separator + "specifications";
+    public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
+            + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
+    public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
+
+
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
 
     // Protocol variables
@@ -2867,4 +2900,13 @@ public final class APIConstants {
     public static final String SMF_TRANSPORT_PROTOCOL_VERSION = "smf";
     public static final String SMFS_TRANSPORT_PROTOCOL_NAME = "smfs";
     public static final String SMFS_TRANSPORT_PROTOCOL_VERSION = "smfs";
+
+    public static class APILogHandler {
+        public static final String DELETE = "delete";
+        public static final String DELETE_ALL = "deleteAll";
+        public static final String OFF = "OFF";
+        public static final String BASIC = "BASIC";
+        public static final String STANDARD = "STANDARD";
+        public static final String FULL = "FULL";
+    }
 }

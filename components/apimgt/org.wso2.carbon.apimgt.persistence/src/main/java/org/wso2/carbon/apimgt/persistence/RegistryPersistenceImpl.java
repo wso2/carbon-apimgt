@@ -990,6 +990,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
                 apiInfo.setUpdatedTime(apiResource.getLastModified());
                 apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
+                apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
+                        .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
                 publisherAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1119,6 +1121,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
                 apiInfo.setSubscriptionAvailableOrgs(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+                apiInfo.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
                 devPortalAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1232,6 +1235,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                         artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
                                 apiInfo.setSubscriptionAvailableOrgs(artifact
                                         .getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+                                apiInfo.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
                                 devPortalAPIInfoList.add(apiInfo);
                             }
 
@@ -1343,6 +1347,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                                 //apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                                apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
+                                        .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
                                 publisherAPIInfoList.add(apiInfo);
                             }
 
@@ -1511,6 +1517,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setType(type);
                                 content.setVersion(pubAPI.getVersion());
                                 content.setStatus(pubAPI.getStatus());
+                                content.setAdvertiseOnly(pubAPI.isAdvertiseOnly());
                                 contentData.add(content);
                             } else {
                                 throw new GovernanceException("artifact id is null for " + resourcePath);

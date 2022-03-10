@@ -7,6 +7,7 @@ public class ExtendedJWTConfigurationDto extends JWTConfigurationDto {
     private String claimRetrieverImplClass;
     private boolean tenantBasedSigningEnabled;
     private boolean enableUserClaimRetrievalFromUserStore;
+    private boolean isBindFederatedUserClaims;
 
     public String getClaimRetrieverImplClass() {
 
@@ -46,5 +47,15 @@ public class ExtendedJWTConfigurationDto extends JWTConfigurationDto {
     public boolean isEnableUserClaimRetrievalFromUserStore() {
 
         return enableUserClaimRetrievalFromUserStore;
+    }
+
+    public boolean isBindFederatedUserClaims() {
+
+        return isBindFederatedUserClaims;
+    }
+
+    public void setBindFederatedUserClaims(boolean isBindFederatedUserClaims) {
+
+        this.isBindFederatedUserClaims = isBindFederatedUserClaims;
     }
 }

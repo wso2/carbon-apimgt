@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import javax.validation.constraints.*;
 
 
@@ -35,6 +36,7 @@ public class APIOperationsDTO   {
     private String sandBoxEndpointId = null;
     private String productionEndpointId = null;
     private String uriMapping = null;
+    private APIOperationPoliciesDTO operationPolicies = null;
 
   /**
    **/
@@ -208,36 +210,36 @@ public class APIOperationsDTO   {
 
   /**
    **/
-  public APIOperationsDTO productionEndpointId(String productionEndpointId) {
-    this.productionEndpointId = productionEndpointId;
-    return this;
-  }
-
-  @ApiModelProperty(value = "")
-  @JsonProperty("productionEndpointId")
-  public String getProductionEndpointId() {
-    return productionEndpointId;
-  }
-
-  public void setProductionEndpointId(String productionEndpointId) {
-    this.productionEndpointId = productionEndpointId;
-  }
-
-  /**
-   **/
   public APIOperationsDTO sandBoxEndpointId(String sandBoxEndpointId) {
     this.sandBoxEndpointId = sandBoxEndpointId;
     return this;
   }
 
-  public void setSandBoxEndpointId(String sandBoxEndpointId) {
-    this.sandBoxEndpointId = sandBoxEndpointId;
-  }
-
+  
   @ApiModelProperty(value = "")
   @JsonProperty("sandBoxEndpointId")
   public String getSandBoxEndpointId() {
     return sandBoxEndpointId;
+  }
+  public void setSandBoxEndpointId(String sandBoxEndpointId) {
+    this.sandBoxEndpointId = sandBoxEndpointId;
+  }
+
+  /**
+   **/
+  public APIOperationsDTO productionEndpointId(String productionEndpointId) {
+    this.productionEndpointId = productionEndpointId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("productionEndpointId")
+  public String getProductionEndpointId() {
+    return productionEndpointId;
+  }
+  public void setProductionEndpointId(String productionEndpointId) {
+    this.productionEndpointId = productionEndpointId;
   }
 
   /**
@@ -255,6 +257,24 @@ public class APIOperationsDTO   {
   }
   public void setUriMapping(String uriMapping) {
     this.uriMapping = uriMapping;
+  }
+
+  /**
+   **/
+  public APIOperationsDTO operationPolicies(APIOperationPoliciesDTO operationPolicies) {
+    this.operationPolicies = operationPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("operationPolicies")
+  public APIOperationPoliciesDTO getOperationPolicies() {
+    return operationPolicies;
+  }
+  public void setOperationPolicies(APIOperationPoliciesDTO operationPolicies) {
+    this.operationPolicies = operationPolicies;
   }
 
 
@@ -277,12 +297,15 @@ public class APIOperationsDTO   {
         Objects.equals(amznResourceName, apIOperations.amznResourceName) &&
         Objects.equals(amznResourceTimeout, apIOperations.amznResourceTimeout) &&
         Objects.equals(payloadSchema, apIOperations.payloadSchema) &&
-        Objects.equals(uriMapping, apIOperations.uriMapping);
+        Objects.equals(sandBoxEndpointId, apIOperations.sandBoxEndpointId) &&
+        Objects.equals(productionEndpointId, apIOperations.productionEndpointId) &&
+        Objects.equals(uriMapping, apIOperations.uriMapping) &&
+        Objects.equals(operationPolicies, apIOperations.operationPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, payloadSchema, uriMapping);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, payloadSchema, sandBoxEndpointId, productionEndpointId, uriMapping, operationPolicies);
   }
 
   @Override
@@ -300,7 +323,10 @@ public class APIOperationsDTO   {
     sb.append("    amznResourceName: ").append(toIndentedString(amznResourceName)).append("\n");
     sb.append("    amznResourceTimeout: ").append(toIndentedString(amznResourceTimeout)).append("\n");
     sb.append("    payloadSchema: ").append(toIndentedString(payloadSchema)).append("\n");
+    sb.append("    sandBoxEndpointId: ").append(toIndentedString(sandBoxEndpointId)).append("\n");
+    sb.append("    productionEndpointId: ").append(toIndentedString(productionEndpointId)).append("\n");
     sb.append("    uriMapping: ").append(toIndentedString(uriMapping)).append("\n");
+    sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -40,6 +40,8 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -80,8 +82,12 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
@@ -124,6 +130,9 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -188,7 +197,6 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -376,6 +384,8 @@ public final class APIUtil {
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
     private static Schema tenantConfigJsonSchema;
+    private static Schema operationPolicySpecSchema;
+
 
     private APIUtil() {
 
@@ -393,6 +403,13 @@ public final class APIUtil {
             tenantConfigJsonSchema = SchemaLoader.load(tenantConfigSchema);
         } catch (IOException e) {
             log.error("Error occurred while reading tenant-config-schema.json", e);
+        }
+
+        try (InputStream inputStream = APIUtil.class.getResourceAsStream("/operationPolicy/operation-policy-specification-schema.json")) {
+            org.json.JSONObject operationPolicySpecificationSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
+            operationPolicySpecSchema = SchemaLoader.load(operationPolicySpecificationSchema);
+        } catch (IOException e) {
+            log.error("Error occurred while reading operation-policy-specification-schema.json", e);
         }
     }
 
@@ -767,6 +784,8 @@ public final class APIUtil {
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+            api.setApiExternalProductionEndpoint(artifact.getAttribute(APIConstants.API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT));
+            api.setApiExternalSandboxEndpoint(artifact.getAttribute(APIConstants.API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(
@@ -1257,6 +1276,10 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(api.getCacheTimeout()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL, api.getRedirectURL());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT,
+                    api.getApiExternalProductionEndpoint());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT,
+                    api.getApiExternalSandboxEndpoint());
             artifact.setAttribute(APIConstants.API_OVERVIEW_OWNER, api.getApiOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, Boolean.toString(api.isAdvertiseOnly()));
 
@@ -2311,11 +2334,11 @@ public final class APIUtil {
      * @return {@link String} - Gateway URL
      */
 
-    public static String getGatewayendpoint(String transports) throws APIManagementException {
+    public static String getGatewayendpoint(String transports, String organization) throws APIManagementException {
 
         String gatewayURLs;
 
-        Map<String, Environment> gatewayEnvironments = getEnvironments();
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
         if (gatewayEnvironments.size() > 1) {
             for (Environment environment : gatewayEnvironments.values()) {
                 if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
@@ -2355,13 +2378,14 @@ public final class APIUtil {
      * @param environmentType gateway environment type
      * @return Gateway URL
      */
-    public static String getGatewayEndpoint(String transports, String environmentName, String environmentType)
+    public static String getGatewayEndpoint(String transports, String environmentName, String environmentType,
+                                            String organization)
             throws APIManagementException {
 
         String gatewayURLs;
         String gatewayEndpoint = "";
 
-        Map<String, Environment> gatewayEnvironments = getEnvironments();
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
         Environment environment = gatewayEnvironments.get(environmentName);
         if (environment.getType().equals(environmentType)) {
             gatewayURLs = environment.getApiGatewayEndpoint();
@@ -3911,6 +3935,17 @@ public final class APIUtil {
                 }
             }
 
+            // create IntegrationDeveloperRole role if it's creation is enabled in tenant-conf.json
+            JSONObject integrationDeveloperRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE);
+            if (isRoleCreationEnabled(integrationDeveloperRoleConfig)) {
+                String integrationDeveloperRoleName = String.valueOf(integrationDeveloperRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(integrationDeveloperRoleName)) {
+                    createIntegrationDeveloperRole(integrationDeveloperRoleName, tenantId);
+                }
+            }
+
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
@@ -4206,6 +4241,19 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
         };
         createRole(roleName, devOpsPermissions, tenantId);
+    }
+
+    /**
+     * Create Integration developer roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createIntegrationDeveloperRole(String roleName, int tenantId) throws APIManagementException {
+
+        Permission[] integrationDeveloperPermissions = new Permission[]{};
+        createRole(roleName, integrationDeveloperPermissions, tenantId);
     }
 
     /**
@@ -4741,7 +4789,8 @@ public final class APIUtil {
     public static String createSwaggerJSONContent(API api) throws APIManagementException {
 
         APIIdentifier identifier = api.getId();
-        Environment environment = (Environment) getEnvironments().values().toArray()[0];
+        String organization = api.getOrganization();
+        Environment environment = (Environment) getEnvironments(organization).values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
@@ -6118,9 +6167,17 @@ public final class APIUtil {
      */
     public static Set<String> extractEnvironmentsForAPI(String environments) throws APIManagementException {
 
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        Set<String> environmentStringSet = extractEnvironmentsForAPI(environments, tenantDomain);
+
+        return environmentStringSet;
+    }
+
+    public static Set<String> extractEnvironmentsForAPI(String environments, String organization) throws APIManagementException {
+
         Set<String> environmentStringSet = null;
         if (environments == null) {
-            environmentStringSet = new HashSet<>(getEnvironments().keySet());
+            environmentStringSet = new HashSet<>(getEnvironments(organization).keySet());
         } else {
             //handle not to publish to any of the gateways
             if (APIConstants.API_GATEWAY_NONE.equals(environments)) {
@@ -6134,7 +6191,7 @@ public final class APIUtil {
             }
             //handle to publish to any of the gateways when api creating stage
             else if ("".equals(environments)) {
-                environmentStringSet = new HashSet<>(getEnvironments().keySet());
+                environmentStringSet = new HashSet<>(getEnvironments(organization).keySet());
             }
         }
 
@@ -6198,7 +6255,8 @@ public final class APIUtil {
      */
     public static List<Environment> getEnvironmentsOfAPI(API api) throws APIManagementException {
 
-        Map<String, Environment> gatewayEnvironments = getEnvironments();
+        String organization = api.getOrganization();
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
         Set<String> apiEnvironments = api.getEnvironments();
         List<Environment> returnEnvironments = new ArrayList<Environment>();
 
@@ -9251,11 +9309,11 @@ public final class APIUtil {
      * @param environments environments values in json format
      * @return set of environments that need to Publish
      */
-    public static Set<String> extractEnvironmentsForAPI(List<String> environments) throws APIManagementException {
+    public static Set<String> extractEnvironmentsForAPI(List<String> environments, String organization) throws APIManagementException {
 
         Set<String> environmentStringSet = null;
         if (environments == null) {
-            environmentStringSet = new HashSet<>(getEnvironments().keySet());
+            environmentStringSet = new HashSet<>(getEnvironments(organization).keySet());
         } else {
             //handle not to publish to any of the gateways
             if (environments.size() == 1 && APIConstants.API_GATEWAY_NONE.equals(environments.get(0))) {
@@ -9268,7 +9326,7 @@ public final class APIUtil {
             }
             //handle to publish to any of the gateways when api creating stage
             else if (environments.size() == 0) {
-                environmentStringSet = new HashSet<>(getEnvironments().keySet());
+                environmentStringSet = new HashSet<>(getEnvironments(organization).keySet());
             }
         }
         return environmentStringSet;
@@ -9298,6 +9356,18 @@ public final class APIUtil {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(tenantDomain).stream()
+                .collect(Collectors.toMap(Environment::getName, env -> env));
+
+        // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
+        Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
+        allEnvironments.putAll(envFromDB);
+        return allEnvironments;
+    }
+
+    // Take organization as a parameter
+    public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
+        // get dynamic gateway environments read from database
+        Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(organization).stream()
                 .collect(Collectors.toMap(Environment::getName, env -> env));
 
         // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
@@ -9486,7 +9556,6 @@ public final class APIUtil {
 
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(resource.getApiId());
                 API api = getAPI(apiArtifact, registry);
-
                 resource.setEndpointConfig(api.getEndpointConfig());
                 resource.setEndpointSecurityMap(setEndpointSecurityForAPIProduct(api));
             }
@@ -9516,6 +9585,28 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return apiProduct;
+    }
+
+    /**
+     * Return the generated endpoint config JSON string for advertise only APIs
+     *
+     * @param api API object
+     * @return generated JSON string
+     */
+    public static String generateEndpointConfigForAdvertiseOnlyApi(API api) {
+        JSONObject endpointConfig = new JSONObject();
+        endpointConfig.put("endpoint_type", "http");
+        if (StringUtils.isNotEmpty(api.getApiExternalProductionEndpoint())) {
+            JSONObject productionEndpoints = new JSONObject();
+            productionEndpoints.put("url", api.getApiExternalProductionEndpoint());
+            endpointConfig.put("production_endpoints", productionEndpoints);
+        }
+        if (StringUtils.isNotEmpty(api.getApiExternalSandboxEndpoint())) {
+            JSONObject sandboxEndpoints = new JSONObject();
+            sandboxEndpoints.put("url", api.getApiExternalSandboxEndpoint());
+            endpointConfig.put("sandbox_endpoints", sandboxEndpoints);
+        }
+        return endpointConfig.toJSONString();
     }
 
     /**
@@ -10450,7 +10541,7 @@ public final class APIUtil {
         try {
             endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new EndpointSecurity());
             endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, new EndpointSecurity());
-            if (api.isEndpointSecured()) {
+            if (api.isEndpointSecured() && !api.isAdvertiseOnly()) {
                 EndpointSecurity productionEndpointSecurity = new EndpointSecurity();
                 productionEndpointSecurity.setEnabled(true);
                 productionEndpointSecurity.setUsername(api.getEndpointUTUsername());
@@ -10462,7 +10553,7 @@ public final class APIUtil {
                 }
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionEndpointSecurity);
-            } else {
+            } else if (!api.isAdvertiseOnly()) {
                 String endpointConfig = api.getEndpointConfig();
                 if (endpointConfig != null) {
                     JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
@@ -10776,9 +10867,9 @@ public final class APIUtil {
         return keyManagerConfigurationDTO;
     }
 
-    public static String getTokenEndpointsByType(String type) throws APIManagementException {
+    public static String getTokenEndpointsByType(String type, String organization) throws APIManagementException {
 
-        Map<String, Environment> environments = getEnvironments();
+        Map<String, Environment> environments = getEnvironments(organization);
         Map<String, String> map = new HashMap<>();
 
         String productionUrl = "";
@@ -11301,13 +11392,15 @@ public final class APIUtil {
     public static boolean isStreamingApi(API api) {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(api.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(api.getType()) ||
-                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(api.getType());
+                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(api.getType()) ||
+                APIConstants.APITransportType.ASYNC.toString().equalsIgnoreCase(api.getType());
     }
 
     public static boolean isStreamingApi(APIProduct apiProduct) {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(apiProduct.getType()) ||
-                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType());
+                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType()) ||
+                APIConstants.APITransportType.ASYNC.toString().equalsIgnoreCase(apiProduct.getType());
     }
 
     /**
@@ -11411,6 +11504,10 @@ public final class APIUtil {
         return tenantConfigJsonSchema;
     }
 
+    public static Schema retrieveOperationPolicySpecificationJsonSchema(){
+        return operationPolicySpecSchema;
+    }
+
     /**
      * Get gateway environments defined in the configuration: api-manager.xml
      *
@@ -11459,5 +11556,208 @@ public final class APIUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * Load the common policies for the organization at the first startup. This will only copy the policies to the
+     * database if the total policies for this organization is zero.
+     *
+     * @param organization organization name
+     */
+    public static void loadCommonOperationPolicies(String organization) throws APIManagementException {
+
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+
+        int policyCount = apiMgtDAO.getOperationPolicyCount(organization);
+
+        if (policyCount == 0) {
+            String policySpecLocation = CarbonUtils.getCarbonHome() + File.separator
+                    + APIConstants.COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION;
+            String policyDefinitionLocation = CarbonUtils.getCarbonHome() + File.separator
+                    + APIConstants.COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION;
+            File policiesDir = new File(policySpecLocation);
+            File[] files = policiesDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    String jsonContent;
+                    try {
+                        jsonContent = FileUtils.readFileToString(file);
+                        OperationPolicySpecification policySpec = getValidatedOperationPolicySpecification(jsonContent);
+                        if (policySpec != null) {
+                            OperationPolicyData policyData = new OperationPolicyData();
+                            policyData.setSpecification(policySpec);
+                            policyData.setOrganization(organization);
+
+                            OperationPolicyDefinition synapsePolicyDefinition =
+                                    getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
+                                            policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                            if (synapsePolicyDefinition != null) {
+                                synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
+                            }
+                            OperationPolicyDefinition ccPolicyDefinition =
+                                    getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
+                                            policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                            if (ccPolicyDefinition != null) {
+                                ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                policyData.setCcPolicyDefinition(ccPolicyDefinition);
+                            }
+
+                            policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
+                            apiMgtDAO.addCommonOperationPolicy(policyData);
+                            log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
+                                    + " was added to the organization " + organization + " successfully");
+                        }
+                    } catch (IOException | APIManagementException e) {
+                        log.error("Invalid policy specification for file " + file.getName()
+                                + ".Hence skipped from importing as a common operation policy.", e);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Read the operation policy definition from the provided path and return the definition object
+     *
+     * @param extractedFolderPath   Location of the policy definition
+     * @param policyName            Name of the policy
+     * @param fileExtension         Since there can be both synapse and choreo connect definitons, fileExtension is used
+     *
+     * @return OperationPolicyDefinition
+     */
+    public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
+                                                                                 String policyName,
+                                                                                 String fileExtension)
+            throws APIManagementException {
+
+        OperationPolicyDefinition policyDefinition = null;
+        try {
+            String fileName = extractedFolderPath + File.separator + policyName + fileExtension;
+            if (checkFileExistence(fileName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found policy definition file " + fileName);
+                }
+                String yamlContent = FileUtils.readFileToString(new File(fileName));
+                policyDefinition = new OperationPolicyDefinition();
+                policyDefinition.setContent(yamlContent);
+                policyDefinition.setMd5Hash(getMd5OfOperationPolicyDefinition(policyDefinition));
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading policy specification from path: "
+                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return policyDefinition;
+    }
+
+    /**
+     * Check whether there exists a file for the provided location
+     *
+     * @param fileLocation   Location of the file
+     * @return True if file exists
+     */
+    public static boolean checkFileExistence(String fileLocation) {
+
+        File testFile = new File(fileLocation);
+        return testFile.exists();
+    }
+
+    /**
+     * Get the validated policy specification object from a provided policy string. Validation is done against the
+     * policy schema
+     *
+     * @param policySpecAsString  Policy specification as a string
+     * @return OperationPolicySpecification object
+     * @throws APIManagementException If the policy schema validation fails
+     */
+    public static OperationPolicySpecification getValidatedOperationPolicySpecification(String policySpecAsString)
+            throws APIManagementException {
+
+        Schema schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema();
+        if (schema != null) {
+            try {
+                org.json.JSONObject uploadedConfig = new org.json.JSONObject(policySpecAsString);
+                schema.validate(uploadedConfig);
+            } catch (ValidationException e) {
+                List<String> errors = e.getAllMessages();
+                String errorMessage = errors.size() + " validation error(s) found. Error(s) :" + errors.toString();
+                throw new APIManagementException("Policy specification validation failure. " + errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_SPECIFICATION,
+                                errorMessage));
+            }
+            return new Gson().fromJson(policySpecAsString, OperationPolicySpecification.class);
+        }
+        return null;
+    }
+
+    /**
+     * Export the policy attribute object of the specification as a string
+     *
+     * @param policySpecification  Policy specification
+     * @return policy attributes string
+     * @throws APIManagementException If the policy schema validation fails
+     */
+    public static String getPolicyAttributesAsString(OperationPolicySpecification policySpecification) {
+
+        String policyParamsString = "";
+        if (policySpecification != null) {
+            if (policySpecification.getPolicyAttributes() != null) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                policyParamsString = gson.toJson(policySpecification.getPolicyAttributes());
+            }
+        }
+        return policyParamsString;
+    }
+
+    /**
+     * Return the md5 hash of the provided policy. To generate the md5 hash, policy Specification and the
+     * two definitions are used
+     *
+     * @param policyData  Operation policy data
+     * @return md5 hash
+     */
+    public static String getMd5OfOperationPolicy(OperationPolicyData policyData) {
+
+        String policySpecificationAsString = "";
+        String synapsePolicyDefinitionAsString = "";
+        String ccPolicyDefinitionAsString = "";
+
+        if (policyData.getSpecification() != null) {
+            policySpecificationAsString = new Gson().toJson(policyData.getSpecification());
+        }
+        if (policyData.getSynapsePolicyDefinition() != null) {
+            synapsePolicyDefinitionAsString = new Gson().toJson(policyData.getSynapsePolicyDefinition());
+        }
+        if (policyData.getCcPolicyDefinition() != null) {
+            ccPolicyDefinitionAsString = new Gson().toJson(policyData.getCcPolicyDefinition());
+        }
+
+        return DigestUtils.md5Hex(policySpecificationAsString + synapsePolicyDefinitionAsString
+                + ccPolicyDefinitionAsString);
+    }
+
+    /**
+     * Return the md5 hash of the policy definition string
+     *
+     * @param policyDefinition  Operation policy definition
+     * @return md5 hash of the definition content
+     */
+    public static String getMd5OfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition) {
+
+        String md5Hash = "";
+
+        if (policyDefinition != null) {
+            if (policyDefinition.getContent() != null) {
+                md5Hash = DigestUtils.md5Hex(policyDefinition.getContent());
+            }
+        }
+        return md5Hash;
+    }
+
+    public static void initializeVelocityContext(VelocityEngine velocityEngine){
+        velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
+        velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
+        velocityEngine.setProperty("runtime.conversion.handler", "none");
+
     }
 }

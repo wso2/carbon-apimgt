@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.wso2.carbon.apimgt.internal.service.impl.ApisApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -54,11 +55,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/deployed-revisions")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Deploy Revision", notes = "Deploy a revision ", response = Void.class, tags={ "API Revisions" })
+    @ApiOperation(value = "Deploy Revision", notes = "Deploy a revision ", response = Void.class, tags={ "API Revisions",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Created. ", response = Void.class),
         @ApiResponse(code = 200, message = "", response = Void.class) })
     public Response deployedAPIRevision(@ApiParam(value = "Notification event payload" ) List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList) throws APIManagementException{
         return delegate.deployedAPIRevision(deployedAPIRevisionDTOList, securityContext);
+    }
+
+    @POST
+    @Path("/undeployed-revision")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Remove undeployed revision", notes = "Remove undeployed Revision entry from the database", response = Void.class, tags={ "UnDeployed API Revision" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Fetch un-deployed revision", response = Void.class),
+        @ApiResponse(code = 200, message = "", response = Void.class) })
+    public Response unDeployedAPIRevision(@ApiParam(value = "Notification event payload" ) UnDeployedAPIRevisionDTO unDeployedAPIRevisionDTO) throws APIManagementException{
+        return delegate.unDeployedAPIRevision(unDeployedAPIRevisionDTO, securityContext);
     }
 }

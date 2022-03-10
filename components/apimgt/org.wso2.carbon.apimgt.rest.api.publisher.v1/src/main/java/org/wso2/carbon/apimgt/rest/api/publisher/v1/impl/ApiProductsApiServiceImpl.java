@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -845,7 +844,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                              List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO,
                                              MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
@@ -966,7 +966,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }
         }
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);

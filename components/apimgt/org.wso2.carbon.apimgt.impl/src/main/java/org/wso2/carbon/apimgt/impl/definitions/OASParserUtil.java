@@ -1185,11 +1185,13 @@ public class OASParserUtil {
                                                   Set<Scope> apiScopes) throws APIManagementException {
 
         for (String scopeName : resourceScopes) {
-            Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
-            if (scope == null) {
-                throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+            if (StringUtils.isNotBlank(scopeName)) {
+                Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+                if (scope == null) {
+                    throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                }
+                template.setScopes(scope);
             }
-            template.setScopes(scope);
         }
         return template;
     }
@@ -1221,6 +1223,8 @@ public class OASParserUtil {
             endpointResult = populateLoadBalanceConfig(endpointConfig, isProduction);
         } else if (APIConstants.ENDPOINT_TYPE_HTTP.equalsIgnoreCase(type)) {
             endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_HTTP);
+        } else if (APIConstants.ENDPOINT_TYPE_SERVICE.equalsIgnoreCase(type)) {
+            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_SERVICE);
         } else if (APIConstants.ENDPOINT_TYPE_ADDRESS.equalsIgnoreCase(type)) {
             endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_ADDRESS);
         } else {

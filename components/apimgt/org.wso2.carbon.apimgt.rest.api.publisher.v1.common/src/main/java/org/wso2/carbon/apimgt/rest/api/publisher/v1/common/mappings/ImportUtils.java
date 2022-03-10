@@ -59,6 +59,10 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -116,6 +120,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -195,8 +200,7 @@ public class ImportUtils {
             // Validate swagger content except for streaming APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                validationResponse = retrieveValidatedSwaggerDefinitionFromArchive(
-                        extractedFolderPath);
+                validationResponse = retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
             }
             // Validate the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
@@ -222,6 +226,9 @@ public class ImportUtils {
             if (isAdvertiseOnlyAPI(importedApiDTO)) {
                 processAdvertiseOnlyPropertiesInDTO(importedApiDTO, tokenScopes);
             }
+
+            Map<String, List<OperationPolicy>> extractedPoliciesMap =
+                    extractAndDropOperationPoliciesFromURITemplate(importedApiDTO.getOperations());
 
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
@@ -250,6 +257,18 @@ public class ImportUtils {
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
                                 importedApiDTO.getProvider(), organization);
+
+                // Set API definition to validationResponse if the API is imported with sample API definition
+                if (validationResponse.isInit()) {
+                    validationResponse.setContent(importedApi.getSwaggerDefinition());
+                    validationResponse.setJsonContent(importedApi.getSwaggerDefinition());
+                }
+            }
+
+            if (!extractedPoliciesMap.isEmpty()) {
+                importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath,
+                        extractedPoliciesMap, currentTenantDomain));
+                apiProvider.updateAPI(importedApi);
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
@@ -319,7 +338,7 @@ public class ImportUtils {
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
             }
             List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
-                    tenantDomain, apiProvider);
+                    tenantDomain, apiProvider, organization);
             if (apiRevisionDeployments.size() > 0) {
                 String importedAPIUuid = importedApi.getUuid();
                 String revisionId;
@@ -396,6 +415,90 @@ public class ImportUtils {
         }
     }
 
+    public static Map<String, List<OperationPolicy>> extractAndDropOperationPoliciesFromURITemplate
+            (List<APIOperationsDTO> operationsDTO) {
+        Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
+        for (APIOperationsDTO dto : operationsDTO) {
+            String key = dto.getVerb() + ":" + dto.getTarget();
+            List<OperationPolicy> operationPolicies =
+                    OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(dto.getOperationPolicies());
+            if (!operationPolicies.isEmpty()) {
+                operationPoliciesMap.put(key, operationPolicies);
+            }
+            dto.setOperationPolicies(null);
+        }
+        return operationPoliciesMap;
+    }
+
+    public static Set<URITemplate> validateOperationPolicies(API api, APIProvider provider, String extractedFolderPath,
+                                                             Map<String, List<OperationPolicy>> extractedPoliciesMap,
+                                                             String tenantDomain) {
+
+        String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+            if (extractedPoliciesMap.containsKey(key)) {
+                List<OperationPolicy> operationPolicies = extractedPoliciesMap.get(key);
+                List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
+                if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    for (OperationPolicy policy : operationPolicies) {
+                        try {
+                            OperationPolicySpecification policySpec =
+                                    getOperationPolicySpecificationFromFile(policyDirectory,
+                                            policy.getPolicyName());
+
+                            OperationPolicyData operationPolicyData = new OperationPolicyData();
+                            operationPolicyData.setSpecification(policySpec);
+                            operationPolicyData.setOrganization(tenantDomain);
+                            operationPolicyData.setApiUUID(api.getUuid());
+
+                            OperationPolicyDefinition synapseDefinition =
+                                    APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                            policy.getPolicyName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                            if (synapseDefinition != null) {
+                                synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+                                operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                            }
+                            OperationPolicyDefinition ccDefinition =
+                                    APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                            policy.getPolicyName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                            if (ccDefinition != null) {
+                                ccDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                                operationPolicyData.setCcPolicyDefinition(ccDefinition);
+                            }
+                            operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                            String policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
+                            policy.setPolicyId(policyID);
+                            validatedOperationPolicies.add(policy);
+                        } catch (APIManagementException e) {
+                            log.error(e);
+                        }
+                    }
+                }
+                uriTemplate.setOperationPolicies(validatedOperationPolicies);
+            }
+        }
+        return uriTemplates;
+    }
+
+    public static OperationPolicySpecification getOperationPolicySpecificationFromFile(String extractedFolderPath,
+                                                                                       String policyName)
+            throws APIManagementException {
+        try {
+            String jsonContent =  getFileContentAsJson(extractedFolderPath + File.separator + policyName);
+            if (jsonContent == null) {
+                return null;
+            }
+            // Retrieving the field "data" in deployment_environments.yaml
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            return APIUtil.getValidatedOperationPolicySpecification(configElement.toString());
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading policy specification info from path: "
+                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
+        }
+    }
+
     /**
      * Check whether an advertise only API
      *
@@ -439,12 +542,13 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs when validating the deployments list
      */
     private static List<APIRevisionDeployment> getValidatedDeploymentsList(JsonArray deploymentInfoArray,
-                                                                           String tenantDomain, APIProvider apiProvider)
+                                                                           String tenantDomain, APIProvider apiProvider,
+                                                                           String organization)
             throws APIManagementException {
 
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
-            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments();
+            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments(organization);
 
             for (int i = 0; i < deploymentInfoArray.size(); i++) {
                 JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
@@ -769,35 +873,61 @@ public class ImportUtils {
                 }
             }
             if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                JsonObject productionEndpoint = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).
-                        getAsJsonObject();
-                if (productionEndpoint.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)) {
-                    JsonObject config = productionEndpoint.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
+                if (endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).isJsonObject()) {
+                    JsonObject productionEndpoint = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).
                             getAsJsonObject();
-                    if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
-                        Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsDouble();
-                        Integer value = (int) Math.round(actionDuration);
-                        config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
-                        config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                    endpointConfig.add(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                            getUpdatedEndpointConfig(productionEndpoint));
+                } else if (endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).isJsonArray()) {
+                    JsonArray productionEndpointArray = endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS).
+                            getAsJsonArray();
+                    JsonArray updatedArray = new JsonArray();
+                    for (JsonElement endpoint : productionEndpointArray) {
+                        updatedArray.add(getUpdatedEndpointConfig(endpoint.getAsJsonObject()));
                     }
+                    endpointConfig.add(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, updatedArray);
                 }
             }
             if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                JsonObject sandboxEndpoint = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).
-                        getAsJsonObject();
-                if (sandboxEndpoint.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)) {
-                    JsonObject config = sandboxEndpoint.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
+                if (endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).isJsonObject()) {
+                    JsonObject sandboxEndpoint = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).
                             getAsJsonObject();
-                    if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
-                        Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).getAsDouble();
-                        Integer value = (int) Math.round(actionDuration);
-                        config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
-                        config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+                    endpointConfig.add(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                            getUpdatedEndpointConfig(sandboxEndpoint));
+                } else if (endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).isJsonArray()) {
+                    JsonArray sandboxEndpointArray = endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS).
+                            getAsJsonArray();
+                    JsonArray updatedArray = new JsonArray();
+                    for (JsonElement endpoint : sandboxEndpointArray) {
+                        updatedArray.add(getUpdatedEndpointConfig(endpoint.getAsJsonObject()));
                     }
+                    endpointConfig.add(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, updatedArray);
                 }
             }
         }
         return configObject;
+    }
+
+     /**
+     * This function will preprocess and get the updated Endpoint Config object from the API/API Product configuration
+     *
+     * @param endpointConfigObject Endpoint Config object from the API/API Product configuration
+     * @return JsonObject endpointConfigObject  with pre-processed endpoint config
+     */
+    public static JsonObject getUpdatedEndpointConfig(JsonObject endpointConfigObject) {
+
+        if (endpointConfigObject.has(APIConstants.ENDPOINT_SPECIFIC_CONFIG)) {
+            JsonObject config = endpointConfigObject.get(APIConstants.ENDPOINT_SPECIFIC_CONFIG).
+                    getAsJsonObject();
+            if (config.has(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION)) {
+                Double actionDuration = config.get(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION).
+                        getAsDouble();
+                Integer value = (int) Math.round(actionDuration);
+                config.remove(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION);
+                config.addProperty(APIConstants.ENDPOINT_CONFIG_ACTION_DURATION, value.toString());
+            }
+        }
+        return endpointConfigObject;
     }
 
     /**
@@ -1129,6 +1259,14 @@ public class ImportUtils {
                 throw new APIManagementException(
                         "Error occurred while importing the API. Invalid Swagger definition found. "
                                 + validationResponse.getErrorItems(), ExceptionCodes.ERROR_READING_META_DATA);
+            }
+            JsonObject swaggerContentJson = new JsonParser().parse(swaggerContent).getAsJsonObject();
+            if (swaggerContentJson.has(APIConstants.SWAGGER_INFO)
+                    && swaggerContentJson.getAsJsonObject(APIConstants.SWAGGER_INFO)
+                    .has(ImportExportConstants.SWAGGER_X_WSO2_APICTL_INIT)
+                    && swaggerContentJson.getAsJsonObject(APIConstants.SWAGGER_INFO)
+                    .get(ImportExportConstants.SWAGGER_X_WSO2_APICTL_INIT).getAsBoolean()) {
+                validationResponse.setInit(true);
             }
             return validationResponse;
         } catch (IOException e) {
@@ -1997,7 +2135,7 @@ public class ImportUtils {
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
             }
             List<APIRevisionDeployment> apiProductRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
-                    currentTenantDomain, apiProvider);
+                    currentTenantDomain, apiProvider, organization);
             if (apiProductRevisionDeployments.size() > 0) {
                 String importedAPIUuid = importedApiProduct.getUuid();
                 String revisionId;

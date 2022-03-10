@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.9.2-SNAPSHOT</version>
+        <version>9.18.13-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -66,7 +66,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
-            <artifactId>jempbox</artifactId>
+            <artifactId>xmpbox</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache.wso2</groupId>
@@ -288,7 +288,7 @@
                                 <importBundleDef>org.wso2.orbit.io.swagger.v3:swagger-parser:${swagger.parser.v3.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>
-                                <importBundleDef>org.apache.pdfbox:jempbox:${pdfbox.version}</importBundleDef>
+                                <importBundleDef>org.apache.pdfbox:xmpbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>
                                     org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}
                                 </importBundleDef>

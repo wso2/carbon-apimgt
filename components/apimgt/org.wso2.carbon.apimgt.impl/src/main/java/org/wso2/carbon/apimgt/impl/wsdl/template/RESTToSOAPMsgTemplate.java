@@ -19,17 +19,18 @@ package org.wso2.carbon.apimgt.impl.wsdl.template;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.log.CommonsLogLogChute;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.template.ConfigContext;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -67,12 +68,7 @@ public class RESTToSOAPMsgTemplate {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!SOAPToRESTConstants.Template.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
-                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
-                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-            }
+            APIUtil.initializeVelocityContext(velocityengine);
             velocityengine.init();
             org.apache.velocity.Template t = velocityengine.getTemplate(this.getInSeqTemplatePath());
             t.merge(context, writer);
@@ -96,15 +92,9 @@ public class RESTToSOAPMsgTemplate {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!SOAPToRESTConstants.Template.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
-                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
-                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-            }
-
+            APIUtil.initializeVelocityContext(velocityengine);
             velocityengine.init();
-            org.apache.velocity.Template template = velocityengine.getTemplate(this.getOutSeqTemplatePath());
+            Template template = velocityengine.getTemplate(this.getOutSeqTemplatePath());
 
             template.merge(context, writer);
         } catch (Exception e) {

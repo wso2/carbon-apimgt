@@ -291,6 +291,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Please provide the Authorization : Bearer <> token to proceed."),
     MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
             "Please provide the Authorization : Basic <> token to proceed."),
+    INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the resource."),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
     OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
@@ -483,16 +484,45 @@ public enum ExceptionCodes implements ErrorHandler {
             "Missing protocol in Async API Definition"),
     UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION(900912, "Unsupported protocol specified in Async API " +
                "Definition", 400, "Unsupported protocol specified in Async API Definition"),
+    API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS(900915, "API Creation is supported only for WebSocket, WebSub and SSE APIs", 400,
+            "API Creation is supported only for WebSocket, WebSub and SSE APIs"),
+    LOGGING_API_NOT_FOUND(901400, "Requested Resource Not Found", 404, "Request API Not Found for context: %s"),
+    LOGGING_API_INCORRECT_LOG_LEVEL(901401, "Bad Request", 400, "Log level should be either OFF, BASIC, STANDARD or FULL"),
+    LOGGING_API_MISSING_DATA(901402, "Missing data", 400, "API context or log level is missing"),
 
     //Service Catalog related error codes
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
+
+    //Operation Policies related error codes
+    INVALID_OPERATION_POLICY(900915, "Cannot find the selected operation policy", 400,
+            "Selected operation policy is not found"),
+    INVALID_OPERATION_POLICY_SPECIFICATION(900916, "Invalid operation policy specification found", 400,
+            "Invalid operation policy specification. %s", false),
+
+    INVALID_OPERATION_POLICY_PARAMETERS(900917, "Missing required parameters for operation policy specification", 400,
+            "Required parameter(s) %s for operation policy specification %s are either missing or empty"),
+    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(900918, "Operation policy is not allowed in the applied flow", 400,
+            "%s policy is not allowed in response flow"),
+    MISSING_MANDATORY_POLICY_ATTRIBUTES(900919, "Missing mandatory operation policy attribute", 400,
+            "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
+    OPERATION_POLICY_NOT_FOUND(900920, "Operation Policy Not Found", 404,
+            "Requested operation policy with id '%s' not found"),
+    OPERATION_ENDPOINT_NOT_FOUND(900921, "Operation Endpoint Not Found", 404,
+            "Requested operation endpoint with id '%s' not found"),
+
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),
-    ERROR_FETCHING_OPERATION_ENDPOINTS_API(902003, "Cannot find informations of operation endpoints", 400,
-            "Cannot find informations of operation endpoints."),;
+    ERROR_FETCHING_OPERATION_ENDPOINTS_API(902003, "Cannot find information of operation endpoints", 400,
+            "Cannot find information of operation endpoints."),
+    ERROR_FETCHING_OPERATION_ENDPOINT_API(902004, "Cannot find information of operation endpoint", 400,
+                                                   "Cannot find information of operation endpoint."),
+    ERROR_UPDATING_OPERATION_ENDPOINT_API(902004, "Cannot find information of operation endpoint", 400,
+                                                  "Cannot find information of operation endpoint."),
+    ERROR_INSERTING_OPERATION_ENDPOINT_API(902004, "Cannot find information of operation endpoint", 400,
+                                                  "Cannot find information of operation endpoint.");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.InputStream;
 import java.util.List;
@@ -453,4 +454,13 @@ public interface APIAdmin  {
 
     String getTenantConfigSchema(String organization) throws APIManagementException;
 
+    /**
+     * Get policy list for given level
+     *
+     * @param tenantId  tenant ID of user
+     * @param level     policy level
+     * @return
+     * @throws APIManagementException
+     */
+    Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
 }

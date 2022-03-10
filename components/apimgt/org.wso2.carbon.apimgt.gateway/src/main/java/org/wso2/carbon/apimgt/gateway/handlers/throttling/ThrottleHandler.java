@@ -90,7 +90,6 @@ import javax.xml.stream.XMLStreamException;
 public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(ThrottleHandler.class);
-    private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     private volatile Throttle throttle;
     private String policyKeyApplication = null;
     private static final String THROTTLE_MAIN = "THROTTLE_MAIN";
@@ -187,7 +186,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         apiContext = apiContext != null ? apiContext : "";
         apiVersion = apiVersion != null ? apiVersion : "";
-        String clientIp = getClientIp(synCtx);
+        String clientIp = GatewayUtils.getClientIp(synCtx);
         String subscriberTenantDomain = "";
         String apiTenantDomain = getTenantDomain();
         ConditionGroupDTO[] conditionGroupDTOs;
@@ -801,27 +800,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     public String gePolicyKeyResource() {
         return policyKeyResource;
     }
-
-    private String getClientIp(MessageContext synCtx) {
-        String clientIp;
-
-        org.apache.axis2.context.MessageContext axis2MsgContext =
-                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-        Map headers =
-                (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String xForwardForHeader = (String) headers.get(HEADER_X_FORWARDED_FOR);
-        if (!StringUtils.isEmpty(xForwardForHeader)) {
-            clientIp = xForwardForHeader;
-            int idx = xForwardForHeader.indexOf(',');
-            if (idx > -1) {
-                clientIp = clientIp.substring(0, idx);
-            }
-        } else {
-            clientIp = (String) axis2MsgContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-        }
-        return clientIp;
-    }
-
 
     private OMElement createSpikeArrestSubscriptionLevelPolicy(String policyName, int maxCount, int unitTime) {
 

@@ -41,6 +41,7 @@ public class PublisherAPIInfo {
     private Map<String, String> additionalProperties;
     private String description;
     private String gatewayVendor;
+    private boolean advertiseOnly;
 
     public String getAudience() {
         return audience;
@@ -138,11 +139,19 @@ public class PublisherAPIInfo {
         this.gatewayVendor = gatewayVendor;
     }
 
+    public boolean isAdvertiseOnly() {
+        return advertiseOnly;
+    }
+
+    public void setAdvertiseOnly(boolean advertiseOnly) {
+        this.advertiseOnly = advertiseOnly;
+    }
+
     @Override
     public String toString() {
         return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version=" +
                 version + ", providerName=" + providerName + ", context=" + context + ", status=" + status + ", type="
-                + type + ", thumbnail=" + thumbnail + "]";
+                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly + "]";
     }
 
     public Map<String, String> getAdditionalProperties() {

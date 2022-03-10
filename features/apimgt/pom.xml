@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.9.2-SNAPSHOT</version>
+        <version>9.18.13-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -43,6 +43,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.store.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.admin.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.gateway.feature</module>
+        <module>org.wso2.carbon.apimgt.rest.api.devops.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.dcr.feature</module>
         <module>org.wso2.carbon.apimgt.scxml.feature</module>
         <module>org.wso2.carbon.apimgt.throttling.siddhi.extension.feature</module>

@@ -213,6 +213,7 @@ public class APIManagerComponent {
             APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             // load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -885,7 +886,8 @@ public class APIManagerComponent {
                 for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
                     properties.put(key, eventHubPublisherConfiguration.getProperties().get(key));
                 }
-                properties.put("is_enabled", Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
+                properties.put(APIConstants.IS_ENABLED,
+                        Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
                 try {
                     ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(properties);
                 } catch (EventPublisherException e) {

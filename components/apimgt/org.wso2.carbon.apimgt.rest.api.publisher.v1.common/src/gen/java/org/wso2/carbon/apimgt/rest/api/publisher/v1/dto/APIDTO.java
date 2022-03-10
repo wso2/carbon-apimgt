@@ -71,7 +71,8 @@ public class APIDTO   {
         GRAPHQL("GRAPHQL"),
         WEBSUB("WEBSUB"),
         SSE("SSE"),
-        WEBHOOK("WEBHOOK");
+        WEBHOOK("WEBHOOK"),
+        ASYNC("ASYNC");
         private String value;
 
         TypeEnum (String v) {
@@ -275,7 +276,8 @@ return null;
     @XmlEnum(String.class)
     public enum EndpointImplementationTypeEnum {
         INLINE("INLINE"),
-        ENDPOINT("ENDPOINT");
+        ENDPOINT("ENDPOINT"),
+        MOCKED_OAS("MOCKED_OAS");
         private String value;
 
         EndpointImplementationTypeEnum (String v) {
@@ -610,7 +612,7 @@ return null;
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -618,7 +620,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;

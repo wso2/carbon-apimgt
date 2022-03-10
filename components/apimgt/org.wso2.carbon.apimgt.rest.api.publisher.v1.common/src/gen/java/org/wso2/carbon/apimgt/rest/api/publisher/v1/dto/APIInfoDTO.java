@@ -74,6 +74,7 @@ return null;
     private String createdTime = null;
     private String updatedTime = null;
     private String gatewayVendor = null;
+    private Boolean advertiseOnly = null;
 
   /**
    **/
@@ -369,6 +370,23 @@ return null;
     this.gatewayVendor = gatewayVendor;
   }
 
+  /**
+   **/
+  public APIInfoDTO advertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("advertiseOnly")
+  public Boolean isAdvertiseOnly() {
+    return advertiseOnly;
+  }
+  public void setAdvertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -395,12 +413,13 @@ return null;
         Objects.equals(securityScheme, apIInfo.securityScheme) &&
         Objects.equals(createdTime, apIInfo.createdTime) &&
         Objects.equals(updatedTime, apIInfo.updatedTime) &&
-        Objects.equals(gatewayVendor, apIInfo.gatewayVendor);
+        Objects.equals(gatewayVendor, apIInfo.gatewayVendor) &&
+        Objects.equals(advertiseOnly, apIInfo.advertiseOnly);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, gatewayVendor);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, gatewayVendor, advertiseOnly);
   }
 
   @Override
@@ -425,6 +444,7 @@ return null;
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("}");
     return sb.toString();
   }

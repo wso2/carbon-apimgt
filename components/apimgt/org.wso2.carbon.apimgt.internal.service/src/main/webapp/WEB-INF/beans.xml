@@ -9,7 +9,7 @@
 	  <property name="environment">
 	    <bean class="org.springframework.web.context.support.StandardServletEnvironment" />
 	  </property> 
-    </bean> 
+    </bean>
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
@@ -36,6 +36,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.WebhooksSubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.EndpointCertificatesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.GaConfigApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApiLoggingConfigsApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

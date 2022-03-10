@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers;
 
-import org.apache.log4j.MDC;
+import org.apache.logging.log4j.ThreadContext;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -36,21 +37,22 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogUtils.class, MDC.class, System.class})
+@PrepareForTest({LogUtils.class, ThreadContext.class, System.class, LogsHandler.class})
 public class LogsHandlerTestCase {
 
     @Before
     public void init() {
         PowerMockito.mockStatic(LogUtils.class);
-        PowerMockito.mockStatic(MDC.class);
+        PowerMockito.mockStatic(ThreadContext.class);
         System.setProperty(APIConstants.ENABLE_CORRELATION_LOGS, "true");
     }
 
     @Test
-    public void testHandleRequestInFlow() {
+    public void testHandleRequestInFlow() throws Exception {
+        LogsHandler logsHandler = PowerMockito.spy(new LogsHandler());
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         PowerMockito.when(LogUtils.getTo(messageContext)).thenReturn("pizzashack/1.0.0/menu");
-        LogsHandler logsHandler = new LogsHandler();
+        PowerMockito.doReturn(null).when(logsHandler, "getAPILogLevel", messageContext);
         Assert.assertTrue(logsHandler.handleRequestInFlow(messageContext));
     }
 
@@ -64,7 +66,7 @@ public class LogsHandlerTestCase {
         // For websocket APIs
         Mockito.when(axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(null);
         PowerMockito.when(LogUtils.getTransportHeaders(messageContext)).thenReturn(null);
-        PowerMockito.when(MDC.get(APIConstants.CORRELATION_ID)).thenReturn(null);
+        PowerMockito.when(ThreadContext.get(APIConstants.CORRELATION_ID)).thenReturn(null);
         PowerMockito.when(messageContext.getMessageID()).thenReturn("urn:uuid:"+ UUID.randomUUID().toString());
         PowerMockito.when(LogUtils.getResourceCacheKey(messageContext)).thenReturn(null);
 
@@ -80,7 +82,7 @@ public class LogsHandlerTestCase {
                 .thenReturn(treeMap);
         PowerMockito.when(LogUtils.getTransportHeaders(messageContext)).thenReturn(treeMap);
         String uuid = UUID.randomUUID().toString();
-        PowerMockito.when(MDC.get(APIConstants.CORRELATION_ID)).thenReturn(uuid);
+        PowerMockito.when(ThreadContext.get(APIConstants.CORRELATION_ID)).thenReturn(uuid);
         PowerMockito.when(messageContext.getMessageID()).thenReturn("urn:uuid:"+uuid);
         PowerMockito.when(LogUtils.getResourceCacheKey(messageContext)).thenReturn("/pizzashack/1.0.0/1.0.0/menu:GET");
 
