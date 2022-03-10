@@ -2875,34 +2875,6 @@ public class APIMappingUtil {
     }
 
     /**
-     * Returns uuid of the specified mediation policy.
-     *
-     * @param sequenceName mediation sequence name
-     * @param direction    in/out/fault
-     * @param dto          APIDetailedDTO contains details of the exporting API
-     * @return UUID of sequence or null
-     */
-    private static Map<String, String> getMediationPolicyAttributes(String sequenceName, String direction,
-                                                                    APIDTO dto) {
-
-        APIIdentifier apiIdentifier = new APIIdentifier(dto.getProvider(), dto.getName(),
-                dto.getVersion());
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
-            return APIUtil.getMediationPolicyAttributes(sequenceName, tenantId, direction, apiIdentifier);
-        } catch (UserStoreException e) {
-            log.error("Error occurred while reading tenant information ", e);
-
-        } catch (APIManagementException e) {
-            log.error("Error occurred while getting the uuid of the mediation sequence", e);
-        }
-
-        return null;
-    }
-
-    /**
      * Set API categories to API or APIProduct based on the instance type of the DTO object passes.
      *
      * @param dto   APIDTO or APIProductDTO

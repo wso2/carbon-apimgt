@@ -1289,16 +1289,6 @@ public interface APIProvider extends APIManager {
     ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
 
     /**
-     * Method to get the selected mediation sequence as a String.
-     * @param apiIdentifier : The API identifier
-     * @param type : The type of the selected mediation policy (IN, OUT, FAULT)
-     * @param name : Name of the selected mediation policy.
-     * @return : The content of the mediation policy as a string.
-     * @throws APIManagementException
-     */
-    String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
-
-    /**
      * Create API product
      * @param product product object containing details of the product
      * @return Map of APIs as keys and respective APIProductResources as values
@@ -1530,55 +1520,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void setThumbnailToAPI(String apiId, ResourceFile resource, String orgId) throws APIManagementException;
-
-    /**
-     * List all the mediation policies for the api
-     * @param apiId  ID of the API
-     * @param orgId  Identifier of an organization
-     * @return
-     * @throws APIManagementException
-     */
-    List<Mediation> getAllApiSpecificMediationPolicies(String apiId, String orgId) throws APIManagementException;
-
-    /**
-     * The mediation policies for the api
-     * @param apiId     ID of the API
-     * @param policyId  Policy id
-     * @param orgId     Identifier of an organization
-     * @return
-     * @throws APIManagementException
-     */
-    Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId, String orgId) throws APIManagementException;
-
-    /**
-     * upload mediation policy to api
-     * @param apiId           ID of the API
-     * @param mediationPolicy Mediation Policy
-     * @param organization    Identifier of an organization
-     * @return added policy
-     * @throws APIManagementException
-     */
-    Mediation addApiSpecificMediationPolicy(String apiId, Mediation mediationPolicy, String organization) throws APIManagementException;
-
-    /**
-     * update mediation policy content
-     * @param apiId           ID of the API
-     * @param mediationPolicy Mediation Policy
-     * @param orgId           Identifier of an organization
-     * @return added policy
-     * @throws APIManagementException
-     */
-    Mediation updateApiSpecificMediationPolicyContent(String apiId, Mediation mediationPolicy, String orgId)
-            throws APIManagementException;
-
-    /**
-     * delete mediation policy
-     * @param apiId             ID of the API
-     * @param mediationPolicyId Mediation Policy Id
-     * @param orgId             Identifier of an organization
-     * @throws APIManagementException
-     */
-    void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId, String orgId) throws APIManagementException;
 
     /**
      * Add or update graphql definition

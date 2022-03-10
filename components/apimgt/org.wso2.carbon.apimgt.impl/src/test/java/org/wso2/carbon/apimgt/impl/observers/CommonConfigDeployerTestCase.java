@@ -122,8 +122,6 @@ public class CommonConfigDeployerTestCase {
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.addDefaultTenantAdvancedThrottlePolicies(TENANT_DOMAIN, TENANT_ID);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
-        APIUtil.writeDefinedSequencesToTenantRegistry(TENANT_ID);
-        PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.loadTenantExternalStoreConfig(TENANT_DOMAIN);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.loadTenantGAConfig(TENANT_DOMAIN);

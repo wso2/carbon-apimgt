@@ -442,14 +442,6 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
 
-
-    //API mediation policies related
-    MEDIATION_POLICY_API_ALREADY_EXISTS(901800, "Mediation Policy Already Exists", 409,
-                                            "A mediation policy with the given name is already attached to the API"),
-
-    //mediation policies related common errors
-    MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
-                                                "The name of the mediation policy exceeds the max length (%s)"),
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),
     API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),

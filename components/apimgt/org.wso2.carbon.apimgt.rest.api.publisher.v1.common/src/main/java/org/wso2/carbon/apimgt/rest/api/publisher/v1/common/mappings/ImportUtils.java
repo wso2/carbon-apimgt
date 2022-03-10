@@ -1483,7 +1483,6 @@ public class ImportUtils {
         }
     }
 
-
     public static String retrieveSequenceContent(String pathToArchive, boolean specific, String type,
                                                  String sequenceName) {
 
