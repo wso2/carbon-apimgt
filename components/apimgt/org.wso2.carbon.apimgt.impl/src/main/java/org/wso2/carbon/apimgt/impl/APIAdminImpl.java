@@ -525,7 +525,7 @@ public class APIAdminImpl implements APIAdmin {
         }
 
         String issuer = keyManagerConfigurationDTO.getAdditionalProperties().get(ISSUER_KEY).toString();
-        if (StringUtils.isEmpty(issuer)) {
+        if (StringUtils.isNotEmpty(issuer)) {
             try {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Checking whether an Idp with issuer %s is registered.", issuer));
