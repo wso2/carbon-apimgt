@@ -684,8 +684,8 @@ public class ExportUtils {
         }
     }
 
-    public static void exportPolicyData(String policyFileName, OperationPolicyData policyData, String archivePath, ExportFormat exportFormat)
-            throws APIImportExportException, IOException {
+    public static void exportPolicyData(String policyFileName, OperationPolicyData policyData, String archivePath,
+                                        ExportFormat exportFormat) throws APIImportExportException, IOException {
 
         String policyName = archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
                 policyFileName;
