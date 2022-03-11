@@ -27,7 +27,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.dcr</artifactId>
-    <name>WSO2 Carbon API Manager- Dynamic Client Registration Web Service</name>
+    <name>WSO2 Carbon - Dynamic Client Registration Web Service</name>
     <description>WSO2 Carbon API Manager- Dynamic Client Registration Web</description>
     <packaging>war</packaging>
 
