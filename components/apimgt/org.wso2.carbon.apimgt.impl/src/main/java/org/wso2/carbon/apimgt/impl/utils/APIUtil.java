@@ -755,6 +755,8 @@ public final class APIUtil {
                     APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
             api.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
+            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
+            api.setGatewayType(artifact.getAttribute(APIConstants.API_POLICY_GATEWAY_TYPE));
             if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
                     .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
                 api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
@@ -11603,5 +11605,48 @@ public final class APIUtil {
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
 
+    }
+
+    /**
+     * Handles gateway vendor for Choreo Connect before insert DB operations.
+     *
+     * @param gatewayVendorType Gateway vendor
+     * @param gatewayType       Gateway type
+     * @return Choreo Connect gateway vendor
+     */
+    public static String setCCGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
+        if(gatewayType != null && gatewayType.equals(APIConstants.WSO2_CHOREO_CONNECT_GATEWAY)) {
+            gatewayVendorType =  APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        }
+        return gatewayVendorType;
+    }
+
+    /**
+     * Provides gateway type considering gateway vendor.
+     *
+     * @param gatewayVendor Gateway vendor type.
+     * @return gateway type
+     */
+    public static String getGatewayType(String gatewayVendor) {
+        String gatewayType = null;
+        if(gatewayVendor.equals(APIConstants.WSO2_GATEWAY_ENVIRONMENT)) {
+            gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
+        } else if (gatewayVendor.equals(APIConstants.WSO2_CHOREO_CONNECT_GATEWAY)) {
+            gatewayType = APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        }
+        return gatewayType;
+    }
+
+    /**
+     * Applies wso2 gateway vendor type for the Choreo Connect after retrieving from db.
+     *
+     * @param gatewayVendor Gateway vendor type
+     * @return wso2 gateway vendor type
+     */
+    public static String handleCCGatewayVendorRetrieval(String gatewayVendor) {
+        if (gatewayVendor.equals(APIConstants.WSO2_CHOREO_CONNECT_GATEWAY)) {
+            gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        }
+        return  gatewayVendor;
     }
 }

@@ -5309,6 +5309,10 @@ public class ApiMgtDAO {
                 //Remove the {version} part from the context template.
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
+
+            api.setGatewayVendor(APIUtil.setCCGatewayVendorBeforeInsertion(
+                    api.getGatewayVendor(), api.getGatewayType()));
+
             prepStmt.setString(5, contextTemplate);
             prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
@@ -6721,6 +6725,10 @@ public class ApiMgtDAO {
                 //Remove the {version} part from the context template.
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
+
+            api.setGatewayVendor(APIUtil.setCCGatewayVendorBeforeInsertion(
+                    api.getGatewayVendor(), api.getGatewayType()));
+
             prepStmt.setString(2, api.getId().getApiName());
             prepStmt.setString(3, contextTemplate);
             prepStmt.setString(4, username);
@@ -8010,6 +8018,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error occurred while fetching gateway vendor of the API with ID " + apiId, e);
         }
+        gatewayVendor = APIUtil.handleCCGatewayVendorRetrieval(gatewayVendor);
         return gatewayVendor;
     }
 

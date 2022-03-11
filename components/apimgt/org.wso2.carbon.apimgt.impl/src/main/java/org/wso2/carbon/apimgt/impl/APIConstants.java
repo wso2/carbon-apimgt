@@ -310,6 +310,8 @@ public final class APIConstants {
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
+    public static final String API_POLICY_GATEWAY_TYPE = "gatewayType";
     public static final String API_OVERVIEW_GATEWAY_VENDOR = "overview_gatewayVendor";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
@@ -2881,6 +2883,8 @@ public final class APIConstants {
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
+    public static final String WSO2_CHOREO_CONNECT_GATEWAY = "wso2/choreo-connect";
+    public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
 
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";

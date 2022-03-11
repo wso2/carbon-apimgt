@@ -1310,6 +1310,19 @@ public class API implements Serializable {
     }
 
     /**
+     * Property to hold the gateway type relevant to the policies
+     */
+    private String gatewayType;
+
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
+    }
+
+    /**
      * Property to hold Async API transport protocols
      */
     private String asyncTransportProtocols;

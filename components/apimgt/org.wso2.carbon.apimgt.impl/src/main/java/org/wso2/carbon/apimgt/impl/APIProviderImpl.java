@@ -8305,6 +8305,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
+                api.setGatewayType(APIUtil.getGatewayType(api.getGatewayVendor()));
+                api.setGatewayVendor(APIUtil.handleCCGatewayVendorRetrieval(api.getGatewayVendor()));
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";

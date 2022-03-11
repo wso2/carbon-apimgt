@@ -74,40 +74,6 @@ return null;
     private String createdTime = null;
     private String updatedTime = null;
     private String gatewayVendor = null;
-
-    @XmlType(name="GatewayTypeEnum")
-    @XmlEnum(String.class)
-    public enum GatewayTypeEnum {
-      WSO2_SYNAPSE("WSO2_SYNAPSE"),
-      WSO2_CHOREO_CONNECT("WSO2_CHOREO_CONNECT"),
-      NOT_SELECTED("NOT_SELECTED");
-      private String value;
-
-      GatewayTypeEnum(String v) {
-        value = v;
-      }
-
-      public String value() {
-        return value;
-      }
-
-      @Override
-      public String toString() {
-        return String.valueOf(value);
-      }
-
-      @JsonCreator
-      public static GatewayTypeEnum fromValue(String v) {
-        for (GatewayTypeEnum b : GatewayTypeEnum.values()) {
-          if (String.valueOf(b.value).equals(v)) {
-            return b;
-          }
-        }
-        return null;
-      }
-    }
-
-  private GatewayTypeEnum gatewayType = GatewayTypeEnum.NOT_SELECTED;
     private Boolean advertiseOnly = null;
 
   /**
@@ -405,24 +371,6 @@ return null;
   }
 
   /**
-   * The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.
-   **/
-  public APIInfoDTO gatewayType(GatewayTypeEnum gatewayType) {
-    this.gatewayType = gatewayType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "WSO2_SYNAPSE", value = "The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.")
-  @JsonProperty("gatewayType")
-  public GatewayTypeEnum getGatewayType() {
-    return gatewayType;
-  }
-  public void setGatewayType(GatewayTypeEnum gatewayType) {
-    this.gatewayType = gatewayType;
-  }
-
-  /**
    **/
   public APIInfoDTO advertiseOnly(Boolean advertiseOnly) {
     this.advertiseOnly = advertiseOnly;
@@ -466,13 +414,12 @@ return null;
         Objects.equals(createdTime, apIInfo.createdTime) &&
         Objects.equals(updatedTime, apIInfo.updatedTime) &&
         Objects.equals(gatewayVendor, apIInfo.gatewayVendor) &&
-        Objects.equals(gatewayType, apIInfo.gatewayType) &&
         Objects.equals(advertiseOnly, apIInfo.advertiseOnly);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, gatewayVendor, gatewayType, advertiseOnly);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, gatewayVendor, advertiseOnly);
   }
 
   @Override
@@ -497,7 +444,6 @@ return null;
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
-    sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("}");
     return sb.toString();

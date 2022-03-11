@@ -67,40 +67,6 @@ return null;
     private List<String> securityScheme = new ArrayList<String>();
     private String gatewayVendor = null;
 
-    @XmlType(name="GatewayTypeEnum")
-    @XmlEnum(String.class)
-    public enum GatewayTypeEnum {
-        WSO2_SYNAPSE("WSO2_SYNAPSE"),
-        WSO2_CHOREO_CONNECT("WSO2_CHOREO_CONNECT"),
-        NOT_SELECTED("NOT_SELECTED");
-        private String value;
-
-        GatewayTypeEnum(String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static GatewayTypeEnum fromValue(String v) {
-            for (GatewayTypeEnum b : GatewayTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-    }
-
-    private GatewayTypeEnum gatewayType = GatewayTypeEnum.NOT_SELECTED;
-
   /**
    * UUID of the api product 
    **/
@@ -260,24 +226,6 @@ return null;
     this.gatewayVendor = gatewayVendor;
   }
 
-  /**
-   * The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.
-   **/
-  public APIProductInfoDTO gatewayType(GatewayTypeEnum gatewayType) {
-    this.gatewayType = gatewayType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "WSO2_SYNAPSE", value = "The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.")
-  @JsonProperty("gatewayType")
-  public GatewayTypeEnum getGatewayType() {
-    return gatewayType;
-  }
-  public void setGatewayType(GatewayTypeEnum gatewayType) {
-    this.gatewayType = gatewayType;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -296,13 +244,12 @@ return null;
         Objects.equals(hasThumbnail, apIProductInfo.hasThumbnail) &&
         Objects.equals(state, apIProductInfo.state) &&
         Objects.equals(securityScheme, apIProductInfo.securityScheme) &&
-        Objects.equals(gatewayVendor, apIProductInfo.gatewayVendor) &&
-        Objects.equals(gatewayType, apIProductInfo.gatewayType);
+        Objects.equals(gatewayVendor, apIProductInfo.gatewayVendor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, securityScheme, gatewayVendor, gatewayType);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, securityScheme, gatewayVendor);
   }
 
   @Override
@@ -319,7 +266,6 @@ return null;
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
-    sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -229,39 +229,6 @@ return null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
     private String gatewayVendor = null;
-
-    @XmlType(name="GatewayTypeEnum")
-    @XmlEnum(String.class)
-    public enum GatewayTypeEnum {
-        WSO2_SYNAPSE("WSO2_SYNAPSE"),
-        WSO2_CHOREO_CONNECT("WSO2_CHOREO_CONNECT"),
-        NOT_SELECTED("NOT_SELECTED");
-        private String value;
-
-        GatewayTypeEnum(String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static GatewayTypeEnum fromValue(String v) {
-            for (GatewayTypeEnum b : GatewayTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-    }
-    private GatewayTypeEnum gatewayType = GatewayTypeEnum.NOT_SELECTED;
     private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<String> categories = new ArrayList<String>();
@@ -886,24 +853,6 @@ return null;
   }
 
   /**
-   * The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.
-   **/
-  public APIProductDTO gatewayType(GatewayTypeEnum gatewayType) {
-    this.gatewayType = gatewayType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "WSO2_SYNAPSE", value = "The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.")
-  @JsonProperty("gatewayType")
-  public GatewayTypeEnum getGatewayType() {
-    return gatewayType;
-  }
-  public void setGatewayType(GatewayTypeEnum gatewayType) {
-    this.gatewayType = gatewayType;
-  }
-
-  /**
    * APIs and resources in the API Product. 
    **/
   public APIProductDTO apis(List<ProductAPIDTO> apis) {
@@ -1020,7 +969,6 @@ return null;
         Objects.equals(createdTime, apIProduct.createdTime) &&
         Objects.equals(lastUpdatedTime, apIProduct.lastUpdatedTime) &&
         Objects.equals(gatewayVendor, apIProduct.gatewayVendor) &&
-        Objects.equals(gatewayType, apIProduct.gatewayType) &&
         Objects.equals(apis, apIProduct.apis) &&
         Objects.equals(scopes, apIProduct.scopes) &&
         Objects.equals(categories, apIProduct.categories) &&
@@ -1029,7 +977,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, gatewayVendor, gatewayType, apis, scopes, categories, workflowStatus);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, gatewayVendor, apis, scopes, categories, workflowStatus);
   }
 
   @Override
@@ -1072,7 +1020,6 @@ return null;
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
-    sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");

@@ -313,40 +313,7 @@ return null;
     private APIServiceInfoDTO serviceInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
     private String gatewayVendor = null;
-
-    @XmlType(name="GatewayTypeEnum")
-    @XmlEnum(String.class)
-    public enum GatewayTypeEnum {
-        WSO2_SYNAPSE("WSO2_SYNAPSE"),
-        WSO2_CHOREO_CONNECT("WSO2_CHOREO_CONNECT"),
-        NOT_SELECTED("NOT_SELECTED");
-        private String value;
-
-        GatewayTypeEnum(String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static GatewayTypeEnum fromValue(String v) {
-            for (GatewayTypeEnum b : GatewayTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-    }
-
-    private GatewayTypeEnum gatewayType = GatewayTypeEnum.NOT_SELECTED;
+    private String gatewayType = null;
     private List<String> asyncTransportProtocols = new ArrayList<String>();
 
   /**
@@ -1288,20 +1255,20 @@ return null;
   }
 
   /**
-   * The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.
+   * The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/choreo-connect.
    **/
-  public APIDTO gatewayType(GatewayTypeEnum gatewayType) {
+  public APIDTO gatewayType(String gatewayType) {
     this.gatewayType = gatewayType;
     return this;
   }
 
   
-  @ApiModelProperty(example = "WSO2_SYNAPSE", value = "The gateway type selected for the API. Used in gateway policy handling. Accepts one of the following. WSO2_SYNAPSE, WSO2_CHOREO_CONNECT, NOT_SELECTED.")
+  @ApiModelProperty(example = "wso2/synapse", value = "The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/choreo-connect.")
   @JsonProperty("gatewayType")
-  public GatewayTypeEnum getGatewayType() {
+  public String getGatewayType() {
     return gatewayType;
   }
-  public void setGatewayType(GatewayTypeEnum gatewayType) {
+  public void setGatewayType(String gatewayType) {
     this.gatewayType = gatewayType;
   }
 
