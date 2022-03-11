@@ -502,7 +502,8 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
                         APIConstants.WSDL_ELEMENT_LOCAL_NAME);
                 if (nodeList != null && nodeList.getLength() > 0) {
                     nodeList.item(0).setTextContent(
-                            APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+                            APIUtil.getGatewayEndpoint(transports, environmentName, environmentType, organization)
+                                    + context);
                 }
             }
         } else {
