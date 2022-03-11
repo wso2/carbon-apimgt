@@ -167,12 +167,6 @@
         <field type="text-area">
             <name>Cors Configuration</name>
         </field>
-        <field type="text">
-            <name>Gateway Vendor</name>
-        </field>
-        <field type="text">
-            <name>Async Transport Protocols</name>
-        </field>
         <field type="text-area">
             <name>Websub Subscription Configuration</name>
         </field>

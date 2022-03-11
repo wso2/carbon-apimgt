@@ -1258,7 +1258,11 @@ public class APIMappingUtil {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
 
-        dto.setGatewayVendor(StringUtils.toRootLowerCase(model.getGatewayVendor()));
+        if (model.getGatewayVendor() == null) {
+            dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        } else {
+            dto.setGatewayVendor(StringUtils.toRootLowerCase(model.getGatewayVendor()));
+        }
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
