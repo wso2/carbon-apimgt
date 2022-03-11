@@ -27,6 +27,7 @@ import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.analytics.Constants;
+
 import java.util.Map;
 
 /**
@@ -51,18 +52,21 @@ public class AnalyticsDataPublisher {
     public void initialize(AnalyticsCommonConfiguration commonConfig) {
         Map<String, String> configs = commonConfig.getConfigurations();
         String reporterClass = configs.get("publisher.reporter.class");
+        String reporterType = configs.get("type");
         try {
             MetricReporter metricReporter;
             if (reporterClass != null) {
                 metricReporter = MetricReporterFactory.getInstance()
                         .createMetricReporter(reporterClass, configs);
+            } else if (reporterType != null) {
+                metricReporter = MetricReporterFactory.getInstance().createLogMetricReporter(configs);
             } else {
                 metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
             }
 
             if (!StringUtils.isEmpty(commonConfig.getResponseSchema())) {
                 this.successMetricReporter = metricReporter.createCounterMetric(Constants.RESPONSE_METRIC_NAME,
-                                MetricSchema.valueOf(commonConfig.getResponseSchema()));
+                        MetricSchema.valueOf(commonConfig.getResponseSchema()));
             } else {
                 this.successMetricReporter = metricReporter
                         .createCounterMetric(Constants.RESPONSE_METRIC_NAME, MetricSchema.RESPONSE);
@@ -70,7 +74,7 @@ public class AnalyticsDataPublisher {
 
             if (!StringUtils.isEmpty(commonConfig.getFaultSchema())) {
                 this.faultyMetricReporter = metricReporter.createCounterMetric(Constants.FAULTY_METRIC_NAME,
-                                MetricSchema.valueOf(commonConfig.getFaultSchema()));
+                        MetricSchema.valueOf(commonConfig.getFaultSchema()));
             } else {
                 this.faultyMetricReporter = metricReporter
                         .createCounterMetric(Constants.FAULTY_METRIC_NAME, MetricSchema.ERROR);

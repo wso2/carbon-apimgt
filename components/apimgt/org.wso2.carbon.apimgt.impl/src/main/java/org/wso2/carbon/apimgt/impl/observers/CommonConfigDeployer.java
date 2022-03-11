@@ -82,20 +82,6 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
-
-            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-
-            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
-            }
-        }
-        // Need to continue the execution even if we encounter an error.
-        catch (Exception e) {
-            log.error("Failed to write defined sequences to tenant " + tenantDomain + "'s registry", e);
-        }
-
-        try {
             APIUtil.loadTenantExternalStoreConfig(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load external-stores.xml to tenant " + tenantDomain + "'s registry", e);

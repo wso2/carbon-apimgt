@@ -19,14 +19,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.18.13-SNAPSHOT</version>
+        <version>9.20.23-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>apimgt-stubs</artifactId>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-    <name>API Management</name>
+    <name>WSO2 Carbon - API Management Service Stub Aggregator Module</name>
     <modules>
         <module>org.wso2.carbon.apimgt.keymgt.stub</module>
     </modules>

@@ -396,7 +396,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
                     }
                     handleNoAuthentication(messageContext);
-                    return true;
+                    return ExtensionListenerUtil.postProcessRequest(messageContext, type);
                 }
                 try {
                     if (isAuthenticate(messageContext)) {

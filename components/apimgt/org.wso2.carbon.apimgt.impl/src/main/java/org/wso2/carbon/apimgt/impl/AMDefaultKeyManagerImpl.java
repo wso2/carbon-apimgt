@@ -492,8 +492,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException {
 
         ClientInfo updatedClient;
+        String encodedClientId =
+                Base64.getUrlEncoder().encodeToString(tokenRequest.getClientId().getBytes(StandardCharsets.UTF_8));
         try {
-            updatedClient = dcrClient.updateApplicationSecret(tokenRequest.getClientId());
+            updatedClient = dcrClient.updateApplicationSecret(encodedClientId);
             return updatedClient.getClientSecret();
 
         } catch (KeyManagerClientException e) {
