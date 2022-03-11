@@ -462,7 +462,8 @@ public class APIMappingUtil {
         return apidto;
     }
 
-    private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization) throws APIManagementException {
+    private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization)
+            throws APIManagementException {
         APIDTO apidto;
         apidto = fromAPItoDTO(model.getApi(), organization);
         JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());

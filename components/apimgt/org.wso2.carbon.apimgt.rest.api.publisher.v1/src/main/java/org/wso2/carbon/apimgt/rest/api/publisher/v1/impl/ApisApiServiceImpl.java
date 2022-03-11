@@ -62,7 +62,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -199,7 +198,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -3138,23 +3136,25 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             if (query.contains(":")) {
                 String[] queryTokens = query.split(":");
                 switch (queryTokens[0]) {
                 case "name":
-                    isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1]) ||
-                            apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1]);
+                    isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1], organization) ||
+                            apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1], organization);
                     break;
                 case "context":
                 default: // API version validation.
-                    isSearchArtifactExists = apiProvider.isContextExist(queryTokens[1]);
+                    isSearchArtifactExists = apiProvider.isContextExist(queryTokens[1], organization);
                     break;
                 }
 
             } else { // consider the query as api name
                 isSearchArtifactExists =
-                        apiProvider.isApiNameExist(query) || apiProvider.isApiNameWithDifferentCaseExist(query);
+                        apiProvider.isApiNameExist(query, organization) ||
+                                apiProvider.isApiNameWithDifferentCaseExist(query, organization);
             }
         } catch(APIManagementException e){
             RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);

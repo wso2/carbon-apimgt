@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -74,8 +73,6 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -83,7 +80,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
@@ -99,7 +95,6 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -141,6 +136,7 @@ public class AbstractAPIManagerTestCase {
     public static final String SAMPLE_RESOURCE_ID = "xyz";
     public static final String SAMPLE_API_RESOURCE_ID = "xyz";
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
+    public static final String SAMPLE_ORGANIZATION = "carbon.super";
     private PrivilegedCarbonContext privilegedCarbonContext;
     private PaginationContext paginationContext;
     private ApiMgtDAO apiMgtDAO;
@@ -944,10 +940,10 @@ public class AbstractAPIManagerTestCase {
     @Test
     public void testIsContextExist() throws APIManagementException {
         String context = "/t/sample";
-        Mockito.when(apiMgtDAO.isContextExist(Mockito.anyString())).thenReturn( true);
+        Mockito.when(apiMgtDAO.isContextExist(Mockito.anyString(), Mockito.anyString())).thenReturn( true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertTrue(abstractAPIManager.isContextExist(context));
+        Assert.assertTrue(abstractAPIManager.isContextExist(context, SAMPLE_ORGANIZATION));
     }
 
     @Test
@@ -977,11 +973,12 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsApiNameExist() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isApiNameExist(Mockito.anyString(), Mockito.anyString())).thenReturn(false, true);
+        Mockito.when(apiMgtDAO.isApiNameExist(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
-        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
+        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, SAMPLE_ORGANIZATION));
+        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, SAMPLE_ORGANIZATION));
 
     }
 

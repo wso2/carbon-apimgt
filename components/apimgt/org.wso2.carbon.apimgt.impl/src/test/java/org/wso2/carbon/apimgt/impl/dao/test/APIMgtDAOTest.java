@@ -864,7 +864,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,subscriber.getName());
         int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application,
                 APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
-        assertTrue(apiMgtDAO.isContextExist(api.getContext()));
+        assertTrue(apiMgtDAO.isContextExist(api.getContext(), api.getOrganization()));
         assertTrue(api.getContext().equals(apiMgtDAO.getAPIContext(api.getUuid())));
         apiMgtDAO.removeSubscription(apiId, application.getId());
         apiMgtDAO.removeSubscriptionById(subsId);
