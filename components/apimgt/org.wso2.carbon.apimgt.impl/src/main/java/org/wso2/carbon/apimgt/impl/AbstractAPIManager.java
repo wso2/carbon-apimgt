@@ -384,14 +384,14 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    public boolean isContextExist(String context) throws APIManagementException {
+    public boolean isContextExist(String context, String organization) throws APIManagementException {
         // Since we don't have tenant in the APIM table, we do the filtering using this hack
         if (context != null && context.startsWith("/t/"))
             context = context.replace("/t/" + getTenantDomainFromUrl(context), ""); //removing prefix
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             context = "/t/" + tenantDomain + context;
         }
-        return apiMgtDAO.isContextExist(context);
+        return apiMgtDAO.isContextExist(context, organization);
     }
 
     protected String getTenantDomainFromUrl(String url) {
@@ -452,22 +452,22 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isScopeKeyAssignedLocally(apiName, scopeKey, tenantId, organization);
     }
 
-    public boolean isApiNameExist(String apiName) throws APIManagementException {
+    public boolean isApiNameExist(String apiName, String organization) throws APIManagementException {
 
         String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             tenantName = tenantDomain;
         }
-        return apiMgtDAO.isApiNameExist(apiName, tenantName);
+        return apiMgtDAO.isApiNameExist(apiName, tenantName, organization);
     }
 
-    public boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException {
+    public boolean isApiNameWithDifferentCaseExist(String apiName, String organization) throws APIManagementException {
 
         String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             tenantName = tenantDomain;
         }
-        return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName);
+        return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName, organization);
     }
 
     public void addSubscriber(String username, String groupingId)
