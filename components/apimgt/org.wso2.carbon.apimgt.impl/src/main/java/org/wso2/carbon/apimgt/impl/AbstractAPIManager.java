@@ -530,6 +530,20 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * Returns the minimalistic information related to the given API under given organization. This will only query from AM database AM_API
+     * table.
+     *
+     * @param id UUID of the API
+     * @param organization organizationId          
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    @Override
+    public APIInfo getAPIInfoByUUID(String id, String organization) throws APIManagementException {
+        return apiMgtDAO.getAPIInfoByUUID(id, organization);
+    }
+
+    /**
      * Get API or APIProduct by registry artifact id
      *
      * @param uuid                  Registry artifact id

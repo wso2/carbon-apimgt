@@ -9409,6 +9409,60 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Retrieve basic information about the given API by the UUID and organization quering only from AM_API
+     *
+     * @param apiId UUID of the API
+     * @param organization organizationId
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    public APIInfo getAPIInfoByUUID(String apiId, String organization) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            APIRevision apiRevision = getRevisionByRevisionUUID(connection, apiId);
+            String sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID_AND_ORG;
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                if (apiRevision != null) {
+                    preparedStatement.setString(1, apiRevision.getApiUUID());
+                } else {
+                    preparedStatement.setString(1, apiId);
+                }
+                preparedStatement.setString(2, organization);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        APIInfo.Builder apiInfoBuilder = new APIInfo.Builder();
+                        apiInfoBuilder = apiInfoBuilder.id(resultSet.getString("API_UUID"))
+                                .name(resultSet.getString("API_NAME"))
+                                .version(resultSet.getString("API_VERSION"))
+                                .provider(resultSet.getString("API_PROVIDER"))
+                                .context(resultSet.getString("CONTEXT"))
+                                .contextTemplate(resultSet.getString("CONTEXT_TEMPLATE"))
+                                .status(APIUtil.getApiStatus(resultSet.getString("STATUS")))
+                                .apiType(resultSet.getString("API_TYPE"))
+                                .createdBy(resultSet.getString("CREATED_BY"))
+                                .createdTime(resultSet.getString("CREATED_TIME"))
+                                .updatedBy(resultSet.getString("UPDATED_BY"))
+                                .updatedTime(resultSet.getString("UPDATED_TIME"))
+                                .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
+                                .isRevision(apiRevision != null);
+                        if (apiRevision != null) {
+                            apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
+                                    apiRevision.getApiUUID(), apiId));
+                        } else {
+                            apiInfoBuilder = apiInfoBuilder.apiTier(resultSet.getString("API_TIER"));
+                        }
+                        return apiInfoBuilder.build();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return null;
+    }
+
     private APIRevision getRevisionByRevisionUUID(Connection connection, String revisionUUID) throws SQLException {
 
         try (PreparedStatement statement = connection

@@ -34,6 +34,7 @@ public class APIInfo {
     private String createdBy;
     private String updatedTime;
     private String updatedBy;
+    private String organization;
     private APIStatus status;
     private int revisionsCreated;
     private boolean isRevision;
@@ -202,6 +203,14 @@ public class APIInfo {
         isRevision = revision;
     }
 
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
     public static class Builder {
 
         private String id;
@@ -217,6 +226,7 @@ public class APIInfo {
         private String updatedTime;
         private String updatedBy;
         private APIStatus status;
+        private String organization;
         private int revisionsCreated;
         private boolean isRevision;
 
@@ -310,6 +320,11 @@ public class APIInfo {
             return this;
         }
 
+        public Builder organization(String organization) {
+            this.organization = organization;
+            return this;
+        }
+
         public APIInfo build() {
 
             APIInfo apiInfo = new APIInfo();
@@ -328,6 +343,7 @@ public class APIInfo {
             apiInfo.status = status;
             apiInfo.revisionsCreated = revisionsCreated;
             apiInfo.isRevision = isRevision;
+            apiInfo.organization = organization;
             return apiInfo;
         }
     }

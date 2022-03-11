@@ -3310,6 +3310,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         log.error("Error while deleting Resource Registration for API " + apiUuid +
                                 " on organization " + organization + " in Key Manager "
                                 + keyManagerDtoEntry.getKey(), e);
+                        isError = true;
                     }
                 }
             }

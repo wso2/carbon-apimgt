@@ -85,6 +85,17 @@ public interface APIManager {
     APIInfo getAPIInfoByUUID(String id) throws APIManagementException;
 
     /**
+     * Returns the minimalistic information about the API for given UUID and organization. This will only query from AM database AM_API
+     * table.
+     *
+     * @param id UUID of the API
+     * @param organization organizationId
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    APIInfo getAPIInfoByUUID(String id, String organization) throws APIManagementException;
+
+    /**
      * Get API or APIProduct by registry artifact id
      *
      * @param uuid   Registry artifact id
