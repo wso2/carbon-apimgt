@@ -44,11 +44,7 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a new common operation policy", notes = "This operation can be used to add a new common operation policy. ", response = OperationPolicyDataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies"),
-            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
-            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
+            @AuthorizationScope(scope = "apim:common_operation_policy_manage", description = "Add, Update and Delete common operation policies")
         })
     }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
@@ -65,10 +61,7 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a common operation policy", notes = "This operation can be used to delete an existing common opreation policy by providing the Id of the policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
-            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
+            @AuthorizationScope(scope = "apim:common_operation_policy_manage", description = "Add, Update and Delete common operation policies")
         })
     }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
@@ -86,10 +79,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @ApiOperation(value = "Export the operation policies specification schema.", notes = "This operation can be used to export the operation-policy-specification-schema.json used in deployment. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
-            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
-            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
+            @AuthorizationScope(scope = "apim:common_operation_policy_view", description = "View common operation policies")
         })
     }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
@@ -107,11 +98,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all common operation policies to all the APIs ", notes = "This operation provides you a list of all common operation policies that can be used by any API ", response = OperationPolicyDataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
-            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
-            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
+            @AuthorizationScope(scope = "apim:common_operation_policy_view", description = "View common operation policies"),
+            @AuthorizationScope(scope = "apim:common_operation_policy_manage", description = "Add, Update and Delete common operation policies")
         })
     }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
@@ -127,11 +115,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the details of a common operation policy by providing policy ID", notes = "This operation can be used to retrieve a particular common operation policy. ", response = OperationPolicyDataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
-            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
-            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
+            @AuthorizationScope(scope = "apim:common_operation_policy_view", description = "View common operation policies"),
+            @AuthorizationScope(scope = "apim:common_operation_policy_manage", description = "Add, Update and Delete common operation policies")
         })
     }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
@@ -148,11 +133,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Download a common operation policy", notes = "This operation can be used to download a selected common operation policy. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
-            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
-            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
+            @AuthorizationScope(scope = "apim:common_operation_policy_view", description = "View common operation policies"),
+            @AuthorizationScope(scope = "apim:common_operation_policy_manage", description = "Add, Update and Delete common operation policies")
         })
     }, tags={ "Operation Policies" })
     @ApiResponses(value = { 

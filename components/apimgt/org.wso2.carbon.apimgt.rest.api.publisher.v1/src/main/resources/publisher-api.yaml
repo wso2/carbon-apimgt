@@ -12180,6 +12180,8 @@ components:
             apim:mediation_policy_view: View mediation policies
             apim:mediation_policy_create: Create mediation policies
             apim:mediation_policy_manage: Update and delete mediation policies
+            apim:common_operation_policy_view: View common operation policies
+            apim:common_operation_policy_manage: Add, Update and Delete common operation policies
             apim:client_certificates_view: View client certificates
             apim:client_certificates_add: Add client certificates
             apim:client_certificates_update: Update and delete client certificates

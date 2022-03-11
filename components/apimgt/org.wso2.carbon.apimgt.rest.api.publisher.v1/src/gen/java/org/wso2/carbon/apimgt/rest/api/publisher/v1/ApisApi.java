@@ -165,7 +165,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add an API specific operation policy", notes = "This operation can be used to add an API specifc operation policy. This policy cannot be used in other APIs. ", response = OperationPolicyDataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies"),
             @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
@@ -461,8 +460,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an API Specific Operation Policy", notes = "This operation can be used to delete an existing API specific opreation policy by providing the Id of the API and the Id of the policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies"),
             @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
             @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
