@@ -9717,4 +9717,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return operationPoliciesMap;
     }
+
+    public  APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.checkAPIUUIDIsARevisionUUID(apiUUID);
+    }
+
 }

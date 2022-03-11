@@ -1940,6 +1940,24 @@ public interface APIProvider extends APIManager {
      */
     void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
 
+    /**
+     * Load the mediation policies if exists to the API. If a mediation policy is defined in the object under keys
+     * inSequence, outSequence or faultSequence, this method will search in the registry for a such sequence and
+     * populate the inSequenceMediation, outSequenceMediation or faultSequenceMediation attributes with a mediation
+     * object.
+     *
+     * @param api     API object
+     * @param organization Organization name
+     * @throws APIManagementException
+     */
     void loadMediationPoliciesToAPI(API api, String organization) throws APIManagementException;
+
+    /**
+     * Check whether the provided api uuid is a revisioned API's uuid or not.
+     *
+     * @param apiUUID    API UUID
+     * @throws APIManagementException
+     */
+    APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
 
 }

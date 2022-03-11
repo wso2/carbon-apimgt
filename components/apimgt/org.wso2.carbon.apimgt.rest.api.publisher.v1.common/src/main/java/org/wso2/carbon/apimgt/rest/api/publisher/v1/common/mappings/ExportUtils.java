@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
@@ -625,6 +626,15 @@ public class ExportUtils {
             throws APIManagementException {
 
         try {
+
+            String currentApiUuid;
+            APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiID);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                currentApiUuid = apiRevision.getApiUUID();
+            } else {
+                currentApiUuid = apiID;
+            }
+
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
             Set<URITemplate> uriTemplates = api.getUriTemplates();
             Set<String> exportedPolicies = new HashSet<>();
@@ -638,8 +648,8 @@ public class ExportUtils {
                                     policy.getPolicyVersion());
                             if (policy.getPolicyId() != null) {
                                 OperationPolicyData policyData =
-                                        apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
-                                                tenantDomain, true);
+                                        apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
+                                                currentApiUuid, tenantDomain, true);
                                 if (policyData != null) {
                                     exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
                                     exportedPolicies.add(policy.getPolicyName());
