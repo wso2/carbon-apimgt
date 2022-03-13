@@ -7514,6 +7514,8 @@ paths:
                 $ref: '#/components/schemas/OperationPolicyDataList'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_view    #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
@@ -7579,6 +7581,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_manage
@@ -7622,6 +7626,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_view   #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
@@ -7654,6 +7660,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_manage
@@ -7694,6 +7702,8 @@ paths:
                 format: binary
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_view  #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
@@ -7739,6 +7749,8 @@ paths:
                 $ref: '#/components/schemas/OperationPolicyDataList'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:common_operation_policy_view
@@ -7799,6 +7811,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:common_operation_policy_manage
@@ -7837,6 +7851,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:common_operation_policy_view
@@ -7865,6 +7881,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:common_operation_policy_manage
@@ -7901,6 +7919,8 @@ paths:
                 format: binary
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:common_operation_policy_view
@@ -7909,46 +7929,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
-
-  /operation-policies/specification/schema:
-    get:
-      tags:
-        - Operation Policies
-      summary: Export the operation policies specification schema.
-      description: |
-        This operation can be used to export the operation-policy-specification-schema.json used in deployment.
-      operationId: exportOperationPolicySpecificationSchema
-      responses:
-        200:
-          description: |
-            OK.
-            Operation policy specification schema exported successfully.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                type: string
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:mediation_policy_view
-            - apim:common_operation_policy_view
-      x-code-samples:
-        - lang: Shell
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/v2/operation-policies/specification/schema" > operation-policy-specification-schema.json'
-
 
   /api-products/change-lifecycle:
     post:

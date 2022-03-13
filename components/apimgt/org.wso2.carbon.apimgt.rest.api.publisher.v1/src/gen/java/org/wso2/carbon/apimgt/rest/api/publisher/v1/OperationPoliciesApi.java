@@ -50,7 +50,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "OK. Shared operation policy uploaded ", response = OperationPolicyDataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response addCommonOperationPolicy( @Multipart(value = "policySpecFile", required = false) InputStream policySpecFileInputStream, @Multipart(value = "policySpecFile" , required = false) Attachment policySpecFileDetail,  @Multipart(value = "synapsePolicyDefinitionFile", required = false) InputStream synapsePolicyDefinitionFileInputStream, @Multipart(value = "synapsePolicyDefinitionFile" , required = false) Attachment synapsePolicyDefinitionFileDetail,  @Multipart(value = "ccPolicyDefinitionFile", required = false) InputStream ccPolicyDefinitionFileInputStream, @Multipart(value = "ccPolicyDefinitionFile" , required = false) Attachment ccPolicyDefinitionFileDetail) throws APIManagementException{
         return delegate.addCommonOperationPolicy(policySpecFileInputStream, policySpecFileDetail, synapsePolicyDefinitionFileInputStream, synapsePolicyDefinitionFileDetail, ccPolicyDefinitionFileInputStream, ccPolicyDefinitionFileDetail, securityContext);
     }
@@ -67,29 +68,10 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response deleteCommonOperationPolicyByPolicyId(@ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
-        return delegate.deleteCommonOperationPolicyByPolicyId(operationPolicyId, securityContext);
-    }
-
-    @GET
-    @Path("/specification/schema")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Export the operation policies specification schema.", notes = "This operation can be used to export the operation-policy-specification-schema.json used in deployment. ", response = String.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
-            @AuthorizationScope(scope = "apim:common_operation_policy_view", description = "View common operation policies")
-        })
-    }, tags={ "Operation Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Operation policy specification schema exported successfully. ", response = String.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response exportOperationPolicySpecificationSchema() throws APIManagementException{
-        return delegate.exportOperationPolicySpecificationSchema(securityContext);
+    public Response deleteCommonOperationPolicyByPolicyId(@ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
+        return delegate.deleteCommonOperationPolicyByPolicyId(operationPolicyId, securityContext);
     }
 
     @GET
@@ -104,7 +86,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     }, tags={ "Operation Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying policies is returned. ", response = OperationPolicyDataListDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getAllCommonOperationPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "-Not supported yet-")  @QueryParam("query") String query) throws APIManagementException{
         return delegate.getAllCommonOperationPolicies(limit, offset, query, securityContext);
     }
@@ -122,7 +105,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = OperationPolicyDataDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getCommonOperationPolicyByPolicyId(@ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
         return delegate.getCommonOperationPolicyByPolicyId(operationPolicyId, securityContext);
     }
@@ -139,7 +123,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     }, tags={ "Operation Policies" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Operation policy returned. ", response = File.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getCommonOperationPolicyContentByPolicyId(@ApiParam(value = "Operation policy Id ",required=true) @PathParam("operationPolicyId") String operationPolicyId) throws APIManagementException{
         return delegate.getCommonOperationPolicyContentByPolicyId(operationPolicyId, securityContext);
     }
