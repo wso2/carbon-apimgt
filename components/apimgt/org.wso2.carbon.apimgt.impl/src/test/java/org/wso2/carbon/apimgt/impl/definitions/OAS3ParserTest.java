@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -138,6 +139,25 @@ public class OAS3ParserTest extends OASTestBase {
         APIDefinitionValidationResponse response = oas3Parser.validateAPIDefinition(openApi, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(oas3Parser.getClass()));
+    }
+
+    @Test
+    public void testOpenApi3WithEmptyDescriptionsInResponseObjects() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_uri_template.json";
+        String openAPISpec300 =
+                IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        OpenAPI openAPI = oas3Parser.getOpenAPI(openAPISpec300);
+        Paths paths = openAPI.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                for (String responseEntry : operation.getResponses().keySet()) {
+                    String description = operation.getResponses().get(responseEntry).getDescription();
+                    Assert.assertEquals("", description);
+                }
+            }
+        }
     }
 
 }

@@ -1463,7 +1463,7 @@
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-models</artifactId>
-                <version>${swagger.models.version}</version>
+                <version>${swagger.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -2056,7 +2056,7 @@
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>
-        <openapi.generator.version>4.3.1.wso2v4</openapi.generator.version>
+        <openapi.generator.version>4.3.1.wso2v3</openapi.generator.version>
         <caffeine.version>2.8.1</caffeine.version>
         <cal10n.version>0.8.1</cal10n.version>
         <commons-lang.version>2.4</commons-lang.version>
@@ -2087,23 +2087,23 @@
 	    <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v1</swagger.inflector.oas3.version>
-        <swagger.parser.version>1.0.57.wso2v1</swagger.parser.version>
-        <swagger.parser.v3.version>2.0.29.wso2v1</swagger.parser.v3.version>
-        <swagger.core.version>1.6.5</swagger.core.version>
-        <swagger.models.version>1.6.5</swagger.models.version>
-        <swagger.annotations.version>1.6.5</swagger.annotations.version>
+        <swagger.parser.version>1.0.51.wso2v1</swagger.parser.version>
+        <swagger.parser.v3.version>2.0.20.wso2v1</swagger.parser.v3.version>
+        <swagger.core.version>1.6.1</swagger.core.version>
+        <swagger.models.version>1.6.1</swagger.models.version>
+        <swagger.annotations.version>1.6.1</swagger.annotations.version>
         <servicemix.bundles.jedis.version>3.3.0_1</servicemix.bundles.jedis.version>
-        <google.guava.version>31.0.1-jre</google.guava.version>
+        <google.guava.version>27.0-jre</google.guava.version>
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
         <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
         <velocity.version>2.1</velocity.version>
-        <fasterxml.jackson.version>2.13.1</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.13.1</fasterxml.jackson.databind.version>
-        <fasterxml.jackson.core.version>2.13.1</fasterxml.jackson.core.version>
+        <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
+        <fasterxml.jackson.databind.version>2.10.3</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.core.version>2.11.0.wso2v1</fasterxml.jackson.core.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.3.14</carbon.broker.version>
         <waffle-jna.version>1.6.wso2v6</waffle-jna.version>
-        <version.snake.yaml>1.28</version.snake.yaml>
+        <version.snake.yaml>1.26</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>1.7.29</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
@@ -2130,7 +2130,7 @@
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
         <swagger3-codegen-maven-plugin.version>3.0.19</swagger3-codegen-maven-plugin.version>
-        <swagger3.core.version>2.1.12</swagger3.core.version>
+        <swagger3.core.version>2.1.5</swagger3.core.version>
         <javax.enterprise.version>2.0</javax.enterprise.version>
         <jaeger.client.version>0.32.0.wso2v4</jaeger.client.version>
         <zipkin.sender.okhttp3.version>2.12.1</zipkin.sender.okhttp3.version>
