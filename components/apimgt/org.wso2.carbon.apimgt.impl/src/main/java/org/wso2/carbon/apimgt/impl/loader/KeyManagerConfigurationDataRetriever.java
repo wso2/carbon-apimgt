@@ -57,6 +57,7 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                     HttpResponse httpResponse = null;
                     int retryCount = 0;
                     boolean retry;
+                    int maxRetries = 15;
                     do {
                         try {
                             httpResponse = httpClient.execute(method);
@@ -86,17 +87,21 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                                 retryCount++;
                             }
                         } catch (IOException ex) {
-                            retryCount++;
-                            int maxRetries = 15;
                             if (retryCount < maxRetries) {
                                 retry = true;
-                                long retryTimeout = (long) Math.min(Math.pow(2, retryCount), 300);
-                                log.warn("Failed retrieving Key Manager Configurations from remote " +
-                                        "endpoint: " + ex.getMessage()
-                                        + ". Retrying after " + retryTimeout + " seconds...");
-                                Thread.sleep(retryTimeout * 1000);
                             } else {
                                 throw ex;
+                            }
+                        }
+                        if (retry) {
+                            if (retryCount < maxRetries) {
+                                retryCount++;
+                                long retryTimeout = (long) Math.min(Math.pow(2, retryCount), 300);
+                                log.warn("Failed retrieving Key Manager Configurations from remote " +
+                                        "endpoint. Retrying after " + retryTimeout + " seconds...");
+                                Thread.sleep(retryTimeout * 1000);
+                            } else {
+                                log.error("Failed to retrieve Key Manager configuration with " + retryCount + " times.");
                             }
                         }
                     } while (retry);
@@ -108,6 +113,6 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
     }
 
     public void startLoadKeyManagerConfigurations() {
-        new Timer().schedule(this, ((int) (Math.random() * 60) + 900) * 1000);
+        new Timer().schedule(this, 5);
     }
 }

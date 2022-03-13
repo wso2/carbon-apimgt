@@ -422,7 +422,7 @@ public class RegistrySearchUtil {
                 } else {
                     // solr result grouping is used when displayMultipleVersions is not enabled(default).
                     modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria +
-                            "&group=true&group.field=name&group.ngroups=true&group.sort=versionTimestamp desc";
+                            "&group=true&group.field=name&group.ngroups=true&group.sort=versionComparable desc";
                 }
             }
             

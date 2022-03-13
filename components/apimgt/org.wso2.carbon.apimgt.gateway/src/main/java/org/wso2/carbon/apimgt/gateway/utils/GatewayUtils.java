@@ -560,6 +560,7 @@ public class GatewayUtils {
             authContext.setKeyType(apiKeyValidationInfoDTO.getType());
             authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
             authContext.setApplicationUUID(apiKeyValidationInfoDTO.getApplicationUUID());
+            authContext.setApplicationGroupIds(apiKeyValidationInfoDTO.getApplicationGroupIds());
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
