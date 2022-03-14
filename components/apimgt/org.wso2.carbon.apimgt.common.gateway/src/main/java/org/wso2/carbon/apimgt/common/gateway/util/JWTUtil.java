@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -91,8 +90,8 @@ public final class JWTUtil {
             byte[] digestInBytes = digestValue.digest();
             String publicCertThumbprint = hexify(digestInBytes);
             String base64UrlEncodedThumbPrint;
-            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                    .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+            base64UrlEncodedThumbPrint = new String(new Base64(0, null, true).
+                    encode(publicCertThumbprint.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             StringBuilder jwtHeader = new StringBuilder();
             /*
              * Sample header
@@ -110,7 +109,7 @@ public final class JWTUtil {
             jwtHeader.append("\"}");
             return jwtHeader.toString();
 
-        } catch (NoSuchAlgorithmException | CertificateEncodingException | UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
             throw new JWTGeneratorException("Error in generating public certificate thumbprint", e);
         }
     }
