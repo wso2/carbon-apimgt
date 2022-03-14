@@ -2773,8 +2773,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         } else {
                             OperationPolicyData commonPolicyData =
                                     getCommonOperationPolicyByPolicyName(policy.getPolicyName(),
- policy.getPolicyVersion(), tenantDomain, false);
+                                            policy.getPolicyVersion(), tenantDomain, false);
                             if (commonPolicyData != null) {
+                                log.info(commonPolicyData.getPolicyId());
                                 // A common policy is found for specified policy. This will be validated according to the provided
                                 // attributes and added to API policy list
                                 if (log.isDebugEnabled()) {
@@ -2783,7 +2784,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 }
                                 OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
                                 if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api)) {
-                                    policy.setPolicyId(policyData.getPolicyId());
+                                    policy.setPolicyId(commonPolicyData.getPolicyId());
                                     validatedPolicies.add(policy);
                                 }
                             } else {
