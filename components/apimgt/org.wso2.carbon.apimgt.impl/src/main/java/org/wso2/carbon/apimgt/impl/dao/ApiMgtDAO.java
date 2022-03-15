@@ -5312,7 +5312,7 @@ public class ApiMgtDAO {
 
             // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
             // This value is determined considering the gateway type comes with the request.
-            api.setGatewayVendor(APIUtil.setCCGatewayVendorBeforeInsertion(
+            api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
                     api.getGatewayVendor(), api.getGatewayType()));
 
             prepStmt.setString(5, contextTemplate);
@@ -6730,7 +6730,7 @@ public class ApiMgtDAO {
 
             // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
             // This value is determined considering the gateway type comes with the request.
-            api.setGatewayVendor(APIUtil.setCCGatewayVendorBeforeInsertion(
+            api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
                     api.getGatewayVendor(), api.getGatewayType()));
 
             prepStmt.setString(2, api.getId().getApiName());
@@ -8022,7 +8022,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error occurred while fetching gateway vendor of the API with ID " + apiId, e);
         }
-        gatewayVendor = APIUtil.handleCCGatewayVendorRetrieval(gatewayVendor);
+        gatewayVendor = APIUtil.handleGatewayVendorRetrieval(gatewayVendor);
         return gatewayVendor;
     }
 
