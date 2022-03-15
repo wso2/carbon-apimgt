@@ -3153,6 +3153,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     // failed cleanup processes are ignored to prevent failing the deletion process
                     log.warn("Failed to clean pending subscription approval task");
                 }
+            } else if (APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(status)) {
+                try {
+                    String subId = null;
+                    if (apiIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiIdentifier.getUUID(), applicationId);
+                    } else if (apiProdIdentifier != null) {
+                        subId = apiMgtDAO.getSubscriptionId(apiProdIdentifier.getUUID(), applicationId);
+                    }
+                    if (subId != null) {
+                        WorkflowDTO wf = apiMgtDAO.retrieveWorkflowFromInternalReference(subId,
+                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+                        WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(
+                                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+                        updateSubscriptionWFExecutor.cleanUpPendingTask(wf.getExternalWorkflowReference());
+                    }
+
+                } catch (WorkflowException ex) {
+                    // failed cleanup processes are ignored to prevent failing the deletion process
+                    log.warn("Failed to clean pending subscription update approval task");
+                }
             }
 
             // update attributes of the new remove workflow to be created
