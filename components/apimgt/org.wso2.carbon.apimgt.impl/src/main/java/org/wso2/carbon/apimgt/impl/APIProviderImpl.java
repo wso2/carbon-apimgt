@@ -8290,14 +8290,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Organization org = new Organization(organization);
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
-            //Gateway type is obtained considering the gateway vendor.
-            publisherAPI.setGatewayType(APIUtil.getGatewayType(publisherAPI.getGatewayVendor()));
-            publisherAPI.setGatewayVendor(APIUtil.handleCCGatewayVendorRetrieval(publisherAPI.getGatewayVendor()));
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 APIIdentifier apiIdentifier = api.getId();
                 apiIdentifier.setUuid(uuid);
                 api.setId(apiIdentifier);
+                //Gateway type is obtained considering the gateway vendor.
+                api.setGatewayType(APIUtil.getGatewayType(publisherAPI.getGatewayVendor()));
+                api.setGatewayVendor(APIUtil.handleCCGatewayVendorRetrieval(publisherAPI.getGatewayVendor()));
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);

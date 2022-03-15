@@ -89,7 +89,6 @@ public class PublisherAPI extends PublisherAPIInfo {
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
     private String gatewayVendor;
-    private String gatewayType;
     private String asyncTransportProtocols;
 
     private String versionTimestamp;
@@ -542,14 +541,6 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.gatewayVendor = gatewayVendor;
     }
 
-    public String getGatewayType() {
-        return gatewayType;
-    }
-
-    public void setGatewayType(String gatewayType) {
-        this.gatewayType = gatewayType;
-    }
-
     public String getAsyncTransportProtocols() { return asyncTransportProtocols; }
 
     public void setAsyncTransportProtocols(String asyncTransportProtocols) {
@@ -635,7 +626,7 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + ", versionTimestamp=" + versionTimestamp + ",apiExternalProductionEndpoint="
                 + apiExternalProductionEndpoint + ",apiExternalSandboxEndpoint=" + apiExternalSandboxEndpoint
                 + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor
-                + ", gatewayType=" + gatewayType + ", toString()=" + super.toString() + "]";
+                + ", toString()=" + super.toString() + "]";
     }
 }
 
