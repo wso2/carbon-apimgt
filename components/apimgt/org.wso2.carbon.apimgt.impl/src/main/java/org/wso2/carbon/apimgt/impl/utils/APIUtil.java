@@ -11346,17 +11346,18 @@ public final class APIUtil {
                                 OperationPolicyData policyData = new OperationPolicyData();
                                 policyData.setSpecification(policySpec);
                                 policyData.setOrganization(organization);
-
+                                String policyFileName = getOperationPolicyFileName(policySpec.getName(),
+                                        policySpec.getVersion());
                                 OperationPolicyDefinition synapsePolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                                policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                                                policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
                                 if (synapsePolicyDefinition != null) {
                                     synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
                                     policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
                                 }
                                 OperationPolicyDefinition ccPolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                                policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                                                policyFileName, APIConstants.CC_POLICY_DEFINITION_EXTENSION);
                                 if (ccPolicyDefinition != null) {
                                     ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
                                     policyData.setCcPolicyDefinition(ccPolicyDefinition);
@@ -11384,19 +11385,19 @@ public final class APIUtil {
      * Read the operation policy definition from the provided path and return the definition object
      *
      * @param extractedFolderPath   Location of the policy definition
-     * @param policyName            Name of the policy
+     * @param definitionFileName    Name of the policy file
      * @param fileExtension         Since there can be both synapse and choreo connect definitons, fileExtension is used
      *
      * @return OperationPolicyDefinition
      */
     public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
-                                                                                 String policyName,
+                                                                                 String definitionFileName,
                                                                                  String fileExtension)
             throws APIManagementException {
 
         OperationPolicyDefinition policyDefinition = null;
         try {
-            String fileName = extractedFolderPath + File.separator + policyName + fileExtension;
+            String fileName = extractedFolderPath + File.separator + definitionFileName + fileExtension;
             if (checkFileExistence(fileName)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Found policy definition file " + fileName);
@@ -11597,6 +11598,13 @@ public final class APIUtil {
         return policyData;
     }
 
+
+    public static String getOperationPolicyFileName(String policyName, String policyVersion) {
+        if (StringUtils.isEmpty(policyVersion)) {
+            policyVersion = "v1";
+        }
+        return policyName + "_" + policyVersion;
+    }
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);

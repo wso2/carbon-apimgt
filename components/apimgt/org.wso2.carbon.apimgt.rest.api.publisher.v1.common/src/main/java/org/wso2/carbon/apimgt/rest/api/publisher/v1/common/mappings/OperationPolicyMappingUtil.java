@@ -56,6 +56,7 @@ public class OperationPolicyMappingUtil {
 
         OperationPolicy operationPolicy = new OperationPolicy();
         operationPolicy.setPolicyName(operationPolicyDTO.getPolicyName());
+        operationPolicy.setPolicyVersion(operationPolicyDTO.getPolicyVersion());
         operationPolicy.setPolicyId(operationPolicyDTO.getPolicyId());
         operationPolicy.setParameters(operationPolicyDTO.getParameters());
         return operationPolicy;
@@ -65,6 +66,7 @@ public class OperationPolicyMappingUtil {
 
         OperationPolicyDTO dto = new OperationPolicyDTO();
         dto.setPolicyName(operationPolicy.getPolicyName());
+        dto.setPolicyVersion(operationPolicy.getPolicyVersion());
         dto.setPolicyId(operationPolicy.getPolicyId());
         dto.setParameters(operationPolicy.getParameters());
         return dto;
