@@ -19,7 +19,7 @@
       },
       {
         "Name": "apim:api_view",
-        "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics"
+        "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics,Internal/observer"
       },
       {
         "Name": "apim:api_delete",
@@ -362,6 +362,10 @@
     "DevOpsRole" : {
       "CreateOnTenantLoad" : true,
       "RoleName" : "Internal/devops"
+    },
+    "ObserverRole" : {
+      "CreateOnTenantLoad" : true,
+      "RoleName" : "Internal/observer"
     },
     "IntegrationDeveloperRole" : {
       "CreateOnTenantLoad" : true,
