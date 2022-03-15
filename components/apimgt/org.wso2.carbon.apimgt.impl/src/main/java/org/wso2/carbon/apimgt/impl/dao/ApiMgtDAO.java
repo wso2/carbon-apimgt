@@ -5310,6 +5310,8 @@ public class ApiMgtDAO {
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
 
+            // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
+            // This value is determined considering the gateway type comes with the request.
             api.setGatewayVendor(APIUtil.setCCGatewayVendorBeforeInsertion(
                     api.getGatewayVendor(), api.getGatewayType()));
 
@@ -6726,6 +6728,8 @@ public class ApiMgtDAO {
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
 
+            // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
+            // This value is determined considering the gateway type comes with the request.
             api.setGatewayVendor(APIUtil.setCCGatewayVendorBeforeInsertion(
                     api.getGatewayVendor(), api.getGatewayType()));
 

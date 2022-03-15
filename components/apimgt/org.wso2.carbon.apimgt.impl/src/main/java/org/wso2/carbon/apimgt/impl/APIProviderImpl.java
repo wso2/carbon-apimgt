@@ -8290,6 +8290,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Organization org = new Organization(organization);
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            //Gateway type is obtained considering the gateway vendor.
+            publisherAPI.setGatewayType(APIUtil.getGatewayType(publisherAPI.getGatewayVendor()));
+            publisherAPI.setGatewayVendor(APIUtil.handleCCGatewayVendorRetrieval(publisherAPI.getGatewayVendor()));
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 APIIdentifier apiIdentifier = api.getId();
@@ -8305,8 +8308,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
-                api.setGatewayType(APIUtil.getGatewayType(api.getGatewayVendor()));
-                api.setGatewayVendor(APIUtil.handleCCGatewayVendorRetrieval(api.getGatewayVendor()));
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";

@@ -635,7 +635,7 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + ", versionTimestamp=" + versionTimestamp + ",apiExternalProductionEndpoint="
                 + apiExternalProductionEndpoint + ",apiExternalSandboxEndpoint=" + apiExternalSandboxEndpoint
                 + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor
-                + ", toString()=" + super.toString() + "]";
+                + ", gatewayType=" + gatewayType + ", toString()=" + super.toString() + "]";
     }
 }
 
