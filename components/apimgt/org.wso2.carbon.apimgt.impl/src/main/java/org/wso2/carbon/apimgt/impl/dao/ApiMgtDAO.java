@@ -8686,6 +8686,43 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieves subscription Id for APIIdentifier and applicationId
+     *
+     * @param uuid    API subscribed
+     * @param applicationId application with subscription
+     * @return subscription id
+     * @throws APIManagementException
+     */
+    public String getSubscriptionId(String uuid, int applicationId) throws APIManagementException {
+
+        String subId = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int id = -1;
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_ID_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            id = getAPIID(uuid, conn);
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, id);
+            ps.setInt(2, applicationId);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                subId = rs.getString("SUBSCRIPTION_ID");
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription id for " +
+                    "Application : " + applicationId + ", API with UUID: " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return subId;
+    }
+    /**
      * Retrieve subscription create state for APIIdentifier and applicationID
      *
      * @param identifier    - api identifier which is subscribed
