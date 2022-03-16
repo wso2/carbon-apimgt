@@ -1540,7 +1540,7 @@
             </dependency>
 
             <dependency>
-                <groupId>commons-scxml.wso2</groupId>
+                <groupId>org.wso2.orbit.commons-scxml</groupId>
                 <artifactId>commons-scxml</artifactId>
                 <version>${commons.scxml.version}</version>
             </dependency>
@@ -2095,13 +2095,13 @@
         <servicemix.bundles.jedis.version>3.3.0_1</servicemix.bundles.jedis.version>
         <google.guava.version>31.0.1-jre</google.guava.version>
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
-        <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
+        <commons.scxml.version>0.9.0.wso2v2</commons.scxml.version>
         <velocity.version>2.1</velocity.version>
         <fasterxml.jackson.version>2.13.1</fasterxml.jackson.version>
         <fasterxml.jackson.databind.version>2.13.1</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.13.1</fasterxml.jackson.core.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
-        <carbon.broker.version>3.3.23</carbon.broker.version>
+        <carbon.broker.version>3.3.24</carbon.broker.version>
         <andes.version>3.3.22</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
         <version.snake.yaml>1.28</version.snake.yaml>
