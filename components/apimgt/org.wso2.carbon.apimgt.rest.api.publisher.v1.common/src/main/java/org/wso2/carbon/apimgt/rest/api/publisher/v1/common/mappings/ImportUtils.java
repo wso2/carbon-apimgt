@@ -258,7 +258,7 @@ public class ImportUtils {
                                 importedApiDTO.getProvider(), organization);
 
                 // Set API definition to validationResponse if the API is imported with sample API definition
-                if (validationResponse.isInit()) {
+                if (validationResponse != null && validationResponse.isInit()) {
                     validationResponse.setContent(importedApi.getSwaggerDefinition());
                     validationResponse.setJsonContent(importedApi.getSwaggerDefinition());
                 }
