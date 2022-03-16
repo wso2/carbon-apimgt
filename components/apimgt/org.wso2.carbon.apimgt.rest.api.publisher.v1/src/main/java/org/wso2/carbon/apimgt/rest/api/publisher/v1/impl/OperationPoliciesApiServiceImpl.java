@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -44,7 +46,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URLConnection;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -81,27 +82,34 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             if (policySpecFileInputStream != null) {
-                String jsonContent = "";
-                jsonContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
+                String specFileName = policySpecFileDetail.getDataHandler().getName();
+                String specExtension = FilenameUtils.getExtension(specFileName);
+                if (!APIConstants.ALLOWED_POLICY_SPEC_EXTENSIONS.contains(specExtension)) {
+                    RestApiUtil.handleBadRequest("Unsupported Policy specification File Extension. " +
+                            "Supported extensions are " +
+                            APIConstants.ALLOWED_POLICY_SPEC_EXTENSIONS.toArray().toString(), log);
+                }
 
-                String fileName = policySpecFileDetail.getDataHandler().getName();
-                String fileContentType = URLConnection.guessContentTypeFromName(fileName);
-                if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
-                    fileContentType = policySpecFileDetail.getContentType().toString();
+                String policySpecContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream);
+                if (APIConstants.YAML_FILE_EXTENSION_TYPE.equals(specExtension)) {
+                    policySpecContent = CommonUtil.yamlToJson(policySpecContent);
                 }
-                if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
-                    jsonContent = CommonUtil.yamlToJson(jsonContent);
-                }
-                policySpecification = APIUtil.getValidatedOperationPolicySpecification(jsonContent);
+                policySpecification = APIUtil.getValidatedOperationPolicySpecification(policySpecContent);
 
                 OperationPolicyData operationPolicyData = new OperationPolicyData();
                 operationPolicyData.setOrganization(organization);
                 operationPolicyData.setSpecification(policySpecification);
 
                 if (synapsePolicyDefinitionFileInputStream != null) {
+                    String synapseDefFileName = synapsePolicyDefinitionFileDetail.getDataHandler().getName();
+                    String synapseDefExtension = FilenameUtils.getExtension(synapseDefFileName);
+                    if (!APIConstants.ALLOWED_SYNAPSE_POLICY_DEFINITION_EXTENSIONS.contains(synapseDefExtension)) {
+                        RestApiUtil.handleBadRequest("Unsupported Synapse Policy Definition File Extension. " +
+                                "Supported extensions are " +
+                                APIConstants.ALLOWED_SYNAPSE_POLICY_DEFINITION_EXTENSIONS.toArray().toString(), log);
+                    }
                     String synapsePolicyDefinition =
-                            RestApiPublisherUtils.readInputStream(synapsePolicyDefinitionFileInputStream,
-                                    synapsePolicyDefinitionFileDetail);
+                            RestApiPublisherUtils.readInputStream(synapsePolicyDefinitionFileInputStream);
                     synapseDefinition = new OperationPolicyDefinition();
                     synapseDefinition.setContent(synapsePolicyDefinition);
                     synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
@@ -110,8 +118,15 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 }
 
                 if (ccPolicyDefinitionFileInputStream != null) {
+                    String ccDefFileName = ccPolicyDefinitionFileDetail.getDataHandler().getName();
+                    String ccDefExtension = FilenameUtils.getExtension(ccDefFileName);
+                    if (!APIConstants.ALLOWED_CC_POLICY_DEFINITION_EXTENSIONS.contains(ccDefExtension)) {
+                        RestApiUtil.handleBadRequest("Unsupported Choreo Connect Policy Definition File Extension. " +
+                                "Supported extensions are " +
+                                APIConstants.ALLOWED_CC_POLICY_DEFINITION_EXTENSIONS.toArray().toString(), log);
+                    }
                     String choreoConnectPolicyDefinition = RestApiPublisherUtils
-                            .readInputStream(ccPolicyDefinitionFileInputStream, ccPolicyDefinitionFileDetail);
+                            .readInputStream(ccPolicyDefinitionFileInputStream);
                     ccPolicyDefinition = new OperationPolicyDefinition();
                     ccPolicyDefinition.setContent(choreoConnectPolicyDefinition);
                     ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);

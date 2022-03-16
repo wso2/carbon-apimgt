@@ -2871,7 +2871,6 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
     public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
-    public static final String YAML_CONTENT_TYPE = "text/yaml";
     public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "specifications";
     public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
@@ -2879,6 +2878,13 @@ public final class APIConstants {
     public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP = "HTTP";
     public static final String DEFAULT_POLICY_VERSION = "v1";
+    public static final Set<String> ALLOWED_POLICY_SPEC_EXTENSIONS = new HashSet<String>(
+            Arrays.asList("json", "yaml"));
+    public static final Set<String> ALLOWED_SYNAPSE_POLICY_DEFINITION_EXTENSIONS = new HashSet<String>(
+            Arrays.asList("xml", "j2"));
+    public static final Set<String> ALLOWED_CC_POLICY_DEFINITION_EXTENSIONS = new HashSet<String>(
+            Arrays.asList("gotmpl"));
+    public static final String YAML_FILE_EXTENSION_TYPE = "yaml";
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";

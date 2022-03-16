@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -233,17 +234,10 @@ public class RestApiPublisherUtils {
      * @return String
      * @throws IOException
      * */
-    public static String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws IOException {
+    public static String readInputStream (InputStream fileInputStream) throws IOException {
 
         String content = null;
         if (fileInputStream != null) {
-            String fileName = fileDetail.getDataHandler().getName();
-
-            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
-
-            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
-                fileContentType = fileDetail.getContentType().toString();
-            }
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             IOUtils.copy(fileInputStream, outputStream);
             byte[] sequenceBytes = outputStream.toByteArray();
@@ -251,16 +245,6 @@ public class RestApiPublisherUtils {
             content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
         }
         return content;
-    }
-
-    public static String getContentType(Attachment fileDetail) {
-        String fileName = fileDetail.getDataHandler().getName();
-        String fileContentType = URLConnection.guessContentTypeFromName(fileName);
-
-        if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
-            fileContentType = fileDetail.getContentType().toString();
-        }
-        return fileContentType;
     }
 
     public static File exportOperationPolicyData(OperationPolicyData policyData)
