@@ -101,6 +101,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     .getInboundMessageContextForConnectionId(channelId);
         } else {
             inboundMessageContext = new InboundMessageContext();
+            inboundMessageContext.setCtx(ctx);
             InboundMessageContextDataHolder.getInstance()
                     .addInboundMessageContextForConnection(channelId, inboundMessageContext);
         }

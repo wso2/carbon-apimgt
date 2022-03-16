@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer.SubscriptionAnalyzer;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.GraphQLProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
@@ -87,6 +88,8 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                             // subscription operation name
                             String subscriptionOperation = GraphQLProcessorUtil.getOperationList(operation,
                                     inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
+                            WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                                    APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);
                             // extract verb info dto with throttle policy for matching verb
                             VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil
                                     .findMatchingVerb(subscriptionOperation, inboundMessageContext);
