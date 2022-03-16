@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.threatprotection.APIMThreatAnalyzerException;
 import org.wso2.carbon.apimgt.gateway.threatprotection.AnalyzerHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.APIMThreatAnalyzer;
-import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.ConfigurationHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.JSONConfig;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatExceptionHandler;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
@@ -80,8 +79,8 @@ public class JsonSchemaValidator extends AbstractMediator {
                 (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType) ||
                         ThreatProtectorConstants.TEXT_JSON.equals(contentType))) {
             JSONConfig jsonConfig = configureSchemaProperties(messageContext);
-            ConfigurationHolder.addJsonConfig(jsonConfig);
             APIMThreatAnalyzer apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
+            apimThreatAnalyzer.configure(jsonConfig);
             try {
                 inputStreams = GatewayUtils.cloneRequestMessage(messageContext);
                 if (inputStreams != null) {

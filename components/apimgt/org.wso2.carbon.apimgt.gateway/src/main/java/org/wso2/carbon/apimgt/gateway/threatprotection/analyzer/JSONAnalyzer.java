@@ -66,6 +66,16 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
     }
 
     @Override
+    public void clearConfiguration() {
+        this.enabled = true;
+        this.maxFieldCount = 0;
+        this.maxStringLength = 0;
+        this.maxArrayElementCount = 0;
+        this.maxFieldLength = 0;
+        this.maxJsonDepth = 0;
+    }
+
+    @Override
     public void configure(XMLConfig config) {
         throw new UnsupportedOperationException("This method is not supported on this instance");
     }
