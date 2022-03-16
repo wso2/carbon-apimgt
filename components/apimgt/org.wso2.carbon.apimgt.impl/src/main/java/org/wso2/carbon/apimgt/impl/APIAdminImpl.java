@@ -566,9 +566,11 @@ public class APIAdminImpl implements APIAdmin {
                         .getEndpointConfigurations()) {
                     if (configurationDto.isRequired()) {
                         if (!keyManagerConfigurationDTO.getEndpoints().containsKey(configurationDto.getName())) {
-                            if (StringUtils.isNotEmpty(configurationDto.getDefaultValue())) {
+                            if (configurationDto.getDefaultValue() != null
+                                    && configurationDto.getDefaultValue() instanceof String
+                                    && StringUtils.isNotEmpty((String) configurationDto.getDefaultValue())) {
                                 keyManagerConfigurationDTO.getEndpoints().put(configurationDto.getName(),
-                                        configurationDto.getDefaultValue());
+                                        (String) configurationDto.getDefaultValue());
                             }
                             missingRequiredConfigurations.add(configurationDto.getName());
                         }
@@ -1020,7 +1022,7 @@ public class APIAdminImpl implements APIAdmin {
                     if (configurationDto.isRequired()) {
                         if (!keyManagerConfigurationDTO.getAdditionalProperties()
                                 .containsKey(configurationDto.getName())) {
-                            if (StringUtils.isNotEmpty(configurationDto.getDefaultValue())) {
+                            if (StringUtils.isNotEmpty((String) configurationDto.getDefaultValue())) {
                                 keyManagerConfigurationDTO.getAdditionalProperties().put(configurationDto.getName(),
                                         configurationDto.getDefaultValue());
                             }

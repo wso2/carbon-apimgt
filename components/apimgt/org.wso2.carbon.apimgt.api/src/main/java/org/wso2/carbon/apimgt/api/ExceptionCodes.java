@@ -505,7 +505,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "Requested operation policy with id '%s' not found"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
-            " not allowed for user %s ", false);
+            " not allowed for user %s ", false),
+    INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),
+    INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true);
 
     private final long errorCode;
     private final String errorMessage;
