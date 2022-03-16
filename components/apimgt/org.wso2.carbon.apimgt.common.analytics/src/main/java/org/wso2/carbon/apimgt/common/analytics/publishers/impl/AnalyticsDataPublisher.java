@@ -58,7 +58,7 @@ public class AnalyticsDataPublisher {
             if (reporterClass != null) {
                 metricReporter = MetricReporterFactory.getInstance()
                         .createMetricReporter(reporterClass, configs);
-            } else if (reporterType != null) {
+            } else if (reporterType !=null && !reporterType.equals("")) {
                 metricReporter = MetricReporterFactory.getInstance().createLogMetricReporter(configs);
             } else {
                 metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
