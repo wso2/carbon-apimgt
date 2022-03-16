@@ -155,7 +155,7 @@
       },
       {
         "Name": "apim:publisher_settings",
-        "Roles": "admin,Internal/creator,Internal/publisher"
+        "Roles": "admin,Internal/creator,Internal/publisher,Internal/observer"
       },
       {
         "Name": "apim:store_settings",
