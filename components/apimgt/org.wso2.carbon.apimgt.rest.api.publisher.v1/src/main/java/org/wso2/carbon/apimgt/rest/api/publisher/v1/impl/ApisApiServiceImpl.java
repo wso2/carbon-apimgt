@@ -572,7 +572,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiId);
+                String currentApiUuid;
+                // Resolve whether an API or a corresponding revision
+                APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiId);
+                if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                    currentApiUuid = apiRevision.getApiUUID();
+                } else {
+                    currentApiUuid = apiId;
+                }
+                GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(currentApiUuid);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                         GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
                 return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
