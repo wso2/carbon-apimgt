@@ -11612,4 +11612,47 @@ public final class APIUtil {
         velocityEngine.setProperty("runtime.conversion.handler", "none");
 
     }
+
+    /**
+     * Handles gateway vendor for Choreo Connect before insert DB operations.
+     *
+     * @param gatewayVendorType Gateway vendor
+     * @param gatewayType       Gateway type
+     * @return gateway vendor for the API
+     */
+    public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
+        if(gatewayType != null && APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayType)) {
+            gatewayVendorType =  APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        }
+        return gatewayVendorType;
+    }
+
+    /**
+     * Provides gateway type considering gateway vendor.
+     *
+     * @param gatewayVendor Gateway vendor type.
+     * @return gateway type
+     */
+    public static String getGatewayType(String gatewayVendor) {
+        String gatewayType = null;
+        if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
+            gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
+        } else if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
+            gatewayType = APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        }
+        return gatewayType;
+    }
+
+    /**
+     * Replaces wso2/choreo-connect gateway vendor type as wso2 after retrieving from db.
+     *
+     * @param gatewayVendor Gateway vendor type
+     * @return wso2 gateway vendor type
+     */
+    public static String handleGatewayVendorRetrieval(String gatewayVendor) {
+        if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
+            gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        }
+        return  gatewayVendor;
+    }
 }

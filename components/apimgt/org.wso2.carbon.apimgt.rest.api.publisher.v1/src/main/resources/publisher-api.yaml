@@ -8775,6 +8775,12 @@ components:
           type: string
           example:
             wso2
+        gatewayType:
+          title: Field to identify gateway type.
+          type: string
+          description: The gateway type selected for the API policies. Accepts one of the
+            following. wso2/synapse, wso2/choreo-connect.
+          example: wso2/synapse
         asyncTransportProtocols:
           type: array
           description: |

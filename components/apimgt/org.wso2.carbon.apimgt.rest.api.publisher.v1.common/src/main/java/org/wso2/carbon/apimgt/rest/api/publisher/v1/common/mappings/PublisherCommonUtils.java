@@ -336,6 +336,7 @@ public class PublisherCommonUtils {
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
+        apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();
@@ -1139,6 +1140,7 @@ public class PublisherCommonUtils {
             apiToAdd.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         }
         apiToAdd.setOrganization(organization);
+        apiToAdd.setGatewayType(body.getGatewayType());
         return apiToAdd;
     }
 
