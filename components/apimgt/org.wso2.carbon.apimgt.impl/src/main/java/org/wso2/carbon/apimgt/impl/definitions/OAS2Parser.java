@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.gson.JsonObject;
 import io.swagger.inflector.examples.ExampleBuilder;
 import io.swagger.inflector.examples.models.Example;
 import io.swagger.inflector.processors.JsonNodeExampleSerializer;
@@ -1060,8 +1059,8 @@ public class OAS2Parser extends APIDefinition {
         mapper.addMixIn(Response.class, ResponseSchemaMixin.class);
         try {
             //this is to remove responesObject from swagger content
-            String modifiedSwagString = removeResponsesObject(swaggerObj, new String(mapper.writeValueAsBytes(swaggerObj)));
-            return modifiedSwagString;
+            String modifiedSwaggerString = removeResponsesObject(swaggerObj, new String(mapper.writeValueAsBytes(swaggerObj)));
+            return modifiedSwaggerString;
         } catch (JsonProcessingException e) {
             throw new APIManagementException("Error while generating Swagger json from model", e);
         }
@@ -1194,7 +1193,6 @@ public class OAS2Parser extends APIDefinition {
      * @param swagger Swagger model
      * @param swaggerString Swagger definition as string
      * @return Modified swagger string
-     * @throws APIManagementException
      */
     public String removeResponsesObject(Swagger swagger, String swaggerString) {
         JSONObject jsonObj = new JSONObject(swaggerString);
