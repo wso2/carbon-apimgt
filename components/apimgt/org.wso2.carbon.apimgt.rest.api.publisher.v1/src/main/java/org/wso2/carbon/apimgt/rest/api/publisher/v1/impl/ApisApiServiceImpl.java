@@ -31,7 +31,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.httpclient.HttpStatus;
@@ -137,7 +136,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CommentMappi
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStoreMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.OperationPolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -164,8 +162,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
@@ -191,8 +187,6 @@ import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -936,9 +930,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                         String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                         String region = (String) endpointConfig.get(APIConstants.AMZN_REGION);
                         AWSCredentialsProvider credentialsProvider;
+                        AWSLambda awsLambda;
                         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey) &&
                             StringUtils.isEmpty(region)) {
                             credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
+                            awsLambda = AWSLambdaClientBuilder.standard().withCredentials(credentialsProvider).build();
                         } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey) &&
                                     !StringUtils.isEmpty(region)) {
                             if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
@@ -948,14 +944,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                             }
                             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                             credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+                            awsLambda = AWSLambdaClientBuilder.standard()
+                                    .withCredentials(credentialsProvider)
+                                    .withRegion(region)
+                                    .build();
                         } else {
                             log.error("Missing AWS Credentials");
                             return null;
                         }
-                        AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
-                                .withCredentials(credentialsProvider)
-                                .withRegion(region)
-                                .build();
                         ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
                         List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
                         arns.put("count", functionConfigurations.size());
@@ -2382,8 +2378,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
 
                 OperationPolicyData existingPolicy =
-                        apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(), apiId,
-                                null, organization, false);
+                        apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(),
+                                policySpecification.getVersion(), apiId, null, organization, false);
                 String policyID;
                 if (existingPolicy == null) {
                     policyID = apiProvider.addAPISpecificOperationPolicy(apiId, operationPolicyData, organization);
@@ -3634,8 +3630,10 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            ApiTypeWrapper apiWrapper = new ApiTypeWrapper(apiProvider.getAPIbyUUID(apiId, organization));
             APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
-                    apiId, lifecycleChecklist, organization);
+                    apiWrapper, lifecycleChecklist, organization);
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call
@@ -4065,84 +4063,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
-    }
-
-    /***
-     * To check if the API is modified or not when the given sequence is in API.
-     *
-     * @param api
-     * @param mediation
-     * @return if the API is modified or not
-     */
-    private boolean isAPIModified(API api, Mediation mediation) {
-
-        if (mediation != null) {
-            String sequenceName;
-            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(mediation.getType())) {
-                sequenceName = api.getInSequence();
-                if (isSequenceExistsInAPI(sequenceName, mediation)) {
-                    api.setInSequence(null);
-                    return true;
-                }
-            } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(mediation.getType())) {
-                sequenceName = api.getOutSequence();
-                if (isSequenceExistsInAPI(sequenceName, mediation)) {
-                    api.setOutSequence(null);
-                    return true;
-                }
-            } else {
-                sequenceName = api.getFaultSequence();
-                if (isSequenceExistsInAPI(sequenceName, mediation)) {
-                    api.setFaultSequence(null);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isSequenceExistsInAPI(String sequenceName, Mediation mediation) {
-
-        return StringUtils.isNotEmpty(sequenceName) && mediation.getName().equals(sequenceName);
-    }
-
-    /**
-     * Returns the mediation policy name specify inside mediation config
-     *
-     * @param config mediation config content
-     * @return name of the mediation policy or null
-     */
-    public String getMediationNameFromConfig(String config) {
-        try {
-            //convert xml content in to json
-            String configInJson = XML.toJSONObject(config).toString();
-            JSONParser parser = new JSONParser();
-            //Extracting mediation policy name from the json string
-            JSONObject jsonObject = (JSONObject) parser.parse(configInJson);
-            JSONObject rootObject = (JSONObject) jsonObject.get(APIConstants.MEDIATION_SEQUENCE_ELEM);
-            String name = rootObject.get(APIConstants.POLICY_NAME_ELEM).toString();
-            return name + APIConstants.MEDIATION_CONFIG_EXT;
-        } catch (JSONException e) {
-            log.error("JSON Error occurred while converting the mediation config string to json", e);
-        } catch (ParseException e) {
-            log.error("Parser Error occurred while parsing config json string in to json object", e);
-        }
-        return null;
-    }
-
-    /**
-     * Check the existence of the mediation policy
-     *
-     * @param mediationResourcePath mediation config content
-     */
-    public void checkMediationPolicy(APIProvider apiProvider, String mediationResourcePath, String name) throws APIManagementException {
-        if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-            throw new APIManagementException(ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
-        }
-        if (StringUtils.isNotBlank(name) && name.length() > APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.MEDIATION_POLICY_NAME_TOO_LONG,
-                    APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME + ""));
-        }
     }
 
     /**

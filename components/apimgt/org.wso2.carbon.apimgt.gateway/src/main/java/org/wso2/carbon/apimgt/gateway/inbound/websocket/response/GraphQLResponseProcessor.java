@@ -17,12 +17,14 @@
  */
 package org.wso2.carbon.apimgt.gateway.inbound.websocket.response;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
  * A GraphQL subscriptions specific extension of ResponseProcessor. This class intercepts the inbound websocket
@@ -54,9 +56,12 @@ public class GraphQLResponseProcessor extends ResponseProcessor {
                 GraphQLOperationDTO graphQLOperationDTO =
                         inboundMessageContext.getVerbInfoForGraphQLMsgId(
                                 graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID));
-                // validate scopes based on subscription payload
-                responseDTO = InboundWebsocketProcessorUtil
-                        .validateScopes(inboundMessageContext, graphQLOperationDTO.getOperation(), operationId);
+                // validate scopes based on subscription payload when security is enabled
+                String authType = graphQLOperationDTO.getVerbInfoDTO().getAuthType();
+                if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()).equals(authType)) {
+                    responseDTO = InboundWebsocketProcessorUtil
+                            .validateScopes(inboundMessageContext, graphQLOperationDTO.getOperation(), operationId);
+                }
                 if (!responseDTO.isError()) {
                     //throttle for matching resource
                     return InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize,

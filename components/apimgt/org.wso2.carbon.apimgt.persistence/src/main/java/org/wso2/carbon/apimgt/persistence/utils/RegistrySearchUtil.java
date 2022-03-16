@@ -60,6 +60,7 @@ public class RegistrySearchUtil {
     public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
     public static final String API_OVERVIEW_STATUS = "overview_status";
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
+    public static final String API_RELATED_CUSTOM_PROPERTIES_DISPLAY_DEV = "__display";
     public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
     public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
@@ -241,7 +242,7 @@ public class RegistrySearchUtil {
     }
     
 
-    private static String extractQuery(String searchQuery) {
+    private static String extractQuery(String searchQuery, boolean isDevPortal) {
         String[] searchQueries = searchQuery.split("&");
         StringBuilder filteredQuery = new StringBuilder();
 
@@ -261,7 +262,13 @@ public class RegistrySearchUtil {
                             log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
                                     + " appending " + API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
                         }
-                        searchKeys[0] = (API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
+                        if (isDevPortal) {
+                            searchKeys[0] = (API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]
+                                    + API_RELATED_CUSTOM_PROPERTIES_DISPLAY_DEV);
+                        } else {
+                            searchKeys[0] = (API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
+                        }
+
                     }
 
                     // Ideally query keys for label and  category searchs are as below
@@ -415,7 +422,7 @@ public class RegistrySearchUtil {
                 } else {
                     // solr result grouping is used when displayMultipleVersions is not enabled(default).
                     modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria +
-                            "&group=true&group.field=name&group.ngroups=true&group.sort=versionTimestamp desc";
+                            "&group=true&group.field=name&group.ngroups=true&group.sort=versionComparable desc";
                 }
             }
             
@@ -424,7 +431,7 @@ public class RegistrySearchUtil {
 
             modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
         }
-        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery), ctx);
+        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery, true), ctx);
         return modifiedQuery;
     }
 
@@ -444,7 +451,7 @@ public class RegistrySearchUtil {
                     + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST);
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
         }
-        newSearchQuery = extractQuery(newSearchQuery);
+        newSearchQuery = extractQuery(newSearchQuery, false);
 
         newSearchQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(newSearchQuery, ctx);
         return newSearchQuery;

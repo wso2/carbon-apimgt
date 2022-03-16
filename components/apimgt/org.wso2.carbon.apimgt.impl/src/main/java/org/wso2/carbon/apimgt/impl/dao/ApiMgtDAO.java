@@ -3337,7 +3337,7 @@ public class ApiMgtDAO {
                 blockCondition = new BlockConditionsDTO();
                 blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
                 blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
@@ -4227,11 +4227,11 @@ public class ApiMgtDAO {
                 sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate " +
                         "SQL_Latin1_General_CP1_CI_AS as NAME");
                 blockingFilerSql = " select distinct x.*,bl.ENABLED from ( " + sqlQuery + " )x left join " +
-                        "AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x" +
+                        "AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x" +
                         ".name)";
             } else {
                 blockingFilerSql = " select distinct x.*,bl.ENABLED from ( " + sqlQuery
-                        + " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = "
+                        + " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = "
                         + "concat(concat(x.USER_ID,':'),x.name))";
             }
 
@@ -8686,6 +8686,43 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieves subscription Id for APIIdentifier and applicationId
+     *
+     * @param uuid    API subscribed
+     * @param applicationId application with subscription
+     * @return subscription id
+     * @throws APIManagementException
+     */
+    public String getSubscriptionId(String uuid, int applicationId) throws APIManagementException {
+
+        String subId = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int id = -1;
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_ID_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            id = getAPIID(uuid, conn);
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, id);
+            ps.setInt(2, applicationId);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                subId = rs.getString("SUBSCRIPTION_ID");
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription id for " +
+                    "Application : " + applicationId + ", API with UUID: " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return subId;
+    }
+    /**
      * Retrieve subscription create state for APIIdentifier and applicationID
      *
      * @param identifier    - api identifier which is subscribed
@@ -12874,7 +12911,7 @@ public class ApiMgtDAO {
                 blockCondition = new BlockConditionsDTO();
                 blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockCondition.setConditionId(conditionId);
                 blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
@@ -12918,7 +12955,7 @@ public class ApiMgtDAO {
                 blockCondition = new BlockConditionsDTO();
                 blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
                 blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
@@ -12955,7 +12992,7 @@ public class ApiMgtDAO {
                 BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
                 blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
-                blockConditionsDTO.setConditionValue(resultSet.getString("VALUE"));
+                blockConditionsDTO.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
                 blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
                 blockConditionsDTO.setUUID(resultSet.getString("UUID"));
                 blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
@@ -13701,11 +13738,10 @@ public class ApiMgtDAO {
                     new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "ID")})) {
                 prepStmt.setString(1, uuid);
                 prepStmt.setString(2, environment.getName());
-                prepStmt.setString(3, APIConstants.SUPER_TENANT_DOMAIN);
-                prepStmt.setString(4, environment.getDisplayName());
-                prepStmt.setString(5, environment.getDescription());
-                prepStmt.setString(6, environment.getProvider());
-                prepStmt.setString(7, tenantDomain);
+                prepStmt.setString(3, environment.getDisplayName());
+                prepStmt.setString(4, environment.getDescription());
+                prepStmt.setString(5, environment.getProvider());
+                prepStmt.setString(6, tenantDomain);
                 prepStmt.executeUpdate();
 
                 ResultSet rs = prepStmt.getGeneratedKeys();
@@ -13905,7 +13941,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 applicationAttributes.put(rs.getString("NAME"),
-                        rs.getString("VALUE"));
+                        rs.getString("APP_ATTRIBUTE"));
             }
 
         } catch (SQLException e) {
@@ -16567,10 +16603,17 @@ public class ApiMgtDAO {
      */
     public List<APIRevisionDeployment> getAPIRevisionDeploymentByApiUUID(String apiUUID) throws APIManagementException {
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.
-                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID)) {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement statement;
+            if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                statement = connection
+                        .prepareStatement(SQLConstants.
+                                APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID_POSTGRES);
+            } else {
+                statement = connection
+                        .prepareStatement(SQLConstants.
+                                APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID);
+            }
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs);
@@ -18129,16 +18172,16 @@ public class ApiMgtDAO {
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyUUID);
         statement.setString(2, policySpecification.getName());
-        statement.setString(3, policySpecification.getDisplayName());
-        statement.setString(4, policySpecification.getDescription());
-        statement.setString(5, policySpecification.getApplicableFlows().toString());
-        statement.setString(6, policySpecification.getSupportedGateways().toString());
-        statement.setString(7, policySpecification.getSupportedApiTypes().toString());
-        statement.setBinaryStream(8,
+        statement.setString(3, policySpecification.getVersion());
+        statement.setString(4, policySpecification.getDisplayName());
+        statement.setString(5, policySpecification.getDescription());
+        statement.setString(6, policySpecification.getApplicableFlows().toString());
+        statement.setString(7, policySpecification.getSupportedGateways().toString());
+        statement.setString(8, policySpecification.getSupportedApiTypes().toString());
+        statement.setBinaryStream(9,
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
-        statement.setString(9, policyData.getOrganization());
-        statement.setString(10, policySpecification.getCategory().toString());
-        statement.setBoolean(11, policySpecification.isMultipleAllowed());
+        statement.setString(10, policyData.getOrganization());
+        statement.setString(11, policySpecification.getCategory().toString());
         statement.setString(12, policyData.getMd5Hash());
         statement.executeUpdate();
         statement.close();
@@ -18188,16 +18231,16 @@ public class ApiMgtDAO {
                 SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_CONTENT);
 
         statement.setString(1, policySpecification.getName());
-        statement.setString(2, policySpecification.getDisplayName());
-        statement.setString(3, policySpecification.getDescription());
-        statement.setString(4, policySpecification.getApplicableFlows().toString());
-        statement.setString(5, policySpecification.getSupportedGateways().toString());
-        statement.setString(6, policySpecification.getSupportedApiTypes().toString());
-        statement.setBinaryStream(7,
+        statement.setString(2, policySpecification.getVersion());
+        statement.setString(3, policySpecification.getDisplayName());
+        statement.setString(4, policySpecification.getDescription());
+        statement.setString(5, policySpecification.getApplicableFlows().toString());
+        statement.setString(6, policySpecification.getSupportedGateways().toString());
+        statement.setString(7, policySpecification.getSupportedApiTypes().toString());
+        statement.setBinaryStream(8,
                 new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
-        statement.setString(8, policyData.getOrganization());
-        statement.setString(9, policySpecification.getCategory().toString());
-        statement.setBoolean(10, policySpecification.isMultipleAllowed());
+        statement.setString(9, policyData.getOrganization());
+        statement.setString(10, policySpecification.getCategory().toString());
         statement.setString(11, policyData.getMd5Hash());
         statement.setString(12, policyId);
         statement.executeUpdate();
@@ -18253,7 +18296,7 @@ public class ApiMgtDAO {
         ResultSet rs = statement.executeQuery();
 
         if (rs.next()) {
-            result =  true;
+            result = rs.getInt("POLICY_COUNT") != 0;
         }
         rs.close();
         statement.close();
@@ -18590,8 +18633,8 @@ public class ApiMgtDAO {
             // First check whether there exists a API specific policy for same policy name with revision uuid null
             // This is the state where we record the policies applied in the working copy.
             OperationPolicyData apiSpecificPolicy = getAPISpecificOperationPolicyByPolicyName(connection,
-                    revisionedPolicy.getSpecification().getName(), revisionedPolicy.getApiUUID(), null,
-                    organization, false);
+                    revisionedPolicy.getSpecification().getName(), revisionedPolicy.getSpecification().getVersion(),
+                    revisionedPolicy.getApiUUID(), null, organization, false);
             if (apiSpecificPolicy != null) {
                 if (apiSpecificPolicy.getMd5Hash().equals(revisionedPolicy.getMd5Hash())) {
                     if (log.isDebugEnabled()) {
@@ -18904,17 +18947,19 @@ public class ApiMgtDAO {
      * Retrieve a common operation policy by providing the policy name and organization
      *
      * @param policyName             Policy name
+     * @param policyVersion          Policy version
      * @param organization           Organization name
      * @param isWithPolicyDefinition Include the policy definition to the output or not
      * @return operation policy
      * @throws APIManagementException
      */
-    public OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String organization,
-                                                                    boolean isWithPolicyDefinition)
+    public OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String policyVersion,
+                                                                    String organization, boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getCommonOperationPolicyByPolicyName(connection, policyName, organization, isWithPolicyDefinition);
+            return getCommonOperationPolicyByPolicyName(connection, policyName, policyVersion, organization,
+                    isWithPolicyDefinition);
         } catch (SQLException e) {
             handleException("Failed to get common operation policy for name " + policyName + "for organization "
                     + organization, e);
@@ -18923,7 +18968,7 @@ public class ApiMgtDAO {
     }
 
     private OperationPolicyData getCommonOperationPolicyByPolicyName(Connection connection, String policyName,
-                                                                     String tenantDomain,
+                                                                     String policyVersion, String tenantDomain,
                                                                      boolean isWithPolicyDefinition)
             throws SQLException {
 
@@ -18932,7 +18977,8 @@ public class ApiMgtDAO {
 
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyName);
-        statement.setString(2, tenantDomain);
+        statement.setString(2, policyVersion);
+        statement.setString(3, tenantDomain);
         ResultSet rs = statement.executeQuery();
         OperationPolicyData policyData = null;
         if (rs.next()) {
@@ -18966,15 +19012,14 @@ public class ApiMgtDAO {
      * @return operation policy
      * @throws APIManagementException
      */
-    public OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
-                                                                         String revisionUUID, String organization,
-                                                                         boolean isWithPolicyDefinition)
+    public OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String policyVersion,
+                                                                         String apiUUID, String revisionUUID,
+                                                                         String organization, boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getAPISpecificOperationPolicyByPolicyName(connection, policyName, apiUUID, revisionUUID,
-                    organization,
-                    isWithPolicyDefinition);
+            return getAPISpecificOperationPolicyByPolicyName(connection, policyName, policyVersion, apiUUID,
+                    revisionUUID, organization, isWithPolicyDefinition);
         } catch (SQLException e) {
             handleException("Failed to get API specific operation policy for name " + policyName + " with API UUID "
                     + apiUUID + " revision UUID " + revisionUUID, e);
@@ -18983,8 +19028,8 @@ public class ApiMgtDAO {
     }
 
     private OperationPolicyData getAPISpecificOperationPolicyByPolicyName(Connection connection,
-                                                                          String policyName, String apiUUID,
-                                                                          String revisionUUID,
+                                                                          String policyName, String policyVersion,
+                                                                          String apiUUID, String revisionUUID,
                                                                           String tenantDomain,
                                                                           boolean isWithPolicyDefinition)
             throws SQLException {
@@ -18998,10 +19043,11 @@ public class ApiMgtDAO {
 
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyName);
-        statement.setString(2, tenantDomain);
-        statement.setString(3, apiUUID);
+        statement.setString(2, policyVersion);
+        statement.setString(3, tenantDomain);
+        statement.setString(4, apiUUID);
         if (revisionUUID != null) {
-            statement.setString(4, revisionUUID);
+            statement.setString(5, revisionUUID);
         }
         ResultSet rs = statement.executeQuery();
         OperationPolicyData policyData = null;
@@ -19071,21 +19117,23 @@ public class ApiMgtDAO {
         return policyDataList;
     }
 
-    public int getOperationPolicyCount(String organization) throws APIManagementException {
+    public Set<String> getCommonOperationPolicyNames(String organization) throws APIManagementException {
 
-        int count = -1;
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_THE_COUNT_OF_OPERATION_POLICIES_FOR_ORGANIZATION;
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_NAMES_FOR_ORGANIZATION;
+        Set<String> policyNames = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, organization);
             ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt("POLICY_COUNT");
+            while (rs.next()) {
+                String policyName = rs.getString("POLICY_NAME");
+                String policyVersion = rs.getString("POLICY_VERSION");
+                policyNames.add(APIUtil.getOperationPolicyFileName(policyName, policyVersion));
             }
         } catch (SQLException e) {
             handleException("Failed to get the count of operation policies for organization " + organization, e);
         }
-        return count;
+        return policyNames;
     }
 
 
@@ -19214,6 +19262,7 @@ public class ApiMgtDAO {
 
         OperationPolicy operationPolicy = new OperationPolicy();
         operationPolicy.setPolicyName(rs.getString("POLICY_NAME"));
+        operationPolicy.setPolicyVersion(rs.getString("POLICY_VERSION"));
         operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
         operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
         operationPolicy.setDirection(rs.getString("DIRECTION"));
@@ -19233,6 +19282,7 @@ public class ApiMgtDAO {
 
         OperationPolicySpecification policySpecification = new OperationPolicySpecification();
         policySpecification.setName(rs.getString("POLICY_NAME"));
+        policySpecification.setVersion(rs.getString("POLICY_VERSION"));
         policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
         policySpecification.setDescription(rs.getString("POLICY_DESCRIPTION"));
         policySpecification.setApplicableFlows(getListFromString(rs.getString("APPLICABLE_FLOWS")));
@@ -19240,7 +19290,6 @@ public class ApiMgtDAO {
         policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory
                 .valueOf(rs.getString("POLICY_CATEGORY")));
-        policySpecification.setMultipleAllowed(rs.getBoolean("MULTIPLE_ALLOWED"));
         List<OperationPolicySpecAttribute> policySpecAttributes = null;
 
         try (InputStream policyParametersStream = rs.getBinaryStream("POLICY_PARAMETERS")) {

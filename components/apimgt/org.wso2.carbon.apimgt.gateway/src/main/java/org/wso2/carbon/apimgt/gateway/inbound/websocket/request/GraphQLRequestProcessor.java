@@ -22,6 +22,7 @@ import graphql.language.Document;
 import graphql.language.OperationDefinition;
 import graphql.parser.Parser;
 import graphql.validation.Validator;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -86,27 +87,29 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                             // subscription operation name
                             String subscriptionOperation = GraphQLProcessorUtil.getOperationList(operation,
                                     inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
-                            // validate scopes based on subscription payload
-                            responseDTO = InboundWebsocketProcessorUtil
-                                    .validateScopes(inboundMessageContext, subscriptionOperation, operationId);
+                            // extract verb info dto with throttle policy for matching verb
+                            VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil
+                                    .findMatchingVerb(subscriptionOperation, inboundMessageContext);
+                            String authType = verbInfoDTO.getAuthType();
+                            // validate scopes based on subscription payload when security is enabled
+                            if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()).equals(authType)) {
+                                responseDTO = InboundWebsocketProcessorUtil
+                                        .validateScopes(inboundMessageContext, subscriptionOperation, operationId);
+                            }
                             if (!responseDTO.isError()) {
-                                // extract verb info dto with throttle policy for matching verb
-                                VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil.findMatchingVerb(
-                                        subscriptionOperation, inboundMessageContext);
-                                SubscriptionAnalyzer subscriptionAnalyzer =
-                                        new SubscriptionAnalyzer(inboundMessageContext.getGraphQLSchemaDTO()
-                                                .getGraphQLSchema());
+                                SubscriptionAnalyzer subscriptionAnalyzer = new SubscriptionAnalyzer(
+                                        inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema());
                                 // analyze query depth and complexity
                                 responseDTO = validateQueryDepthAndComplexity(subscriptionAnalyzer,
                                         inboundMessageContext, graphQLSubscriptionPayload, operationId);
                                 if (!responseDTO.isError()) {
                                     //throttle for matching resource
-                                    responseDTO = InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
-                                            inboundMessageContext, operationId);
+                                    responseDTO = InboundWebsocketProcessorUtil
+                                            .doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext,
+                                                    operationId);
                                     // add verb info dto for the successful invoking subscription operation request
-                                    inboundMessageContext.addVerbInfoForGraphQLMsgId(
-                                            graphQLMsg.getString(
-                                                    GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID),
+                                    inboundMessageContext.addVerbInfoForGraphQLMsgId(graphQLMsg
+                                                    .getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID),
                                             new GraphQLOperationDTO(verbInfoDTO, subscriptionOperation));
                                 }
                             }

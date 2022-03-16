@@ -45,7 +45,10 @@
         </jaxrs:properties>
     </jaxrs:server>
 
-    <bean id="V2URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.V2URLValidationInterceptor" />
+    <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor">
+        <property name="majorVersion" value="v2" />
+        <property name="latestVersion" value="v2.1" />
+    </bean>
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
     <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
@@ -79,7 +82,7 @@
 
     <cxf:bus>
         <cxf:inInterceptors>
-            <ref bean="V2URLValidationInterceptor"/>
+            <ref bean="URLValidationInterceptor"/>
             <ref bean="TokenMergeInterceptor"/>
             <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>

@@ -677,7 +677,7 @@ public class OAS2Parser extends APIDefinition {
             if (returnJsonContent) {
                 if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
                     try {
-                        JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition);
+                        JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
                         validationResponse.setJsonContent(jsonNode.toString());
                     } catch (IOException e) {
                         throw new APIManagementException("Error while reading API definition yaml", e);

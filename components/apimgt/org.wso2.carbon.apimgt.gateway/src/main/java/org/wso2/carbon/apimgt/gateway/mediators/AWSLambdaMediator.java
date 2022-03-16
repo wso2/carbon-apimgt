@@ -154,21 +154,26 @@ public class AWSLambdaMediator extends AbstractMediator {
      */
     private InvokeResult invokeLambda(String payload) {
         try {
-            String[] resourceNameSplit = resourceName.split(":");
-            region = resourceNameSplit[3];
             // set credential provider
             AWSCredentialsProvider credentialsProvider;
+            AWSLambda awsLambda;
             if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Using temporary credentials supplied by the IAM role attached to the EC2 instance");
                 }
                 credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
-            } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
+                awsLambda = AWSLambdaClientBuilder.standard().withCredentials(credentialsProvider).build();
+            } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)
+                    && !StringUtils.isEmpty(region)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Using user given stored credentials");
                 }
                 BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                 credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+                awsLambda = AWSLambdaClientBuilder.standard()
+                        .withCredentials(credentialsProvider)
+                        .withRegion(region)
+                        .build();
             } else {
                 log.error("Missing AWS Credentials");
                 return null;
@@ -182,11 +187,6 @@ public class AWSLambdaMediator extends AbstractMediator {
                     .withPayload(payload)
                     .withInvocationType(InvocationType.RequestResponse)
                     .withSdkClientExecutionTimeout(resourceTimeout);
-            // set aws lambda client
-            AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
-                    .withCredentials(credentialsProvider)
-                    .withRegion(region)
-                    .build();
             return awsLambda.invoke(invokeRequest);
         } catch (SdkClientException e) {
             log.error("Error while invoking the lambda function", e);
@@ -214,6 +214,10 @@ public class AWSLambdaMediator extends AbstractMediator {
         return secretKey;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
     public String getResourceName() {
         return resourceName;
     }
@@ -228,6 +232,10 @@ public class AWSLambdaMediator extends AbstractMediator {
 
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public void setResourceName(String resourceName) {

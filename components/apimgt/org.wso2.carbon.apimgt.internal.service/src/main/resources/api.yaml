@@ -200,6 +200,12 @@ paths:
             **Search condition**.
              label associated with the APIs
           type: string
+        - name: expand
+          in: query
+          description: |
+            Defines whether the returned response should contain full details of API
+          type: boolean
+          default: true
         - $ref: "#/parameters/Accept"
       tags:
         - Subscription Validation

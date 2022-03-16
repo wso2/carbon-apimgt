@@ -1047,7 +1047,6 @@ public class APIMappingUtil {
         }
 
         dto.setMediationPolicies(mediationPolicies);
-
         dto.setLifeCycleStatus(model.getStatus());
 
         String subscriptionAvailability = model.getSubscriptionAvailability();
@@ -1259,7 +1258,11 @@ public class APIMappingUtil {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
 
-        dto.setGatewayVendor(StringUtils.toRootLowerCase(model.getGatewayVendor()));
+        if (model.getGatewayVendor() == null) {
+            dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        } else {
+            dto.setGatewayVendor(StringUtils.toRootLowerCase(model.getGatewayVendor()));
+        }
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
@@ -2873,34 +2876,6 @@ public class APIMappingUtil {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Returns uuid of the specified mediation policy.
-     *
-     * @param sequenceName mediation sequence name
-     * @param direction    in/out/fault
-     * @param dto          APIDetailedDTO contains details of the exporting API
-     * @return UUID of sequence or null
-     */
-    private static Map<String, String> getMediationPolicyAttributes(String sequenceName, String direction,
-                                                                    APIDTO dto) {
-
-        APIIdentifier apiIdentifier = new APIIdentifier(dto.getProvider(), dto.getName(),
-                dto.getVersion());
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
-            return APIUtil.getMediationPolicyAttributes(sequenceName, tenantId, direction, apiIdentifier);
-        } catch (UserStoreException e) {
-            log.error("Error occurred while reading tenant information ", e);
-
-        } catch (APIManagementException e) {
-            log.error("Error occurred while getting the uuid of the mediation sequence", e);
-        }
-
-        return null;
     }
 
     /**

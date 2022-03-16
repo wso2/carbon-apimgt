@@ -24,8 +24,8 @@ import javax.validation.Valid;
 public class OperationPolicyDTO   {
   
     private String policyName = null;
+    private String policyVersion = "v1";
     private String policyId = null;
-    private Integer order = null;
     private Map<String, Object> parameters = new HashMap<String, Object>();
 
   /**
@@ -48,6 +48,23 @@ public class OperationPolicyDTO   {
 
   /**
    **/
+  public OperationPolicyDTO policyVersion(String policyVersion) {
+    this.policyVersion = policyVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("policyVersion")
+  public String getPolicyVersion() {
+    return policyVersion;
+  }
+  public void setPolicyVersion(String policyVersion) {
+    this.policyVersion = policyVersion;
+  }
+
+  /**
+   **/
   public OperationPolicyDTO policyId(String policyId) {
     this.policyId = policyId;
     return this;
@@ -61,23 +78,6 @@ public class OperationPolicyDTO   {
   }
   public void setPolicyId(String policyId) {
     this.policyId = policyId;
-  }
-
-  /**
-   **/
-  public OperationPolicyDTO order(Integer order) {
-    this.order = order;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("order")
-  public Integer getOrder() {
-    return order;
-  }
-  public void setOrder(Integer order) {
-    this.order = order;
   }
 
   /**
@@ -108,14 +108,14 @@ public class OperationPolicyDTO   {
     }
     OperationPolicyDTO operationPolicy = (OperationPolicyDTO) o;
     return Objects.equals(policyName, operationPolicy.policyName) &&
+        Objects.equals(policyVersion, operationPolicy.policyVersion) &&
         Objects.equals(policyId, operationPolicy.policyId) &&
-        Objects.equals(order, operationPolicy.order) &&
         Objects.equals(parameters, operationPolicy.parameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyName, policyId, order, parameters);
+    return Objects.hash(policyName, policyVersion, policyId, parameters);
   }
 
   @Override
@@ -124,8 +124,8 @@ public class OperationPolicyDTO   {
     sb.append("class OperationPolicyDTO {\n");
     
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
+    sb.append("    policyVersion: ").append(toIndentedString(policyVersion)).append("\n");
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
-    sb.append("    order: ").append(toIndentedString(order)).append("\n");
     sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("}");
     return sb.toString();

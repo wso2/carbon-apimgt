@@ -96,7 +96,7 @@ public class RegistrySearchUtilTestCase {
 
         String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
 
-        String expected = "name=*&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true&group.sort=versionTimestamp desc&lcState=(PUBLISHED OR PROTOTYPED)";
+        String expected = "name=*&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true&group.sort=versionComparable desc&lcState=(PUBLISHED OR PROTOTYPED)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
@@ -120,7 +120,7 @@ public class RegistrySearchUtilTestCase {
         String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
 
         String expected = "store_view_roles=(null OR system\\/wso2.anonymous.role)&name=*&enableStore=(true OR null)"
-                + "&group=true&group.field=name&group.ngroups=true&group.sort=versionTimestamp desc&lcState=(PUBLISHED OR PROTOTYPED)";
+                + "&group=true&group.field=name&group.ngroups=true&group.sort=versionComparable desc&lcState=(PUBLISHED OR PROTOTYPED)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
@@ -140,7 +140,7 @@ public class RegistrySearchUtilTestCase {
         // search for propertyname 'test'
         inputQuery = "property_name:test";
         expected =   "store_view_roles=(null OR system\\/wso2.anonymous.role)"
-                + "&api_meta.property_name=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
+                + "&api_meta.property_name__display=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for property search. ", expected, searchQuery);
         
@@ -155,7 +155,7 @@ public class RegistrySearchUtilTestCase {
         String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
 
         String expected = "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)&name=*"
-                + "&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true&group.sort=versionTimestamp desc" +
+                + "&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true&group.sort=versionComparable desc" +
                 "&lcState=(PUBLISHED OR PROTOTYPED)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
@@ -176,7 +176,7 @@ public class RegistrySearchUtilTestCase {
         // search for propertyname 'test'
         inputQuery = "property_name:test";
         expected =   "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)"
-                + "&api_meta.property_name=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
+                + "&api_meta.property_name__display=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for property search. ", expected, searchQuery);
     }

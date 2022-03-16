@@ -286,6 +286,9 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             if (keyManagerInstance != null) {
                 log.debug("KeyManager instance available to validate token.");
                 AccessTokenInfo tokenInfo = keyManagerInstance.getTokenMetaData(validationContext.getAccessToken());
+                if (tokenInfo == null) {
+                    return null;
+                }
                 tokenInfo.setKeyManager(electedKeyManager);
                 CacheProvider.getGatewayIntrospectCache().put(validationContext.getAccessToken(), tokenInfo);
                 return tokenInfo;

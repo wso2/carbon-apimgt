@@ -123,7 +123,7 @@ public final class BlockConditionDBUtil {
             while (rs.next()) {
 
                 String type = rs.getString("TYPE");
-                String value = rs.getString("VALUE");
+                String value = rs.getString("BLOCK_CONDITION");
                 String enabled = rs.getString("ENABLED");
                 String tenantDomain = rs.getString("DOMAIN");
                 int conditionId = rs.getInt("CONDITION_ID");

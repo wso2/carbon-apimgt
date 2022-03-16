@@ -258,6 +258,12 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                         + "Application.");
             }
             throw new DeployerException(response1.getStatusLine().toString());
+        } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+            if (log.isDebugEnabled()) {
+                log.warn("Cannot undeploy. Solace API product '" + apiNameWithContext + "' is already "
+                        + " un deployed.");
+            }
+            return true;
         } else {
             if (log.isDebugEnabled()) {
                 log.error("Error occurred while deleting the API Product '" + apiNameWithContext + "' from Solace " +
