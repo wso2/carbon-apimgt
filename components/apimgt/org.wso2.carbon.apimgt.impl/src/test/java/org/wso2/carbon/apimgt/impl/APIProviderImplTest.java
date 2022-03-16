@@ -4059,11 +4059,11 @@ public class APIProviderImplTest {
         api.setFaultSequence("test-sequence");
 
         Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getInSequence(),
-                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+                APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
         Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getOutSequence(),
-                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+                APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
         Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getFaultSequence(),
-                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+                APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
 
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
         apiProvider.loadMediationPoliciesAsOperationPoliciesToAPI(api, superTenantDomain);
@@ -4111,11 +4111,11 @@ public class APIProviderImplTest {
         policyData.setPolicyId(policyId);
 
         Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getInSequence(),
-                api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
+                APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
         Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getOutSequence(),
-                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+                APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
         Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName(api.getFaultSequence(),
-                api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
+                APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
 
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
         apiProvider.loadMediationPoliciesAsOperationPoliciesToAPI(api, superTenantDomain);
@@ -4195,7 +4195,7 @@ public class APIProviderImplTest {
         PowerMockito.when(APIUtil.isSequenceDefined(api.getInSequence())).thenReturn(true);
 
         Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName("in-policy",
-                api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
+                APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(null);
         PowerMockito.when(APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST,
                 superTenantDomain)).thenReturn(policyData);
         Mockito.when(apiProvider.addAPISpecificOperationPolicy(apiuuid, policyData, superTenantDomain)).thenReturn("11111");
@@ -4276,7 +4276,7 @@ public class APIProviderImplTest {
         PowerMockito.when(APIUtil.isSequenceDefined(api.getInSequence())).thenReturn(true);
 
         Mockito.when(apiProvider.getAPISpecificOperationPolicyByPolicyName("in-policy",
-                api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
+                APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, superTenantDomain, false)).thenReturn(policyData);
 
         apiProvider.migrateMediationPoliciesOfAPI(api, superTenantDomain, false);
 

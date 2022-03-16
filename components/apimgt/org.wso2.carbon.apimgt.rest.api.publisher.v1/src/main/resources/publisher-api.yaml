@@ -7514,9 +7514,11 @@ paths:
                 $ref: '#/components/schemas/OperationPolicyDataList'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
+            - apim:api_view    #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
             - apim:api_manage
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
@@ -7579,9 +7581,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
             - apim:api_manage
             - apim:mediation_policy_create
             - apim:mediation_policy_manage
@@ -7623,9 +7626,11 @@ paths:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
+            - apim:api_view   #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
             - apim:api_manage
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
@@ -7655,10 +7660,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_create
             - apim:api_manage
+            - apim:mediation_policy_create
             - apim:mediation_policy_manage
             - apim:api_mediation_policy_manage
       x-code-samples:
@@ -7695,9 +7702,11 @@ paths:
                 format: binary
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
+            - apim:api_view  #This scope was added as the publisher user needs to access this resource. Mediation_policy_view scope is not included in the Internal/Publisher user.
             - apim:api_manage
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
@@ -7740,13 +7749,12 @@ paths:
                 $ref: '#/components/schemas/OperationPolicyDataList'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_view
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7803,13 +7811,11 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_create #todo: consider removing this. There are some requirements to deny creating policies even though user has api_create scope.
-            - apim:api_manage
-            - apim:mediation_policy_create
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7845,13 +7851,12 @@ paths:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_view
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7876,12 +7881,11 @@ paths:
           $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7915,59 +7919,16 @@ paths:
                 format: binary
         404:
           $ref: '#/components/responses/NotFound'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
-
-  /operation-policies/specification/schema:
-    get:
-      tags:
-        - Operation Policies
-      summary: Export the operation policies specification schema.
-      description: |
-        This operation can be used to export the operation-policy-specification-schema.json used in deployment.
-      operationId: exportOperationPolicySpecificationSchema
-      responses:
-        200:
-          description: |
-            OK.
-            Operation policy specification schema exported successfully.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                type: string
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:mediation_policy_view
-            - apim:mediation_policy_manage
-            - apim:api_mediation_policy_manage
+            - apim:common_operation_policy_view
+            - apim:common_operation_policy_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/v2/operation-policies/specification/schema" > operation-policy-specification-schema.json'
-
+          "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
   /api-products/change-lifecycle:
     post:
@@ -9059,6 +9020,12 @@ components:
           type: string
           example:
             wso2
+        gatewayType:
+          title: Field to identify gateway type.
+          type: string
+          description: The gateway type selected for the API policies. Accepts one of the
+            following. wso2/synapse, wso2/choreo-connect.
+          example: wso2/synapse
         asyncTransportProtocols:
           type: array
           description: |
@@ -11764,6 +11731,9 @@ components:
       properties:
         policyName:
           type: string
+        policyVersion:
+          type: string
+          default: v1
         policyId:
           type: string
         parameters:
@@ -12447,6 +12417,8 @@ components:
             apim:mediation_policy_view: View mediation policies
             apim:mediation_policy_create: Create mediation policies
             apim:mediation_policy_manage: Update and delete mediation policies
+            apim:common_operation_policy_view: View common operation policies
+            apim:common_operation_policy_manage: Add, Update and Delete common operation policies
             apim:client_certificates_view: View client certificates
             apim:client_certificates_add: Add client certificates
             apim:client_certificates_update: Update and delete client certificates

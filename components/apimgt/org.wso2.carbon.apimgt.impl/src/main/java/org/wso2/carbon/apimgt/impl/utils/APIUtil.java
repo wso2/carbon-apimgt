@@ -11346,17 +11346,18 @@ public final class APIUtil {
                                 OperationPolicyData policyData = new OperationPolicyData();
                                 policyData.setSpecification(policySpec);
                                 policyData.setOrganization(organization);
-
+                                String policyFileName = getOperationPolicyFileName(policySpec.getName(),
+                                        policySpec.getVersion());
                                 OperationPolicyDefinition synapsePolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                                policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                                                policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
                                 if (synapsePolicyDefinition != null) {
                                     synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
                                     policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
                                 }
                                 OperationPolicyDefinition ccPolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                                policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                                                policyFileName, APIConstants.CC_POLICY_DEFINITION_EXTENSION);
                                 if (ccPolicyDefinition != null) {
                                     ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
                                     policyData.setCcPolicyDefinition(ccPolicyDefinition);
@@ -11384,19 +11385,19 @@ public final class APIUtil {
      * Read the operation policy definition from the provided path and return the definition object
      *
      * @param extractedFolderPath   Location of the policy definition
-     * @param policyName            Name of the policy
+     * @param definitionFileName    Name of the policy file
      * @param fileExtension         Since there can be both synapse and choreo connect definitons, fileExtension is used
      *
      * @return OperationPolicyDefinition
      */
     public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
-                                                                                 String policyName,
+                                                                                 String definitionFileName,
                                                                                  String fileExtension)
             throws APIManagementException {
 
         OperationPolicyDefinition policyDefinition = null;
         try {
-            String fileName = extractedFolderPath + File.separator + policyName + fileExtension;
+            String fileName = extractedFolderPath + File.separator + definitionFileName + fileExtension;
             if (checkFileExistence(fileName)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Found policy definition file " + fileName);
@@ -11598,10 +11599,60 @@ public final class APIUtil {
     }
 
 
+    public static String getOperationPolicyFileName(String policyName, String policyVersion) {
+        if (StringUtils.isEmpty(policyVersion)) {
+            policyVersion = "v1";
+        }
+        return policyName + "_" + policyVersion;
+    }
+
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
 
+    }
+
+    /**
+     * Handles gateway vendor for Choreo Connect before insert DB operations.
+     *
+     * @param gatewayVendorType Gateway vendor
+     * @param gatewayType       Gateway type
+     * @return gateway vendor for the API
+     */
+    public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
+        if(gatewayType != null && APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayType)) {
+            gatewayVendorType =  APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        }
+        return gatewayVendorType;
+    }
+
+    /**
+     * Provides gateway type considering gateway vendor.
+     *
+     * @param gatewayVendor Gateway vendor type.
+     * @return gateway type
+     */
+    public static String getGatewayType(String gatewayVendor) {
+        String gatewayType = null;
+        if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
+            gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
+        } else if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
+            gatewayType = APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        }
+        return gatewayType;
+    }
+
+    /**
+     * Replaces wso2/choreo-connect gateway vendor type as wso2 after retrieving from db.
+     *
+     * @param gatewayVendor Gateway vendor type
+     * @return wso2 gateway vendor type
+     */
+    public static String handleGatewayVendorRetrieval(String gatewayVendor) {
+        if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
+            gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        }
+        return  gatewayVendor;
     }
 }

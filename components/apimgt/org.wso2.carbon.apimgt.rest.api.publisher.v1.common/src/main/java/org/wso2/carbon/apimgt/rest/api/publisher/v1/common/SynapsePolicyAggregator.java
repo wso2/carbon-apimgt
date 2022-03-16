@@ -98,12 +98,14 @@ public class SynapsePolicyAggregator {
         for (OperationPolicy policy : operationPolicies) {
             if (flow.equals(policy.getDirection())) {
                 Map<String, Object> policyParameters = policy.getParameters();
+                String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                        policy.getPolicyVersion());
                 OperationPolicySpecification policySpecification = ImportUtils
-                        .getOperationPolicySpecificationFromFile(policyDirectory, policy.getPolicyName());
+                        .getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
                 if (policySpecification.getSupportedGateways()
                         .contains(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE)) {
                     OperationPolicyDefinition policyDefinition =
-                            APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory, policy.getPolicyName(),
+                            APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory, policyFileName,
                                     APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
                     if (policyDefinition != null) {
                         try {

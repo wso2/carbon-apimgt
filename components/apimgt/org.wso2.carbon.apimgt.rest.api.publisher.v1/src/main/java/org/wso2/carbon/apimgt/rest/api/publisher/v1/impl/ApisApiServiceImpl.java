@@ -2479,8 +2479,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
 
                 OperationPolicyData existingPolicy =
-                        apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(), apiId,
-                                null, organization, false);
+                        apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(),
+                                policySpecification.getVersion(), apiId, null, organization, false);
                 String policyID;
                 if (existingPolicy == null) {
                     policyID = apiProvider.addAPISpecificOperationPolicy(apiId, operationPolicyData, organization);

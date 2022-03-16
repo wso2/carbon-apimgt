@@ -24,6 +24,7 @@ import javax.validation.Valid;
 public class OperationPolicyDTO   {
   
     private String policyName = null;
+    private String policyVersion = "v1";
     private String policyId = null;
     private Map<String, Object> parameters = new HashMap<String, Object>();
 
@@ -43,6 +44,23 @@ public class OperationPolicyDTO   {
   }
   public void setPolicyName(String policyName) {
     this.policyName = policyName;
+  }
+
+  /**
+   **/
+  public OperationPolicyDTO policyVersion(String policyVersion) {
+    this.policyVersion = policyVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("policyVersion")
+  public String getPolicyVersion() {
+    return policyVersion;
+  }
+  public void setPolicyVersion(String policyVersion) {
+    this.policyVersion = policyVersion;
   }
 
   /**
@@ -90,13 +108,14 @@ public class OperationPolicyDTO   {
     }
     OperationPolicyDTO operationPolicy = (OperationPolicyDTO) o;
     return Objects.equals(policyName, operationPolicy.policyName) &&
+        Objects.equals(policyVersion, operationPolicy.policyVersion) &&
         Objects.equals(policyId, operationPolicy.policyId) &&
         Objects.equals(parameters, operationPolicy.parameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyName, policyId, parameters);
+    return Objects.hash(policyName, policyVersion, policyId, parameters);
   }
 
   @Override
@@ -105,6 +124,7 @@ public class OperationPolicyDTO   {
     sb.append("class OperationPolicyDTO {\n");
     
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
+    sb.append("    policyVersion: ").append(toIndentedString(policyVersion)).append("\n");
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("}");

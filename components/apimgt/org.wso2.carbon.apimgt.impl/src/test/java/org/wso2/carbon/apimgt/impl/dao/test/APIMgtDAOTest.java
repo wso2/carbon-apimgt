@@ -829,6 +829,24 @@ public class APIMgtDAOTest {
     }
 
     @Test
+    public void testAPIGatewayTypeHandling() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIGatewayVendorByApiUUID",
+                "getAPIGatewayVendorByApiUUID", "1.0.0");
+        API api = new API(apiId);
+        api.setContext("/getAPIGatewayTypeHandling");
+        api.setContextTemplate("/getAPIGatewayTypeHandling/{version}");
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        api.setGatewayVendor("wso2");
+        api.setGatewayType("wso2/choreo-connect");
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+        String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(apiUUID);
+        assertNotNull(gatewayVendor);
+        assertTrue(gatewayVendor.equals("wso2"));
+        apiMgtDAO.deleteAPI(api.getUuid());
+    }
+
+    @Test
     public void testCreateApplicationRegistrationEntry() throws Exception {
         Subscriber subscriber = new Subscriber("testCreateApplicationRegistrationEntry");
         subscriber.setTenantId(-1234);

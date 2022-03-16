@@ -1852,6 +1852,7 @@ public interface APIProvider extends APIManager {
      * or not.
      *
      * @param policyName             API specific policy name
+     * @param policyVersion          API specific policy version
      * @param apiUUID                Unique identifier for API
      * @param revisionUUID           Unique identifier for API revision
      * @param organization           Organization name
@@ -1860,7 +1861,7 @@ public interface APIProvider extends APIManager {
      * @return Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String apiUUID,
+    OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String policyName, String policyVersion, String apiUUID,
                                                                   String revisionUUID,
                                                                   String organization,
                                                                   boolean isWithPolicyDefinition)
@@ -1871,13 +1872,14 @@ public interface APIProvider extends APIManager {
      * a matching policy created as a common policy. If not, it will return null
      *
      * @param policyName             Common Policy name
+     * @param policyVersion          Common Policy version
      * @param organization           Organization
      * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
      *                               is bit bulky
      * @return Common Operation Policy
      * @throws APIManagementException
      */
-    OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String organization,
+    OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String policyVersion, String organization,
                                                              boolean isWithPolicyDefinition)
             throws APIManagementException;
 
@@ -1987,10 +1989,23 @@ public interface APIProvider extends APIManager {
 
     /**
      *
-     * @param api
-     * @param organization
+     * Load the mediation policies if exists to the API. If a mediation policy is defined in the object under keys
+     * inSequence, outSequence or faultSequence, this method will search in the registry for a such sequence and
+     * populate the inSequenceMediation, outSequenceMediation or faultSequenceMediation attributes with a mediation
+     * object.
+     *
+     * @param api     API object
+     * @param organization Organization name
      * @throws APIManagementException
      */
     void loadMediationPoliciesToAPI(API api, String organization) throws APIManagementException;
+
+    /**
+     * Check whether the provided api uuid is a revisioned API's uuid or not.
+     *
+     * @param apiUUID    API UUID
+     * @throws APIManagementException
+     */
+    APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
 
 }

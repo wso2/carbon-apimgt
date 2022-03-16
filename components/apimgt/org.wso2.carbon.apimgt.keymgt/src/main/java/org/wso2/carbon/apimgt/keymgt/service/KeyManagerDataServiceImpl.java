@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
@@ -37,9 +38,14 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.entity.GroupId;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class KeyManagerDataServiceImpl implements KeyManagerDataService {
 
@@ -349,6 +355,16 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         application.setOrganization(event.getTenantDomain());
         event.getAttributes().forEach(application::addAttribute);
         application.setSubName(event.getSubscriber());
+        //add group ids list to application
+        if (!StringUtils.isEmpty(event.getGroupId())) {
+            String[] groupIdArray = event.getGroupId().split(",");
+            List<GroupId> groupIdList = Arrays.asList(groupIdArray).stream().map(id -> {
+                GroupId groupId = new GroupId();
+                groupId.setApplicationId(event.getApplicationId());
+                groupId.setGroupId(id);
+                return groupId;
+            }).collect(Collectors.toList());
+        }
         if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + application.toString());
