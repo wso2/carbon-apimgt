@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.gson.JsonObject;
 import io.swagger.inflector.examples.ExampleBuilder;
 import io.swagger.inflector.examples.models.Example;
 import io.swagger.inflector.processors.JsonNodeExampleSerializer;
@@ -56,6 +57,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -114,9 +116,7 @@ public class OAS2Parser extends APIDefinition {
     @Override
     public Map<String, Object> generateExample(String swaggerDef) throws APIManagementException {
         // create APIResourceMediationPolicy List = policyList
-        SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
-        Swagger swagger = parseAttemptForV2.getSwagger();
+        Swagger swagger = getSwagger(swaggerDef);
         //return map
         Map<String, Object> returnMap = new HashMap<>();
         //List for APIResMedPolicyList
@@ -1059,7 +1059,9 @@ public class OAS2Parser extends APIDefinition {
         //this is to ignore "responseSchema" in response schema objects
         mapper.addMixIn(Response.class, ResponseSchemaMixin.class);
         try {
-            return new String(mapper.writeValueAsBytes(swaggerObj));
+            //this is to remove responesObject from swagger content
+            String modifiedSwagString = removeResponsesObject(swaggerObj, new String(mapper.writeValueAsBytes(swaggerObj)));
+            return modifiedSwagString;
         } catch (JsonProcessingException e) {
             throw new APIManagementException("Error while generating Swagger json from model", e);
         }
@@ -1186,6 +1188,36 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
+     * Remove responsesObject from the swagger string
+     * This is to address a bug in swagger parser
+     *
+     * @param swagger Swagger model
+     * @param swaggerString Swagger definition as string
+     * @return Modified swagger string
+     * @throws APIManagementException
+     */
+    public String removeResponsesObject(Swagger swagger, String swaggerString) {
+        JSONObject jsonObj = new JSONObject(swaggerString);
+        if (swagger != null && swagger.getPaths() != null) {
+            Map<String, Path> pathMap = swagger.getPaths();
+            for (String pathKey : swagger.getPaths().keySet()) {
+                Path path = swagger.getPath(pathKey);
+                Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+                for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
+                    JSONObject  jsonPaths = (JSONObject)jsonObj.get("paths");
+                    if (((JSONObject)((JSONObject)(jsonPaths).get(pathKey)).get(entry.getKey().
+                            toString().toLowerCase())).has("responsesObject")) {
+                        ((JSONObject)((JSONObject)(jsonPaths).get(pathKey)).get(entry.getKey().
+                                toString().toLowerCase())).remove("responsesObject");
+                    }
+                }
+            }
+            return jsonObj.toString();
+        }
+        return swaggerString;
+    }
+
+    /**
      * Update OAS definition with GW endpoints
      *
      * @param product          APIProduct
@@ -1270,9 +1302,7 @@ public class OAS2Parser extends APIDefinition {
     @Override
     public String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
             List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
-        SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
-        Swagger swagger = parseAttemptForV2.getSwagger();
+        Swagger swagger = getSwagger(oasDefinition);
         // check if API Level tier is content aware. if so, we set a extension as a global property
         if (contentAwareTiersList.contains(apiLevelTier)) {
             swagger.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, true);
