@@ -98,7 +98,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             List<API> subscribedAPIs = new ArrayList<>();
-            labelOne:
+
             //Check whether the application needs to be updated has a Solace API subscription
             for (SubscribedAPI api : subscriptions) {
                 List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(api.
@@ -107,17 +107,16 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
                         if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
-                            API api2 = apiProvider.getAPIbyUUID(api.getApiId().getUUID(), api.getOrganization());
-                            subscribedAPIs.add(api2);
+                            subscribedAPIs.add(apiProvider.getAPIbyUUID(api.getApiId().getUUID(),
+                                    api.getOrganization()));
                             isContainsSolaceApis = true;
                             organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
                                     getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
-                            break labelOne;
                         }
                     }
                 }
             }
-            // Patching consumerKey to Solace application using Admin Apis
+
             if (isContainsSolaceApis) {
                 if (application.getKeys() != null) {
                     String consumerSecret = null;
@@ -137,36 +136,10 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                         SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
                                 application, event.getConsumerKey(), consumerSecret);
                     } else if (isApplicationExistsResponse.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                        // Create applications in solace
                         for (API api : subscribedAPIs) {
-                            ArrayList<String> solaceApiProducts = new ArrayList<>();
-                            List<Environment> deployedSolaceEnvironments = SolaceNotifierUtils.
-                                    getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
-                            String applicationOrganizationName = SolaceNotifierUtils.getSolaceOrganizationName
-                                    (deployedSolaceEnvironments);
-                            if (applicationOrganizationName != null) {
-                                try {
-                                    boolean apiProductDeployedIntoSolace = SolaceNotifierUtils.
-                                            checkApiProductAlreadyDeployedIntoSolaceEnvironments(api,
-                                                    deployedSolaceEnvironments);
-                                    if (apiProductDeployedIntoSolace) {
-                                        for (Environment environment : deployedSolaceEnvironments) {
-                                            solaceApiProducts.add(SolaceNotifierUtils
-                                                    .generateApiProductNameForSolaceBroker(api, environment.getName()));
-                                        }
-                                        SolaceNotifierUtils.deployApplicationToSolaceBroker(application,
-                                                solaceApiProducts, applicationOrganizationName);
-                                    }
-                                } catch (IOException e) {
-                                    log.error(e.getMessage());
-                                }
-                            } else {
-                                if (log.isDebugEnabled()) {
-                                    log.error("Cannot create solace application " + application.getName() +
-                                            "with API product deployed in different organizations...");
-                                }
-                                throw new APIManagementException("Cannot create solace application " + application
-                                        .getName() + "with API product deployed in different organizations...");
-                            }
+                            SolaceSubscriptionsNotifier solaceSubscriptionsNotifier = new SolaceSubscriptionsNotifier();
+                            solaceSubscriptionsNotifier.deployApplication(api, application);
                         }
 
                     } else {
@@ -184,6 +157,8 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                 }
             }
         } catch (APIManagementException e) {
+            throw new NotifierException(e.getMessage());
+        }  catch (IOException e) {
             throw new NotifierException(e.getMessage());
         }
     }
