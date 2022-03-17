@@ -87,7 +87,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
      */
     private void syncSolaceApplicationClientId(ApplicationRegistrationEvent event) throws NotifierException {
 
-        // get list of subscribed APIs in the application
+        // Get list of subscribed APIs in the application
         try {
             Application application = apiMgtDAO.getApplicationByUUID(event.getApplicationUUID());
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
@@ -157,9 +157,9 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                 }
             }
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("Error while persisting generated keys in solace Broker " + e.getMessage());
         }  catch (IOException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("I/O Error while persisting generated keys in solace Broker " + e.getMessage());
         }
     }
 

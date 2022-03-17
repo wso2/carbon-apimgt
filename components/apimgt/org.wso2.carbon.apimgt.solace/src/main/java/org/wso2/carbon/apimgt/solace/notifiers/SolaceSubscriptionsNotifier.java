@@ -103,9 +103,9 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             }
             deployApplication(api, application);
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
-        } catch (IOException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("Error while creating application solace Broker " + e.getMessage());
+        }  catch (IOException e) {
+            throw new NotifierException("I/O Error while creating application solace Broker " + e.getMessage());
         }
     }
 
@@ -133,9 +133,9 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             }
             deployApplication(api, application);
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
-        } catch (IOException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("Error while updating application solace Broker " + e.getMessage());
+        }  catch (IOException e) {
+            throw new NotifierException("I/O Error while updating application solace Broker " + e.getMessage());
         }
     }
 
@@ -160,7 +160,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                 SolaceNotifierUtils.unsubscribeAPIProductFromSolaceApplication(api, application);
             }
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("Error while removing application solace Broker " + e.getMessage());
         }
     }
 
@@ -202,11 +202,15 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                 }
             }
         } catch (APIManagementException e) {
-            log.error(e.getMessage());
-            throw new APIManagementException(e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.error("Error while creating application solace Broker" + e.getMessage());
+            }
+            throw new APIManagementException("I/O Error while creating application solace Broker" + e.getMessage());
         }  catch (IOException e) {
-            log.error(e.getMessage());
-            throw new IOException(e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.error("I/O Error while creating application solace Broker" + e.getMessage());
+            }
+            throw new IOException("I/O Error while creating application solace Broker" + e.getMessage());
         }
     }
 
