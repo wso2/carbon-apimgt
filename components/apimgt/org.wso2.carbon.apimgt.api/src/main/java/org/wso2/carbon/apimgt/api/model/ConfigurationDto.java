@@ -124,4 +124,18 @@ public class ConfigurationDto {
         this.values = values;
         this.multiple = multiple;
     }
+    public ConfigurationDto(String name, String label, String type, String tooltip, String defaultValue,
+                            boolean required,
+                            boolean mask, List values, boolean multiple) {
+
+        this.name = name;
+        this.label = label;
+        this.type = type;
+        this.tooltip = tooltip;
+        this.defaultValue = defaultValue;
+        this.required = required;
+        this.mask = mask;
+        this.values = values;
+        this.multiple = multiple;
+    }
 }
