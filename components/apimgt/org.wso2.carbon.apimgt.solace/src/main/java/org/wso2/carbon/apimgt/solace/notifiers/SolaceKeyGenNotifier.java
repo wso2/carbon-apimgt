@@ -17,8 +17,12 @@ package org.wso2.carbon.apimgt.solace.notifiers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -32,10 +36,13 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,6 +95,9 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                     application.getName(), application.getGroupId());
             boolean isContainsSolaceApis = false;
             String organizationNameOfSolaceDeployment = null;
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
+            List<API> subscribedAPIs = new ArrayList<>();
             labelOne:
             //Check whether the application needs to be updated has a Solace API subscription
             for (SubscribedAPI api : subscriptions) {
@@ -97,6 +107,8 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
                         if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
+                            API api2 = apiProvider.getAPIbyUUID(api.getApiId().getUUID(), api.getOrganization());
+                            subscribedAPIs.add(api2);
                             isContainsSolaceApis = true;
                             organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
                                     getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
@@ -115,10 +127,57 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                     for (APIKey key : consumerKeys) {
                         if (key.getConsumerKey().equals(event.getConsumerKey())) {
                             consumerSecret = key.getConsumerSecret();
+                            application.addKey(key);
                         }
                     }
-                    SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
-                            application, event.getConsumerKey(), consumerSecret);
+                    SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
+                    CloseableHttpResponse isApplicationExistsResponse = solaceAdminApis.applicationGet(
+                            organizationNameOfSolaceDeployment, application.getUUID(), "default");
+                    if (isApplicationExistsResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
+                                application, event.getConsumerKey(), consumerSecret);
+                    } else if (isApplicationExistsResponse.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                        for (API api : subscribedAPIs) {
+                            ArrayList<String> solaceApiProducts = new ArrayList<>();
+                            List<Environment> deployedSolaceEnvironments = SolaceNotifierUtils.
+                                    getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
+                            String applicationOrganizationName = SolaceNotifierUtils.getSolaceOrganizationName
+                                    (deployedSolaceEnvironments);
+                            if (applicationOrganizationName != null) {
+                                try {
+                                    boolean apiProductDeployedIntoSolace = SolaceNotifierUtils.
+                                            checkApiProductAlreadyDeployedIntoSolaceEnvironments(api,
+                                                    deployedSolaceEnvironments);
+                                    if (apiProductDeployedIntoSolace) {
+                                        for (Environment environment : deployedSolaceEnvironments) {
+                                            solaceApiProducts.add(SolaceNotifierUtils
+                                                    .generateApiProductNameForSolaceBroker(api, environment.getName()));
+                                        }
+                                        SolaceNotifierUtils.deployApplicationToSolaceBroker(application,
+                                                solaceApiProducts, applicationOrganizationName);
+                                    }
+                                } catch (IOException e) {
+                                    log.error(e.getMessage());
+                                }
+                            } else {
+                                if (log.isDebugEnabled()) {
+                                    log.error("Cannot create solace application " + application.getName() +
+                                            "with API product deployed in different organizations...");
+                                }
+                                throw new APIManagementException("Cannot create solace application " + application
+                                        .getName() + "with API product deployed in different organizations...");
+                            }
+                        }
+
+                    } else {
+                        String msg = "Error while searching for application '" + application.getName() + ". : " +
+                                isApplicationExistsResponse.getStatusLine().toString();
+                        if (log.isDebugEnabled()) {
+                            log.error(msg);
+                        }
+                        throw new NotifierException(msg);
+                    }
+
                 } else {
                     throw new NotifierException("Application keys are not found in the application : " +
                             application.getName());
