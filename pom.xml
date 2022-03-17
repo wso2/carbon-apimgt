@@ -1940,7 +1940,7 @@
         <carbon.identity-inbound-auth-saml2.version>5.5.2</carbon.identity-inbound-auth-saml2.version>
         <carbon.identity-inbound-auth-openid.version>5.6.0</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>6.3.57</carbon.identity-local-auth-basicauth.version>
-        <carbon.identity-outbound-auth-samlsso.version>5.3.18</carbon.identity-outbound-auth-samlsso.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.3.34</carbon.identity-outbound-auth-samlsso.version>
         <carbon.identity-data-publisher-application-authentication.version>5.3.25</carbon.identity-data-publisher-application-authentication.version>
 
         <!--SAML Common Utils Version-->
