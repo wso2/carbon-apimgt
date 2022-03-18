@@ -16368,8 +16368,6 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public String getEarliestRevision(String apiUUID) throws APIManagementException {
-
-
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = (
