@@ -4876,37 +4876,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         //Import the API and Definition
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String definitionToAdd = validationResponse.getJsonContent();
-            String protocol = validationResponse.getProtocol();
-            if (isServiceAPI) {
-                apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
-            }
-            if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDTOFromProperties.getGatewayVendor())) {
-                apiDTOFromProperties.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
-                apiDTOFromProperties.setAsyncTransportProtocols(AsyncApiParser.
-                        getTransportProtocolsForAsyncAPI(definitionToAdd));
-            }
-            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername(), organization);
-            if (isServiceAPI) {
-                apiToAdd.setServiceInfo("key", service.getKey());
-                apiToAdd.setServiceInfo("md5", service.getMd5());
-                if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
-                    apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
-                            .getServiceUrl(), protocol));
-                }
-            }
-            apiToAdd.setAsyncApiDefinition(definitionToAdd);
-
-            //load topics from AsyncAPI
-            apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
-                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())
-                            || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor())));
-            apiToAdd.setOrganization(organization);
-            apiToAdd.setAsyncApiDefinition(definitionToAdd);
-
-            apiProvider.addAPI(apiToAdd);
-            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization));
+            API api = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, isServiceAPI,
+                    apiDTOFromProperties, service, organization, apiProvider);
+            return APIMappingUtil.fromAPItoDTO(api);
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();

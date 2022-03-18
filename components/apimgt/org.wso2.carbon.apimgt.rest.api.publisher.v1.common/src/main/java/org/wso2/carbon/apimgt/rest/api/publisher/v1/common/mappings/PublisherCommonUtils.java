@@ -1671,6 +1671,11 @@ public class PublisherCommonUtils {
                 APIDTO.TypeEnum.WEBSUB.equals(apidto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apidto.getType());
     }
 
+    public static boolean isThirdPartyAsyncAPI(APIDTO apidto) {
+        return APIDTO.TypeEnum.ASYNC.equals(apidto.getType()) && apidto.getAdvertiseInfo() != null &&
+                apidto.getAdvertiseInfo().isAdvertised();
+    }
+
     /**
      * Add WSDL file of an API.
      *
@@ -1812,5 +1817,42 @@ public class PublisherCommonUtils {
             }
             return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
         }
+    }
+
+    public static API importAsyncAPIWithDefinition(APIDefinitionValidationResponse validationResponse,
+            Boolean isServiceAPI, APIDTO apiDTOFromProperties, ServiceEntry service, String organization,
+            APIProvider apiProvider)
+            throws APIManagementException {
+        String definitionToAdd = validationResponse.getJsonContent();
+        String protocol = validationResponse.getProtocol();
+        if (isServiceAPI) {
+            apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
+        }
+        if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDTOFromProperties.getGatewayVendor())) {
+            apiDTOFromProperties.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
+            apiDTOFromProperties.setAsyncTransportProtocols(
+                    AsyncApiParser.getTransportProtocolsForAsyncAPI(definitionToAdd));
+        }
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
+                RestApiCommonUtil.getLoggedInUsername(), organization);
+        if (isServiceAPI) {
+            apiToAdd.setServiceInfo("key", service.getKey());
+            apiToAdd.setServiceInfo("md5", service.getMd5());
+            if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
+                apiToAdd.setEndpointConfig(
+                        PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(), protocol));
+            }
+        }
+        apiToAdd.setAsyncApiDefinition(definitionToAdd);
+
+        //load topics from AsyncAPI
+        apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(definitionToAdd,
+                APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(
+                        apiToAdd.getGatewayVendor())));
+        apiToAdd.setOrganization(organization);
+        apiToAdd.setAsyncApiDefinition(definitionToAdd);
+
+        apiProvider.addAPI(apiToAdd);
+        return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
     }
 }
