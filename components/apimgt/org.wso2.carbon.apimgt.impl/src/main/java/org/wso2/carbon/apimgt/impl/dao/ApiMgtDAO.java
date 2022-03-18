@@ -16369,10 +16369,20 @@ public class ApiMgtDAO {
      */
     public String getEarliestRevision(String apiUUID) throws APIManagementException {
 
+
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID)) {
+                PreparedStatement statement = (
+                        connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
+                                .getDriverName().contains("Microsoft") ?
+                                connection.prepareStatement(
+                                        SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MSSQL) :
+                                (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
+                                        .getDriverName().contains("H2")) ?
+                                        connection.prepareStatement(
+                                                SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MYSQL) :
+                                        connection.prepareStatement(
+                                                SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID))) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
