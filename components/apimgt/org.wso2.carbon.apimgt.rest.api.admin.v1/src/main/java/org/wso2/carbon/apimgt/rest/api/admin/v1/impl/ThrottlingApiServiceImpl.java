@@ -229,7 +229,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
-
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //This will give PolicyNotFoundException if there's no policy exists with UUID
         APIPolicy existingPolicy = null;
         try {
@@ -240,7 +240,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
         }
-        if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API)) {
+        if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API, organization)) {
             String message = "Advanced Throttling Policy " + existingPolicy.getPolicyName() + ": " + policyId
                     + " already attached to API/Resource";
             throw new APIManagementException(message, ExceptionCodes
@@ -413,14 +413,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
-
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             ApplicationPolicy existingPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APP_POLICY, policyId, log);
             }
-            if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
-                    PolicyConstants.POLICY_LEVEL_APP)) {
+            if (apiProvider.hasAttachments(organization, existingPolicy.getPolicyName(),
+                    PolicyConstants.POLICY_LEVEL_APP,organization)) {
                 String message = "Policy " + policyId + " already attached to an application";
                 log.error(message);
                 throw new APIManagementException(message);
@@ -683,14 +683,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
-
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             SubscriptionPolicy existingPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId, log);
             }
             if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
-                    PolicyConstants.POLICY_LEVEL_SUB)) {
+                    PolicyConstants.POLICY_LEVEL_SUB, organization)) {
                 String message = "Policy " + policyId + " already has subscriptions";
                 log.error(message);
                 throw new APIManagementException(message);
