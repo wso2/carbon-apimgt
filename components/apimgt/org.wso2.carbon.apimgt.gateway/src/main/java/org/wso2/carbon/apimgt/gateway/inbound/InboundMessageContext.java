@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.inbound;
 
+import io.netty.channel.ChannelHandlerContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.synapse.api.API;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
@@ -57,6 +58,7 @@ public class InboundMessageContext {
     private Map<String, ResourceInfoDTO> resourcesMap = new HashMap<>(); //elected API resources
     private String userIP;
     private String matchingResource; //invoking API resource
+    private ChannelHandlerContext ctx;
 
     //Graphql Subscription specific connection context information
     private GraphQLSchemaDTO graphQLSchemaDTO;
@@ -232,5 +234,13 @@ public class InboundMessageContext {
 
     public void setMatchingResource(String matchingResource) {
         this.matchingResource = matchingResource;
+    }
+
+    public ChannelHandlerContext getCtx() {
+        return ctx;
+    }
+
+    public void setCtx(ChannelHandlerContext ctx) {
+        this.ctx = ctx;
     }
 }

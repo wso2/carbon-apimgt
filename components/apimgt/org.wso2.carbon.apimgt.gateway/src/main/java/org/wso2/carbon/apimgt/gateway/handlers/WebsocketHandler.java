@@ -64,6 +64,7 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                     .getInboundMessageContextForConnectionId(channelId);
         } else {
             inboundMessageContext = new InboundMessageContext();
+            inboundMessageContext.setCtx(ctx);
             InboundMessageContextDataHolder.getInstance()
                     .addInboundMessageContextForConnection(channelId, inboundMessageContext);
         }
