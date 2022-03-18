@@ -95,8 +95,6 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                     application.getName(), application.getGroupId());
             boolean isContainsSolaceApis = false;
             String organizationNameOfSolaceDeployment = null;
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
             List<API> subscribedAPIs = new ArrayList<>();
 
             //Check whether the application needs to be updated has a Solace API subscription
@@ -107,6 +105,8 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
                         if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
+                            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
+                                    getThreadLocalCarbonContext().getUsername());
                             subscribedAPIs.add(apiProvider.getAPIbyUUID(api.getApiId().getUUID(),
                                     api.getOrganization()));
                             isContainsSolaceApis = true;
