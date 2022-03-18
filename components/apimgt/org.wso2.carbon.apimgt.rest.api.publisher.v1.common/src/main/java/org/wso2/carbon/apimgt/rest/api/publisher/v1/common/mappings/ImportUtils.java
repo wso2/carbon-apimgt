@@ -294,10 +294,8 @@ public class ImportUtils {
                     apiProvider.addOrUpdateComplexityDetails(importedApi.getUuid(), graphqlComplexityInfo);
                 }
             }
-            // Add/update Async API definition for streaming APIs (but for not third party ones,
-            // because it was already done in importAsyncAPIWithDefinition)
-            if (PublisherCommonUtils.isStreamingAPI(importedApiDTO) && !PublisherCommonUtils.isThirdPartyAsyncAPI(
-                    importedApiDTO)) {
+            // Add/update Async API definition for streaming APIs
+            if (PublisherCommonUtils.isStreamingAPI(importedApiDTO)) {
                 // Add the validated Async API definition separately since the UI does the same procedure
                 PublisherCommonUtils.updateAsyncAPIDefinition(importedApi.getUuid(), validationResponse, organization);
             }
