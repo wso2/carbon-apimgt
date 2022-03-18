@@ -39,11 +39,8 @@ public class SubscriptionsNotifier extends AbstractNotifier {
                 event.setTimeStamp(event.getTimeStamp() + 10l);
             }
         }
-        if (!APIUtil.isAnyExternalGateWayProviderExists()) {
-            publishEventToEventHub(event);
-            return true;
-        }
-        return false;
+        publishEventToEventHub(event);
+        return true;
     }
 
     @Override
