@@ -99,7 +99,13 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
             Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
             for (APIKey apiKey : consumerKeys) {
-                application.addKey(apiKey);
+                if (SolaceConstants.OAUTH_CLIENT_PRODUCTION.equals(apiKey.getType())) {
+                    application.addKey(apiKey);
+                }
+            }
+            // Send only the production keys to Solace broker.
+            if (application.getKeys().isEmpty()) {
+                return;
             }
             deployApplication(api, application);
         } catch (APIManagementException e) {
@@ -129,7 +135,13 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
             Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
             for (APIKey apiKey : consumerKeys) {
-                application.addKey(apiKey);
+                if (SolaceConstants.OAUTH_CLIENT_PRODUCTION.equals(apiKey.getType())) {
+                    application.addKey(apiKey);
+                }
+            }
+            // Send only the production keys to Solace broker.
+            if (application.getKeys().isEmpty()) {
+                return;
             }
             deployApplication(api, application);
         } catch (APIManagementException e) {

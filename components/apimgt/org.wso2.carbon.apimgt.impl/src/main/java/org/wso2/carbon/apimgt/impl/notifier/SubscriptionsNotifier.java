@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
  * The default Subscription notification service implementation in which Subscription creation, update and delete
@@ -38,8 +39,11 @@ public class SubscriptionsNotifier extends AbstractNotifier {
                 event.setTimeStamp(event.getTimeStamp() + 10l);
             }
         }
-        publishEventToEventHub(event);
-        return true;
+        if (!APIUtil.isAnyExternalGateWayProviderExists()) {
+            publishEventToEventHub(event);
+            return true;
+        }
+        return false;
     }
 
     @Override

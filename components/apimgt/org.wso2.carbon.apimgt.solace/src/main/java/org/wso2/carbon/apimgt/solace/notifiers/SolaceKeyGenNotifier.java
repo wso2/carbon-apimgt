@@ -124,10 +124,15 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                             getThreadLocalCarbonContext().getUsername());
                     Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
                     for (APIKey key : consumerKeys) {
-                        if (key.getConsumerKey().equals(event.getConsumerKey())) {
+                        if (key.getConsumerKey().equals(event.getConsumerKey()) && SolaceConstants
+                                .OAUTH_CLIENT_PRODUCTION.equals(key.getType())) {
                             consumerSecret = key.getConsumerSecret();
                             application.addKey(key);
                         }
+                    }
+                    // Send only the production keys to Solace broker.
+                    if (application.getKeys().isEmpty()) {
+                        return;
                     }
                     SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
                     CloseableHttpResponse isApplicationExistsResponse = solaceAdminApis.applicationGet(

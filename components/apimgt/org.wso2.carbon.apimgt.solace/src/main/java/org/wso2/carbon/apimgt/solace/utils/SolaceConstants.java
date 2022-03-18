@@ -23,6 +23,7 @@ public class SolaceConstants {
     public static final String SOLACE_ENVIRONMENT_ORGANIZATION = "Organization";
     public static final String SOLACE_ENVIRONMENT_DEV_NAME = "DevAccountName";
     public static final String SOLACE_API_TAG = "SolaceAPI";
+    public static final String OAUTH_CLIENT_PRODUCTION = "PRODUCTION";
 
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
