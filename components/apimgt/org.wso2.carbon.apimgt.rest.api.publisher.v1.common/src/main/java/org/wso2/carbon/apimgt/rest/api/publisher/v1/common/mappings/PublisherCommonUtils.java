@@ -1819,21 +1819,29 @@ public class PublisherCommonUtils {
         }
     }
 
+    /**
+     * @param validationResponse Response of a Async API definition validation call
+     * @param isServiceAPI       Whether this is a service API
+     * @param apiDto             API DTO
+     * @param service            If this is a service API, the service entry should be passed here
+     * @param organization       Organization of logged-in user
+     * @param apiProvider        API Provider
+     * @return
+     * @throws APIManagementException If an error occurs while importing the Async API definition
+     */
     public static API importAsyncAPIWithDefinition(APIDefinitionValidationResponse validationResponse,
-            Boolean isServiceAPI, APIDTO apiDTOFromProperties, ServiceEntry service, String organization,
-            APIProvider apiProvider)
+            Boolean isServiceAPI, APIDTO apiDto, ServiceEntry service, String organization, APIProvider apiProvider)
             throws APIManagementException {
         String definitionToAdd = validationResponse.getJsonContent();
         String protocol = validationResponse.getProtocol();
         if (isServiceAPI) {
-            apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
+            apiDto.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
         }
-        if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDTOFromProperties.getGatewayVendor())) {
-            apiDTOFromProperties.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
-            apiDTOFromProperties.setAsyncTransportProtocols(
-                    AsyncApiParser.getTransportProtocolsForAsyncAPI(definitionToAdd));
+        if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDto.getGatewayVendor())) {
+            apiDto.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
+            apiDto.setAsyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI(definitionToAdd));
         }
-        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto, apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         if (isServiceAPI) {
             apiToAdd.setServiceInfo("key", service.getKey());
@@ -1845,7 +1853,7 @@ public class PublisherCommonUtils {
         }
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
-        //load topics from AsyncAPI
+        // load topics from AsyncAPI
         apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(definitionToAdd,
                 APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(
                         apiToAdd.getGatewayVendor())));
