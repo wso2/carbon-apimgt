@@ -2042,11 +2042,14 @@ public class AsyncApiParser extends APIDefinition {
         oauth2SecurityScheme.flows.implicit.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, xScopeBindings);
 
         document.components.securitySchemes.put(APIConstants.DEFAULT_API_SECURITY_OAUTH2, oauth2SecurityScheme);
-        Aai20Server server = (Aai20Server) document.createServer("production");
-        JSONObject endpointConfig = new JSONObject(apiToUpdate.getEndpointConfig());
-        server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
-        server.protocol = apiToUpdate.getType().toLowerCase();
-        document.addServer("production", server);
+        if (!StringUtils.equalsIgnoreCase(APIConstants.API_TYPE_ASYNC, apiToUpdate.getType())
+                || !apiToUpdate.isAdvertiseOnly()) {
+            Aai20Server server = (Aai20Server) document.createServer("production");
+            JSONObject endpointConfig = new JSONObject(apiToUpdate.getEndpointConfig());
+            server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
+            server.protocol = apiToUpdate.getType().toLowerCase();
+            document.addServer("production", server);
+        }
         return Library.writeDocumentToJSONString(document);
     }
 

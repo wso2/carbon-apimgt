@@ -253,9 +253,14 @@ public class ImportUtils {
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
-                importedApi = PublisherCommonUtils
-                        .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
-                                importedApiDTO.getProvider(), organization);
+                if (!PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
+                    importedApi = PublisherCommonUtils
+                            .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
+                                    importedApiDTO.getProvider(), organization);
+                } else {
+                    importedApi = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, Boolean.FALSE,
+                            importedApiDTO, null, currentTenantDomain, apiProvider);
+                }
 
                 // Set API definition to validationResponse if the API is imported with sample API definition
                 if (validationResponse != null && validationResponse.isInit()) {
