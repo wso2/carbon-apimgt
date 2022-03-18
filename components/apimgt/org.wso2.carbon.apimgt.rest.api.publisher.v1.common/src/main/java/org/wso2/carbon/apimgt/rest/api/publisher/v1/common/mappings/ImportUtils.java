@@ -253,9 +253,14 @@ public class ImportUtils {
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
-                importedApi = PublisherCommonUtils
-                        .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
-                                importedApiDTO.getProvider(), organization);
+                if (!PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
+                    importedApi = PublisherCommonUtils
+                            .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
+                                    importedApiDTO.getProvider(), organization);
+                } else {
+                    importedApi = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, Boolean.FALSE,
+                            importedApiDTO, null, currentTenantDomain, apiProvider);
+                }
 
                 // Set API definition to validationResponse if the API is imported with sample API definition
                 if (validationResponse != null && validationResponse.isInit()) {
@@ -289,8 +294,10 @@ public class ImportUtils {
                     apiProvider.addOrUpdateComplexityDetails(importedApi.getUuid(), graphqlComplexityInfo);
                 }
             }
-            // Add/update Async API definition for streaming APIs
-            if (PublisherCommonUtils.isStreamingAPI(importedApiDTO)) {
+            // Add/update Async API definition for streaming APIs (but for not third party ones,
+            // because it was already done in importAsyncAPIWithDefinition)
+            if (PublisherCommonUtils.isStreamingAPI(importedApiDTO) && !PublisherCommonUtils.isThirdPartyAsyncAPI(
+                    importedApiDTO)) {
                 // Add the validated Async API definition separately since the UI does the same procedure
                 PublisherCommonUtils.updateAsyncAPIDefinition(importedApi.getUuid(), validationResponse, organization);
             }
