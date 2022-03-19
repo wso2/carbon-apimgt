@@ -135,27 +135,30 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                         return;
                     }
                     SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-                    CloseableHttpResponse isApplicationExistsResponse = solaceAdminApis.applicationGet(
-                            organizationNameOfSolaceDeployment, application.getUUID(), "default");
-                    if (isApplicationExistsResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                        SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
-                                application, event.getConsumerKey(), consumerSecret);
-                    } else if (isApplicationExistsResponse.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                        // Create applications in solace
-                        for (API api : subscribedAPIs) {
-                            SolaceSubscriptionsNotifier solaceSubscriptionsNotifier = new SolaceSubscriptionsNotifier();
-                            solaceSubscriptionsNotifier.deployApplication(api, application);
-                        }
 
-                    } else {
-                        String msg = "Error while searching for application '" + application.getName() + ". : " +
-                                isApplicationExistsResponse.getStatusLine().toString();
-                        if (log.isDebugEnabled()) {
-                            log.error(msg);
+                    try (CloseableHttpResponse isApplicationExistsResponse = solaceAdminApis.applicationGet(
+                            organizationNameOfSolaceDeployment, application.getUUID(), "default")) {
+                        if (isApplicationExistsResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                            SolaceNotifierUtils.patchSolaceApplicationClientId(organizationNameOfSolaceDeployment,
+                                    application, event.getConsumerKey(), consumerSecret);
+                        } else if (isApplicationExistsResponse.getStatusLine().getStatusCode() ==
+                                HttpStatus.SC_NOT_FOUND) {
+                            // Create applications in solace
+                            for (API api : subscribedAPIs) {
+                                SolaceSubscriptionsNotifier solaceSubscriptionsNotifier = new
+                                        SolaceSubscriptionsNotifier();
+                                solaceSubscriptionsNotifier.deployApplication(api, application);
+                            }
+
+                        } else {
+                            String msg = "Error while searching for application '" + application.getName() + ". : " +
+                                    isApplicationExistsResponse.getStatusLine().toString();
+                            if (log.isDebugEnabled()) {
+                                log.error(msg);
+                            }
+                            throw new NotifierException(msg);
                         }
-                        throw new NotifierException(msg);
                     }
-
                 } else {
                     throw new NotifierException("Application keys are not found in the application : " +
                             application.getName());
