@@ -29,7 +29,7 @@
     <artifactId>org.wso2.carbon.apimgt.output.adapter.http</artifactId>
 
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Event Output Extended HTTP adapter Module</name>
+    <name>WSO2 Carbon - Event Output Extended HTTP Adapter Module</name>
     <description>org.wso2.carbon.output.adapter.http provides the back-end functionality of http event adapter
     </description>
     <url>http://wso2.org</url>

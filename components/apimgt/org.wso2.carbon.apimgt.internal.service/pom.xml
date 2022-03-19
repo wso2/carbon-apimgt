@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.internal.service</artifactId>
     <packaging>war</packaging>
-    <name>WSO2 API Manager Internal Data Service</name>
+    <name>WSO2 API Manager Internal Data Service - v1</name>
     <description>WSO2 API Manager Internal Data Service</description>
 
 
