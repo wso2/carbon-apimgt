@@ -50,6 +50,7 @@ public class WebSocketApiConstants {
         public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
         public static final String ERROR_CODE = "code";
         public static final String ERROR_MESSAGE = "message";
+        public static final int OTHER_ERROR = 4023;
 
     }
 

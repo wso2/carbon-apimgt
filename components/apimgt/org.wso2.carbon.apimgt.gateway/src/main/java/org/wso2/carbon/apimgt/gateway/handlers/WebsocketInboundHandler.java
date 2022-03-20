@@ -154,18 +154,14 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                         log.debug("Error while handling Outbound Websocket frame. Closing connection for "
                                 + ctx.channel().toString());
                     }
+                    publishPublishFrameErrorEvent(ctx, responseDTO);
                     ctx.writeAndFlush(new CloseWebSocketFrame(responseDTO.getErrorCode(),
                             responseDTO.getErrorMessage() + StringUtils.SPACE + "Connection closed" + "!"));
                     ctx.close();
                 } else {
                     String errorMessage = responseDTO.getErrorResponseString();
                     ctx.writeAndFlush(new TextWebSocketFrame(errorMessage));
-                    if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Inbound Websocket frame is throttled. " + ctx.channel().toString());
-                        }
-                        publishPublishThrottledEvent(ctx);
-                    }
+                    publishPublishFrameErrorEvent(ctx, responseDTO);
                 }
             } else {
                 if (log.isDebugEnabled()) {
@@ -175,6 +171,29 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 // publish analytics events if analytics is enabled
                 publishPublishEvent(ctx);
             }
+        }
+    }
+
+    private void publishPublishFrameErrorEvent(ChannelHandlerContext ctx, InboundProcessorResponseDTO responseDTO) {
+        if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR
+                || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX
+                || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP) {
+            if (log.isDebugEnabled()) {
+                log.debug("Inbound WebSocket frame is throttled. " + ctx.channel().toString());
+            }
+            publishPublishThrottledEvent(ctx);
+        } else if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR
+                || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS
+                || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR) {
+            if (log.isDebugEnabled()) {
+                log.debug("Inbound WebSocket frame failed due to auth error. " + ctx.channel().toString());
+            }
+            publishPublishFrameAuthErrorEvent(ctx);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Unclassified error in Inbound WebSocket frame. " + ctx.channel().toString());
+            }
+            publishPublishFrameOtherErrorEvent(ctx);
         }
     }
 
@@ -200,6 +219,22 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    private void publishPublishFrameAuthErrorEvent(ChannelHandlerContext ctx) {
+        if (APIUtil.isAnalyticsEnabled()) {
+            addAuthErrorPropertiesToChannel(ctx);
+            metricsHandler.handlePublish(ctx);
+            removeErrorPropertiesFromChannel(ctx);
+        }
+    }
+
+    private void publishPublishFrameOtherErrorEvent(ChannelHandlerContext ctx) {
+        if (APIUtil.isAnalyticsEnabled()) {
+            addOtherErrorPropertiesToChannel(ctx);
+            metricsHandler.handlePublish(ctx);
+            removeErrorPropertiesFromChannel(ctx);
+        }
+    }
+
     protected String getRemoteIP(ChannelHandlerContext ctx) {
         return ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().getHostAddress();
     }
@@ -213,6 +248,20 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
                 APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE);
         WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, "Message Throttled Out");
+    }
+
+    private void addAuthErrorPropertiesToChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE,
+                "Authentication Failure");
+    }
+
+    private void addOtherErrorPropertiesToChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                WebSocketApiConstants.FrameErrorConstants.OTHER_ERROR);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE,
+                "Unclassified Error");
     }
 
     private void populateContextHeaders(FullHttpRequest request, InboundMessageContext inboundMessageContext) {

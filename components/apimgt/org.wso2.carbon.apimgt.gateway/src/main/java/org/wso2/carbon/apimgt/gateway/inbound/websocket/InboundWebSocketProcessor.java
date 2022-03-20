@@ -126,7 +126,9 @@ public class InboundWebSocketProcessor {
                 inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
                         WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR, errorMessage);
             }
-            publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
+            if (inboundProcessorResponseDTO.isError()) {
+                publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
+            }
             return inboundProcessorResponseDTO;
         } catch (APISecurityException e) {
             log.error("Authentication Failure for the websocket context: " + inboundMessageContext.getApiContext()
@@ -397,6 +399,52 @@ public class InboundWebSocketProcessor {
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
             WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
             metricsHandler.handleHandshake(ctx);
+            removeErrorPropertiesFromChannel(ctx);
+        }
+    }
+
+    /**
+     * Publish WebSocket frame auth error event if analytics enabled.
+     *
+     * @param ctx Channel context
+     */
+    private void publishFrameAuthErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR);
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
+            metricsHandler.handlePublish(ctx);
+            removeErrorPropertiesFromChannel(ctx);
+        }
+    }
+
+    /**
+     * Publish WebSocket frame other error event if analytics enabled.
+     *
+     * @param ctx Channel context
+     */
+    private void publishPublishFrameOtherErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                    WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY);
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
+            metricsHandler.handlePublish(ctx);
+            removeErrorPropertiesFromChannel(ctx);
+        }
+    }
+
+    /**
+     * Publish WebSocket frame other error event if analytics enabled.
+     *
+     * @param ctx Channel context
+     */
+    private void publishSubscribeFrameOtherErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
+
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                    WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY);
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
+            metricsHandler.handlePublish(ctx);
             removeErrorPropertiesFromChannel(ctx);
         }
     }

@@ -38,6 +38,8 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCate
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.FaultCodeClassifier;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -123,14 +125,21 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private boolean isAuthFaultRequest() {
         int errorCode = getErrorCode();
-        return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
+        return (errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END)
+                || errorCode == WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR;
     }
 
     private boolean isThrottledFaultRequest() {
         int errorCode = getErrorCode();
-        return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
+        return (errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END)
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP;
     }
 
     private boolean isTargetFaultRequest() {
