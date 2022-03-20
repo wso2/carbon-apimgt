@@ -25,6 +25,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.swagger.inflector.examples.ExampleBuilder;
 import io.swagger.inflector.examples.models.Example;
 import io.swagger.inflector.processors.JsonNodeExampleSerializer;
@@ -56,7 +60,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -1194,23 +1197,23 @@ public class OAS2Parser extends APIDefinition {
      * @param swaggerString Swagger definition as string
      * @return Modified swagger string
      */
-    public String removeResponsesObject(Swagger swagger, String swaggerString) {
-        JSONObject jsonObj = new JSONObject(swaggerString);
+    public String removeResponsesObject(Swagger swagger, String swaggerString) throws JsonProcessingException {
+        JsonObject jsonObject = new JsonParser().parse(swaggerString).getAsJsonObject();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         if (swagger != null && swagger.getPaths() != null) {
-            Map<String, Path> pathMap = swagger.getPaths();
             for (String pathKey : swagger.getPaths().keySet()) {
                 Path path = swagger.getPath(pathKey);
                 Map<HttpMethod, Operation> operationMap = path.getOperationMap();
                 for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
-                    JSONObject  jsonPaths = (JSONObject)jsonObj.get("paths");
-                    if (((JSONObject)((JSONObject)(jsonPaths).get(pathKey)).get(entry.getKey().
+                    JsonObject  jsonPaths = (JsonObject)jsonObject.get("paths");
+                    if (((JsonObject)((JsonObject)(jsonPaths).get(pathKey)).get(entry.getKey().
                             toString().toLowerCase())).has("responsesObject")) {
-                        ((JSONObject)((JSONObject)(jsonPaths).get(pathKey)).get(entry.getKey().
+                        ((JsonObject)((JsonObject)(jsonPaths).get(pathKey)).get(entry.getKey().
                                 toString().toLowerCase())).remove("responsesObject");
                     }
                 }
             }
-            return jsonObj.toString();
+            return gson.toJson(jsonObject);
         }
         return swaggerString;
     }
