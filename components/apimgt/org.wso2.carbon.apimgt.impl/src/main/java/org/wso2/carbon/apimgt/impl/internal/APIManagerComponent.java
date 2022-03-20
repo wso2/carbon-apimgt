@@ -221,7 +221,7 @@ public class APIManagerComponent {
                     jwtValidationService, null);
             ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
             APIStatusObserverList.getInstance().init(configuration);
-            DataHolder.getInstance().init();
+            MonetizationDataHolder.getInstance().init();
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,

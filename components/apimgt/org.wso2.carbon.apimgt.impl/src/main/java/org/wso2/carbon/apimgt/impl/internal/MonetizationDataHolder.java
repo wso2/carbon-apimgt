@@ -23,16 +23,16 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 
-public class DataHolder {
+public class MonetizationDataHolder {
 
-    private static final DataHolder Instance = new DataHolder();
+    private static final MonetizationDataHolder Instance = new MonetizationDataHolder();
     private AccessTokenGenerator monetizationAccessTokenGenerator;
 
-    private DataHolder() {
+    private MonetizationDataHolder() {
 
     }
 
-    public static DataHolder getInstance() {
+    public static MonetizationDataHolder getInstance() {
 
         return Instance;
     }
