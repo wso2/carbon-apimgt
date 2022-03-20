@@ -404,52 +404,6 @@ public class InboundWebSocketProcessor {
     }
 
     /**
-     * Publish WebSocket frame auth error event if analytics enabled.
-     *
-     * @param ctx Channel context
-     */
-    private void publishFrameAuthErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
-        if (APIUtil.isAnalyticsEnabled()) {
-            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
-                    WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR);
-            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
-            metricsHandler.handlePublish(ctx);
-            removeErrorPropertiesFromChannel(ctx);
-        }
-    }
-
-    /**
-     * Publish WebSocket frame other error event if analytics enabled.
-     *
-     * @param ctx Channel context
-     */
-    private void publishPublishFrameOtherErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
-        if (APIUtil.isAnalyticsEnabled()) {
-            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
-                    WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY);
-            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
-            metricsHandler.handlePublish(ctx);
-            removeErrorPropertiesFromChannel(ctx);
-        }
-    }
-
-    /**
-     * Publish WebSocket frame other error event if analytics enabled.
-     *
-     * @param ctx Channel context
-     */
-    private void publishSubscribeFrameOtherErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
-
-        if (APIUtil.isAnalyticsEnabled()) {
-            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
-                    WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY);
-            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
-            metricsHandler.handlePublish(ctx);
-            removeErrorPropertiesFromChannel(ctx);
-        }
-    }
-
-    /**
      * Remove error properties from channel properties.
      *
      * @param ctx Channel context
