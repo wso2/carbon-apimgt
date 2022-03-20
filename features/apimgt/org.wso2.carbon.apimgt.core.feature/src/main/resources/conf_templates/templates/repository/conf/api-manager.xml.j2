@@ -988,11 +988,21 @@
     <Monetization>
         <MonetizationImpl>{{apim.monetization.monetization_impl}}</MonetizationImpl>
         <UsagePublisher>
+            <!--Inorder to reduce configuration migration, previous config name for query API is used for choreo insight API endpoint-->
              {% if apim.monetization.analytics_query_api_endpoint is defined %}
-                   <AnalyticsQueryAPIEndpoint>{{apim.monetization.analytics_query_api_endpoint}}</AnalyticsQueryAPIEndpoint>
+                    <ChoreoInsightAPIEndpoint>{{apim.monetization.analytics_query_api_endpoint}}</ChoreoInsightAPIEndpoint>
              {% endif %}
              {% if apim.monetization.analytics_access_token is defined %}
                     <AnalyticsAccessToken>{{apim.monetization.analytics_access_token}}</AnalyticsAccessToken>
+             {% endif %}
+             {% if apim.monetization.choreo_insight_app_consumer_key is defined %}
+                    <ChoreoInsightAppConsumerKey>{{apim.monetization.choreo_insight_app_consumer_key}}</ChoreoInsightAppConsumerKey>
+             {% endif %}
+             {% if apim.monetization.choreo_insight_app_consumer_secret is defined %}
+                    <ChoreoInsightAppConsumerSecret>{{apim.monetization.choreo_insight_app_consumer_secret}}</ChoreoInsightAppConsumerSecret>
+             {% endif %}
+             {% if apim.monetization.choreo_token_endpoint is defined %}
+                    <ChoreoTokenEndpoint>{{apim.monetization.choreo_token_endpoint}}</ChoreoTokenEndpoint>
              {% endif %}
         </UsagePublisher>
         {% if apim.monetization.additional_attributes is defined %}
