@@ -2260,6 +2260,9 @@ public final class APIConstants {
         public static final String PRICE_PER_REQUEST = "pricePerRequest";
         public static final String API_MONETIZATION_STATUS = "isMonetizationEnabled";
         public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";
+        public static final String CHOREO_TOKEN_URL_PROP = "Monetization.UsagePublisher.ChoreoTokenEndpoint";
+        public static final String CHOREO_INSIGHT_APP_CONSUMER_KEY_PROP = "Monetization.UsagePublisher.ChoreoInsightAppConsumerKey";
+        public static final String CHOREO_INSIGHT_APP_CONSUMER_SECRET_PROP = "Monetization.UsagePublisher.ChoreoInsightAppConsumerSecret";
     }
 
     // HTTP methods

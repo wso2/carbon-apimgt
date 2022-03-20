@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 
 public class DataHolder {
@@ -34,14 +37,40 @@ public class DataHolder {
         return Instance;
     }
 
+    public void init() {
+
+        initializeMonetizationAccessTokenGenerator();
+    }
+
     public AccessTokenGenerator getMonetizationAccessTokenGenerator() {
 
         return monetizationAccessTokenGenerator;
     }
 
-    public void setMonetizationAccessTokenGenerator(
-            AccessTokenGenerator monetizationAccessTokenGenerator) {
+    public void setMonetizationAccessTokenGenerator(AccessTokenGenerator monetizationAccessTokenGenerator) {
 
         this.monetizationAccessTokenGenerator = monetizationAccessTokenGenerator;
+    }
+
+    /**
+     * This method will read the monetization configurations and if a token url and consumer key, secret pair is defined,
+     * create a new AccessTokenGenerator instance for monetization strip client. This token generator will be used to
+     * obtain a valid access token to query choreo insight API.
+     */
+    public void initializeMonetizationAccessTokenGenerator() {
+
+        APIManagerConfiguration config =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String choreoTokenUrl = config.getFirstProperty(APIConstants.Monetization.CHOREO_TOKEN_URL_PROP);
+        String insightAppConsumerKey =
+                config.getFirstProperty(APIConstants.Monetization.CHOREO_INSIGHT_APP_CONSUMER_KEY_PROP);
+        String insightAppConsumerSecret =
+                config.getFirstProperty(APIConstants.Monetization.CHOREO_INSIGHT_APP_CONSUMER_SECRET_PROP);
+
+        if (!StringUtils.isEmpty(choreoTokenUrl) && !StringUtils.isEmpty(insightAppConsumerKey) &&
+                !StringUtils.isEmpty(insightAppConsumerSecret)) {
+            monetizationAccessTokenGenerator =
+                    new AccessTokenGenerator(choreoTokenUrl, null, insightAppConsumerKey, insightAppConsumerSecret);
+        }
     }
 }
