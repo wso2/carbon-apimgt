@@ -23,6 +23,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 
+/**
+ * A holder class to hold monetization feature related data objects.
+ */
 public class MonetizationDataHolder {
 
     private static final MonetizationDataHolder Instance = new MonetizationDataHolder();
