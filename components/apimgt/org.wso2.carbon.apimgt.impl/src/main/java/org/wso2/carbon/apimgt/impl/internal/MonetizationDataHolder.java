@@ -64,13 +64,16 @@ public class MonetizationDataHolder {
         MonetizationConfigurationDto configDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getMonetizationConfigurationDto();
-        String choreoTokenUrl = configDto.getChoreoTokenEndpoint();
-        String insightAppConsumerKey = configDto.getInsightAppConsumerKey();
-        String insightAppConsumerSecret = configDto.getInsightAppConsumerSecret();
-        if (!StringUtils.isEmpty(choreoTokenUrl) && !StringUtils.isEmpty(insightAppConsumerKey) &&
-                !StringUtils.isEmpty(insightAppConsumerSecret)) {
-            monetizationAccessTokenGenerator =
-                    new AccessTokenGenerator(choreoTokenUrl, null, insightAppConsumerKey, insightAppConsumerSecret);
+
+        if (configDto != null) {
+            String choreoTokenUrl = configDto.getChoreoTokenEndpoint();
+            String insightAppConsumerKey = configDto.getInsightAppConsumerKey();
+            String insightAppConsumerSecret = configDto.getInsightAppConsumerSecret();
+            if (!StringUtils.isEmpty(choreoTokenUrl) && !StringUtils.isEmpty(insightAppConsumerKey) &&
+                    !StringUtils.isEmpty(insightAppConsumerSecret)) {
+                monetizationAccessTokenGenerator =
+                        new AccessTokenGenerator(choreoTokenUrl, null, insightAppConsumerKey, insightAppConsumerSecret);
+            }
         }
     }
 }
