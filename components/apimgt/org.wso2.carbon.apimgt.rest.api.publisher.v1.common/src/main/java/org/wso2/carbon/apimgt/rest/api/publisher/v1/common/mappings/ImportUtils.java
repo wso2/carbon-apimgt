@@ -253,12 +253,17 @@ public class ImportUtils {
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
-                importedApi = PublisherCommonUtils
-                        .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
-                                importedApiDTO.getProvider(), organization);
+                if (!PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
+                    importedApi = PublisherCommonUtils
+                            .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
+                                    importedApiDTO.getProvider(), organization);
+                } else {
+                    importedApi = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, Boolean.FALSE,
+                            importedApiDTO, null, currentTenantDomain, apiProvider);
+                }
 
                 // Set API definition to validationResponse if the API is imported with sample API definition
-                if (validationResponse.isInit()) {
+                if (validationResponse != null && validationResponse.isInit()) {
                     validationResponse.setContent(importedApi.getSwaggerDefinition());
                     validationResponse.setJsonContent(importedApi.getSwaggerDefinition());
                 }
@@ -278,6 +283,7 @@ public class ImportUtils {
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
                 PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false, organization);
+                importedApi =  apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
             }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {

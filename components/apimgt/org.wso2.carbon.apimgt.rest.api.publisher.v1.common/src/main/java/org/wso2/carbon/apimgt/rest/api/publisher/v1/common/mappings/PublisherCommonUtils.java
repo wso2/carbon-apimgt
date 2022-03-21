@@ -1645,6 +1645,11 @@ public class PublisherCommonUtils {
                 APIDTO.TypeEnum.WEBSUB.equals(apidto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apidto.getType());
     }
 
+    public static boolean isThirdPartyAsyncAPI(APIDTO apidto) {
+        return APIDTO.TypeEnum.ASYNC.equals(apidto.getType()) && apidto.getAdvertiseInfo() != null &&
+                apidto.getAdvertiseInfo().isAdvertised();
+    }
+
     /**
      * Add WSDL file of an API.
      *
@@ -1876,5 +1881,50 @@ public class PublisherCommonUtils {
                     ExceptionCodes.ERROR_INSERTING_OPERATION_ENDPOINT_API);
         }
         return operationEndpointId;
+    }
+
+    /**
+     * @param validationResponse Response of a Async API definition validation call
+     * @param isServiceAPI       Whether this is a service API
+     * @param apiDto             API DTO
+     * @param service            If this is a service API, the service entry should be passed here
+     * @param organization       Organization of logged-in user
+     * @param apiProvider        API Provider
+     * @return
+     * @throws APIManagementException If an error occurs while importing the Async API definition
+     */
+    public static API importAsyncAPIWithDefinition(APIDefinitionValidationResponse validationResponse,
+            Boolean isServiceAPI, APIDTO apiDto, ServiceEntry service, String organization, APIProvider apiProvider)
+            throws APIManagementException {
+        String definitionToAdd = validationResponse.getJsonContent();
+        String protocol = validationResponse.getProtocol();
+        if (isServiceAPI) {
+            apiDto.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
+        }
+        if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDto.getGatewayVendor())) {
+            apiDto.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
+            apiDto.setAsyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI(definitionToAdd));
+        }
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto, apiProvider,
+                RestApiCommonUtil.getLoggedInUsername(), organization);
+        if (isServiceAPI) {
+            apiToAdd.setServiceInfo("key", service.getKey());
+            apiToAdd.setServiceInfo("md5", service.getMd5());
+            if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
+                apiToAdd.setEndpointConfig(
+                        PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(), protocol));
+            }
+        }
+        apiToAdd.setAsyncApiDefinition(definitionToAdd);
+
+        // load topics from AsyncAPI
+        apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(definitionToAdd,
+                APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(
+                        apiToAdd.getGatewayVendor())));
+        apiToAdd.setOrganization(organization);
+        apiToAdd.setAsyncApiDefinition(definitionToAdd);
+
+        apiProvider.addAPI(apiToAdd);
+        return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
     }
 }

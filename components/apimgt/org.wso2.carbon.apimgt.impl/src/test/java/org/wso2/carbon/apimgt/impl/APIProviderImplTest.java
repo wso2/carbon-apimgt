@@ -797,12 +797,20 @@ public class APIProviderImplTest {
     @Test
     public void testHasAttachments() throws APIManagementException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        PowerMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(0);
-        PowerMockito.mockStatic(MultitenantUtils.class);
-        PowerMockito.when(MultitenantUtils.getTenantDomain("testName")).thenReturn("carbon.super");
-        Mockito.when(apimgtDAO.hasSubscription("testId", "testName", "testPolicy")).
-                thenReturn(true);
-        assertTrue(apiProvider.hasAttachments("testName", "testId", "testPolicy"));
+        Mockito.when(apimgtDAO.hasApplicationPolicyAttachedToApplication("testId","carbon.super")).thenReturn(true);
+        assertTrue(apiProvider.hasAttachments("testName", "testId", PolicyConstants.POLICY_LEVEL_APP, "carbon.super"));
+    }
+    @Test
+    public void testHasAttachmentsForAPI() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.hasAPIPolicyAttached("testId","carbon.super")).thenReturn(true);
+        assertTrue(apiProvider.hasAttachments("testName", "testId", PolicyConstants.POLICY_LEVEL_API, "carbon.super"));
+    }
+    @Test
+    public void testHasAttachmentsForSubscription() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apimgtDAO.hasSubscriptionPolicyAttached("testId","carbon.super")).thenReturn(true);
+        assertTrue(apiProvider.hasAttachments("testName", "testId", PolicyConstants.POLICY_LEVEL_SUB, "carbon.super"));
     }
 
     @Test

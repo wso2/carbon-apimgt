@@ -132,4 +132,19 @@ public class OAS2ParserTest extends OASTestBase {
         Set<URITemplate> uriTemplateSet = oas2Parser.getURITemplates(swagger);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
     }
+
+    @Test
+    public void testRemoveResponsesObjectFromOpenAPI20Spec() throws Exception {
+        String relativePathSwagger1 = "definitions" + File.separator + "oas2" + File.separator +
+                "oas2_uri_template.json";
+        String relativePathSwagger2 = "definitions" + File.separator + "oas2" + File.separator +
+                "oas2_uri_template_with_responsesObject.json";
+        String swaggerWithoutResponsesObject = IOUtils.toString(getClass().getClassLoader().
+                getResourceAsStream(relativePathSwagger1), "UTF-8");
+        String swaggerWithResponsesObject = IOUtils.toString(getClass().getClassLoader().
+                getResourceAsStream(relativePathSwagger2), "UTF-8");
+        Swagger swagger = oas2Parser.getSwagger(swaggerWithResponsesObject);
+        Assert.assertEquals(oas2Parser.removeResponsesObject(swagger,swaggerWithoutResponsesObject),
+                oas2Parser.removeResponsesObject(swagger,swaggerWithResponsesObject));
+    }
 }

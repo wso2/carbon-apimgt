@@ -508,14 +508,17 @@ public enum ExceptionCodes implements ErrorHandler {
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),
-    ERROR_FETCHING_OPERATION_ENDPOINTS_API(902003, "Cannot find information of operation endpoints", 400,
+    ERROR_FETCHING_OPERATION_ENDPOINTS_API(902030, "Cannot find information of operation endpoints", 400,
             "Cannot find information of operation endpoints."),
-    ERROR_FETCHING_OPERATION_ENDPOINT_API(902004, "Cannot find information of operation endpoint", 400,
-                                                   "Cannot find information of operation endpoint."),
-    ERROR_UPDATING_OPERATION_ENDPOINT_API(902004, "Cannot find information of operation endpoint", 400,
-                                                  "Cannot find information of operation endpoint."),
-    ERROR_INSERTING_OPERATION_ENDPOINT_API(902004, "Cannot find information of operation endpoint", 400,
-                                                  "Cannot find information of operation endpoint.");
+    ERROR_FETCHING_OPERATION_ENDPOINT_API(9020031, "Cannot find information of an operation endpoint", 400,
+                                                   "Cannot find information of an operation endpoint."),
+    ERROR_UPDATING_OPERATION_ENDPOINT_API(902032, "Cannot update an operation endpoint", 400,
+                                                  "Cannot update an of operation endpoint."),
+    ERROR_INSERTING_OPERATION_ENDPOINT_API(902033, "Cannot add an operation endpoint", 400,
+                                                  "Error occured while inserting an operation endpoint."),
+    INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),
+    INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true);
+
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>9.20.33-SNAPSHOT</version>
+    <version>9.20.53-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -1540,7 +1540,7 @@
             </dependency>
 
             <dependency>
-                <groupId>commons-scxml.wso2</groupId>
+                <groupId>org.wso2.orbit.commons-scxml</groupId>
                 <artifactId>commons-scxml</artifactId>
                 <version>${commons.scxml.version}</version>
             </dependency>
@@ -1916,10 +1916,10 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>9.20.33-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>9.20.53-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.2.37</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.2.41</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.6.3-beta</carbon.kernel.version>
         <carbon.kernel.feature.version>4.6.3-beta</carbon.kernel.feature.version>
@@ -1940,7 +1940,7 @@
         <carbon.identity-inbound-auth-saml2.version>5.5.2</carbon.identity-inbound-auth-saml2.version>
         <carbon.identity-inbound-auth-openid.version>5.6.0</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>6.3.57</carbon.identity-local-auth-basicauth.version>
-        <carbon.identity-outbound-auth-samlsso.version>5.3.18</carbon.identity-outbound-auth-samlsso.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.3.34</carbon.identity-outbound-auth-samlsso.version>
         <carbon.identity-data-publisher-application-authentication.version>5.3.25</carbon.identity-data-publisher-application-authentication.version>
 
         <!--SAML Common Utils Version-->
@@ -2095,13 +2095,13 @@
         <servicemix.bundles.jedis.version>3.3.0_1</servicemix.bundles.jedis.version>
         <google.guava.version>31.0.1-jre</google.guava.version>
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
-        <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
+        <commons.scxml.version>0.9.0.wso2v2</commons.scxml.version>
         <velocity.version>2.1</velocity.version>
         <fasterxml.jackson.version>2.13.1</fasterxml.jackson.version>
         <fasterxml.jackson.databind.version>2.13.1</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.13.1</fasterxml.jackson.core.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
-        <carbon.broker.version>3.3.23</carbon.broker.version>
+        <carbon.broker.version>3.3.24</carbon.broker.version>
         <andes.version>3.3.22</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
         <version.snake.yaml>1.28</version.snake.yaml>

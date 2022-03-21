@@ -19,14 +19,14 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.20.33-SNAPSHOT</version>
+        <version>9.20.53-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.samples.calculator</artifactId>
     <packaging>war</packaging>
-    <name>WSO2 Carbon - Sample API</name>
+    <name>WSO2 Carbon - Sample Calculator API</name>
     <url>http://wso2.org</url>
     <description>This feature contains the sample calculator api</description>
 

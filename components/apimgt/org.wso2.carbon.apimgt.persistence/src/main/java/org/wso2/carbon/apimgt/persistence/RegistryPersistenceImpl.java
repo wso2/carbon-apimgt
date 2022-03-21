@@ -391,6 +391,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiUUID);
             String lcState = ((GenericArtifactImpl) apiArtifact).getLcState();
             if (apiArtifact != null) {
+                API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
+                String visibleRolesList = api.getVisibleRoles();
+                String[] visibleRoles = new String[0];
+                if (visibleRolesList != null) {
+                    visibleRoles = visibleRolesList.split(",");
+                }
                 String apiPath = GovernanceUtils.getArtifactPath(registry, apiUUID);
                 int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex);
@@ -401,6 +407,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 newAPIArtifact.setUUID(apiUUID);
                 newAPIArtifact.setProperty("registry.lifecycle.APILifeCycle.state", java.util.Arrays.asList((lcState)));
                 registry.put(apiPath, newAPIArtifact);
+                RegistryPersistenceUtil.clearResourcePermissions(apiPath, api.getId(),
+                        ((UserRegistry) registry).getTenantId());
+                RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                        visibleRoles, apiPath);
             }
             registry.commitTransaction();
             transactionCommitted = true;
@@ -418,6 +428,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         + apiUUID, re);
             }
             throw new APIPersistenceException("Error while performing registry transaction operation", e);
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while restoring revision", e);
         } finally {
             try {
                 if (tenantFlowStarted) {

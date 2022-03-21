@@ -13281,55 +13281,6 @@ public class ApiMgtDAO {
         return status;
     }
 
-    public boolean hasSubscription(String tierId, String tenantDomainWithAt, String policyLevel) throws APIManagementException {
-
-        PreparedStatement checkIsExistPreparedStatement = null;
-        Connection connection = null;
-        ResultSet checkIsResultSet = null;
-        boolean status = false;
-        try {
-            /*String apiProvider = tenantId;*/
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(true);
-            String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
-            if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-                isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_ATTACHED_TO_RESOURCES_API;
-            } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
-                isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_ATTACHED_TO_APPLICATION;
-            } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
-                isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
-            }
-
-            checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
-            checkIsExistPreparedStatement.setString(1, tierId);
-            if (!PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
-                checkIsExistPreparedStatement.setString(2, "%" + tenantDomainWithAt);
-            }
-            if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-                checkIsExistPreparedStatement.setString(3, tierId);
-                checkIsExistPreparedStatement.setString(4, "%" + tenantDomainWithAt);
-            }
-            checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
-            if (checkIsResultSet != null && checkIsResultSet.next()) {
-                int count = checkIsResultSet.getInt(1);
-                if (count > 0) {
-                    status = true;
-                }
-
-            }
-
-            connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            String msg = "Couldn't check Subscription Exist";
-            log.error(msg, e);
-            handleException(msg, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, connection, checkIsResultSet);
-        }
-        return status;
-
-    }
-
     public String[] getAPIDetailsByContext(String context) {
 
         String apiName = "";
@@ -16323,11 +16274,19 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public String getEarliestRevision(String apiUUID) throws APIManagementException {
-
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID)) {
+                PreparedStatement statement = (
+                        connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
+                                .getDriverName().contains("Microsoft") ?
+                                connection.prepareStatement(
+                                        SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MSSQL) :
+                                (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
+                                        .getDriverName().contains("H2")) ?
+                                        connection.prepareStatement(
+                                                SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MYSQL) :
+                                        connection.prepareStatement(
+                                                SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID))) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -18181,6 +18140,61 @@ public class ApiMgtDAO {
 
         statement.close();
         return null;
+    public boolean hasApplicationPolicyAttachedToApplication(String policyName, String organization) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_APPLICATION)) {
+                preparedStatement.setString(1, organization);
+                preparedStatement.setString(2,policyName);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking existence of Policy " + policyName + "Attached to Application.", e);
+        }
+
+        return false;
+    }
+
+    public boolean hasSubscriptionPolicyAttached(String policyName, String organization) throws APIManagementException {
+
+        String sql = ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_SUBSCRIPTION_SUPER_TENANT;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    preparedStatement.setString(1, organization);
+                    preparedStatement.setString(2, policyName);
+                    preparedStatement.setString(3, organization);
+                    preparedStatement.setString(4, policyName);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking existence of Policy " + policyName + "Attached to Subscription.", e);
+        }
+
+        return false;
+    }
+    public boolean hasAPIPolicyAttached(String policyName, String organization) throws APIManagementException {
+
+        String sql = ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_API_RESOURCE_TENANT;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    preparedStatement.setString(1, organization);
+                    preparedStatement.setString(2, policyName);
+                    preparedStatement.setString(3, organization);
+                    preparedStatement.setString(4, policyName);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking existence of Policy " + policyName + "Attached to API/Resouce.", e);
+        }
+
+        return false;
     }
 
     private class SubscriptionInfo {

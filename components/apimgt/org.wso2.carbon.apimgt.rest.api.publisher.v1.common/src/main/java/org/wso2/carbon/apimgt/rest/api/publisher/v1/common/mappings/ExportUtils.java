@@ -165,9 +165,19 @@ public class ExportUtils {
             throws APIManagementException, APIImportExportException {
 
         int tenantId;
+        String currentApiUuid;
+
         // If explicitly advertise only property has been specified as true, make it true and update the API DTO.
         if (StringUtils.isNotBlank(originalDevPortalUrl)) {
             setAdvertiseOnlySpecificPropertiesToDTO(apiDtoToReturn, originalDevPortalUrl);
+        }
+
+        // Resolve whether an API or a corresponding revision
+        APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiDtoToReturn.getId());
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = apiDtoToReturn.getId();
         }
 
         // Create temp location for storing API data
@@ -202,8 +212,8 @@ public class ExportUtils {
             apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
         }
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        addOperationPoliciesToArchive(archivePath, apiDtoToReturn.getId(), tenantDomain, exportFormat, apiProvider,
-                api);
+        addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
+                api, currentApiUuid);
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
@@ -216,7 +226,7 @@ public class ExportUtils {
                     organization);
         }
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
-                organization);
+                organization, currentApiUuid);
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -615,26 +625,15 @@ public class ExportUtils {
     /**
      * Retrieve the operation policies and store those in the archive directory.
      *
-     * @param archivePath  File path to export the endpoint certificates
-     * @param apiID        UUID of the API/ API Product
-     * @param exportFormat Export format of file
-     * @param apiProvider  API Provider
-     * @throws APIImportExportException If an error occurs while exporting operation policies
+     * @param archivePath    File path to export the endpoint certificates
+     * @param exportFormat   Export format of file
+     * @param apiProvider    API Provider
+     * @param currentApiUuid UUID of the API/ API Product
+     * @throws APIManagementException If an error occurs while exporting operation policies
      */
-    public static void addOperationPoliciesToArchive(String archivePath, String apiID, String tenantDomain,
-                                                     ExportFormat exportFormat, APIProvider apiProvider, API api)
-            throws APIManagementException {
-
+    public static void addOperationPoliciesToArchive(String archivePath, String tenantDomain, ExportFormat exportFormat,
+            APIProvider apiProvider, API api, String currentApiUuid) throws APIManagementException {
         try {
-
-            String currentApiUuid;
-            APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiID);
-            if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                currentApiUuid = apiRevision.getApiUUID();
-            } else {
-                currentApiUuid = apiID;
-            }
-
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
             Set<URITemplate> uriTemplates = api.getUriTemplates();
             Set<String> exportedPolicies = new HashSet<>();
@@ -689,8 +688,8 @@ public class ExportUtils {
                 api.setFaultSequenceMediation(null);
             }
         } catch (IOException | APIImportExportException e) {
-            throw new APIManagementException(
-                    "Error while adding operation policy details for API: " + apiID, e);
+            throw new APIManagementException("Error while adding operation policy details for API: " + currentApiUuid,
+                    e);
         }
     }
 
@@ -861,11 +860,12 @@ public class ExportUtils {
      * @param apiProvider    API Provider
      * @param apiIdentifier  API Identifier
      * @param organization   Organization Identifier
+     * @param currentApiUuid UUID of the API/ API Product
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization)
-            throws APIImportExportException {
+            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization,
+            String currentApiUuid) throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
@@ -883,7 +883,7 @@ public class ExportUtils {
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
                     GraphqlComplexityInfo graphqlComplexityInfo = apiProvider
-                            .getComplexityDetails(apiDtoToReturn.getId());
+                            .getComplexityDetails(currentApiUuid);
                     if (graphqlComplexityInfo.getList().size() != 0) {
                         GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                                 GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
