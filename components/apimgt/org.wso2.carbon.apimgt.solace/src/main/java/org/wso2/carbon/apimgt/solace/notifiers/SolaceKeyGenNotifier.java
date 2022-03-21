@@ -105,10 +105,8 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
                         if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
-                            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                                    getThreadLocalCarbonContext().getUsername());
-                            subscribedAPIs.add(apiProvider.getAPIbyUUID(api.getApiId().getUUID(),
-                                    api.getOrganization()));
+                            subscribedAPIs.add(apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(api.getApiId(),
+                                    APIConstants.SUPER_TENANT_DOMAIN));
                             isContainsSolaceApis = true;
                             organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
                                     getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
