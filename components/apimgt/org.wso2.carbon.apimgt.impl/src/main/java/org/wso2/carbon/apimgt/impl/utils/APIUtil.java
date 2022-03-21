@@ -8942,11 +8942,8 @@ public final class APIUtil {
             throws APIManagementException {
 
         JSONObject jsonObject = null;
-        String granularity = null;
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        granularity = configuration.getFirstProperty(
-                APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY);
+        String granularity = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getMonetizationConfigurationDto().getGranularity();
         if (StringUtils.isEmpty(granularity)) {
             //set the default granularity to days, if it is not set in configuration
             granularity = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_GRANULARITY;
@@ -9519,7 +9516,7 @@ public final class APIUtil {
     public static JSONArray getMonetizationAttributes() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getMonetizationAttributes();
+                .getMonetizationConfigurationDto().getMonetizationAttributes();
     }
 
     /**
