@@ -678,10 +678,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
         String username = RestApiCommonUtil.getLoggedInUsername();
+        boolean isWSAPI = APIDTO.TypeEnum.WS.equals(body.getType());
+
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
             validateAPIExistence(apiId);
+
+            // validate web socket api endpoint configurations
+            if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(body)) {
+                throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
+                        ExceptionCodes.INVALID_ENDPOINT_URL);
+            }
 
             // validate sandbox and production endpoints
             if (!PublisherCommonUtils.validateEndpoints(body)) {
