@@ -51,6 +51,7 @@ public class GatewayUtils {
         apiInfoDTO.setIsDefaultVersion(api.isDefaultVersion());
         apiInfoDTO.setPolicy(api.getApiTier());
         apiInfoDTO.setProvider(api.getApiProvider());
+        apiInfoDTO.setStatus(api.getStatus());
         apiInfoDTO.setUrlMappings(convertUriTemplate(api.getResources()));
         apiInfoDTO.setSubscripitons(convertSubscriptionsToSubscriptionInfo(subscriptionsByAPIId,
                 subscriptionDataStore));
@@ -138,6 +139,7 @@ public class GatewayUtils {
                     .isDefaultVersion(api.isDefaultVersion())
                     .name(api.getApiName())
                     .policy(api.getApiTier())
+                    .status(api.getStatus())
                     .apiType(api.getApiType());
             apiMetaDataDTOList.add(apiMetaDataDTO);
         }
