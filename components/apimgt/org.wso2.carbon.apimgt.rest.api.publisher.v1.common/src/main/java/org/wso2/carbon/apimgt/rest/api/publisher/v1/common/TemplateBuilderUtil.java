@@ -631,6 +631,7 @@ public class TemplateBuilderUtil {
 
         String definition;
         boolean isGraphQLSubscriptionAPI = false;
+        org.json.JSONObject endpointConfig = new org.json.JSONObject(api.getEndpointConfig());
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
             //Build schema with additional info
@@ -697,10 +698,12 @@ public class TemplateBuilderUtil {
         // If the API exists in the Gateway and If the Gateway type is 'production' and a production url has not been
         // specified Or if the Gateway type is 'sandbox' and a sandbox url has not been specified
 
-        if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
-                && !APIUtil.isProductionEndpointsExists(api.getEndpointConfig()))
-                || (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
-                && !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()))) {
+        if (!APIConstants.ENDPOINT_TYPE_AWSLAMBDA
+                .equals(endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && ((
+                APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil
+                        .isProductionEndpointsExists(api.getEndpointConfig())) || (
+                APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil
+                        .isSandboxEndpointsExists(api.getEndpointConfig())))) {
             if (log.isDebugEnabled()) {
                 log.debug("Not adding API to environment " + environment.getName() + " since its endpoint URL "
                         + "cannot be found");
@@ -724,7 +727,6 @@ public class TemplateBuilderUtil {
         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())) {
             String apiConfig = builder.getConfigStringForTemplate(environment);
             gatewayAPIDTO.setApiDefinition(apiConfig);
-            org.json.JSONObject endpointConfig = new org.json.JSONObject(api.getEndpointConfig());
             if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
                     .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
                 if (!isWsApi) {
