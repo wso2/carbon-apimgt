@@ -133,9 +133,6 @@ public class RuntimeArtifactGeneratorUtil {
             gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
         }
         if (gatewayArtifacts != null) {
-            if (gatewayArtifacts.isEmpty()) {
-                throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
-            }
             for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
                 String organizationId = gatewayArtifactsMgtDAO.retrieveOrganization(apiRuntimeArtifactDto.getApiId());
                 if (organizationId != null) {
