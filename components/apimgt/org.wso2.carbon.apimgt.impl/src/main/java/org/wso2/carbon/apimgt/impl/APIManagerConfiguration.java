@@ -156,7 +156,7 @@ public class APIManagerConfiguration {
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
     private EventHubConfigurationDto eventHubConfigurationDto;
-    private MonetizationConfigurationDto monetizationConfigurationDto;
+    private MonetizationConfigurationDto monetizationConfigurationDto = new MonetizationConfigurationDto();
 
     public MonetizationConfigurationDto getMonetizationConfigurationDto() {
 
@@ -1573,7 +1573,6 @@ public class APIManagerConfiguration {
      */
     private void setMonetizationConfigurations(OMElement element) {
 
-        monetizationConfigurationDto = new MonetizationConfigurationDto();
         OMElement monetizationImplElement = element.getFirstChildWithName(
                 new QName(APIConstants.Monetization.MONETIZATION_IMPL_CONFIG));
         if (monetizationImplElement != null) {

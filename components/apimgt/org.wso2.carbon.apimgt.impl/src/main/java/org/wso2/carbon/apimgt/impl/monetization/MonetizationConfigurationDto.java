@@ -30,7 +30,7 @@ public class MonetizationConfigurationDto {
     private String insightAppConsumerSecret;
     private String granularity;
     private String publishTimeDurationInDays;
-    private JSONArray monetizationAttributes;
+    private JSONArray monetizationAttributes = new JSONArray();
 
     public String getMonetizationImpl() {
 
