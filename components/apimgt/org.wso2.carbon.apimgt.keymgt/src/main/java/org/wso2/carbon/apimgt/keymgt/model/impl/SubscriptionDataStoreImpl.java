@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
@@ -57,6 +58,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     public static final String DELEM_PERIOD = ":";
     public static final int LOADING_POOL_SIZE = 7;
     private static final Log log = LogFactory.getLog(SubscriptionDataStoreImpl.class);
+    private final EventHubConfigurationDto eventHubConfiguration;
     private boolean scopesInitialized;
     // Maps for keeping Subscription related details.
     private Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> applicationKeyMappingMap;
@@ -76,6 +78,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     public SubscriptionDataStoreImpl(String tenantDomain) {
 
+        this.eventHubConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getEventHubConfigurationDto();
         this.tenantDomain = tenantDomain;
         initializeStore();
     }
@@ -308,7 +312,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     return null;
                 });
 
-        executorService.schedule(apiTask, 0, TimeUnit.SECONDS);
+        executorService.schedule(apiTask, eventHubConfiguration.getInitDelay(), TimeUnit.MILLISECONDS);
 
         Runnable subscriptionLoadingTask = new PopulateTask<>(subscriptionMap,
                 () -> {
@@ -321,7 +325,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     return null;
                 });
 
-        executorService.schedule(subscriptionLoadingTask, 0, TimeUnit.SECONDS);
+        executorService.schedule(subscriptionLoadingTask, eventHubConfiguration.getInitDelay(), TimeUnit.MILLISECONDS);
 
         Runnable applicationLoadingTask = new PopulateTask<>(applicationMap,
                 () -> {
@@ -334,7 +338,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     return null;
                 });
 
-        executorService.schedule(applicationLoadingTask, 0, TimeUnit.SECONDS);
+        executorService.schedule(applicationLoadingTask, eventHubConfiguration.getInitDelay(), TimeUnit.MILLISECONDS);
 
         Runnable keyMappingsTask =
                 new PopulateTask<>(applicationKeyMappingMap,
@@ -348,7 +352,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                             return null;
                         });
 
-        executorService.schedule(keyMappingsTask, 0, TimeUnit.SECONDS);
+        executorService.schedule(keyMappingsTask, eventHubConfiguration.getInitDelay(), TimeUnit.MILLISECONDS);
 
         Runnable apiPolicyLoadingTask =
                 new PopulateTask<>(apiPolicyMap,
@@ -365,7 +369,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                             return null;
                         });
 
-        executorService.schedule(apiPolicyLoadingTask, 0, TimeUnit.SECONDS);
+        executorService.schedule(apiPolicyLoadingTask, eventHubConfiguration.getInitDelay(), TimeUnit.MILLISECONDS);
 
         Runnable subPolicyLoadingTask =
                 new PopulateTask<>(subscriptionPolicyMap,
@@ -379,7 +383,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                             return null;
                         });
 
-        executorService.schedule(subPolicyLoadingTask, 0, TimeUnit.SECONDS);
+        executorService.schedule(subPolicyLoadingTask, eventHubConfiguration.getInitDelay(), TimeUnit.MILLISECONDS);
 
         Runnable appPolicyLoadingTask =
                 new PopulateTask<>(appPolicyMap,
@@ -393,7 +397,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                             return null;
                         });
 
-        executorService.schedule(appPolicyLoadingTask, 0, TimeUnit.SECONDS);
+        executorService.schedule(appPolicyLoadingTask, eventHubConfiguration.getInitDelay(), TimeUnit.MILLISECONDS);
         Runnable scopesLoadingTask =
                 new PopulateTask<>(scopesMap,
                         () -> {
@@ -409,7 +413,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                             return null;
                         });
 
-        executorService.schedule(scopesLoadingTask, 0, TimeUnit.SECONDS);
+        executorService.schedule(scopesLoadingTask, eventHubConfiguration.getInitDelay(), TimeUnit.MILLISECONDS);
     }
 
     public boolean isApisInitialized() {
