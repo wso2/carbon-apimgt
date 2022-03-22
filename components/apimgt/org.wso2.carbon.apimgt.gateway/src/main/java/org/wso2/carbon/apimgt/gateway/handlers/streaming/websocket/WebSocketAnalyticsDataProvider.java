@@ -123,14 +123,21 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private boolean isAuthFaultRequest() {
         int errorCode = getErrorCode();
-        return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
+        return (errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END)
+                || errorCode == WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR;
     }
 
     private boolean isThrottledFaultRequest() {
         int errorCode = getErrorCode();
-        return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
+        return (errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END)
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX
+                || errorCode == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP;
     }
 
     private boolean isTargetFaultRequest() {
