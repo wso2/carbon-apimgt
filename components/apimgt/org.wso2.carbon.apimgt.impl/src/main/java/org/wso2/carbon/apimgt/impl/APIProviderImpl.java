@@ -2341,6 +2341,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     //updateApiArtifactNew(api, false, false);
+
+                    // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
+                    // This value is determined considering the gateway type comes with the request.
+                    api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
+                            api.getGatewayVendor(), api.getGatewayType()));
                     PublisherAPI publisherAPI =  APIMapper.INSTANCE.toPublisherApi(api);
                     try {
                         apiPersistenceInstance.updateAPI(new Organization(api.getOrganization()), publisherAPI);
@@ -6290,7 +6295,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
         } else {
-            String monetizationImplClass = configuration.getFirstProperty(APIConstants.Monetization.MONETIZATION_IMPL);
+            String monetizationImplClass = configuration.getMonetizationConfigurationDto().getMonetizationImpl();
             if (monetizationImplClass == null) {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {

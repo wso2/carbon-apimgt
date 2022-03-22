@@ -3942,6 +3942,17 @@ public final class APIUtil {
                 }
             }
 
+            // create observer role if it's creation is enabled in tenant-conf.json
+            JSONObject observerRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_OBSERVER_ROLE);
+            if (isRoleCreationEnabled(observerRoleConfig)) {
+                String observerRoleName = String.valueOf(observerRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(observerRoleName)) {
+                    createObserverRole(observerRoleName, tenantId);
+                }
+            }
+
             // create IntegrationDeveloperRole role if it's creation is enabled in tenant-conf.json
             JSONObject integrationDeveloperRoleConfig = (JSONObject) defaultRoles
                     .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE);
@@ -4158,6 +4169,21 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
         };
         createRole(roleName, devOpsPermissions, tenantId);
+    }
+
+    /**
+     * Create APIM Observer roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createObserverRole(String roleName, int tenantId) throws APIManagementException {
+
+        Permission[] observerPermissions = new Permission[]{
+                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION)
+        };
+        createRole(roleName, observerPermissions, tenantId);
     }
 
     /**
@@ -8942,11 +8968,8 @@ public final class APIUtil {
             throws APIManagementException {
 
         JSONObject jsonObject = null;
-        String granularity = null;
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        granularity = configuration.getFirstProperty(
-                APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY);
+        String granularity = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getMonetizationConfigurationDto().getGranularity();
         if (StringUtils.isEmpty(granularity)) {
             //set the default granularity to days, if it is not set in configuration
             granularity = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_GRANULARITY;
@@ -9519,7 +9542,7 @@ public final class APIUtil {
     public static JSONArray getMonetizationAttributes() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getMonetizationAttributes();
+                .getMonetizationConfigurationDto().getMonetizationAttributes();
     }
 
     /**

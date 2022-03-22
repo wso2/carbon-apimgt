@@ -169,7 +169,7 @@ public class SolaceNotifierUtils {
         CloseableHttpResponse response = solaceAdminApis.patchClientIdForApplication(organization, application,
                 consumerKey, consumerSecret);
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            log.info("CliendID and Secret patched successfully for " + application.getName() +
+            log.info("Client ID and Secret patched successfully for " + application.getName() +
                     " Solace application");
         } else {
             log.error("Error while patching clientID for Solace application. : " + response.getStatusLine().

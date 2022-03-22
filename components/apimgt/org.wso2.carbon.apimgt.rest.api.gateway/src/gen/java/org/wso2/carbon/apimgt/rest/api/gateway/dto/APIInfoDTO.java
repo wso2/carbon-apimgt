@@ -29,6 +29,7 @@ public class APIInfoDTO   {
     private String policy = null;
     private String apiType = null;
     private Boolean isDefaultVersion = null;
+    private String status = null;
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
     private List<SubscriptionInfoDTO> subscripitons = new ArrayList<>();
 
@@ -194,6 +195,24 @@ public class APIInfoDTO   {
   }
 
   /**
+   * Status of API.
+   **/
+  public APIInfoDTO status(String status) {
+    this.status = status;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Published", value = "Status of API.")
+  @JsonProperty("status")
+  public String getStatus() {
+    return status;
+  }
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  /**
    **/
   public APIInfoDTO urlMappings(List<URLMappingDTO> urlMappings) {
     this.urlMappings = urlMappings;
@@ -246,13 +265,14 @@ public class APIInfoDTO   {
         Objects.equals(policy, apIInfo.policy) &&
         Objects.equals(apiType, apIInfo.apiType) &&
         Objects.equals(isDefaultVersion, apIInfo.isDefaultVersion) &&
+        Objects.equals(status, apIInfo.status) &&
         Objects.equals(urlMappings, apIInfo.urlMappings) &&
         Objects.equals(subscripitons, apIInfo.subscripitons);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiUUID, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings, subscripitons);
+    return Objects.hash(apiUUID, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, status, urlMappings, subscripitons);
   }
 
   @Override
@@ -269,6 +289,7 @@ public class APIInfoDTO   {
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("    subscripitons: ").append(toIndentedString(subscripitons)).append("\n");
     sb.append("}");

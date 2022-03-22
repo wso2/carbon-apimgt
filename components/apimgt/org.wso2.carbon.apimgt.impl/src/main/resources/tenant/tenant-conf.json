@@ -19,7 +19,7 @@
       },
       {
         "Name": "apim:api_view",
-        "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics"
+        "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics,Internal/observer"
       },
       {
         "Name": "apim:api_delete",
@@ -155,7 +155,7 @@
       },
       {
         "Name": "apim:publisher_settings",
-        "Roles": "admin,Internal/creator,Internal/publisher"
+        "Roles": "admin,Internal/creator,Internal/publisher,Internal/observer"
       },
       {
         "Name": "apim:store_settings",
@@ -370,6 +370,10 @@
     "DevOpsRole" : {
       "CreateOnTenantLoad" : true,
       "RoleName" : "Internal/devops"
+    },
+    "ObserverRole" : {
+      "CreateOnTenantLoad" : true,
+      "RoleName" : "Internal/observer"
     },
     "IntegrationDeveloperRole" : {
       "CreateOnTenantLoad" : true,

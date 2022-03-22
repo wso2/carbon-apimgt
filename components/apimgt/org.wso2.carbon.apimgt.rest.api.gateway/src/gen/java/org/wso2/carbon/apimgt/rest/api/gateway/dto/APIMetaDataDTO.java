@@ -25,6 +25,7 @@ public class APIMetaDataDTO   {
     private String policy = null;
     private String apiType = null;
     private Boolean isDefaultVersion = null;
+    private String status = null;
 
   /**
    * UUID of API.
@@ -187,6 +188,24 @@ public class APIMetaDataDTO   {
     this.isDefaultVersion = isDefaultVersion;
   }
 
+  /**
+   * Status of API.
+   **/
+  public APIMetaDataDTO status(String status) {
+    this.status = status;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Published", value = "Status of API.")
+  @JsonProperty("status")
+  public String getStatus() {
+    return status;
+  }
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -205,12 +224,13 @@ public class APIMetaDataDTO   {
         Objects.equals(context, apIMetaData.context) &&
         Objects.equals(policy, apIMetaData.policy) &&
         Objects.equals(apiType, apIMetaData.apiType) &&
-        Objects.equals(isDefaultVersion, apIMetaData.isDefaultVersion);
+        Objects.equals(isDefaultVersion, apIMetaData.isDefaultVersion) &&
+        Objects.equals(status, apIMetaData.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiUUID, apiId, provider, name, version, context, policy, apiType, isDefaultVersion);
+    return Objects.hash(apiUUID, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, status);
   }
 
   @Override
@@ -227,6 +247,7 @@ public class APIMetaDataDTO   {
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");
     return sb.toString();
   }
