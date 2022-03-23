@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponse
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import java.util.UUID;
@@ -50,7 +51,7 @@ import java.util.UUID;
  * Test class for WebsocketHandler
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({InboundWebsocketProcessorUtil.class})
+@PrepareForTest({InboundWebsocketProcessorUtil.class, APIUtil.class})
 public class WebsocketHandlerTestCase {
 
     private static final String channelIdString = "11111";
@@ -62,7 +63,7 @@ public class WebsocketHandlerTestCase {
     private org.wso2.carbon.apimgt.keymgt.model.entity.API graphQLAPI;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
         channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         Channel channel = Mockito.mock(Channel.class);
@@ -73,6 +74,7 @@ public class WebsocketHandlerTestCase {
         Mockito.when(msg.content()).thenReturn(content);
         websocketHandler = new WebsocketHandler();
         Mockito.when(channelHandlerContext.channel()).thenReturn(channel);
+        PowerMockito.mockStatic(APIUtil.class);
         Mockito.when(channel.id()).thenReturn(channelId);
         Mockito.when(channelId.asLongText()).thenReturn(channelIdString);
         websocketAPI = new API(UUID.randomUUID().toString(), 1, "admin", "WSAPI", "1.0.0", "/wscontext", "Unlimited",

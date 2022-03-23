@@ -37,6 +37,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.SynapseConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
@@ -51,6 +53,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is a handler which is actually embedded to the netty pipeline which does operations such as
@@ -117,6 +121,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
             populateContextHeaders(req, inboundMessageContext);
+            validateCorsHeaders(ctx, req);
+
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
             if (!responseDTO.isError()) {
@@ -260,5 +266,43 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     inboundMessageContext.getMatchingResource());
             metricsHandler.handleHandshake(ctx);
         }
+    }
+
+    private void validateCorsHeaders(ChannelHandlerContext ctx, FullHttpRequest req) throws APISecurityException {
+        // Current implementation supports validating only the 'origin' header
+
+        if (!APIUtil.isCORSValidationEnabledForWS()) {
+            return;
+        }
+        String requestOrigin = req.headers().get(HttpHeaderNames.ORIGIN);
+        String allowedOrigin = assessAndGetAllowedOrigin(requestOrigin);
+        if (allowedOrigin == null) {
+            FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
+            ctx.writeAndFlush(httpResponse);
+            ctx.close();
+            log.warn("Validation of CORS origin header failed for WS request on: " + req.uri());
+            throw new APISecurityException(APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED,
+                    APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED_MESSAGE);
+        }
+    }
+
+    private String assessAndGetAllowedOrigin(String origin) {
+
+        if (WebsocketUtil.allowedOriginsConfigured.contains("*")) {
+            return "*";
+        } else if (WebsocketUtil.allowedOriginsConfigured.contains(origin)) {
+            return origin;
+        } else if (origin != null) {
+            for (String allowedOrigin : WebsocketUtil.allowedOriginsConfigured) {
+                if (allowedOrigin.contains("*")) {
+                    Pattern pattern = Pattern.compile(allowedOrigin.replace("*", ".*"));
+                    Matcher matcher = pattern.matcher(origin);
+                    if (matcher.find()) {
+                        return origin;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

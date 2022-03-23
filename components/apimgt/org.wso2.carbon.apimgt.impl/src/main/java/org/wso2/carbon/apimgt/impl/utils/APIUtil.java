@@ -7045,6 +7045,21 @@ public final class APIUtil {
     }
 
     /**
+     * Used to get the configuration which is set to decide whether CORS validation is enabled for Websocket APIs,
+     * from api-manager.xml
+     *
+     * @return true if CORS validation for WS APIs is enabled in api-manager.xml
+     */
+    public static boolean isCORSValidationEnabledForWS() {
+
+        String corsValidationEnabledForWS =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLE_VALIDATION_FOR_WS);
+
+        return Boolean.parseBoolean(corsValidationEnabledForWS);
+    }
+
+    /**
      * Used to get access control allowed origins define in api-manager.xml
      *
      * @return allow origins list defined in api-manager.xml
