@@ -142,9 +142,16 @@ public class WSO2APIPublisher implements APIPublisher {
 
             //Export API as an archive file and set it as a multipart entity in the request
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+
+            Boolean exportLatestRevision = false;
+            String revisionNumberStr = null;
+            if (api.getRevisionId() != 0) {
+                exportLatestRevision = true;
+                revisionNumberStr = String.valueOf(api.getRevisionId());
+            }
             apiArchive = importExportAPI.exportAPI(api.getUuid(), api.getId().getName(), api.getId().getVersion(),
-                    String.valueOf(api.getRevisionId()), api.getId().getProviderName(), Boolean.TRUE, ExportFormat.JSON,
-                    Boolean.TRUE, Boolean.TRUE, Boolean.TRUE,
+                    revisionNumberStr, api.getId().getProviderName(), Boolean.TRUE, ExportFormat.JSON,
+                    Boolean.TRUE, Boolean.TRUE, exportLatestRevision,
                     getExternalStoreRedirectURLForAPI(tenantId, api.getUuid()), api.getOrganization());
             if (log.isDebugEnabled()) {
                 log.debug("API successfully exported to file: " + apiArchive.getName());
