@@ -2079,7 +2079,6 @@ public final class APIConstants {
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
     public static final String API_TYPE_SSE = "SSE";
-    public static final String API_TYPE_ASYNC = "ASYNC";
 
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
