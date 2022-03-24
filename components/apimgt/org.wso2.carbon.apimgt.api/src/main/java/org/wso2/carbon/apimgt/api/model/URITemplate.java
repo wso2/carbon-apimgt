@@ -49,6 +49,8 @@ public class URITemplate implements Serializable{
     private String amznResourceName;
     private int amznResourceTimeout;
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
+    private String sandboxEndpoint;
+    private String productionEndpoint;
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
@@ -62,6 +64,21 @@ public class URITemplate implements Serializable{
         return mediationScript;
     }
 
+    public String getSandboxEndpoint() {
+        return sandboxEndpoint;
+    }
+
+    public void setSandboxEndpoint(String sandboxEndpoint) {
+        this.sandboxEndpoint = sandboxEndpoint;
+    }
+
+    public String getProductionEndpoint() {
+        return productionEndpoint;
+    }
+
+    public void setProductionEndpoint(String productionEndpoint) {
+        this.productionEndpoint = productionEndpoint;
+    }
 
     public List<String> getThrottlingConditions() {
         return throttlingConditions;

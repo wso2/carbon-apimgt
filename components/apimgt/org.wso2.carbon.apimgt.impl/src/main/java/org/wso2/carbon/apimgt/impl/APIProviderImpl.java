@@ -8285,6 +8285,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
+                populateAPIOperationEndpointsMapping(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -8298,6 +8299,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while parsing the OAS definition", e);
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
+        }
+    }
+
+    private void populateAPIOperationEndpointsMapping(API api) throws APIManagementException {
+        for (URITemplate uriTemplate: api.getUriTemplates()) {
+            // TODO set uri template mapping id here
+            log.info("hi");
         }
     }
 

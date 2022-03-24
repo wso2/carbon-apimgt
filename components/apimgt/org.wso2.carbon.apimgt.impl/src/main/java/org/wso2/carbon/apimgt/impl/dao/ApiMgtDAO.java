@@ -98,21 +98,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -5664,7 +5650,9 @@ public class ApiMgtDAO {
              PreparedStatement uriScopeMappingPrepStmt =
                      connection.prepareStatement(SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
              PreparedStatement operationPolicyMappingPrepStmt =
-                     connection.prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING)) {
+                     connection.prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
+             PreparedStatement operationEndpointMappingPrepStmt =
+                     connection.prepareStatement(SQLConstants.OperationEndpointsSQLConstants.ADD_NEW_OPERATION_ENDPOINT_MAPPING)) {
             Map<String, String> updatedPoliciesMap = new HashMap<>();
             Set<String> usedClonedPolicies = new HashSet<String>();
             for (URITemplate uriTemplate : api.getUriTemplates()) {
@@ -5764,11 +5752,28 @@ public class ApiMgtDAO {
                             operationPolicyMappingPrepStmt.addBatch();
                         }
                     }
+
+                    //save operation endpoint mapping to AM_API_OPERATION_ENDPOINT_MAPPING : table
+                    if(uriTemplate.getProductionEndpoint().toLowerCase() != "none" ||
+                                uriTemplate.getSandboxEndpoint().toLowerCase() != "none") {
+                        operationEndpointMappingPrepStmt.setInt(1, uriMappingId);
+                        operationEndpointMappingPrepStmt.setInt(2,
+                                (uriTemplate.getProductionEndpoint().toLowerCase()) == "default"
+                                        ? -1 : getOperationEndpointId(uriTemplate.getProductionEndpoint()));
+                        if (uriTemplate.getProductionEndpoint().toLowerCase() != "none") {
+                            operationEndpointMappingPrepStmt.setString(3, "PRODUCTION");
+                        }
+                        if (uriTemplate.getSandboxEndpoint().toLowerCase() != "none") {
+                            operationEndpointMappingPrepStmt.setString(3, "SANDBOX");
+                        }
+                        operationEndpointMappingPrepStmt.addBatch();
+                    }
                 }
                 uriTemplate.setId(uriMappingId);
             } // end URITemplate list iteration
             uriScopeMappingPrepStmt.executeBatch();
             operationPolicyMappingPrepStmt.executeBatch();
+            operationEndpointMappingPrepStmt.executeBatch();
             cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, api.getUuid());
         }
     }
@@ -18133,13 +18138,15 @@ public class ApiMgtDAO {
         statement.setString(5, operationEndpoint.getEndpointConfig());
         statement.setString(6, operationEndpoint.getSecurityConfig());
         statement.setString(7, operationEndpoint.getOrganization());
-        if(statement.executeUpdate() > 0){
+        if (statement.executeUpdate() > 0) {
             statement.close();
             return endpointUUID;
         }
 
         statement.close();
         return null;
+    }
+
     public boolean hasApplicationPolicyAttachedToApplication(String policyName, String organization) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement =

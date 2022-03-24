@@ -286,17 +286,28 @@ public class PublisherCommonUtils {
                 //set operation policies from the original API Payload
                 Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
                 Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
+                Map<String, String> operationEndpointPerURITemplate = new HashMap<>();
                 for (URITemplate uriTemplate : uriTemplatesFromPayload) {
                     if (!uriTemplate.getOperationPolicies().isEmpty()) {
                         String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                        operationEndpointPerURITemplate.put(key + "_Sandbox", uriTemplate.getProductionEndpoint());
+                        operationEndpointPerURITemplate.put(key + "_Production", uriTemplate.getSandboxEndpoint());
                     }
                 }
 
                 for (URITemplate uriTemplate : uriTemplates) {
                     String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                    String sandboxKey = key + "_Sandbox";
+                    String productionKey = key + "_Production";
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
+                    }
+                    if(operationEndpointPerURITemplate.containsKey(sandboxKey)){
+                        uriTemplate.setSandboxEndpoint(operationEndpointPerURITemplate.get(key + "_Sandbox"));
+                    }
+                    if(operationEndpointPerURITemplate.containsKey(productionKey)){
+                        uriTemplate.setProductionEndpoint(operationEndpointPerURITemplate.get(key + "_Production"));
                     }
                 }
 

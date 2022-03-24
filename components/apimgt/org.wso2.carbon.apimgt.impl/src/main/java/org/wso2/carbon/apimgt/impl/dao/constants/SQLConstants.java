@@ -3983,5 +3983,12 @@ public class SQLConstants {
                 "SECURITY_CONFIG, " +
                 "ENDPOINT_CONFIG, ORGANIZATION) " +
                 "VALUES(NULL,?,?,?,?,?,?,?)";
+
+        public static final String ADD_NEW_OPERATION_ENDPOINT_MAPPING = " INSERT INTO " +
+                "AM_API_OPERATION_ENDPOINT_MAPPING " +
+                "(URL_MAPPING_ID, " +
+                "OPERATION_ENDPOINT_ID, " +
+                "ENVIRONMENT) " +
+                "VALUES(?,?,?)";
     }
 }
