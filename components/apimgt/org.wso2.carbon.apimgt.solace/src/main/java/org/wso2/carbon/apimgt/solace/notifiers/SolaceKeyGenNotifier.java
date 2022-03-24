@@ -90,8 +90,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
         try {
             Application application = apiMgtDAO.getApplicationByUUID(event.getApplicationUUID());
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-            Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(application.getSubscriber(),
-                    application.getName(), application.getGroupId());
+            Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIsByApplication(application);
             boolean isContainsSolaceApis = false;
             String organizationNameOfSolaceDeployment = null;
             List<API> subscribedAPIs = new ArrayList<>();
@@ -105,7 +104,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                         if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
                             API subscribedAPI = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(api.getApiId(),
-                                    APIConstants.SUPER_TENANT_DOMAIN);
+                                    event.tenantDomain);
                             subscribedAPI.setGatewayVendor(SolaceConstants.SOLACE_ENVIRONMENT);
                             subscribedAPIs.add(subscribedAPI);
                             isContainsSolaceApis = true;
