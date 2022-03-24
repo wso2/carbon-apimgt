@@ -58,6 +58,10 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpcore</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -98,6 +102,7 @@
                                     org.wso2.carbon.event-processing:org.wso2.carbon.event.processor.core:${event.processor.core.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.apache.httpcomponents.wso2:httpcore</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
