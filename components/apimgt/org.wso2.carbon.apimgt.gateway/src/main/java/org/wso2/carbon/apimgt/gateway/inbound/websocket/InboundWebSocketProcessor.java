@@ -126,7 +126,9 @@ public class InboundWebSocketProcessor {
                 inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
                         WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR, errorMessage);
             }
-            publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
+            if (inboundProcessorResponseDTO.isError()) {
+                publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
+            }
             return inboundProcessorResponseDTO;
         } catch (APISecurityException e) {
             log.error("Authentication Failure for the websocket context: " + inboundMessageContext.getApiContext()

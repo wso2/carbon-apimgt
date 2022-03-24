@@ -5827,6 +5827,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 Set<Tier> availableTiers = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
                 api.removeAllTiers();
                 api.setAvailableTiers(availableTiers);
+                api.setOrganization(organization);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";

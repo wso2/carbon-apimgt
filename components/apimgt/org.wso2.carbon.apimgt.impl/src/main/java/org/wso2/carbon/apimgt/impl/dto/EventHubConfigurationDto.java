@@ -23,7 +23,7 @@ import java.util.Properties;
 public class EventHubConfigurationDto {
     private boolean enabled = false;
     private String serviceUrl;
-    private int initDelay = 0;
+    private int initDelay = 1000;
     private String username;
     private char[] password;
     private EventHubReceiverConfiguration eventHubReceiverConfiguration;
