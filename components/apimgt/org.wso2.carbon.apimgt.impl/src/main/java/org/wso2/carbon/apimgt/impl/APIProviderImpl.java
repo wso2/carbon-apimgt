@@ -5371,8 +5371,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                 targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
                 apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
-                sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
-                        apiOrApiProductId, uuid);
                 if (!isApiProduct) {
                     API api = apiTypeWrapper.getApi();
                     api.setOrganization(orgId);
@@ -5387,6 +5385,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     changeLifecycle(apiProduct, currentStatus, targetStatus);
                 }
                 addLCStateChangeInDatabase(currentStatus, targetStatus, uuid);
+                // Event need to be sent after database status update.
+                sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
+                        apiOrApiProductId, uuid);
                 if (log.isDebugEnabled()) {
                     String logMessage = "LC Status changed successfully for artifact with name: " + apiName
                             + ", version " + apiVersion + ", New Status : " + targetStatus;
