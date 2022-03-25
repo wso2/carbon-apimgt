@@ -376,7 +376,10 @@ public class APIAdminImpl implements APIAdmin {
 
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
-            getKeyManagerEndpoints(keyManagerConfigurationDTO);
+            if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfigurationDTO.getTokenType())) {
+                getKeyManagerEndpoints(keyManagerConfigurationDTO);
+            }
         }
 
         setIdentityProviderRelatedInformation(keyManagerConfigurationsByTenant, organization);
@@ -851,7 +854,8 @@ public class APIAdminImpl implements APIAdmin {
         if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                 keyManagerConfiguration.getTokenType())) {
             getKeyManagerEndpoints(keyManagerConfiguration);
-        }        return keyManagerConfiguration;
+        }
+        return keyManagerConfiguration;
     }
 
     @Override
