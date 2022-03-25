@@ -2174,6 +2174,7 @@ public class APIMappingUtil {
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
         productDto.setGatewayVendor(product.getGatewayVendor());
+        productDto.setHasThumbnail(!StringUtils.isBlank(product.getThumbnailUrl()));
 
         Set<String> apiTags = product.getTags();
         List<String> tagsToReturn = new ArrayList<>(apiTags);
