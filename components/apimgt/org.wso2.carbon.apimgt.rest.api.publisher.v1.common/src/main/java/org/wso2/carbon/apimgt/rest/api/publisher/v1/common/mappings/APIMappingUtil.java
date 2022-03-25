@@ -2150,6 +2150,7 @@ public class APIMappingUtil {
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
             productDto.setId(apiProduct.getUuid());
+            productDto.setHasThumbnail(!StringUtils.isBlank(apiProduct.getThumbnailUrl()));
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
