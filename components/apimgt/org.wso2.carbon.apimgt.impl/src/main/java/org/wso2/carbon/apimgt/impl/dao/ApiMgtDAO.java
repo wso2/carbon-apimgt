@@ -106,12 +106,7 @@ import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -4988,11 +4983,11 @@ public class ApiMgtDAO {
         return events;
     }
 
-    public void makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, List<API> oldAPIVersions) throws APIManagementException {
-
+    public List<SubscribedAPI> makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, List<API> oldAPIVersions) throws APIManagementException {
+        List<SubscribedAPI> subscribedAPISet = new ArrayList<>();
         //if there are no previous versions, there is no need to copy subscriptions
         if (oldAPIVersions == null || oldAPIVersions.isEmpty()) {
-            return;
+            return subscribedAPISet;
         }
         String getSubscriptionDataQuery = SQLConstants.GET_SUBSCRIPTION_DATA_SQL.replaceAll("_API_VERSION_LIST_",
                 String.join(",", Collections.nCopies(oldAPIVersions.size(), "?")));
@@ -5044,8 +5039,9 @@ public class ApiMgtDAO {
                                         apiTypeWrapper.setTier(info.getTierId());
                                         Application application = getLightweightApplicationById(connection,
                                                 info.getApplicationId());
+                                        String subscriptionUUID = UUID.randomUUID().toString();
                                         int subscriptionId = addSubscription(connection, apiTypeWrapper, application,
-                                                subscriptionStatus, apiIdentifier.getProviderName());
+                                                subscriptionStatus, apiIdentifier.getProviderName(), subscriptionUUID);
                                         if (subscriptionId == -1) {
                                             String msg =
                                                     "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
@@ -5053,7 +5049,15 @@ public class ApiMgtDAO {
                                             log.error(msg);
                                             throw new APIManagementException(msg);
                                         }
+                                        SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionUUID);
+                                        subscribedAPI.setApplication(application);
+                                        subscribedAPI.setTier(new Tier(info.getTierId()));
+                                        subscribedAPI.setOrganization(apiTypeWrapper.getOrganization());
+                                        subscribedAPI.setIdentifier(apiTypeWrapper);
+                                        subscribedAPI.setSubStatus(subscriptionStatus);
+                                        subscribedAPI.setSubscriptionId(subscriptionId);
                                         addedApplications.add(info.getApplicationId());
+                                        subscribedAPISet.add(subscribedAPI);
                                     }
                                     // catching the exception because when copy the api without the option "require
                                     // re-subscription"
@@ -5075,11 +5079,17 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error when executing the SQL queries", e);
         }
+        return subscribedAPISet;
     }
 
     private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
                                 String subscriptionStatus, String subscriber) throws APIManagementException,
             SQLException {
+        return addSubscription(connection, apiTypeWrapper, application, subscriptionStatus, subscriber, UUID.randomUUID().toString());
+    }
+    private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
+                                String subscriptionStatus, String subscriber, String subscriptionUUID)
+            throws APIManagementException, SQLException {
 
         final boolean isProduct = apiTypeWrapper.isAPIProduct();
         int subscriptionId = -1;
@@ -5151,7 +5161,6 @@ public class ApiMgtDAO {
         //Adding data to the AM_SUBSCRIPTION table
         //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
         String subscriptionIDColumn = "SUBSCRIPTION_ID";
-        String subscriptionUUID = UUID.randomUUID().toString();
         if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             subscriptionIDColumn = "subscription_id";
         }
@@ -5187,13 +5196,6 @@ public class ApiMgtDAO {
                 }
             }
 
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                    tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
-                    application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
-                    APIConstants.SubscriptionStatus.UNBLOCKED));
         return subscriptionId;
     }
 
