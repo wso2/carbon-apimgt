@@ -226,4 +226,27 @@ public class SubscribedAPI {
             return productId;
         }
     }
+    public void setIdentifier(ApiTypeWrapper apiTypeWrapper){
+        if (apiTypeWrapper.isAPIProduct()){
+            productId = (APIProductIdentifier) apiTypeWrapper.getId();
+        }else{
+            apiId = (APIIdentifier) apiTypeWrapper.getId();
+        }
+    }
+
+    public int getapiId() {
+        if (apiId != null) {
+            return apiId.getId();
+        } else {
+            return productId.getProductId();
+        }
+    }
+
+    public String getAPIUUId() {
+        if (apiId != null) {
+            return apiId.getUUID();
+        } else {
+            return productId.getUUID();
+        }
+    }
 }

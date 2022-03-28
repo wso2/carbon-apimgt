@@ -2134,6 +2134,7 @@ public class APIMappingUtil {
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
             productDto.setId(apiProduct.getUuid());
+            productDto.setHasThumbnail(!StringUtils.isBlank(apiProduct.getThumbnailUrl()));
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
@@ -2158,6 +2159,7 @@ public class APIMappingUtil {
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
         productDto.setGatewayVendor(product.getGatewayVendor());
+        productDto.setHasThumbnail(!StringUtils.isBlank(product.getThumbnailUrl()));
 
         Set<String> apiTags = product.getTags();
         List<String> tagsToReturn = new ArrayList<>(apiTags);
