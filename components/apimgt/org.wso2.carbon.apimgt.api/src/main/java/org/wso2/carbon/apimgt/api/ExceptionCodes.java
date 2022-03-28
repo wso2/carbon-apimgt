@@ -485,7 +485,8 @@ public enum ExceptionCodes implements ErrorHandler {
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
-    INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false);
+    INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
+    INVALID_API_ID(9020002, "Invalid API ID", 404, "The provided API ID is not found %s", false);
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
