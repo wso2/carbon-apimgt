@@ -3341,6 +3341,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 info.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
                 info.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                 info.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+                info.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
 
                 publisherAPIProductInfoList.add(info);
 
