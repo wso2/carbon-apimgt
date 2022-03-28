@@ -10845,9 +10845,7 @@ public final class APIUtil {
         String formattedTenantConf = gson.toJson(existingTenantConfObject);
         ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(tenantDomain,
                 formattedTenantConf);
-        Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
-        String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
-        tenantConfigCache.remove(cacheName);
+
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
