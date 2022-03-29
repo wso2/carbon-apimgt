@@ -18092,12 +18092,12 @@ public class ApiMgtDAO {
             prepStmt.setString(1, endpointUUID);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
-                    id = rs.getInt("API_ID");
+                    id = rs.getInt("OPERATION_ENDPOINT_ID");
                 }
                 if (id == -1) {
                     String msg = "Unable to find the Endpoint Id with UUID : " + endpointUUID + " in the database";
                     log.error(msg);
-                    throw new APIManagementException(msg);
+                    throw new APIManagementException(msg,ExceptionCodes.OPERATION_ENDPOINT_ID_NOT_FOUND);
                 }
             }
         }

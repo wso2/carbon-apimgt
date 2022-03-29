@@ -8316,6 +8316,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (URITemplate uriTemplate: api.getUriTemplates()) {
             // TODO set uri template mapping id here
             log.info("hi");
+            log.info(uriTemplate.getProductionEndpoint());
+            log.info(uriTemplate.getSandboxEndpoint());
+            log.info("id of uritemplate");
+            log.info(uriTemplate.getId());
         }
     }
 

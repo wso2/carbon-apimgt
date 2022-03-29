@@ -10710,9 +10710,11 @@ components:
         sandBoxEndpointId:
           type: string
           example: ""
+          default: default
         productionEndpointId:
           type: string
           example: ""
+          default: default
         uriMapping:
           type: string
           example: ""
