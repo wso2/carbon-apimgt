@@ -356,13 +356,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getSequenceFileContent(APIIdentifier apiIdentifier, String sequenceType, String sequenceName)
-            throws APIManagementException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.getSequenceFileContent(apiIdentifier, sequenceType, sequenceName);
-    }
-
-    @Override
     public int addCertificate(String userName, String certificate, String alias, String endpoint) throws APIManagementException {
         return super.addCertificate(userName, certificate, alias, endpoint);
     }

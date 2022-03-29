@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.20.20-SNAPSHOT</version>
+        <version>9.20.75-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.service.catalog</artifactId>
     <packaging>war</packaging>
-    <name>WSO2 API Manager Service Catalog REST API</name>
+    <name>WSO2 API Manager Service Catalog REST API - v1</name>
     <description>WSO2 API Manager REST API for Service Catalog</description>
 
 

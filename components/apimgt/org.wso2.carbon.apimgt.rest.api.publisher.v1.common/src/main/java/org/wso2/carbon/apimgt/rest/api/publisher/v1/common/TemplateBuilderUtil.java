@@ -580,7 +580,20 @@ public class TemplateBuilderUtil {
     private static void setCustomSequencesToBeAdded(APIProduct apiProduct, API api, GatewayAPIDTO gatewayAPIDTO,
                                                     String extractedPath, APIDTO apidto) throws APIManagementException {
 
-        if (APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())) {
+            GatewayContentDTO gatewayInContentDTO = retrieveSequence(apiProduct, extractedPath,
+                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
+            if (gatewayInContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayInContentDTO,
+                        gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(apiProduct, extractedPath,
+                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT, api);
+            if (gatewayOutContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayOutContentDTO,
+                        gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+        } else {
             GatewayContentDTO gatewayInContentDTO = retrieveOperationPolicySequenceForProducts(apiProduct, api,
                     extractedPath, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             if (gatewayInContentDTO != null) {
@@ -598,20 +611,6 @@ public class TemplateBuilderUtil {
             if (gatewayFaultContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
-            }
-        } else {
-
-            GatewayContentDTO gatewayInContentDTO = retrieveSequence(apiProduct, extractedPath,
-                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
-            if (gatewayInContentDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayInContentDTO,
-                        gatewayAPIDTO.getSequenceToBeAdd()));
-            }
-            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(apiProduct, extractedPath,
-                    apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT, api);
-            if (gatewayOutContentDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayOutContentDTO,
-                        gatewayAPIDTO.getSequenceToBeAdd()));
             }
         }
     }
@@ -632,6 +631,12 @@ public class TemplateBuilderUtil {
 
         String definition;
         boolean isGraphQLSubscriptionAPI = false;
+        String endpointConfigString = api.getEndpointConfig();
+        org.json.JSONObject endpointConfig = null;
+        if (StringUtils.isNotBlank(endpointConfigString)) {
+            endpointConfig = new org.json.JSONObject(endpointConfigString);
+        }
+
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
             //Build schema with additional info
@@ -661,7 +666,7 @@ public class TemplateBuilderUtil {
                 template.setUriTemplate("/*");
                 uriTemplates.add(template);
                 api.setUriTemplates(uriTemplates);
-                api.setEndpointConfig(populateSubscriptionEndpointConfig(api.getEndpointConfig()));
+                api.setEndpointConfig(populateSubscriptionEndpointConfig(endpointConfigString));
                 addGqlWebSocketTopicMappings(api);
             }
         } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
@@ -698,10 +703,12 @@ public class TemplateBuilderUtil {
         // If the API exists in the Gateway and If the Gateway type is 'production' and a production url has not been
         // specified Or if the Gateway type is 'sandbox' and a sandbox url has not been specified
 
-        if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
-                && !APIUtil.isProductionEndpointsExists(api.getEndpointConfig()))
-                || (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
-                && !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()))) {
+        if (endpointConfig != null && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equals(
+                endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && (
+                (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
+                        && !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) || (
+                        APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
+                                && !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig())))) {
             if (log.isDebugEnabled()) {
                 log.debug("Not adding API to environment " + environment.getName() + " since its endpoint URL "
                         + "cannot be found");
@@ -725,8 +732,7 @@ public class TemplateBuilderUtil {
         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())) {
             String apiConfig = builder.getConfigStringForTemplate(environment);
             gatewayAPIDTO.setApiDefinition(apiConfig);
-            org.json.JSONObject endpointConfig = new org.json.JSONObject(api.getEndpointConfig());
-            if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+            if (endpointConfig != null && !endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
                     .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
                 if (!isWsApi) {
                     addEndpoints(api, builder, gatewayAPIDTO);
@@ -800,7 +806,23 @@ public class TemplateBuilderUtil {
     private static void setCustomSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
                                                     APIDTO apidto) throws APIManagementException {
 
-        if (APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())) {
+            // This is to preserve the previous non migrated API project. Mediation files are used and they will be
+            // deployed in the gateway as it is.
+            GatewayContentDTO gatewayInContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
+            if (gatewayInContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
+                    , api);
+            if (gatewayOutContentDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+        } else {
             GatewayContentDTO gatewayInContentDTO =
                     retrieveOperationPolicySequence(extractedPath, api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
             if (gatewayInContentDTO != null) {
@@ -819,20 +841,6 @@ public class TemplateBuilderUtil {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
-        } else {
-            GatewayContentDTO gatewayInContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
-                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
-            if (gatewayInContentDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(
-                        addGatewayContentToList(gatewayInContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
-            }
-            GatewayContentDTO gatewayOutContentDTO = retrieveSequence(extractedPath, apidto.getMediationPolicies(),
-                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
-                    , api);
-            if (gatewayOutContentDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(
-                        addGatewayContentToList(gatewayOutContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
-            }
         }
     }
 
@@ -841,7 +849,7 @@ public class TemplateBuilderUtil {
             throws APIManagementException {
 
         String faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
-        if (!APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+        if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
             gatewayAPIDTO.setSequencesToBeRemove(
                     GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
             List<MediationPolicyDTO> mediationPolicies = apidto.getMediationPolicies();

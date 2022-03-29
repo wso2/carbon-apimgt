@@ -1047,7 +1047,6 @@ public class APIMappingUtil {
         }
 
         dto.setMediationPolicies(mediationPolicies);
-
         dto.setLifeCycleStatus(model.getStatus());
 
         String subscriptionAvailability = model.getSubscriptionAvailability();
@@ -1259,7 +1258,14 @@ public class APIMappingUtil {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
 
-        dto.setGatewayVendor(StringUtils.toRootLowerCase(model.getGatewayVendor()));
+        String gatewayVendor = StringUtils.toRootLowerCase(model.getGatewayVendor());
+        dto.setGatewayVendor(gatewayVendor);
+        dto.setGatewayType(model.getGatewayType());
+
+        if (model.getGatewayVendor() == null) {
+            dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        }
+
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
@@ -2144,6 +2150,7 @@ public class APIMappingUtil {
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
             productDto.setId(apiProduct.getUuid());
+            productDto.setHasThumbnail(!StringUtils.isBlank(apiProduct.getThumbnailUrl()));
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
@@ -2168,6 +2175,7 @@ public class APIMappingUtil {
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
         productDto.setGatewayVendor(product.getGatewayVendor());
+        productDto.setHasThumbnail(!StringUtils.isBlank(product.getThumbnailUrl()));
 
         Set<String> apiTags = product.getTags();
         List<String> tagsToReturn = new ArrayList<>(apiTags);
@@ -2873,34 +2881,6 @@ public class APIMappingUtil {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Returns uuid of the specified mediation policy.
-     *
-     * @param sequenceName mediation sequence name
-     * @param direction    in/out/fault
-     * @param dto          APIDetailedDTO contains details of the exporting API
-     * @return UUID of sequence or null
-     */
-    private static Map<String, String> getMediationPolicyAttributes(String sequenceName, String direction,
-                                                                    APIDTO dto) {
-
-        APIIdentifier apiIdentifier = new APIIdentifier(dto.getProvider(), dto.getName(),
-                dto.getVersion());
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
-            return APIUtil.getMediationPolicyAttributes(sequenceName, tenantId, direction, apiIdentifier);
-        } catch (UserStoreException e) {
-            log.error("Error occurred while reading tenant information ", e);
-
-        } catch (APIManagementException e) {
-            log.error("Error occurred while getting the uuid of the mediation sequence", e);
-        }
-
-        return null;
     }
 
     /**

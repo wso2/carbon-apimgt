@@ -21,14 +21,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.20.20-SNAPSHOT</version>
+        <version>9.20.75-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.admin.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - API Manager Admin Rest API Feature</name>
+    <name>WSO2 Carbon - API Admin Rest API Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains required bundles for API Manager Rest API for API Admin Portal functionality
     </description>

@@ -19,7 +19,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi"/>
 	        <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.MediationPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SearchApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApi"/>

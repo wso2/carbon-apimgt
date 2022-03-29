@@ -21,13 +21,13 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.20.20-SNAPSHOT</version>
+        <version>9.20.75-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.dcr</artifactId>
-    <name>WSO2 Carbon API Manager- Dynamic Client Registration Web Service</name>
+    <name>WSO2 Carbon - Dynamic Client Registration Web Service</name>
     <description>WSO2 Carbon API Manager- Dynamic Client Registration Web</description>
     <packaging>war</packaging>
 

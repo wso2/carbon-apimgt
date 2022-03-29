@@ -179,10 +179,6 @@ public class APIManagerComponent {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
-            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                addDefinedSequencesToRegistry();
-            }
             CommonConfigDeployer configDeployer = new CommonConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
             TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
@@ -225,6 +221,7 @@ public class APIManagerComponent {
                     jwtValidationService, null);
             ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
             APIStatusObserverList.getInstance().init(configuration);
+            MonetizationDataHolder.getInstance().init();
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
@@ -495,19 +492,6 @@ public class APIManagerComponent {
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while setting up permissions for image collection", e);
-        }
-    }
-
-    private void addDefinedSequencesToRegistry() throws APIManagementException {
-        try {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry registry = registryService.getGovernanceSystemRegistry();
-            // Add all custom in,out and fault sequences to registry
-            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving defined sequences to the registry ", e);
         }
     }
 

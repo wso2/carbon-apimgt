@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -3941,6 +3942,17 @@ public final class APIUtil {
                 }
             }
 
+            // create observer role if it's creation is enabled in tenant-conf.json
+            JSONObject observerRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_OBSERVER_ROLE);
+            if (isRoleCreationEnabled(observerRoleConfig)) {
+                String observerRoleName = String.valueOf(observerRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(observerRoleName)) {
+                    createObserverRole(observerRoleName, tenantId);
+                }
+            }
+
             // create IntegrationDeveloperRole role if it's creation is enabled in tenant-conf.json
             JSONObject integrationDeveloperRoleConfig = (JSONObject) defaultRoles
                     .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE);
@@ -3995,96 +4007,6 @@ public final class APIUtil {
             accessControlEnabled = true;
         }
         return accessControlEnabled;
-    }
-
-    /**
-     * Add all the custom sequences of given type to registry
-     *
-     * @param registry           Registry instance
-     * @param customSequenceType Custom sequence type which is in/out or fault
-     * @throws APIManagementException
-     */
-    public static void addDefinedAllSequencesToRegistry(UserRegistry registry,
-                                                        String customSequenceType)
-            throws APIManagementException {
-
-        InputStream inSeqStream = null;
-        String seqFolderLocation =
-                CarbonUtils.getCarbonHome() + File.separator + APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION
-                        + File.separator + customSequenceType;
-
-        try {
-            File inSequenceDir = new File(seqFolderLocation);
-            File[] sequences;
-            sequences = inSequenceDir.listFiles();
-
-            if (sequences != null) {
-                for (File sequenceFile : sequences) {
-                    String sequenceFileName = sequenceFile.getName();
-                    String regResourcePath =
-                            APIConstants.API_CUSTOM_SEQUENCE_LOCATION + '/' +
-                                    customSequenceType + '/' + sequenceFileName;
-                    if (registry.resourceExists(regResourcePath)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("The sequence file with the name " + sequenceFileName
-                                    + " already exists in the registry path " + regResourcePath);
-                        }
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug(
-                                    "Adding sequence file with the name " + sequenceFileName + " to the registry path "
-                                            + regResourcePath);
-                        }
-
-                        inSeqStream = new FileInputStream(sequenceFile);
-                        byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
-                        Resource inSeqResource = registry.newResource();
-                        inSeqResource.setContent(inSeqData);
-
-                        registry.put(regResourcePath, inSeqResource);
-                    }
-                }
-            } else {
-                log.error(
-                        "Custom sequence template location unavailable for custom sequence type " +
-                                customSequenceType + " : " + seqFolderLocation
-                );
-            }
-
-        } catch (RegistryException e) {
-            throw new APIManagementException(
-                    "Error while saving defined sequences to the registry ", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading defined sequence ", e);
-        } finally {
-            IOUtils.closeQuietly(inSeqStream);
-        }
-
-    }
-
-    /**
-     * Adds the sequences defined in repository/resources/customsequences folder to tenant registry
-     *
-     * @param tenantID tenant Id
-     * @throws APIManagementException
-     */
-    public static void writeDefinedSequencesToTenantRegistry(int tenantID)
-            throws APIManagementException {
-
-        try {
-
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
-
-            //Add all custom in,out and fault sequences to tenant registry
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException(
-                    "Error while saving defined sequences to the registry of tenant with id " + tenantID, e);
-        }
     }
 
     /**
@@ -4247,6 +4169,21 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
         };
         createRole(roleName, devOpsPermissions, tenantId);
+    }
+
+    /**
+     * Create APIM Observer roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createObserverRole(String roleName, int tenantId) throws APIManagementException {
+
+        Permission[] observerPermissions = new Permission[]{
+                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION)
+        };
+        createRole(roleName, observerPermissions, tenantId);
     }
 
     /**
@@ -5145,163 +5082,6 @@ public final class APIUtil {
     }
 
     /**
-     * Returns uuid correspond to the given sequence name and direction
-     *
-     * @param sequenceName name of the  sequence
-     * @param tenantId     logged in user's tenantId
-     * @param direction    in/out/fault
-     * @param identifier   API identifier
-     * @return uuid of the given mediation sequence or null
-     * @throws APIManagementException If failed to get the uuid of the mediation sequence
-     */
-    public static String getMediationSequenceUuid(String sequenceName, int tenantId, String direction,
-                                                  APIIdentifier identifier) throws
-            APIManagementException {
-
-        org.wso2.carbon.registry.api.Collection seqCollection = null;
-        String seqCollectionPath;
-
-        try {
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-
-            if ("in".equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            } else if ("out".equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-            } else if ("fault".equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-            }
-
-            if (seqCollection == null) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get
-                        (getSequencePath(identifier,
-                                direction));
-
-            }
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
-                for (String childPath : childPaths) {
-                    Resource sequence = registry.get(childPath);
-                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-                    String seqElmentName = seqElment.getAttributeValue(new QName("name"));
-                    if (sequenceName.equals(seqElmentName)) {
-                        return sequence.getUUID();
-                    }
-                }
-            }
-
-            // If the sequence not found the default sequences, check in custom sequences
-
-            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get
-                    (getSequencePath(identifier, direction));
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
-                for (String childPath : childPaths) {
-                    Resource sequence = registry.get(childPath);
-                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
-                        return sequence.getUUID();
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            String msg = "Issue is in accessing the Registry";
-            log.error(msg);
-            throw new APIManagementException(msg, e);
-        }
-        return null;
-    }
-
-    /**
-     * Returns attributes correspond to the given mediation policy name and direction
-     *
-     * @param policyName name of the  sequence
-     * @param tenantId   logged in user's tenantId
-     * @param direction  in/out/fault
-     * @param identifier API identifier
-     * @return attributes(path, uuid) of the given mediation sequence or null
-     * @throws APIManagementException If failed to get the uuid of the mediation sequence
-     */
-    public static Map<String, String> getMediationPolicyAttributes(String policyName, int tenantId, String direction,
-                                                                   APIIdentifier identifier) throws APIManagementException {
-
-        org.wso2.carbon.registry.api.Collection seqCollection = null;
-        String seqCollectionPath = "";
-        Map<String, String> mediationPolicyAttributes = new HashMap<>(3);
-        try {
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-
-            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
-                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
-                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-            } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
-                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-            }
-
-            if (seqCollection == null) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get
-                        (getSequencePath(identifier,
-                                direction));
-
-            }
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
-                for (String childPath : childPaths) {
-                    Resource mediationPolicy = registry.get(childPath);
-                    OMElement seqElment = APIUtil.buildOMElement(mediationPolicy.getContentStream());
-                    String seqElmentName = seqElment.getAttributeValue(new QName("name"));
-                    if (policyName.equals(seqElmentName)) {
-                        mediationPolicyAttributes.put("path", childPath);
-                        mediationPolicyAttributes.put("uuid", mediationPolicy.getUUID());
-                        mediationPolicyAttributes.put("name", policyName);
-                        return mediationPolicyAttributes;
-                    }
-                }
-            }
-
-            // If the sequence not found the default sequences, check in custom sequences
-
-            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get
-                    (getSequencePath(identifier, direction));
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
-                for (String childPath : childPaths) {
-                    Resource mediationPolicy = registry.get(childPath);
-                    OMElement seqElment = APIUtil.buildOMElement(mediationPolicy.getContentStream());
-                    if (policyName.equals(seqElment.getAttributeValue(new QName("name")))) {
-                        mediationPolicyAttributes.put("path", childPath);
-                        mediationPolicyAttributes.put("uuid", mediationPolicy.getUUID());
-                        mediationPolicyAttributes.put("name", policyName);
-                        return mediationPolicyAttributes;
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            String msg = "Issue is in accessing the Registry";
-            log.error(msg);
-            throw new APIManagementException(msg, e);
-        }
-        return mediationPolicyAttributes;
-    }
-
-    /**
      * Returns true if sequence is set
      *
      * @param sequence
@@ -5309,7 +5089,7 @@ public final class APIUtil {
      */
     public static boolean isSequenceDefined(String sequence) {
 
-        return sequence != null && !"none".equals(sequence);
+        return sequence != null && !"none".equals(sequence) && !StringUtils.isEmpty(sequence) ;
     }
 
     /**
@@ -9188,11 +8968,8 @@ public final class APIUtil {
             throws APIManagementException {
 
         JSONObject jsonObject = null;
-        String granularity = null;
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        granularity = configuration.getFirstProperty(
-                APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY);
+        String granularity = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getMonetizationConfigurationDto().getGranularity();
         if (StringUtils.isEmpty(granularity)) {
             //set the default granularity to days, if it is not set in configuration
             granularity = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_GRANULARITY;
@@ -9765,7 +9542,7 @@ public final class APIUtil {
     public static JSONArray getMonetizationAttributes() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getMonetizationAttributes();
+                .getMonetizationConfigurationDto().getMonetizationAttributes();
     }
 
     /**
@@ -11068,9 +10845,7 @@ public final class APIUtil {
         String formattedTenantConf = gson.toJson(existingTenantConfObject);
         ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(tenantDomain,
                 formattedTenantConf);
-        Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
-        String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
-        tenantConfigCache.remove(cacheName);
+
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
@@ -11420,8 +11195,9 @@ public final class APIUtil {
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
         for (String endpoint : endpoints) {
-            // If url is a JMS connection url, validation is skipped. If not, validity is checked.
-            if (!endpoint.startsWith("jms:") && !urlValidator.isValid(endpoint)) {
+            // If url is a JMS connection url or a Consul service discovery related url, validation is skipped.
+            // If not, validity is checked.
+            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !urlValidator.isValid(endpoint)) {
                 try {
                     // If the url is not identified as valid from the above check,
                     // next step is determine the validity of the encoded url (done through the URI constructor).
@@ -11592,17 +11368,18 @@ public final class APIUtil {
                                 OperationPolicyData policyData = new OperationPolicyData();
                                 policyData.setSpecification(policySpec);
                                 policyData.setOrganization(organization);
-
+                                String policyFileName = getOperationPolicyFileName(policySpec.getName(),
+                                        policySpec.getVersion());
                                 OperationPolicyDefinition synapsePolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                                policySpec.getName(), APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                                                policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
                                 if (synapsePolicyDefinition != null) {
                                     synapsePolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
                                     policyData.setSynapsePolicyDefinition(synapsePolicyDefinition);
                                 }
                                 OperationPolicyDefinition ccPolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
-                                                policySpec.getName(), APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+                                                policyFileName, APIConstants.CC_POLICY_DEFINITION_EXTENSION);
                                 if (ccPolicyDefinition != null) {
                                     ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
                                     policyData.setCcPolicyDefinition(ccPolicyDefinition);
@@ -11630,19 +11407,19 @@ public final class APIUtil {
      * Read the operation policy definition from the provided path and return the definition object
      *
      * @param extractedFolderPath   Location of the policy definition
-     * @param policyName            Name of the policy
+     * @param definitionFileName    Name of the policy file
      * @param fileExtension         Since there can be both synapse and choreo connect definitons, fileExtension is used
      *
      * @return OperationPolicyDefinition
      */
     public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
-                                                                                 String policyName,
+                                                                                 String definitionFileName,
                                                                                  String fileExtension)
             throws APIManagementException {
 
         OperationPolicyDefinition policyDefinition = null;
         try {
-            String fileName = extractedFolderPath + File.separator + policyName + fileExtension;
+            String fileName = extractedFolderPath + File.separator + definitionFileName + fileExtension;
             if (checkFileExistence(fileName)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Found policy definition file " + fileName);
@@ -11763,10 +11540,141 @@ public final class APIUtil {
         return md5Hash;
     }
 
+    /**
+     * This method will generate a operation policy data object if a mediation policy is found for the selected flow.
+     *
+     * @param api             API
+     * @param policyDirection Request, response of fault flow
+     * @param organization    organization
+     * @throws APIManagementException
+     */
+    public static OperationPolicyData getPolicyDataForMediationFlow(API api, String policyDirection,
+                                                                    String organization) {
+
+        OperationPolicyData policyData = null;
+        switch (policyDirection) {
+            case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+                if (isSequenceDefined(api.getInSequence()) && api.getInSequenceMediation() != null) {
+                    Mediation inSequenceMediation = api.getInSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            inSequenceMediation.getName(), inSequenceMediation.getConfig());
+                }
+                break;
+            case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+                if (isSequenceDefined(api.getOutSequence()) && api.getOutSequenceMediation() != null) {
+                    Mediation outSequenceMediation = api.getOutSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            outSequenceMediation.getName(), outSequenceMediation.getConfig());
+                }
+                break;
+            case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+                if (isSequenceDefined(api.getFaultSequence()) && api.getFaultSequenceMediation() != null) {
+                    Mediation faultSequenceMediation = api.getFaultSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
+                }
+                break;
+        }
+        return policyData;
+    }
+
+    public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String organization,
+                                                                        String policyName,
+                                                                        String policyDefinitionString) {
+
+        OperationPolicySpecification policySpecification = new OperationPolicySpecification();
+        policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
+        policySpecification.setName(policyName);
+        policySpecification.setDisplayName(policyName);
+        policySpecification.setDescription("This is a mediation policy migrated to an operation policy.");
+
+        ArrayList<String> gatewayList = new ArrayList<>();
+        gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
+        policySpecification.setSupportedGateways(gatewayList);
+
+        ArrayList<String> supportedAPIList = new ArrayList<>();
+        supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
+        policySpecification.setSupportedApiTypes(supportedAPIList);
+
+        ArrayList<String> applicableFlows = new ArrayList<>();
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE);
+        applicableFlows.add(APIConstants.OPERATION_SEQUENCE_TYPE_FAULT);
+        policySpecification.setApplicableFlows(applicableFlows);
+
+        OperationPolicyData policyData = new OperationPolicyData();
+        policyData.setOrganization(organization);
+        policyData.setSpecification(policySpecification);
+        policyData.setApiUUID(apiUuid);
+
+        if (policyDefinitionString != null) {
+            OperationPolicyDefinition policyDefinition = new OperationPolicyDefinition();
+            policyDefinition.setContent(policyDefinitionString);
+            policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
+            policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+            policyData.setSynapsePolicyDefinition(policyDefinition);
+        }
+
+        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+
+        return policyData;
+    }
+
+
+    public static String getOperationPolicyFileName(String policyName, String policyVersion) {
+        if (StringUtils.isEmpty(policyVersion)) {
+            policyVersion = "v1";
+        }
+        return policyName + "_" + policyVersion;
+    }
+
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
 
+    }
+
+    /**
+     * Handles gateway vendor for Choreo Connect before insert DB operations.
+     *
+     * @param gatewayVendorType Gateway vendor
+     * @param gatewayType       Gateway type
+     * @return gateway vendor for the API
+     */
+    public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
+        if(gatewayType != null && APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayType)) {
+            gatewayVendorType =  APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        }
+        return gatewayVendorType;
+    }
+
+    /**
+     * Provides gateway type considering gateway vendor.
+     *
+     * @param gatewayVendor Gateway vendor type.
+     * @return gateway type
+     */
+    public static String getGatewayType(String gatewayVendor) {
+        String gatewayType = null;
+        if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
+            gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
+        } else if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
+            gatewayType = APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        }
+        return gatewayType;
+    }
+
+    /**
+     * Replaces wso2/choreo-connect gateway vendor type as wso2 after retrieving from db.
+     *
+     * @param gatewayVendor Gateway vendor type
+     * @return wso2 gateway vendor type
+     */
+    public static String handleGatewayVendorRetrieval(String gatewayVendor) {
+        if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
+            gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        }
+        return  gatewayVendor;
     }
 }

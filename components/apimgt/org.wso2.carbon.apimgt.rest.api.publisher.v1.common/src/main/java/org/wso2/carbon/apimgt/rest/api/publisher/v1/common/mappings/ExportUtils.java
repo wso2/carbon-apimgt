@@ -44,11 +44,11 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -165,9 +165,19 @@ public class ExportUtils {
             throws APIManagementException, APIImportExportException {
 
         int tenantId;
+        String currentApiUuid;
+
         // If explicitly advertise only property has been specified as true, make it true and update the API DTO.
         if (StringUtils.isNotBlank(originalDevPortalUrl)) {
             setAdvertiseOnlySpecificPropertiesToDTO(apiDtoToReturn, originalDevPortalUrl);
+        }
+
+        // Resolve whether an API or a corresponding revision
+        APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiDtoToReturn.getId());
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = apiDtoToReturn.getId();
         }
 
         // Create temp location for storing API data
@@ -202,16 +212,12 @@ public class ExportUtils {
             apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
         }
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        addOperationPoliciesToArchive(archivePath, apiDtoToReturn.getId(), tenantDomain, exportFormat, apiProvider,
-                api);
+        addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
+                api, currentApiUuid);
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
-            addRuntimeSequencesToArchive(archivePath, api);
-            if (preserveDocs) {
-                addMultipleAPISpecificSequencesToArchive(archivePath, api, apiProvider);
-            }
             // Export mTLS authentication related certificates
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Exporting client certificates.");
@@ -220,7 +226,7 @@ public class ExportUtils {
                     organization);
         }
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
-                organization);
+                organization, currentApiUuid);
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -523,117 +529,6 @@ public class ExportUtils {
     }
 
     /**
-     * Retrieve available custom sequences and API specific sequences for API export, and store it in the archive
-     * directory.
-     *
-     * @param archivePath File path to export the sequences
-     * @throws APIImportExportException If an error occurs while exporting sequences
-     */
-    public static void addRuntimeSequencesToArchive(String archivePath, API api)
-            throws APIImportExportException, APIManagementException {
-
-        String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
-        Mediation inSequenceMediation = api.getInSequenceMediation();
-        Mediation outSequenceMediation = api.getOutSequenceMediation();
-        Mediation faultSequenceMediation = api.getFaultSequenceMediation();
-        if (inSequenceMediation != null || outSequenceMediation != null || faultSequenceMediation != null) {
-            CommonUtil.createDirectory(seqArchivePath);
-            if (inSequenceMediation != null) {
-                String individualSequenceExportPath;
-                if (inSequenceMediation.isGlobal()) {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX +
-                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
-                } else {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX
-                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
-                                    + ImportExportConstants.CUSTOM_TYPE;
-                }
-                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                    CommonUtil.createDirectory(individualSequenceExportPath);
-                }
-                writeSequenceToArchive(inSequenceMediation.getConfig(), individualSequenceExportPath,
-                        inSequenceMediation.getName());
-            }
-            if (outSequenceMediation != null) {
-                String individualSequenceExportPath;
-                if (outSequenceMediation.isGlobal()) {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.OUT_SEQUENCE_PREFIX +
-                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
-                } else {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.OUT_SEQUENCE_PREFIX
-                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
-                                    + ImportExportConstants.CUSTOM_TYPE;
-                }
-                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                    CommonUtil.createDirectory(individualSequenceExportPath);
-                }
-                writeSequenceToArchive(outSequenceMediation.getConfig(), individualSequenceExportPath,
-                        outSequenceMediation.getName());
-            }
-            if (faultSequenceMediation != null) {
-                String individualSequenceExportPath;
-                if (faultSequenceMediation.isGlobal()) {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX +
-                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
-                } else {
-                    individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX
-                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
-                                    + ImportExportConstants.CUSTOM_TYPE;
-
-                }
-                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                    CommonUtil.createDirectory(individualSequenceExportPath);
-                }
-                writeSequenceToArchive(faultSequenceMediation.getConfig(), individualSequenceExportPath,
-                        faultSequenceMediation.getName());
-            }
-        }
-    }
-
-    /**
-     * Retrieve multiple API specific sequences for API export, and store it in the archive
-     * directory.
-     *
-     * @param archivePath File path to export the sequences
-     * @param api         API
-     * @param apiProvider API Provider
-     * @throws APIManagementException   If an error occurs while retrieving sequences and writing those
-     * @throws APIImportExportException If an error occurs while creating the directory to export sequences
-     */
-    private static void addMultipleAPISpecificSequencesToArchive(String archivePath, API api, APIProvider apiProvider)
-            throws APIManagementException, APIImportExportException {
-        String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (!CommonUtil.checkFileExistence(seqArchivePath)) {
-            CommonUtil.createDirectory(seqArchivePath);
-        }
-        // Getting list of API specific custom mediation policies
-        List<Mediation> apiSpecificMediationList = apiProvider
-                .getAllApiSpecificMediationPolicies(api.getUuid(), tenantDomain);
-        if (!apiSpecificMediationList.isEmpty()) {
-            for (Mediation mediation : apiSpecificMediationList) {
-                Mediation mediationResource = apiProvider
-                        .getApiSpecificMediationPolicyByPolicyId(api.getUuid(), mediation.getUuid(), tenantDomain);
-                String individualSequenceExportPath =
-                        seqArchivePath + File.separator + mediation.getType().toLowerCase()
-                                + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
-                                + ImportExportConstants.CUSTOM_TYPE;
-                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                    CommonUtil.createDirectory(individualSequenceExportPath);
-                }
-                writeSequenceToArchive(mediationResource.getConfig(), individualSequenceExportPath,
-                        mediation.getName());
-            }
-        }
-    }
-
-    /**
      * Write the sequence to API archive.
      *
      * @param mediation                    Mediation content
@@ -730,51 +625,91 @@ public class ExportUtils {
     /**
      * Retrieve the operation policies and store those in the archive directory.
      *
-     * @param archivePath  File path to export the endpoint certificates
-     * @param apiID        UUID of the API/ API Product
-     * @param exportFormat Export format of file
-     * @param apiProvider  API Provider
-     * @throws APIImportExportException If an error occurs while exporting operation policies
+     * @param archivePath    File path to export the endpoint certificates
+     * @param exportFormat   Export format of file
+     * @param apiProvider    API Provider
+     * @param currentApiUuid UUID of the API/ API Product
+     * @throws APIManagementException If an error occurs while exporting operation policies
      */
-    public static void addOperationPoliciesToArchive(String archivePath, String apiID, String tenantDomain,
-                                                     ExportFormat exportFormat, APIProvider apiProvider, API api)
-            throws APIManagementException {
-
+    public static void addOperationPoliciesToArchive(String archivePath, String tenantDomain, ExportFormat exportFormat,
+            APIProvider apiProvider, API api, String currentApiUuid) throws APIManagementException {
         try {
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY);
             Set<URITemplate> uriTemplates = api.getUriTemplates();
+            Set<String> exportedPolicies = new HashSet<>();
+            boolean mediationPoliciesLoaded = false;
             for (URITemplate uriTemplate : uriTemplates) {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        OperationPolicyData policyData =
-                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(), apiID,
-                                        tenantDomain, true);
-                        if (policyData != null) {
-                            String policyName = archivePath + File.separator
-                                    + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
-                                    policyData.getSpecification().getName();
-                            // Policy specification and definition will have the same name
-                            if (policyData.getSpecification() != null) {
-                                CommonUtil.writeDtoToFile(policyName, exportFormat,
-                                        ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                                        policyData.getSpecification());
-                            }
-                            if (policyData.getSynapsePolicyDefinition() != null) {
-                                CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
-                                        policyData.getSynapsePolicyDefinition().getContent());
-                            }
-                            if (policyData.getCcPolicyDefinition() != null) {
-                                CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
-                                        policyData.getCcPolicyDefinition().getContent());
+                        if (!exportedPolicies.contains(policy.getPolicyName())) {
+                            String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                                    policy.getPolicyVersion());
+                            if (policy.getPolicyId() != null) {
+                                OperationPolicyData policyData =
+                                        apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
+                                                currentApiUuid, tenantDomain, true);
+                                if (policyData != null) {
+                                    exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
+                                    exportedPolicies.add(policy.getPolicyName());
+                                }
+                            } else {
+                                // This path is to handle migrated APIs with mediation policies attached
+                                if (APIUtil.isSequenceDefined(api.getInSequence())
+                                        || APIUtil.isSequenceDefined(api.getOutSequence())
+                                        || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                                    log.info("Mediation policy " + policy.getPolicyName()
+                                            + " will be converted to an operation policy");
+                                    if (!mediationPoliciesLoaded) {
+                                        apiProvider.loadMediationPoliciesToAPI(api, tenantDomain);
+                                        mediationPoliciesLoaded = true;
+                                    }
+
+                                    OperationPolicyData policyData = APIUtil.getPolicyDataForMediationFlow(api,
+                                            policy.getDirection(), tenantDomain);
+                                    if (policyData != null) {
+                                        exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
+                                        exportedPolicies.add(policy.getPolicyName());
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+            if (APIUtil.isSequenceDefined(api.getInSequence())
+                    || APIUtil.isSequenceDefined(api.getOutSequence())
+                    || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                api.setInSequence(null);
+                api.setInSequenceMediation(null);
+                api.setOutSequence(null);
+                api.setOutSequenceMediation(null);
+                api.setFaultSequence(null);
+                api.setFaultSequenceMediation(null);
+            }
         } catch (IOException | APIImportExportException e) {
-            throw new APIManagementException(
-                    "Error while adding operation policy details for API: " + apiID, e);
+            throw new APIManagementException("Error while adding operation policy details for API: " + currentApiUuid,
+                    e);
+        }
+    }
+
+    public static void exportPolicyData(String policyFileName, OperationPolicyData policyData, String archivePath,
+                                        ExportFormat exportFormat) throws APIImportExportException, IOException {
+
+        String policyName = archivePath + File.separator + ImportExportConstants.POLICIES_DIRECTORY + File.separator +
+                policyFileName;
+        // Policy specification and definition will have the same name
+        if (policyData.getSpecification() != null) {
+            CommonUtil.writeDtoToFile(policyName, exportFormat, ImportExportConstants.TYPE_POLICY_SPECIFICATION,
+                    policyData.getSpecification());
+        }
+        if (policyData.getSynapsePolicyDefinition() != null) {
+            CommonUtil.writeFile(policyName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION,
+                    policyData.getSynapsePolicyDefinition().getContent());
+        }
+        if (policyData.getCcPolicyDefinition() != null) {
+            CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
+                    policyData.getCcPolicyDefinition().getContent());
         }
     }
 
@@ -925,11 +860,12 @@ public class ExportUtils {
      * @param apiProvider    API Provider
      * @param apiIdentifier  API Identifier
      * @param organization   Organization Identifier
+     * @param currentApiUuid UUID of the API/ API Product
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization)
-            throws APIImportExportException {
+            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization,
+            String currentApiUuid) throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
@@ -947,7 +883,7 @@ public class ExportUtils {
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
                     GraphqlComplexityInfo graphqlComplexityInfo = apiProvider
-                            .getComplexityDetails(apiDtoToReturn.getId());
+                            .getComplexityDetails(currentApiUuid);
                     if (graphqlComplexityInfo.getList().size() != 0) {
                         GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                                 GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
@@ -1004,7 +940,7 @@ public class ExportUtils {
             JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
             JsonObject apiJson = (JsonObject) apiObj;
             apiJson.addProperty("organizationId", organization);
-            
+
             CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API, apiJson);
         } catch (APIManagementException e) {

@@ -29,7 +29,6 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
-import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -57,7 +56,6 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -91,7 +89,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -104,7 +101,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.xml.namespace.QName;
 
 /**
  * This is a publisher rest api utility class.
@@ -340,6 +336,7 @@ public class PublisherCommonUtils {
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
+        apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();
@@ -1143,6 +1140,7 @@ public class PublisherCommonUtils {
             apiToAdd.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         }
         apiToAdd.setOrganization(organization);
+        apiToAdd.setGatewayType(body.getGatewayType());
         return apiToAdd;
     }
 
@@ -1673,6 +1671,11 @@ public class PublisherCommonUtils {
                 APIDTO.TypeEnum.WEBSUB.equals(apidto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apidto.getType());
     }
 
+    public static boolean isThirdPartyAsyncAPI(APIDTO apidto) {
+        return APIDTO.TypeEnum.ASYNC.equals(apidto.getType()) && apidto.getAdvertiseInfo() != null &&
+                apidto.getAdvertiseInfo().isAdvertised();
+    }
+
     /**
      * Add WSDL file of an API.
      *
@@ -1714,96 +1717,6 @@ public class PublisherCommonUtils {
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), organization);
         updatedAPI.setSoapToRestSequences(list);
         return apiProvider.updateAPI(updatedAPI, api);
-    }
-
-    /**
-     * Add mediation sequences from file content.
-     *
-     * @param content            File content of the mediation policy to be added
-     * @param type               Type (in/out/fault) of the mediation policy to be added
-     * @param apiProvider        API Provider
-     * @param apiId              API ID of the mediation policy
-     * @param organization       Organization of the API
-     * @param existingMediations Existing mediation sequences
-     *                           (This can be null when adding an API specific sequence)
-     * @return Added mediation
-     * @throws Exception If an error occurs while adding the mediation sequence
-     */
-    public static Mediation addMediationPolicyFromFile(String content, String type, APIProvider apiProvider,
-            String apiId, String organization, List<Mediation> existingMediations, boolean isAPISpecific)
-            throws Exception {
-        if (StringUtils.isNotEmpty(content)) {
-            OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(content.getBytes()));
-            String localName = seqElement.getLocalName();
-            String fileName = seqElement.getAttributeValue(new QName("name"));
-            Mediation existingMediation = (existingMediations != null) ?
-                    checkInExistingMediations(existingMediations, fileName, type) :
-                    null;
-            // existingGlobalMediations will not be null for only API specific sequences.
-            // Otherwise, the value of this variable will be set before coming into this function
-            if (!isAPISpecific) {
-                if (existingMediation != null) {
-                    log.debug("Sequence" + fileName + " already exists");
-                } else {
-                    return addApiSpecificMediationPolicyFromFile(localName, content, fileName, type, apiProvider, apiId,
-                            organization);
-                }
-            } else {
-                if (existingMediation != null) {
-                    // This will happen only when updating an API specific sequence using apictl
-                    apiProvider.deleteApiSpecificMediationPolicy(apiId, existingMediation.getUuid(), organization);
-                }
-                return addApiSpecificMediationPolicyFromFile(localName, content, fileName, type, apiProvider, apiId,
-                        organization);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Add API specific mediation sequences from file content.
-     *
-     * @param localName    Local name of the mediation policy to be added
-     * @param content      File content of the mediation policy to be added
-     * @param fileName     File name of the mediation policy to be added
-     * @param type         Type (in/out/fault) of the mediation policy to be added
-     * @param apiProvider  API Provider
-     * @param apiId        API ID of the mediation policy
-     * @param organization Organization of the API
-     * @return
-     * @throws APIManagementException If the sequence is malformed.
-     */
-    private static Mediation addApiSpecificMediationPolicyFromFile(String localName, String content, String fileName,
-            String type, APIProvider apiProvider, String apiId, String organization) throws APIManagementException {
-        if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
-            Mediation mediationPolicy = new Mediation();
-            mediationPolicy.setConfig(content);
-            mediationPolicy.setName(fileName);
-            mediationPolicy.setType(type);
-            // Adding API specific mediation policy
-            return apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy, organization);
-        } else {
-            throw new APIManagementException("Sequence is malformed");
-        }
-    }
-
-    /**
-     * Check whether a mediation policy included in a list.
-     *
-     * @param existingMediations Existing mediations as a list
-     * @param mediationName      Mediation name to be checked
-     * @param type               Type of the mediation to be checked
-     * @return Matched mediation
-     */
-    public static Mediation checkInExistingMediations(List<Mediation> existingMediations, String mediationName,
-            String type) {
-        for (Mediation mediation : existingMediations) {
-            if (StringUtils.equals(mediation.getName(), mediationName) && StringUtils
-                    .equals(type.toLowerCase(), mediation.getType().toLowerCase())) {
-                return mediation;
-            }
-        }
-        return null;
     }
 
     /**
@@ -1904,5 +1817,50 @@ public class PublisherCommonUtils {
             }
             return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
         }
+    }
+
+    /**
+     * @param validationResponse Response of a Async API definition validation call
+     * @param isServiceAPI       Whether this is a service API
+     * @param apiDto             API DTO
+     * @param service            If this is a service API, the service entry should be passed here
+     * @param organization       Organization of logged-in user
+     * @param apiProvider        API Provider
+     * @return
+     * @throws APIManagementException If an error occurs while importing the Async API definition
+     */
+    public static API importAsyncAPIWithDefinition(APIDefinitionValidationResponse validationResponse,
+            Boolean isServiceAPI, APIDTO apiDto, ServiceEntry service, String organization, APIProvider apiProvider)
+            throws APIManagementException {
+        String definitionToAdd = validationResponse.getJsonContent();
+        String protocol = validationResponse.getProtocol();
+        if (isServiceAPI) {
+            apiDto.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
+        }
+        if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDto.getGatewayVendor())) {
+            apiDto.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
+            apiDto.setAsyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI(definitionToAdd));
+        }
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto, apiProvider,
+                RestApiCommonUtil.getLoggedInUsername(), organization);
+        if (isServiceAPI) {
+            apiToAdd.setServiceInfo("key", service.getKey());
+            apiToAdd.setServiceInfo("md5", service.getMd5());
+            if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
+                apiToAdd.setEndpointConfig(
+                        PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(), protocol));
+            }
+        }
+        apiToAdd.setAsyncApiDefinition(definitionToAdd);
+
+        // load topics from AsyncAPI
+        apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(definitionToAdd,
+                APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(
+                        apiToAdd.getGatewayVendor())));
+        apiToAdd.setOrganization(organization);
+        apiToAdd.setAsyncApiDefinition(definitionToAdd);
+
+        apiProvider.addAPI(apiToAdd);
+        return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
     }
 }

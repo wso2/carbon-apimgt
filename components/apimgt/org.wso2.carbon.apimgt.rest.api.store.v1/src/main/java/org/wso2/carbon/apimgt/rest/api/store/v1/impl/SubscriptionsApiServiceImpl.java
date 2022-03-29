@@ -550,7 +550,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            AdditionalSubscriptionInfoListDTO additionalSubscriptionInfoListDTO;
+            AdditionalSubscriptionInfoListDTO additionalSubscriptionInfoListDTO = null;
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
 
@@ -569,7 +569,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     .fromAdditionalSubscriptionInfoListToDTO(subscribedAPIList, limit, offset, organization);
             AdditionalSubscriptionInfoMappingUtil.setPaginationParams(additionalSubscriptionInfoListDTO, apiId,
                     "", limit, offset, subscribedAPIList.size());
-
             return Response.ok().entity(additionalSubscriptionInfoListDTO).build();
 
         } catch (APIManagementException e) {

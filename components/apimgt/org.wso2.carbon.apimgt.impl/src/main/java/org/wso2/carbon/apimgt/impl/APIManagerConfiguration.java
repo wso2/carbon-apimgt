@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
@@ -67,6 +68,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -100,7 +102,6 @@ public class APIManagerConfiguration {
     public static final String WEBSUB_DEFAULT_GATEWAY_URL = "http://localhost:9021";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
-    private JSONArray monetizationAttributes = new JSONArray();
     private CacheInvalidationConfiguration cacheInvalidationConfiguration;
 
     private RecommendationEnvironment recommendationEnvironment;
@@ -155,6 +156,12 @@ public class APIManagerConfiguration {
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
     private EventHubConfigurationDto eventHubConfigurationDto;
+    private MonetizationConfigurationDto monetizationConfigurationDto = new MonetizationConfigurationDto();
+
+    public MonetizationConfigurationDto getMonetizationConfigurationDto() {
+
+        return monetizationConfigurationDto;
+    }
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
 
@@ -346,6 +353,9 @@ public class APIManagerConfiguration {
                 OMElement authTokenElement = element.getFirstChildWithName(new QName("AuthToken"));
                 String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
                 analyticsProps.put("auth.api.token", resolvedAuthToken);
+
+                OMElement analyticsType = element.getFirstChildWithName(new QName("Type"));
+                analyticsProps.put("type", analyticsType.getText());
                 analyticsProperties = analyticsProps;
             } else if ("PersistenceConfigs".equals(localName)) {
                 OMElement properties = element.getFirstChildWithName(new QName("Properties"));
@@ -526,11 +536,7 @@ public class APIManagerConfiguration {
                     applicationAttributes.add(jsonObject);
                 }
             } else if (APIConstants.Monetization.MONETIZATION_CONFIG.equals(localName)) {
-                OMElement additionalAttributes = element
-                        .getFirstChildWithName(new QName(APIConstants.Monetization.ADDITIONAL_ATTRIBUTES));
-                if (additionalAttributes != null) {
-                    setMonetizationAdditionalAttributes(additionalAttributes);
-                }
+                setMonetizationConfigurations(element);
             } else if (APIConstants.JWT_CONFIGS.equals(localName)) {
                 setJWTConfiguration(element);
             } else if (APIConstants.TOKEN_ISSUERS.equals(localName)) {
@@ -805,11 +811,6 @@ public class APIManagerConfiguration {
     public JSONArray getApplicationAttributes() {
 
         return applicationAttributes;
-    }
-
-    public JSONArray getMonetizationAttributes() {
-
-        return monetizationAttributes;
     }
 
     /**
@@ -1566,6 +1567,75 @@ public class APIManagerConfiguration {
     }
 
     /**
+     * To populate Monetization configurations
+     *
+     * @param element
+     */
+    private void setMonetizationConfigurations(OMElement element) {
+
+        OMElement monetizationImplElement = element.getFirstChildWithName(
+                new QName(APIConstants.Monetization.MONETIZATION_IMPL_CONFIG));
+        if (monetizationImplElement != null) {
+            monetizationConfigurationDto.setMonetizationImpl(monetizationImplElement.getText());
+        }
+
+        OMElement usagePublisherElement =
+                element.getFirstChildWithName(new QName(APIConstants.Monetization.USAGE_PUBLISHER_CONFIG));
+        if (usagePublisherElement != null) {
+            OMElement choreoInsightAPIEndpointElement = usagePublisherElement.getFirstChildWithName(
+                    new QName(APIConstants.Monetization.INSIGHT_API_ENDPOINT_CONFIG));
+            if (choreoInsightAPIEndpointElement != null) {
+                monetizationConfigurationDto.setInsightAPIEndpoint(choreoInsightAPIEndpointElement.getText());
+            }
+
+            OMElement analyticsAccessTokenElement = usagePublisherElement.getFirstChildWithName(
+                    new QName(APIConstants.Monetization.ANALYTICS_ACCESS_TOKEN_CONFIG));
+            if (analyticsAccessTokenElement != null) {
+                String analyticsAccessToken = MiscellaneousUtil.resolve(analyticsAccessTokenElement, secretResolver);
+                monetizationConfigurationDto.setAnalyticsAccessToken(analyticsAccessToken);
+            }
+
+            OMElement choreoTokenEndpointElement = usagePublisherElement.getFirstChildWithName(
+                    new QName(APIConstants.Monetization.CHOREO_TOKEN_URL_CONFIG));
+            if (choreoTokenEndpointElement != null) {
+                monetizationConfigurationDto.setChoreoTokenEndpoint(choreoTokenEndpointElement.getText());
+            }
+
+            OMElement consumerKeyElement = usagePublisherElement.getFirstChildWithName(
+                    new QName(APIConstants.Monetization.CHOREO_INSIGHT_APP_CONSUMER_KEY_CONFIG));
+            if (consumerKeyElement != null) {
+                String consumerKeyToken = MiscellaneousUtil.resolve(consumerKeyElement, secretResolver);
+                monetizationConfigurationDto.setInsightAppConsumerKey(consumerKeyToken);
+            }
+
+            OMElement consumerSecretElement = usagePublisherElement.getFirstChildWithName(
+                    new QName(APIConstants.Monetization.CHOREO_INSIGHT_APP_CONSUMER_SECRET_CONFIG));
+            if (consumerSecretElement != null) {
+                String consumerSecretToken = MiscellaneousUtil.resolve(consumerSecretElement, secretResolver);
+                monetizationConfigurationDto.setInsightAppConsumerSecret(consumerSecretToken);
+            }
+
+            OMElement granularityElement = usagePublisherElement.getFirstChildWithName(
+                    new QName(APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY_CONFIG));
+            if (granularityElement != null) {
+                monetizationConfigurationDto.setGranularity(granularityElement.getText());
+            }
+
+            OMElement publishTimeDurationElement = usagePublisherElement.getFirstChildWithName(
+                    new QName(APIConstants.Monetization.FROM_TIME_CONFIGURATION_PROPERTY));
+            if (publishTimeDurationElement != null) {
+                monetizationConfigurationDto.setPublishTimeDurationInDays(publishTimeDurationElement.getText());
+            }
+        }
+
+        OMElement additionalAttributes =
+                element.getFirstChildWithName(new QName(APIConstants.Monetization.ADDITIONAL_ATTRIBUTES));
+        if (additionalAttributes != null) {
+            setMonetizationAdditionalAttributes(additionalAttributes);
+        }
+    }
+
+    /**
      * To populate Monetization Additional Attributes
      *
      * @param element
@@ -1573,6 +1643,7 @@ public class APIManagerConfiguration {
     private void setMonetizationAdditionalAttributes(OMElement element) {
 
         Iterator iterator = element.getChildrenWithLocalName(APIConstants.Monetization.ATTRIBUTE);
+        JSONArray monetizationAttributes = new JSONArray();
         while (iterator.hasNext()) {
             OMElement omElement = (OMElement) iterator.next();
             Iterator attributes = omElement.getChildElements();
@@ -1601,6 +1672,7 @@ public class APIManagerConfiguration {
             monetizationAttribute.put(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED, isRequired);
             monetizationAttributes.add(monetizationAttribute);
         }
+        monetizationConfigurationDto.setMonetizationAttributes(monetizationAttributes);
     }
 
     /**

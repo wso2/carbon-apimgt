@@ -1362,10 +1362,16 @@ public class RestApiUtil {
             APIDefinition oasParser = OASParserUtil.getOASParser(definition);
             Set<Scope> scopeSet = oasParser.getScopes(definition);
             for (Scope entry : scopeSet) {
-                List <String> list = new ArrayList<>();
+                List<String> list = new ArrayList<>();
                 list.add(entry.getDescription());
-                list.add((fileName.replaceAll("-api.yaml", "").replace("/","")));
-                portalScopeList.put(entry.getName(), list);
+                list.add((fileName.replaceAll("-api.yaml", "").replace("/", "")));
+                if (("/service-catalog-api.yaml".equals(fileName))) {
+                    if (!entry.getKey().contains("apim:api_view")) {
+                        portalScopeList.put(entry.getName(), list);
+                    }
+                } else {
+                    portalScopeList.put(entry.getName(), list);
+                }
             }
         }
         return portalScopeList;

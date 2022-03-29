@@ -276,6 +276,8 @@
         <!-- Enable Analytics for API Manager -->
         <Enabled>{{apim.analytics.enable}}</Enabled>
 
+        <Type>{{apim.analytics.type}}</Type>
+
         <AuthToken>{{apim.analytics.auth_token}}</AuthToken>
 
         {% if apim.analytics.response_schema_name is defined %}
@@ -709,6 +711,10 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/topics</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/service-catalog/{serviceCatalogVersion}/oas.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
@@ -982,11 +988,21 @@
     <Monetization>
         <MonetizationImpl>{{apim.monetization.monetization_impl}}</MonetizationImpl>
         <UsagePublisher>
+            <!--Inorder to reduce configuration migration, previous config name for query API is used for choreo insight API endpoint-->
              {% if apim.monetization.analytics_query_api_endpoint is defined %}
-                   <AnalyticsQueryAPIEndpoint>{{apim.monetization.analytics_query_api_endpoint}}</AnalyticsQueryAPIEndpoint>
+                    <ChoreoInsightAPIEndpoint>{{apim.monetization.analytics_query_api_endpoint}}</ChoreoInsightAPIEndpoint>
              {% endif %}
              {% if apim.monetization.analytics_access_token is defined %}
                     <AnalyticsAccessToken>{{apim.monetization.analytics_access_token}}</AnalyticsAccessToken>
+             {% endif %}
+             {% if apim.monetization.choreo_insight_app_consumer_key is defined %}
+                    <ChoreoInsightAppConsumerKey>{{apim.monetization.choreo_insight_app_consumer_key}}</ChoreoInsightAppConsumerKey>
+             {% endif %}
+             {% if apim.monetization.choreo_insight_app_consumer_secret is defined %}
+                    <ChoreoInsightAppConsumerSecret>{{apim.monetization.choreo_insight_app_consumer_secret}}</ChoreoInsightAppConsumerSecret>
+             {% endif %}
+             {% if apim.monetization.choreo_token_endpoint is defined %}
+                    <ChoreoTokenEndpoint>{{apim.monetization.choreo_token_endpoint}}</ChoreoTokenEndpoint>
              {% endif %}
         </UsagePublisher>
         {% if apim.monetization.additional_attributes is defined %}
@@ -1081,7 +1097,7 @@
                  <{{property_name}}>{{property_value}}</{{property_name}}>
                 {% endfor %}
                 {% endif %}
-            <Properties>
+            </Properties>
         </RedisConfig>
     {% endif %}
 
@@ -1278,15 +1294,19 @@
              <transport.jms.DestinationType>topic</transport.jms.DestinationType>
              <java.naming.factory.initial>{{apim.event_hub.java_naming_factory_initial}}</java.naming.factory.initial>
              {% if apim.event_hub.event_listening_endpoints is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.event_hub.username}}]]>:<![CDATA[{{apim.event_hub.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             {% if (apim.event_hub.jms.username is defined) and (apim.event_hub.jms.password is defined) %}
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.event_hub.jms.username}}]]>:<![CDATA[{{apim.event_hub.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?{% if apim.event_hub.jms.ssl is defined %}ssl='{{apim.event_hub.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+              {% else %}
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.event_hub.username}}]]>:<![CDATA[{{apim.event_hub.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?{% if apim.event_hub.jms.ssl is defined %}ssl='{{apim.event_hub.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             {% endif %}
              {% elif apim.throttling.throttle_decision_endpoints is defined %}
              <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
              {% elif apim.throttling.jms.username is defined %}
              {% if apim.throttling.jms.password is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
              {% else %}
-             <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+             <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
          </EventReceiverConfiguration>
      </EventHubConfigurations>

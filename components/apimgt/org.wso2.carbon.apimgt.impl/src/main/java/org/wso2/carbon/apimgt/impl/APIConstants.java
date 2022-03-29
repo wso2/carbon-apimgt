@@ -116,6 +116,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE = "DevOpsRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_OBSERVER_ROLE = "ObserverRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE = "IntegrationDeveloperRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
     public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
@@ -2237,14 +2238,20 @@ public final class APIConstants {
         public static final String USAGE_PUBLISH_DEFAULT_GRANULARITY = "days";
         public static final String USAGE_PUBLISH_DEFAULT_TIME_GAP_IN_DAYS = "1";
         public static final String USAGE_PUBLISHER_JOB_NAME = "USAGE_PUBLISHER";
-        public static final String FROM_TIME_CONFIGURATION_PROPERTY =
-                "Monetization.UsagePubliser.PublishTimeDurationInDays";
+
         public static final String MONETIZATION_CONFIG = "Monetization";
-        public static final String MONETIZATION_IMPL = MONETIZATION_CONFIG + ".MonetizationImpl";
-        public static final String USAGE_PUBLISHER = MONETIZATION_CONFIG + ".UsagePublisher";
-        public static final String USAGE_PUBLISHER_GRANULARITY = USAGE_PUBLISHER + ".Granularity";
+        public static final String MONETIZATION_IMPL_CONFIG = "MonetizationImpl";
+        public static final String USAGE_PUBLISHER_CONFIG = "UsagePublisher";
+        public static final String INSIGHT_API_ENDPOINT_CONFIG = "ChoreoInsightAPIEndpoint";
+        public static final String ANALYTICS_ACCESS_TOKEN_CONFIG = "AnalyticsAccessToken";
+        public static final String CHOREO_TOKEN_URL_CONFIG = "ChoreoTokenEndpoint";
+        public static final String CHOREO_INSIGHT_APP_CONSUMER_KEY_CONFIG = "ChoreoInsightAppConsumerKey";
+        public static final String CHOREO_INSIGHT_APP_CONSUMER_SECRET_CONFIG = "ChoreoInsightAppConsumerSecret";
+        public static final String USAGE_PUBLISHER_GRANULARITY_CONFIG = "Granularity";
+        public static final String FROM_TIME_CONFIGURATION_PROPERTY = "PublishTimeDurationInDays";
         public static final String ADDITIONAL_ATTRIBUTES = "AdditionalAttributes";
         public static final String ATTRIBUTE = "Attribute";
+
         public static final String IS_ATTRIBITE_REQUIRED = "Required";
         public static final String IS_ATTRIBUTE_HIDDEN = "Hidden";
         public static final String ATTRIBUTE_DESCRIPTION = "Description";
@@ -2877,9 +2884,13 @@ public final class APIConstants {
     public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
     public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP = "HTTP";
+    public static final String DEFAULT_POLICY_VERSION = "v1";
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
+    public static final String WSO2_CHOREO_CONNECT_GATEWAY = "wso2/choreo-connect";
+    public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
 
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";

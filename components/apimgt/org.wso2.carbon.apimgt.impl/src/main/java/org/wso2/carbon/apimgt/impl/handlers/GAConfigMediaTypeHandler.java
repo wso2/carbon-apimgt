@@ -40,7 +40,7 @@ public class GAConfigMediaTypeHandler extends Handler {
     public void put(RequestContext requestContext) throws RegistryException {
 
         ResourceImpl resource = (ResourceImpl) requestContext.getResource();
-        if (!resource.isContentModified()) {
+        if (resource.getCreatedTime().getTime()==0 || !resource.isContentModified()) {
             return;
         }
 

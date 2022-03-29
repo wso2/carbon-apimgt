@@ -38,9 +38,11 @@ import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
+import org.wso2.carbon.apimgt.keymgt.model.entity.GroupId;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This mediator would load the subscriber's information from the subscribers list according to the index of the list.
@@ -174,6 +176,8 @@ public class SubscriberInfoLoader extends AbstractMediator {
         authContext.setApplicationName(app.getName());
         authContext.setSubscriber(app.getSubName());
         authContext.setKeyType(app.getTokenType());
+        authContext.setApplicationGroupIds(app.getGroupIds().stream().map(GroupId::getGroupId)
+                .collect(Collectors.toSet()));
     }
 
 }

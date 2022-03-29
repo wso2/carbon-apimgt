@@ -76,8 +76,6 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             if (apiId == null) {
                 throw new APIImportExportException("API Id not found for the provided details");
             }
-        } else {
-            apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         }
 
         if (exportLatestRevision) {
@@ -99,6 +97,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
         api = apiProvider.getAPIbyUUID(exportAPIUUID, organization);
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
+        apiIdentifier = api.getId();
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs, originalDevPortalUrl, organization);
