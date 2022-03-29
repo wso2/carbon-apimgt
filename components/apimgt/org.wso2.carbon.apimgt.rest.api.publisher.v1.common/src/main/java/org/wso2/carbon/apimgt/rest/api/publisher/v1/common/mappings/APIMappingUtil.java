@@ -1537,7 +1537,7 @@ public class APIMappingUtil {
                     template.setProductionEndpoint(operation.getProductionEndpointId());
                 }
                 if(operation.getProductionEndpointId() == null || operation.getProductionEndpointId() == "" ||
-                        operation.getSandBoxEndpointId() != null || operation.getSandBoxEndpointId() != ""){
+                        operation.getSandBoxEndpointId() == null || operation.getSandBoxEndpointId() == ""){
                     handleException("The resource mappings '" + httpVerb + "' provided for operation '" + uriTempVal
                             + "' is empty");
                 }
