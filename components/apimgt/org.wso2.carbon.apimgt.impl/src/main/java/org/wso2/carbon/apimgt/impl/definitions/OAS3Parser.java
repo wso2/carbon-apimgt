@@ -484,7 +484,7 @@ public class OAS3Parser extends APIDefinition {
         if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes())
                 != null) {
             Set<Scope> scopeSet = new HashSet<>();
-            if  ((securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null &&
+            if ((securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null &&
                     (oAuthFlows = securityScheme.getFlows()) != null && (oAuthFlow = oAuthFlows.getImplicit()) != null
                     && (scopes = oAuthFlow.getScopes()) != null) {
                 for (Map.Entry<String, String> entry : scopes.entrySet()) {
@@ -501,6 +501,10 @@ public class OAS3Parser extends APIDefinition {
                         }
                     }
                     scopeSet.add(scope);
+                }
+                if (scopes.isEmpty() && openAPI.getExtensions() != null
+                        && openAPI.getExtensions().containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
+                    return OASParserUtil.sortScopes(getScopesFromExtensions(openAPI));
                 }
             } else if ((securityScheme = securitySchemes.get("OAuth2Security")) != null &&
                     (oAuthFlows = securityScheme.getFlows()) != null && (oAuthFlow = oAuthFlows.getPassword()) != null

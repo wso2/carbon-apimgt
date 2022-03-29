@@ -437,6 +437,10 @@ public class OAS2Parser extends APIDefinition {
                 }
                 scopeSet.add(scope);
             }
+            if (oAuth2Definition.getScopes().isEmpty() && swagger.getVendorExtensions() != null
+                    && swagger.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
+                return OASParserUtil.sortScopes(getScopesFromExtensions(swagger));
+            }
             return OASParserUtil.sortScopes(scopeSet);
         } else {
             return OASParserUtil.sortScopes(getScopesFromExtensions(swagger));
