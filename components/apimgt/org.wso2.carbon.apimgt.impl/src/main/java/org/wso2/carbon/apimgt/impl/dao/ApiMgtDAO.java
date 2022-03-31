@@ -5326,7 +5326,7 @@ public class ApiMgtDAO {
         String apiUUID;
         Identifier identifier;
         String tier;
-
+        String apiOrgId;
         //Query to check if this subscription already exists
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
         if (!isProduct) {
@@ -5338,10 +5338,12 @@ public class ApiMgtDAO {
             if (id == -1){
                 id = identifier.getId();
             }
+            apiOrgId = apiTypeWrapper.getApi().getOrganization();
         } else {
             identifier = apiTypeWrapper.getApiProduct().getId();
             id = apiTypeWrapper.getApiProduct().getProductId();
             apiUUID = apiTypeWrapper.getApiProduct().getUuid();
+            apiOrgId = apiTypeWrapper.getApiProduct().getOrganization();
         }
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
 
@@ -5430,7 +5432,7 @@ public class ApiMgtDAO {
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                    tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
+                    tenantId, apiOrgId, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
                     application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
                     APIConstants.SubscriptionStatus.UNBLOCKED));
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
@@ -6244,6 +6246,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
+                application.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
@@ -6458,6 +6461,7 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                application.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
                 if (multiGroupAppSharingEnabled) {
@@ -9392,6 +9396,7 @@ public class ApiMgtDAO {
                                 .updatedBy(resultSet.getString("UPDATED_BY"))
                                 .updatedTime(resultSet.getString("UPDATED_TIME"))
                                 .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
+                                .organization(resultSet.getString("ORGANIZATION"))
                                 .isRevision(apiRevision != null);
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
@@ -13773,6 +13778,7 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setKeyType(rs.getString("KEY_TYPE"));
+                application.setOrganization(rs.getString("ORGANIZATION"));
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.notification;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
@@ -55,6 +56,11 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         ApiMgtDAO.getInstance().addRevokedJWTSignature(tokenRevocationEvent.getEventId(),
                 tokenRevocationEvent.getAccessToken(), tokenRevocationEvent.getTokenType(),
                 tokenRevocationEvent.getExpiryTime(), tokenRevocationEvent.getTenantId());
+        Application application = ApiMgtDAO.getInstance()
+                .getApplicationByClientId(tokenRevocationEvent.getConsumerKey());
+        String orgId = application.getOrganization();
+        properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
+
         revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(),
                 tokenRevocationEvent.getExpiryTime(), properties);
 
