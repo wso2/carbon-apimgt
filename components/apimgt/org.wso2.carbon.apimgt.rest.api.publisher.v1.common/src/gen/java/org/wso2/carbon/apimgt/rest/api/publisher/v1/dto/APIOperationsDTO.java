@@ -33,8 +33,8 @@ public class APIOperationsDTO   {
     private String amznResourceName = null;
     private Integer amznResourceTimeout = null;
     private String payloadSchema = null;
-    private String sandBoxEndpointId = "-1";
-    private String productionEndpointId = "-1";
+    private String sandBoxEndpointId = "default";
+    private String productionEndpointId = "default";
     private String uriMapping = null;
     private APIOperationPoliciesDTO operationPolicies = null;
 
