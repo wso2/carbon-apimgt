@@ -4016,5 +4016,17 @@ public class SQLConstants {
                 "OPERATION_ENDPOINT_ID, " +
                 "ENVIRONMENT) " +
                 "VALUES(?,?,?)";
+
+        public static final String GET_OPERATION_ENDPOINT_ID_BY_URL_MAPPING_ID_AND_ENV = "SELECT OPERATION_ENDPOINT_ID " +
+                "FROM AM_API_OPERATION_ENDPOINT_MAPPING AMOEM " +
+                "WHERE " +
+                "AMOEM.URL_MAPPING_ID = ? AND " +
+                "AMOEM.ENVIRONMENT = ? ";
+
+        public static final String GET_OPERATION_ENDPOINT_UUID_SQL_BY_ENDPOINT_ID =
+                "SELECT " +
+                        "AMOE.OPERATION_ENDPOINT_UUID " +
+                        "FROM AM_API_OPERATION_ENDPOINTS AMOE " +
+                        "WHERE AMOE.OPERATION_ENDPOINT_ID = ?";
     }
 }

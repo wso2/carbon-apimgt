@@ -5769,11 +5769,12 @@ public class ApiMgtDAO {
                                         ? -1 : getOperationEndpointId(uriTemplate.getProductionEndpoint()));
                         if (uriTemplate.getProductionEndpoint().toLowerCase() != "none") {
                             operationEndpointMappingPrepStmt.setString(3, "PRODUCTION");
+                            operationEndpointMappingPrepStmt.addBatch();
                         }
                         if (uriTemplate.getSandboxEndpoint().toLowerCase() != "none") {
                             operationEndpointMappingPrepStmt.setString(3, "SANDBOX");
+                            operationEndpointMappingPrepStmt.addBatch();
                         }
-                        operationEndpointMappingPrepStmt.addBatch();
                     }
                 }
                 uriTemplate.setId(uriMappingId);
@@ -18084,7 +18085,7 @@ public class ApiMgtDAO {
     }
 
     private int getOperationEndpointIdFromUUID(Connection connection, String endpointUUID)
-            throws SQLException, APIManagementException {
+            throws SQLException {
         int id = -1;
         String getAPIQuery = SQLConstants.OperationEndpointsSQLConstants.GET_ENDPOINT_ID_SQL_BY_ENDPOINT_UUID;
 
@@ -18233,6 +18234,56 @@ public class ApiMgtDAO {
         }
 
         return false;
+    }
+
+    /**
+     * Get operation endpoint uuid from mapping urlId
+     *
+     * @param urlMappingId
+     * @param env
+     * @return
+     * @throws APIManagementException
+     */
+    public String getEndpointUUIDByURIMappingIdAndEnv(int urlMappingId, String env) throws APIManagementException{
+
+        String sql = SQLConstants.OperationEndpointsSQLConstants.GET_OPERATION_ENDPOINT_ID_BY_URL_MAPPING_ID_AND_ENV;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, urlMappingId);
+                preparedStatement.setString(2, env);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    String operationEndpointId = resultSet.getString("OPERATION_ENDPOINT_ID");
+                    if(operationEndpointId == null || operationEndpointId == ""){
+                        return "none";
+                    }else if(operationEndpointId.equals("-1")){
+                        return "default";
+                    }else{
+                        return getOperationEndpointUUIDFromID(connection, operationEndpointId);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting operation endpoint id ", e);
+        }
+        return "none";
+    }
+
+    private String getOperationEndpointUUIDFromID(Connection connection, String operationEndpointId)
+            throws APIManagementException {
+        String getAPIQuery = SQLConstants.OperationEndpointsSQLConstants.GET_OPERATION_ENDPOINT_UUID_SQL_BY_ENDPOINT_ID;
+
+        try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
+            prepStmt.setString(1, operationEndpointId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("OPERATION_ENDPOINT_UUID");
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            handleException("ERROR while getting operation endpoint UUID of " + operationEndpointId, e);
+        }
+        return null;
     }
 
     private class SubscriptionInfo {

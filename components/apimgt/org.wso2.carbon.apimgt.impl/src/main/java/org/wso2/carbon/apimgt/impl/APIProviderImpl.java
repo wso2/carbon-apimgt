@@ -8314,12 +8314,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void populateAPIOperationEndpointsMapping(API api) throws APIManagementException {
         for (URITemplate uriTemplate: api.getUriTemplates()) {
-            // TODO set uri template mapping id here
-            log.info("hi");
-            log.info(uriTemplate.getProductionEndpoint());
-            log.info(uriTemplate.getSandboxEndpoint());
-            log.info("id of uritemplate");
-            log.info(uriTemplate.getId());
+            // Get production Endpoint mapping
+                String productionEndpointId =
+                        apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "PRODUCTION");
+                        uriTemplate.setProductionEndpoint(productionEndpointId);
+            // Get sandbox endpoint endpoint
+                String sandboxEndpointId =
+                        apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "SANDBOX");
+                        uriTemplate.setSandboxEndpoint(sandboxEndpointId);
         }
     }
 
