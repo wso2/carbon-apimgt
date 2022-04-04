@@ -31,6 +31,7 @@ public class EventPublisherEvent extends Event {
      * The event that needs to be logged in case if it is different from the payload.
      */
     private String loggingEvent;
+    private String orgId;
 
     public EventPublisherEvent(String streamId, long timeStamp, Object[] payloadDataArray) {
         super(streamId, timeStamp, null, null, payloadDataArray);
@@ -48,5 +49,13 @@ public class EventPublisherEvent extends Event {
             loggingEvent = (Arrays.asList(this.getPayloadData())).toString();
         }
         return "\nEvent{\n  payloadData" + "=" + loggingEvent + "\n}\n";
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
     }
 }
