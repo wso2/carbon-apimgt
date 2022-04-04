@@ -67,13 +67,11 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         long expiryTimeForJWT = Long.parseLong(properties.getProperty("expiryTime"));
         String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
         String tokenType = properties.getProperty(APIConstants.NotificationEvent.TOKEN_TYPE);
-        String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
         int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
         Object[] objects =
                 new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, tokenType, tenantId};
         EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(APIConstants.TOKEN_REVOCATION_STREAM_ID,
                                                                            System.currentTimeMillis(), objects);
-        tokenRevocationEvent.setOrgId(orgId);
         APIUtil.publishEvent(EventPublisherType.TOKEN_REVOCATION, tokenRevocationEvent,
                 tokenRevocationEvent.toString());
     }
