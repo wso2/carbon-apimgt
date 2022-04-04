@@ -57,6 +57,7 @@ public class Application {
     private String keyType;
     private int subscriptionCount;
     private String keyManager;
+    private String organization;
     public String getCreatedTime() {
         return createdTime;
     }
@@ -308,5 +309,13 @@ public class Application {
     public void setKeyManager(String keyManager) {
 
         this.keyManager = keyManager;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }
