@@ -26,13 +26,16 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
 import java.util.Properties;
+import java.util.UUID;
 
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 @RunWith(PowerMockRunner.class)
@@ -43,6 +46,7 @@ public class AbstractKeyManagerEventHandlerTest {
     public void handleTokenRevocationEventTest() throws Exception {
 
         TokenRevocationEvent tokenRevocationEvent = new TokenRevocationEvent();
+        tokenRevocationEvent.setConsumerKey(UUID.randomUUID().toString());
         Assert.assertTrue(StringUtils.isBlank(tokenRevocationEvent.getTokenType()));
 
         RevocationRequestPublisher revocationRequestPublisher = Mockito.mock(RevocationRequestPublisher.class);
@@ -54,9 +58,13 @@ public class AbstractKeyManagerEventHandlerTest {
         Properties properties = Mockito.mock(Properties.class);
         whenNew(Properties.class).withNoArguments().thenReturn(properties);
 
+        Application application = Mockito.mock(Application.class);
+        when(application.getOrganization()).thenReturn(UUID.randomUUID().toString());
+
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        when(apiMgtDAO.getApplicationByClientId(tokenRevocationEvent.getConsumerKey())).thenReturn(application);
 
         DefaultKeyManagerEventHandlerImpl defaultKeyManagerEventHandler = new DefaultKeyManagerEventHandlerImpl();
         Boolean result = defaultKeyManagerEventHandler.handleTokenRevocationEvent(tokenRevocationEvent);
