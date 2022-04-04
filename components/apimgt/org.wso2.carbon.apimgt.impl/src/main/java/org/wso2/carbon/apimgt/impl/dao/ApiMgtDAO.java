@@ -18252,14 +18252,14 @@ public class ApiMgtDAO {
                 preparedStatement.setInt(1, urlMappingId);
                 preparedStatement.setString(2, env);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    String operationEndpointId = resultSet.getString("OPERATION_ENDPOINT_ID");
-                    if(operationEndpointId == null || operationEndpointId == ""){
-                        return "none";
-                    }else if(operationEndpointId.equals("-1")){
-                        return "default";
-                    }else{
-                        return getOperationEndpointUUIDFromID(connection, operationEndpointId);
-                    }
+                    if(resultSet.next()){
+                        int operationEndpointId = resultSet.getInt("OPERATION_ENDPOINT_ID");
+                        if(operationEndpointId == -1 ){
+                            return "default";
+                        }else{
+                            return getOperationEndpointUUIDFromID(connection, operationEndpointId);
+                        }
+                    } return "none";
                 }
             }
         } catch (SQLException e) {
@@ -18268,12 +18268,12 @@ public class ApiMgtDAO {
         return "none";
     }
 
-    private String getOperationEndpointUUIDFromID(Connection connection, String operationEndpointId)
+    private String getOperationEndpointUUIDFromID(Connection connection, int operationEndpointId)
             throws APIManagementException {
         String getAPIQuery = SQLConstants.OperationEndpointsSQLConstants.GET_OPERATION_ENDPOINT_UUID_SQL_BY_ENDPOINT_ID;
 
         try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
-            prepStmt.setString(1, operationEndpointId);
+            prepStmt.setInt(1, operationEndpointId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getString("OPERATION_ENDPOINT_UUID");
