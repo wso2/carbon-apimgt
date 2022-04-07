@@ -13804,7 +13804,8 @@ public class ApiMgtDAO {
 
         List<Environment> envList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_ORGANIZATION_SQL)) {
+             PreparedStatement prepStmt =
+                     connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_ORGANIZATION_SQL)) {
             prepStmt.setString(1, tenantDomain);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
@@ -13890,7 +13891,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, "carbon.super");
                 prepStmt.setString(4, environment.getDisplayName());
                 prepStmt.setString(5, environment.getDescription());
-                prepStmt.setString(6, tenantDomain);
+                prepStmt.setString(6, environment.getProvider());
+                prepStmt.setString(7, tenantDomain);
                 prepStmt.executeUpdate();
 
                 ResultSet rs = prepStmt.getGeneratedKeys();
