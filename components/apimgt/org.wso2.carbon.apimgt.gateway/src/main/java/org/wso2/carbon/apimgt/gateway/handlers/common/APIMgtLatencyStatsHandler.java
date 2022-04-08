@@ -1,20 +1,20 @@
 /*
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+*  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import io.swagger.parser.OpenAPIParser;
@@ -27,7 +27,7 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 
 public class APIMgtLatencyStatsHandler extends AbstractHandler {
-
     private static final Log log = LogFactory.getLog(APIMgtLatencyStatsHandler.class);
     private OpenAPI openAPI;
     private String apiUUID;
@@ -53,21 +52,19 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext messageContext) {
 
+//        if (Util.tracingEnabled()) {
+//            TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+//            TracingTracer tracer = Util.getGlobalTracer();
+//            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan, tracer);
+//            messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
+//        }
         if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy()) {
-                TracingSpan responseLatencySpan =
-                        (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-                TracingTracer tracer = Util.getGlobalTracer();
-                TracingSpan span = Util.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan, tracer);
-                messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
-            } else {
-                TelemetrySpan responseLatencySpan =
-                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-                TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
-                TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
-                        tracer);
-                messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
-            }
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TelemetryTracer tracer = TelemetryUtil.getGlobalTracer();
+            TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
+                    tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
         }
         messageContext.setProperty(APIMgtGatewayConstants.API_UUID_PROPERTY, apiUUID);
         org.apache.axis2.context.MessageContext axis2MsgContext =
@@ -81,8 +78,8 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             messageContext.setProperty(APIMgtGatewayConstants.HTTP_METHOD, method);
         }
         /*
-         * The axis2 message context is set here so that the method level logging can access the transport headers
-         */
+        * The axis2 message context is set here so that the method level logging can access the transport headers
+        */
         org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MsgContext);
         long currentTime = System.currentTimeMillis();
         messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
