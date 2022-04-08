@@ -56,6 +56,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -352,17 +355,29 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
 
-        TracingSpan keySpan = null;
-        if (Util.tracingEnabled()) {
-            TracingSpan responseLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-            TracingTracer tracer = Util.getGlobalTracer();
-            keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+        TelemetrySpan keySpan = null;
+        if (TelemetryUtil.telemetryEnabled()) {
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            TelemetryTracer tracer = TelemetryUtil.getGlobalTracer();
+            keySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
             messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
             org.apache.axis2.context.MessageContext axis2MC =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
         }
+
+//        TracingSpan keySpan = null;
+//        if (Util.tracingEnabled()) {
+//            TracingSpan responseLatencySpan =
+//                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+//            TracingTracer tracer = Util.getGlobalTracer();
+//            keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+//            messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+//            org.apache.axis2.context.MessageContext axis2MC =
+//                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+//            axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+//        }
 
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
@@ -391,8 +406,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     initOAuthParams();
                 }
                 String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
-                if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
-                    if(log.isDebugEnabled()){
+                if (APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
+                    if (log.isDebugEnabled()) {
                         log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
                     }
                     handleNoAuthentication(messageContext);
@@ -411,38 +426,44 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
         } catch (APISecurityException e) {
 
-            if (Util.tracingEnabled() && keySpan != null) {
-                Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
+            if (TelemetryUtil.telemetryEnabled() && keySpan != null) {
+                TelemetryUtil.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
             }
+//            if (Util.tracingEnabled() && keySpan != null) {
+//                Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
+//            }
             if (log.isDebugEnabled()) {
-                    // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
-                    // to all the gateway calls that is happening.
-                    endTime = System.nanoTime();
-                    difference = (endTime - startTime) / 1000000;
-                    String messageDetails = logMessageDetails(messageContext);
-                    log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
-                            difference / 1000000);
-                }
-
-                String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
-
-                if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
-                    log.error("API authentication failure due to "
-                            + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
-                } else {
-                    // We do not need to log known authentication failures as errors since these are not product errors.
-                    log.warn("API authentication failure due to " + errorMessage);
-
-                    if (log.isDebugEnabled()) {
-                        log.debug("API authentication failed with error " + e.getErrorCode(), e);
-                    }
-                }
-
-                handleAuthFailure(messageContext, e);
-        } finally {
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(keySpan);
+                // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
+                // to all the gateway calls that is happening.
+                endTime = System.nanoTime();
+                difference = (endTime - startTime) / 1000000;
+                String messageDetails = logMessageDetails(messageContext);
+                log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
+                        difference / 1000000);
             }
+
+            String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
+
+            if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
+                log.error("API authentication failure due to "
+                        + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            } else {
+                // We do not need to log known authentication failures as errors since these are not product errors.
+                log.warn("API authentication failure due to " + errorMessage);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("API authentication failed with error " + e.getErrorCode(), e);
+                }
+            }
+
+            handleAuthFailure(messageContext, e);
+        } finally {
+            if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryUtil.finishSpan(keySpan);
+            }
+//            if (Util.tracingEnabled()) {
+//                Util.finishSpan(keySpan);
+//            }
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             stopMetricTimer(context);

@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.ext;
 
-
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
@@ -29,15 +28,14 @@ import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * A simple extension handler for the APIs deployed in the API gateway. This handler first
@@ -89,12 +87,13 @@ public class APIManagerExtensionHandler extends AbstractHandler {
 
         Timer.Context context = startMetricTimer(DIRECTION_IN);
         long executionStartTime = System.nanoTime();
-        TracingSpan requestMediationSpan = null;
-        if (Util.tracingEnabled()) {
-            TracingSpan responseLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-            TracingTracer tracer = Util.getGlobalTracer();
-            requestMediationSpan = Util.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION, responseLatencySpan, tracer);
+        TelemetrySpan requestMediationSpan = null;
+        if (TelemetryUtil.telemetryEnabled()) {
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            TelemetryTracer tracer = TelemetryUtil.getGlobalTracer();
+            requestMediationSpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION,
+                    responseLatencySpan, tracer);
         }
         try {
             boolean isMediated = mediate(messageContext, DIRECTION_IN);
@@ -111,59 +110,122 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             }
             return isMediated;
         } catch (Exception e) {
-            if (Util.tracingEnabled() && requestMediationSpan != null) {
-                Util.setTag(requestMediationSpan, APIMgtGatewayConstants.ERROR,
+            if (TelemetryUtil.telemetryEnabled() && requestMediationSpan != null) {
+                TelemetryUtil.setTag(requestMediationSpan, APIMgtGatewayConstants.ERROR,
                         APIMgtGatewayConstants.REQUEST_MEDIATION_ERROR);
             }
             throw e;
         } finally {
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(requestMediationSpan);
+            if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryUtil.finishSpan(requestMediationSpan);
             }
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             stopMetricTimer(context);
         }
+//        TracingSpan requestMediationSpan = null;
+//        if (Util.tracingEnabled()) {
+//            TracingSpan responseLatencySpan =
+//                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+//            TracingTracer tracer = Util.getGlobalTracer();
+//            requestMediationSpan = Util.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION, responseLatencySpan,
+//            tracer);
+//        }
+//        try {
+//            boolean isMediated = mediate(messageContext, DIRECTION_IN);
+//            if (isMediated) {
+//                String requestDestination = null;
+//                EndpointReference objectTo = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+//                        .getOptions().getTo();
+//                if (objectTo != null) {
+//                    requestDestination = objectTo.getAddress();
+//                }
+//                if (requestDestination != null) {
+//                    messageContext.setProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS, requestDestination);
+//                }
+//            }
+//            return isMediated;
+//        } catch (Exception e) {
+//            if (Util.tracingEnabled() && requestMediationSpan != null) {
+//                Util.setTag(requestMediationSpan, APIMgtGatewayConstants.ERROR,
+//                        APIMgtGatewayConstants.REQUEST_MEDIATION_ERROR);
+//            }
+//            throw e;
+//        } finally {
+//            if (Util.tracingEnabled()) {
+//                Util.finishSpan(requestMediationSpan);
+//            }
+//            messageContext.setProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY,
+//                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
+//            stopMetricTimer(context);
+//        }
     }
 
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
+
         Timer.Context context = startMetricTimer(DIRECTION_OUT);
         long executionStartTime = System.nanoTime();
-        TracingSpan responseMediationSpan = null;
-        if (Util.tracingEnabled()) {
-            TracingSpan responseLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-            TracingTracer tracer = Util.getGlobalTracer();
+        TelemetrySpan responseMediationSpan = null;
+        if (TelemetryUtil.telemetryEnabled()) {
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            TelemetryTracer tracer = TelemetryUtil.getGlobalTracer();
             responseMediationSpan =
-                    Util.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
+                    TelemetryUtil.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
         }
         try {
             return mediate(messageContext, DIRECTION_OUT);
         } catch (Exception e) {
-            if (Util.tracingEnabled() && responseMediationSpan != null) {
-                Util.setTag(responseMediationSpan, APIMgtGatewayConstants.ERROR,
+            if (TelemetryUtil.telemetryEnabled() && responseMediationSpan != null) {
+                TelemetryUtil.setTag(responseMediationSpan, APIMgtGatewayConstants.ERROR,
                         APIMgtGatewayConstants.RESPONSE_MEDIATION_ERROR);
             }
             throw e;
         } finally {
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(responseMediationSpan);
+            if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryUtil.finishSpan(responseMediationSpan);
             }
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             stopMetricTimer(context);
         }
+//        TracingSpan responseMediationSpan = null;
+//        if (Util.tracingEnabled()) {
+//            TracingSpan responseLatencySpan =
+//                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+//            TracingTracer tracer = Util.getGlobalTracer();
+//            responseMediationSpan =
+//                    Util.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
+//        }
+//        try {
+//            return mediate(messageContext, DIRECTION_OUT);
+//        } catch (Exception e) {
+//            if (Util.tracingEnabled() && responseMediationSpan != null) {
+//                Util.setTag(responseMediationSpan, APIMgtGatewayConstants.ERROR,
+//                        APIMgtGatewayConstants.RESPONSE_MEDIATION_ERROR);
+//            }
+//            throw e;
+//        } finally {
+//            if (Util.tracingEnabled()) {
+//                Util.finishSpan(responseMediationSpan);
+//            }
+//            messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY,
+//                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
+//            stopMetricTimer(context);
+//        }
     }
 
-	protected void stopMetricTimer(Timer.Context context) {
-		context.stop();
-	}
+    protected void stopMetricTimer(Timer.Context context) {
 
-	protected Timer.Context startMetricTimer(String direction) {
-		Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO,
-				MetricManager.name(APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), direction));
-		return timer.start();
-	}
+        context.stop();
+    }
+
+    protected Timer.Context startMetricTimer(String direction) {
+
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO,
+                MetricManager.name(APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), direction));
+        return timer.start();
+    }
 }
 

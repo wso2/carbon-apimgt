@@ -44,10 +44,9 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
@@ -73,13 +72,17 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
     @Override
     public boolean handleRequest(MessageContext msgCtx) {
 
-        TracingSpan span = null;
-        TracingTracer tracer = null;
+//        TracingSpan span = null;
+//        TracingTracer tracer = null;
+        TelemetrySpan span = null;
+        TelemetryTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
-        if (Util.tracingEnabled()) {
-            TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-            tracer = Util.getGlobalTracer();
-            span = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan, tracer);
+        if (TelemetryUtil.telemetryEnabled()) {
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            tracer = TelemetryUtil.getGlobalTracer();
+            span = TelemetryUtil.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
+                    tracer);
         }
         try {
             if (configKey == null) {
@@ -122,12 +125,12 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 return true;
             }
             try {
-                if (Util.tracingEnabled()) {
-                    Util.inject(span, tracer, tracerSpecificCarrier);
+                if (TelemetryUtil.telemetryEnabled()) {
+                    TelemetryUtil.inject(span, tracerSpecificCarrier);
                     if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
                         Map headers =
                                 (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
-                                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                                        org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                         headers.putAll(tracerSpecificCarrier);
                         org.apache.axis2.context.MessageContext.getCurrentMessageContext()
                                 .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
@@ -139,16 +142,17 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             }
             return true;
         } catch (Exception e) {
-            if (Util.tracingEnabled() && span != null) {
-                Util.setTag(span, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.GOOGLE_ANALYTICS_ERROR);
+            if (TelemetryUtil.telemetryEnabled() && span != null) {
+                TelemetryUtil.setTag(span, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.GOOGLE_ANALYTICS_ERROR);
             }
             throw e;
         } finally {
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(span);
+            if (TelemetryUtil.telemetryEnabled()) {
+                TelemetryUtil.finishSpan(span);
             }
         }
     }
+
 
     protected GoogleAnalyticsConfig getGoogleAnalyticsConfig(OMElement entryValue) {
         return new GoogleAnalyticsConfig(entryValue);
