@@ -32,6 +32,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 
 public class APIMgtLatencyStatsHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(APIMgtLatencyStatsHandler.class);
@@ -49,10 +52,18 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext messageContext) {
 
-        if (Util.tracingEnabled()) {
-            TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-            TracingTracer tracer = Util.getGlobalTracer();
-            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan, tracer);
+//        if (Util.tracingEnabled()) {
+//            TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+//            TracingTracer tracer = Util.getGlobalTracer();
+//            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan, tracer);
+//            messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
+//        }
+        if (TelemetryUtil.telemetryEnabled()) {
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TelemetryTracer tracer = TelemetryUtil.getGlobalTracer();
+            TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
+                    tracer);
             messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
         }
         messageContext.setProperty(APIMgtGatewayConstants.API_UUID_PROPERTY, apiUUID);

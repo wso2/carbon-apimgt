@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.APIMOpenTelemetry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,7 @@ public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private APIManagerConfiguration configuration;
     private static Map<String, OpenTracer> openTracerMap = new HashMap();
+    private static Map<String, APIMOpenTelemetry> openTelemetryTracerMap = new HashMap();
     private ServiceReferenceHolder() {
     }
 
@@ -55,5 +57,10 @@ public class ServiceReferenceHolder {
     public static Map<String, OpenTracer> getOpenTracerMap() {
 
         return openTracerMap;
+    }
+
+    public static Map<String, APIMOpenTelemetry> getOpenTelemetryTracerMap() {
+
+        return openTelemetryTracerMap;
     }
 }
