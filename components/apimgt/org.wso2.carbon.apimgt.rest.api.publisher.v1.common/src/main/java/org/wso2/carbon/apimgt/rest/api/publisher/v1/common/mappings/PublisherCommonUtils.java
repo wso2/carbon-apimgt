@@ -288,26 +288,26 @@ public class PublisherCommonUtils {
                 Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
                 Map<String, String> operationEndpointPerURITemplate = new HashMap<>();
                 for (URITemplate uriTemplate : uriTemplatesFromPayload) {
+                    String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                     if (!uriTemplate.getOperationPolicies().isEmpty()) {
-                        String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
-                        operationEndpointPerURITemplate.put(key + "_Sandbox", uriTemplate.getProductionEndpoint());
-                        operationEndpointPerURITemplate.put(key + "_Production", uriTemplate.getSandboxEndpoint());
                     }
+                    operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, uriTemplate.getProductionEndpoint());
+                    operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, uriTemplate.getSandboxEndpoint());
                 }
 
                 for (URITemplate uriTemplate : uriTemplates) {
                     String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                    String sandboxKey = key + "_Sandbox";
-                    String productionKey = key + "_Production";
+                    String sandboxKey = key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS;
+                    String productionKey = key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS;
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
                     }
                     if(operationEndpointPerURITemplate.containsKey(sandboxKey)){
-                        uriTemplate.setSandboxEndpoint(operationEndpointPerURITemplate.get(key + "_Sandbox"));
+                        uriTemplate.setSandboxEndpoint(operationEndpointPerURITemplate.get(sandboxKey));
                     }
                     if(operationEndpointPerURITemplate.containsKey(productionKey)){
-                        uriTemplate.setProductionEndpoint(operationEndpointPerURITemplate.get(key + "_Production"));
+                        uriTemplate.setProductionEndpoint(operationEndpointPerURITemplate.get(productionKey));
                     }
                 }
 
@@ -1241,6 +1241,9 @@ public class PublisherCommonUtils {
 
         //set existing operation policies to URI templates
         apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
+
+        //TODO set exiting operation endpoints to URI Templates... :):):)
+        apiProvider.setOperationEndpointsToURITemplates(apiId, uriTemplates);
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);

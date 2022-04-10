@@ -4001,14 +4001,13 @@ public class SQLConstants {
 
         public static final String ADD_NEW_OPERATION_ENDPOINT = " INSERT INTO " +
                 "AM_API_OPERATION_ENDPOINTS " +
-                "(OPERATION_ENDPOINT_ID," +
-                "API_ID, " +
+                "(API_ID, " +
                 "OPERATION_ENDPOINT_UUID, " +
                 "REVISION_UUID, " +
                 "ENDPOINT_NAME, " +
                 "SECURITY_CONFIG, " +
                 "ENDPOINT_CONFIG, ORGANIZATION) " +
-                "VALUES(NULL,?,?,?,?,?,?,?)";
+                "VALUES(?,?,?,?,?,?,?)";
 
         public static final String ADD_NEW_OPERATION_ENDPOINT_MAPPING = " INSERT INTO " +
                 "AM_API_OPERATION_ENDPOINT_MAPPING " +
@@ -4028,5 +4027,21 @@ public class SQLConstants {
                         "AMOE.OPERATION_ENDPOINT_UUID " +
                         "FROM AM_API_OPERATION_ENDPOINTS AMOE " +
                         "WHERE AMOE.OPERATION_ENDPOINT_ID = ?";
+
+        public static final String GET_OPERATION_ENDPOINTS_OF_API_SQL = "SELECT  " +
+                "AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, AUM.REVISION_UUID, AOE.OPERATION_ENDPOINT_UUID, " +
+                "AOEM.OPERATION_ENDPOINT_ID, AOEM.ENVIRONMENT, AOE.ENDPOINT_NAME FROM  AM_API_URL_MAPPING AUM  " +
+                "INNER JOIN AM_API_OPERATION_ENDPOINT_MAPPING AOEM ON AUM.URL_MAPPING_ID = AOEM.URL_MAPPING_ID " +
+                "LEFT JOIN AM_API_OPERATION_ENDPOINTS AOE ON AOE.OPERATION_ENDPOINT_ID = AOEM.OPERATION_ENDPOINT_ID  " +
+                "WHERE AUM.API_ID = ? " +
+                "AND  AUM.REVISION_UUID IS NULL ORDER BY AUM.URL_MAPPING_ID ASC";
+
+        public static final String GET_OPERATION_ENDPOINTS_OF_API_REVISION_SQL = "SELECT  " +
+                "AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, AUM.REVISION_UUID, AOE.OPERATION_ENDPOINT_UUID, " +
+                "AOEM.OPERATION_ENDPOINT_ID, AOEM.ENVIRONMENT, AOE.ENDPOINT_NAME FROM  AM_API_URL_MAPPING AUM  " +
+                "INNER JOIN AM_API_OPERATION_ENDPOINT_MAPPING AOEM ON AUM.URL_MAPPING_ID = AOEM.URL_MAPPING_ID " +
+                "LEFT JOIN AM_API_OPERATION_ENDPOINTS AOE ON AOE.OPERATION_ENDPOINT_ID = AOEM.OPERATION_ENDPOINT_ID  " +
+                "WHERE AUM.API_ID = ? " +
+                "AND  AUM.REVISION_UUID = ? ORDER BY AUM.URL_MAPPING_ID ASC";
     }
 }

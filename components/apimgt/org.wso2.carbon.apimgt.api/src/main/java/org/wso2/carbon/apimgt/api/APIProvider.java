@@ -2008,4 +2008,12 @@ public interface APIProvider extends APIManager {
      */
     APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
 
+    /**
+     * Set existing Operation Endpoints to URI Templates
+     *
+     * @param apiId
+     * @param uriTemplates
+     * @throws APIManagementException
+     */
+    void setOperationEndpointsToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
 }

@@ -18286,6 +18286,73 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Get Operation Endpoints mapping for each resource
+     *
+     * @param apiUUID
+     * @return
+     * @throws APIManagementException
+     */
+    public Set<URITemplate> getURITemplatesWithOperationEndpoints(String apiUUID) throws APIManagementException{
+        String query;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
+
+        if (apiRevision == null) {
+            query = SQLConstants.OperationEndpointsSQLConstants.GET_OPERATION_ENDPOINTS_OF_API_SQL;
+        } else {
+            query = SQLConstants.OperationEndpointsSQLConstants.GET_OPERATION_ENDPOINTS_OF_API_REVISION_SQL;
+        }
+
+        Map<String, URITemplate> uriTemplates = new HashMap<>();
+        Set<URITemplate> uriTemplateList = new HashSet<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            if (apiRevision == null) {
+                int apiId = getAPIID(apiUUID, connection);
+                prepStmt.setInt(1, apiId);
+            } else {
+                int apiId = getAPIID(apiRevision.getApiUUID(), connection);
+                prepStmt.setInt(1, apiId);
+                prepStmt.setString(2, apiRevision.getRevisionUUID());
+            }
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                URITemplate uriTemplate;
+                while (rs.next()) {
+                    String httpMethod = rs.getString("HTTP_METHOD");
+                    String urlPattern = rs.getString("URL_PATTERN");
+                    String urlTemplateKey = httpMethod + ":" + urlPattern;
+                    if (!uriTemplates.containsKey(urlTemplateKey)) {
+                        uriTemplate = new URITemplate();
+                    } else {
+                        uriTemplate = uriTemplates.get(urlTemplateKey);
+                    }
+                    uriTemplate.setHTTPVerb(httpMethod);
+                    uriTemplate.setUriTemplate(urlPattern);
+                    uriTemplate.setId(rs.getInt("URL_MAPPING_ID"));
+                    if(rs.getString("ENVIRONMENT").equals(APIConstants.API_KEY_TYPE_SANDBOX)){
+                        if(rs.getString("OPERATION_ENDPOINT_ID").equals("-1")){
+                            uriTemplate.setSandboxEndpoint("-1");
+                        }else{
+                            uriTemplate.setSandboxEndpoint(rs.getString("OPERATION_ENDPOINT_UUID"));
+                        }
+                    }
+                    if(rs.getString("ENVIRONMENT").equals(APIConstants.API_KEY_TYPE_PRODUCTION)){
+                        if(rs.getString("OPERATION_ENDPOINT_ID").equals("-1")){
+                            uriTemplate.setProductionEndpoint("-1");
+                        }else{
+                            uriTemplate.setProductionEndpoint(rs.getString("OPERATION_ENDPOINT_UUID"));
+                        }
+                    }
+                    uriTemplates.put(urlTemplateKey, uriTemplate);
+                }
+            }
+            uriTemplateList.addAll(uriTemplates.values());
+        } catch (SQLException e) {
+            handleException("Error while fetching URI templates with operation policies for " + apiUUID, e);
+        }
+        return uriTemplateList;
+    }
+
     private class SubscriptionInfo {
 
         private int subscriptionId;

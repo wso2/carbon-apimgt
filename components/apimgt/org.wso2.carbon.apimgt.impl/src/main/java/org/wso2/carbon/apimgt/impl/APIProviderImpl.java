@@ -8313,15 +8313,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void populateAPIOperationEndpointsMapping(API api) throws APIManagementException {
-        for (URITemplate uriTemplate: api.getUriTemplates()) {
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
             // Get production Endpoint mapping
-                String productionEndpointId =
-                        apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "PRODUCTION");
-                        uriTemplate.setProductionEndpoint(productionEndpointId);
+            String productionEndpointId =
+                    apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "PRODUCTION");
+            uriTemplate.setProductionEndpoint(productionEndpointId);
             // Get sandbox endpoint endpoint
-                String sandboxEndpointId =
-                        apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "SANDBOX");
-                        uriTemplate.setSandboxEndpoint(sandboxEndpointId);
+            String sandboxEndpointId =
+                    apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "SANDBOX");
+            uriTemplate.setSandboxEndpoint(sandboxEndpointId);
         }
     }
 
@@ -9526,13 +9526,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates)
             throws APIManagementException {
-
         Set<URITemplate> uriTemplatesWithPolicies = apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
 
         if (!uriTemplatesWithPolicies.isEmpty()) {
-            //This is a temporary map to keep operation policies list of URI Templates against the URI mapping ID
+            //This is a temporary map to keep operation endpoints list of URI Templates against the URI mapping ID
             Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
-
             for (URITemplate uriTemplate : uriTemplatesWithPolicies) {
                 String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
@@ -9545,6 +9543,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 if (operationPoliciesMap.containsKey(key)) {
                     uriTemplate.setOperationPolicies(operationPoliciesMap.get(key));
+                }
+            }
+        }
+    }
+
+    public void setOperationEndpointsToURITemplates(String apiId, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
+
+        Set<URITemplate> uriTemplatesWithOperationEndpoints = apiMgtDAO.getURITemplatesWithOperationEndpoints(apiId);
+
+        if (!uriTemplatesWithOperationEndpoints.isEmpty()) {
+            //This is a temporary map to keep operation policies list of URI Templates against the URI mapping ID
+            Map<String, String> operationEndpointPerURITemplate = new HashMap<>();
+
+            for (URITemplate uriTemplate : uriTemplatesWithOperationEndpoints) {
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, uriTemplate.getProductionEndpoint());
+                operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, uriTemplate.getSandboxEndpoint());
+            }
+
+            for (URITemplate uriTemplate : uriTemplates) {
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                String sandboxKey = key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS;
+                String productionKey = key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS;
+                if(operationEndpointPerURITemplate.containsKey(sandboxKey)){
+                    uriTemplate.setSandboxEndpoint(operationEndpointPerURITemplate.get(sandboxKey));
+                }
+                if(operationEndpointPerURITemplate.containsKey(productionKey)){
+                    uriTemplate.setProductionEndpoint(operationEndpointPerURITemplate.get(productionKey));
                 }
             }
         }
