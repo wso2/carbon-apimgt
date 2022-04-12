@@ -60,7 +60,7 @@ import java.util.UUID;
  * Test class for WebsocketInboundHandler.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WebSocketUtils.class, InboundWebsocketProcessorUtil.class})
+@PrepareForTest({WebSocketUtils.class, InboundWebsocketProcessorUtil.class, APIUtil.class})
 public class WebsocketInboundHandlerTestCase {
 
     private static final String channelIdString = "11111";
