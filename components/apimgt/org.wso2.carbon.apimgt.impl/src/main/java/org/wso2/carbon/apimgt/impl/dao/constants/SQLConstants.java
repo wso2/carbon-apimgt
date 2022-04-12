@@ -2084,7 +2084,7 @@ public class SQLConstants {
 
     public static final String GET_SUBSCRIPTION_STATUS_SQL =
             "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
-    
+
     public static final String GET_SUBSCRIPTION_ID_SQL =
             "SELECT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
 
@@ -3957,25 +3957,38 @@ public class SQLConstants {
     public static class OperationEndpointsSQLConstants {
         public static final String GET_ALL_OPERATION_ENDPOINTS_BY_API_UUID =
                 " SELECT " +
-                        "   AMOE.OPERATION_ENDPOINT_UUID ," +
-                        "   AMOE.REVISION_UUID" +
-                        "   AMOE.ENDPOINT_NAME" +
-                        "   AMOE.SECURITY_CONFIG" +
-                        "   AMOE.ENDPOINT_CONFIG" +
+                        "   AMOE.OPERATION_ENDPOINT_UUID," +
+                        "   AMOE.REVISION_UUID," +
+                        "   AMOE.ENDPOINT_NAME," +
+                        "   AMOE.SECURITY_CONFIG," +
+                        "   AMOE.ENDPOINT_CONFIG," +
                         "   AMOE.ORGANIZATION" +
                         " FROM " +
                         "   AM_API_OPERATION_ENDPOINTS  AMOE" +
                         " WHERE " +
                         "   AMOE.API_ID = ? ";
 
+        public static final String GET_ALL_OPERATION_ENDPOINTS_BY_API_UUID_REVISION_SQL =
+                " SELECT " +
+                        "   AMOE.OPERATION_ENDPOINT_UUID," +
+                        "   AMOE.REVISION_UUID," +
+                        "   AMOE.ENDPOINT_NAME," +
+                        "   AMOE.SECURITY_CONFIG," +
+                        "   AMOE.ENDPOINT_CONFIG," +
+                        "   AMOE.ORGANIZATION" +
+                        " FROM " +
+                        "   AM_API_OPERATION_ENDPOINTS  AMOE" +
+                        " WHERE " +
+                        "   AMOE.API_ID = ? AND AMOE.REVISION_UUID = ?";
+
 
         public static final String GET_OPERATION_ENDPOINT_BY_API_UUID_AND_ENDPOINT_UUID =
                 " SELECT " +
-                        "   AMOE.OPERATION_ENDPOINT_UUID ," +
-                        "   AMOE.REVISION_UUID" +
-                        "   AMOE.ENDPOINT_NAME" +
-                        "   AMOE.SECURITY_CONFIG" +
-                        "   AMOE.ENDPOINT_CONFIG" +
+                        "   AMOE.OPERATION_ENDPOINT_UUID," +
+                        "   AMOE.REVISION_UUID," +
+                        "   AMOE.ENDPOINT_NAME," +
+                        "   AMOE.SECURITY_CONFIG," +
+                        "   AMOE.ENDPOINT_CONFIG," +
                         "   AMOE.ORGANIZATION" +
                         " FROM " +
                         "   AM_API_OPERATION_ENDPOINTS  AMOE" +

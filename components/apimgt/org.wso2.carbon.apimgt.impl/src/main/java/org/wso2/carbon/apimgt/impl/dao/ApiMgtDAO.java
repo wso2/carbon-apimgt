@@ -17942,7 +17942,15 @@ public class ApiMgtDAO {
     public List<OperationEndpoint> getOperationEndpoints(String uuid) throws APIManagementException{
 
         List<OperationEndpoint> operationEndpoints = null;
-        String sql = SQLConstants.OperationEndpointsSQLConstants.GET_ALL_OPERATION_ENDPOINTS_BY_API_UUID;
+        String sql;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+
+        if (apiRevision == null) {
+            sql = SQLConstants.OperationEndpointsSQLConstants.GET_ALL_OPERATION_ENDPOINTS_BY_API_UUID;
+        } else {
+            sql = SQLConstants.OperationEndpointsSQLConstants.GET_ALL_OPERATION_ENDPOINTS_BY_API_UUID_REVISION_SQL;
+        }
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -17952,6 +17960,9 @@ public class ApiMgtDAO {
             int apiId = getAPIID(uuid, conn);
             ps = conn.prepareStatement(sql);
             ps.setInt(1,apiId);
+            if(apiRevision != null){
+                ps.setString(2,apiRevision.getRevisionUUID());
+            }
             rs = ps.executeQuery();
 
             if(rs != null){
@@ -17961,10 +17972,9 @@ public class ApiMgtDAO {
                     operationEndpoint.setOperationEndpointUuid(rs.getString("OPERATION_ENDPOINT_UUID"));
                     operationEndpoint.setRevisionUuid(rs.getString("REVISION_UUID"));
                     operationEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
-                    operationEndpoint.setSecurityConfig(rs.getBlob("SECURITY_CONFIG").toString());
-                    operationEndpoint.setEndpointConfig(rs.getBlob("ENDPOINT_CONFIG").toString());
+                    operationEndpoint.setSecurityConfig(rs.getBlob("SECURITY_CONFIG"));
+                    operationEndpoint.setEndpointConfig(rs.getBlob("ENDPOINT_CONFIG"));
                     operationEndpoint.setOrganization(rs.getString("ORGANIZATION"));
-                    operationEndpoint.setApiId(uuid);
                     operationEndpoints.add(operationEndpoint);
                 }
                 log.info(operationEndpoints);
@@ -18037,10 +18047,9 @@ public class ApiMgtDAO {
                 operationEndpoint.setOperationEndpointUuid(rs.getString("OPERATION_ENDPOINT_UUID"));
                 operationEndpoint.setRevisionUuid(rs.getString("REVISION_UUID"));
                 operationEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
-                operationEndpoint.setSecurityConfig(rs.getBlob("SECURITY_CONFIG").toString());
-                operationEndpoint.setEndpointConfig(rs.getBlob("ENDPOINT_CONFIG").toString());
+                operationEndpoint.setSecurityConfig(rs.getBlob("SECURITY_CONFIG"));
+                operationEndpoint.setEndpointConfig(rs.getBlob("ENDPOINT_CONFIG"));
                 operationEndpoint.setOrganization(rs.getString("ORGANIZATION"));
-                operationEndpoint.setApiId(apiUUID);
                 log.info(operationEndpoint);
                 return operationEndpoint;
             }
@@ -18057,13 +18066,13 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public void deleteOperationEndpointByEndpointId(String endpointId) throws APIManagementException {
+    public void deleteOperationEndpointByEndpointId(String endpointUuid) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            deleteOperationEndpointByEndpointId(connection, endpointId);
+            deleteOperationEndpointByEndpointId(connection, endpointUuid);
             connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to delete operation policy " + endpointId, e);
+            handleException("Failed to delete operation policy " + endpointUuid, e);
         }
     }
 
@@ -18127,8 +18136,8 @@ public class ApiMgtDAO {
                 SQLConstants.OperationEndpointsSQLConstants.UPDATE_OPERATION_ENDPOINT_BY_UUID);
 
         statement.setString(1, operationEndpoint.getEndpointName());
-        statement.setString(2, operationEndpoint.getSecurityConfig());
-        statement.setString(3, operationEndpoint.getEndpointConfig());
+        statement.setBlob(2, operationEndpoint.getSecurityConfig());
+        statement.setBlob(3, operationEndpoint.getEndpointConfig());
         statement.setString(4, operationEndpoint.getOrganization());
         statement.setString(5, endpointUUID);
         if(statement.executeUpdate() > 0){
@@ -18162,20 +18171,20 @@ public class ApiMgtDAO {
         String dbQuery = SQLConstants.OperationEndpointsSQLConstants.ADD_NEW_OPERATION_ENDPOINT;
         String endpointUUID = UUID.randomUUID().toString();
 
-        PreparedStatement statement = connection.prepareStatement(dbQuery);
-        statement.setString(1, operationEndpoint.getApiId());
-        statement.setString(2, endpointUUID);
-        statement.setString(3, getLatestRevisionUUID(operationEndpoint.getApiId()));
-        statement.setString(4, operationEndpoint.getEndpointName());
-        statement.setString(5, operationEndpoint.getEndpointConfig());
-        statement.setString(6, operationEndpoint.getSecurityConfig());
-        statement.setString(7, operationEndpoint.getOrganization());
-        if (statement.executeUpdate() > 0) {
-            statement.close();
-            return endpointUUID;
+        try(PreparedStatement statement = connection.prepareStatement(dbQuery)){
+            statement.setInt(1, operationEndpoint.getApiId());
+            statement.setString(2, endpointUUID);
+            statement.setString(3, getLatestRevisionUUID(operationEndpoint.getRevisionUuid()));
+            statement.setString(4, operationEndpoint.getEndpointName());
+            if( operationEndpoint.getSecurityConfig() == null)
+                statement.setBlob(5, operationEndpoint.getSecurityConfig());
+            statement.setBlob(6, operationEndpoint.getEndpointConfig());
+            statement.setString(7, operationEndpoint.getOrganization());
+            if (statement.executeUpdate() > 0) {
+                statement.close();
+                return endpointUUID;
+            }
         }
-
-        statement.close();
         return null;
     }
 
@@ -18644,11 +18653,11 @@ public class ApiMgtDAO {
         statement.close();
     }
 
-    private void deleteOperationEndpointByEndpointId(Connection connection, String endpointId) throws SQLException {
+    private void deleteOperationEndpointByEndpointId(Connection connection, String endpointUuid) throws SQLException {
 
         String dbQuery = SQLConstants.OperationEndpointsSQLConstants.DELETE_OPERATION_ENDPOINT_BY_ID;
         PreparedStatement statement = connection.prepareStatement(dbQuery);
-        statement.setString(1, endpointId);
+        statement.setString(1, endpointUuid);
         statement.execute();
         statement.close();
     }

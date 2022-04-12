@@ -1981,11 +1981,12 @@ public interface APIProvider extends APIManager {
     /**
      * Insert new operation endpoint an API
      *
+     * @param apiUUID
      * @param operationEndpoint
      * @return
      * @throws APIManagementException
      */
-    String addOperationEndpoint(OperationEndpoint operationEndpoint) throws APIManagementException;
+    String addOperationEndpoint(String apiUUID, OperationEndpoint operationEndpoint) throws APIManagementException;
 
     /**
      *

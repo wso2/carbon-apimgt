@@ -1815,7 +1815,8 @@ public class PublisherCommonUtils {
      * @return OperationEndpointListDTO object
      * @throws APIManagementException if there is en error while retrieving the lifecycle state information
      */
-    public static OperationEndpointListDTO getOperationEndpoints(String uuid, APIProvider apiProvider) throws APIManagementException, JsonProcessingException {
+    public static OperationEndpointListDTO getOperationEndpoints(String uuid, APIProvider apiProvider)
+            throws APIManagementException {
         List<OperationEndpoint> operationEndpointsList = apiProvider.getAllOperationEndpointsByUUID(uuid);
         if (operationEndpointsList == null) {
             throw new APIManagementException("Error occurred while getting operation Endpoints of API " + uuid,
@@ -1862,8 +1863,8 @@ public class PublisherCommonUtils {
                                                                OperationEndpointDTO operationEndpointDTO,
                                                                String organization,
                                                                APIProvider apiProvider)
-            throws APIManagementException, JsonProcessingException {
-        OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(apiId, operationEndpointDTO, organization);
+            throws APIManagementException {
+        OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(operationEndpointDTO, organization);
         OperationEndpoint operationEndpointUpdated = apiProvider.updateOperationEndpoint(endpointId, operationEndpoint);
         if (operationEndpointUpdated == null) {
             throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
@@ -1887,9 +1888,9 @@ public class PublisherCommonUtils {
      */
     public static String addOperationEndpoint(String apiId, OperationEndpointDTO operationEndpointDTO,
                                               String organization, APIProvider apiProvider)
-            throws APIManagementException, JsonProcessingException {
-        OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(apiId, operationEndpointDTO, organization);
-        String operationEndpointId = apiProvider.addOperationEndpoint(operationEndpoint);
+            throws APIManagementException {
+        OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(operationEndpointDTO, organization);
+        String operationEndpointId = apiProvider.addOperationEndpoint(apiId, operationEndpoint);
         if (operationEndpointId == null) {
             throw new APIManagementException("Error occurred while getting operation Endpoint of API " + apiId,
                     ExceptionCodes.ERROR_INSERTING_OPERATION_ENDPOINT_API);

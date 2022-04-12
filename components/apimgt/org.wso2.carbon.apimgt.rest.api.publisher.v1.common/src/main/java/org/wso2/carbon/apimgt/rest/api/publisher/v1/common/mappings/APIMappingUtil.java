@@ -67,9 +67,10 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -3037,50 +3038,80 @@ public class APIMappingUtil {
         return dateFormat.parse(time);
     }
 
-    public static OperationEndpointListDTO fromOperationEndpointListToDTO(List<OperationEndpoint> operationEndpoints)
-            throws JsonProcessingException {
+    public static OperationEndpointListDTO fromOperationEndpointListToDTO(List<OperationEndpoint> operationEndpoints) {
         OperationEndpointListDTO operationEndpointListDTO = new OperationEndpointListDTO();
         List<OperationEndpointDTO> operationEndpointDTOS = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
-        for (OperationEndpoint operationEndpoint :
-             operationEndpoints) {
-            OperationEndpointDTO operationEndpointDTO = new OperationEndpointDTO();
-            operationEndpointDTO.setId(operationEndpoint.getOperationEndpointUuid());
-            operationEndpointDTO.setName(operationEndpoint.getEndpointName());
-            EndpointConfigDTO endpointConfigDTO = mapper.readValue(operationEndpoint.getEndpointConfig(),
-                    EndpointConfigDTO.class);
-            operationEndpointDTO.setEndpointConfig(endpointConfigDTO);
-            operationEndpointDTOS.add(operationEndpointDTO);
+        for (OperationEndpoint operationEndpoint : operationEndpoints) {
+            operationEndpointDTOS.add(fromOperationEndpointToDTO(operationEndpoint));
         }
         operationEndpointListDTO.setCount(operationEndpointDTOS.size());
         operationEndpointListDTO.setList(operationEndpointDTOS);
         return operationEndpointListDTO;
     }
 
-    public static OperationEndpointDTO fromOperationEndpointToDTO(OperationEndpoint operationEndpoint)
-            throws JsonProcessingException {
+    public static OperationEndpointDTO fromOperationEndpointToDTO(OperationEndpoint operationEndpoint) {
         OperationEndpointDTO operationEndpointDTO = new OperationEndpointDTO();
-        ObjectMapper mapper = new ObjectMapper();
         operationEndpointDTO.setId(operationEndpoint.getOperationEndpointUuid());
         operationEndpointDTO.setName(operationEndpoint.getEndpointName());
-        EndpointConfigDTO endpointConfigDTO = mapper.readValue(operationEndpoint.getEndpointConfig(),
-                EndpointConfigDTO.class);
-        operationEndpointDTO.setEndpointConfig(endpointConfigDTO);
+        Blob securityConfBlob = operationEndpoint.getSecurityConfig();
+        Blob endpointConfBlob = operationEndpoint.getEndpointConfig();
+        if(securityConfBlob != null){
+            ObjectInputStream objInSecurityConf;
+            ByteArrayInputStream bInSecurityConf;
+            try {
+                bInSecurityConf = new ByteArrayInputStream(securityConfBlob.getBytes(1, (int) securityConfBlob.length()));
+                objInSecurityConf = new ObjectInputStream(bInSecurityConf);
+                EndpointSecurityDTO endpointSecurityDTO = (EndpointSecurityDTO) objInSecurityConf.readObject();
+                operationEndpointDTO.setSecurityConfig(endpointSecurityDTO);
+            } catch (SQLException | ClassNotFoundException | IOException  e) {
+                // TODO : print message
+                e.printStackTrace();
+            }
+        }
+        if(endpointConfBlob != null){
+            ObjectInputStream objInEndpointConf;
+            ByteArrayInputStream bInEndpointConf;
+            try {
+                bInEndpointConf = new ByteArrayInputStream(endpointConfBlob.getBytes(1, (int) endpointConfBlob.length()));
+                objInEndpointConf = new ObjectInputStream(bInEndpointConf);
+                EndpointConfigDTO endpointConfigDTO = (EndpointConfigDTO) objInEndpointConf.readObject();
+                operationEndpointDTO.setEndpointConfig(endpointConfigDTO);
+            } catch (SQLException | ClassNotFoundException | IOException  e) {
+                // TODO : print message
+                e.printStackTrace();
+            }
+        }
+
+
         return operationEndpointDTO;
     }
 
-    public static OperationEndpoint fromDTOtoOperationEndpoint(String apiId, OperationEndpointDTO operationEndpointDTO
-            , String organization)
-            throws JsonProcessingException {
+    public static OperationEndpoint fromDTOtoOperationEndpoint(OperationEndpointDTO operationEndpointDTO
+            , String organization){
         OperationEndpoint operationEndpoint = new OperationEndpoint();
         operationEndpoint.setOperationEndpointUuid(operationEndpointDTO.getId());
         operationEndpoint.setEndpointName(operationEndpointDTO.getName());
-        operationEndpoint.setApiId(apiId);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String endPointConfigString = objectMapper.writeValueAsString(operationEndpointDTO.getEndpointConfig());
-        operationEndpoint.setEndpointConfig(endPointConfigString);
-        String endpointSecurityString = objectMapper.writeValueAsString(operationEndpointDTO.getSecurityConfig());
-        operationEndpoint.setSecurityConfig(endpointSecurityString);
+        if(operationEndpointDTO.getSecurityConfig() != null){
+            ByteArrayOutputStream bAoutSecurityConf = new ByteArrayOutputStream();
+            try(ObjectOutputStream objOut = new ObjectOutputStream(bAoutSecurityConf)) {
+                objOut.writeObject(operationEndpointDTO.getSecurityConfig());
+                objOut.flush();
+                operationEndpoint.setEndpointConfig((Blob) new ByteArrayInputStream(bAoutSecurityConf.toByteArray()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(operationEndpointDTO.getEndpointConfig() != null){
+            ByteArrayOutputStream bAoutEndPointConf = new ByteArrayOutputStream();
+            try(ObjectOutputStream objOut = new ObjectOutputStream(bAoutEndPointConf)) {
+                objOut.writeObject(operationEndpointDTO.getSecurityConfig());
+                objOut.flush();
+                operationEndpoint.setEndpointConfig((Blob) new ByteArrayInputStream(bAoutEndPointConf.toByteArray()));
+            } catch (IOException e) {
+                // TODO : print message
+                e.printStackTrace();
+            }
+        }
         operationEndpoint.setOrganization(organization);
         return operationEndpoint;
     }

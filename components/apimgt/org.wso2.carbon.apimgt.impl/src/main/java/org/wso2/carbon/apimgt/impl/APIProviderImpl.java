@@ -28,7 +28,6 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -191,7 +190,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -9751,13 +9749,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public OperationEndpoint updateOperationEndpoint(String endpointUUID, OperationEndpoint operationEndpoint)
             throws APIManagementException {
-        int endpointIdx = apiMgtDAO.getOperationEndpointId(endpointUUID);
-        operationEndpoint.setOperationEndpointId(endpointIdx);
         return apiMgtDAO.updateOperationEndpoint(endpointUUID, operationEndpoint);
     }
 
     @Override
-    public String addOperationEndpoint(OperationEndpoint operationEndpoint) throws APIManagementException {
+    public String addOperationEndpoint(String apiUUID, OperationEndpoint operationEndpoint) throws APIManagementException {
+        int apiId = apiMgtDAO.getAPIID(apiUUID);
+        operationEndpoint.setApiId(apiId);
         return apiMgtDAO.addOperationEndpoint(operationEndpoint);
     }
 

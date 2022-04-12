@@ -1,14 +1,16 @@
 package org.wso2.carbon.apimgt.api.model;
 
 
+import java.sql.Blob;
+
 public class OperationEndpoint {
     private int operationEndpointId;
-    private String apiId;
+    private int apiId;
     private String operationEndpointUuid;
     private String revisionUuid;
     private String endpointName;
-    private String endpointConfig;
-    private String securityConfig;
+    private Blob endpointConfig;
+    private Blob securityConfig;
     private String organization;
 
     public int getOperationEndpointId() {
@@ -19,11 +21,11 @@ public class OperationEndpoint {
         this.operationEndpointId = operationEndpointId;
     }
 
-    public String getApiId() {
+    public int getApiId() {
         return apiId;
     }
 
-    public void setApiId(String apiId) {
+    public void setApiId(int apiId) {
         this.apiId = apiId;
     }
 
@@ -51,19 +53,19 @@ public class OperationEndpoint {
         this.endpointName = endpointName;
     }
 
-    public String getEndpointConfig() {
+    public Blob getEndpointConfig() {
         return endpointConfig;
     }
 
-    public void setEndpointConfig(String endpointConfig) {
+    public void setEndpointConfig(Blob endpointConfig) {
         this.endpointConfig = endpointConfig;
     }
 
-    public String getSecurityConfig() {
+    public Blob getSecurityConfig() {
         return securityConfig;
     }
 
-    public void setSecurityConfig(String securityConfig) {
+    public void setSecurityConfig(Blob securityConfig) {
         this.securityConfig = securityConfig;
     }
 

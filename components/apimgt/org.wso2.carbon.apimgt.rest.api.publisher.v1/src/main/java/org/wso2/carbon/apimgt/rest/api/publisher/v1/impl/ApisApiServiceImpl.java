@@ -321,9 +321,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (URISyntaxException e) {
             throw new APIManagementException("Error while retrieving operation endpoint location for API " + apiId);
-        } catch (JsonProcessingException e) {
-            String errorMessage = "Error while inserting OperationEndpoint of the API: " + apiId ;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -525,11 +522,11 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Delete operation Endpoint by UUIDs
      *
      * @param apiId          apiUUID
-     * @param endpointId    endpointUUID
+     * @param endpointUuid    endpointUUID
      * @return Status of Operation Endpoint Deletion
      */
     @Override
-    public Response deleteOperationEndpoint(String apiId, String endpointId, MessageContext messageContext) throws APIManagementException {
+    public Response deleteOperationEndpoint(String apiId, String endpointUuid, MessageContext messageContext) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -539,33 +536,33 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //validate Operation Endpoint
             OperationEndpoint existingOperationEndpoint =
-                    apiProvider.getOperationEndpointByUUID(apiId, endpointId);
+                    apiProvider.getOperationEndpointByUUID(apiId, endpointUuid);
             if (existingOperationEndpoint != null) {
-                apiProvider.deleteOperationEndpointById(endpointId, organization);
+                apiProvider.deleteOperationEndpointById(endpointUuid, organization);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("The operation endpoint " + endpointId + " has been deleted from the the API "
+                    log.debug("The operation endpoint " + endpointUuid + " has been deleted from the the API "
                             + apiId);
                 }
                 return Response.ok().build();
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation Endpoint with ID: "
-                        + endpointId + " for API " + apiId,
-                        ExceptionCodes.from(ExceptionCodes.OPERATION_ENDPOINT_NOT_FOUND, endpointId));
+                        + endpointUuid + " for API " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_ENDPOINT_NOT_FOUND, endpointUuid));
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_ENDPOINTS,
-                        endpointId, e, log);
+                        endpointUuid, e, log);
             } else {
                 String errorMessage =
-                        "Error while deleting the API specific operation endpoint with ID :" + endpointId
+                        "Error while deleting the API specific operation endpoint with ID :" + endpointUuid
                                 + " for API " + apiId + " " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (Exception e) {
             RestApiUtil.handleInternalServerError("An error has occurred while deleting the API specific " +
-                    " operation endpointId with ID" + endpointId + " for API " + apiId, e, log);
+                    " operation endpointId with ID" + endpointUuid + " for API " + apiId, e, log);
         }
         return null;
     }
@@ -693,9 +690,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while uploading schema of the API: " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (JsonProcessingException e) {
-            String errorMessage = "Error while updating OperationEndpoint of the API: " + apiId + " EndpointId : " + endpointId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -1012,9 +1006,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving operation endpoints of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (JsonProcessingException e) {
-            String errorMessage = "Error while retrieving operation endpoints of API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
