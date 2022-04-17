@@ -152,11 +152,12 @@ public class WorkflowUtils {
             APIStateWorkflowDTO apiStateWFDto = (APIStateWorkflowDTO) workflowDTO;
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), apiStateWFDto.getTenantId(),
-                    apiStateWFDto.getTenantDomain(), apiStateWFDto.getApiName(),
+                    apiStateWFDto.getTenantDomain(), apiStateWFDto.getMetadata("ApiName"),
                     Integer.parseInt(apiStateWFDto.getWorkflowReference()), apiStateWFDto.getApiUUID(),
-                    apiStateWFDto.getApiVersion(),
-                    apiStateWFDto.getApiType(), apiStateWFDto.getApiContext(), apiStateWFDto.getApiProvider(),
-                    apiStateWFDto.getApiLCAction());
+                    apiStateWFDto.getMetadata("ApiVersion"),
+                    apiStateWFDto.getApiType(), apiStateWFDto.getMetadata( "ApiContext"),
+                    apiStateWFDto.getMetadata("ApiProvider"),
+                    apiStateWFDto.getMetadata("Action"));
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equalsIgnoreCase(wfType)) {
             ApplicationRegistrationWorkflowDTO appRegWFDto = (ApplicationRegistrationWorkflowDTO) workflowDTO;
@@ -244,6 +245,7 @@ public class WorkflowUtils {
         apiStateWorkFlowDTO.setMetadata("CurrentState", apiStateWorkFlowDTO.getApiCurrentState());
         apiStateWorkFlowDTO.setMetadata("Action", apiStateWorkFlowDTO.getApiLCAction());
         apiStateWorkFlowDTO.setMetadata("ApiName", apiStateWorkFlowDTO.getApiName());
+        apiStateWorkFlowDTO.setMetadata("ApiContext", apiStateWorkFlowDTO.getApiContext());
         apiStateWorkFlowDTO.setMetadata("ApiVersion", apiStateWorkFlowDTO.getApiVersion());
         apiStateWorkFlowDTO.setMetadata("ApiProvider", apiStateWorkFlowDTO.getApiProvider());
         apiStateWorkFlowDTO.setMetadata("Invoker", apiStateWorkFlowDTO.getInvoker());
