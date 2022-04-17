@@ -3091,20 +3091,28 @@ public class APIMappingUtil {
         OperationEndpoint operationEndpoint = new OperationEndpoint();
         operationEndpoint.setOperationEndpointUuid(operationEndpointDTO.getId());
         operationEndpoint.setEndpointName(operationEndpointDTO.getName());
-        if(operationEndpointDTO.getSecurityConfig() != null){
+        EndpointSecurityDTO endpointSecurityDTO = operationEndpointDTO.getSecurityConfig();
+        EndpointConfigDTO endpointConfigDTO = operationEndpointDTO.getEndpointConfig();
+
+        if(endpointSecurityDTO!= null){
+            // Serialized DTOs
+            org.wso2.carbon.apimgt.impl.dto.EndpointSecurityDTO endpointSecurityDTOSerialized =
+                    convertEndpointSecurityDTOToSerialized(endpointSecurityDTO);
             ByteArrayOutputStream bAoutSecurityConf = new ByteArrayOutputStream();
             try(ObjectOutputStream objOut = new ObjectOutputStream(bAoutSecurityConf)) {
-                objOut.writeObject(operationEndpointDTO.getSecurityConfig());
+                objOut.writeObject(endpointSecurityDTOSerialized);
                 objOut.flush();
                 operationEndpoint.setEndpointConfig((Blob) new ByteArrayInputStream(bAoutSecurityConf.toByteArray()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        if(operationEndpointDTO.getEndpointConfig() != null){
+        if(endpointConfigDTO != null){
+            org.wso2.carbon.apimgt.impl.dto.EndpointConfigDTO endpointConfigDTOSerialized =
+                    convertEndpointConfigDTOToSerialized(endpointConfigDTO);
             ByteArrayOutputStream bAoutEndPointConf = new ByteArrayOutputStream();
             try(ObjectOutputStream objOut = new ObjectOutputStream(bAoutEndPointConf)) {
-                objOut.writeObject(operationEndpointDTO.getSecurityConfig());
+                objOut.writeObject(endpointConfigDTOSerialized);
                 objOut.flush();
                 operationEndpoint.setEndpointConfig((Blob) new ByteArrayInputStream(bAoutEndPointConf.toByteArray()));
             } catch (IOException e) {
@@ -3114,5 +3122,34 @@ public class APIMappingUtil {
         }
         operationEndpoint.setOrganization(organization);
         return operationEndpoint;
+    }
+
+    private static org.wso2.carbon.apimgt.impl.dto.EndpointConfigDTO convertEndpointConfigDTOToSerialized
+            (EndpointConfigDTO endpointConfigDTO) {
+        org.wso2.carbon.apimgt.impl.dto.EndpointConfigDTO endpointConfigDTOSerialized =
+                new org.wso2.carbon.apimgt.impl.dto.EndpointConfigDTO();
+        endpointConfigDTOSerialized.setUrl(endpointConfigDTO.getUrl());
+        endpointConfigDTOSerialized.setTimeout(endpointConfigDTO.getTimeout());
+        List<org.wso2.carbon.apimgt.impl.dto.EndpointConfigAttributesDTO> endpointConfigAttributesDTOS = new ArrayList<>();
+        for (EndpointConfigAttributesDTO endpointConfigAttributesDTO : endpointConfigDTO.getAttributes()) {
+            org.wso2.carbon.apimgt.impl.dto.EndpointConfigAttributesDTO endpointConfigAttributesDTOSerialized =
+                    new org.wso2.carbon.apimgt.impl.dto.EndpointConfigAttributesDTO();
+            endpointConfigAttributesDTOSerialized.setName(endpointConfigAttributesDTO.getName());
+            endpointConfigAttributesDTOSerialized.setValue(endpointConfigAttributesDTO.getValue());
+            endpointConfigAttributesDTOS.add(endpointConfigAttributesDTOSerialized);
+        }
+        endpointConfigDTOSerialized.setAttributes(endpointConfigAttributesDTOS);
+        return  endpointConfigDTOSerialized;
+    }
+
+    private static org.wso2.carbon.apimgt.impl.dto.EndpointSecurityDTO convertEndpointSecurityDTOToSerialized
+            (EndpointSecurityDTO endpointSecurityDTO) {
+        org.wso2.carbon.apimgt.impl.dto.EndpointSecurityDTO endpointSecurityDTOSerialized =
+                new org.wso2.carbon.apimgt.impl.dto.EndpointSecurityDTO();
+        endpointSecurityDTOSerialized.setEnabled(endpointSecurityDTO.isEnabled());
+        endpointSecurityDTOSerialized.setUsername(endpointSecurityDTO.getUsername());
+        endpointSecurityDTOSerialized.setPassword(endpointSecurityDTO.getPassword());
+        endpointSecurityDTOSerialized.setType(endpointSecurityDTO.getType());
+        return endpointSecurityDTOSerialized;
     }
 }
