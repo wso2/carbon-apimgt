@@ -394,9 +394,13 @@ public class GatewayArtifactsMgtDAO {
     public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByAPIIDs(List<String> apiIds, String[] labels,
                                                                         String tenantDomain)
             throws APIManagementException {
+        int apiIdListSize = apiIds.size();
+        // Logging the API ID List
+        for (int i = 0; i < apiIdListSize; i++) {
+            log.info("Getting runtime artifacts for the API ID: " + apiIds.get(i));
+        }
         // Split apiId list into smaller list of size 25
         List<List<String>> apiIdsChunk = new ArrayList<>();
-        int apiIdListSize = apiIds.size();
         int apiIdArrayIndex = 0;
         int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
         while (apiIdArrayIndex < apiIdListSize) {
@@ -451,6 +455,9 @@ public class GatewayArtifactsMgtDAO {
                             }
                         }
                         apiRuntimeArtifactDto.setFile(true);
+                        log.info("Adding runtime artifact dto for the API ID: " + apiRuntimeArtifactDto.getApiId()
+                                + ", revision ID: " + apiRuntimeArtifactDto.getRevision() + ", label: "
+                                + apiRuntimeArtifactDto.getLabel());
                         apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
                     }
                 }
