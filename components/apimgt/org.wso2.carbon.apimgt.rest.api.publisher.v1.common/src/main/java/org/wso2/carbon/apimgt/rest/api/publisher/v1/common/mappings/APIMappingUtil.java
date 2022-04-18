@@ -3061,7 +3061,9 @@ public class APIMappingUtil {
             try {
                 bInSecurityConf = new ByteArrayInputStream(securityConfBlob.getBytes(1, (int) securityConfBlob.length()));
                 objInSecurityConf = new ObjectInputStream(bInSecurityConf);
-                EndpointSecurityDTO endpointSecurityDTO = (EndpointSecurityDTO) objInSecurityConf.readObject();
+                org.wso2.carbon.apimgt.impl.dto.EndpointSecurityDTO endpointSecurityDTOSerialized =
+                        (org.wso2.carbon.apimgt.impl.dto.EndpointSecurityDTO) objInSecurityConf.readObject();
+                EndpointSecurityDTO endpointSecurityDTO = convertSerializedEndpointSecurityToDTO(endpointSecurityDTOSerialized);
                 operationEndpointDTO.setSecurityConfig(endpointSecurityDTO);
             } catch (SQLException | ClassNotFoundException | IOException  e) {
                 // TODO : print message
@@ -3072,9 +3074,12 @@ public class APIMappingUtil {
             ObjectInputStream objInEndpointConf;
             ByteArrayInputStream bInEndpointConf;
             try {
-                bInEndpointConf = new ByteArrayInputStream(endpointConfBlob.getBytes(1, (int) endpointConfBlob.length()));
+                bInEndpointConf = new ByteArrayInputStream(
+                        endpointConfBlob.getBytes(1, (int) endpointConfBlob.length()));
                 objInEndpointConf = new ObjectInputStream(bInEndpointConf);
-                EndpointConfigDTO endpointConfigDTO = (EndpointConfigDTO) objInEndpointConf.readObject();
+                org.wso2.carbon.apimgt.impl.dto.EndpointConfigDTO endpointConfigDTOSerialized =
+                        (org.wso2.carbon.apimgt.impl.dto.EndpointConfigDTO)  objInEndpointConf.readObject();
+                EndpointConfigDTO endpointConfigDTO = convertSerializedEndpointConfigToDTO(endpointConfigDTOSerialized);
                 operationEndpointDTO.setEndpointConfig(endpointConfigDTO);
             } catch (SQLException | ClassNotFoundException | IOException  e) {
                 // TODO : print message
@@ -3085,6 +3090,35 @@ public class APIMappingUtil {
 
         return operationEndpointDTO;
     }
+
+    private static EndpointSecurityDTO convertSerializedEndpointSecurityToDTO
+            (org.wso2.carbon.apimgt.impl.dto.EndpointSecurityDTO endpointSecurityDTOSerialized) {
+        EndpointSecurityDTO endpointSecurityDTO = new EndpointSecurityDTO();
+        endpointSecurityDTO.setEnabled(endpointSecurityDTOSerialized.getEnabled());
+        endpointSecurityDTO.setType(endpointSecurityDTOSerialized.getType());
+        endpointSecurityDTO.setUsername(endpointSecurityDTOSerialized.getUsername());
+        endpointSecurityDTO.setPassword(endpointSecurityDTOSerialized.getPassword());
+        return endpointSecurityDTO;
+    }
+
+    private static EndpointConfigDTO convertSerializedEndpointConfigToDTO
+            (org.wso2.carbon.apimgt.impl.dto.EndpointConfigDTO endpointConfigDTO) {
+        EndpointConfigDTO endpointConfigDTOUnSerialized = new EndpointConfigDTO();
+        endpointConfigDTOUnSerialized.setUrl(endpointConfigDTO.getUrl());
+        endpointConfigDTOUnSerialized.setTimeout(endpointConfigDTO.getTimeout());
+        List<EndpointConfigAttributesDTO> endpointConfigAttributesDTOS = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.impl.dto.EndpointConfigAttributesDTO endpointConfigAttributesDTOSerialized:
+             endpointConfigDTO.getAttributes()) {
+            EndpointConfigAttributesDTO endpointConfigAttributesDTO = new EndpointConfigAttributesDTO();
+            endpointConfigAttributesDTO.setName(endpointConfigAttributesDTOSerialized.getName());
+            endpointConfigAttributesDTO.setValue(endpointConfigAttributesDTOSerialized.getValue());
+            endpointConfigAttributesDTOS.add(endpointConfigAttributesDTO);
+        }
+        endpointConfigDTOUnSerialized.setAttributes(endpointConfigAttributesDTOS);
+        return endpointConfigDTOUnSerialized;
+    }
+
+
 
     public static OperationEndpoint fromDTOtoOperationEndpoint(OperationEndpointDTO operationEndpointDTO
             , String organization){
@@ -3108,6 +3142,7 @@ public class APIMappingUtil {
             }
         }
         if(endpointConfigDTO != null){
+            // Serialized endpoint config DTOs
             org.wso2.carbon.apimgt.impl.dto.EndpointConfigDTO endpointConfigDTOSerialized =
                     convertEndpointConfigDTOToSerialized(endpointConfigDTO);
             ByteArrayOutputStream bAoutEndPointConf = new ByteArrayOutputStream();
