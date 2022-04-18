@@ -1,6 +1,6 @@
 blank_issues_enabled: false
 contact_links:
-- name: '📚 APIM Issue'
+- name: '📚 Product Issue'
   about: If Something is missing in the API Manager product.
   url: https://github.com/wso2/product-apim/issues/new/choose
 - name: '💬 Slack Channel'
