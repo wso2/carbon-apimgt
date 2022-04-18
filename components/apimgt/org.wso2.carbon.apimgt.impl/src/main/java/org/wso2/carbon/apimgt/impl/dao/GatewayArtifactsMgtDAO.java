@@ -396,9 +396,11 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
         int apiIdListSize = apiIds.size();
         // Logging the API ID List
+        StringBuilder apiIdList = new StringBuilder();
         for (int i = 0; i < apiIdListSize; i++) {
-            log.info("Getting runtime artifacts for the API ID: " + apiIds.get(i));
+            apiIdList.append(apiIds.get(i)+ ", ");
         }
+        log.debug("Getting runtime artifacts for the API ID List: " + apiIdList);
         // Split apiId list into smaller list of size 25
         List<List<String>> apiIdsChunk = new ArrayList<>();
         int apiIdArrayIndex = 0;
@@ -455,7 +457,7 @@ public class GatewayArtifactsMgtDAO {
                             }
                         }
                         apiRuntimeArtifactDto.setFile(true);
-                        log.info("Adding runtime artifact dto for the API ID: " + apiRuntimeArtifactDto.getApiId()
+                        log.debug("Adding runtime artifact dto for the API ID: " + apiRuntimeArtifactDto.getApiId()
                                 + ", revision ID: " + apiRuntimeArtifactDto.getRevision() + ", label: "
                                 + apiRuntimeArtifactDto.getLabel());
                         apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
