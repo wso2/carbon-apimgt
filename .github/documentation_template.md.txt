@@ -1,9 +1,9 @@
 ---
 name: "\U0001F4DA Documentation Issue"
-about: If Something is missing in the project or official documentation.
+about: Report an issue if something is missing or incorrect in the official documentation.
 title: ''
 labels: Docs/Has Impact, Priority/Normal, Type/Docs
-assignees: Mariangela, ruthryi, shaniR
+assignees: Mariangela, ruthryi, samgnaniah
 
 ---
 
@@ -12,7 +12,7 @@ assignees: Mariangela, ruthryi, shaniR
 
 ### Steps to reproduce:
 
-### Content Positioning in Documentation:
+### Content location in the documentation:
 <!-- https://docs.wso2.com/display/AM260/WSO2+API+Manager+Documentation -->
 - Link:
 
@@ -23,12 +23,12 @@ assignees: Mariangela, ruthryi, shaniR
 - Any other reference:
 
 ---
-### Optional Fields
-#### Related Issues:
+### Optional fields
+#### Related issues:
 <!-- Any related issues from this/other repositories-->
 
-#### Suggested Labels:
+#### Suggested labels:
 <!--Only to be used by non-members-->
 
-#### Suggested Assignees:
+#### Suggested assignees:
 <!--Only to be used by non-members-->
