@@ -25,8 +25,10 @@ public class RegistryCacheInvalidationClientWrapper extends RegistryCacheInvalid
     private AuthenticationAdminStub authStub;
     private RegistryCacheInvalidationServiceStub cacheStub;
 
-    public RegistryCacheInvalidationClientWrapper(AuthenticationAdminStub authStub, RegistryCacheInvalidationServiceStub cacheStub)
+    public RegistryCacheInvalidationClientWrapper(AuthenticationAdminStub authStub,
+                                                  RegistryCacheInvalidationServiceStub cacheStub, String organization)
             throws APIManagementException {
+        super(organization);
         this.authStub = authStub;
         this.cacheStub = cacheStub;
     }

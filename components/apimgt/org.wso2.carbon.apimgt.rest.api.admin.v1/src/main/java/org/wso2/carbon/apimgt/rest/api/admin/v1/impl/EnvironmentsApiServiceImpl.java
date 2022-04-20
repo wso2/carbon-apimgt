@@ -40,8 +40,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      */
     public Response environmentsEnvironmentIdDelete(String environmentId, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        apiAdmin.deleteEnvironment(tenantDomain, environmentId);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        apiAdmin.deleteEnvironment(organization, environmentId);
         return Response.ok().build();
     }
 
@@ -57,9 +57,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     public Response environmentsEnvironmentIdPut(String environmentId, EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         body.setId(environmentId);
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
-        apiAdmin.updateEnvironment(tenantDomain, env);
+        apiAdmin.updateEnvironment(organization, env);
         URI location = null;
         try {
             location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
@@ -79,8 +79,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      */
     public Response environmentsGet(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        List<Environment> envList = apiAdmin.getAllEnvironments(tenantDomain);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        List<Environment> envList = apiAdmin.getAllEnvironments(organization);
         EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);
         return Response.ok().entity(envListDTO).build();
     }
@@ -95,9 +95,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     public Response environmentsPost(EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
-            EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(tenantDomain, env));
+            EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(organization, env));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
             return Response.created(location).entity(envDTO).build();
         } catch (URISyntaxException e) {

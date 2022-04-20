@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,12 +52,13 @@ public class SettingsMappingUtil {
      * @return SettingsDTO
      * @throws APIManagementException
      */
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException {
+    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, String organization) throws APIManagementException,
+            IOException {
 
         SettingsDTO settingsDTO = new SettingsDTO();
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
         if (isUserAvailable) {
-            Map<String, Environment> environments = APIUtil.getEnvironments();
+            Map<String, Environment> environments = APIUtil.getEnvironments(organization);
             if (environments != null) {
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }

@@ -319,7 +319,7 @@ public class ImportUtils {
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
             }
             List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
-                    tenantDomain, apiProvider);
+                    tenantDomain, apiProvider, organization);
             if (apiRevisionDeployments.size() > 0) {
                 String importedAPIUuid = importedApi.getUuid();
                 String revisionId;
@@ -439,12 +439,13 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs when validating the deployments list
      */
     private static List<APIRevisionDeployment> getValidatedDeploymentsList(JsonArray deploymentInfoArray,
-                                                                           String tenantDomain, APIProvider apiProvider)
+                                                                           String tenantDomain, APIProvider apiProvider,
+                                                                           String organization)
             throws APIManagementException {
 
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
-            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments();
+            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments(organization);
 
             for (int i = 0; i < deploymentInfoArray.size(); i++) {
                 JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
@@ -1950,7 +1951,7 @@ public class ImportUtils {
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
             }
             List<APIRevisionDeployment> apiProductRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
-                    currentTenantDomain, apiProvider);
+                    currentTenantDomain, apiProvider, organization);
             if (apiProductRevisionDeployments.size() > 0) {
                 String importedAPIUuid = importedApiProduct.getUuid();
                 String revisionId;

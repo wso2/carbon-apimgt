@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.CarbonContext;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -103,7 +104,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (!revisionUUIDs.contains(revisionUUID)) {
                 revisionUUIDs.add(revisionUUID);
-                Map<String, Environment> environments = APIUtil.getEnvironments();
+                String organization = apiProvider.getAPIInfoByUUID(deployedAPIRevisionDTO.getApiId()).getOrganization();
+                Map<String, Environment> environments = APIUtil.getEnvironments(organization);
                 List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
                 for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
                     DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();

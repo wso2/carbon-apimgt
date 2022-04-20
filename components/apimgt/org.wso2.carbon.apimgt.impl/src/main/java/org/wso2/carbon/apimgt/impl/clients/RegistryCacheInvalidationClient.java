@@ -20,13 +20,9 @@ package org.wso2.carbon.apimgt.impl.clients;
 
 import java.util.Map;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.registry.cache.stub.RegistryCacheInvalidationServiceStub;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 
 /**
  * This is the client implementation of RegistryCacheInvalidationService
@@ -39,8 +35,8 @@ public class RegistryCacheInvalidationClient {
     Map<String, Environment> environments;
     
 
-    public RegistryCacheInvalidationClient() throws APIManagementException {
-        environments = APIUtil.getEnvironments();
+    public RegistryCacheInvalidationClient(String organization) throws APIManagementException {
+        environments = APIUtil.getEnvironments(organization);
     }
 
 }

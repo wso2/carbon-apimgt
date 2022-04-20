@@ -70,7 +70,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AsyncAPIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -687,7 +686,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // gets the first available environment if environment is not provided
             if (StringUtils.isEmpty(environmentName)) {
-                Map<String, Environment> existingEnvironments = APIUtil.getEnvironments();
+                Map<String, Environment> existingEnvironments = APIUtil.getEnvironments(organization);
 
                 // find a valid environment name from API
                 // gateway environment may be invalid due to inconsistent state of the API

@@ -145,7 +145,9 @@ public class APIMWSDLReaderTest {
         API api = getAPIForTesting();
         String environmentName = "Default";
         String environmentType = "hybrid";
-        PowerMockito.when(APIUtil.getGatewayEndpoint(api.getTransports(), environmentName, environmentType))
+        String organization = "61416403c40f086ad2dc5eed";
+        PowerMockito.when(APIUtil.getGatewayEndpoint(api.getTransports(), environmentName, environmentType,
+                        organization))
                 .thenReturn("http://localhost:8280");
 
         APIMWSDLReader wsdlReader = new APIMWSDLReader("");
@@ -211,7 +213,7 @@ public class APIMWSDLReaderTest {
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
             Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
                     .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
-            PowerMockito.when(APIUtil.getEnvironments()).thenReturn(gatewayEnvironments);
+            PowerMockito.when(APIUtil.getEnvironments("61416403c40f086ad2dc5eed")).thenReturn(gatewayEnvironments);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

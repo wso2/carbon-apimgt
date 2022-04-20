@@ -5432,6 +5432,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         Map<String, String> hostsWithSchemes = new HashMap<>();
+        String organization = api.getOrganization();
         if (!domains.isEmpty()) {
             String customUrl = domains.get(APIConstants.CUSTOM_URL);
             if (customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
@@ -5440,7 +5441,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
             }
         } else {
-            Map<String, Environment> allEnvironments = APIUtil.getEnvironments();
+            Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
@@ -5780,7 +5781,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (api.getEnvironments() != null) {
                     environmentString = String.join(",", api.getEnvironments());
                 }
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
                 //CORS . if null is returned, set default config from the configuration
                 if(api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
@@ -6006,7 +6007,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return Host name to transport scheme mapping
      * @throws APIManagementException if an error occurs when getting host names with schemes
      */
-    private Map<String, String> getHostWithSchemeMappingForEnvironmentWS(String apiTenantDomain, String environmentName)
+    private Map<String, String> getHostWithSchemeMappingForEnvironmentWS(String apiTenantDomain, String environmentName,
+                                                                         String organization)
             throws APIManagementException {
 
         Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
@@ -6019,7 +6021,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 hostsWithSchemes.put(APIConstants.WSS_PROTOCOL, customUrl);
             }
         } else {
-            Map<String, Environment> allEnvironments = APIUtil.getEnvironments();
+            Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
