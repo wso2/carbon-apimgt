@@ -279,9 +279,9 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     /**
      * Undeploy API artifact from provided environment in the external gateway when Api is retired
      *
-     * @param api         API to be undeployed from the external gateway
-     * @param environment Environment needed to be undeployed API from the external gateway
-     * @throws DeployerException if error occurs when undeploying APIs from the external gateway
+     * @param api         API to be un deployed from the external gateway
+     * @param environment Environment needed to be un deployed API from the external gateway
+     * @throws DeployerException if error occurs when un deploying APIs from the external gateway
      */
     public boolean undeployWhenRetire(API api, Environment environment) throws DeployerException {
         Application application;
