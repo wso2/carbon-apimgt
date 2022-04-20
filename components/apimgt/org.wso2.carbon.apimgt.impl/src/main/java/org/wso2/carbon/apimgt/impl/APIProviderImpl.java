@@ -5391,7 +5391,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
                         apiOrApiProductId, uuid);
 
-                // Remove revisions and subscriptions after
+                // Remove revisions and subscriptions after API retire
                 if (!isApiProduct) {
                     String newStatus = (targetStatus != null) ? targetStatus.toUpperCase() : targetStatus;
                     if (APIConstants.RETIRED.equals(newStatus)) {
