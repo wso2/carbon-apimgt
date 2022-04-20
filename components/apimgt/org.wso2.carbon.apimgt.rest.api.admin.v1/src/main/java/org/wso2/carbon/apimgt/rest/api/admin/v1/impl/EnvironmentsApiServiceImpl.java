@@ -40,7 +40,6 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      */
     public Response environmentsEnvironmentIdDelete(String environmentId, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         apiAdmin.deleteEnvironment(organization, environmentId);
         return Response.ok().build();
@@ -96,7 +95,6 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     public Response environmentsPost(EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
             EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(organization, env));
