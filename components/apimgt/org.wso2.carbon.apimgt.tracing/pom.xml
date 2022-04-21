@@ -74,29 +74,8 @@
             <artifactId>opentracing-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-            <version>1.12.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-jaeger</artifactId>
-            <version>1.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-extension-trace-propagators</artifactId>
-            <version>1.10.1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-semconv</artifactId>
-            <version>1.9.1-alpha</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-zipkin</artifactId>
-            <version>1.12.0</version>
+            <groupId>org.wso2.orbit.io.opentelemetry</groupId>
+            <artifactId>opentelemetry-all</artifactId>
         </dependency>
 
     </dependencies>
@@ -155,6 +134,7 @@
                             org.slf4j.*,
                             io.opentracing.*; version="${jaeger.client.version}",
                             io.opentracing.*; version="${jaeger.client.version}",
+                            io.opentelemetry.*; version="${opentelemetry.all.version}",
                             zipkin2.reporter.*; version="${zipkin.reporter.version}",
                             zipkin2.reporter.okhttp3.*; version="${zipkin.sender.okhttp3.version}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
