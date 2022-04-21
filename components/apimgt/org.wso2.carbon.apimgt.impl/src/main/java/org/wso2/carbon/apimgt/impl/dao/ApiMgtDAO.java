@@ -1111,6 +1111,9 @@ public class ApiMgtDAO {
         Set<Subscription> subscriptionSet = new HashSet();
         try {
             conn = APIMgtDBUtil.getConnection();
+            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
+                getTopicSubscriptionsQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS_POSTGRE_SQL;
+            }
             ps = conn.prepareStatement(getTopicSubscriptionsQuery);
             ps.setString(1, applicationId);
             resultSet = ps.executeQuery();
@@ -1153,6 +1156,9 @@ public class ApiMgtDAO {
         Set<Subscription> subscriptionSet = new HashSet();
         try {
             conn = APIMgtDBUtil.getConnection();
+            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
+                getTopicSubscriptionsByApiIdQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS_BY_API_KEY_POSTGRE_SQL;
+            }
             ps = conn.prepareStatement(getTopicSubscriptionsByApiIdQuery);
             ps.setString(1, applicationId);
             ps.setString(2, apiId);
