@@ -25,7 +25,11 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 /**
  * Osgi Registration for Tracing Service.
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetryServiceImpl} instead</p>
  */
+
+@Deprecated
 public class TracingServiceImpl implements TracingService {
 
     private static final Log log = LogFactory.getLog(TracingServiceImpl.class);

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
+import io.opentelemetry.context.Context;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -47,9 +48,6 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
-import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
-import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
-import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -85,49 +83,12 @@ public class APIKeyValidationService {
                                                List keyManagers)
             throws APIKeyMgtException, APIManagementException {
 
-//        TracingSpan validateMainSpan = null;
-//        TracingSpan getAccessTokenCacheSpan = null;
-//        TracingSpan fetchingKeyValDTOSpan = null;
-//        TracingSpan validateTokenSpan = null;
-//        TracingSpan validateSubscriptionSpan = null;
-//        TracingSpan validateScopeSpan = null;
-//        TracingSpan generateJWTSpan = null;
-//        TracingSpan keyCache = null;
-//        TracingSpan keyValResponseSpan = null;
-//        TracingTracer tracer = Util.getGlobalTracer();
-
-        TelemetrySpan validateMainSpan = null;
-        TelemetrySpan getAccessTokenCacheSpan = null;
-        TelemetrySpan fetchingKeyValDTOSpan = null;
-        TelemetrySpan validateTokenSpan = null;
-        TelemetrySpan validateSubscriptionSpan = null;
-        TelemetrySpan validateScopeSpan = null;
-        TelemetrySpan generateJWTSpan = null;
-        TelemetrySpan keyCache = null;
-        TelemetrySpan keyValResponseSpan = null;
-        TelemetryTracer tracer = TelemetryUtil.getGlobalTracer();
-
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_MAIN"));
         Timer.Context timerContext = timer.start();
 
         MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
-        if (TelemetryUtil.telemetryEnabled() && axis2MessageContext != null) {
-            Map map = (Map) axis2MessageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-            TelemetrySpan spanContext = TelemetryUtil.extract(map);
-            validateMainSpan = TelemetryUtil.startSpan(TracingConstants.VALIDATE_MAIN, spanContext, tracer);
-        }
 
-//        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
-//                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_MAIN"));
-//        Timer.Context timerContext = timer.start();
-//
-//        MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
-//        if (Util.tracingEnabled() && axis2MessageContext != null) {
-//            Map map = (Map) axis2MessageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-//            TracingSpan spanContext = Util.extract(tracer, map);
-//            validateMainSpan = Util.startSpan(TracingConstants.VALIDATE_MAIN, spanContext, tracer);
-//        }
         Map headersMap = null;
         String activityID = null;
         try {
@@ -175,44 +136,12 @@ public class APIKeyValidationService {
         validationContext.setTenantDomain(tenantDomain);
         validationContext.setKeyManagers(keyManagers);
 
-//        if (Util.tracingEnabled()) {
-//            getAccessTokenCacheSpan =
-//                    Util.startSpan(TracingConstants.GET_ACCESS_TOKEN_CACHE_KEY, validateMainSpan, tracer);
-//        }
-//        String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken,
-//                                                         context, version, matchingResource, httpVerb,
-//                                                         requiredAuthenticationLevel);
-//
-//        validationContext.setCacheKey(cacheKey);
-//        if (Util.tracingEnabled()) {
-//            Util.finishSpan(getAccessTokenCacheSpan);
-//            fetchingKeyValDTOSpan =
-//                    Util.startSpan(TracingConstants.FETCHING_API_KEY_VAL_INFO_DTO_FROM_CACHE, validateMainSpan,
-//                    tracer);
-//        }
-//        APIKeyValidationInfoDTO infoDTO = APIKeyMgtUtil.getFromKeyManagerCache(cacheKey);
-//        if (Util.tracingEnabled()) {
-//            Util.finishSpan(fetchingKeyValDTOSpan);
-//        }
-
-        if (TelemetryUtil.telemetryEnabled()) {
-            getAccessTokenCacheSpan =
-                    TelemetryUtil.startSpan(TracingConstants.GET_ACCESS_TOKEN_CACHE_KEY, validateMainSpan, tracer);
-        }
         String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken,
                 context, version, matchingResource, httpVerb, requiredAuthenticationLevel);
 
         validationContext.setCacheKey(cacheKey);
-        if (TelemetryUtil.telemetryEnabled()) {
-            TelemetryUtil.finishSpan(getAccessTokenCacheSpan);
-            fetchingKeyValDTOSpan =
-                    TelemetryUtil.startSpan(TracingConstants.FETCHING_API_KEY_VAL_INFO_DTO_FROM_CACHE,
-                            validateMainSpan, tracer);
-        }
+
         APIKeyValidationInfoDTO infoDTO = APIKeyMgtUtil.getFromKeyManagerCache(cacheKey);
-        if (TelemetryUtil.telemetryEnabled()) {
-            TelemetryUtil.finishSpan(fetchingKeyValDTOSpan);
-        }
 
         if (infoDTO != null) {
             validationContext.setCacheHit(true);
@@ -225,31 +154,19 @@ public class APIKeyValidationService {
         Timer timer2 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_TOKEN"));
         Timer.Context timerContext2 = timer2.start();
-        if (TelemetryUtil.telemetryEnabled()) {
-            validateTokenSpan = TelemetryUtil.startSpan(TracingConstants.VALIDATE_TOKEN, validateMainSpan, tracer);
-        }
+
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
         timerContext2.stop();
-        if (TelemetryUtil.telemetryEnabled()) {
-            TelemetryUtil.finishSpan(validateTokenSpan);
-        }
         log.debug("State after calling validateToken ... " + state);
 
         if (state) {
             Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SUBSCRIPTION"));
             Timer.Context timerContext3 = timer3.start();
-            if (TelemetryUtil.telemetryEnabled()) {
-                validateSubscriptionSpan =
-                        TelemetryUtil.startSpan(TracingConstants.VALIDATE_SUBSCRIPTION, validateMainSpan, tracer);
-            }
             state = keyValidationHandler.validateSubscription(validationContext);
             timerContext3.stop();
-            if (TelemetryUtil.telemetryEnabled()) {
-                TelemetryUtil.finishSpan(validateSubscriptionSpan);
-            }
         }
 
         log.debug("State after calling validateSubscription... " + state);
@@ -258,14 +175,8 @@ public class APIKeyValidationService {
             Timer timer4 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SCOPES"));
             Timer.Context timerContext4 = timer4.start();
-            if (TelemetryUtil.telemetryEnabled()) {
-                validateScopeSpan = TelemetryUtil.startSpan(TracingConstants.VALIDATE_SCOPES, validateMainSpan, tracer);
-            }
             state = keyValidationHandler.validateScopes(validationContext);
             timerContext4.stop();
-            if (TelemetryUtil.telemetryEnabled()) {
-                TelemetryUtil.finishSpan(validateScopeSpan);
-            }
         }
 
         log.debug("State after calling validateScopes... " + state);
@@ -275,33 +186,15 @@ public class APIKeyValidationService {
             Timer timer5 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GENERATE_JWT"));
             Timer.Context timerContext5 = timer5.start();
-            if (TelemetryUtil.telemetryEnabled()) {
-                generateJWTSpan = TelemetryUtil.startSpan(TracingConstants.GENERATE_JWT, validateMainSpan, tracer);
-            }
             keyValidationHandler.generateConsumerToken(validationContext);
             timerContext5.stop();
-            if (TelemetryUtil.telemetryEnabled()) {
-                TelemetryUtil.finishSpan(generateJWTSpan);
-            }
         }
         log.debug("State after calling generateConsumerToken... " + state);
 
         if (!validationContext.isCacheHit()) {
-            if (TelemetryUtil.telemetryEnabled()) {
-                keyCache = TelemetryUtil.startSpan(TracingConstants.WRITE_TO_KEY_MANAGER_CACHE, validateMainSpan,
-                        tracer);
-            }
             APIKeyMgtUtil.writeToKeyManagerCache(cacheKey, validationContext.getValidationInfoDTO());
-            if (TelemetryUtil.telemetryEnabled()) {
-                TelemetryUtil.finishSpan(keyCache);
-            }
         }
 
-        if (TelemetryUtil.telemetryEnabled()) {
-            keyValResponseSpan =
-                    TelemetryUtil.startSpan(TracingConstants.PUBLISHING_KEY_VALIDATION_RESPONSE, validateMainSpan,
-                            tracer);
-        }
         if (log.isDebugEnabled() && axis2MessageContext != null) {
             logMessageDetails(axis2MessageContext, validationContext.getValidationInfoDTO());
         }
@@ -311,13 +204,7 @@ public class APIKeyValidationService {
             log.debug("KeyValidation response from keymanager to gateway for access token:" + accessToken + " at "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
-        if (TelemetryUtil.telemetryEnabled()) {
-            TelemetryUtil.finishSpan(keyValResponseSpan);
-        }
         timerContext.stop();
-        if (TelemetryUtil.telemetryEnabled() && validateMainSpan != null) {
-            TelemetryUtil.finishSpan(validateMainSpan);
-        }
         return validationContext.getValidationInfoDTO();
     }
 

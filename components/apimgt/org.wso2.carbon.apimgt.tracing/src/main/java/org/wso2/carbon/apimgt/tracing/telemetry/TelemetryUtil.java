@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.tracing.telemetry;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -68,6 +67,21 @@ public class TelemetryUtil {
                 childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).startSpan();
             }
         }
+        return new TelemetrySpan(childSpan);
+    }
+
+    /**
+     * Start telemetry tracing span after extracting a context
+     * @param spanName
+     * @param parentSpan
+     * @param tracer     io.opentelemetry.api.trace tracer
+     * @return a TelemetrySpan object
+     */
+    public static TelemetrySpan startSpan(String spanName, Context parentSpan, TelemetryTracer tracer) {
+
+        Span childSpan;
+        childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(parentSpan).startSpan();
+
         return new TelemetrySpan(childSpan);
     }
 
@@ -152,7 +166,7 @@ public class TelemetryUtil {
      *
      * @param tracerSpecificCarrier
      */
-    public static TelemetrySpan extract(Map<String, String> tracerSpecificCarrier) {
+    public static Context extract(Map<String, String> tracerSpecificCarrier) {
 
         OpenTelemetry openTelemetry = TelemetryServiceImpl.getInstance().getOpenTelemetry();
         TextMapGetter<Map<String, String>> getter =
@@ -171,13 +185,8 @@ public class TelemetryUtil {
                     }
                 };
 
-        return new TelemetrySpan((Span) openTelemetry.getPropagators().getTextMapPropagator()
-                .extract(Context.current(), tracerSpecificCarrier, getter));
-    }
-
-    public static TelemetryTracer getGlobalTracer() {
-
-        return new TelemetryTracer(GlobalOpenTelemetry.getTracer("org.wso2.carbon.apimgt.tracing.telemetry"));
+        return openTelemetry.getPropagators().getTextMapPropagator()
+                .extract(Context.current(), tracerSpecificCarrier, getter);
     }
 
     public static boolean telemetryEnabled() {
@@ -185,13 +194,13 @@ public class TelemetryUtil {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
-            boolean remoteTracerEnabled =
+            boolean remoteTelemetryTracerEnabled =
                     Boolean.parseBoolean(apiManagerConfiguration
                             .getFirstProperty(TelemetryConstants.REMOTE_TELEMETRY_TRACER_ENABLED));
-            boolean logTracerEnabled =
+            boolean logTelemetryTracerEnabled =
                     Boolean.parseBoolean(apiManagerConfiguration
                             .getFirstProperty(TelemetryConstants.LOG_TELEMETRY_TRACER_ENABLED));
-            return remoteTracerEnabled || logTracerEnabled;
+            return remoteTelemetryTracerEnabled || logTelemetryTracerEnabled;
         }
         return false;
     }

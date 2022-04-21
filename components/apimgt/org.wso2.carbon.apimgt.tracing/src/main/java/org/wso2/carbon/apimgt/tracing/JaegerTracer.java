@@ -30,7 +30,10 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 /**
  * Class for getting Jaeger tracer from reading configuration file
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.JaegerTelemetry} instead</p>
  * */
+@Deprecated
 public class JaegerTracer implements OpenTracer {
 
     private static final String NAME = "jaeger";
