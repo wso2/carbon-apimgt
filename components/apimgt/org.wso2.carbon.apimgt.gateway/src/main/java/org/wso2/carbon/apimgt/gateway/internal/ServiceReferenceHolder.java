@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import io.opentelemetry.api.OpenTelemetry;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,7 +85,6 @@ public class ServiceReferenceHolder {
     private APIThrottleDataService throttleDataService;
     private Certificate publicCert;
     private PrivateKey privateKey;
-    private OpenTelemetry openTelemetry;
 
     private JWTValidationService jwtValidationService;
     private KeyManagerDataService keyManagerDataService;
@@ -412,13 +410,4 @@ public class ServiceReferenceHolder {
         this.redisPool = redisPool;
     }
 
-    public void setOpenTelemetry(OpenTelemetry openTelemetry){
-
-        this.openTelemetry=openTelemetry;
-    }
-
-    public OpenTelemetry getOpenTelemetry(){
-
-        return openTelemetry;
-    }
 }

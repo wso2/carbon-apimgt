@@ -23,14 +23,14 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.API;
+import org.apache.synapse.api.Resource;
+import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.api.API;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
-import org.apache.synapse.api.Resource;
-import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -71,6 +71,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     private String authorizationHeader;
 
     public void init(SynapseEnvironment synapseEnvironment) {
+
         if (log.isDebugEnabled()) {
             log.debug("Initializing CORSRequest Handler instance");
         }
@@ -80,6 +81,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     }
 
     protected APIManagerConfigurationService getApiManagerConfigurationService() {
+
         return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService();
     }
 
@@ -89,6 +91,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
      * @return true after Initialize the values
      */
     void initializeHeaders() {
+
         if (allowHeaders == null) {
             allowHeaders = APIUtil.getAllowedHeaders();
         }
@@ -118,6 +121,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     }
 
     public void destroy() {
+
         if (log.isDebugEnabled()) {
             log.debug("Destroying CORSRequest Handler instance");
         }
@@ -127,23 +131,25 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     public boolean handleRequest(MessageContext messageContext) {
 
         Timer.Context context = startMetricTimer();
-        TelemetrySpan CORSRequestHandlerSpan = null;
+        TelemetrySpan corsRequestHandlerSpan = null;
+        TracingSpan corsRequestHandlerTracingSpan = null;
         if (TelemetryUtil.telemetryEnabled()) {
-            TelemetrySpan responseLatencySpan =
-                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-            TelemetryTracer tracer = TelemetryUtil.getGlobalTracer();
-            CORSRequestHandlerSpan =
-                    TelemetryUtil.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
+            if (Util.legacy()) {
+                TracingSpan responseLatencySpan =
+                        (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+                TracingTracer tracer = Util.getGlobalTracer();
+                corsRequestHandlerTracingSpan =
+                        Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
+            } else {
+                TelemetrySpan responseLatencySpan =
+                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+                TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
+                corsRequestHandlerSpan =
+                        TelemetryUtil.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan,
+                                tracer);
+            }
         }
 
-//        TracingSpan CORSRequestHandlerSpan = null;
-//        if (Util.tracingEnabled()) {
-//            TracingSpan responseLatencySpan =
-//                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-//            TracingTracer tracer = Util.getGlobalTracer();
-//            CORSRequestHandlerSpan =
-//                    Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
-//        }
         if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
             if (log.isDebugEnabled()) {
                 log.debug("Skipping GraphQL subscription handshake request.");
@@ -238,43 +244,48 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             setCORSHeaders(messageContext, selectedResource);
             return true;
         } catch (Exception e) {
-            if (TelemetryUtil.telemetryEnabled() && CORSRequestHandlerSpan != null) {
-                TelemetryUtil.setTag(CORSRequestHandlerSpan, APIMgtGatewayConstants.ERROR,
-                        APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
+            if (TelemetryUtil.telemetryEnabled()) {
+                if (Util.legacy() && corsRequestHandlerTracingSpan != null) {
+                    Util.setTag(corsRequestHandlerTracingSpan, APIMgtGatewayConstants.ERROR,
+                            APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
+                } else if (corsRequestHandlerTracingSpan != null) {
+                    TelemetryUtil.setTag(corsRequestHandlerSpan, APIMgtGatewayConstants.ERROR,
+                            APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
+                }
             }
-
-//            if (Util.tracingEnabled() && CORSRequestHandlerSpan != null) {
-//                Util.setTag(CORSRequestHandlerSpan, APIMgtGatewayConstants.ERROR,
-//                        APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
-//            }
             throw e;
         } finally {
             stopMetricTimer(context);
             if (TelemetryUtil.telemetryEnabled()) {
-                TelemetryUtil.finishSpan(CORSRequestHandlerSpan);
+                if (Util.legacy()) {
+                    Util.finishSpan(corsRequestHandlerTracingSpan);
+                } else {
+                    TelemetryUtil.finishSpan(corsRequestHandlerSpan);
+                }
             }
-//            if (Util.tracingEnabled()) {
-//                Util.finishSpan(CORSRequestHandlerSpan);
-//            }
         }
     }
 
     protected String getFullRequestPath(MessageContext messageContext) {
+
         return RESTUtils.getFullRequestPath(messageContext);
     }
 
     protected Timer.Context startMetricTimer() {
+
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         return timer.start();
     }
 
     protected void stopMetricTimer(Timer.Context context) {
+
         context.stop();
     }
 
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
+
         Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
         if (corsSequence != null) {
             corsSequence.mediate(messageContext);
@@ -303,6 +314,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     }
 
     private void onResourceNotFoundError(MessageContext messageContext, int statusCode, String errorMessage) {
+
         messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, statusCode);
         messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, statusCode);
         messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, errorMessage);
@@ -319,6 +331,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
      * @param selectedResource resource according to the request
      */
     public void setCORSHeaders(MessageContext messageContext, Resource selectedResource) {
+
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         Map<String, String> headers =
@@ -326,7 +339,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         String requestOrigin = headers.get("Origin");
         String allowedOrigin = getAllowedOrigins(requestOrigin);
 
-        //Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the api-manager configuration
+        //Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the
+        // api-manager configuration
         //and the allowed origin is not the wildcard (*)
         if (allowCredentialsEnabled && !"*".equals(allowedOrigin)) {
             messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE);
@@ -359,18 +373,22 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     }
 
     protected boolean isCorsEnabled() {
+
         return APIUtil.isCORSEnabled();
     }
 
     public String getAllowHeaders() {
+
         return allowHeaders;
     }
 
     public void setAllowHeaders(String allowHeaders) {
+
         this.allowHeaders = allowHeaders;
     }
 
     public String getAllowedOrigins(String origin) {
+
         if (allowedOrigins.contains("*")) {
             return "*";
         } else if (allowedOrigins.contains(origin)) {
@@ -390,41 +408,50 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     }
 
     public void setAllowedOrigins(String allowedOrigins) {
+
         this.allowedOrigins = new HashSet<String>(Arrays.asList(allowedOrigins.split(",")));
     }
 
     public String getApiImplementationType() {
+
         return apiImplementationType;
     }
 
     public void setApiImplementationType(String apiImplementationType) {
+
         this.apiImplementationType = apiImplementationType;
     }
 
     // For backward compatibility with 1.9.0 since the property name is inline
     public String getInline() {
+
         return getApiImplementationType();
     }
 
     // For backward compatibility with 1.9.0 since the property name is inline
     public void setInline(String inlineType) {
+
         setApiImplementationType(inlineType);
     }
 
     public String isAllowCredentials() {
+
         return allowCredentials;
     }
 
     public void setAllowCredentials(String allowCredentials) {
+
         this.allowCredentialsEnabled = Boolean.parseBoolean(allowCredentials);
         this.allowCredentials = allowCredentials;
     }
 
     public String getAllowedMethods() {
+
         return allowedMethods;
     }
 
     public void setAllowedMethods(String allowedMethods) {
+
         this.allowedMethods = allowedMethods;
         if (allowedMethods != null) {
             allowedMethodList = Arrays.asList(allowedMethods.split(","));
@@ -432,10 +459,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     }
 
     public String getAuthorizationHeader() {
+
         return authorizationHeader;
     }
 
     public void setAuthorizationHeader(String authorizationHeader) {
+
         this.authorizationHeader = authorizationHeader;
     }
 }
