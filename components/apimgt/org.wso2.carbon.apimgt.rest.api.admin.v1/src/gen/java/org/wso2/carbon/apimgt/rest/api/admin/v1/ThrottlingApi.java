@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ExportThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
@@ -45,6 +46,44 @@ public class ThrottlingApi  {
 
 ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
 
+
+    @GET
+    @Path("/policies/export")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Export a Throttling Policy", notes = "This operation can be used to export the details of a particular Throttling Policy. ", response = ExportThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+        })
+    }, tags={ "Import Export",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Export Successful. ", response = ExportThrottlePolicyDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response exportThrottlingPolicy( @ApiParam(value = "UUID of the ThrotlingPolicy")  @QueryParam("policyId") String policyId,  @ApiParam(value = "Throttling Policy Name ")  @QueryParam("name") String name,  @ApiParam(value = "Type of the Throttling Policy ", allowableValues="subscription, application, advanced, custom")  @QueryParam("type") String type,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format) throws APIManagementException{
+        return delegate.exportThrottlingPolicy(policyId, name, type, format, securityContext);
+    }
+
+    @POST
+    @Path("/policies/import")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Import a Throttling Policy", notes = "This operation can be used to import a Throttling Policy ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+        })
+    }, tags={ "Import Export",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. Throttling Policy Imported Successfully. ", response = Void.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response importThrottlingPolicy(@ApiParam(value = "Throttling Policy object that should to be imported " ,required=true) ExportThrottlePolicyDTO exportThrottlePolicyDTO,  @ApiParam(value = "Update an existing throttlingpolicy with the same name ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
+        return delegate.importThrottlingPolicy(exportThrottlePolicyDTO, overwrite, securityContext);
+    }
 
     @GET
     @Path("/deny-policies")

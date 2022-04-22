@@ -19,6 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ExportThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
 
@@ -31,6 +32,8 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ThrottlingApiService {
+      public Response exportThrottlingPolicy(String policyId, String name, String type, String format, MessageContext messageContext) throws APIManagementException;
+      public Response importThrottlingPolicy(ExportThrottlePolicyDTO exportThrottlePolicyDTO, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPoliciesGet(String accept, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPoliciesPost(String contentType, BlockingConditionDTO blockingConditionDTO, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPolicyConditionIdDelete(String conditionId, MessageContext messageContext) throws APIManagementException;
