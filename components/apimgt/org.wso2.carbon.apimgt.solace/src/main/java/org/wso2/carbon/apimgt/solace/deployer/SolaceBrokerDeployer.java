@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
@@ -52,6 +53,7 @@ import java.util.Set;
 public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
 
     private static final Log log = LogFactory.getLog(SolaceBrokerDeployer.class);
+    protected ApiMgtDAO apiMgtDAO;
 
     /**
      * Get external vendor type as Solace
@@ -279,9 +281,9 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     /**
      * Undeploy API artifact from provided environment in the external gateway when Api is retired
      *
-     * @param api         API to be undeployed from the external gateway
-     * @param environment Environment needed to be undeployed API from the external gateway
-     * @throws DeployerException if error occurs when undeploying APIs from the external gateway
+     * @param api         API to be un deployed from the external gateway
+     * @param environment Environment needed to be un deployed API from the external gateway
+     * @throws DeployerException if error occurs when un deploying APIs from the external gateway
      */
     public boolean undeployWhenRetire(API api, Environment environment) throws DeployerException {
         Application application;
@@ -294,8 +296,9 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getUuid(), api.getOrganization());
+            apiMgtDAO = ApiMgtDAO.getInstance();
             for (SubscribedAPI usage : apiUsages) {
-                application = usage.getApplication();
+                application = apiMgtDAO.getApplicationByUUID(usage.getApplication().getUUID());
                 Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
                 boolean isProductionKeysGenerated = false;
                 for (APIKey key : consumerKeys) {
