@@ -632,6 +632,7 @@ public final class APIConstants {
         public static final String ON_HOLD = "ON_HOLD";
         public static final String TIER_UPDATE_PENDING = "TIER_UPDATE_PENDING";
         public static final String REJECTED = "REJECTED";
+        public static final String DELETE_PENDING = "DELETE_PENDING";
 
         private SubscriptionStatus() {
 
@@ -1225,6 +1226,7 @@ public final class APIConstants {
         public static final String APPLICATION_APPROVED = "APPROVED";
         public static final String APPLICATION_REJECTED = "REJECTED";
         public static final String APPLICATION_ONHOLD = "ON_HOLD";
+        public static final String DELETE_PENDING = "DELETE_PENDING";
     }
 
     public static class AppRegistrationStatus {
