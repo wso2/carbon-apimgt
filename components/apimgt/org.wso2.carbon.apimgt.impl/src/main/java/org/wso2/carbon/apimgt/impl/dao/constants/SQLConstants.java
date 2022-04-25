@@ -3481,8 +3481,9 @@ public class SQLConstants {
         public static final String ADD_API_REVISION =
                 " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY, CREATED_TIME)" +
                         " VALUES (?,?,?,?,?,?)";
+        //TODO edited
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
-                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID " +
+                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID, AUM.URL_MAPPING_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
@@ -3584,7 +3585,7 @@ public class SQLConstants {
         public static final String REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING =
                 "DELETE FROM AM_API_URL_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_REVISION_UUID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
-                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID " +
+                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID, AUM.URL_MAPPING_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID = ?";
@@ -3960,7 +3961,6 @@ public class SQLConstants {
                         "   AMOE.OPERATION_ENDPOINT_UUID," +
                         "   AMOE.REVISION_UUID," +
                         "   AMOE.ENDPOINT_NAME," +
-                        "   AMOE.SECURITY_CONFIG," +
                         "   AMOE.ENDPOINT_CONFIG," +
                         "   AMOE.ORGANIZATION" +
                         " FROM " +
@@ -3973,7 +3973,6 @@ public class SQLConstants {
                         "   AMOE.OPERATION_ENDPOINT_UUID," +
                         "   AMOE.REVISION_UUID," +
                         "   AMOE.ENDPOINT_NAME," +
-                        "   AMOE.SECURITY_CONFIG," +
                         "   AMOE.ENDPOINT_CONFIG," +
                         "   AMOE.ORGANIZATION" +
                         " FROM " +
@@ -3987,7 +3986,7 @@ public class SQLConstants {
                         "   AMOE.OPERATION_ENDPOINT_UUID," +
                         "   AMOE.REVISION_UUID," +
                         "   AMOE.ENDPOINT_NAME," +
-                        "   AMOE.SECURITY_CONFIG," +
+    //                    "   AMOE.SECURITY_CONFIG," +
                         "   AMOE.ENDPOINT_CONFIG," +
                         "   AMOE.ORGANIZATION" +
                         " FROM " +
@@ -4008,7 +4007,7 @@ public class SQLConstants {
         public static final String UPDATE_OPERATION_ENDPOINT_BY_UUID =  "UPDATE " +
                 " AM_API_OPERATION_ENDPOINTS " +
                 " SET " +
-                " ENDPOINT_NAME = ?, SECURITY_CONFIG = ?, ENDPOINT_CONFIG = ?, ORGANIZATION = ? " +
+                " REVISION_UUID = ?, ENDPOINT_NAME = ?, ENDPOINT_CONFIG = ?, ORGANIZATION = ? " +
                 " WHERE " +
                 " OPERATION_ENDPOINT_UUID = ?";
 
@@ -4018,9 +4017,9 @@ public class SQLConstants {
                 "OPERATION_ENDPOINT_UUID, " +
                 "REVISION_UUID, " +
                 "ENDPOINT_NAME, " +
-                "SECURITY_CONFIG, " +
+    //            "SECURITY_CONFIG, " +
                 "ENDPOINT_CONFIG, ORGANIZATION) " +
-                "VALUES(?,?,?,?,?,?,?)";
+                "VALUES(?,?,?,?,?,?)";
 
         public static final String ADD_NEW_OPERATION_ENDPOINT_MAPPING = " INSERT INTO " +
                 "AM_API_OPERATION_ENDPOINT_MAPPING " +

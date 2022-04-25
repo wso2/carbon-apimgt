@@ -1865,7 +1865,7 @@ public class PublisherCommonUtils {
                                                                APIProvider apiProvider)
             throws APIManagementException {
         OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(operationEndpointDTO, organization);
-        OperationEndpoint operationEndpointUpdated = apiProvider.updateOperationEndpoint(endpointId, operationEndpoint);
+        OperationEndpoint operationEndpointUpdated = apiProvider.updateOperationEndpoint(apiId, endpointId, operationEndpoint);
         if (operationEndpointUpdated == null) {
             throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
                     "endpoint UUID" + endpointId,

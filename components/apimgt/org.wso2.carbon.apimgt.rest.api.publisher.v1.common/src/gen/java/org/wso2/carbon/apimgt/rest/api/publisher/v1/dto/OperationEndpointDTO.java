@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointConfigDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointSecurityDTO;
 import javax.validation.constraints.*;
 
 
@@ -24,8 +22,7 @@ public class OperationEndpointDTO   {
   
     private String id = null;
     private String name = null;
-    private EndpointSecurityDTO securityConfig = null;
-    private EndpointConfigDTO endpointConfig = null;
+    private Object endpointConfig = null;
 
   /**
    **/
@@ -63,38 +60,21 @@ public class OperationEndpointDTO   {
   }
 
   /**
+   * Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  &#x60;Simple REST Endpoint&#x60;   {     \&quot;endpoint_type\&quot;: \&quot;http\&quot;,     \&quot;sandbox_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     },     \&quot;production_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     }   }  &#x60;Loadbalanced Endpoint&#x60;    {     \&quot;endpoint_type\&quot;: \&quot;load_balance\&quot;,     \&quot;algoCombo\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;,     \&quot;sessionManagement\&quot;: \&quot;\&quot;,     \&quot;sandbox_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;        }     ],     \&quot;production_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ],     \&quot;sessionTimeOut\&quot;: \&quot;\&quot;,     \&quot;algoClassName\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;   }  &#x60;Failover Endpoint&#x60;    {     \&quot;production_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        }     ],     \&quot;endpoint_type\&quot;:\&quot;failover\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;     },     \&quot;sandbox_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ]   }  &#x60;Default Endpoint&#x60;    {     \&quot;endpoint_type\&quot;:\&quot;default\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     }   }  &#x60;Endpoint from Endpoint Registry&#x60;   {     \&quot;endpoint_type\&quot;: \&quot;Registry\&quot;,     \&quot;endpoint_id\&quot;: \&quot;{registry-name:entry-name:version}\&quot;,   } 
    **/
-  public OperationEndpointDTO securityConfig(EndpointSecurityDTO securityConfig) {
-    this.securityConfig = securityConfig;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("securityConfig")
-  public EndpointSecurityDTO getSecurityConfig() {
-    return securityConfig;
-  }
-  public void setSecurityConfig(EndpointSecurityDTO securityConfig) {
-    this.securityConfig = securityConfig;
-  }
-
-  /**
-   **/
-  public OperationEndpointDTO endpointConfig(EndpointConfigDTO endpointConfig) {
+  public OperationEndpointDTO endpointConfig(Object endpointConfig) {
     this.endpointConfig = endpointConfig;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "{\"endpoint_type\":\"http\",\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"}", value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  `Simple REST Endpoint`   {     \"endpoint_type\": \"http\",     \"sandbox_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     },     \"production_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     }   }  `Loadbalanced Endpoint`    {     \"endpoint_type\": \"load_balance\",     \"algoCombo\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\",     \"sessionManagement\": \"\",     \"sandbox_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/2\"        }     ],     \"production_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/3\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ],     \"sessionTimeOut\": \"\",     \"algoClassName\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\"   }  `Failover Endpoint`    {     \"production_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        }     ],     \"endpoint_type\":\"failover\",     \"sandbox_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\"     },     \"production_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/3\"     },     \"sandbox_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ]   }  `Default Endpoint`    {     \"endpoint_type\":\"default\",     \"sandbox_endpoints\":{        \"url\":\"default\"     },     \"production_endpoints\":{        \"url\":\"default\"     }   }  `Endpoint from Endpoint Registry`   {     \"endpoint_type\": \"Registry\",     \"endpoint_id\": \"{registry-name:entry-name:version}\",   } ")
       @Valid
   @JsonProperty("endpointConfig")
-  public EndpointConfigDTO getEndpointConfig() {
+  public Object getEndpointConfig() {
     return endpointConfig;
   }
-  public void setEndpointConfig(EndpointConfigDTO endpointConfig) {
+  public void setEndpointConfig(Object endpointConfig) {
     this.endpointConfig = endpointConfig;
   }
 
@@ -110,13 +90,12 @@ public class OperationEndpointDTO   {
     OperationEndpointDTO operationEndpoint = (OperationEndpointDTO) o;
     return Objects.equals(id, operationEndpoint.id) &&
         Objects.equals(name, operationEndpoint.name) &&
-        Objects.equals(securityConfig, operationEndpoint.securityConfig) &&
         Objects.equals(endpointConfig, operationEndpoint.endpointConfig);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, securityConfig, endpointConfig);
+    return Objects.hash(id, name, endpointConfig);
   }
 
   @Override
@@ -126,7 +105,6 @@ public class OperationEndpointDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    securityConfig: ").append(toIndentedString(securityConfig)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("}");
     return sb.toString();

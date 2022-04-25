@@ -9747,16 +9747,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public OperationEndpoint updateOperationEndpoint(String endpointUUID, OperationEndpoint operationEndpoint)
+    public OperationEndpoint updateOperationEndpoint(String apiUUID, String endpointUUID, OperationEndpoint operationEndpoint)
             throws APIManagementException {
-        return apiMgtDAO.updateOperationEndpoint(endpointUUID, operationEndpoint);
+        return apiMgtDAO.updateOperationEndpoint(apiUUID, endpointUUID, operationEndpoint);
     }
 
     @Override
     public String addOperationEndpoint(String apiUUID, OperationEndpoint operationEndpoint) throws APIManagementException {
         int apiId = apiMgtDAO.getAPIID(apiUUID);
         operationEndpoint.setApiId(apiId);
-        return apiMgtDAO.addOperationEndpoint(operationEndpoint);
+        return apiMgtDAO.addOperationEndpoint(apiUUID, operationEndpoint);
     }
 
     @Override

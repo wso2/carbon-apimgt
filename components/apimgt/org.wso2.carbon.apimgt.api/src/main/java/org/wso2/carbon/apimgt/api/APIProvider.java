@@ -1970,12 +1970,13 @@ public interface APIProvider extends APIManager {
     /**
      *  Update an operation endpoint by providing the endpoint ID
      *
+     * @param apiUUID
      * @param endpointUUID
      * @param operationEndpoint
      * @return
      * @throws APIManagementException
      */
-    OperationEndpoint updateOperationEndpoint(String endpointUUID, OperationEndpoint operationEndpoint)
+    OperationEndpoint updateOperationEndpoint(String apiUUID, String endpointUUID, OperationEndpoint operationEndpoint)
             throws APIManagementException;
 
     /**

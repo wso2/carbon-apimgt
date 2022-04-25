@@ -41,18 +41,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
@@ -215,7 +204,7 @@ public class ExportUtils {
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
                 api, currentApiUuid);
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
-
+        addOperationEndpointsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
             // Export mTLS authentication related certificates
@@ -230,6 +219,37 @@ public class ExportUtils {
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
+    }
+
+    /**
+     * Save All OperationEndpoints To Zip File
+     *
+     * @param archivePath
+     * @param apiID
+     * @param exportFormat
+     * @param apiProvider
+     * @throws APIManagementException
+     */
+    public static void addOperationEndpointsToArchive(String archivePath, String apiID, ExportFormat exportFormat,
+                                                      APIProvider apiProvider) throws APIManagementException {
+        try {
+            CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.OPERATION_ENDPOINTS_DIRECTORY);
+            List<OperationEndpoint> operationEndpointList = apiProvider.getAllOperationEndpointsByUUID(apiID);
+
+            if (operationEndpointList.size() > 0) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                JsonElement operatiobEndpointObj = gson.toJsonTree(operationEndpointList);
+                JsonObject operatiobEndpointJson = (JsonObject) operatiobEndpointObj;
+                CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.OPERATION_ENDPOINTS_DIRECTORY +
+                                File.separator + apiID, exportFormat, ImportExportConstants.TYPE_OPERATION_ENDPOINT, operatiobEndpointJson);
+            }
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while adding operation policy details for API: " + apiID, e);
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Error while saving deployment environment details for API: " + apiID + " as YAML", e);
+        }
+
     }
 
     /**

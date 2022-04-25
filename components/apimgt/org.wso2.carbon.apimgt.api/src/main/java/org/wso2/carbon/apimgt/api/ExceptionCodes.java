@@ -516,6 +516,8 @@ public enum ExceptionCodes implements ErrorHandler {
                                                   "Cannot update an of operation endpoint."),
     ERROR_INSERTING_OPERATION_ENDPOINT_API(902033, "Cannot add an operation endpoint", 400,
                                                   "Error occured while inserting an operation endpoint."),
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_OPERATION_ENDPOINT_API(902036, "Missing Operation endpoint's endpoint config", 404,
+            "Cannot find endpoint config object."),
     OPERATION_ENDPOINT_ID_NOT_FOUND(902034, "Cannot find operation endpoint id", 400,
             "Operation Endpoint id not found in operation_endpoint database."),
     INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),

@@ -8315,12 +8315,100 @@ components:
           type: string
         name:
           type: string
-        securityConfig:
-          type: object
-          $ref: '#/components/schemas/EndpointSecurity'
         endpointConfig:
           type: object
-          $ref: '#/components/schemas/EndpointConfig'
+          properties: { }
+          description: |
+            Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.
+            
+            `Simple REST Endpoint`
+              {
+                "endpoint_type": "http",
+                "sandbox_endpoints":       {
+                   "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+                },
+                "production_endpoints":       {
+                   "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+                }
+              }
+            
+            `Loadbalanced Endpoint`
+            
+              {
+                "endpoint_type": "load_balance",
+                "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+                "sessionManagement": "",
+                "sandbox_endpoints":       [
+                            {
+                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/1"
+                   },
+                            {
+                      "endpoint_type": "http",
+                      "template_not_supported": false,
+                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/2"
+                   }
+                ],
+                "production_endpoints":       [
+                            {
+                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/3"
+                   },
+                            {
+                      "endpoint_type": "http",
+                      "template_not_supported": false,
+                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/4"
+                   }
+                ],
+                "sessionTimeOut": "",
+                "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+              }
+            
+            `Failover Endpoint`
+            
+              {
+                "production_failovers":[
+                   {
+                      "endpoint_type":"http",
+                      "template_not_supported":false,
+                      "url":"https://localhost:9443/am/sample/pizzashack/v1/api/1"
+                   }
+                ],
+                "endpoint_type":"failover",
+                "sandbox_endpoints":{
+                   "url":"https://localhost:9443/am/sample/pizzashack/v1/api/2"
+                },
+                "production_endpoints":{
+                   "url":"https://localhost:9443/am/sample/pizzashack/v1/api/3"
+                },
+                "sandbox_failovers":[
+                   {
+                      "endpoint_type":"http",
+                      "template_not_supported":false,
+                      "url":"https://localhost:9443/am/sample/pizzashack/v1/api/4"
+                   }
+                ]
+              }
+            
+            `Default Endpoint`
+            
+              {
+                "endpoint_type":"default",
+                "sandbox_endpoints":{
+                   "url":"default"
+                },
+                "production_endpoints":{
+                   "url":"default"
+                }
+              }
+            
+            `Endpoint from Endpoint Registry`
+              {
+                "endpoint_type": "Registry",
+                "endpoint_id": "{registry-name:entry-name:version}",
+              }
+          example:
+            endpoint_type: http
+            url: https://localhost:9443/am/sample/pizzashack/v1/api/
+
 
     OperationEndpointList:
       title: Operation Endpoints List

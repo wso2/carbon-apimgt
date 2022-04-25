@@ -317,7 +317,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
+                RestApiUtil.handleInternalServerError("Failed to add operation endpoint to the API " + apiId, e, log);
             }
         } catch (URISyntaxException e) {
             throw new APIManagementException("Error while retrieving operation endpoint location for API " + apiId);
@@ -674,8 +674,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
             validateAPIExistence(apiId);
-            OperationEndpointDTO updatedOperationEndpointDTO = PublisherCommonUtils.updateOperationEndpoint
-                    (apiId, endpointId,operationEndpointDTO, organization, apiProvider);
+            PublisherCommonUtils.updateOperationEndpoint(apiId, endpointId, operationEndpointDTO, organization, apiProvider);
+            OperationEndpoint updatedOperationEndpoint = apiProvider.getOperationEndpointByUUID(apiId, endpointId);
+            OperationEndpointDTO updatedOperationEndpointDTO =
+                    APIMappingUtil.fromOperationEndpointToDTO(updatedOperationEndpoint);
             return Response.ok().entity(updatedOperationEndpointDTO).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -683,9 +685,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
-                                log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving schema of API: "
+                        + apiId, e, log);
             } else {
                 String errorMessage = "Error while uploading schema of the API: " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
