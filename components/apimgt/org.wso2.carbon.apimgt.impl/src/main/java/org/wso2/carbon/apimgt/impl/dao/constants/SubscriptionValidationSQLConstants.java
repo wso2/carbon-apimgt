@@ -235,8 +235,7 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   SUBS.API_ID = API.API_ID AND " +
                     "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
-                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
-                    "   SUB.TENANT_ID = ? ";
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND ";
 
     public static final String GET_TENANT_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
@@ -465,7 +464,7 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_APPLICATION_KEY_MAPPING MAPPING,AM_APPLICATION APP,AM_SUBSCRIBER SUB,AM_KEY_MANAGER KEYM" +
                     " WHERE " +
                     "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
-                    "   MAPPING.KEY_MANAGER = KEYM.UUID AND SUB.TENANT_ID = ?";
+                    "   MAPPING.KEY_MANAGER = KEYM.UUID AND ";
 
     public static final String GET_ALL_GLOBAL_POLICIES_SQL =
             " SELECT " +

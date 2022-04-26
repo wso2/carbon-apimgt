@@ -96,9 +96,10 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         List<String> revisionUUIDs = new ArrayList<>();
         for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
+            String organization = RestApiUtil.getOrganization(messageContext);
             // get revision uuid
             String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
-                    deployedAPIRevisionDTO.getApiId());
+                    deployedAPIRevisionDTO.getApiId(), organization);
             if (revisionUUID == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }

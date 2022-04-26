@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.sql.Struct;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1638,7 +1639,7 @@ public interface APIProvider extends APIManager {
      * @return UUID of the revision
      * @throws APIManagementException if failed to get the API revision uuid
      */
-    String getAPIRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException;
+    String getAPIRevisionUUID(String revisionNum, String apiUUID, String organization) throws APIManagementException;
 
     /**
      * Get the earliest revision UUID from the revision list for a given API

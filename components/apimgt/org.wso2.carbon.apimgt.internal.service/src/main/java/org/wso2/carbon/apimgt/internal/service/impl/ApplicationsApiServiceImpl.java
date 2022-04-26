@@ -47,13 +47,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String organization = RestApiUtil.getOrganization(messageContext);
         if (StringUtils.isNotEmpty(organization)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
-                            subscriptionValidationDAO.getAllApplications(organization)))
+                            subscriptionValidationDAO.getAllApplications(organization, true)))
                     .build();
         }
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
-                    subscriptionValidationDAO.getAllApplications(xWSO2Tenant)))
+                    subscriptionValidationDAO.getAllApplications(xWSO2Tenant, false)))
                     .build();
         }
         return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(

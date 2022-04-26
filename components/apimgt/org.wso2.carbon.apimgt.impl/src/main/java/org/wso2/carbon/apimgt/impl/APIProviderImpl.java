@@ -8583,8 +8583,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to get the API revision uuid
      */
     @Override
-    public String getAPIRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
-        return apiMgtDAO.getRevisionUUID(revisionNum, apiUUID);
+    public String getAPIRevisionUUID(String revisionNum, String apiUUID, String organization) throws APIManagementException {
+        return apiMgtDAO.getRevisionUUID(revisionNum, apiUUID, organization);
     }
 
     /**

@@ -16353,14 +16353,19 @@ public class ApiMgtDAO {
      * @return UUID of the revision
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
-    public String getRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
+    public String getRevisionUUID(String revisionNum, String apiUUID, String organization) throws APIManagementException {
 
         String revisionUUID = null;
+        String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID;
+        if (StringUtils.isNotEmpty(organization)) {
+            sql = sql.concat(" AND AM_API.ORGANIZATION = ?");
+        }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID)) {
+                     .prepareStatement(sql)) {
             statement.setString(1, apiUUID);
             statement.setInt(2, Integer.parseInt(revisionNum));
+            statement.setString(3, organization);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     revisionUUID = rs.getString(1);

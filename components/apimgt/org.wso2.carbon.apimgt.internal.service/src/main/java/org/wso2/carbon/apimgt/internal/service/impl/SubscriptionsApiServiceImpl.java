@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         List<Subscription> subscriptionList = new ArrayList<>();
+        String organization = RestApiUtil.getOrganization(messageContext);
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(applicationUUID) && StringUtils.isNotEmpty(apiUUID)) {
             Subscription subscription = subscriptionValidationDAO.getSubscription(apiUUID, applicationUUID);
@@ -56,9 +58,12 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             }
             result = Response.ok().entity(
                     SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(subscriptionList)).build();
+        } else if (StringUtils.isNotEmpty(organization)){
+            result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
+                    subscriptionValidationDAO.getAllSubscriptions(organization, true))).build();
         } else if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
-                    subscriptionValidationDAO.getAllSubscriptions(xWSO2Tenant))).build();
+                    subscriptionValidationDAO.getAllSubscriptions(xWSO2Tenant, false))).build();
         } else {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
                     subscriptionValidationDAO.getAllSubscriptions())).build();

@@ -3505,8 +3505,8 @@ public class SQLConstants {
         public static final String GET_MOST_RECENT_REVISION_ID = "SELECT REVISIONS_CREATED FROM AM_API WHERE API_UUID" +
                 " = ?";
         public static final String GET_REVISION_BY_REVISION_UUID = "SELECT * FROM AM_REVISION WHERE REVISION_UUID = ?";
-        public static final String GET_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? " +
-                "AND ID = ?";
+        public static final String GET_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION, AM_API WHERE AM_REVISION.API_UUID = ? " +
+                "AND AM_REVISION.ID = ?";
         public static final String GET_EARLIEST_REVISION_ID = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? " +
                 "ORDER BY ID ASC LIMIT 1";
         public static final String GET_MOST_RECENT_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE " +

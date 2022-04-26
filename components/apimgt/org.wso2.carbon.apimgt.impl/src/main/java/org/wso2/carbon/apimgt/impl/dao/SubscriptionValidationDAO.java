@@ -423,26 +423,34 @@ public class SubscriptionValidationDAO {
      * @param subscriptionId : unique identifier of a subscription
      * @return {@link List<Subscription>}
      * */
-    public List<Subscription> getAllSubscriptions(String tenantDomain) {
+    public List<Subscription> getAllSubscriptions(String organization, boolean isOrgPresent) {
 
         List<Subscription> subscriptions = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL;
+        if (isOrgPresent) {
+            sql = sql.concat("API.ORGANIZATION = ?");
+        } else {
+            sql = sql.concat("SUB.TENANT_ID = ?");
+        }
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL)) {
+                     conn.prepareStatement(sql)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                        .getTenantId(organization);
             } catch (UserStoreException e) {
-                log.error("Error in getting tenant id for loading Subscriptions for tenant : " + tenantDomain, e);
+                log.error("Error in getting tenant id for loading Subscriptions for tenant : " + organization, e);
+            }if (isOrgPresent) {
+                ps.setString(1, organization);
+            } else {
+                ps.setInt(1, tenantId);
             }
-            ps.setInt(1, tenantId);
-
             try (ResultSet resultSet = ps.executeQuery()) {
                 populateSubscriptionsList(subscriptions, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Subscriptions for tenantId : " + tenantDomain, e);
+            log.error("Error in loading Subscriptions for tenantId : " + organization, e);
         }
         return subscriptions;
     }
@@ -470,44 +478,44 @@ public class SubscriptionValidationDAO {
      * @param tenantId : tenant Id
      * @return {@link Subscription}
      * */
-    public List<Application> getAllApplications(String organization) {
+    public List<Application> getAllApplications(String organization, boolean isOrgPresent) {
 
         ArrayList<Application> applications = new ArrayList<>();
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-            try (Connection conn = APIMgtDBUtil.getConnection();
-                 PreparedStatement ps =
-                         conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATIONS_SQL)) {
-                try {
-                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                            .getTenantId(organization);
-                    ps.setInt(1, tenantId);
-
-                    try (ResultSet resultSet = ps.executeQuery()) {
-                        addToApplicationList(applications, resultSet);
-                    }
-                } catch (UserStoreException e) {
-                    log.error("Error in getting tenant id for loading Applications for tenant : " + organization, e);
-                }
-
-            } catch (SQLException e) {
-                log.error("Error in loading Applications for tenantDomain : " + organization, e);
-            }
-        } else {
+        if (isOrgPresent) {
             try (Connection conn = APIMgtDBUtil.getConnection();
                  PreparedStatement ps =
                          conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATIONS_BY_ORGANIZATION_SQL)) {
-                    ps.setString(1, organization);
+                ps.setString(1, organization);
 
-                    try (ResultSet resultSet = ps.executeQuery()) {
-                        addToApplicationList(applications, resultSet);
-                    }
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    addToApplicationList(applications, resultSet);
+                }
 
             } catch (SQLException e) {
                 log.error("Error in loading Applications for organization : " + organization, e);
             }
+        } else {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+                try (Connection conn = APIMgtDBUtil.getConnection();
+                     PreparedStatement ps =
+                             conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATIONS_SQL)) {
+                    try {
+                        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                .getTenantId(organization);
+                        ps.setInt(1, tenantId);
+
+                        try (ResultSet resultSet = ps.executeQuery()) {
+                            addToApplicationList(applications, resultSet);
+                        }
+                    } catch (UserStoreException e) {
+                        log.error("Error in getting tenant id for loading Applications for tenant : " + organization, e);
+                    }
+
+                } catch (SQLException e) {
+                    log.error("Error in loading Applications for tenantDomain : " + organization, e);
+                }
+            }
         }
-
-
         return applications;
     }
 
@@ -515,27 +523,37 @@ public class SubscriptionValidationDAO {
      * @param subscriptionId : unique identifier of a subscription
      * @return {@link Subscription}
      * */
-    public List<ApplicationKeyMapping> getAllApplicationKeyMappings(String tenantDomain) {
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappings(String organization, boolean isOrgPresent) {
 
         List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL;
+        if (isOrgPresent) {
+            sql = sql.concat("APP.ORGANIZATION = ?");
+        } else {
+            sql = sql.concat("SUB.TENANT_ID = ?");
+        }
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL)) {
+                     conn.prepareStatement(sql)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                        .getTenantId(organization);
             } catch (UserStoreException e) {
-                log.error("Error in loading ApplicationKeyMappings for tenantDomain : " + tenantDomain, e);
+                log.error("Error in loading ApplicationKeyMappings for tenantDomain : " + organization, e);
             }
-            ps.setInt(1, tenantId);
+            if (isOrgPresent) {
+                ps.setString(1, organization);
+            } else {
+                ps.setInt(1, tenantId);
 
+            }
             try (ResultSet resultSet = ps.executeQuery()) {
                 populateApplicationKeyMappingsList(keyMappings, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Application key mappings for tenantId : " + tenantDomain, e);
+            log.error("Error in loading Application key mappings for tenantId : " + organization, e);
         }
 
         return keyMappings;
