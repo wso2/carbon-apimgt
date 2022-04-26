@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -45,10 +46,18 @@ public class RetrieveApiArtifactsApiServiceImpl implements RetrieveApiArtifactsA
     public Response retrieveApiArtifactsPost(String xWSO2Tenant, String gatewayLabel, String type, UUIDListDTO uuidList,
                                              MessageContext messageContext)
             throws APIManagementException {
+        RuntimeArtifactDto runtimeArtifactDto;
+        String organization = RestApiUtil.getOrganization(messageContext);
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-        RuntimeArtifactDto runtimeArtifactDto =
-                APIArtifactGeneratorUtil.generateAPIArtifact(uuidList.getUuids(), "", "", gatewayLabel,
-                        type, xWSO2Tenant);
+        if (StringUtils.isNotEmpty(organization)) {
+            runtimeArtifactDto =
+                    APIArtifactGeneratorUtil.generateAPIArtifact(uuidList.getUuids(), "", "", gatewayLabel, type,
+                            organization, true);
+        } else {
+            runtimeArtifactDto =
+                    APIArtifactGeneratorUtil.generateAPIArtifact(uuidList.getUuids(), "", "", gatewayLabel, type,
+                            xWSO2Tenant, false);
+        }
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
                 File artifact = (File) runtimeArtifactDto.getArtifact();

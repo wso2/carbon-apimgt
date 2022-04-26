@@ -19,11 +19,17 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
+import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.internal.service.ApplicationsApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
 import javax.ws.rs.core.Response;
@@ -31,13 +37,18 @@ import javax.ws.rs.core.Response;
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
-    public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) {
-
+    public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) throws APIManagementException {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         if (appId != null && appId > 0) {
             List<Application> application = subscriptionValidationDAO.getApplicationById(appId);
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(application)
             ).build();
+        }
+        String organization = RestApiUtil.getOrganization(messageContext);
+        if (StringUtils.isNotEmpty(organization)) {
+            return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
+                            subscriptionValidationDAO.getAllApplications(organization)))
+                    .build();
         }
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {

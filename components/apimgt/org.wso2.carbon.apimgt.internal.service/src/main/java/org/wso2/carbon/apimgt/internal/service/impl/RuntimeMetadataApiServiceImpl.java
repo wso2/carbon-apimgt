@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -38,9 +39,16 @@ public class RuntimeMetadataApiServiceImpl implements RuntimeMetadataApiService 
     public Response runtimeMetadataGet(String xWSO2Tenant, String apiId, String gatewayLabel, MessageContext messageContext)
             throws APIManagementException {
 
+        RuntimeArtifactDto runtimeArtifactDto;
+        String organization = RestApiUtil.getOrganization(messageContext);
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-        RuntimeArtifactDto runtimeArtifactDto =
-                RuntimeArtifactGeneratorUtil.generateMetadataArtifact(xWSO2Tenant, apiId, gatewayLabel);
+        if (StringUtils.isNotEmpty(organization)) {
+            runtimeArtifactDto =
+                    RuntimeArtifactGeneratorUtil.generateMetadataArtifact(organization, apiId, gatewayLabel, true);
+        } else {
+            runtimeArtifactDto =
+                    RuntimeArtifactGeneratorUtil.generateMetadataArtifact(xWSO2Tenant, apiId, gatewayLabel, false);
+        }
         if (runtimeArtifactDto != null) {
             File artifact = (File) runtimeArtifactDto.getArtifact();
             StreamingOutput streamingOutput = (outputStream) -> {

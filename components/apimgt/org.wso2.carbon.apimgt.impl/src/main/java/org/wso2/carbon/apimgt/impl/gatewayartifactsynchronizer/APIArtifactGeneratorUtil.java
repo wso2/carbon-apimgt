@@ -34,7 +34,7 @@ public class APIArtifactGeneratorUtil {
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
     public static RuntimeArtifactDto generateAPIArtifact(List<String> apiUuids, String name, String version,
-                                                         String gatewayLabel, String type, String tenantDomain)
+                                                             String gatewayLabel, String type, String tenantDomain)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
@@ -46,13 +46,13 @@ public class APIArtifactGeneratorUtil {
                 String[] gatewayLabels = new String(decodedValue).split("\\|");
                 if (!apiUuids.isEmpty()) {
                     gatewayArtifacts = gatewayArtifactsMgtDAO.
-                            retrieveGatewayArtifactsByAPIIDs(apiUuids, gatewayLabels, tenantDomain);
+                            retrieveGatewayArtifactsByAPIIDs(apiUuids, gatewayLabels, tenantDomain, isOrgPresent);
                 } else {
                     gatewayArtifacts =
-                            gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabels, tenantDomain);
+                            gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabels, tenantDomain, isOrgPresent);
                 }
             } else {
-                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
+                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain, isOrgPresent);
             }
             if (gatewayArtifacts != null) {
                 if (gatewayArtifacts.isEmpty()) {

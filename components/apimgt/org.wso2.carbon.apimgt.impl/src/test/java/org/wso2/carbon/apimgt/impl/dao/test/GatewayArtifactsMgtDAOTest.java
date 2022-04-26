@@ -155,7 +155,7 @@ public class GatewayArtifactsMgtDAOTest {
         gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"),
                 gatewayVhosts);
         List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid,
-                new String[]{"label1"}, "carbon.super");
+                new String[]{"label1"}, "carbon.super", false);
         Assert.assertEquals(artifacts.size(), 1);
         RuntimeArtifactDto artifact = artifacts.get(0);
         Assert.assertNotNull(artifact);
@@ -166,10 +166,10 @@ public class GatewayArtifactsMgtDAOTest {
         gatewayVhosts.put("label2", "prod.wso2.com");
         gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label2"),
                 gatewayVhosts, Collections.asSet(apiRevisionDeployment));
-        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label1"}, "carbon.super");
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label1"}, "carbon.super", false);
         Assert.assertEquals(artifacts.size(), 0);
         artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label2"},
-                "carbon.super");
+                "carbon.super", false);
         Assert.assertEquals(artifacts.size(), 1);
         artifact = artifacts.get(0);
         Assert.assertNotNull(artifact);
@@ -198,7 +198,7 @@ public class GatewayArtifactsMgtDAOTest {
         gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"),
                 gatewayVhosts);
         List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid,
-                new String[]{"label1"}, "carbon.super");
+                new String[]{"label1"}, "carbon.super", false);
         Assert.assertEquals(artifacts.size(), 1);
         RuntimeArtifactDto artifact = artifacts.get(0);
         Assert.assertNotNull(artifact);

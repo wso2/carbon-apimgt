@@ -57,6 +57,25 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   SUB.TENANT_ID = ? ";
 
+    public static final String GET_APPLICATIONS_BY_ORGANIZATION_SQL =
+            " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
+                    "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.NAME AS APS_NAME," +
+                    "   APP.APPLICATION_TIER AS TIER," +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE" +
+                    " FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES ATTRIBUTES" +
+                    "  ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
+                    " WHERE " +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "   APP.ORGANIZATION = ? ";
+
     public static final String GET_APPLICATION_BY_ID_SQL =
             " SELECT " +
                     "   APP.UUID AS APP_UUID," +
