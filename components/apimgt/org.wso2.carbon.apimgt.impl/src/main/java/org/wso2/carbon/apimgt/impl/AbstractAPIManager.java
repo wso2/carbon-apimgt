@@ -457,64 +457,6 @@ public abstract class AbstractAPIManager implements APIManager {
         apiMgtDAO.setDefaultVersion(api);
     }
 
-    /**
-     * Get API by registry artifact id
-     *
-     * @param uuid         Registry artifact id
-     * @param organization organization for the registry
-     * @return API of the provided artifact id
-     * @throws APIManagementException
-     */
-    public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
-
-        boolean tenantFlowStarted = false;
-        try {
-            Registry registry;
-            if (organization != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
-                    (organization)) {
-                int id = getTenantManager()
-                        .getTenantId(organization);
-                startTenantFlow(organization);
-                tenantFlowStarted = true;
-                registry = getRegistryService().getGovernanceSystemRegistry(id);
-            } else {
-                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
-                    // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
-                    registry = getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
-                } else {
-                    // both requested tenant and logged in user's tenant are carbon.super
-                    registry = this.registry;
-                }
-            }
-
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
-            if (apiArtifact != null) {
-                API api = getApiForPublishing(registry, apiArtifact);
-                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(api.getUuid(), WF_TYPE_AM_API_STATE);
-                if (workflowDTO != null) {
-                    WorkflowStatus status = workflowDTO.getStatus();
-                    api.setWorkflowStatus(status.toString());
-                }
-                return api;
-            } else {
-                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get API";
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API";
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (tenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-    }
 
 
     /**
