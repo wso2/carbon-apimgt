@@ -5786,6 +5786,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if(api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
                 }
+                api.setOrganization(organization);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
