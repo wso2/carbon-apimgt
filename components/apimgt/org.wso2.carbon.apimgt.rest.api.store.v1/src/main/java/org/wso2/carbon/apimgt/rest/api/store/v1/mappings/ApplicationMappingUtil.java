@@ -52,6 +52,8 @@ public class ApplicationMappingUtil {
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
         applicationDTO.setOwner(application.getOwner());
+        applicationDTO.setCreatedTime(application.getCreatedTime());
+        applicationDTO.setUpdatedTime(application.getLastUpdatedTime());
 
         if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
@@ -185,6 +187,8 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setAttributes(applicationAttributes);
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
         applicationInfoDTO.setOwner(application.getOwner());
+        applicationInfoDTO.setCreatedTime(application.getCreatedTime());
+        applicationInfoDTO.setUpdatedTime(application.getLastUpdatedTime());
         return applicationInfoDTO;
     }
 
