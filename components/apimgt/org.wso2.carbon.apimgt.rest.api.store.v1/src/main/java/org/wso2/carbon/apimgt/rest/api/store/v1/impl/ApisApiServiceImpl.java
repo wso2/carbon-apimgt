@@ -679,7 +679,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (api.getSwaggerDefinition() != null) {
-                api.setSwaggerDefinition(APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition()));
+                api.setSwaggerDefinition(APIUtil.removeInterceptorsFromSwagger(
+                        APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition())));
             } else {
                 api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, organization));
             }
