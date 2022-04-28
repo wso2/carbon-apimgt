@@ -49,8 +49,8 @@ public class URITemplate implements Serializable{
     private String amznResourceName;
     private int amznResourceTimeout;
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
-    private String sandboxEndpoint = "";
-    private String productionEndpoint = "";
+    private String sandboxEndpoint = "none";
+    private String productionEndpoint = "none";
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;

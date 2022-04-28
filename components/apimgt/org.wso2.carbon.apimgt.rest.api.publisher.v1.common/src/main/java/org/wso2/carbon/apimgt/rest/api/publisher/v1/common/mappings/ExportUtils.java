@@ -239,15 +239,15 @@ public class ExportUtils {
             if (operationEndpointList.size() > 0) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonElement operatiobEndpointObj = gson.toJsonTree(operationEndpointList);
-                JsonObject operatiobEndpointJson = (JsonObject) operatiobEndpointObj;
-                CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.OPERATION_ENDPOINTS_DIRECTORY +
-                                File.separator + apiID, exportFormat, ImportExportConstants.TYPE_OPERATION_ENDPOINT, operatiobEndpointJson);
+                JsonArray operatiobEndpointJson = (JsonArray) operatiobEndpointObj;
+                CommonUtil.writeDtoToFile(archivePath + File.separator + ImportExportConstants.OPERATION_ENDPOINTS_DIRECTORY +
+                                File.separator + apiID+"_OE", exportFormat, ImportExportConstants.TYPE_OPERATION_ENDPOINT, operatiobEndpointJson);
             }
         } catch (APIImportExportException e) {
-            throw new APIManagementException("Error while adding operation policy details for API: " + apiID, e);
+            throw new APIManagementException("Error while adding operation endpoints details for API: " + apiID, e);
         } catch (IOException e) {
             throw new APIManagementException(
-                    "Error while saving deployment environment details for API: " + apiID + " as YAML", e);
+                    "Error while saving deployment operation endpoints details for API: " + apiID + " as File", e);
         }
 
     }

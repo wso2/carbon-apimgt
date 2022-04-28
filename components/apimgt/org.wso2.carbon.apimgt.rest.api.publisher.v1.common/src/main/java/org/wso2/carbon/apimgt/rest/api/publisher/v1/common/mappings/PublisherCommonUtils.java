@@ -292,8 +292,8 @@ public class PublisherCommonUtils {
                     if (!uriTemplate.getOperationPolicies().isEmpty()) {
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
                     }
-                    operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, uriTemplate.getProductionEndpoint());
-                    operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, uriTemplate.getSandboxEndpoint());
+                    operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, uriTemplate.getSandboxEndpoint());
+                    operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, uriTemplate.getProductionEndpoint());
                 }
 
                 for (URITemplate uriTemplate : uriTemplates) {
