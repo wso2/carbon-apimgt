@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,25 +93,6 @@ public interface APIProvider extends APIManager {
      */
     boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException;
 
-
-    /**
-     * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
-     *
-     * @return Set<Provider>
-     * @throws APIManagementException if failed to get Providers
-     */
-    Set<Provider> getAllProviders() throws APIManagementException;
-
-    /**
-     * Get a list of APIs published by the given provider. If a given API has multiple APIs,
-     * only the latest version will
-     * be included in this list.
-     *
-     * @param providerId , provider id
-     * @return set of API
-     * @throws APIManagementException if failed to get set of API
-     */
-    List<API> getAPIsByProvider(String providerId) throws APIManagementException;
 
     /**
      * Get a list of all the consumers for all APIs
@@ -1097,7 +1077,7 @@ public interface APIProvider extends APIManager {
      * CERTIFICATE_EXPIRED : If the certificate is expired.
      * @throws APIManagementException API Management Exception.
      */
-    int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
+    int addClientCertificate(String userName, Identifier apiIdentifier, String certificate, String alias,
                              String tierName, String organization) throws APIManagementException;
 
     /**
@@ -1121,7 +1101,7 @@ public interface APIProvider extends APIManager {
      * 4 : If certificate is not found in the trust store.
      * @throws APIManagementException API Management Exception.
      */
-    int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+    int deleteClientCertificate(String userName, Identifier apiIdentifier, String alias)
             throws APIManagementException;
 
     /**
@@ -1228,7 +1208,7 @@ public interface APIProvider extends APIManager {
      * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
-    ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier,
+    ClientCertificateDTO getClientCertificate(int tenantId, String alias, Identifier apiIdentifier,
             String organization) throws APIManagementException;
 
 
@@ -1267,7 +1247,7 @@ public interface APIProvider extends APIManager {
      * 6 : If provided certificate is expired
      * @throws APIManagementException API Management Exception.
      */
-    int updateClientCertificate(String certificate, String alias, APIIdentifier APIIdentifier, String tier,
+    int updateClientCertificate(String certificate, String alias, Identifier APIIdentifier, String tier,
                                 int tenantId, String organization) throws APIManagementException;
 
     /**
@@ -1314,28 +1294,6 @@ public interface APIProvider extends APIManager {
     Map<API, List<APIProductResource>> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
 
     List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
-
-    /**
-     * Updates a given api product documentation
-     *
-     * @param productId         APIProductIdentifier
-     * @param documentation Documentation
-     * @throws APIManagementException if failed to update docs
-     */
-    void updateDocumentation(APIProductIdentifier productId, Documentation documentation) throws APIManagementException;
-
-    /**
-     * Add a file to a document of source type FILE
-     *
-     * @param prodcutId APIProduct identifier the document belongs to
-     * @param documentation document
-     * @param filename name of the file
-     * @param content content of the file as an Input Stream
-     * @param contentType content type of the file
-     * @throws APIManagementException if failed to add the file
-     */
-    void addFileToProductDocumentation(APIProductIdentifier prodcutId, Documentation documentation, String filename, InputStream content,
-                                       String contentType) throws APIManagementException;
 
     /**
      * This method used to save the documentation content
@@ -1950,5 +1908,35 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
+
+    /**
+     * Returns details of an APIProduct
+     *
+     * @param identifier APIProductIdentifier
+     * @return An APIProduct object related to the given identifier or null
+     * @throws APIManagementException if failed get APIProduct from APIProductIdentifier
+     */
+    APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
+    /**
+     * Returns APIProduct Search result based on the provided query.
+     *
+     * @param searchQuery     search query. Ex: provider=*admin*
+     * @param tenantDomain    tenant domain
+     * @param start           starting number
+     * @param end             ending number
+     * @return APIProduct result
+     * @throws APIManagementException if search is failed
+     */
+    Map<String,Object> searchPaginatedAPIProducts(String searchQuery, String tenantDomain,int start,int end) throws
+            APIManagementException;
+
+    /**
+     * Returns details of an API
+     * @param uuid   UUID of the API's registry artifact
+     * @param organization  Identifier of an organization
+     * @return An API object related to the given artifact id or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
 }

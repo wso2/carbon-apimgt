@@ -30,15 +30,12 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
@@ -87,12 +84,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
         checkAccessControlPermission(api.getId());
         super.updateAPI(api);
-    }
-
-    @Override
-    public ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getWSDL(apiId);
     }
 
     @Override
@@ -220,14 +211,14 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
-            String tierName, String organization) throws APIManagementException {
+    public int addClientCertificate(String userName, Identifier apiIdentifier, String certificate, String alias,
+                                    String tierName, String organization) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName, organization);
     }
 
     @Override
-    public int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+    public int deleteClientCertificate(String userName, Identifier apiIdentifier, String alias)
             throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.deleteClientCertificate(userName, apiIdentifier, alias);
@@ -277,23 +268,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public List<Mediation> getAllApiSpecificMediationPolicies(APIIdentifier apiIdentifier)
-            throws APIManagementException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.getAllApiSpecificMediationPolicies(apiIdentifier);
-    }
-
-    @Override
     public boolean isAPIUpdateValid(API api) throws APIManagementException {
         checkAccessControlPermission(api.getId());
         return super.isAPIUpdateValid(api);
-    }
-
-    @Override
-    public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
-            throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.addResourceFile(identifier, resourcePath, resourceFile);
     }
 
     @Override
@@ -304,12 +281,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
             checkAccessControlPermission(api.getId());
         }
         return api;
-    }
-
-    @Override
-    public ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getIcon(identifier);
     }
 
     @Override
@@ -332,27 +303,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
             }
         }
         return filteredAPIDocumentation;
-    }
-
-    @Override
-    public Boolean deleteApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath,
-            String mediationPolicyId) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.deleteApiSpecificMediationPolicy(identifier, apiResourcePath, mediationPolicyId);
-    }
-
-    @Override
-    public Mediation getApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath,
-            String mediationPolicyId) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getApiSpecificMediationPolicy(identifier, apiResourcePath, mediationPolicyId);
-    }
-
-    @Override
-    public Resource getApiSpecificMediationResourceFromUuid(Identifier identifier, String uuid, String resourcePath)
-            throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getApiSpecificMediationResourceFromUuid(identifier, uuid, resourcePath);
     }
 
     @Override
@@ -391,7 +341,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier, String organization)
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, Identifier apiIdentifier, String organization)
             throws APIManagementException {
         ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias, organization);
         if (clientCertificateDTO != null) {
@@ -411,8 +361,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
-            String tier, int tenantId, String organization) throws APIManagementException {
+    public int updateClientCertificate(String certificate, String alias, Identifier apiIdentifier,
+                                       String tier, int tenantId, String organization) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId, organization);
     }

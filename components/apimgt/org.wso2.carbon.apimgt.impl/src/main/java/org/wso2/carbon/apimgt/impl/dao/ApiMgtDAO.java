@@ -18067,6 +18067,14 @@ public class ApiMgtDAO {
         return false;
     }
 
+    public String getUUIDFromIdentifier(Identifier apiIdentifier, String organization) throws APIManagementException {
+        if (apiIdentifier instanceof APIProductIdentifier) {
+            return getUUIDFromIdentifier((APIProductIdentifier) apiIdentifier, organization);
+        } else {
+            return getUUIDFromIdentifier((APIIdentifier) apiIdentifier, organization);
+        }
+    }
+
     private class SubscriptionInfo {
 
         private int subscriptionId;

@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -267,7 +267,7 @@ public class CertificateRestApiUtils {
      * @return Client certificate
      * @throws APIManagementException API Management Exception.
      */
-    public static ClientCertificateDTO preValidateClientCertificate(String alias, APIIdentifier apiIdentifier,
+    public static ClientCertificateDTO preValidateClientCertificate(String alias, Identifier apiIdentifier,
             String organization) throws APIManagementException {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);

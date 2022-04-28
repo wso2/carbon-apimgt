@@ -282,37 +282,7 @@ public class APIProviderImplTest {
         superTenantDomain = "carbon.super";
     }
 
-    @Test
-    public void testGetAllProviders() throws APIManagementException, GovernanceException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        UserRegistry userReg = Mockito.mock(UserRegistry.class);
 
-        API api1 = new API(new APIIdentifier("admin", "API1", "1.0.1"));
-        api1.setContext("api1context");
-        api1.setStatus(APIConstants.PUBLISHED);
-        api1.setDescription("API 1 Desciption");
-        GenericArtifact genericArtifact1 = Mockito.mock(GenericArtifact.class);
-        GenericArtifact genericArtifact2 = Mockito.mock(GenericArtifact.class);
-
-        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API1");
-        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.1");
-        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_CONTEXT)).thenReturn("api1context");
-        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION)).thenReturn(
-                "API 1 Desciption");
-        Mockito.when(APIUtil.getAPI(genericArtifact1, apiProvider.registry)).thenReturn(api1);
-        Mockito.when(APIUtil.getAPI(genericArtifact1)).thenReturn(api1);
-        GenericArtifact[] genericArtifacts = {genericArtifact1, genericArtifact2};
-        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
-        PowerMockito.when(APIUtil.getArtifactManager(userReg, APIConstants.API_KEY)).thenReturn(artifactManager);
-        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
-        Assert.assertNotNull(apiProvider.getAllProviders());
-
-        //generic artifact null
-        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
-        PowerMockito.when(APIUtil.getArtifactManager(userReg, APIConstants.API_KEY)).thenReturn(artifactManager);
-        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(null);
-        Assert.assertNotNull(apiProvider.getAllProviders());
-    }
 
     @Test
     public void testGetSubscribersOfProvider() throws APIManagementException {
@@ -1055,14 +1025,6 @@ public class APIProviderImplTest {
         }
     }
 
-    @Test
-    public void testSearchAPIsByDoc() throws APIManagementException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        Map<Documentation, API> apiMap = new HashMap<Documentation, API>();
-        PowerMockito.when(APIUtil.searchAPIsByDoc(apiProvider.registry, apiProvider.tenantId,
-                apiProvider.username, "testTerm", APIConstants.PUBLISHER_CLIENT)).thenReturn(apiMap);
-        assertEquals(apiMap, apiProvider.searchAPIsByDoc("testTerm", "testType"));
-    }
 
     @Test
     public void testRemoveDocumentation() throws APIManagementException, RegistryException {
@@ -1823,30 +1785,7 @@ public class APIProviderImplTest {
         apiProvider.createNewAPIVersion(api.getUuid(), newVersion, false, "carbon.super");
     }
 
-    @Test
-    public void testGetAPIsByProvider() throws RegistryException, UserStoreException, APIManagementException {
 
-        String providerId = "admin";
-        API api1 = new API(new APIIdentifier("admin", "API1", "1.0.0"));
-        API api2 = new API(new APIIdentifier("admin", "API2", "1.0.0"));
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-
-        prepareForGetAPIsByProvider(artifactManager, apiProvider, providerId, api1, api2);
-
-        List<API> apiResponse = apiProvider.getAPIsByProvider(providerId);
-
-        Assert.assertEquals(2, apiResponse.size());
-        Assert.assertEquals("API1", apiResponse.get(0).getId().getApiName());
-
-        Mockito.when(apiProvider.registry.getAspectActions(Matchers.anyString(),
-                Matchers.anyString())).thenThrow(RegistryException.class);
-        try {
-            apiProvider.getAPIsByProvider(providerId);
-        } catch (APIManagementException e) {
-            Assert.assertEquals("Failed to get APIs for provider : " + providerId, e.getMessage());
-        }
-    }
 
     @Test
     public void testChangeLifeCycleStatus_WFAlreadyStarted() throws RegistryException, UserStoreException,

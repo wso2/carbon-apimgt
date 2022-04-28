@@ -208,7 +208,6 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBean
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -279,7 +278,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected ImportExportAPI importExportAPI;
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private RecommendationEnvironment recommendationEnvironment;
-
+    private GlobalMediationPolicyImpl globalMediationPolicyImpl;
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
@@ -289,90 +288,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
         this.recommendationEnvironment = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        globalMediationPolicyImpl = new GlobalMediationPolicyImpl(organization);
     }
 
     protected String getUserNameWithoutChange() {
         return userNameWithoutChange;
-    }
-
-    /**
-     * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
-     *
-     * @return Set<Provider>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Providers
-     */
-    @Override
-    public Set<Provider> getAllProviders() throws APIManagementException {
-        Set<Provider> providerSet = new HashSet<Provider>();
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.PROVIDER_KEY);
-        try {
-            if (artifactManager == null) {
-                String errorMessage = "Failed to retrieve artifact manager when fetching providers.";
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            GenericArtifact[] genericArtifact = artifactManager.getAllGenericArtifacts();
-            if (genericArtifact == null || genericArtifact.length == 0) {
-                return providerSet;
-            }
-            for (GenericArtifact artifact : genericArtifact) {
-                Provider provider = new Provider(artifact.getAttribute(APIConstants.PROVIDER_OVERVIEW_NAME));
-                provider.setDescription(APIConstants.PROVIDER_OVERVIEW_DESCRIPTION);
-                provider.setEmail(APIConstants.PROVIDER_OVERVIEW_EMAIL);
-                providerSet.add(provider);
-            }
-        } catch (GovernanceException e) {
-            handleException("Failed to get all providers", e);
-        }
-        return providerSet;
-    }
-
-    /**
-     * Get a list of APIs published by the given provider. If a given API has multiple APIs,
-     * only the latest version will
-     * be included in this list.
-     *
-     * @param providerId , provider id
-     * @return set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
-     */
-    @Override
-    public List<API> getAPIsByProvider(String providerId) throws APIManagementException {
-
-        List<API> apiSortedList = new ArrayList<API>();
-
-        try {
-            providerId = APIUtil.replaceEmailDomain(providerId);
-            String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + providerId;
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            Association[] associations = registry.getAssociations(providerPath, APIConstants.PROVIDER_ASSOCIATION);
-            for (Association association : associations) {
-                String apiPath = association.getDestinationPath();
-                if (registry.resourceExists(apiPath)) {
-                    Resource resource = registry.get(apiPath);
-                    String apiArtifactId = resource.getUUID();
-                    if (apiArtifactId != null) {
-                        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                        if (apiArtifact != null) {
-                            String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
-                            if (!APIConstants.API_PRODUCT.equals(type)) {
-                                apiSortedList.add(getAPI(apiArtifact));
-                            }
-                        }
-                    } else {
-                        throw new GovernanceException("artifact id is null of " + apiPath);
-                    }
-                }
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to get APIs for provider : " + providerId, e);
-        }
-        Collections.sort(apiSortedList, new APINameComparator());
-
-        return apiSortedList;
-
     }
 
 
@@ -1979,12 +1899,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     if (!found) { // global policy
                         if (globalPolicies == null) {
-                            globalPolicies = getAllGlobalMediationPolicies();
+                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
                         }
                         for (Mediation m : globalPolicies) {
                             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(m.getType())
                                     && api.getInSequence().equals(m.getName())) {
-                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
                                 mediation.setGlobal(true);
                                 api.setInSequenceMediation(mediation);
                                 found = true;
@@ -2013,12 +1933,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     if (!found) { // global policy
                         if (globalPolicies == null) {
-                            globalPolicies = getAllGlobalMediationPolicies();
+                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
                         }
                         for (Mediation m : globalPolicies) {
                             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(m.getType())
                                     && api.getOutSequence().equals(m.getName())) {
-                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
                                 mediation.setGlobal(true);
                                 api.setOutSequenceMediation(mediation);
                                 found = true;
@@ -2047,12 +1967,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     if (!found) { // global policy
                         if (globalPolicies == null) {
-                            globalPolicies = getAllGlobalMediationPolicies();
+                            globalPolicies = globalMediationPolicyImpl.getAllGlobalMediationPolicies();
                         }
                         for (Mediation m : globalPolicies) {
                             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(m.getType())
                                     && api.getFaultSequence().equals(m.getName())) {
-                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                Mediation mediation = globalMediationPolicyImpl.getGlobalMediationPolicy(m.getUuid());
                                 mediation.setGlobal(true);
                                 api.setFaultSequenceMediation(mediation);
                                 found = true;
@@ -3125,32 +3045,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
         return apiMgtDAO.retrieveServiceKeyByApiId(apiId, tenantId);
-    }
-
-    private void copySequencesToNewVersion(API api, String newVersion, String pathFlow) throws Exception {
-        String seqFilePath = APIUtil.getSequencePath(api.getId(), pathFlow);
-
-        if (registry.resourceExists(seqFilePath)) {
-            APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
-                    api.getId().getApiName(), newVersion);
-
-            String seqNewFilePath = APIUtil.getSequencePath(newApiId, pathFlow);
-            org.wso2.carbon.registry.api.Collection seqCollection =
-                    (org.wso2.carbon.registry.api.Collection) registry.get(seqFilePath);
-
-            if (seqCollection != null) {
-                String[] seqChildPaths = seqCollection.getChildren();
-
-                for (String seqChildPath : seqChildPaths) {
-                    Resource sequence = registry.get(seqChildPath);
-
-                    ResourceFile seqFile = new ResourceFile(sequence.getContentStream(), sequence.getMediaType());
-                    OMElement seqElement = APIUtil.buildOMElement(sequence.getContentStream());
-                    String seqFileName = seqElement.getAttributeValue(new QName("name"));
-                    addResourceFile(api.getId(), seqNewFilePath + seqFileName, seqFile);
-                }
-            }
-        }
     }
 
     /**
@@ -5094,7 +4988,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData updatedData = new SwaggerData(apiProduct);
-        String existingProductSwagger = getAPIDefinitionOfAPIProduct(apiProduct);
+        String existingProductSwagger = getOpenAPIDefinition(productId, orgId);
         String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
         updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
                 updatedProductSwagger);
@@ -6754,8 +6648,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
-            String tierName, String organization) throws APIManagementException {
+    public int addClientCertificate(String userName, Identifier apiIdentifier, String certificate, String alias,
+                                    String tierName, String organization) throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
@@ -6793,7 +6687,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+    public int deleteClientCertificate(String userName, Identifier apiIdentifier, String alias)
             throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
@@ -6866,8 +6760,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier,
-            String organization) throws APIManagementException {
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, Identifier apiIdentifier,
+                                                     String organization) throws APIManagementException {
         List<ClientCertificateDTO> clientCertificateDTOS = certificateManager
                 .searchClientCertificates(tenantId, alias, apiIdentifier, organization);
         if (clientCertificateDTOS != null && clientCertificateDTOS.size() > 0) {
@@ -6896,8 +6790,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     @Override
-    public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
-            String tier, int tenantId, String organization) throws APIManagementException {
+    public int updateClientCertificate(String certificate, String alias, Identifier apiIdentifier,
+                                       String tier, int tenantId, String organization) throws APIManagementException {
         ResponseCode responseCode = certificateManager
                 .updateClientCertificate(certificate, alias, tier, tenantId, organization);
         return responseCode != null ?
@@ -7409,6 +7303,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+        String apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, organization);
+        return getAPIProductbyUUID(apiProductUUID, organization);
+    }
+
+    @Override
     public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID, String organization)
             throws APIManagementException {
         if (StringUtils.isEmpty(apiProductUUID)) {
@@ -7719,102 +7619,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Updates a given api product documentation
-     *
-     * @param productId         APIProductIdentifier
-     * @param documentation Documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update docs
-     */
-    public void updateDocumentation(APIProductIdentifier productId, Documentation documentation) throws APIManagementException {
-
-        String productPath = APIUtil.getAPIProductPath(productId);
-        APIProduct product = getAPIProduct(productPath);
-        String docPath = APIUtil.getProductDocPath(productId) + documentation.getName();
-        try {
-            String docArtifactId = registry.get(docPath).getUUID();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(docArtifactId);
-            String docVisibility = documentation.getVisibility().name();
-            String[] authorizedRoles = new String[0];
-            String visibleRolesList = product.getVisibleRoles();
-            if (visibleRolesList != null) {
-                authorizedRoles = visibleRolesList.split(",");
-            }
-            String visibility = product.getVisibility();
-            if (docVisibility != null) {
-                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
-                    authorizedRoles = null;
-                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
-                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
-                    authorizedRoles = null;
-                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
-                }
-            }
-
-            GenericArtifact updateDocArtifact = APIUtil.createDocArtifactContent(artifact, productId, documentation);
-            artifactManager.updateGenericArtifact(updateDocArtifact);
-            APIUtil.clearResourcePermissions(docPath, productId, ((UserRegistry) registry).getTenantId());
-
-            APIUtil.setResourcePermissions(product.getId().getProviderName(), visibility, authorizedRoles,
-                    artifact.getPath(), registry);
-
-            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-            if (docFilePath != null && !"".equals(docFilePath)) {
-                // The docFilePatch comes as
-                // /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
-                // We need to remove the
-                // /t/tenanatdoman/registry/resource/_system/governance section
-                // to set permissions.
-                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
-                String filePath = docFilePath.substring(startIndex, docFilePath.length());
-                APIUtil.setResourcePermissions(product.getId().getProviderName(), visibility, authorizedRoles, filePath,
-                        registry);
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to update documentation", e);
-        }
-    }
-
-    /**
-     * Add a file to a product document of source type FILE
-     *
-     * @param productId         APIProduct identifier the document belongs to
-     * @param documentation document
-     * @param filename      name of the file
-     * @param content       content of the file as an Input Stream
-     * @param contentType   content type of the file
-     * @throws APIManagementException if failed to add the file
-     */
-    public void addFileToProductDocumentation(APIProductIdentifier productId, Documentation documentation, String filename,
-            InputStream content, String contentType) throws APIManagementException {
-        if (Documentation.DocumentSourceType.FILE.equals(documentation.getSourceType())) {
-            contentType = "application/force-download";
-            ResourceFile icon = new ResourceFile(content, contentType);
-            String filePath = APIUtil.getDocumentationFilePath(productId, filename);
-            APIProduct apiProduct;
-            try {
-                apiProduct = getAPIProduct(productId);
-                String visibleRolesList = apiProduct.getVisibleRoles();
-                String[] visibleRoles = new String[0];
-                if (visibleRolesList != null) {
-                    visibleRoles = visibleRolesList.split(",");
-                }
-                APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
-                        filePath, registry);
-                documentation.setFilePath(addResourceFile(productId, filePath, icon));
-                APIUtil.setFilePermission(filePath);
-            } catch (APIManagementException e) {
-                handleException("Failed to add file to product document " + documentation.getName(), e);
-            }
-        } else {
-            String errorMsg = "Cannot add file to the Product Document. Document " + documentation.getName()
-                    + "'s Source type is not FILE.";
-            handleException(errorMsg);
-        }
-    }
-
-    /**
      * This method used to save the product documentation content
      *
      * @param apiProduct,               API Product
@@ -7888,11 +7692,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-    }
-
-    @Override
-    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
-        return getGraphqlSchemaDefinition(apiId);
     }
 
     /**
@@ -8713,14 +8512,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Returns APIProduct Search result based on the provided query.
      *
-     * @param registry
      * @param searchQuery Ex: provider=*admin*
      * @return APIProduct result
      * @throws APIManagementException
      */
 
-    public Map<String, Object> searchPaginatedAPIProducts(Registry registry, String searchQuery, int start, int end)
-            throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIProducts(String searchQuery, String organization, int start, int end) throws APIManagementException {
         SortedSet<APIProduct> productSet = new TreeSet<APIProduct>(new APIProductNameComparator());
         List<APIProduct> productList = new ArrayList<APIProduct>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -8728,7 +8525,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Original search query received : " + searchQuery);
         }
 
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organization);
         String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
         Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);

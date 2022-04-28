@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
@@ -124,13 +123,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     protected int getTenantId(String tenantDomain) {
 
         return -1234;
-    }
-
-    @Override
-    public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
-            throws APIManagementException {
-
-        return null;
     }
 
     @Override

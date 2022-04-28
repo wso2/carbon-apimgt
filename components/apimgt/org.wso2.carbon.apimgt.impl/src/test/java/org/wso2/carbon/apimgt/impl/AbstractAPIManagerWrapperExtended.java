@@ -25,9 +25,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.ResourceImpl;
-import org.wso2.carbon.registry.core.jdbc.dataobjects.ResourceDO;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
@@ -53,16 +50,6 @@ public class AbstractAPIManagerWrapperExtended extends AbstractAPIManagerWrapper
     @Override
     protected String getTenantDomain(Identifier identifier) {
         return "abc.com";
-    }
-
-    @Override
-    public Resource getCustomMediationResourceFromUuid(String mediationPolicyId){
-        return new ResourceImpl("/apimgt/apis", new ResourceDO());
-    }
-
-    @Override
-    public Resource getApiSpecificMediationResourceFromUuid(Identifier identifier, String uuid, String resourcePath) {
-        return new ResourceImpl("/apimgt/apis", new ResourceDO());
     }
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,

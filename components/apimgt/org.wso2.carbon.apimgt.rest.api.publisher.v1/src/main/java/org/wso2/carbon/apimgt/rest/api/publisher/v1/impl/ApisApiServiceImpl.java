@@ -51,55 +51,16 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONTokener;
-import org.json.XML;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIInfo;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.ServiceEntry;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -108,12 +69,7 @@ import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
-import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.*;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -129,54 +85,8 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CommentMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStoreMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.OperationPolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -186,34 +96,12 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
 
@@ -629,7 +517,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
-            String schema = apiProvider.getGraphqlSchema(apiInfo.toAPIIdentifier());
+            String schema = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
 
             GraphqlComplexityInfo graphqlComplexityInfo =
                     GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(body, schema);
@@ -714,7 +602,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
-            String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+            String schemaContent = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
             GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
             dto.setSchemaDefinition(schemaContent);
             dto.setName(apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
@@ -894,7 +782,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+                String schemaContent = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
                 GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
                         GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
@@ -1271,28 +1159,24 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            api.setOrganization(organization);
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+            apiTypeWrapper.setOrganization(organization);
             //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(api.getStatus());
+            validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    api.getId(), organization);
+                    apiTypeWrapper.getId(), organization);
             int responseCode = apiProvider
                     .deleteClientCertificate(
                             RestApiCommonUtil.getLoggedInUsername(), clientCertificateDTO.getApiIdentifier(),
                             alias);
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
                 //Handle api product case.
-                if (API_PRODUCT_TYPE.equals(api.getType())) {
-                    APIIdentifier apiIdentifier = api.getId();
-                    APIProductIdentifier apiProductIdentifier =
-                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
-                                    apiIdentifier.getVersion());
-                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-                    apiProduct.setOrganization(organization);
+                if (apiTypeWrapper.isAPIProduct()) {
+                    APIProduct apiProduct = apiTypeWrapper.getApiProduct();
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
+                    API api = apiTypeWrapper.getApi();
                     apiProvider.updateAPI(api);
                 }
                 if (log.isDebugEnabled()) {
@@ -1361,15 +1245,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             String base64EncodedCert = null;
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            api.setOrganization(organization);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(api.getStatus());
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+            apiTypeWrapper.setOrganization(organization);
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    api.getId(), organization);
+                    apiTypeWrapper.getId(), organization);
             if (certificateDetail != null) {
                 contentDisposition = certificateDetail.getContentDisposition();
                 fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
@@ -1386,20 +1268,18 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
                 //Handle api product case.
-                if (API_PRODUCT_TYPE.equals(api.getType())) {
-                    APIIdentifier apiIdentifier = api.getId();
-                    APIProductIdentifier apiProductIdentifier =
-                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
-                                    apiIdentifier.getVersion());
-                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-                    apiProduct.setOrganization(organization);
+                if (apiTypeWrapper.isAPIProduct()) {
+                    APIProduct apiProduct = apiTypeWrapper.getApiProduct();
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
+                    API api = apiTypeWrapper.getApi();
+                    //validate API update operation permitted based on the LC state
+                    validateAPIOperationsPerLC(api.getStatus());
                     apiProvider.updateAPI(api);
                 }
                 ClientCertMetadataDTO clientCertMetadataDTO = new ClientCertMetadataDTO();
                 clientCertMetadataDTO.setAlias(alias);
-                clientCertMetadataDTO.setApiId(api.getUUID());
+                clientCertMetadataDTO.setApiId(apiTypeWrapper.getUuid());
                 clientCertMetadataDTO.setTier(clientCertificateDTO.getTierName());
                 URI updatedCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + "?alias=" + alias);
 
@@ -1488,30 +1368,25 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             validateAPIExistence(apiId);
 
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            api.setOrganization(organization);
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+            apiTypeWrapper.setOrganization(organization);
             //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(api.getStatus());
+            validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider
-                    .addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier, organization);
+                    .addClientCertificate(userName, apiTypeWrapper.getId(), base64EncodedCert, alias, tier, organization);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
                 //Handle api product case.
-                if (API_PRODUCT_TYPE.equals(api.getType())) {
-                    APIIdentifier apiIdentifier = api.getId();
-                    APIProductIdentifier apiProductIdentifier =
-                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
-                                    apiIdentifier.getVersion());
-                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-                    apiProduct.setOrganization(organization);
+                if (apiTypeWrapper.isAPIProduct()) {
+                    APIProduct apiProduct = apiTypeWrapper.getApiProduct();
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
-                    apiProvider.updateAPI(api);
+                    apiProvider.updateAPI(apiTypeWrapper.getApi());
                 }
                 ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
                 certificateDTO.setAlias(alias);

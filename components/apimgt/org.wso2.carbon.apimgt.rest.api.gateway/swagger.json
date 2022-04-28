@@ -745,6 +745,11 @@
           "example" : false,
           "description" : "Whether this is the default version of the API."
         },
+        "status" : {
+          "type" : "string",
+          "example" : "Published",
+          "description" : "Status of API."
+        },
         "urlMappings" : {
           "type" : "array",
           "items" : {
@@ -925,6 +930,11 @@
           "type" : "boolean",
           "example" : false,
           "description" : "Whether this is the default version of the API."
+        },
+        "status" : {
+          "type" : "string",
+          "example" : "Published",
+          "description" : "Status of API."
         }
       }
     },
