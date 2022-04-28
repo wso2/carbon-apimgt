@@ -2164,6 +2164,11 @@ public final class APIConstants {
     public static final String MIGRATION_MODE = "migrationMode";
 
     /**
+     * Constants for migration
+     */
+    public static final String MIGRATE_FROM_VERSION_PROPERTY = "migrateFromVersion";
+
+    /**
      * Constants for correlation logging
      */
     public static final String CORRELATION_ID = "Correlation-ID";
