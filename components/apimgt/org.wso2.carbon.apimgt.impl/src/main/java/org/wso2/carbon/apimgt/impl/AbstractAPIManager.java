@@ -471,94 +471,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPIInfoByUUID(id);
     }
 
-    /**
-     * Get API or APIProduct by registry artifact id
-     *
-     * @param uuid                  Registry artifact id
-     * @param requestedTenantDomain tenantDomain for the registry
-     * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
-     * @throws APIManagementException
-     */
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
-            throws APIManagementException {
-
-        boolean tenantFlowStarted = false;
-        try {
-            Registry registry;
-            if (requestedTenantDomain != null) {
-                int id = getTenantManager().getTenantId(requestedTenantDomain);
-                startTenantFlow(requestedTenantDomain);
-                tenantFlowStarted = true;
-                if (APIConstants.WSO2_ANONYMOUS_USER.equals(this.username)) {
-                    registry = getRegistryService().getGovernanceUserRegistry(this.username, id);
-                } else if (this.tenantDomain != null && !this.tenantDomain.equals(requestedTenantDomain)) {
-                    registry = getRegistryService().getGovernanceSystemRegistry(id);
-                } else {
-                    registry = this.registry;
-                }
-            } else {
-                registry = this.registry;
-            }
-
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
-            if (apiArtifact != null) {
-                String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
-
-                if (APIConstants.API_PRODUCT.equals(type)) {
-                    APIProduct apiProduct = getApiProduct(registry, apiArtifact);
-                    String productTenantDomain = getTenantDomain(apiProduct.getId());
-                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(apiProduct.getVisibility())) {
-                        return new ApiTypeWrapper(apiProduct);
-                    }
-
-                    if (this.tenantDomain == null || !this.tenantDomain.equals(productTenantDomain)) {
-                        throw new APIManagementException(
-                                "User " + username + " does not have permission to view API Product : " + apiProduct
-                                        .getId().getName());
-                    }
-
-                    return new ApiTypeWrapper(apiProduct);
-
-                } else {
-                    API api = getApiForPublishing(registry, apiArtifact);
-                    String apiTenantDomain = getTenantDomain(api.getId());
-                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
-                        return new ApiTypeWrapper(api);
-                    }
-
-                    if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
-                        throw new APIManagementException(
-                                "User " + username + " does not have permission to view API : " + api.getId()
-                                        .getApiName());
-                    }
-
-                    return new ApiTypeWrapper(api);
-                }
-            } else {
-                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
-            }
-        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API";
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (tenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-    }
 
     protected TenantManager getTenantManager() {
 
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
-    }
-
-    protected API getApiInformation(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
-
-        return APIUtil.getAPIInformation(apiArtifact, registry);
     }
 
     protected void endTenantFlow() {

@@ -32,10 +32,6 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.API_PROVIDER;
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_NAME;
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_VERSION;
-
 import java.util.Map;
 
 public class AbstractAPIManagerWrapper extends AbstractAPIManager {
@@ -149,10 +145,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         } catch (GovernanceException e) {
             throw new APIManagementException("Error while getting attribute", e);
         }
-    }
-
-    protected API getApiInformation(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
-        return getApi(apiArtifact);
     }
 
     protected String getTenantDomain(Identifier identifier) {

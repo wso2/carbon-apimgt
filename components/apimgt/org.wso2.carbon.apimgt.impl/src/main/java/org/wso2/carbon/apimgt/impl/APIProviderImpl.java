@@ -28,7 +28,6 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -230,7 +229,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -3908,60 +3906,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException {
         return searchAPIDoc(registry, tenantId, username, searchTerm);
-    }
-
-    /**
-     * Search APIs based on given search term
-     *
-     * @param searchTerm
-     * @param searchType
-     * @param providerId
-     * @throws APIManagementException
-     */
-
-    @Deprecated
-    public List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException {
-        List<API> foundApiList = new ArrayList<API>();
-        String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
-        Pattern pattern;
-        Matcher matcher;
-        String apiConstant = null;
-        try {
-            if (providerId != null) {
-                List<API> apiList = getAPIsByProvider(providerId);
-                if (apiList == null || apiList.isEmpty()) {
-                    return apiList;
-                }
-                pattern = Pattern.compile(regex);
-                for (API api : apiList) {
-                    if ("Name".equalsIgnoreCase(searchType)) {
-                        apiConstant = api.getId().getApiName();
-                    } else if ("Provider".equalsIgnoreCase(searchType)) {
-                        apiConstant = api.getId().getProviderName();
-                    } else if ("Version".equalsIgnoreCase(searchType)) {
-                        apiConstant = api.getId().getVersion();
-                    } else if ("Context".equalsIgnoreCase(searchType)) {
-                        apiConstant = api.getContext();
-                    } else if ("Status".equalsIgnoreCase(searchType)) {
-                        apiConstant = api.getStatus();
-                    } else if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equalsIgnoreCase(searchType)) {
-                        apiConstant = api.getDescription();
-                    }
-                    if (apiConstant != null) {
-                        matcher = pattern.matcher(apiConstant);
-                        if (matcher.find()) {
-                            foundApiList.add(api);
-                        }
-                    }
-                }
-            } else {
-                foundApiList = searchAPIs(searchTerm, searchType);
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to search APIs with type", e);
-        }
-        Collections.sort(foundApiList, new APINameComparator());
-        return foundApiList;
     }
 
     /**
@@ -9745,4 +9689,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.checkAPIUUIDIsARevisionUUID(apiUUID);
     }
 
+    @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(uuid);
+        if (apiInfo != null) {
+            if (apiInfo.getOrganization().equals(requestedTenantDomain)) {
+                if (APIConstants.API_PRODUCT.equals(apiInfo.getApiType())) {
+                    return new ApiTypeWrapper(getAPIProductbyUUID(uuid, requestedTenantDomain));
+                } else {
+                    return new ApiTypeWrapper(getAPIbyUUID(uuid, requestedTenantDomain));
+                }
+            } else {
+                throw new APIManagementException(
+                        "User " + username + " does not have permission to view API Product : " + uuid);
+            }
+        } else {
+            String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+            throw new APIMgtResourceNotFoundException(msg);
+        }
+    }
 }

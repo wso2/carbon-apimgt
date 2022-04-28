@@ -5664,6 +5664,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);

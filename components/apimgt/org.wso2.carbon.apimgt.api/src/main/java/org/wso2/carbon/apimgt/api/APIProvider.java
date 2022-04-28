@@ -526,15 +526,6 @@ public interface APIProvider extends APIManager {
     List<LifeCycleEvent> getLifeCycleEvents(String uuid) throws APIManagementException;
 
     /**
-     * Search API
-     *
-     * @param searchTerm  Search Term
-     * @param searchType  Search Type
-     * @return   Set of APIs
-     * @throws APIManagementException
-     */
-    List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException;
-    /**
      * Update the subscription status
      *
      * @param apiId API Identifier

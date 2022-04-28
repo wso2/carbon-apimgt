@@ -9329,7 +9329,7 @@ public class ApiMgtDAO {
                                 .updatedBy(resultSet.getString("UPDATED_BY"))
                                 .updatedTime(resultSet.getString("UPDATED_TIME"))
                                 .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
-                                .isRevision(apiRevision != null);
+                                .isRevision(apiRevision != null).organization(resultSet.getString("ORGANIZATION"));
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
                                     apiRevision.getApiUUID(), apiId));
