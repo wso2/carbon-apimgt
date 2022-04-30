@@ -5756,14 +5756,14 @@ public class ApiMgtDAO {
                     }
 
                     //save operation endpoint mapping to AM_API_OPERATION_ENDPOINT_MAPPING : table
-                    if (uriTemplate.getProductionEndpoint().toLowerCase() != "none") {
+                    if (!(uriTemplate.getProductionEndpoint().equals("none"))) {
                         operationEndpointMappingPrepStmt.setInt(1, uriMappingId);
                         operationEndpointMappingPrepStmt.setInt(2, (uriTemplate.getProductionEndpoint().toLowerCase())
                                 == "default" ? -1 : getOperationEndpointId(uriTemplate.getProductionEndpoint()));
                         operationEndpointMappingPrepStmt.setString(3, APIConstants.API_KEY_TYPE_PRODUCTION);
                         operationEndpointMappingPrepStmt.addBatch();
                     }
-                    if (uriTemplate.getSandboxEndpoint().toLowerCase() != "none") {
+                    if (!(uriTemplate.getSandboxEndpoint().equals("none"))) {
                         operationEndpointMappingPrepStmt.setInt(1, uriMappingId);
                         operationEndpointMappingPrepStmt.setInt(2, (uriTemplate.getSandboxEndpoint().toLowerCase())
                                 == "default" ? -1 : getOperationEndpointId(uriTemplate.getSandboxEndpoint()));
@@ -16156,14 +16156,14 @@ public class ApiMgtDAO {
                             }
 
                             //save operation endpoint mapping to AM_API_OPERATION_ENDPOINT_MAPPING : table
-                            if (urlMapping.getProductionEndpoint().toLowerCase() != "none") {
+                            if (!(urlMapping.getProductionEndpoint().equals("none"))) {
                                 operationEndpointMappingPrepStmt.setInt(1, rs.getInt(1));
                                 operationEndpointMappingPrepStmt.setInt(2, (urlMapping.getProductionEndpoint().toLowerCase())
                                         == "default" ? -1 : getOperationEndpointId(urlMapping.getProductionEndpoint()));
                                 operationEndpointMappingPrepStmt.setString(3, APIConstants.API_KEY_TYPE_PRODUCTION);
                                 operationEndpointMappingPrepStmt.addBatch();
                             }
-                            if (urlMapping.getSandboxEndpoint().toLowerCase() != "none") {
+                            if (!(urlMapping.getSandboxEndpoint().equals("none"))) {
                                 operationEndpointMappingPrepStmt.setInt(1, rs.getInt(1));
                                 operationEndpointMappingPrepStmt.setInt(2, (urlMapping.getSandboxEndpoint().toLowerCase())
                                         == "default" ? -1 : getOperationEndpointId(urlMapping.getSandboxEndpoint()));
@@ -16993,8 +16993,8 @@ public class ApiMgtDAO {
                             }
                         }
                     }
-                    if (urlMapping.getProductionEndpoint().toLowerCase() != "none" ||
-                            urlMapping.getSandboxEndpoint().toLowerCase() != "none") {
+                    if (!(urlMapping.getProductionEndpoint().equals("none")) ||
+                            !(urlMapping.getSandboxEndpoint().equals("none"))) {
                         //save operation endpoint mapping to AM_API_OPERATION_ENDPOINT_MAPPING : table
                         getCurrentAPIURLMappingsStatement.setInt(1, apiId);
                         getCurrentAPIURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -17002,14 +17002,14 @@ public class ApiMgtDAO {
                         getCurrentAPIURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                         getCurrentAPIURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
                         try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
-                            if (urlMapping.getProductionEndpoint().toLowerCase() != "none") {
+                            if (!(urlMapping.getProductionEndpoint().equals("none"))) {
                                 operationEndpointMappingPrepStmt.setInt(1, rs.getInt(1));
                                 operationEndpointMappingPrepStmt.setInt(2, (urlMapping.getProductionEndpoint().toLowerCase())
                                         == "default" ? -1 : getOperationEndpointId(urlMapping.getProductionEndpoint()));
                                 operationEndpointMappingPrepStmt.setString(3, APIConstants.API_KEY_TYPE_PRODUCTION);
                                 operationEndpointMappingPrepStmt.addBatch();
                             }
-                            if (urlMapping.getSandboxEndpoint().toLowerCase() != "none") {
+                            if (!(urlMapping.getSandboxEndpoint().equals("none"))) {
                                 operationEndpointMappingPrepStmt.setInt(1, rs.getInt(1));
                                 operationEndpointMappingPrepStmt.setInt(2, (urlMapping.getSandboxEndpoint().toLowerCase())
                                         == "default" ? -1 : getOperationEndpointId(urlMapping.getSandboxEndpoint()));

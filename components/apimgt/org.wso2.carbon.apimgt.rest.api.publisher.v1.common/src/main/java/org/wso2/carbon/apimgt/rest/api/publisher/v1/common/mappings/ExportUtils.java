@@ -238,10 +238,10 @@ public class ExportUtils {
 
             if (operationEndpointList.size() > 0) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                JsonElement operatiobEndpointObj = gson.toJsonTree(operationEndpointList);
-                JsonArray operatiobEndpointJson = (JsonArray) operatiobEndpointObj;
+                JsonElement operationEndpointObj = gson.toJsonTree(operationEndpointList);
+                JsonArray operationnEndpointJson = (JsonArray) operationEndpointObj;
                 CommonUtil.writeDtoToFile(archivePath + File.separator + ImportExportConstants.OPERATION_ENDPOINTS_DIRECTORY +
-                                File.separator + apiID+"_OE", exportFormat, ImportExportConstants.TYPE_OPERATION_ENDPOINT, operatiobEndpointJson);
+                                File.separator + apiID+"_OE", exportFormat, ImportExportConstants.TYPE_OPERATION_ENDPOINT, operationnEndpointJson);
             }
         } catch (APIImportExportException e) {
             throw new APIManagementException("Error while adding operation endpoints details for API: " + apiID, e);
