@@ -196,7 +196,7 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "2021-02-11-09:57:25", value = "")
+  @ApiModelProperty(example = "1651555310208", value = "")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
     return createdTime;
@@ -213,7 +213,7 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "2021-02-11-09:57:25", value = "")
+  @ApiModelProperty(example = "1651555310208", value = "")
   @JsonProperty("updatedTime")
   public String getUpdatedTime() {
     return updatedTime;
