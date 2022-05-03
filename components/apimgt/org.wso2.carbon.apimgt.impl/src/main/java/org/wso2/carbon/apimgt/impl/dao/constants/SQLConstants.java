@@ -1511,6 +1511,8 @@ public class SQLConstants {
             "   APP.UUID," +
             "   APP.CREATED_BY," +
             "   APP.TOKEN_TYPE," +
+            "   APP.UPDATED_TIME," +
+            "   APP.CREATED_TIME," +
             "   SUB.USER_ID," +
             "   APP.CREATED_BY" +
             " FROM " +
@@ -1535,6 +1537,8 @@ public class SQLConstants {
             "   APP.DESCRIPTION, " +
             "   APP.SUBSCRIBER_ID," +
             "   APP.APPLICATION_STATUS, " +
+            "   APP.UPDATED_TIME," +
+            "   APP.CREATED_TIME," +
             "   SUB.USER_ID, " +
             "   APP.GROUP_ID," +
             "   APP.CREATED_BY," +

@@ -34,6 +34,8 @@ public class SQLConstantOracle extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -68,6 +70,8 @@ public class SQLConstantOracle extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -99,6 +103,8 @@ public class SQLConstantOracle extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -136,6 +142,8 @@ public class SQLConstantOracle extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -174,6 +182,8 @@ public class SQLConstantOracle extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -206,6 +216,8 @@ public class SQLConstantOracle extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -236,6 +248,8 @@ public class SQLConstantOracle extends SQLConstants{
                     "   APP.APPLICATION_ID as APPLICATION_ID, " +
                     "   SUB.CREATED_BY AS CREATED_BY, " +
                     "   APP.GROUP_ID AS GROUP_ID, " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   SUB.TENANT_ID AS TENANT_ID, " +
                     "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID, " +
                     "   APP.UUID AS UUID," +

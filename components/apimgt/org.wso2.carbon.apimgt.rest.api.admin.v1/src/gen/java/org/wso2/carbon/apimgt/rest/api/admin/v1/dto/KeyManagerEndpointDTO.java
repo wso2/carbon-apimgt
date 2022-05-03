@@ -31,7 +31,7 @@ public class KeyManagerEndpointDTO   {
   }
 
   
-  @ApiModelProperty(example = "TokenEndpoint", required = true, value = "")
+  @ApiModelProperty(example = "token_endpoint", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
