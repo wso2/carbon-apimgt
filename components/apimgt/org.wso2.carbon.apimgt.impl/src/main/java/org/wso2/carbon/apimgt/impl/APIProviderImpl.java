@@ -2295,8 +2295,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
                     if (APIConstants.RETIRED.equals(newStatus)) {
                         cleanUpPendingSubscriptionCreationProcessesByAPI(api.getUuid());
-                        apiMgtDAO.removeAllSubscriptions(api.getUuid());
-                        deleteAPIRevisions(api.getUuid(), tenantDomain);
                     }
 
                     //updateApiArtifactNew(api, false, false);
@@ -5351,6 +5349,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Event need to be sent after database status update.
                 sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
                         apiOrApiProductId, uuid);
+
+                // Remove revisions and subscriptions after API retire
+                if (!isApiProduct) {
+                    String newStatus = (targetStatus != null) ? targetStatus.toUpperCase() : targetStatus;
+                    if (APIConstants.RETIRED.equals(newStatus)) {
+                        API api = apiTypeWrapper.getApi();
+                        api.setOrganization(orgId);
+                        cleanUpPendingSubscriptionCreationProcessesByAPI(api.getUuid());
+                        apiMgtDAO.removeAllSubscriptions(api.getUuid());
+                        deleteAPIRevisions(api.getUuid(), tenantDomain);
+                    }
+                }
                 if (log.isDebugEnabled()) {
                     String logMessage = "LC Status changed successfully for artifact with name: " + apiName
                             + ", version " + apiVersion + ", New Status : " + targetStatus;

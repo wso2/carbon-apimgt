@@ -401,8 +401,7 @@ public class InboundWebsocketProcessorUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
             APIKeyValidationInfoDTO info;
-            String authorizationHeader = inboundMessageContext.getRequestHeaders().get(HttpHeaders.AUTHORIZATION);
-            inboundMessageContext.getRequestHeaders().put(HttpHeaders.AUTHORIZATION, authorizationHeader);
+            String authorizationHeader = inboundMessageContext.getRequestHeaders().get(WebsocketUtil.authorizationHeader);
             String[] auth = authorizationHeader.split(StringUtils.SPACE);
             List<String> keyManagerList =
                     DataHolder.getInstance().getKeyManagersFromUUID(inboundMessageContext.getElectedAPI().getUuid());
@@ -411,7 +410,7 @@ public class InboundWebsocketProcessorUtil {
                 boolean isJwtToken = false;
                 String apiKey = auth[1];
                 if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
-                    inboundMessageContext.getRequestHeaders().remove(HttpHeaders.AUTHORIZATION);
+                    inboundMessageContext.getHeadersToRemove().add(WebsocketUtil.authorizationHeader);
                 }
 
                 //Initial guess of a JWT token using the presence of a DOT.
