@@ -311,7 +311,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     @Override
     public String getChallengeString() {
 
-        return null;
+        return "Internal API Key realm=\"WSO2 API Manager\"";
     }
 
     @Override
