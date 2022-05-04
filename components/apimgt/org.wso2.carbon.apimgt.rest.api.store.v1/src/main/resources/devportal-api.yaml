@@ -3879,6 +3879,14 @@ components:
           type: boolean
           readOnly: true
           example: false
+        createdTime:
+          type: string
+          readOnly: true
+          example: 1651555310208
+        updatedTime:
+          type: string
+          readOnly: true
+          example: 1651555310208
     ApplicationInfo:
       title: Application info object with basic application details
       type: object
@@ -3913,6 +3921,14 @@ components:
         owner:
           type: string
           example: admin
+        createdTime:
+          type: string
+          readOnly: true
+          example: 1651555310208
+        updatedTime:
+          type: string
+          readOnly: true
+          example: 1651555310208
     DocumentList:
       title: Document List
       type: object
