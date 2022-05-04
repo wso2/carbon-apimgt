@@ -155,7 +155,7 @@ public class APIGatewayManager {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifact(apiProductUuid,
                     APIConstants.API_PRODUCT_REVISION);
             GatewayArtifactsMgtDAO.getInstance()
-                    .removePublishedGatewayLabels(apiProductUuid, APIConstants.API_PRODUCT_REVISION);
+                    .removePublishedGatewayLabels(apiProductUuid, APIConstants.API_PRODUCT_REVISION, gatewaysToRemove);
         } catch (ArtifactSynchronizerException e) {
             throw new APIManagementException("API " + apiProductIdentifier + "couldn't get unDeployed", e);
         }

@@ -588,12 +588,12 @@ public class GatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
-    public void removePublishedGatewayLabels(String apiId, String apiRevisionId) throws APIManagementException {
+    public void removePublishedGatewayLabels(String apiId, String apiRevisionId, Set<String> gatewayLabels) throws APIManagementException {
 
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             try {
                 connection.setAutoCommit(false);
-                removePublishedGatewayLabels(connection, apiId, apiRevisionId);
+                removePublishedGatewayLabels(connection, apiId, apiRevisionId, gatewayLabels);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -615,6 +615,21 @@ public class GatewayArtifactsMgtDAO {
         }
     }
 
+    private void removePublishedGatewayLabels(Connection connection, String apiId, String revision,
+        Set<String> labels) throws SQLException {
+
+        try (PreparedStatement preparedStatement = connection
+                .prepareStatement(SQLConstants.DELETE_GW_PUBLISHED_LABELS_BY_API_ID_REVISION_ID_DEPLOYMENT)) {
+            for (String label : labels) {
+                preparedStatement.setString(1, apiId);
+                preparedStatement.setString(2, revision);
+                preparedStatement.setString(3, label);
+                preparedStatement.addBatch();
+            }
+            preparedStatement.executeBatch();
+        }
+    }
+
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gateways,
                                                    Map<String, String> gatewayVhosts)
             throws APIManagementException {
@@ -622,7 +637,7 @@ public class GatewayArtifactsMgtDAO {
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             try {
                 connection.setAutoCommit(false);
-                removePublishedGatewayLabels(connection, apiId, revision);
+                removePublishedGatewayLabels(connection, apiId, revision, gateways);
                 addPublishedGatewayLabels(connection, apiId, revision, gateways, gatewayVhosts);
                 connection.commit();
             } catch (SQLException | APIManagementException e) {
