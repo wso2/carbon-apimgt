@@ -9421,8 +9421,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setEnvironments(environmentsToRemove);
         removeFromGateway(product, tenantDomain, new HashSet<>(apiRevisionDeployments),Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
-        GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiProductId, apiRevisionId,
-                environmentsToRemove);
+        if (environmentsToRemove.size() > 0) {
+            GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiProductId, apiRevisionId,
+                    environmentsToRemove);
+        }
     }
 
     @Override
