@@ -1435,7 +1435,8 @@ public class GatewayUtils {
         if (tokenTypeClaim != null) {
             return APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
         }
-        return jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null;
+        return jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null
+                && jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY) == null;
     }
 
     public static boolean isInternalKey(JWTClaimsSet jwtClaimsSet) {
