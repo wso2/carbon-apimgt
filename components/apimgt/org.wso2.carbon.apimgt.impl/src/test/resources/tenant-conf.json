@@ -82,6 +82,10 @@
         "Roles": "admin,Internal/devops"
       },
       {
+        "Name": "apim:policies_import_export",
+        "Roles": "admin,Internal/devops"
+      },
+      {
         "Name": "apim:api_product_import_export",
         "Roles": "admin,Internal/devops"
       },

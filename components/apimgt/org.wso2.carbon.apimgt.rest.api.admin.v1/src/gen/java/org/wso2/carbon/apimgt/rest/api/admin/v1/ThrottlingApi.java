@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ExportThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDetailsListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.ThrottlingApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -54,14 +55,15 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Export a Throttling Policy", notes = "This operation can be used to export the details of a particular Throttling Policy. ", response = ExportThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import throttling policies related operations")
         })
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = ExportThrottlePolicyDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response exportThrottlingPolicy( @ApiParam(value = "UUID of the ThrotlingPolicy")  @QueryParam("policyId") String policyId,  @ApiParam(value = "Throttling Policy Name ")  @QueryParam("name") String name,  @ApiParam(value = "Type of the Throttling Policy ", allowableValues="subscription, application, advanced, custom")  @QueryParam("type") String type,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format) throws APIManagementException{
+    public Response exportThrottlingPolicy( @ApiParam(value = "UUID of the ThrottlingPolicy")  @QueryParam("policyId") String policyId,  @ApiParam(value = "Throttling Policy Name ")  @QueryParam("name") String name,  @ApiParam(value = "Type of the Throttling Policy ", allowableValues="subscription, application, advanced, custom")  @QueryParam("type") String type,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format) throws APIManagementException{
         return delegate.exportThrottlingPolicy(policyId, name, type, format, securityContext);
     }
 
@@ -72,7 +74,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Import a Throttling Policy", notes = "This operation can be used to import a Throttling Policy ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import throttling policies related operations")
         })
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 
@@ -83,6 +86,22 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response importThrottlingPolicy(@ApiParam(value = "Throttling Policy object that should to be imported " ,required=true) ExportThrottlePolicyDTO exportThrottlePolicyDTO,  @ApiParam(value = "Update an existing throttlingpolicy with the same name ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
         return delegate.importThrottlingPolicy(exportThrottlePolicyDTO, overwrite, securityContext);
+    }
+
+    @GET
+    @Path("/policies/search")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve/Search Throttling Polcies ", notes = "This operation provides you a list of available Throttling Policies qualifying the given keyword match. ", response = ThrottlePolicyDetailsListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+        })
+    }, tags={ "Unified Search",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of qualifying Throttling Policies is returned. ", response = ThrottlePolicyDetailsListDTO.class) })
+    public Response search( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "**Search**.  You can search by providing a keyword. ")  @QueryParam("query") String query,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.search(limit, offset, query, ifNoneMatch, securityContext);
     }
 
     @GET
