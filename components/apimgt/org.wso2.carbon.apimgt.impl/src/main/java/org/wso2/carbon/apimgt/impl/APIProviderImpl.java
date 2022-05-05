@@ -8530,13 +8530,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Keeping the organization as tenant domain since MG does not support organization-wise deployment
                 // Artifacts will be deployed in ST for all organizations
                 gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
-                        apiId.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, APIConstants.HTTP_PROTOCOL,
+                        apiId.getVersion(), apiRevision.getRevisionUUID(), organization, APIConstants.HTTP_PROTOCOL,
                          artifact);
                 if (artifactSaver != null) {
                     // Keeping the organization as tenant domain since MG does not support organization-wise deployment
                     // Artifacts will be deployed in ST for all organizations
                     artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
-                            apiRevision.getRevisionUUID(), tenantDomain, artifact);
+                            apiRevision.getRevisionUUID(), organization, artifact);
                 }
             } catch (APIImportExportException | ArtifactSynchronizerException e) {
                 throw new APIManagementException("Error while Store the Revision Artifact",

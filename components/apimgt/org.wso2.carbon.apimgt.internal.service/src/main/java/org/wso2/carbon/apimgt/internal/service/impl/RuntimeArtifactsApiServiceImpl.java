@@ -20,6 +20,8 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -31,6 +33,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactListDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -42,22 +45,29 @@ import java.util.List;
  * Runtime Artifact Service implementation.
  */
 public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiService {
+    private static Log log = LogFactory.getLog(RuntimeArtifactsApiService.class);
+
 
     public Response runtimeArtifactsGet(String xWSO2Tenant, String apiId, String gatewayLabel, String type,
                                         String name, String version, MessageContext messageContext)
             throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
-        String organization = RestApiUtil.getOrganization(messageContext);
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-        if (StringUtils.isNotEmpty(organization)) {
-            runtimeArtifactDto =
-                    RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, name, version, gatewayLabel, type,
-                            organization, true);
-        } else {
-            runtimeArtifactDto =
-                    RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, name, version, gatewayLabel, type,
-                            xWSO2Tenant, false);
+        String organization = RestApiUtil.getOrganization(messageContext);
+        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
         }
+
+        if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
+                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(apiId,
+                    name, version, gatewayLabel, type);
+        } else {
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId,
+                    name, version, gatewayLabel, type, xWSO2Tenant);
+        }
+
+        log.info(xWSO2Tenant);
 
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {

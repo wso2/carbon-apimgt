@@ -336,15 +336,10 @@ public class GatewayArtifactsMgtDAO {
     }
 
     public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByAPIIDAndLabel(String apiId, String[] labels,
-                                                                               String tenantDomain, boolean isOrgPresent)
+                                                                               String tenantDomain)
             throws APIManagementException {
 
-        String query;
-        if (isOrgPresent) {
-            query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL_BY_ORGANIZATION;
-        } else {
-            query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
-        }
+        String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
         query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
@@ -359,12 +354,63 @@ public class GatewayArtifactsMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
-                    if (isOrgPresent) {
-                        apiRuntimeArtifactDto.setOrganization(resultSet.getString("ORGANIZATION"));
-                    } else {
-                        apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
 
-                    }                    apiRuntimeArtifactDto.setApiId(apiId);
+                    log.info("JAYANIEEEEEBOGAAAA:" + resultSet.getString("TENANT_DOMAIN"));
+                    apiRuntimeArtifactDto.setApiId(apiId);
+                    String label = resultSet.getString("LABEL");
+                    // Do not handle the exception here since runtime artifacts are retrieved by API UUID
+                    // throw the exception here.
+                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                            resultSet.getString("VHOST"));
+                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                    apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
+                    apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
+                    apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
+                    apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
+                    apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                    apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
+                    InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
+                    if (artifact != null) {
+                        byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                        try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                            apiRuntimeArtifactDto.setArtifact(newArtifact);
+                        } catch (IOException e) {
+                            // Do not handle the exception here since runtime artifacts are retrieved by API UUID
+                            // throw the exception here.
+                            handleException("Error occurred retrieving input stream from byte array.", e);
+                        }
+                    }
+                    apiRuntimeArtifactDto.setFile(true);
+                    apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Gateway Artifact for Api : " + apiId + " and labels: " + StringUtils.join(",", labels), e);
+        }
+
+        return apiRuntimeArtifactDtoList;
+    }
+
+    public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByAPIIDAndLabel(String apiId, String[] labels)
+            throws APIManagementException {
+
+        String query = SQLConstants.RETRIEVE_ALL_ARTIFACTS_BY_APIID_AND_LABEL;
+        query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            int index = 2;
+            for (String label : labels) {
+                preparedStatement.setString(index, label);
+                index++;
+            }
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                    apiRuntimeArtifactDto.setApiId(apiId);
                     String label = resultSet.getString("LABEL");
                     // Do not handle the exception here since runtime artifacts are retrieved by API UUID
                     // throw the exception here.
@@ -401,7 +447,7 @@ public class GatewayArtifactsMgtDAO {
     }
 
     public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByAPIIDs(List<String> apiIds, String[] labels,
-                                                                        String tenantDomain, boolean isOrgPresent)
+                                                                        String tenantDomain)
             throws APIManagementException {
         // Logging the API ID List
         log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
@@ -417,12 +463,7 @@ public class GatewayArtifactsMgtDAO {
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
 
         for (List<String> apiIdList: apiIdsChunk) {
-            String query;
-            if (isOrgPresent) {
-                query = SQLConstants.RETRIEVE_ARTIFACTS_BY_MULTIPLE_APIIDs_AND_LABEL_BY_ORGANIZATION;
-            } else {
-                query = SQLConstants.RETRIEVE_ARTIFACTS_BY_MULTIPLE_APIIDs_AND_LABEL;
-            }
+            String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_MULTIPLE_APIIDs_AND_LABEL;
             query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
             query = query.replaceAll(SQLConstants.API_ID_REGEX, String.join(",",Collections.nCopies(apiIdList.size(), "?")));
 
@@ -441,12 +482,8 @@ public class GatewayArtifactsMgtDAO {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
-                        if (isOrgPresent) {
-                            apiRuntimeArtifactDto.setOrganization(resultSet.getString("ORGANIZATION"));
-                        } else {
-                            apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-
-                        }                        String apiId = resultSet.getString("API_ID");
+                        apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                        String apiId = resultSet.getString("API_ID");
                         apiRuntimeArtifactDto.setApiId(apiId);
                         String label = resultSet.getString("LABEL");
                         String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
@@ -484,16 +521,82 @@ public class GatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
-    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByLabel(String[] labels, String tenantDomain,
-                                                                       boolean isOrgPresent)
+    public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByAPIIDs(List<String> apiIds, String[] labels)
+            throws APIManagementException {
+        // Logging the API ID List
+        log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
+        // Split apiId list into smaller list of size 25
+        List<List<String>> apiIdsChunk = new ArrayList<>();
+        int apiIdListSize = apiIds.size();
+        int apiIdArrayIndex = 0;
+        int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
+        while (apiIdArrayIndex < apiIdListSize) {
+            apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, Math.min(apiIdArrayIndex + apiIdsChunkSize, apiIdListSize)));
+            apiIdArrayIndex += apiIdsChunkSize;
+        }
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
+
+        for (List<String> apiIdList: apiIdsChunk) {
+            String query = SQLConstants.RETRIEVE_ALL_ARTIFACTS_BY_MULTIPLE_APIIDs_AND_LABEL;
+            query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
+            query = query.replaceAll(SQLConstants.API_ID_REGEX, String.join(",",Collections.nCopies(apiIdList.size(), "?")));
+
+            try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                int index = 1;
+                for (String apiId: apiIdList) {
+                    preparedStatement.setString(index, apiId);
+                    index++;
+                }
+                for (String label : labels) {
+                    preparedStatement.setString(index, label);
+                    index++;
+                }
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                        String apiId = resultSet.getString("API_ID");
+                        apiRuntimeArtifactDto.setApiId(apiId);
+                        String label = resultSet.getString("LABEL");
+                        String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSet.getString("VHOST"));
+                        apiRuntimeArtifactDto.setLabel(label);
+                        apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                        apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
+                        apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
+                        apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
+                        apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
+                        apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
+                        InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
+                        if (artifact != null) {
+                            byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                            try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                                apiRuntimeArtifactDto.setArtifact(newArtifact);
+                            } catch (IOException e) {
+                                // Do not handle the exception here since runtime artifacts are retrieved by API UUID
+                                // throw the exception here.
+                                handleException("Error occurred retrieving input stream from byte array.", e);
+                            }
+                        }
+                        apiRuntimeArtifactDto.setFile(true);
+                        log.debug("Adding runtime artifact dto for the API ID: " + apiRuntimeArtifactDto.getApiId()
+                                + ", revision ID: " + apiRuntimeArtifactDto.getRevision() + ", label: "
+                                + apiRuntimeArtifactDto.getLabel());
+                        apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                    }
+                }
+            } catch (SQLException e) {
+                handleException("Failed to retrieve Gateway Artifact for Apis : " + apiIdList + " and labels: " + StringUtils.join(",", labels), e);
+            }
+        }
+        return apiRuntimeArtifactDtoList;
+    }
+
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByLabel(String[] labels, String tenantDomain)
             throws APIManagementException {
 
-        String query;
-        if (isOrgPresent) {
-            query = SQLConstants.RETRIEVE_ARTIFACTS_BY_LABEL_BY_ORGANIZATION;
-        } else {
-            query = SQLConstants.RETRIEVE_ARTIFACTS_BY_LABEL;
-        }
+        String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_LABEL;
         query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
@@ -510,12 +613,9 @@ public class GatewayArtifactsMgtDAO {
                     String label = resultSet.getString("LABEL");
                     try {
                         APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
-                        if (isOrgPresent) {
-                            apiRuntimeArtifactDto.setOrganization(resultSet.getString("ORGANIZATION"));
-                        } else {
-                            apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-
-                        }                        apiRuntimeArtifactDto.setApiId(apiId);
+                        apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                        log.info("JAYANIEEEEEBOGAAAA:" + resultSet.getString("TENANT_DOMAIN"));
+                        apiRuntimeArtifactDto.setApiId(apiId);
                         String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
                                 resultSet.getString("VHOST"));
                         apiRuntimeArtifactDto.setLabel(label);
@@ -558,15 +658,71 @@ public class GatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
-    public List<APIRuntimeArtifactDto> retrieveGatewayArtifacts(String tenantDomain, boolean isOrgPresent)
+    public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByLabel(String[] labels)
             throws APIManagementException {
 
-        String query;
-        if (isOrgPresent) {
-            query = SQLConstants.RETRIEVE_ARTIFACTS_BY_ORGANIZATION;
-        } else {
-            query = SQLConstants.RETRIEVE_ARTIFACTS;
+        String query = SQLConstants.RETRIEVE_ALL_ARTIFACTS_BY_LABEL;
+        query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            int index = 1;
+            for (String label : labels) {
+                preparedStatement.setString(index, label);
+                index++;
+            }
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String apiId = resultSet.getString("API_ID");
+                    String label = resultSet.getString("LABEL");
+                    try {
+                        APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                        apiRuntimeArtifactDto.setApiId(apiId);
+                        String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSet.getString("VHOST"));
+                        apiRuntimeArtifactDto.setLabel(label);
+                        apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                        apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
+                        apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
+                        apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
+                        apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
+                        apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
+                        InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
+                        if (artifact != null) {
+                            byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                            try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                                apiRuntimeArtifactDto.setArtifact(newArtifact);
+                            }
+                        }
+                        apiRuntimeArtifactDto.setFile(true);
+                        apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                    } catch (APIManagementException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s, "
+                                + "gateway environment \"%s\"." +
+                                "Skipping runtime artifact for the API.", apiId, label), e);
+                    } catch (IOException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Error occurred retrieving input stream from byte array of " +
+                                "API: %s, gateway environment \"%s\".", apiId, label), e);
+                    } catch (SQLException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Failed to retrieve Gateway Artifact of API: %s, " +
+                                "gateway environment \"%s\".", apiId, label), e);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Gateway Artifact for labels : " + StringUtils.join(",", labels), e);
         }
+
+        return apiRuntimeArtifactDtoList;
+    }
+
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifacts(String tenantDomain)
+            throws APIManagementException {
+        String query = SQLConstants.RETRIEVE_ARTIFACTS;
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -577,12 +733,7 @@ public class GatewayArtifactsMgtDAO {
                     String label = resultSet.getString("LABEL");
                     try {
                         APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
-                        if (isOrgPresent) {
-                            apiRuntimeArtifactDto.setOrganization(resultSet.getString("ORGANIZATION"));
-                        } else {
-                            apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-
-                        }
+                        apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                         apiRuntimeArtifactDto.setApiId(apiId);
                         String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
                                 resultSet.getString("VHOST"));
@@ -616,6 +767,60 @@ public class GatewayArtifactsMgtDAO {
                         // handle exception inside the loop and continue with other API artifacts
                         log.error(String.format("Failed to retrieve Gateway Artifact of API: %s, " +
                                 "gateway environment \"%s\", tenant: \"%s\".", apiId, label, tenantDomain), e);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Gateway Artifacts.", e);
+        }
+
+        return apiRuntimeArtifactDtoList;
+    }
+
+    public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifacts() throws APIManagementException {
+        String query = SQLConstants.RETRIEVE_ALL_ARTIFACTS;
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String apiId = resultSet.getString("API_ID");
+                    String label = resultSet.getString("LABEL");
+                    try {
+                        APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                        apiRuntimeArtifactDto.setApiId(apiId);
+                        String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSet.getString("VHOST"));
+                        apiRuntimeArtifactDto.setLabel(label);
+                        apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                        apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
+                        apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
+                        apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
+                        apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
+                        apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
+                        InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
+                        if (artifact != null) {
+                            byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                            try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                                apiRuntimeArtifactDto.setArtifact(newArtifact);
+                            }
+                        }
+                        apiRuntimeArtifactDto.setFile(true);
+                        apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                    } catch (APIManagementException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s, "
+                                + "gateway environment \"%s\"." +
+                                "Skipping runtime artifact for the API.", apiId, label), e);
+                    } catch (IOException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Error occurred retrieving input stream from byte array of " +
+                                "API: %s, gateway environment \"%s\".", apiId, label), e);
+                    } catch (SQLException e) {
+                        // handle exception inside the loop and continue with other API artifacts
+                        log.error(String.format("Failed to retrieve Gateway Artifact of API: %s, " +
+                                "gateway environment \"%s\".", apiId, label), e);
                     }
                 }
             }

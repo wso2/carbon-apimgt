@@ -42,8 +42,12 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         List<Subscription> subscriptionList = new ArrayList<>();
-        String organization = RestApiUtil.getOrganization(messageContext);
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
+        if (StringUtils.isNotEmpty(organization)) {
+            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
+        }
+
         if (StringUtils.isNotEmpty(applicationUUID) && StringUtils.isNotEmpty(apiUUID)) {
             Subscription subscription = subscriptionValidationDAO.getSubscription(apiUUID, applicationUUID);
             if (subscription != null) {

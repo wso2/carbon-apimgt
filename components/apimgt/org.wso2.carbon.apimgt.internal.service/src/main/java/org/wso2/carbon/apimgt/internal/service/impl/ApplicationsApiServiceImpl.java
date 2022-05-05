@@ -24,17 +24,22 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.internal.service.ApplicationsApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.List;
+import java.util.Objects;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
+    private static Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
+
 
     @Override
     public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) throws APIManagementException {
@@ -45,15 +50,20 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             ).build();
         }
         String organization = RestApiUtil.getOrganization(messageContext);
-        if (StringUtils.isNotEmpty(organization)) {
-            return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
-                            subscriptionValidationDAO.getAllApplications(organization, true)))
-                    .build();
+        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
         }
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+
+        log.info("JAYANIEEEEE:" + xWSO2Tenant);
+        if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
+                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
+                    subscriptionValidationDAO.getAllApplications())).build();
+        }
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
-                    subscriptionValidationDAO.getAllApplications(xWSO2Tenant, false)))
+                    subscriptionValidationDAO.getAllApplications(xWSO2Tenant)))
                     .build();
         }
         return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(

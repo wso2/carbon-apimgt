@@ -18,16 +18,20 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.APIArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.internal.service.RuntimeMetadataApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -35,20 +39,25 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 public class RuntimeMetadataApiServiceImpl implements RuntimeMetadataApiService {
+    private static Log log = LogFactory.getLog(RuntimeMetadataApiServiceImpl.class);
 
     public Response runtimeMetadataGet(String xWSO2Tenant, String apiId, String gatewayLabel, MessageContext messageContext)
             throws APIManagementException {
 
         RuntimeArtifactDto runtimeArtifactDto;
-        String organization = RestApiUtil.getOrganization(messageContext);
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-        if (StringUtils.isNotEmpty(organization)) {
-            runtimeArtifactDto =
-                    RuntimeArtifactGeneratorUtil.generateMetadataArtifact(organization, apiId, gatewayLabel, true);
-        } else {
-            runtimeArtifactDto =
-                    RuntimeArtifactGeneratorUtil.generateMetadataArtifact(xWSO2Tenant, apiId, gatewayLabel, false);
+        String organization = RestApiUtil.getOrganization(messageContext);
+        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
         }
+        if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
+                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllMetadataArtifact(apiId, gatewayLabel);
+        } else {
+            runtimeArtifactDto =  RuntimeArtifactGeneratorUtil.generateMetadataArtifact(xWSO2Tenant, apiId, gatewayLabel);
+        }
+        log.info("JAYANIEEEEE:" + xWSO2Tenant);
+
         if (runtimeArtifactDto != null) {
             File artifact = (File) runtimeArtifactDto.getArtifact();
             StreamingOutput streamingOutput = (outputStream) -> {
