@@ -410,8 +410,6 @@ public class GatewayArtifactsMgtDAO {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setApiId(apiId);
                     String label = resultSet.getString("LABEL");
-                    // Do not handle the exception here since runtime artifacts are retrieved by API UUID
-                    // throw the exception here.
                     String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
                             resultSet.getString("VHOST"));
                     apiRuntimeArtifactDto.setLabel(label);
