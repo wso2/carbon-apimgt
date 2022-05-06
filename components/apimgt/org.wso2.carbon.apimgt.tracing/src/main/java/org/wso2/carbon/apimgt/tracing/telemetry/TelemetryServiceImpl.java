@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.tracing.telemetry;
 
 import io.opentelemetry.api.OpenTelemetry;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -31,26 +32,31 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 public class TelemetryServiceImpl implements TelemetryService {
 
     private static final Log log = LogFactory.getLog(TelemetryServiceImpl.class);
-    private static APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+    private static final APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfiguration();
-    private static TelemetryServiceImpl instance = new TelemetryServiceImpl();
-    private APIMOpenTelemetry tracer;
+    private static final TelemetryServiceImpl instance = new TelemetryServiceImpl();
+    private final APIMOpenTelemetry tracer;
 
     private TelemetryServiceImpl() {
 
-        String openTelemetryTracerName =
-                configuration.getFirstProperty(TelemetryConstants.OPEN_TELEMETRY_TRACER_NAME) != null ?
-                        configuration.getFirstProperty(TelemetryConstants.OPEN_TELEMETRY_TRACER_NAME)
-                        : TelemetryConstants.DEFAULT_OPEN_TELEMETRY_TRACER_NAME;
+        String openTelemetryTracerName = configuration.getFirstProperty(TelemetryConstants.OPEN_TELEMETRY_TRACER_NAME);
+        String openTelemetryTracerDefaultName = TelemetryConstants.DEFAULT_OPEN_TELEMETRY_TRACER_NAME;
 
-        Boolean remoteTelemetryTracerEnabled =
-                Boolean.valueOf(configuration
-                        .getFirstProperty(TelemetryConstants.OPEN_TELEMETRY_TRACER_ENABLED) != null ?
-                        configuration.getFirstProperty(TelemetryConstants.OPEN_TELEMETRY_TRACER_ENABLED)
-                        : TelemetryConstants.DEFAULT_OPEN_TELEMETRY_TRACER_ENABLED);
+        if (StringUtils.isEmpty(openTelemetryTracerName)) {
+            openTelemetryTracerName = openTelemetryTracerDefaultName;
+        }
+
+        String remoteTelemetryTracer = configuration.getFirstProperty(TelemetryConstants.OPEN_TELEMETRY_TRACER_ENABLED);
+        boolean remoteTelemetryTracerEnabled = Boolean.parseBoolean(remoteTelemetryTracer != null ?
+                remoteTelemetryTracer : TelemetryConstants.DEFAULT_OPEN_TELEMETRY_TRACER_ENABLED);
 
         String telemetryTracerName = (openTelemetryTracerName != null && remoteTelemetryTracerEnabled) ?
                 openTelemetryTracerName : TelemetryConstants.LOG;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing the tracer: " + telemetryTracerName);
+        }
+
         this.tracer = ServiceReferenceHolder.getOpenTelemetryTracerMap().get(telemetryTracerName);
     }
 
@@ -63,6 +69,9 @@ public class TelemetryServiceImpl implements TelemetryService {
     public TelemetryTracer buildTelemetryTracer(String serviceName) {
 
         tracer.init(serviceName);
+        if (log.isDebugEnabled()) {
+            log.debug("Tracer is configured.");
+        }
         return new TelemetryTracer(tracer.getTelemetryTracer());
     }
 

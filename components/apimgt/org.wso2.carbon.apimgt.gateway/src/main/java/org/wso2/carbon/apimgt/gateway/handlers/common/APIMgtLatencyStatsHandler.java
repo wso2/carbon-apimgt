@@ -44,12 +44,10 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
     private String swagger;
 
     public String getApiUUID() {
-
         return apiUUID;
     }
 
     public void setApiUUID(String apiUUID) {
-
         this.apiUUID = apiUUID;
     }
 

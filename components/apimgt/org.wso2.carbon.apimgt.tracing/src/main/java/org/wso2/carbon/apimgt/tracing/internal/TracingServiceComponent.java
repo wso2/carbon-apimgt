@@ -125,6 +125,7 @@ public class TracingServiceComponent {
 
     protected void unsetTelemetryService(APIMOpenTelemetry tracer) {
 
+        tracer.close();
         ServiceReferenceHolder.getInstance().getOpenTelemetryTracerMap().remove(tracer.getName());
     }
 }

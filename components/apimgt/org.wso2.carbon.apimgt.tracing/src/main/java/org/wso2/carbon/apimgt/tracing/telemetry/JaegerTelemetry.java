@@ -27,20 +27,23 @@ import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * Class for getting Jaeger tracer from reading configuration file
- * */
+ * Class for getting Jaeger tracer from reading configuration file.
+ */
 public class JaegerTelemetry implements APIMOpenTelemetry {
 
     private static final String NAME = "jaeger";
-    private static APIManagerConfiguration configuration =
+    private static final Log log = LogFactory.getLog(JaegerTelemetry.class);
+    private static final APIManagerConfiguration configuration =
             ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
     private SdkTracerProvider sdkTracerProvider;
     private OpenTelemetry openTelemetry;
@@ -61,10 +64,14 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
                 .setTimeout(30, TimeUnit.SECONDS)
                 .build();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Jaeger exporter: " + jaegerExporter + " is configured at http://" + hostname + ":" + port);
+        }
+
         Resource serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
 
         sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
+                .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
                 .setResource(Resource.getDefault().merge(serviceNameResource))
                 .build();
 
@@ -72,6 +79,10 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
                 .setTracerProvider(sdkTracerProvider).
                 setPropagators(ContextPropagators.create(JaegerPropagator.getInstance()))
                 .build();
+
+        if (log.isDebugEnabled()) {
+            log.debug("OpenTelemetry instance: " + openTelemetry + " is configured.");
+        }
     }
 
     @Override
@@ -83,7 +94,7 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
     @Override
     public Tracer getTelemetryTracer() {
 
-        return openTelemetry.getTracer("org.wso2.carbon.apimgt.tracing.telemetry");
+        return openTelemetry.getTracer(TelemetryConstants.OPENTELEMETRY_INSTRUMENTATION_NAME);
     }
 
     @Override
@@ -95,7 +106,9 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
     @Override
     public void close() {
 
-        sdkTracerProvider.close();
+        if (sdkTracerProvider != null) {
+            sdkTracerProvider.close();
+        }
     }
 
 }

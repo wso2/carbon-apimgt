@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.tracing.telemetry;
 
 /**
- * OpenTelemetry Constants
+ * OpenTelemetry Constants.
  */
 public class TelemetryConstants {
 
@@ -29,30 +29,26 @@ public class TelemetryConstants {
     static final String DEFAULT_OPEN_TELEMETRY_TRACER_ENABLED = "false";
     static final String REMOTE_TELEMETRY_TRACER_ENABLED = "OpenTracer.RemoteTracer.Enabled";
     static final String LOG_TELEMETRY_TRACER_ENABLED = "OpenTracer.LogTracer.Enabled";
-
+    static final String OPENTELEMETRY_INSTRUMENTATION_NAME = "org.wso2.carbon.apimgt.tracing.telemetry";
     /**
-     * Jaeger Constants
+     * Jaeger Constants.
      */
-    static final String JAEGER = "JAEGER";
     static final String JAEGER_CONFIG_PORT = "OpenTracer.RemoteTracer.Properties.Port";
     static final String JAEGER_CONFIG_HOST = "OpenTracer.RemoteTracer.Properties.HostName";
     static final int JAEGER_DEFAULT_PORT = 5775;
     static final String JAEGER_DEFAULT_HOST = "localhost";
 
     /**
-     * Zipkin Constants
+     * Zipkin Constants.
      */
-    static final String ZIPKIN = "ZIPKIN";
     static final String ZIPKIN_CONFIG_PORT = "OpenTracer.RemoteTracer.Properties.Port";
     static final String ZIPKIN_CONFIG_HOST = "OpenTracer.RemoteTracer.Properties.HostName";
-    static final String REQUEST_ID = "request-id";
     static final int ZIPKIN_DEFAULT_PORT = 9411;
     static final String ZIPKIN_DEFAULT_HOST = "localhost";
     static final String ZIPKIN_API_CONTEXT = "/api/v2/spans";
 
     /**
-     * Log Constants
+     * Log Constants.
      */
-    static final String LOG_ENABLED = "OpenTracer.LogTracer.Enabled";
     static final String LOG = "log";
 }

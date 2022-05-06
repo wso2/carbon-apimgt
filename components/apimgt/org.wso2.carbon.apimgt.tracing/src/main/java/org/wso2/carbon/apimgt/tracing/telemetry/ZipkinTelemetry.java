@@ -27,18 +27,21 @@ import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 /**
- * Class for getting Zipkin tracer from reading configuration file
+ * Class for getting Zipkin tracer from reading configuration file.
  */
 public class ZipkinTelemetry implements APIMOpenTelemetry {
 
     private static final String NAME = "zipkin";
-    private static APIManagerConfiguration configuration =
+    private static final Log log = LogFactory.getLog(JaegerTelemetry.class);
+    private static final APIManagerConfiguration configuration =
             ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
     private SdkTracerProvider sdkTracerProvider;
     private OpenTelemetry openTelemetry;
@@ -58,10 +61,14 @@ public class ZipkinTelemetry implements APIMOpenTelemetry {
                 .setEndpoint("http://" + hostname + ":" + port + TelemetryConstants.ZIPKIN_API_CONTEXT)
                 .build();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Zipkin exporter: " + zipkinExporter + " is configured at http://" + hostname + ":" + port);
+        }
+
         Resource serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
 
         sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(zipkinExporter))
+                .addSpanProcessor(BatchSpanProcessor.builder(zipkinExporter).build())
                 .setResource(Resource.getDefault().merge(serviceNameResource))
                 .build();
 
@@ -69,6 +76,10 @@ public class ZipkinTelemetry implements APIMOpenTelemetry {
                 .setTracerProvider(sdkTracerProvider)
                 .setPropagators(ContextPropagators.create(B3Propagator.injectingMultiHeaders()))
                 .build();
+
+        if (log.isDebugEnabled()) {
+            log.debug("OpenTelemetry instance: " + openTelemetry.toString() + " is configured.");
+        }
     }
 
     @Override
@@ -80,7 +91,7 @@ public class ZipkinTelemetry implements APIMOpenTelemetry {
     @Override
     public Tracer getTelemetryTracer() {
 
-        return openTelemetry.getTracer("org.wso2.carbon.apimgt.tracing.telemetry");
+        return openTelemetry.getTracer(TelemetryConstants.OPENTELEMETRY_INSTRUMENTATION_NAME);
     }
 
     @Override
@@ -92,6 +103,8 @@ public class ZipkinTelemetry implements APIMOpenTelemetry {
     @Override
     public void close() {
 
-        sdkTracerProvider.close();
+        if (sdkTracerProvider != null) {
+            sdkTracerProvider.close();
+        }
     }
 }

@@ -19,32 +19,33 @@
 package org.wso2.carbon.apimgt.tracing.telemetry;
 
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapSetter;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 import java.util.Map;
 
 /**
- * Span utility class
+ * Span utility class.
  */
 
 public class TelemetryUtil {
 
+    private static final Log log = LogFactory.getLog(TelemetryUtil.class);
+
     /**
-     * Start the telemetry tracing span
+     * Start the telemetry tracing span.
      *
-     * @param spanName
-     * @param parentSpan
-     * @param tracer     io.opentelemetry.api.trace tracer
-     * @return a TelemetrySpan object
+     * @param spanName   Operation name of the span.
+     * @param parentSpan Root span of the new span to be created.
+     * @param tracer     Initialized io.opentelemetry.api.trace tracer.
+     * @return TelemetrySpan object.
      */
     public static TelemetrySpan startSpan(String spanName, TelemetrySpan parentSpan, TelemetryTracer tracer) {
 
@@ -55,6 +56,9 @@ public class TelemetryUtil {
         } else {
             Object sp = parentSpan.getSpan();
             if (sp != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Parent span exist");
+                }
                 if (sp instanceof Span) {
                     childSpan = tracer.getTelemetryTracingTracer().spanBuilder(spanName).setParent(Context.current()
                             .with((Span) sp)).startSpan();
@@ -71,11 +75,12 @@ public class TelemetryUtil {
     }
 
     /**
-     * Start telemetry tracing span after extracting a context
-     * @param spanName
-     * @param parentSpan
-     * @param tracer     io.opentelemetry.api.trace tracer
-     * @return a TelemetrySpan object
+     * Start telemetry tracing span after extracting a context.
+     *
+     * @param spanName   Operation name of the span.
+     * @param parentSpan Root context of the new span to be created.
+     * @param tracer     Initialized io.opentelemetry.api.trace tracer.
+     * @return TelemetrySpan object.
      */
     public static TelemetrySpan startSpan(String spanName, Context parentSpan, TelemetryTracer tracer) {
 
@@ -86,11 +91,11 @@ public class TelemetryUtil {
     }
 
     /**
-     * Set tag to the span
+     * Set tag to the span.
      *
-     * @param span
-     * @param key
-     * @param value
+     * @param span  Span which the tag is set.
+     * @param key   keys.
+     * @param value value for the keys.
      */
     public static void setTag(TelemetrySpan span, String key, String value) {
 
@@ -101,10 +106,10 @@ public class TelemetryUtil {
     }
 
     /**
-     * Update operation to the span
+     * Update operation to the span.
      *
-     * @param span
-     * @param name
+     * @param span Current span which the update operation is done.
+     * @param name Updated name.
      */
     public static void updateOperation(TelemetrySpan span, String name) {
 
@@ -114,18 +119,10 @@ public class TelemetryUtil {
         }
     }
 
-    public static void setLog(TelemetrySpan span, String key, String value) {
-
-        Object sp = span.getSpan();
-        if (sp instanceof Span) {
-            ((Span) sp).addEvent("event", Attributes.of(AttributeKey.stringKey(key), value));
-        }
-    }
-
     /**
-     * Finish the span
+     * Finish the span.
      *
-     * @param span
+     * @param span Span to be ended.
      */
     public static void finishSpan(TelemetrySpan span) {
 
@@ -136,25 +133,32 @@ public class TelemetryUtil {
     }
 
     /**
-     * Inject tracer specific information to tracerSpecificCarrier
+     * Inject tracer specific information to tracerSpecificCarrier.
      *
-     * @param span
-     * @param tracerSpecificCarrier
+     * @param span                  Span which the span information will be injected to the tracerSpecificCarrier.
+     * @param tracerSpecificCarrier Hashmap to inject the tracer and span context.
      */
     public static void inject(TelemetrySpan span, Map<String, String> tracerSpecificCarrier) {
 
         OpenTelemetry openTelemetry = TelemetryServiceImpl.getInstance().getOpenTelemetry();
         TextMapSetter<Map<String, String>> setter = new TextMapSetter<Map<String, String>>() {
             @Override
-            public void set(@NotNull Map<String, String> tracerSpecificCarrier, String key, String value) {
+            public void set(Map<String, String> tracerSpecificCarrier, String key, String value) {
 
-                tracerSpecificCarrier.put(key, value);
+                if (tracerSpecificCarrier != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("value: " + value + " was set for key: " + key + " in tracer specific carrier");
+                    }
+
+                    tracerSpecificCarrier.put(key, value);
+                }
+
             }
         };
 
         Object sp = span.getSpan();
         if (sp instanceof Span) {
-            try (Scope scope = ((Span) sp).makeCurrent()) {
+            try (Scope ignored = ((Span) sp).makeCurrent()) {
                 openTelemetry.getPropagators().getTextMapPropagator().inject(Context.current(), tracerSpecificCarrier
                         , setter);
             }
@@ -162,18 +166,23 @@ public class TelemetryUtil {
     }
 
     /**
-     * Inject tracer specific information to tracerSpecificCarrier
+     * Extract tracer specific information from tracerSpecificCarrier and return the extracted context
      *
-     * @param tracerSpecificCarrier
+     * @param tracerSpecificCarrier Hashmap to extract the tracer and span context
+     * @return extracted context
      */
     public static Context extract(Map<String, String> tracerSpecificCarrier) {
 
         OpenTelemetry openTelemetry = TelemetryServiceImpl.getInstance().getOpenTelemetry();
         TextMapGetter<Map<String, String>> getter =
                 new TextMapGetter<Map<String, String>>() {
-                    public String get(@NotNull Map<String, String> tracerSpecificCarrier, String key) {
+                    public String get(Map<String, String> tracerSpecificCarrier, String key) {
 
-                        if (tracerSpecificCarrier.containsKey(key)) {
+                        if (tracerSpecificCarrier != null && tracerSpecificCarrier.containsKey(key)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("value: " + tracerSpecificCarrier.get(key) + " found for key: " + key +
+                                        " in tracer specific carrier");
+                            }
                             return tracerSpecificCarrier.get(key);
                         }
                         return null;
@@ -185,23 +194,43 @@ public class TelemetryUtil {
                     }
                 };
 
+        if (log.isDebugEnabled()) {
+            log.debug("Extraction starts");
+        }
+
         return openTelemetry.getPropagators().getTextMapPropagator()
                 .extract(Context.current(), tracerSpecificCarrier, getter);
     }
 
+    /**
+     * Check whether telemetry tracing is enabled
+     **/
     public static boolean telemetryEnabled() {
 
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("API Manager Configuration is set");
+            }
             boolean remoteTelemetryTracerEnabled =
                     Boolean.parseBoolean(apiManagerConfiguration
                             .getFirstProperty(TelemetryConstants.REMOTE_TELEMETRY_TRACER_ENABLED));
             boolean logTelemetryTracerEnabled =
                     Boolean.parseBoolean(apiManagerConfiguration
                             .getFirstProperty(TelemetryConstants.LOG_TELEMETRY_TRACER_ENABLED));
+            if (log.isDebugEnabled()) {
+                log.debug("Remote Telemetry Tracer Enabled: " + remoteTelemetryTracerEnabled);
+                log.debug("Log Telemetry Tracer Enabled: " + logTelemetryTracerEnabled);
+
+            }
             return remoteTelemetryTracerEnabled || logTelemetryTracerEnabled;
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("API Manager Configuration is null");
+            }
         }
+
         return false;
     }
 }

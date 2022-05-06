@@ -22,18 +22,39 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 
 /**
- * This interface used to implement OpenTelemetry Bridge Implementations for APIM.
+ * This interface used to implement OpenTelemetry Bridge Implementations for APIM
  */
 
 public interface APIMOpenTelemetry {
 
+    /**
+     * Initialize the exporter and configure an openTelemetry instance from it.
+     *
+     * @param serviceName API:Latency
+     */
     void init(String serviceName);
 
+    /**
+     *
+     * Return the initialized the openTelemetry instance.
+     * @return openTelemetry instance.
+     */
     OpenTelemetry getAPIMOpenTelemetry();
 
+    /**
+     * Return the OpenTelemetry tracer from the initialized openTelemetry instance.
+     * @return OpenTelemetry tracer.
+     */
     Tracer getTelemetryTracer();
 
+    /**
+     * Return the exporter name.
+     * @return exporter name.
+     */
     String getName();
 
+    /**
+     * Shutdown the SDK cleanly at JVM exit.
+     */
     void close();
 }
