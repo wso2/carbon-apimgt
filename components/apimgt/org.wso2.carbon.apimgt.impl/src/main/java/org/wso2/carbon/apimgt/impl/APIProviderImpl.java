@@ -8577,8 +8577,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Get the revision UUID from the Revision no and API UUID
      *
-     * @param revisionNum revision number
-     * @param apiUUID     UUID of the API
+     * @param revisionNum   revision number
+     * @param apiUUID       UUID of the API
+     * @param organization  organization ID of the API
      * @return UUID of the revision
      * @throws APIManagementException if failed to get the API revision uuid
      */

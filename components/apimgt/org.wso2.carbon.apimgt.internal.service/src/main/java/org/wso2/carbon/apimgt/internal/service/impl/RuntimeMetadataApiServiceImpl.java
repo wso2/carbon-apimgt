@@ -39,7 +39,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 public class RuntimeMetadataApiServiceImpl implements RuntimeMetadataApiService {
-    private static Log log = LogFactory.getLog(RuntimeMetadataApiServiceImpl.class);
 
     public Response runtimeMetadataGet(String xWSO2Tenant, String apiId, String gatewayLabel, MessageContext messageContext)
             throws APIManagementException {

@@ -485,7 +485,7 @@ public class SubscriptionValidationDAO {
 
     /*
      * This method can be used to retrieve all the Applications of a given tenant in the database
-     * @param tenantId : tenant Id
+     * @param tenantId : tenant Id or organization
      * @return {@link Subscription}
      * */
     public List<Application> getAllApplications(String organization) {
