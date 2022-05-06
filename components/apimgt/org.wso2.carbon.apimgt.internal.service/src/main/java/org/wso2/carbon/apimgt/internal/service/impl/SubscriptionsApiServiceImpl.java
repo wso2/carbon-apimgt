@@ -71,7 +71,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         } else if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
                     subscriptionValidationDAO.getAllSubscriptions(xWSO2Tenant))).build();
-        }  else {
+        } else {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
                     subscriptionValidationDAO.getAllSubscriptions())).build();
         }
