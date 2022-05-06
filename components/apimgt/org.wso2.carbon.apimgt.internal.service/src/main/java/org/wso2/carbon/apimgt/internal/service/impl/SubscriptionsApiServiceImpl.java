@@ -22,10 +22,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +46,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         List<Subscription> subscriptionList = new ArrayList<>();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
-        if (StringUtils.isNotEmpty(organization)) {
-            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
-        }
-
         if (StringUtils.isNotEmpty(applicationUUID) && StringUtils.isNotEmpty(apiUUID)) {
             Subscription subscription = subscriptionValidationDAO.getSubscription(apiUUID, applicationUUID);
             if (subscription != null) {
@@ -62,13 +60,18 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             }
             result = Response.ok().entity(
                     SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(subscriptionList)).build();
-        } else if (StringUtils.isNotEmpty(organization)){
+        } else if (StringUtils.isNotEmpty(organization) &&
+                !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
-                    subscriptionValidationDAO.getAllSubscriptions(organization, true))).build();
+                    subscriptionValidationDAO.getAllSubscriptionsByOrganization(organization))).build();
+        } else if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
+                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
+                    subscriptionValidationDAO.getAllSubscriptions())).build();
         } else if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
-                    subscriptionValidationDAO.getAllSubscriptions(xWSO2Tenant, false))).build();
-        } else {
+                    subscriptionValidationDAO.getAllSubscriptions(xWSO2Tenant))).build();
+        }  else {
             result = Response.ok().entity(SubscriptionValidationDataUtil.fromSubscriptionToSubscriptionListDTO(
                     subscriptionValidationDAO.getAllSubscriptions())).build();
         }

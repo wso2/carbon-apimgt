@@ -949,7 +949,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                                MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (revisionId == null && revisionNumber != null) {
-            revisionId = apiProvider.getAPIRevisionUUID(revisionNumber, apiProductId, "");
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNumber, apiProductId, null);
             if (revisionId == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }

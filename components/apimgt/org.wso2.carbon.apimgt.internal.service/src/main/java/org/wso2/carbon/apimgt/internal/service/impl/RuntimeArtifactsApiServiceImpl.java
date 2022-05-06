@@ -45,8 +45,6 @@ import java.util.List;
  * Runtime Artifact Service implementation.
  */
 public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiService {
-    private static Log log = LogFactory.getLog(RuntimeArtifactsApiService.class);
-
 
     public Response runtimeArtifactsGet(String xWSO2Tenant, String apiId, String gatewayLabel, String type,
                                         String name, String version, MessageContext messageContext)
@@ -66,9 +64,6 @@ public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiServic
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId,
                     name, version, gatewayLabel, type, xWSO2Tenant);
         }
-
-        log.info(xWSO2Tenant);
-
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
                 File artifact = (File) runtimeArtifactDto.getArtifact();

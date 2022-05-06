@@ -355,8 +355,6 @@ public class GatewayArtifactsMgtDAO {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-
-                    log.info("JAYANIEEEEEBOGAAAA:" + resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(apiId);
                     String label = resultSet.getString("LABEL");
                     // Do not handle the exception here since runtime artifacts are retrieved by API UUID
@@ -614,7 +612,6 @@ public class GatewayArtifactsMgtDAO {
                     try {
                         APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                         apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-                        log.info("JAYANIEEEEEBOGAAAA:" + resultSet.getString("TENANT_DOMAIN"));
                         apiRuntimeArtifactDto.setApiId(apiId);
                         String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
                                 resultSet.getString("VHOST"));

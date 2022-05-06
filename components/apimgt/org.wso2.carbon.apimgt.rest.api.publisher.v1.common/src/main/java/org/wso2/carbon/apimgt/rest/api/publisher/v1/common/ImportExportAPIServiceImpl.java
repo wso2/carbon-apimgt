@@ -85,7 +85,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             exportAPIUUID = apiProvider.getLatestRevisionUUID(apiId);
         } else if (StringUtils.isNotBlank(revisionNum)) {
             //if a revision number provided, revision api object is used
-            exportAPIUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId, "");
+            exportAPIUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId, null);
         } else {
             //if a revision number is not provided, working copy's id is used
             exportAPIUUID = apiId;
@@ -163,7 +163,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             exportAPIProductUUID = apiProvider.getLatestRevisionUUID(apiId);
         } else if (revisionNum != null) {
             //if a revision number provided, revision api product object is used
-            exportAPIProductUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId, "");
+            exportAPIProductUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId, null);
         } else {
             //if a revision number is not provided, working copy's id is used
             exportAPIProductUUID = apiId;

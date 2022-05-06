@@ -16357,18 +16357,15 @@ public class ApiMgtDAO {
 
         String revisionUUID = null;
         String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID;
-        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase("all")) {
+        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
             sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID_BY_ORGANIZATION;
-        }
-        if (StringUtils.isNotEmpty(organization) && organization.equals("all")){
-            sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID;
         }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(sql)) {
             statement.setString(1, apiUUID);
             statement.setInt(2, Integer.parseInt(revisionNum));
-            if (StringUtils.isNotEmpty(organization)) {
+            if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
                 statement.setString(3, organization);
             }
             try (ResultSet rs = statement.executeQuery()) {

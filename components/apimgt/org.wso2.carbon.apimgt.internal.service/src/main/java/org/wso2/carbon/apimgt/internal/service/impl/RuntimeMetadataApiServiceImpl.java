@@ -56,7 +56,6 @@ public class RuntimeMetadataApiServiceImpl implements RuntimeMetadataApiService 
         } else {
             runtimeArtifactDto =  RuntimeArtifactGeneratorUtil.generateMetadataArtifact(xWSO2Tenant, apiId, gatewayLabel);
         }
-        log.info("JAYANIEEEEE:" + xWSO2Tenant);
 
         if (runtimeArtifactDto != null) {
             File artifact = (File) runtimeArtifactDto.getArtifact();

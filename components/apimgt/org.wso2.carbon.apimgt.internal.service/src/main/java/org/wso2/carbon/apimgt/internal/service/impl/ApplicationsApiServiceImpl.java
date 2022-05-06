@@ -38,8 +38,6 @@ import java.util.Objects;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
-    private static Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
-
 
     @Override
     public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) throws APIManagementException {
@@ -54,8 +52,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
         }
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-
-        log.info("JAYANIEEEEE:" + xWSO2Tenant);
         if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
                 xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(

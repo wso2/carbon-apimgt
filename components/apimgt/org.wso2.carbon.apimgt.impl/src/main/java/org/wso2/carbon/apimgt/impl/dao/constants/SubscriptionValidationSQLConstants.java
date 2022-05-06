@@ -95,16 +95,6 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   APP.APPLICATION_ID = ? ";
 
-    public static final String GET_ALL_SUBSCRIPTIONS_SQL =
-            "SELECT " +
-                    "   SUBSCRIPTION_ID AS SUB_ID," +
-                    "   TIER_ID AS TIER," +
-                    "   API_ID AS API_ID," +
-                    "   APPLICATION_ID AS APP_ID," +
-                    "   SUB_STATUS AS STATUS" +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION";
-
     public static final String GET_SUBSCRIPTION_SQL =
             "SELECT " +
                     "   AM_SUBSCRIPTION.UUID AS SUBSCRIPTION_UUID," +
@@ -235,7 +225,51 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   SUBS.API_ID = API.API_ID AND " +
                     "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
-                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND ";
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
+                    "   SUB.TENANT_ID = ? ";
+
+    public static final String GET_ORGANIZATION_SUBSCRIPTIONS_SQL =
+            "SELECT " +
+                    "   SUBS.UUID AS SUBSCRIPTION_UUID," +
+                    "   SUBS.SUBSCRIPTION_ID AS SUB_ID," +
+                    "   SUBS.TIER_ID AS TIER," +
+                    "   SUBS.API_ID AS API_ID," +
+                    "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.UUID AS APPLICATION_UUID," +
+                    "   API.API_UUID AS API_UUID," +
+                    "   SUBS.SUB_STATUS AS STATUS," +
+                    "   SUB.TENANT_ID AS TENANT_ID" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_API API," +
+                    "   AM_SUBSCRIBER SUB" +
+                    " WHERE " +
+                    "   SUBS.API_ID = API.API_ID AND " +
+                    "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
+                    "   APP.ORGANIZATION = ? ";
+
+    public static final String GET_ALL_SUBSCRIPTIONS_SQL =
+            "SELECT " +
+                    "   SUBS.UUID AS SUBSCRIPTION_UUID," +
+                    "   SUBS.SUBSCRIPTION_ID AS SUB_ID," +
+                    "   SUBS.TIER_ID AS TIER," +
+                    "   SUBS.API_ID AS API_ID," +
+                    "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.UUID AS APPLICATION_UUID," +
+                    "   API.API_UUID AS API_UUID," +
+                    "   SUBS.SUB_STATUS AS STATUS," +
+                    "   SUB.TENANT_ID AS TENANT_ID" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_API API," +
+                    "   AM_SUBSCRIBER SUB" +
+                    " WHERE " +
+                    "   SUBS.API_ID = API.API_ID AND " +
+                    "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
     public static final String GET_TENANT_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
@@ -464,7 +498,25 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_APPLICATION_KEY_MAPPING MAPPING,AM_APPLICATION APP,AM_SUBSCRIBER SUB,AM_KEY_MANAGER KEYM" +
                     " WHERE " +
                     "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
-                    "   MAPPING.KEY_MANAGER = KEYM.UUID AND ";
+                    "   MAPPING.KEY_MANAGER = KEYM.UUID AND SUB.TENANT_ID = ?";
+
+    public static final String GET_ALL_AM_KEY_MAPPING_SQL =
+            "SELECT APP.UUID,MAPPING.APPLICATION_ID, MAPPING.CONSUMER_KEY,MAPPING.KEY_TYPE,KEYM.NAME AS KEY_MANAGER," +
+                    "MAPPING.STATE" +
+                    " FROM " +
+                    "   AM_APPLICATION_KEY_MAPPING MAPPING,AM_APPLICATION APP,AM_SUBSCRIBER SUB,AM_KEY_MANAGER KEYM" +
+                    " WHERE " +
+                    "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "   MAPPING.KEY_MANAGER = KEYM.UUID";
+
+    public static final String GET_ORGANIZATION_AM_KEY_MAPPING_SQL =
+            "SELECT APP.UUID,MAPPING.APPLICATION_ID, MAPPING.CONSUMER_KEY,MAPPING.KEY_TYPE,KEYM.NAME AS KEY_MANAGER," +
+                    "MAPPING.STATE" +
+                    " FROM " +
+                    "   AM_APPLICATION_KEY_MAPPING MAPPING,AM_APPLICATION APP,AM_SUBSCRIBER SUB,AM_KEY_MANAGER KEYM" +
+                    " WHERE " +
+                    "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "   MAPPING.KEY_MANAGER = KEYM.UUID AND APP.ORGANIZATION = ?";
 
     public static final String GET_ALL_GLOBAL_POLICIES_SQL =
             " SELECT " +

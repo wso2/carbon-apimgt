@@ -4525,7 +4525,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         if (revisionId == null && revisionNum != null) {
-            revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId, "");
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId, null);
             if (revisionId == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }
