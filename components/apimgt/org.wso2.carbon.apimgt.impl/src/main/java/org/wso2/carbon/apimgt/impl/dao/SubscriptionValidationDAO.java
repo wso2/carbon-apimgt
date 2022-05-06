@@ -488,28 +488,19 @@ public class SubscriptionValidationDAO {
      * @param tenantId : tenant Id
      * @return {@link Subscription}
      * */
-    public List<Application> getAllApplications(String tenantDomain) {
+    public List<Application> getAllApplications(String organization) {
 
         ArrayList<Application> applications = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATIONS_BY_ORGANIZATION_SQL)) {
-//            try {
-//                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-//                        .getTenantId(tenantDomain);
-                ps.setString(1, tenantDomain);
-
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    addToApplicationList(applications, resultSet);
-                }
-//            } catch (UserStoreException e) {
-//                log.error("Error in getting tenant id for loading Applications for tenant : " + tenantDomain, e);
-//            }
-
+            ps.setString(1, organization);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                addToApplicationList(applications, resultSet);
+            }
         } catch (SQLException e) {
-            log.error("Error in loading Applications for tenantDomain : " + tenantDomain, e);
+            log.error("Error in loading Applications for organization : " + organization, e);
         }
-
         return applications;
     }
 
