@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.sql.Struct;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
