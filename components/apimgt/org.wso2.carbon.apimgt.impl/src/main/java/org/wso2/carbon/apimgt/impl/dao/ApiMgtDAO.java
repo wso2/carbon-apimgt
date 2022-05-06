@@ -6305,9 +6305,14 @@ public class ApiMgtDAO {
                     application.setTier(rs.getString("APPLICATION_TIER"));
                     application.setTokenType(rs.getString("TOKEN_TYPE"));
                     subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                    application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME")
-                            .getTime()));
-                    application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
+                    if (rs.getTimestamp("CREATED_TIME") != null) {
+                        application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME")
+                                .getTime()));
+                    }
+                    if (rs.getTimestamp("UPDATED_TIME") != null) {
+                        application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME")
+                                .getTime()));
+                    }
 
                     if (multiGroupAppSharingEnabled) {
                         if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
