@@ -129,4 +129,12 @@ public class ApiTypeWrapper {
             return api.getOrganization();
         }
     }
+
+    public void setOrganization(String organization) {
+        if (isAPIProduct) {
+            apiProduct.setOrganization(organization);
+        } else {
+            api.setOrganization(organization);
+        }
+    }
 }

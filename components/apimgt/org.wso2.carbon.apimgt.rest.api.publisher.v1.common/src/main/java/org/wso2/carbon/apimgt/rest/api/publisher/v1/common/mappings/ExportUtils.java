@@ -288,7 +288,8 @@ public class ExportUtils {
             apiProductDtoToReturn.setState(APIProductDTO.StateEnum.CREATED);
         }
         addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
-        addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
+        addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat,
+                apiProvider, organization);
         addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
                 Boolean.TRUE, preserveDocs, preserveCredentials, organization);
 
@@ -879,7 +880,7 @@ public class ExportUtils {
             if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
-                    String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+                    String schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, organization);
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
                     GraphqlComplexityInfo graphqlComplexityInfo = apiProvider
@@ -1042,14 +1043,14 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIProductMetaInformationToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
-                                                             ExportFormat exportFormat, APIProvider apiProvider)
+                                                             ExportFormat exportFormat, APIProvider apiProvider,
+                                                             String organization)
             throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
         try {
-            String formattedSwaggerJson = apiProvider.getAPIDefinitionOfAPIProduct(
-                    APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToReturn, apiProductDtoToReturn.getProvider()));
+            String formattedSwaggerJson = apiProvider.getOpenAPIDefinition(apiProductDtoToReturn.getId(), organization);
             CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
                     formattedSwaggerJson);
 

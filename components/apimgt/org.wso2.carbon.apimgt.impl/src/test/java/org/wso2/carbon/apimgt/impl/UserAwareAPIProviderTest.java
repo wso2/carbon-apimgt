@@ -263,17 +263,6 @@ public class UserAwareAPIProviderTest {
         }
     }
 
-    /**
-     * This method checks the behaviour of Delete API specific mediation policy method for a non-existing mediation
-     * policy.
-     *
-     * @throws APIManagementException API Management Exception.
-     */
-    @Test
-    public void testDeleteApiSpecificMediationPolicy() throws APIManagementException {
-        Identifier identifier = Mockito.mock(Identifier.class);
-        Assert.assertFalse(userAwareAPIProvider.deleteApiSpecificMediationPolicy(identifier, "test", "test"));
-    }
 
     /**
      * This method checks the behaviour of getAllDocumentation method when there is no documentation for particular api.
@@ -286,20 +275,6 @@ public class UserAwareAPIProviderTest {
                 userAwareAPIProvider.getAllDocumentation(apiIdentifier).isEmpty());
     }
 
-    /**
-     * This method checks the behaviour of getWSDL method when there is no wsdl for the relevant API.
-     *
-     */
-    @Test
-    public void testGetWsdl() {
-        try {
-            userAwareAPIProvider.getWSDL(apiIdentifier);
-            Assert.fail("Non-existing WSDL file was retrieved successfully");
-        } catch (APIManagementException e) {
-            Assert.assertTrue("Required error message is not present in exception error log",
-                    e.getMessage().contains("No WSDL found"));
-        }
-    }
 
     /**
      * This methos checks the getLifecycleEvents method of a non-existing API.

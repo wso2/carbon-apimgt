@@ -1760,9 +1760,9 @@ public class ImportUtils {
             List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive);
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
                 APIIdentifier apiIdentifier = !preserveProvider ?
-                        new APIIdentifier(provider, certDTO.getApiIdentifier().getApiName(),
+                        new APIIdentifier(provider, certDTO.getApiIdentifier().getName(),
                                 certDTO.getApiIdentifier().getVersion()) :
-                        certDTO.getApiIdentifier();
+                        (APIIdentifier) certDTO.getApiIdentifier();
                 apiProvider.addClientCertificate(APIUtil.replaceEmailDomainBack(provider), apiIdentifier,
                         certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), organization);
             }

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
@@ -31,10 +32,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.API_PROVIDER;
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_NAME;
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_VERSION;
 
 import java.util.Map;
 
@@ -151,10 +148,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         }
     }
 
-    protected API getApiInformation(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
-        return getApi(apiArtifact);
-    }
-
     protected String getTenantDomain(Identifier identifier) {
         return "carbon.super";
     }
@@ -179,8 +172,9 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         return "admin";
     }
 
+
     @Override
-    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         return null;
     }
 
