@@ -272,7 +272,8 @@ public class ImportUtils {
             if (!extractedPoliciesMap.isEmpty()) {
                 importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath,
                         extractedPoliciesMap, currentTenantDomain));
-                apiProvider.updateAPI(importedApi);
+                API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
+                apiProvider.updateAPI(importedApi, oldAPI);
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later

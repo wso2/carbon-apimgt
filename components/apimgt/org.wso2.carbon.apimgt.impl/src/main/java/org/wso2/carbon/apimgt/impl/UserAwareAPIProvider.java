@@ -81,12 +81,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
-        checkAccessControlPermission(api.getId());
-        super.updateAPI(api);
-    }
-
-    @Override
     public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
             throws APIManagementException {
         checkAccessControlPermission(api.getId());
@@ -137,11 +131,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException {
         checkAccessControlPermission(id);
         super.removeDocumentation(id, docId, orgId);
-    }
-
-    @Override
-    public boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException {
-        return super.checkIfAPIExists(apiId);
     }
 
     @Override
@@ -265,22 +254,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
             throws APIManagementException {
         checkAccessControlPermission(identifier);
         return super.getDocumentationContent(identifier, documentationName);
-    }
-
-    @Override
-    public boolean isAPIUpdateValid(API api) throws APIManagementException {
-        checkAccessControlPermission(api.getId());
-        return super.isAPIUpdateValid(api);
-    }
-
-    @Override
-    protected API getAPI(GenericArtifact apiArtifact) throws APIManagementException {
-        API api = APIUtil.getAPI(apiArtifact, registry);
-        if (api != null) {
-            APIUtil.updateAPIProductDependencies(api, registry);
-            checkAccessControlPermission(api.getId());
-        }
-        return api;
     }
 
     @Override

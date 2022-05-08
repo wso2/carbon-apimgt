@@ -550,12 +550,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //validate if api exists
         validateAPIExistence(apiId);
-
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
+        API updatedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         //validate API update operation permitted based on the LC state
-        validateAPIOperationsPerLC(existingAPI.getStatus());
+        validateAPIOperationsPerLC(updatedAPI.getStatus());
 
-        Set<URITemplate> uriTemplates = existingAPI.getUriTemplates();
+        Set<URITemplate> uriTemplates = updatedAPI.getUriTemplates();
         uriTemplates.clear();
 
         for (TopicDTO topicDTO : topicListDTO.getList()) {
@@ -567,12 +567,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
             uriTemplates.add(uriTemplate);
         }
-        existingAPI.setUriTemplates(uriTemplates);
+        updatedAPI.setUriTemplates(uriTemplates);
 
         // TODO: Add scopes
-        existingAPI.setOrganization(organization);
+        updatedAPI.setOrganization(organization);
         try {
-            apiProvider.updateAPI(existingAPI);
+            apiProvider.updateAPI(updatedAPI, existingAPI);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1171,14 +1171,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             RestApiCommonUtil.getLoggedInUsername(), clientCertificateDTO.getApiIdentifier(),
                             alias);
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
-                //Handle api product case.
-                if (apiTypeWrapper.isAPIProduct()) {
-                    APIProduct apiProduct = apiTypeWrapper.getApiProduct();
-                    apiProvider.updateAPIProduct(apiProduct);
-                } else {
-                    API api = apiTypeWrapper.getApi();
-                    apiProvider.updateAPI(api);
-                }
+
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("The client certificate which belongs to tenant : %s represented by the "
                             + "alias : %s is deleted successfully", organization, alias));
@@ -1196,9 +1189,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(
                     "Error while deleting the client certificate with alias " + alias + " for the tenant "
                             + organization, e, log);
-        } catch (FaultGatewaysException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while publishing the certificate change to gateways for the alias " + alias, e, log);
         }
         return null;
     }
@@ -1267,16 +1257,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                             tenantId, organization);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
-                //Handle api product case.
-                if (apiTypeWrapper.isAPIProduct()) {
-                    APIProduct apiProduct = apiTypeWrapper.getApiProduct();
-                    apiProvider.updateAPIProduct(apiProduct);
-                } else {
-                    API api = apiTypeWrapper.getApi();
-                    //validate API update operation permitted based on the LC state
-                    validateAPIOperationsPerLC(api.getStatus());
-                    apiProvider.updateAPI(api);
-                }
                 ClientCertMetadataDTO clientCertMetadataDTO = new ClientCertMetadataDTO();
                 clientCertMetadataDTO.setAlias(alias);
                 clientCertMetadataDTO.setApiId(apiTypeWrapper.getUuid());
@@ -1306,9 +1286,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while generating the resource location URI for alias '" + alias + "'", e, log);
-        } catch (FaultGatewaysException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while publishing the certificate change to gateways for the alias " + alias, e, log);
         }
         return null;
     }
@@ -1381,13 +1358,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
-                //Handle api product case.
-                if (apiTypeWrapper.isAPIProduct()) {
-                    APIProduct apiProduct = apiTypeWrapper.getApiProduct();
-                    apiProvider.updateAPIProduct(apiProduct);
-                } else {
-                    apiProvider.updateAPI(apiTypeWrapper.getApi());
-                }
                 ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
                 certificateDTO.setAlias(alias);
                 certificateDTO.setApiId(apiId);
@@ -1414,9 +1384,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while generating the resource location URI for alias '" + alias + "'", e, log);
-        } catch (FaultGatewaysException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while publishing the certificate change to gateways for the alias " + alias, e, log);
         }
         return null;
     }

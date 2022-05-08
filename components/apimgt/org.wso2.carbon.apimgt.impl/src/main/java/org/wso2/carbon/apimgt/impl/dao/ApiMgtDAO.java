@@ -8081,10 +8081,9 @@ public class ApiMgtDAO {
         String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection.prepareStatement(sql)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getApiName());
-            prepStmt.setString(3, identifier.getVersion());
-            prepStmt.setString(4, organization);
+            prepStmt.setString(1, identifier.getApiName());
+            prepStmt.setString(2, identifier.getVersion());
+            prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);
@@ -8114,10 +8113,9 @@ public class ApiMgtDAO {
         String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection.prepareStatement(sql)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
-            prepStmt.setString(2, apiName);
-            prepStmt.setString(3, version);
-            prepStmt.setString(4, organization);
+            prepStmt.setString(1, apiName);
+            prepStmt.setString(2, version);
+            prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);
@@ -8164,10 +8162,9 @@ public class ApiMgtDAO {
                 isNewConnection = true;
             }
             prepStmt = connection.prepareStatement(sql);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getName());
-            prepStmt.setString(3, identifier.getVersion());
-            prepStmt.setString(4, organization);
+            prepStmt.setString(1, identifier.getName());
+            prepStmt.setString(2, identifier.getVersion());
+            prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);

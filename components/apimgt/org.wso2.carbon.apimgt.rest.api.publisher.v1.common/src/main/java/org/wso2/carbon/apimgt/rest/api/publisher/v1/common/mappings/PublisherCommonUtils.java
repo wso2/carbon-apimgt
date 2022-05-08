@@ -1171,6 +1171,7 @@ public class PublisherCommonUtils {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fall if user does not have access to the API or the API does not exist
+        API oldapi = apiProvider.getAPIbyUUID(apiId, organization);
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setOrganization(organization);
         String apiDefinition = response.getJsonContent();
@@ -1191,7 +1192,7 @@ public class PublisherCommonUtils {
         //updating APi with the new AsyncAPI definition
         existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
-        apiProvider.updateAPI(existingAPI);
+        apiProvider.updateAPI(existingAPI, oldapi);
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId().getUUID(), organization);
     }
@@ -1284,6 +1285,7 @@ public class PublisherCommonUtils {
      */
     public static API addGraphQLSchema(API originalAPI, String schemaDefinition, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
+        API oldApi = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
 
         List<APIOperationsDTO> operationListWithOldData = APIMappingUtil
                 .getOperationListWithOldData(originalAPI.getUriTemplates(),
@@ -1293,7 +1295,7 @@ public class PublisherCommonUtils {
         originalAPI.setUriTemplates(uriTemplates);
 
         apiProvider.saveGraphqlSchemaDefinition(originalAPI, schemaDefinition);
-        apiProvider.updateAPI(originalAPI);
+        apiProvider.updateAPI(originalAPI, oldApi);
 
         return originalAPI;
     }

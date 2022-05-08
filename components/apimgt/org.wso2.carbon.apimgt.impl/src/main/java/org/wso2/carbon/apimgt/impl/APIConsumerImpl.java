@@ -817,18 +817,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return false;
     }
 
-    @Deprecated
-    @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
-            boolean isLazyLoad) throws APIManagementException {
-        Map<String, Object> searchResults =
-                super.searchPaginatedAPIs(searchQuery, requestedTenantDomain, start, end, isLazyLoad);
-        if (APIUtil.isAllowDisplayMultipleVersions()) {
-            return searchResults;
-        }
-        return filterMultipleVersionedAPIs(searchResults);
-    }
-
     @Override
     public boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId) throws
             APIManagementException {
