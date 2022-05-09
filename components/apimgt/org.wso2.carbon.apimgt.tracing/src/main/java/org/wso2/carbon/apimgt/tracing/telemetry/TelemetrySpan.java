@@ -22,7 +22,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 
 /**
- * A Wrapper class for io.opentelemetry.api.trace Span.
+ * A Wrapper class for {@link Span}.
  */
 
 public class TelemetrySpan {

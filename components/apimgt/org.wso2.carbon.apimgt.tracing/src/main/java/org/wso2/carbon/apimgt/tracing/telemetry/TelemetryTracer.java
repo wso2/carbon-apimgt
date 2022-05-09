@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.tracing.telemetry;
 import io.opentelemetry.api.trace.Tracer;
 
 /**
- * A Wrapper class for io.opentelemetry.api.trace Tracer.
+ * A Wrapper class for {@link Tracer}.
  */
 
 public class TelemetryTracer {

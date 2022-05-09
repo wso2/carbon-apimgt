@@ -22,7 +22,7 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 
 /**
- * This interface used to implement OpenTelemetry Bridge Implementations for APIM
+ * This interface used to implement OpenTelemetry Bridge Implementations for APIM.
  */
 
 public interface APIMOpenTelemetry {

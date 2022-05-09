@@ -44,7 +44,7 @@ public class TelemetryUtil {
      *
      * @param spanName   Operation name of the span.
      * @param parentSpan Root span of the new span to be created.
-     * @param tracer     Initialized io.opentelemetry.api.trace tracer.
+     * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
      * @return TelemetrySpan object.
      */
     public static TelemetrySpan startSpan(String spanName, TelemetrySpan parentSpan, TelemetryTracer tracer) {
@@ -79,7 +79,7 @@ public class TelemetryUtil {
      *
      * @param spanName   Operation name of the span.
      * @param parentSpan Root context of the new span to be created.
-     * @param tracer     Initialized io.opentelemetry.api.trace tracer.
+     * @param tracer     Initialized {@link io.opentelemetry.api.trace.Tracer}.
      * @return TelemetrySpan object.
      */
     public static TelemetrySpan startSpan(String spanName, Context parentSpan, TelemetryTracer tracer) {
@@ -166,10 +166,10 @@ public class TelemetryUtil {
     }
 
     /**
-     * Extract tracer specific information from tracerSpecificCarrier and return the extracted context
+     * Extract tracer specific information from tracerSpecificCarrier and return the extracted context.
      *
-     * @param tracerSpecificCarrier Hashmap to extract the tracer and span context
-     * @return extracted context
+     * @param tracerSpecificCarrier Hashmap to extract the tracer and span context.
+     * @return extracted context.
      */
     public static Context extract(Map<String, String> tracerSpecificCarrier) {
 
@@ -203,7 +203,7 @@ public class TelemetryUtil {
     }
 
     /**
-     * Check whether telemetry tracing is enabled
+     * Check whether telemetry tracing is enabled.
      **/
     public static boolean telemetryEnabled() {
 
