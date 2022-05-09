@@ -16350,7 +16350,6 @@ public class ApiMgtDAO {
      *
      * @param revisionNum   Revision number
      * @param apiUUID       UUID of the API
-     * @param organization  organization ID of the API
      * @return UUID of the revision
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
