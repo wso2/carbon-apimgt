@@ -102,13 +102,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    protected String createAPI(API api) throws APIManagementException {
-
-        this.api = api;
-        return super.createAPI(api);
-    }
-
-    @Override
     public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
         //do nothing
     }
@@ -145,11 +138,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     public boolean hasValidLength(String field, int maxLength) {
 
         return true;
-    }
-
-    @Override
-    public void updateWsdlFromUrl(API api) throws APIManagementException {
-        // do nothing
     }
 
 }

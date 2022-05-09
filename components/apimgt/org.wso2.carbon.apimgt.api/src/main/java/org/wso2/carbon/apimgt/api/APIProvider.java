@@ -330,19 +330,6 @@ public interface APIProvider extends APIManager {
      */
     API addAPI(API api) throws APIManagementException;
 
-    public boolean isAPIUpdateValid(API api) throws APIManagementException;
-
-    /**
-     * Updates design and implementation of an existing API. This method must not be used to change API status. Implementations
-     * should throw an exceptions when such attempts are made. All life cycle state changes
-     * should be carried out using the changeAPIStatus method of this interface.
-     *
-     * @param api API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update API
-     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
-     */
-    void updateAPI(API api) throws APIManagementException, FaultGatewaysException;
-
     /**
      * Updates design and implementation of an existing API. This method must not be used to change API status. Implementations
      * should throw an exceptions when such attempts are made. All life cycle state changes
@@ -355,22 +342,6 @@ public interface APIProvider extends APIManager {
      * @return updated API
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
-
-    /**
-     * Update the WSDL of an API from a ResourceFile set to the API object
-     *
-     * @param api API object
-     * @throws APIManagementException if fails to update the WSDL of the API
-     */
-    void updateWsdlFromResourceFile(API api) throws APIManagementException;
-
-    /**
-     * Update the WSDL of an API from a URL set to the API object
-     *
-     * @param api API object
-     * @throws APIManagementException if fails to update the WSDL of the API
-     */
-    void updateWsdlFromUrl(API api) throws APIManagementException;
 
     /**
      * Locate any API keys issued for the previous versions of the given API, which are
@@ -457,14 +428,6 @@ public interface APIProvider extends APIManager {
      */
     void addDocumentationContent(String uuid, String docId, String organization, DocumentationContent content)
             throws APIManagementException;
-
-    /**
-     * Checks if a given API exists in the registry
-     * @param apiId
-     * @return boolean result
-     * @throws APIManagementException
-     */
-    boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * This method used to save the documentation content
@@ -718,17 +681,6 @@ public interface APIProvider extends APIManager {
      *
      */
     boolean isSynapseGateway() throws APIManagementException;
-
-    /**
-     * Search APIs by swagger document content. This method searches the given search term in the registry and returns
-     * a set of APIs which satisfies the given search term
-     *
-     * @param searchTerm  Search Term
-     * @param searchType  Search Type
-     * @return   Set of Documents and APIs
-     * @throws APIManagementException
-     */
-    Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;
 
     /**
      * This method updates Swagger 2.0 resources in the registry
