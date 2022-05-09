@@ -35,6 +35,7 @@ import java.util.Map;
 /**
  * This class used to generate log tracer related logs.
  */
+@Deprecated
 public class TracingReporter implements Reporter {
 
     private final Log log;

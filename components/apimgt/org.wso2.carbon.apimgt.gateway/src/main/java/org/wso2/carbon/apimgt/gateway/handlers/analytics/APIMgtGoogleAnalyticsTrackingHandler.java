@@ -16,17 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
@@ -43,14 +32,27 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
+
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
 public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
@@ -73,13 +75,25 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
     @Override
     public boolean handleRequest(MessageContext msgCtx) {
 
-        TracingSpan span = null;
-        TracingTracer tracer = null;
+        TracingSpan tracingSpan = null;
+        TracingTracer tracingTracer = null;
+        TelemetrySpan span = null;
+        TelemetryTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
-        if (Util.tracingEnabled()) {
-            TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-            tracer = Util.getGlobalTracer();
-            span = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan, tracer);
+        if (TelemetryUtil.telemetryEnabled()) {
+            if (Util.legacy()) {
+                TracingSpan responseLatencySpan =
+                        (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+                tracingTracer = Util.getGlobalTracer();
+                tracingSpan = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
+                        tracingTracer);
+            } else {
+                TelemetrySpan responseLatencySpan =
+                        (TelemetrySpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+                tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
+                span = TelemetryUtil.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
+                        tracer);
+            }
         }
         try {
             if (configKey == null) {
@@ -122,15 +136,27 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 return true;
             }
             try {
-                if (Util.tracingEnabled()) {
-                    Util.inject(span, tracer, tracerSpecificCarrier);
-                    if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
-                        Map headers =
-                                (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
-                                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                        headers.putAll(tracerSpecificCarrier);
-                        org.apache.axis2.context.MessageContext.getCurrentMessageContext()
-                                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+                if (TelemetryUtil.telemetryEnabled()) {
+                    if (Util.legacy()) {
+                        Util.inject(tracingSpan, tracingTracer, tracerSpecificCarrier);
+                        if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
+                            Map headers =
+                                    (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                                            org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                            headers.putAll(tracerSpecificCarrier);
+                            org.apache.axis2.context.MessageContext.getCurrentMessageContext()
+                                    .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+                        }
+                    } else {
+                        TelemetryUtil.inject(span, tracerSpecificCarrier);
+                        if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
+                            Map headers =
+                                    (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                                            org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                            headers.putAll(tracerSpecificCarrier);
+                            org.apache.axis2.context.MessageContext.getCurrentMessageContext()
+                                    .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+                        }
                     }
                 }
                 trackPageView(msgCtx);
@@ -139,13 +165,23 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             }
             return true;
         } catch (Exception e) {
-            if (Util.tracingEnabled() && span != null) {
-                Util.setTag(span, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.GOOGLE_ANALYTICS_ERROR);
+            if (TelemetryUtil.telemetryEnabled()) {
+                if (Util.legacy() && tracingSpan != null) {
+                    Util.setTag(tracingSpan, APIMgtGatewayConstants.ERROR,
+                            APIMgtGatewayConstants.GOOGLE_ANALYTICS_ERROR);
+                } else if (!Util.legacy() && span != null) {
+                    TelemetryUtil.setTag(span, APIMgtGatewayConstants.ERROR,
+                            APIMgtGatewayConstants.GOOGLE_ANALYTICS_ERROR);
+                }
             }
             throw e;
         } finally {
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(span);
+            if (TelemetryUtil.telemetryEnabled()) {
+                if (Util.legacy()) {
+                    Util.finishSpan(tracingSpan);
+                } else {
+                    TelemetryUtil.finishSpan(span);
+                }
             }
         }
     }
