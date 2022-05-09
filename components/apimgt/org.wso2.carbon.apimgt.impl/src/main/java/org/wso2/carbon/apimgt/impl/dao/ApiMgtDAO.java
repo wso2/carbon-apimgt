@@ -16354,21 +16354,46 @@ public class ApiMgtDAO {
      * @return UUID of the revision
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
-    public String getRevisionUUID(String revisionNum, String apiUUID, String organization) throws APIManagementException {
+    public String getRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
 
         String revisionUUID = null;
         String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID;
-        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
-            sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID_BY_ORGANIZATION;
-        }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(sql)) {
             statement.setString(1, apiUUID);
             statement.setInt(2, Integer.parseInt(revisionNum));
-            if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
-                statement.setString(3, organization);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
             }
+        } catch (SQLException e) {
+            handleException("Failed to get revision UUID for Revision " + revisionNum, e);
+        }
+        return revisionUUID;
+    }
+
+    /**
+     * Get revision UUID providing revision number and organization
+     *
+     * @param revisionNum   Revision number
+     * @param apiUUID       UUID of the API
+     * @param organization  organization ID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getRevisionUUIDByOrganization(String revisionNum, String apiUUID, String organization) throws APIManagementException {
+
+        String revisionUUID = null;
+        log.info("JAYANIEEEEE:" +organization);
+        String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID_BY_ORGANIZATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(sql)) {
+            statement.setString(1, apiUUID);
+            statement.setInt(2, Integer.parseInt(revisionNum));
+            statement.setString(3, organization);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     revisionUUID = rs.getString(1);
