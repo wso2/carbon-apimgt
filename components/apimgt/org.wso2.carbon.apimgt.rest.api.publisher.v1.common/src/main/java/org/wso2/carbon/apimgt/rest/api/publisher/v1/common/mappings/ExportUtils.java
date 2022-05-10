@@ -412,9 +412,7 @@ public class ExportUtils {
             throws APIImportExportException, APIManagementException {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        List<Documentation> docList = StringUtils.equals(type, APIConstants.API_IDENTIFIER_TYPE) ?
-                apiProvider.getAllDocumentation(identifier.getUUID(), tenantDomain) :
-                apiProvider.getAllDocumentation(identifier);
+        List<Documentation> docList = apiProvider.getAllDocumentation(identifier.getUUID(), tenantDomain);
         if (!docList.isEmpty()) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String docDirectoryPath = archivePath + File.separator + ImportExportConstants.DOCUMENT_DIRECTORY;

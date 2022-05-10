@@ -104,15 +104,6 @@ public interface APIProvider extends APIManager {
     Set<Subscriber> getSubscribersOfProvider(String providerId) throws APIManagementException;
 
     /**
-     * get details of provider
-     *
-     * @param providerName name of the provider
-     * @return Provider
-     * @throws APIManagementException if failed to get Provider
-     */
-    Provider getProvider(String providerName) throws APIManagementException;
-
-    /**
      * Return Usage of given APIIdentifier
      *
      * @param apiIdentifier APIIdentifier
@@ -379,16 +370,6 @@ public interface APIProvider extends APIManager {
     /**
      * Removes a given documentation
      *
-     * @param apiId   APIIdentifier
-     * @param docType the type of the documentation
-     * @param docName name of the document
-     * @throws APIManagementException if failed to remove documentation
-     */
-    void removeDocumentation(APIIdentifier apiId, String docType, String docName, String orgId) throws APIManagementException;
-
-    /**
-     * Removes a given documentation
-     *
      * @param apiId   api uuid
      * @param documentId ID of the documentation
      * @param organization  Identifier of an organization
@@ -430,16 +411,6 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
-     * This method used to save the documentation content
-     *
-     * @param api,        API
-     * @param documentationName, name of the inline documentation
-     * @param text,              content of the inline documentation
-     * @throws APIManagementException if failed to add the document as a resource to registry
-     */
-    void addDocumentationContent(API api, String documentationName, String text) throws APIManagementException;
-
-    /**
      * Updates a given documentation
      *
      * @param apiId         id of the document
@@ -449,15 +420,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to update docs
      */
     Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException;
-
-    /**
-     * Copies current Documentation into another version of the same API.
-     *
-     * @param toVersion Version to which Documentation should be copied.
-     * @param apiId     id of the APIIdentifier
-     * @throws APIManagementException if failed to copy docs
-     */
-    void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException;
 
     /**
      * Returns the details of all the life-cycle changes done per API or API Product
@@ -713,15 +675,6 @@ public interface APIProvider extends APIManager {
     void saveSwaggerDefinition(String apiId, String jsonText, String orgId) throws APIManagementException;
 
     /**
-     * This method updates the swagger definition in registry
-     *
-     * @param apiProduct   APIProduct
-     * @param jsonText    openAPI definition
-     * @throws APIManagementException
-     */
-    void saveSwaggerDefinition(APIProduct apiProduct, String jsonText) throws APIManagementException;
-
-    /**
      * This method adds the swagger definition of an API Product in registry
      *
      * @param apiToProductResourceMapping   List of API Product resource mappings
@@ -799,17 +752,6 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to change registry lifecycle states for an API artifact
      *
-     * @param  apiIdentifier apiIdentifier
-     * @param  action  Action which need to execute from registry lifecycle
-     * @param organization organization
-     * @return APIStateChangeResponse API workflow state and WorkflowResponse
-     * */
-    APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action, String organization)
-            throws APIManagementException, FaultGatewaysException;
-
-    /**
-     * This method is to change registry lifecycle states for an API artifact
-     *
      * @param orgId UUID of the organization
      * @param  apiTypeWrapper API Type Wrapper
      * @param  action  Action which need to execute from registry lifecycle
@@ -821,39 +763,6 @@ public interface APIProvider extends APIManager {
             FaultGatewaysException;
 
     /**
-     * This method is to set checklist item values for a particular life-cycle state of an API
-     *
-     * @param  apiIdentifier apiIdentifier
-     * @param  checkItem  Order of the checklist item
-     * @param  checkItemValue Value of the checklist item
-     *
-     * */
-    boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
-            throws APIManagementException;
-
-    /**
-     * This method is to set a lifecycle check list item given the APIIdentifier and the checklist item name.
-     * If the given item not in the allowed lifecycle check items list or item is already checked, this will stay
-     * silent and return false. Otherwise, the checklist item will be updated and returns true.
-     *
-     * @param apiIdentifier APIIdentifier
-     * @param checkItemName Name of the checklist item
-     * @param checkItemValue Value to be set to the checklist item
-     * @return boolean value representing success not not
-     * @throws APIManagementException
-     */
-    boolean checkAndChangeAPILCCheckListItem(APIIdentifier apiIdentifier, String checkItemName, boolean checkItemValue)
-            throws APIManagementException;
-
-    /**
-     * This method returns the lifecycle data for an API including current state,next states.
-     *
-     * @param apiId APIIdentifier
-     * @return Map<String,Object> a map with lifecycle data
-     */
-    Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException;
-
-    /**
      * This method returns the lifecycle data for an API including current state,next states.
      *
      * @param apiId id of the api
@@ -861,26 +770,6 @@ public interface APIProvider extends APIManager {
      * @return Map<String,Object> a map with lifecycle data
      */
     Map<String, Object> getAPILifeCycleData(String apiId, String orgId) throws APIManagementException;
-
-
-    /**
-     * Get the current lifecycle status of the api
-     * @param apiIdentifier Api identifier
-     * @return Current lifecycle status
-     * @throws APIManagementException
-     */
-    String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
-
-    /**
-     * Get the paginated APIs from publisher
-     *
-     * @param tenantDomain tenant domain
-     * @param start        starting number
-     * @param end          ending number
-     * @return set of API
-     * @throws APIManagementException if failed to get Apis
-     */
-    Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
 
 
     /**
@@ -985,14 +874,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException;
-
-    /**
-     *  Get the lifecycle configuration for a tenant
-     * @param tenantDomain
-     * @return lifecycle
-     * @throws APIManagementException
-     */
-    String getLifecycleConfiguration(String tenantDomain) throws APIManagementException;
 
     /**
      * Get the external workflow reference id for a subscription
@@ -1246,25 +1127,6 @@ public interface APIProvider extends APIManager {
     Map<API, List<APIProductResource>> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
 
     List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
-
-    /**
-     * This method used to save the documentation content
-     *
-     * @param apiProduct        API Product
-     * @param documentationName name of the inline documentation
-     * @param text              content of the inline documentation
-     * @throws APIManagementException if failed to add the document as a resource to registry
-     */
-    public void addProductDocumentationContent(APIProduct apiProduct, String documentationName, String text) throws APIManagementException;
-
-    /**
-     * This method is used to save the graphql schema content
-     *
-     * @param api api
-     * @param schemaDefinition schema Definition
-     * @throws APIManagementException if failed to add the schema as a resource to registry
-     */
-    void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 
     /**
      * Remove pending lifecycle state change task for the given api or api product.

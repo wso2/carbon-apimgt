@@ -19,13 +19,11 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -34,7 +32,6 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -121,13 +118,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-
-    public void removeDocumentation(APIIdentifier apiId, String docName, String docType, String orgId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        super.removeDocumentation(apiId, docName, docType, orgId);
-    }
-
-    @Override
     public void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException {
         checkAccessControlPermission(id);
         super.removeDocumentation(id, docId, orgId);
@@ -137,19 +127,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException {
         //checkAccessControlPermission(apiId);
         return super.updateDocumentation(apiId, documentation, organization);
-    }
-
-    @Override
-    public void addDocumentationContent(API api, String documentationName,
-                                        String text) throws APIManagementException {
-        checkAccessControlPermission(api.getId());
-        super.addDocumentationContent(api, documentationName, text);
-    }
-
-    @Override
-    public void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        super.copyAllDocumentation(apiId, toVersion);
     }
 
     @Override
@@ -174,31 +151,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         return super.getSubscriptionByUUID(uuid);
     }
 
-    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus,
-            String organization) throws APIManagementException, FaultGatewaysException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.changeLifeCycleStatus(apiIdentifier, targetStatus, organization);
-    }
-
-    @Override
-    public boolean checkAndChangeAPILCCheckListItem(APIIdentifier apiIdentifier, String checkItemName,
-            boolean checkItemValue) throws APIManagementException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.checkAndChangeAPILCCheckListItem(apiIdentifier, checkItemName, checkItemValue);
-    }
-
-    public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
-            throws APIManagementException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.changeAPILCCheckListItems(apiIdentifier, checkItem, checkItemValue);
-    }
-
-    @Override
-    public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getAPILifeCycleData(apiId);
-    }
-
     @Override
     public int addClientCertificate(String userName, Identifier apiIdentifier, String certificate, String alias,
                                     String tierName, String organization) throws APIManagementException {
@@ -220,12 +172,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.getAPILifeCycleStatus(apiIdentifier);
-    }
-
-    @Override
     public long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException {
         checkAccessControlPermission(identifier);
         return super.getAPISubscriptionCountByAPI(identifier);
@@ -241,25 +187,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         super.saveSwagger20Definition(apiId, jsonText, orgId);
-    }
-
-    @Override
-    public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
-        checkAccessControlPermission(id);
-        return super.getAllDocumentation(id);
-    }
-
-    @Override
-    public String getDocumentationContent(Identifier identifier, String documentationName)
-            throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getDocumentationContent(identifier, documentationName);
-    }
-
-    @Override
-    protected GenericArtifact getAPIArtifact(APIIdentifier apiIdentifier) throws APIManagementException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.getAPIArtifact(apiIdentifier);
     }
 
     @Override

@@ -46,12 +46,10 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -131,9 +129,7 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -612,165 +608,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return convertedList;
     }
 
-    public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
-
-        List<Documentation> documentationList = new ArrayList<Documentation>();
-        String docArtifactKeyType = StringUtils.EMPTY;
-        docArtifactKeyType = APIConstants.DOCUMENTATION_KEY;
-        String apiOrAPIProductDocPath;
-        APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(id.getUUID());
-        if (apiRevision != null && apiRevision.getApiUUID() != null) {
-            apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductRevisionDocPath(apiRevision.getApiUUID(), apiRevision.getId());
-        } else {
-            apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductDocPath(id);
-        }
-        String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
-        String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
-        try {
-            if (registry.resourceExists(apiOrAPIProductDocPath)) {
-                Resource resource = registry.get(apiOrAPIProductDocPath);
-                if (resource instanceof org.wso2.carbon.registry.core.Collection) {
-                    List<String> docPaths = getDocPaths((org.wso2.carbon.registry.core.Collection) resource,
-                            apiOrAPIProductDocPath);
-                    for (String docPath : docPaths) {
-                        if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
-                            Resource docResource = registry.get(docPath);
-                            GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
-                                    docArtifactKeyType);
-                            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
-                            Documentation doc = APIUtil.getDocumentation(docArtifact);
-                            Date contentLastModifiedDate;
-                            Date docLastModifiedDate = docResource.getLastModified();
-                            if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())
-                                    || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
-                                String contentPath = StringUtils.EMPTY;
-                                if (id instanceof APIIdentifier) {
-                                    contentPath = APIUtil.getAPIDocContentPath((APIIdentifier) id, doc.getName());
-                                } else if (id instanceof APIProductIdentifier) {
-                                    contentPath = APIUtil.getProductDocContentPath((APIProductIdentifier) id, doc.getName());
-                                }
-                                contentLastModifiedDate = registry.get(contentPath).getLastModified();
-                                doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
-                                        contentLastModifiedDate : docLastModifiedDate));
-                            } else {
-                                doc.setLastUpdated(docLastModifiedDate);
-                            }
-                            documentationList.add(doc);
-                        }
-                    }
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get documentations for api/product " + id.getName();
-            throw new APIManagementException(msg, e);
-        }
-        return documentationList;
-    }
-
-    /**
-     * Get API Documents within the provided registry collection
-     * In case the document names contained '/' character, need to get only leaf node documents within them
-     *
-     * @param docCollection          registry collection
-     * @param apiOrAPIProductDocPath base api/api product document path
-     * @return
-     * @throws APIManagementException
-     */
-    private List<String> getDocPaths(org.wso2.carbon.registry.core.Collection docCollection,
-                                     String apiOrAPIProductDocPath) throws APIManagementException {
-
-        List<String> docPaths = new ArrayList<>();
-        String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
-        String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
-        try {
-            String[] resourcePaths = docCollection.getChildren();
-            for (String resourcePath : resourcePaths) {
-                if (!(resourcePath.equals(pathToContent) || resourcePath.equals(pathToDocFile))) {
-                    Resource resource = registry.get(resourcePath);
-                    if (resource instanceof org.wso2.carbon.registry.core.Collection) {
-                        docPaths.addAll(getDocPaths((org.wso2.carbon.registry.core.Collection) resource,
-                                apiOrAPIProductDocPath));
-                    } else {
-                        docPaths.add(resourcePath);
-                    }
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get documents for api/product";
-            throw new APIManagementException(msg, e);
-        }
-        return docPaths;
-    }
-
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws APIManagementException {
-
-        List<Documentation> documentationList = new ArrayList<Documentation>();
-        try {
-            String tenantDomain = getTenantDomain(apiId);
-            Registry registryType;
-            /* If the API provider is a tenant, load tenant registry*/
-            boolean isTenantMode = (tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = getTenantManager()
-                        .getTenantId(tenantDomain);
-                registryType = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                registryType = registry;
-            }
-            String apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductDocPath(apiId);
-            String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
-            String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
-
-            if (registry.resourceExists(apiOrAPIProductDocPath)) {
-                Resource resource = registry.get(apiOrAPIProductDocPath);
-                if (resource instanceof org.wso2.carbon.registry.core.Collection) {
-                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
-                    for (String docPath : docsPaths) {
-                        if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
-                            Resource docResource = registry.get(docPath);
-                            GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
-                                    APIConstants.DOCUMENTATION_KEY);
-                            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
-                            Documentation doc = APIUtil.getDocumentation(docArtifact, apiId.getProviderName());
-                            Date contentLastModifiedDate;
-                            Date docLastModifiedDate = docResource.getLastModified();
-                            if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
-                                String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
-                                try {
-                                    contentLastModifiedDate = registryType.get(contentPath).getLastModified();
-                                    doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
-                                            contentLastModifiedDate : docLastModifiedDate));
-                                } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
-                                    //do nothing. Permission not allowed to access the doc.
-                                }
-
-                            } else if (Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
-                                String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
-                                try {
-                                    contentLastModifiedDate = registryType.get(contentPath).getLastModified();
-                                    doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
-                                            contentLastModifiedDate : docLastModifiedDate));
-                                } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
-                                    //do nothing. Permission not allowed to access the doc.
-                                }
-                            } else {
-                                doc.setLastUpdated(docLastModifiedDate);
-                            }
-                            documentationList.add(doc);
-                        }
-                    }
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get documentations for api " + apiId.getApiName();
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get documentations for api " + apiId.getApiName();
-            throw new APIManagementException(msg, e);
-        }
-        return documentationList;
-    }
-
     protected GenericArtifactManager getAPIGenericArtifactManager(Registry registryType, String keyType) throws
             APIManagementException {
 
@@ -794,24 +631,6 @@ public abstract class AbstractAPIManager implements APIManager {
             return !(this.tenantDomain.equals(tenantDomain));
         }
         return true;
-    }
-
-    public Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType,
-                                          String docName) throws APIManagementException {
-
-        Documentation documentation = null;
-        String docPath = APIUtil.getAPIDocPath(apiId) + docName;
-        GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                APIConstants.DOCUMENTATION_KEY);
-        try {
-            Resource docResource = registry.get(docPath);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(docResource.getUUID());
-            documentation = APIUtil.getDocumentation(artifact);
-        } catch (RegistryException e) {
-            String msg = "Failed to get documentation details";
-            throw new APIManagementException(msg, e);
-        }
-        return documentation;
     }
 
     /**
@@ -865,67 +684,6 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while retrieving document content ", e);
         }
-    }
-
-    public String getDocumentationContent(Identifier identifier, String documentationName)
-            throws APIManagementException {
-
-        String contentPath = StringUtils.EMPTY;
-        String identifierType = StringUtils.EMPTY;
-        if (identifier instanceof APIIdentifier) {
-            contentPath = APIUtil.getAPIDocPath((APIIdentifier) identifier) +
-                    APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
-                    documentationName;
-            identifierType = APIConstants.API_IDENTIFIER_TYPE;
-        } else if (identifier instanceof APIProductIdentifier) {
-            contentPath = APIUtil.getProductDocPath((APIProductIdentifier) identifier) +
-                    APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
-                    documentationName;
-            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
-        }
-        String tenantDomain = getTenantDomain(identifier);
-        Registry registry;
-
-        boolean isTenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                startTenantFlow(tenantDomain);
-                isTenantFlowStarted = true;
-            }
-
-            /* If the API provider is a tenant, load tenant registry*/
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                int id = getTenantManager().getTenantId(tenantDomain);
-                registry = getRegistryService().getGovernanceSystemRegistry(id);
-            } else {
-                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
-                    registry = getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
-                } else {
-                    registry = this.registry;
-                }
-            }
-
-            if (registry.resourceExists(contentPath)) {
-                Resource docContent = registry.get(contentPath);
-                Object content = docContent.getContent();
-                if (content != null) {
-                    return new String((byte[]) docContent.getContent(), Charset.defaultCharset());
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "No document content found for documentation: "
-                    + documentationName + " of " + identifierType + " : " + identifier.getName();
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get document content found for documentation: "
-                    + documentationName + " of " + identifierType + " : " + identifier.getName();
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-        return null;
     }
 
     public GraphqlComplexityInfo getComplexityDetails(String uuid) throws APIManagementException {
@@ -1387,24 +1145,6 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         policies = policiesWithoutUnlimitedTier.toArray(new Policy[0]);
         return policies;
-    }
-
-    /**
-     * Returns the uuid of the updated/created mediation policy
-     *
-     * @param mediationPolicyPath path to the registry resource
-     * @return uuid of the given registry resource or null
-     */
-    @Override
-    public String getCreatedResourceUuid(String mediationPolicyPath) {
-
-        try {
-            Resource resource = registry.get(mediationPolicyPath);
-            return resource.getUUID();
-        } catch (RegistryException e) {
-            log.error("error occurred while getting created mediation policy uuid", e);
-        }
-        return null;
     }
 
     /**

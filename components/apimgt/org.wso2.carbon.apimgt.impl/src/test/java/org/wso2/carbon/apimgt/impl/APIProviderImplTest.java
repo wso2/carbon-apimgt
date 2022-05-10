@@ -57,11 +57,9 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -113,24 +111,18 @@ import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceE
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBean;
-import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
-import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
-import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -143,7 +135,6 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -287,23 +278,6 @@ public class APIProviderImplTest {
         } catch (APIManagementException e) {
             Assert.assertEquals("Failed to get Subscribers for : testID", e.getMessage());
         }
-    }
-
-    @Test
-    public void testGetProvider() throws APIManagementException, RegistryException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        Mockito.when(APIUtil.getMountedPath((RegistryContext) Mockito.anyObject(),
-                Mockito.anyString())).thenReturn("testPath");
-        UserRegistry userReg = Mockito.mock(UserRegistry.class);
-        Resource resource = Mockito.mock(Resource.class);
-        Mockito.when(apiProvider.registry.get("testPath/providers/testProvider")).thenReturn(resource);
-        Mockito.when(resource.getUUID()).thenReturn("testID");
-        PowerMockito.when(APIUtil.getArtifactManager(userReg, APIConstants.API_KEY)).thenReturn(artifactManager);
-        GenericArtifact providerArtifact = Mockito.mock(GenericArtifact.class);
-        Mockito.when(artifactManager.getGenericArtifact("testID")).thenReturn(providerArtifact);
-        Provider provider = Mockito.mock(Provider.class);
-        Mockito.when(APIUtil.getProvider(providerArtifact)).thenReturn(provider);
-        Assert.assertNotNull(apiProvider.getProvider("testProvider"));
     }
 
     @Test
@@ -539,27 +513,6 @@ public class APIProviderImplTest {
         } catch (APIManagementException e) {
             Assert.assertEquals(msg1, e.getMessage());
         }
-    }
-
-    @Test
-    public void testChangeAPILCCheckListItems() throws APIManagementException, GovernanceException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
-        GenericArtifact apiArtifact = Mockito.mock(GenericArtifact.class);
-        Mockito.when(APIUtil.getAPIArtifact(apiId, apiProvider.registry)).thenReturn(apiArtifact);
-        Mockito.when(apiArtifact.isLCItemChecked(10, "APILifeCycle")).thenThrow(GovernanceException.class).
-                thenReturn(false, true);
-        String msg = "Error while setting registry lifecycle checklist items for the API: API1";
-        try {
-            apiProvider.changeAPILCCheckListItems(apiId, 10, true);
-        } catch (APIManagementException e) {
-            Assert.assertEquals(msg, e.getMessage());
-        }
-        //status checked
-        assertTrue(apiProvider.changeAPILCCheckListItems(apiId, 10, true));
-        // status false
-        assertTrue(apiProvider.changeAPILCCheckListItems(apiId, 10, true));
-
     }
 
     @Test
@@ -983,57 +936,6 @@ public class APIProviderImplTest {
 
 
     @Test
-    public void testRemoveDocumentation() throws APIManagementException, RegistryException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
-        PowerMockito.when(APIUtil.getAPIDocPath(apiId) + "testDoc").thenReturn("testPath");
-        Resource resource = Mockito.mock(Resource.class);
-        Mockito.when(apiProvider.registry.get("testPathtestDoc")).thenReturn(resource);
-        Mockito.when(resource.getUUID()).thenReturn("1111");
-        PowerMockito.when(APIUtil.getArtifactManager(apiProvider.registry, APIConstants.DOCUMENTATION_KEY)).
-                thenReturn(artifactManager);
-        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
-        Mockito.when(artifactManager.getGenericArtifact("1111")).thenReturn(genericArtifact);
-        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("testDocPath");
-        Association association = Mockito.mock(Association.class);
-        Association[] associations = new Association[]{association};
-        Mockito.when(apiProvider.registry.getAssociations("testPathtestDoc", APIConstants.DOCUMENTATION_KEY)).
-                thenReturn(associations);
-        apiProvider.removeDocumentation(apiId, "testDoc", "testType", "carbon.super");
-        Mockito.verify(apiProvider.registry);
-    }
-
-    @Test
-    public void testRemoveDocumentation1() throws APIManagementException, RegistryException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
-                null, null);
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
-        PowerMockito.when(APIUtil.getArtifactManager(apiProvider.registry, APIConstants.DOCUMENTATION_KEY)).
-                thenReturn(artifactManager);
-        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
-        Mockito.when(artifactManager.getGenericArtifact("testId")).thenReturn(artifact);
-        Mockito.when(artifact.getPath()).thenReturn("docPath");
-        Mockito.when(artifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("docFilePath");
-        Association association = Mockito.mock(Association.class);
-        Association[] associations = new Association[]{association};
-        Mockito.when(apiProvider.registry.getAssociations("docPath", APIConstants.DOCUMENTATION_KEY)).
-                thenReturn(associations);
-        apiProvider.removeDocumentation(apiId, "testId", "carbon.super");
-        Mockito.verify(apiProvider.registry);
-    }
-
-    @Test
-    public void testCopyAllDocumentation() throws APIManagementException, RegistryException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
-        PowerMockito.when(APIUtil.getAPIDocPath(apiId)).thenReturn("oldVersion");
-        Resource resource = new ResourceImpl();
-        Mockito.when(apiProvider.registry.get("oldVersion")).thenReturn(resource);
-        apiProvider.copyAllDocumentation(apiId, "testVersion");
-        Mockito.verify(apiProvider.registry);
-    }
-
-    @Test
     public void testDeleteWorkflowTask() throws APIManagementException, WorkflowException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
         Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1111);
@@ -1268,246 +1170,6 @@ public class APIProviderImplTest {
         //Mockito.verify(notificationExecutor).sendAsyncNotifications(notificationDTO); Not valid. notification logic moved outside
     }
 
-    @Test(expected = APIManagementException.class)
-    public void testCreateNewAPIVersion_Exception() throws RegistryException, UserStoreException,
-            APIManagementException, IOException, DuplicateAPIException, APIPersistenceException, XMLStreamException {
-        //Create Original API
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-        API api = new API(apiId);
-        api.setContext("/test");
-        api.setVisibility("Public");
-        api.setStatus(APIConstants.CREATED);
-
-        String newVersion = "1.0.0";
-        //Create new API object
-        APIIdentifier newApiId = new APIIdentifier("admin", "API1", "1.0.1");
-        final API newApi = new API(newApiId);
-        newApi.setStatus(APIConstants.CREATED);
-        newApi.setContext("/test");
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
-                null, null);
-
-        Mockito.when(artifactManager.newGovernanceArtifact(any(QName.class))).thenReturn(artifact);
-        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
-
-        GenericArtifact artifactNew = Mockito.mock(GenericArtifact.class);
-        Mockito.when(APIUtil.createAPIArtifactContent(artifact, newApi)).thenReturn(artifactNew);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
-        RealmService realmService = Mockito.mock(RealmService.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-
-        PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
-        apiProvider.addAPI(api);
-
-        String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                api.getId().getProviderName() +
-                RegistryConstants.PATH_SEPARATOR + api.getId().getApiName() +
-                RegistryConstants.PATH_SEPARATOR + newVersion +
-                APIConstants.API_RESOURCE_NAME;
-
-        String apiSourcePath = "API1/1.0.0/";
-        PowerMockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiSourcePath);
-        Mockito.when(apiProvider.registry.resourceExists(targetPath)).thenThrow(RegistryException.class);
-        apiProvider.createNewAPIVersion(api.getUuid(), newVersion, false, "carbon.super");
-    }
-
-
-
-    @Test
-    public void testChangeLifeCycleStatus_WFAlreadyStarted() throws RegistryException, UserStoreException,
-            APIManagementException, FaultGatewaysException, WorkflowException {
-
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-
-        GenericArtifact apiArtifact = Mockito.mock(GenericArtifact.class);
-        Mockito.when(APIUtil.getAPIArtifact(apiId, apiProvider.registry)).thenReturn(apiArtifact);
-        Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn("admin");
-        Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API1");
-        Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
-        Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
-
-        Mockito.when(apimgtDAO.getUUIDFromIdentifier(apiId, "org1")).thenReturn(apiUUID);
-        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1);
-
-        //Workflow has started already
-        WorkflowDTO wfDTO = Mockito.mock(WorkflowDTO.class);
-        Mockito.when(wfDTO.getStatus()).thenReturn(WorkflowStatus.CREATED);
-        Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference("1",
-                WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(wfDTO);
-        APIStateChangeResponse response = apiProvider.
-                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
-        Assert.assertNotNull(response);
-    }
-
-    @Test
-    public void testChangeLifeCycleStatus() throws RegistryException, UserStoreException, APIManagementException,
-            FaultGatewaysException, WorkflowException, XMLStreamException {
-
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-
-        prepareForChangeLifeCycleStatus(apiProvider, apimgtDAO, apiId, artifact);
-        APIStateChangeResponse response1 = apiProvider.
-                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
-        Assert.assertEquals("APPROVED", response1.getStateChangeStatus());
-    }
-
-    @Test(expected = APIManagementException.class)
-    public void testChangeLifeCycleStatusAPIMgtException() throws RegistryException, UserStoreException,
-            APIManagementException, FaultGatewaysException, WorkflowException, XMLStreamException {
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-        prepareForChangeLifeCycleStatus(apiProvider, apimgtDAO, apiId, artifact);
-        GovernanceException exception = new GovernanceException(new APIManagementException("APIManagementException:"
-                + "Error while retrieving Life cycle state"));
-        Mockito.when(artifact.getLifecycleState()).thenThrow(exception);
-        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
-    }
-
-    @Test(expected = FaultGatewaysException.class)
-    public void testChangeLifeCycleStatus_FaultyGWException() throws RegistryException, UserStoreException,
-            APIManagementException, FaultGatewaysException, WorkflowException, XMLStreamException {
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-        prepareForChangeLifeCycleStatus(apiProvider, apimgtDAO, apiId, artifact);
-        GovernanceException exception = new GovernanceException(new APIManagementException("FaultGatewaysException:"
-                + "{\"PUBLISHED\":{\"PROD\":\"Error\"}}"));
-        Mockito.when(artifact.getLifecycleState()).thenThrow(exception);
-        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
-    }
-
-    @Test(expected = APIManagementException.class)
-    public void testUpdateAPI_WithStatusChange() throws RegistryException, UserStoreException, APIManagementException,
-            FaultGatewaysException, APIPersistenceException, XMLStreamException {
-        APIIdentifier identifier = new APIIdentifier("admin", "API1", "1.0.0");
-        API api = new API(identifier);
-        api.setStatus(APIConstants.PUBLISHED);
-        api.setVisibility("public");
-
-        //API status change is not allowed in UpdateAPI(). Should throw an exception.
-        API oldApi = new API(identifier);
-        oldApi.setStatus(APIConstants.CREATED);
-        oldApi.setVisibility("public");
-        oldApi.setContext("/api1");
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
-                null, null);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
-        RealmService realmService = Mockito.mock(RealmService.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-
-        Mockito.when(artifactManager.newGovernanceArtifact(any(QName.class))).thenReturn(artifact);
-        Mockito.when(APIUtil.createAPIArtifactContent(artifact, oldApi)).thenReturn(artifact);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-
-        PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
-
-        apiProvider.addAPI(oldApi);
-
-        //mock has permission
-        Resource apiSourceArtifact = Mockito.mock(Resource.class);
-        Mockito.when(apiSourceArtifact.getUUID()).thenReturn("12640983654");
-        String apiSourcePath = "path";
-        PowerMockito.when(APIUtil.getAPIPath(api.getId())).thenReturn(apiSourcePath);
-        PowerMockito.when(apiProvider.registry.get(apiSourcePath)).thenReturn(apiSourceArtifact);
-
-        //API Status is CREATED and user has permission
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)).thenReturn("CREATED");
-        Mockito.when(artifactManager.getGenericArtifact(apiSourceArtifact.getUUID())).thenReturn(artifact);
-        PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_PUBLISH)).thenReturn(true);
-        PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_CREATE)).thenReturn(true);
-        apiProvider.updateAPI(api, oldApi);
-    }
-
-
-    @Test
-    public void testGetAPILifeCycleData() throws Exception {
-        APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
-        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-        Resource apiSourceArtifact = Mockito.mock(Resource.class);
-        Mockito.when(apiSourceArtifact.getUUID()).thenReturn("12640983654");
-        PowerMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(path);
-        PowerMockito.when(apiProvider.registry.get(path)).thenReturn(apiSourceArtifact);
-        Mockito.when(artifactManager.getGenericArtifact(apiSourceArtifact.getUUID())).thenReturn(artifact);
-        Mockito.when(artifact.getLifecycleState()).thenReturn("Created");
-        LifecycleBean bean = getLCBean();
-        Mockito.when(LifecycleBeanPopulator.getLifecycleBean(path, (UserRegistry) apiProvider.registry,
-                apiProvider.configRegistry)).thenReturn(bean);
-        Map<String, Object> lcData = apiProvider.getAPILifeCycleData(identifier);
-        List checkListItems = (List) lcData.get(APIConstants.LC_CHECK_ITEMS);
-
-        Assert.assertEquals(2, checkListItems.size());
-        if (checkListItems.get(0) instanceof CheckListItem) {
-            CheckListItem checkListItem = (CheckListItem) checkListItems.get(0);
-            Assert.assertTrue((APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM).equals(checkListItem.getName()) ||
-                    (APIConstants.DEPRECATE_CHECK_LIST_ITEM).equals(checkListItem.getName()));
-            if ((APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM).equals(checkListItem.getName())) {
-                Assert.assertEquals("1", checkListItem.getOrder());
-            } else {
-                Assert.assertEquals("0", checkListItem.getOrder());
-            }
-
-            Assert.assertEquals("Created", checkListItem.getLifeCycleStatus());
-        }
-        if (checkListItems.get(1) instanceof CheckListItem) {
-            CheckListItem checkListItem = (CheckListItem) checkListItems.get(1);
-            Assert.assertTrue((APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM).equals(checkListItem.getName()) ||
-                    (APIConstants.DEPRECATE_CHECK_LIST_ITEM).equals(checkListItem.getName()));
-            if ((APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM).equals(checkListItem.getName())) {
-                Assert.assertEquals("1", checkListItem.getOrder());
-            } else {
-                Assert.assertEquals("0", checkListItem.getOrder());
-            }
-            Assert.assertEquals("Created", checkListItem.getLifeCycleStatus());
-        }
-    }
-
-    @Test
-    public void testGetAPILifeCycleData_WithException() throws Exception {
-        APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
-        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-        Resource apiSourceArtifact = Mockito.mock(Resource.class);
-        Mockito.when(apiSourceArtifact.getUUID()).thenReturn("12640983654");
-        PowerMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(path);
-        PowerMockito.when(apiProvider.registry.get(path)).thenReturn(apiSourceArtifact);
-        Mockito.when(artifactManager.getGenericArtifact(apiSourceArtifact.getUUID())).thenReturn(artifact);
-        Mockito.when(artifact.getLifecycleState()).thenReturn("Created");
-        Mockito.when(LifecycleBeanPopulator.getLifecycleBean(path,
-                (UserRegistry) apiProvider.registry, apiProvider.configRegistry)).
-                thenThrow(new Exception("Failed to get LC data"));
-        try {
-            apiProvider.getAPILifeCycleData(identifier);
-        } catch (APIManagementException e) {
-            Assert.assertEquals("Failed to get LC data", e.getMessage());
-        }
-    }
 
     @Test
     public void testUpdateAPIforStateChange_ToPublished() throws RegistryException, UserStoreException,
@@ -1736,120 +1398,6 @@ public class APIProviderImplTest {
     }
 
 
-    @Test
-    public void testGetAllPaginatedAPIs()
-            throws RegistryException, UserStoreException, APIManagementException, XMLStreamException {
-        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
-        API api1 = new API(apiId1);
-        api1.setContext("/test");
-
-        APIIdentifier apiId2 = new APIIdentifier("admin", "API2", "1.0.0");
-        API api2 = new API(apiId2);
-        api2.setContext("/test1");
-
-        PaginationContext paginationCtx = Mockito.mock(PaginationContext.class);
-        PowerMockito.when(PaginationContext.getInstance()).thenReturn(paginationCtx);
-        Mockito.when(paginationCtx.getLength()).thenReturn(2);
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-        ServiceReferenceHolder sh = TestUtils.getServiceReferenceHolder();
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
-        UserRegistry userReg = Mockito.mock(UserRegistry.class);
-        PowerMockito.when(registryService.getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME,
-                -1234)).thenReturn(userReg);
-        PowerMockito.when(APIUtil.getArtifactManager(userReg, APIConstants.API_KEY)).thenReturn(artifactManager);
-
-        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
-        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
-        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
-        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
-        PowerMockito.when(amConfig.getFirstProperty(APIConstants.API_PUBLISHER_APIS_PER_PAGE)).thenReturn("2");
-        RealmService realmService = Mockito.mock(RealmService.class);
-        TenantManager tm = Mockito.mock(TenantManager.class);
-        PowerMockito.when(sh.getRealmService()).thenReturn(realmService);
-        PowerMockito.when(realmService.getTenantManager()).thenReturn(tm);
-        PowerMockito.when(tm.getTenantId("carbon.super")).thenReturn(-1234);
-
-        GenericArtifact genericArtifact1 = Mockito.mock(GenericArtifact.class);
-        GenericArtifact genericArtifact2 = Mockito.mock(GenericArtifact.class);
-        Mockito.when(APIUtil.getAPI(genericArtifact1)).thenReturn(api1);
-        Mockito.when(APIUtil.getAPI(genericArtifact2)).thenReturn(api2);
-        List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
-        governanceArtifacts.add(genericArtifact1);
-        governanceArtifacts.add(genericArtifact2);
-        List<GovernanceArtifact> governanceArtifacts1 = new ArrayList<GovernanceArtifact>();
-        PowerMockito.when(GovernanceUtils
-                .findGovernanceArtifacts(Mockito.anyMap(), any(Registry.class), Mockito.anyString()))
-                .thenReturn(governanceArtifacts, governanceArtifacts1);
-        Map<String, Object> result = apiProvider.getAllPaginatedAPIs("carbon.super", 0, 10);
-        List<API> apiList = (List<API>) result.get("apis");
-        Assert.assertEquals(2, apiList.size());
-        Assert.assertEquals("API1", apiList.get(0).getId().getApiName());
-        Assert.assertEquals("API2", apiList.get(1).getId().getApiName());
-        Assert.assertEquals(2, result.get("totalLength"));
-
-        //No APIs available
-        Map<String, Object> result1 = apiProvider.getAllPaginatedAPIs("carbon.super", 0, 10);
-        List<API> apiList1 = (List<API>) result1.get("apis");
-        Assert.assertEquals(0, apiList1.size());
-        //Registry Exception while retrieving artifacts
-        Mockito.when(artifactManager.findGenericArtifacts(Matchers.anyMap())).thenThrow(RegistryException.class);
-        try {
-            apiProvider.getAllPaginatedAPIs("carbon.super", 0, 10);
-        } catch (APIManagementException e) {
-            Assert.assertEquals("Failed to get all APIs", e.getMessage());
-        }
-    }
-
-    @Test
-    public void testAddDocumentationContent() throws Exception {
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-        API api = new API(apiId);
-
-        String docName = "HowTo";
-        Documentation doc = new Documentation(DocumentationType.HOWTO, docName);
-        doc.setVisibility(DocumentVisibility.API_LEVEL);
-        String docPath = "/apimgt/applicationdata/provider/admin/API1/1.0.0/documentation/contents";
-        String documentationPath = docPath + docName;
-        String contentPath = docPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
-                RegistryConstants.PATH_SEPARATOR + docName;
-
-        Mockito.when(APIUtil.getAPIDocPath(apiId)).thenReturn(docPath);
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-        Resource docResource = Mockito.mock(Resource.class);
-        Mockito.when(docResource.getUUID()).thenReturn("678ghk");
-        Mockito.when(apiProvider.registry.get(documentationPath)).thenReturn(docResource);
-
-        GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
-        PowerMockito.whenNew(GenericArtifactManager.class).withAnyArguments().thenReturn(artifactManager);
-        Mockito.when(artifactManager.getGenericArtifact("678ghk")).thenReturn(docArtifact);
-        Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(doc);
-
-        Resource docContent = Mockito.mock(Resource.class);
-        Mockito.when(apiProvider.registry.resourceExists(contentPath)).thenReturn(true, false);
-        Mockito.when(apiProvider.registry.get(contentPath)).thenReturn(docContent);
-        Mockito.when(apiProvider.registry.newResource()).thenReturn(docContent);
-        apiProvider.addDocumentationContent(api, docName, "content");
-
-        RegistryAuthorizationManager registryAuthorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
-        PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
-                .thenReturn(registryAuthorizationManager);
-        apiProvider.tenantDomain = "carbon.super";
-        doc.setVisibility(DocumentVisibility.OWNER_ONLY);
-        apiProvider.addDocumentationContent(api, docName, "content");
-        doc.setVisibility(DocumentVisibility.PRIVATE);
-        apiProvider.addDocumentationContent(api, docName, "content");
-        Mockito.doThrow(RegistryException.class).when(apiProvider.registry).put(Matchers.anyString(),
-                any(Resource.class));
-        try {
-            apiProvider.addDocumentationContent(api, docName, "content");
-        } catch (APIManagementException e) {
-            String msg = "Failed to add the documentation content of : "
-                    + docName + " of API :" + apiId.getApiName();
-            Assert.assertEquals(msg, e.getMessage());
-        }
-    }
     @Test
     public void testGetCustomFaultSequences() throws Exception {
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
@@ -2289,61 +1837,6 @@ public class APIProviderImplTest {
         defaultQuotaPolicy.setType("RequestCount");
         policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return policy;
-    }
-
-    private LifecycleBean getLCBean() {
-        LifecycleBean bean = new LifecycleBean();
-        List<Property> lifecycleProps = new ArrayList<Property>();
-
-        Property property1 = new Property();
-        property1.setKey("registry.custom_lifecycle.checklist.option.APILifeCycle.1.item");
-        String[] values1 = {"status:Created", "name:Requires re-subscription when publishing the API", "value:false",
-                "order:1"};
-        property1.setValues(values1);
-
-        Property property2 = new Property();
-        property2.setKey("registry.lifecycle.APILifeCycle.state");
-        String[] values2 = {"Created"};
-        property2.setValues(values2);
-
-        Property property3 = new Property();
-        property3.setKey("registry.custom_lifecycle.checklist.option.APILifeCycle.0.item.permission");
-        String[] values3 = {"registry.custom_lifecycle.checklist.option.APILifeCycle.0.item.permission"};
-        property3.setValues(values3);
-
-        Property property4 = new Property();
-        property4.setKey("registry.lifecycle.APILifeCycle.lastStateUpdatedTime");
-        String[] values4 = {"2017-08-31 13:36:54.501"};
-        property4.setValues(values4);
-
-        Property property5 = new Property();
-        property5.setKey("registry.custom_lifecycle.checklist.option.APILifeCycle.1.item.permission");
-        String[] values5 = {"registry.custom_lifecycle.checklist.option.APILifeCycle.1.item.permission"};
-        property5.setValues(values5);
-
-        Property property6 = new Property();
-        property6.setKey("registry.custom_lifecycle.checklist.option.APILifeCycle.0.item");
-        String[] values6 = {"status:Created", "name:Deprecate old versions after publishing the API", "value:false",
-                "order:0"};
-        property6.setValues(values6);
-
-        Property property7 = new Property();
-        property7.setKey("registry.LC.name");
-        String[] values7 = {"APILifeCycle"};
-        property7.setValues(values7);
-
-        lifecycleProps.add(property1);
-        lifecycleProps.add(property2);
-        lifecycleProps.add(property3);
-        lifecycleProps.add(property4);
-        lifecycleProps.add(property5);
-        lifecycleProps.add(property6);
-
-        Property[] propertyArr = new Property[lifecycleProps.size()];
-        bean.setLifecycleProperties(lifecycleProps.toArray(propertyArr));
-        String[] userRoles = {"publisher"};
-        bean.setRolesOfUser(userRoles);
-        return bean;
     }
 
     private byte[] getTenantConfigContent() {

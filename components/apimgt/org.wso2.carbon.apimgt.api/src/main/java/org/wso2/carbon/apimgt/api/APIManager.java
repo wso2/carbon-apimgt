@@ -195,25 +195,6 @@ public interface APIManager {
     String getAsyncAPIDefinition(String apiId, String organization) throws APIManagementException;
 
     /**
-     * Returns a list of documentation attached to a particular API/API Product
-     *
-     * @param id Identifier
-     * @return List<Documentation>
-     * @throws APIManagementException if failed to get Documentations
-     */
-    List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException;
-
-    /**
-     * Returns a list of documentation attached to a particular API
-     *
-     * @param apiId APIIdentifier
-     * @return List<Documentation>
-     * @throws APIManagementException if failed to get Documentations
-     */
-    List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUserName)
-            throws APIManagementException;
-
-    /**
      * Returns a list of documentation attached to a particular API
      *
      * @param uuid id of the api
@@ -222,16 +203,6 @@ public interface APIManager {
      * @throws APIManagementException if failed to get Documentations
      */
     List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException;
-    /**
-     * Returns the specified document attached to the given API
-     *
-     * @param apiId   APIIdentifier
-     * @param docType type of the documentation
-     * @param docName name of the doc
-     * @return Documentation
-     * @throws APIManagementException if failed to get Documentation
-     */
-    Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType, String docName) throws APIManagementException;
 
     /**
      * Get a documentation by artifact Id
@@ -256,16 +227,6 @@ public interface APIManager {
      */
     DocumentationContent getDocumentationContent(String apiId, String docId, String organization)
             throws APIManagementException;
-
-    /**
-     * This method used to get the content of a documentation
-     *
-     * @param identifier        API/Product identifier
-     * @param documentationName name of the inline documentation
-     * @return if failed to get doc content
-     * @throws APIManagementException if the asking documentation content is unavailable
-     */
-    String getDocumentationContent(Identifier identifier, String documentationName) throws APIManagementException;
 
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
@@ -485,14 +446,6 @@ public interface APIManager {
      */
     Policy[] getPolicies(String username, String level) throws APIManagementException;
 
-
-    /**
-     * Return the uuid of the mediation policy in given registry path
-     *
-     * @param mediationPolicyPath path to the registry resource
-     * @return uuid of the resource
-     */
-    String getCreatedResourceUuid(String mediationPolicyPath);
 
     /**
      * Returns the mediation policy name specify inside mediation config
