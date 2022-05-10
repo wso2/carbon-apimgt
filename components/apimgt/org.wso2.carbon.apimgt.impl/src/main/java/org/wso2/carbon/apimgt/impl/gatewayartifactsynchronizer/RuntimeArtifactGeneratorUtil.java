@@ -47,13 +47,13 @@ public class RuntimeArtifactGeneratorUtil {
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
     public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String name, String version,
-                                                             String gatewayLabel, String type, String tenantDomain)
+                                                             String gatewayLabel, String type, String organization)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
-            List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
+            List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, organization);
             return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
         } else {
             Set<String> gatewayArtifactGeneratorTypes =
@@ -82,10 +82,10 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
-    public static RuntimeArtifactDto generateMetadataArtifact(String tenantDomain, String apiId, String gatewayLabel)
+    public static RuntimeArtifactDto generateMetadataArtifact(String organization, String apiId, String gatewayLabel)
             throws APIManagementException {
 
-        List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
+        List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, organization);
         if (gatewayArtifacts != null) {
 
             try {
@@ -187,20 +187,20 @@ public class RuntimeArtifactGeneratorUtil {
     }
 
     private static List<APIRuntimeArtifactDto> getRuntimeArtifacts(String apiId, String gatewayLabel,
-                                                                   String tenantDomain) throws APIManagementException {
+                                                                   String organization) throws APIManagementException {
         List<APIRuntimeArtifactDto> gatewayArtifacts;
         if (StringUtils.isNotEmpty(gatewayLabel)) {
             byte[] decodedValue = Base64.decodeBase64(gatewayLabel.getBytes());
             String[] gatewayLabels = new String(decodedValue).split("\\|");
             if (StringUtils.isNotEmpty(apiId)) {
                 gatewayArtifacts = gatewayArtifactsMgtDAO
-                        .retrieveGatewayArtifactsByAPIIDAndLabel(apiId, gatewayLabels, tenantDomain);
+                        .retrieveGatewayArtifactsByAPIIDAndLabel(apiId, gatewayLabels, organization);
             } else {
                 gatewayArtifacts =
-                        gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabels, tenantDomain);
+                        gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabels, organization);
             }
         } else {
-            gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
+            gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(organization);
         }
         if (gatewayArtifacts != null) {
             if (gatewayArtifacts.isEmpty()) {

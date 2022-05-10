@@ -448,6 +448,12 @@ public class SubscriptionValidationDAO {
         return subscriptions;
     }
 
+    /*
+     * This method can be used to retrieve all the APIs of a given organization in the database
+     *
+     * @param organization : organization Id
+     * @return {@link List<Subscription>}
+     * */
     public List<Subscription> getAllSubscriptionsByOrganization(String organization) throws APIManagementException {
 
         List<Subscription> subscriptions = new ArrayList<>();
