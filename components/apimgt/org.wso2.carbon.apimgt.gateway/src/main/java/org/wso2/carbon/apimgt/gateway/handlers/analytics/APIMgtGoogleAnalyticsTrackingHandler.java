@@ -139,24 +139,16 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 if (TelemetryUtil.telemetryEnabled()) {
                     if (Util.legacy()) {
                         Util.inject(tracingSpan, tracingTracer, tracerSpecificCarrier);
-                        if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
-                            Map headers =
-                                    (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
-                                            org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                            headers.putAll(tracerSpecificCarrier);
-                            org.apache.axis2.context.MessageContext.getCurrentMessageContext()
-                                    .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-                        }
                     } else {
                         TelemetryUtil.inject(span, tracerSpecificCarrier);
-                        if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
-                            Map headers =
-                                    (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
-                                            org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                            headers.putAll(tracerSpecificCarrier);
-                            org.apache.axis2.context.MessageContext.getCurrentMessageContext()
-                                    .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-                        }
+                    }
+                    if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
+                        Map headers =
+                                (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                                        org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                        headers.putAll(tracerSpecificCarrier);
+                        org.apache.axis2.context.MessageContext.getCurrentMessageContext()
+                                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
                     }
                 }
                 trackPageView(msgCtx);
