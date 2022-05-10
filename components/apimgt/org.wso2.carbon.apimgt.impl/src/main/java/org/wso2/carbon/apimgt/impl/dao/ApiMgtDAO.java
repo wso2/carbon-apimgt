@@ -16385,7 +16385,6 @@ public class ApiMgtDAO {
     public String getRevisionUUIDByOrganization(String revisionNum, String apiUUID, String organization) throws APIManagementException {
 
         String revisionUUID = null;
-        log.info("JAYANIEEEEE:" +organization);
         String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID_BY_ORGANIZATION;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection

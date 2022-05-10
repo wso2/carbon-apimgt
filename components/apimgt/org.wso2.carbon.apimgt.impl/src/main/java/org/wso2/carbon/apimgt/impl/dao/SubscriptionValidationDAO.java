@@ -423,7 +423,7 @@ public class SubscriptionValidationDAO {
      * @param subscriptionId : unique identifier of a subscription
      * @return {@link List<Subscription>}
      * */
-    public List<Subscription> getAllSubscriptions(String tenantDomain) {
+    public List<Subscription> getAllSubscriptions(String tenantDomain) throws APIManagementException {
 
         List<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -442,12 +442,13 @@ public class SubscriptionValidationDAO {
                 populateSubscriptionsList(subscriptions, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Subscriptions for tenantId : " + tenantDomain, e);
+            log.error("Error in loading Subscriptions for tenant domain : " + tenantDomain, e);
+            handleException("Failed to load subscriptions for tenant domain: " + tenantDomain, e);
         }
         return subscriptions;
     }
 
-    public List<Subscription> getAllSubscriptionsByOrganization(String organization) {
+    public List<Subscription> getAllSubscriptionsByOrganization(String organization) throws APIManagementException {
 
         List<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -461,6 +462,7 @@ public class SubscriptionValidationDAO {
             }
         } catch (SQLException e) {
             log.error("Error in loading Subscriptions for organization : " + organization, e);
+            handleException("Failed to load subscriptions for organization: " + organization, e);
         }
         return subscriptions;
     }
@@ -485,10 +487,10 @@ public class SubscriptionValidationDAO {
 
     /*
      * This method can be used to retrieve all the Applications of a given tenant in the database
-     * @param tenantId : tenant Id or organization
+     * @param tenantId : tenant domain or organization
      * @return {@link Subscription}
      * */
-    public List<Application> getAllApplications(String organization) {
+    public List<Application> getAllApplications(String organization) throws APIManagementException {
 
         ArrayList<Application> applications = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -500,6 +502,7 @@ public class SubscriptionValidationDAO {
             }
         } catch (SQLException e) {
             log.error("Error in loading Applications for organization : " + organization, e);
+            handleException("Failed to load Applications for organization: " + organization, e);
         }
         return applications;
     }
@@ -508,7 +511,7 @@ public class SubscriptionValidationDAO {
      * @param subscriptionId : unique identifier of a subscription
      * @return {@link Subscription}
      * */
-    public List<ApplicationKeyMapping> getAllApplicationKeyMappings(String tenantDomain) {
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappings(String tenantDomain) throws APIManagementException {
 
         List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
         String sql = SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL;
@@ -529,12 +532,13 @@ public class SubscriptionValidationDAO {
             }
         } catch (SQLException e) {
             log.error("Error in loading Application key mappings for tenant Domain : " + tenantDomain, e);
+            handleException("Failed to load Application key mappings for organization: " + tenantDomain, e);
         }
 
         return keyMappings;
     }
 
-    public List<ApplicationKeyMapping> getAllApplicationKeyMappings() {
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappings() throws APIManagementException {
 
         List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
         String sql = SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPING_SQL;
@@ -546,13 +550,15 @@ public class SubscriptionValidationDAO {
                 populateApplicationKeyMappingsList(keyMappings, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Application key mappings for all organizations", e);
+            log.error("Error in loading Application key mappings for all organizations ", e);
+            handleException("Failed to load Application key mappings for all organizations " , e);
+
         }
 
         return keyMappings;
     }
 
-    public List<ApplicationKeyMapping> getAllApplicationKeyMappingsByOrganization(String organization) {
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappingsByOrganization(String organization) throws APIManagementException {
 
         List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
         String sql = SubscriptionValidationSQLConstants.GET_ORGANIZATION_AM_KEY_MAPPING_SQL;
@@ -566,6 +572,7 @@ public class SubscriptionValidationDAO {
             }
         } catch (SQLException e) {
             log.error("Error in loading Application key mappings for organization : " + organization, e);
+            handleException("Failed to load Application key mappings for organization: " + organization, e);
         }
 
         return keyMappings;
@@ -1299,5 +1306,11 @@ public class SubscriptionValidationDAO {
             }
         }
         return null;
+    }
+
+    private void handleException(String msg, Throwable t) throws APIManagementException {
+
+        log.error(msg, t);
+        throw new APIManagementException(msg, t);
     }
 }
