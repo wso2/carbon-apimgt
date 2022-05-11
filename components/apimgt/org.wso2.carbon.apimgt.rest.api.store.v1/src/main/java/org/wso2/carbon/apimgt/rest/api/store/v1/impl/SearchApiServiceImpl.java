@@ -69,7 +69,7 @@ public class SearchApiServiceImpl implements SearchApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Map<String, Object> result = null;
             // Extracting search queries for the recommendation system
-            apiConsumer.publishSearchQuery(query, username);
+            apiConsumer.publishSearchQuery(query, username, organization);
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 result = apiConsumer.searchPaginatedContent(query, organization, offset, limit);
             } else {
