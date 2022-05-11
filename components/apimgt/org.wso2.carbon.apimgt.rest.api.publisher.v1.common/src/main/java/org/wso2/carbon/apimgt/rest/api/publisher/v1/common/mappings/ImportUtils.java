@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
@@ -317,12 +318,13 @@ public class ImportUtils {
             if (StringUtils.isNotEmpty(lifecycleAction)) {
                 apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
                 log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
+                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(importedApi);
+                String lcCheckList = "";
                 if (StringUtils.equals(lifecycleAction, APIConstants.LC_PUBLISH_LC_STATE)) {
-                    String lcCheckList = "Requires re-subscription when publishing the API:" + true;
-                    ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(importedApi);
-                    PublisherCommonUtils.changeApiOrApiProductLifecycle(lifecycleAction, apiTypeWrapper, lcCheckList,
-                            importedApi.getOrganization());
+                    lcCheckList = "Requires re-subscription when publishing the API:" + true;
                 }
+                PublisherCommonUtils.changeApiOrApiProductLifecycle(lifecycleAction, apiTypeWrapper, lcCheckList,
+                        importedApi.getOrganization());
             }
             importedApi.setStatus(targetStatus);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -1428,7 +1430,9 @@ public class ImportUtils {
 
         try {
             // Remove all documents associated with the API before update
-            List<Documentation> documents = apiProvider.getAllDocumentation(identifier.getUUID(), tenantDomain);
+
+            String uuidFromIdentifier = ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
+            List<Documentation> documents = apiProvider.getAllDocumentation(uuidFromIdentifier, organization);
             if (documents != null) {
                 for (Documentation documentation : documents) {
                     apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
@@ -1894,7 +1898,7 @@ public class ImportUtils {
         }
         try {
             RegistryLCManager lcManager = LCManagerFactory.getInstance().getLCManager();
-            return lcManager.getTransitionAction(currentStatus.toLowerCase(), targetStatus.toLowerCase());
+            return lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase());
         } catch (PersistenceException e) {
             throw new APIManagementException("Error while retrieving lifecycle configuration", e);
         }
