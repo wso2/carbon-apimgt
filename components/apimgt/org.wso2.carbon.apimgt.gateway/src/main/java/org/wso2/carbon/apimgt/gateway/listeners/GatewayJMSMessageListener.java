@@ -127,60 +127,63 @@ public class GatewayJMSMessageListener implements MessageListener {
 
         if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
-                    DeployAPIInGatewayEvent.class);
-            String tenantDomain = gatewayEvent.getTenantDomain();
-            boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
-            if (!tenantLoaded) {
-                String syncKey = tenantDomain.concat("__").concat(this.getClass().getName());
-                synchronized (syncKey.intern()) {
-                    tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
-                    if (!tenantLoaded) {
-                        APIUtil.loadTenantConfigBlockingMode(tenantDomain);
-                    }
-                }
-            }
-            if (tenantLoaded) {
-                Set<String> systemConfiguredGatewayLabels = new HashSet(gatewayEvent.getGatewayLabels());
-                systemConfiguredGatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
-                if (!systemConfiguredGatewayLabels.isEmpty()) {
-                    ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
-                    if (EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                        boolean tenantFlowStarted = false;
-                        try {
-                            startTenantFlow(tenantDomain);
-                            tenantFlowStarted = true;
-                            inMemoryApiDeployer.deployAPI(gatewayEvent);
-                        } catch (ArtifactSynchronizerException e) {
-                            log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
-                                    "in the Gateway");
-                        } finally {
-                            if (tenantFlowStarted) {
-                                endTenantFlow();
-                            }
-                        }
-                    }
-                    if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                        boolean tenantFlowStarted = false;
-                        try {
-                            startTenantFlow(tenantDomain);
-                            tenantFlowStarted = true;
-                            inMemoryApiDeployer.unDeployAPI(gatewayEvent);
-                        } catch (ArtifactSynchronizerException e) {
-                            log.error("Error in undeploying artifacts");
-                        } finally {
-                            if (tenantFlowStarted) {
-                                endTenantFlow();
-                            }
+            Thread handleGatewayNotificationMessageThread = new Thread(()->{
+                DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
+                        DeployAPIInGatewayEvent.class);
+                String tenantDomain = gatewayEvent.getTenantDomain();
+                boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
+                if (!tenantLoaded) {
+                    String syncKey = tenantDomain.concat("__").concat(this.getClass().getName());
+                    synchronized (syncKey.intern()) {
+                        tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
+                        if (!tenantLoaded) {
+                            APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                         }
                     }
                 }
+                if (tenantLoaded) {
+                    Set<String> systemConfiguredGatewayLabels = new HashSet(gatewayEvent.getGatewayLabels());
+                    systemConfiguredGatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+                    if (!systemConfiguredGatewayLabels.isEmpty()) {
+                        ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
+                        if (EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
+                            boolean tenantFlowStarted = false;
+                            try {
+                                startTenantFlow(tenantDomain);
+                                tenantFlowStarted = true;
+                                inMemoryApiDeployer.deployAPI(gatewayEvent);
+                            } catch (ArtifactSynchronizerException e) {
+                                log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
+                                        "in the Gateway");
+                            } finally {
+                                if (tenantFlowStarted) {
+                                    endTenantFlow();
+                                }
+                            }
+                        }
+                        if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
+                            boolean tenantFlowStarted = false;
+                            try {
+                                startTenantFlow(tenantDomain);
+                                tenantFlowStarted = true;
+                                inMemoryApiDeployer.unDeployAPI(gatewayEvent);
+                            } catch (ArtifactSynchronizerException e) {
+                                log.error("Error in undeploying artifacts");
+                            } finally {
+                                if (tenantFlowStarted) {
+                                    endTenantFlow();
+                                }
+                            }
+                        }
+                    }
 
-                if (debugEnabled) {
-                    log.debug("Event with ID " + gatewayEvent.getEventId() + " is received and " +
-                            gatewayEvent.getUuid() + " is successfully deployed/undeployed");
+                    if (debugEnabled) {
+                        log.debug("Event with ID " + gatewayEvent.getEventId() + " is received and " +
+                                gatewayEvent.getUuid() + " is successfully deployed/undeployed");
+                    }
                 }
-            }
+            });
+            handleGatewayNotificationMessageThread.start();
         }
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)
                 || EventType.APPLICATION_UPDATE.toString().equals(eventType)) {
