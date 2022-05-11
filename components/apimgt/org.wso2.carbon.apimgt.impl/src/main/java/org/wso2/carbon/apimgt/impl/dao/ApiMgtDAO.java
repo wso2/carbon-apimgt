@@ -16348,19 +16348,50 @@ public class ApiMgtDAO {
     /**
      * Get revision UUID providing revision number
      *
-     * @param revisionNum Revision number
-     * @param apiUUID     UUID of the API
+     * @param revisionNum   Revision number
+     * @param apiUUID       UUID of the API
      * @return UUID of the revision
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public String getRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
 
         String revisionUUID = null;
+        String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID)) {
+                     .prepareStatement(sql)) {
             statement.setString(1, apiUUID);
             statement.setInt(2, Integer.parseInt(revisionNum));
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revision UUID for Revision " + revisionNum, e);
+        }
+        return revisionUUID;
+    }
+
+    /**
+     * Get revision UUID providing revision number and organization
+     *
+     * @param revisionNum   Revision number
+     * @param apiUUID       UUID of the API
+     * @param organization  organization ID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getRevisionUUIDByOrganization(String revisionNum, String apiUUID, String organization) throws APIManagementException {
+
+        String revisionUUID = null;
+        String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID_BY_ORGANIZATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(sql)) {
+            statement.setString(1, apiUUID);
+            statement.setInt(2, Integer.parseInt(revisionNum));
+            statement.setString(3, organization);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     revisionUUID = rs.getString(1);

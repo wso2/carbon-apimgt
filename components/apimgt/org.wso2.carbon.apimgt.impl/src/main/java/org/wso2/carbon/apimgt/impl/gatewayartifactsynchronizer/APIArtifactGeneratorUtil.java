@@ -34,7 +34,7 @@ public class APIArtifactGeneratorUtil {
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
     public static RuntimeArtifactDto generateAPIArtifact(List<String> apiUuids, String name, String version,
-                                                         String gatewayLabel, String type, String tenantDomain)
+                                                             String gatewayLabel, String type, String organization)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
@@ -46,13 +46,13 @@ public class APIArtifactGeneratorUtil {
                 String[] gatewayLabels = new String(decodedValue).split("\\|");
                 if (!apiUuids.isEmpty()) {
                     gatewayArtifacts = gatewayArtifactsMgtDAO.
-                            retrieveGatewayArtifactsByAPIIDs(apiUuids, gatewayLabels, tenantDomain);
+                            retrieveGatewayArtifactsByAPIIDs(apiUuids, gatewayLabels, organization);
                 } else {
                     gatewayArtifacts =
-                            gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabels, tenantDomain);
+                            gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabels, organization);
                 }
             } else {
-                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
+                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(organization);
             }
             if (gatewayArtifacts != null) {
                 if (gatewayArtifacts.isEmpty()) {
@@ -77,5 +77,51 @@ public class APIArtifactGeneratorUtil {
                             gatewayArtifactGeneratorTypes)));
         }
     }
+
+    public static RuntimeArtifactDto generateAllAPIArtifact(List<String> apiUuids, String name, String version,
+                                                         String gatewayLabel, String type)
+            throws APIManagementException {
+
+        GatewayArtifactGenerator gatewayArtifactGenerator =
+                ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
+        if (gatewayArtifactGenerator != null) {
+            List<APIRuntimeArtifactDto> gatewayArtifacts;
+            if (StringUtils.isNotEmpty(gatewayLabel)) {
+                byte[] decodedValue = Base64.decodeBase64(gatewayLabel.getBytes());
+                String[] gatewayLabels = new String(decodedValue).split("\\|");
+                if (!apiUuids.isEmpty()) {
+                    gatewayArtifacts = gatewayArtifactsMgtDAO.
+                            retrieveAllGatewayArtifactsByAPIIDs(apiUuids, gatewayLabels);
+                } else {
+                    gatewayArtifacts =
+                            gatewayArtifactsMgtDAO.retrieveAllGatewayArtifactsByLabel(gatewayLabels);
+                }
+            } else {
+                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveAllGatewayArtifacts();
+            }
+            if (gatewayArtifacts != null) {
+                if (gatewayArtifacts.isEmpty()) {
+                    throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
+                }
+                for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
+                    String organizationId = gatewayArtifactsMgtDAO.retrieveOrganization(apiRuntimeArtifactDto.getApiId());
+                    if (organizationId != null) {
+                        apiRuntimeArtifactDto.setOrganization(organizationId);
+                    }
+                }
+            }
+            if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
+                return null;
+            }
+            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+        } else {
+            Set<String> gatewayArtifactGeneratorTypes =
+                    ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();
+            throw new APIManagementException("Couldn't find gateway Type",
+                    ExceptionCodes.from(ExceptionCodes.GATEWAY_TYPE_NOT_FOUND, String.join(",",
+                            gatewayArtifactGeneratorTypes)));
+        }
+    }
+
 
 }

@@ -423,7 +423,7 @@ public class SubscriptionValidationDAO {
      * @param subscriptionId : unique identifier of a subscription
      * @return {@link List<Subscription>}
      * */
-    public List<Subscription> getAllSubscriptions(String tenantDomain) {
+    public List<Subscription> getAllSubscriptions(String tenantDomain) throws APIManagementException {
 
         List<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -442,7 +442,33 @@ public class SubscriptionValidationDAO {
                 populateSubscriptionsList(subscriptions, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Subscriptions for tenantId : " + tenantDomain, e);
+            log.error("Error in loading Subscriptions for tenant domain : " + tenantDomain, e);
+            handleException("Failed to load subscriptions for tenant domain: " + tenantDomain, e);
+        }
+        return subscriptions;
+    }
+
+    /*
+     * This method can be used to retrieve all the APIs of a given organization in the database
+     *
+     * @param organization : organization Id
+     * @return {@link List<Subscription>}
+     * */
+    public List<Subscription> getAllSubscriptionsByOrganization(String organization) throws APIManagementException {
+
+        List<Subscription> subscriptions = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ORGANIZATION_SUBSCRIPTIONS_SQL)) {
+
+            ps.setString(1, organization);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateSubscriptionsList(subscriptions, resultSet);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading Subscriptions for organization : " + organization, e);
+            handleException("Failed to load subscriptions for organization: " + organization, e);
         }
         return subscriptions;
     }
@@ -467,31 +493,23 @@ public class SubscriptionValidationDAO {
 
     /*
      * This method can be used to retrieve all the Applications of a given tenant in the database
-     * @param tenantId : tenant Id
+     * @param tenantId : tenant domain or organization
      * @return {@link Subscription}
      * */
-    public List<Application> getAllApplications(String tenantDomain) {
+    public List<Application> getAllApplications(String organization) throws APIManagementException {
 
         ArrayList<Application> applications = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATIONS_SQL)) {
-            try {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                ps.setInt(1, tenantId);
-
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    addToApplicationList(applications, resultSet);
-                }
-            } catch (UserStoreException e) {
-                log.error("Error in getting tenant id for loading Applications for tenant : " + tenantDomain, e);
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATIONS_BY_ORGANIZATION_SQL)) {
+            ps.setString(1, organization);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                addToApplicationList(applications, resultSet);
             }
-
         } catch (SQLException e) {
-            log.error("Error in loading Applications for tenantDomain : " + tenantDomain, e);
+            log.error("Error in loading Applications for organization : " + organization, e);
+            handleException("Failed to load Applications for organization: " + organization, e);
         }
-
         return applications;
     }
 
@@ -499,27 +517,68 @@ public class SubscriptionValidationDAO {
      * @param subscriptionId : unique identifier of a subscription
      * @return {@link Subscription}
      * */
-    public List<ApplicationKeyMapping> getAllApplicationKeyMappings(String tenantDomain) {
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappings(String tenantDomain) throws APIManagementException {
 
         List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL;
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL)) {
+                     conn.prepareStatement(sql)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
             } catch (UserStoreException e) {
-                log.error("Error in loading ApplicationKeyMappings for tenantDomain : " + tenantDomain, e);
+                log.error("Error in loading ApplicationKeyMappings for tenantId : " + tenantId, e);
             }
             ps.setInt(1, tenantId);
-
             try (ResultSet resultSet = ps.executeQuery()) {
                 populateApplicationKeyMappingsList(keyMappings, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Application key mappings for tenantId : " + tenantDomain, e);
+            log.error("Error in loading Application key mappings for tenant Domain : " + tenantDomain, e);
+            handleException("Failed to load Application key mappings for organization: " + tenantDomain, e);
+        }
+
+        return keyMappings;
+    }
+
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappings() throws APIManagementException {
+
+        List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPING_SQL;
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(sql)) {
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateApplicationKeyMappingsList(keyMappings, resultSet);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading Application key mappings for all organizations ", e);
+            handleException("Failed to load Application key mappings for all organizations " , e);
+
+        }
+
+        return keyMappings;
+    }
+
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappingsByOrganization(String organization) throws APIManagementException {
+
+        List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_ORGANIZATION_AM_KEY_MAPPING_SQL;
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(sql)) {
+            ps.setString(1, organization);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateApplicationKeyMappingsList(keyMappings, resultSet);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading Application key mappings for organization : " + organization, e);
+            handleException("Failed to load Application key mappings for organization: " + organization, e);
         }
 
         return keyMappings;
@@ -1253,5 +1312,11 @@ public class SubscriptionValidationDAO {
             }
         }
         return null;
+    }
+
+    private void handleException(String msg, Throwable t) throws APIManagementException {
+
+        log.error(msg, t);
+        throw new APIManagementException(msg, t);
     }
 }

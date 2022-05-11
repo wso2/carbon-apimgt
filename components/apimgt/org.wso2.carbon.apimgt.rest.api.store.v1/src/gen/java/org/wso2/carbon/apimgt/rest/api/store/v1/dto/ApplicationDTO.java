@@ -325,7 +325,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "1651555478981", value = "")
+  @ApiModelProperty(example = "1651555310208", value = "")
   @JsonProperty("updatedTime")
   public String getUpdatedTime() {
     return updatedTime;
