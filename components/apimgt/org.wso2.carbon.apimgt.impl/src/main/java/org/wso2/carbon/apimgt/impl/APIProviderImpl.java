@@ -7998,9 +7998,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         API api = getAPIbyUUID(apiId, apiRevision, organization);
+        Set<String> environmentsToRemove = new HashSet<>();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+            environmentsToRemove.add(apiRevisionDeployment.getDeployment());
+        }
         removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
-        GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId);
+        GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
     }
 
     /**
@@ -8241,7 +8245,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setEnvironments(environmentsToRemove);
         removeFromGateway(product, tenantDomain, new HashSet<>(apiRevisionDeployments),Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
-        GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiProductId, apiRevisionId);
+        if (environmentsToRemove.size() > 0) {
+            GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiProductId, apiRevisionId,
+                    environmentsToRemove);
+        }
     }
 
     @Override

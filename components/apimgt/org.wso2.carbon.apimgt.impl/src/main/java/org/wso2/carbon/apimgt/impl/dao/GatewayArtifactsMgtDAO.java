@@ -583,12 +583,12 @@ public class GatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
-    public void removePublishedGatewayLabels(String apiId, String apiRevisionId) throws APIManagementException {
+    public void removePublishedGatewayLabels(String apiId, String apiRevisionId, Set<String> gatewayLabels) throws APIManagementException {
 
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             try {
                 connection.setAutoCommit(false);
-                removePublishedGatewayLabels(connection, apiId, apiRevisionId);
+                removePublishedGatewayLabels(connection, apiId, apiRevisionId, gatewayLabels);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -607,6 +607,21 @@ public class GatewayArtifactsMgtDAO {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, revision);
             preparedStatement.executeUpdate();
+        }
+    }
+
+    private void removePublishedGatewayLabels(Connection connection, String apiId, String revision,
+                                              Set<String> labels) throws SQLException {
+
+        try (PreparedStatement preparedStatement = connection
+                .prepareStatement(SQLConstants.DELETE_GW_PUBLISHED_LABELS_BY_API_ID_REVISION_ID_DEPLOYMENT)) {
+            for (String label : labels) {
+                preparedStatement.setString(1, apiId);
+                preparedStatement.setString(2, revision);
+                preparedStatement.setString(3, label);
+                preparedStatement.addBatch();
+            }
+            preparedStatement.executeBatch();
         }
     }
 
