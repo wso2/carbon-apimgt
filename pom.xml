@@ -1770,6 +1770,11 @@
                 <version>${jaeger.client.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.orbit.io.opentelemetry</groupId>
+                <artifactId>opentelemetry-all</artifactId>
+                <version>${opentelemetry.all.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.claim.mgt</artifactId>
                 <version>${carbon.identity.version}</version>
@@ -2134,11 +2139,12 @@
         <swagger3.core.version>2.1.12</swagger3.core.version>
         <javax.enterprise.version>2.0</javax.enterprise.version>
         <jaeger.client.version>0.32.0.wso2v4</jaeger.client.version>
-        <zipkin.sender.okhttp3.version>2.12.1</zipkin.sender.okhttp3.version>
-        <zipkin.reporter.version>2.12.1</zipkin.reporter.version>
+        <zipkin.sender.okhttp3.version>2.16.3</zipkin.sender.okhttp3.version>
+        <zipkin.reporter.version>2.16.3</zipkin.reporter.version>
         <brave.opentracing.version>0.32.0</brave.opentracing.version>
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
+        <opentelemetry.all.version>1.11.0.wso2v1</opentelemetry.all.version>
         <aspectj.version>1.9.5</aspectj.version>
         <everit.version>1.5.0.wso2.v2</everit.version>
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
@@ -2158,7 +2164,7 @@
         <software.amazon.ion.version>1.0.2</software.amazon.ion.version>
         <org.wso2.orbit.com.amazonaws.version>1.11.1034.wso2v1</org.wso2.orbit.com.amazonaws.version>
 
-        <zipkin.version>2.20.1</zipkin.version>
+        <zipkin.version>2.23.2</zipkin.version>
         <okhttp.wso2.version>4.2.0.wso2v1</okhttp.wso2.version>
         <okio.wso2.version>2.4.0.wso2v1</okio.wso2.version>
 

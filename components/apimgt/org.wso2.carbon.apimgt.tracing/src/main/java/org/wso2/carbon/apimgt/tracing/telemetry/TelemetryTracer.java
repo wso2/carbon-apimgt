@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,26 +16,25 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.tracing;
+package org.wso2.carbon.apimgt.tracing.telemetry;
 
-import io.opentracing.Tracer;
+import io.opentelemetry.api.trace.Tracer;
 
 /**
- * A Wrapper class for io.opentracing Tracer
- * @deprecated
- * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer} instead</p>
+ * A Wrapper class for {@link Tracer}.
  */
 
-@Deprecated
-public class TracingTracer {
+public class TelemetryTracer {
 
-    private Tracer tracer;
+    private final Tracer tracer;
 
-    public TracingTracer(Tracer tracer) {
+    public TelemetryTracer(Tracer tracer) {
+
         this.tracer = tracer;
     }
 
-    Tracer getTracingTracer() {
+    Tracer getTelemetryTracingTracer() {
+
         return this.tracer;
     }
 }

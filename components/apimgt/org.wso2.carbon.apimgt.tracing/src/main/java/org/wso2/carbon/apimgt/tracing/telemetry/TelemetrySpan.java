@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,32 +16,32 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.tracing;
+package org.wso2.carbon.apimgt.tracing.telemetry;
 
-import io.opentracing.Span;
-import io.opentracing.SpanContext;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Context;
 
 /**
- * A Wrapper class for io.opentracing Span
- * @deprecated
- * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan} instead</p>
+ * A Wrapper class for {@link Span}.
  */
 
-@Deprecated
-public class TracingSpan {
+public class TelemetrySpan {
 
     private Span span;
-    private SpanContext spanContext;
+    private Context context;
 
-    public TracingSpan(Span span) {
+    public TelemetrySpan(Span span) {
+
         this.span = span;
     }
 
-    public TracingSpan(SpanContext spanContext) {
-        this.spanContext = spanContext;
+    public TelemetrySpan(Context context) {
+
+        this.context = context;
     }
 
     public Object getSpan() {
-        return span == null ? spanContext : span;
+
+        return span == null ? context : span;
     }
 }

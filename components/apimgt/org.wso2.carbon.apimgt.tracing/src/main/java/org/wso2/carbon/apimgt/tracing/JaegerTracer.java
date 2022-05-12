@@ -30,7 +30,10 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 /**
  * Class for getting Jaeger tracer from reading configuration file
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.JaegerTelemetry} instead</p>
  * */
+@Deprecated
 public class JaegerTracer implements OpenTracer {
 
     private static final String NAME = "jaeger";
@@ -57,8 +60,8 @@ public class JaegerTracer implements OpenTracer {
 
         int reporterFlushInterval =
                 configuration.getFirstProperty(TracingConstants.CONFIG_REPORTER_FLUSH_INTERVAL) != null ?
-                Integer.parseInt(configuration.getFirstProperty(TracingConstants.CONFIG_REPORTER_FLUSH_INTERVAL))
-                : TracingConstants.DEFAULT_REPORTER_FLUSH_INTERVAL;
+                        Integer.parseInt(configuration.getFirstProperty(TracingConstants
+                                .CONFIG_REPORTER_FLUSH_INTERVAL)) : TracingConstants.DEFAULT_REPORTER_FLUSH_INTERVAL;
 
         int reporterBufferSize = configuration.getFirstProperty(TracingConstants.CONFIG_REPORTER_BUFFER_SIZE) != null ?
                 Integer.parseInt(configuration.getFirstProperty(TracingConstants.CONFIG_REPORTER_BUFFER_SIZE))

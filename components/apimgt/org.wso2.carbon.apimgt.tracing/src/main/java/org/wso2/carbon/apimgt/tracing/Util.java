@@ -32,7 +32,10 @@ import java.util.Map;
 
 /**
  * Span utility class
+ *
+ * @deprecated <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil} instead</p>
  */
+@Deprecated
 public class Util {
 
     /**
@@ -78,13 +81,14 @@ public class Util {
             ((Span) sp).setTag(key, value);
         }
     }
+
     /**
      * Update operation to the span
      *
      * @param span
      * @param name
      */
-    public static void updateOperation(TracingSpan span,  String name) {
+    public static void updateOperation(TracingSpan span, String name) {
 
         Object sp = span.getSpan();
         if (sp instanceof Span) {
@@ -196,17 +200,15 @@ public class Util {
         return null;
     }
 
-    public static boolean tracingEnabled() {
+    public static boolean legacy() {
+
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
-            boolean remoteTracerEnabled =
-                    Boolean.parseBoolean(apiManagerConfiguration
-                            .getFirstProperty(TracingConstants.REMOTE_TRACER_ENABLED));
-            boolean logTracerEnabled =
-                    Boolean.parseBoolean(apiManagerConfiguration
-                            .getFirstProperty(TracingConstants.LOG_TRACER_ENABLED));
-            return remoteTracerEnabled || logTracerEnabled;
+            boolean legacy =
+                    Boolean.parseBoolean(apiManagerConfiguration.getFirstProperty(TracingConstants.LEGACY));
+
+            return legacy;
         }
         return false;
     }
