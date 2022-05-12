@@ -8444,6 +8444,43 @@ public final class APIUtil {
     }
 
     /**
+     * Removes x-wso2-request-interceptor and x-wso2-response-interceptor from swagger as they should not be provided
+     * to store consumers
+     *
+     * @param apiSwagger swagger definition of API
+     * @return swagger which exclude x-wso2-request-interceptor and x-wso2-response-interceptor elements
+     */
+    public static String removeInterceptorsFromSwagger(String apiSwagger) {
+        // Removes x-wso2-request-interceptor key:values
+        String requestInterceptorScriptRegex = "\"x-wso2-request-interceptor\" ?: ?\\{([^}]*)}";
+        Pattern pattern = Pattern.compile("[,\\n ]*" + requestInterceptorScriptRegex);
+        Matcher matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(requestInterceptorScriptRegex + ",?");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+
+        // Removes x-wso2-response-interceptor key:values
+        String responseInterceptorScriptRegex = "[,\\n ]*\"x-wso2-response-interceptor\" ?: ?\\{([^}]*)}";
+        pattern = Pattern.compile("[,\\n ]*" + responseInterceptorScriptRegex);
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(responseInterceptorScriptRegex + ",?");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+
+        return apiSwagger;
+    }
+
+    /**
      * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
      * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
      * started with the system property 'migrationMode=true' if a migration related exports are to be done.
