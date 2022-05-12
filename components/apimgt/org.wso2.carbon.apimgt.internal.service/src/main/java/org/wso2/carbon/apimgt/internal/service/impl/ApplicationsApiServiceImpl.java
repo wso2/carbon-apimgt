@@ -52,7 +52,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
             xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
         }
-        if (organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
+        if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
                 xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
                     subscriptionValidationDAO.getAllApplications())).build();
