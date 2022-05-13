@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import org.apache.http.client.HttpClient;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,16 +41,12 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API
 
         PowerMockito.mockStatic(RestApiAdminUtils.class);
 
-        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        ObjectMapper mapper = new ObjectMapper();
 
-        String mockPolicy = "class ExportThrottlePolicyDTO {\n" + "    type: throttling policy\n"
-                + "    subtype: application policy\n" + "    version: v4.1.0\n"
-                + "    data: class ApplicationThrottlePolicyDTO {\n" + "        class ThrottlePolicyDTO {\n"
-                + "            policyId: 1e360827-6925-4ce6-95f9-12b521109278\n"
-                + "            policyName: TestPolicy\n" + "            displayName: TestPolicy\n"
-                + "            description: null\n" + "            isDeployed: false\n"
-                + "            type: ApplicationThrottlePolicy\n" + "        }\n" + "        defaultLimit: null\n"
-                + "    }\n" + "}";
+        String expected = "{\"type\":\"throttling policy\",\"subtype\":\"application policy\",\""
+                + "version\":\"v4.1.0\",\"data\":{\"policyId\":\"1e360827-6925-4ce6-95f9-12b521109278\","
+                + "\"policyName\":\"TestPolicy\",\"displayName\":\"TestPolicy\",\"description\":null,\"isDeployed\""
+                + ":false,\"type\":\"ApplicationThrottlePolicy\",\"defaultLimit\":null}}";
 
         ApplicationPolicy appPolicy = new ApplicationPolicy("TestPolicy");
         appPolicy.setPolicyName("TestPolicy");
@@ -65,9 +62,16 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API
         when(RestApiAdminUtils.isPolicyAccessibleToUser(Mockito.anyString(), Mockito.any())).thenReturn(true);
         ThrottlingApiServiceImpl throttlingApiService = new ThrottlingApiServiceImpl();
 
-        Response response = throttlingApiService.exportThrottlingPolicy("dss", "Test", "app", "YAML", null);
+        Response response = throttlingApiService.exportThrottlingPolicy("1e360827-6925-4ce6-95f9-12b521109278",
+                "Test", "app", "YAML", null);
 
-        Assert.assertEquals(response.getEntity().toString(), mockPolicy);
+        String json = null;
+        try {
+            json = mapper.writeValueAsString(response.getEntity());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        Assert.assertEquals(expected, json);
 
     }
 
@@ -106,25 +110,25 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API
         exportedPolicy.setSubtype(RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY);
         exportedPolicy.data(testSubPolicy);
 
-        SubscriptionPolicy mockSubPolicy=new SubscriptionPolicy("Test");
+        SubscriptionPolicy mockSubPolicy = new SubscriptionPolicy("Test");
         APIProvider testApiProvider = Mockito.mock(APIProvider.class);
         PowerMockito.mockStatic(RestApiCommonUtil.class);
         when(RestApiCommonUtil.getLoggedInUserProvider()).thenReturn(testApiProvider);
         when(RestApiCommonUtil.getLoggedInUsername()).thenReturn("admin");
-        when(testApiProvider.getSubscriptionPolicy(Mockito.any(),Mockito.any())).thenReturn(mockSubPolicy);
+        when(testApiProvider.getSubscriptionPolicy(Mockito.any(), Mockito.any())).thenReturn(mockSubPolicy);
 
         ThrottlingApiServiceImpl throttlingApiService = new ThrottlingApiServiceImpl();
         ThrottlingApiServiceImpl throttlingApiServiceMock = spy(throttlingApiService);
 
-        ErrorDTO error =new ErrorDTO();
-        ConflictException conflict=new ConflictException(error);
-       Mockito.doThrow(conflict).when(throttlingApiServiceMock)
-               .throttlingPoliciesSubscriptionPost(Mockito.any(), Mockito.any(), Mockito.any());
+        ErrorDTO error = new ErrorDTO();
+        ConflictException conflict = new ConflictException(error);
+        Mockito.doThrow(conflict).when(throttlingApiServiceMock)
+                .throttlingPoliciesSubscriptionPost(Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.doReturn(Response.ok().build()).when(throttlingApiServiceMock)
-                .throttlingPoliciesSubscriptionPolicyIdPut(Mockito.any(), Mockito.any(), Mockito.any(),Mockito.any());
+                .throttlingPoliciesSubscriptionPolicyIdPut(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         Response response = throttlingApiServiceMock.importThrottlingPolicy(exportedPolicy, true, null);
 
-        String message ="Successfully updated Subscription Throttling Policy : Test";
+        String message = "Successfully updated Subscription Throttling Policy : Test";
         Assert.assertEquals(message, response.getEntity().toString());
     }
 
