@@ -6137,7 +6137,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String monetizationPlan = subPolicy.getMonetizationPlan();
             Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
             if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
-                createMonetizationPlan(subPolicy);
+                if (!monetizationPlanProperties.get("currencyType").isEmpty()) {
+                    createMonetizationPlan(subPolicy);
+                }
             }
             //policy id is not set. retrieving policy to get the id.
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
