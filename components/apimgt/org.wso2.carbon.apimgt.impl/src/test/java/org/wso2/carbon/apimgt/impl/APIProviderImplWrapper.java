@@ -22,7 +22,6 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
@@ -104,12 +103,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     @Override
     public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
         //do nothing
-    }
-
-    @Override
-    public List<Documentation> getAllDocumentation(Identifier apiId) throws APIManagementException {
-
-        return documentationList;
     }
 
     @Override

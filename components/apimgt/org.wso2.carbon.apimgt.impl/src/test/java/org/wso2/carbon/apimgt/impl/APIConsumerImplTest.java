@@ -402,28 +402,6 @@ public class APIConsumerImplTest {
     }
 
     @Test
-    public void testGetAllPublishedAPIs() throws APIManagementException, GovernanceException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        APINameComparator apiNameComparator = Mockito.mock(APINameComparator.class);
-        SortedSet<API> apiSortedSet = new TreeSet<API>(apiNameComparator);
-        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
-        PowerMockito.when(APIUtil.getArtifactManager(apiConsumer.registry, APIConstants.API_KEY)).
-                thenReturn(artifactManager);
-        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
-        GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
-        APIIdentifier apiId1 = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        API api = new API(apiId1);
-
-        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)).thenReturn("PUBLISHED");
-        Mockito.when(APIUtil.getAPI(artifact)).thenReturn(api);
-
-        Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-        latestPublishedAPIs.put("user:key", api);
-        apiSortedSet.addAll(latestPublishedAPIs.values());
-    }
-
-    @Test
     public void testAddApplication() throws APIManagementException, UserStoreException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Application application = Mockito.mock(Application.class);

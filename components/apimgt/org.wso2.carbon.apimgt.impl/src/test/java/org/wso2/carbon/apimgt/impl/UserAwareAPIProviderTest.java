@@ -265,18 +265,6 @@ public class UserAwareAPIProviderTest {
 
 
     /**
-     * This method checks the behaviour of getAllDocumentation method when there is no documentation for particular api.
-     *
-     * @throws APIManagementException API Management Exception.
-     */
-    @Test
-    public void testGetAllDocumentation() throws APIManagementException {
-        Assert.assertTrue("Non-existing documentation list for an API ",
-                userAwareAPIProvider.getAllDocumentation(apiIdentifier).isEmpty());
-    }
-
-
-    /**
      * This methos checks the getLifecycleEvents method of a non-existing API.
      *
      * @throws APIManagementException API Management Exception.

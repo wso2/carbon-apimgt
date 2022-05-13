@@ -1294,7 +1294,7 @@ public class PublisherCommonUtils {
         Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationListWithOldData);
         originalAPI.setUriTemplates(uriTemplates);
 
-        apiProvider.saveGraphqlSchemaDefinition(originalAPI, schemaDefinition);
+        apiProvider.saveGraphqlSchemaDefinition(originalAPI.getUuid(), schemaDefinition, originalAPI.getOrganization());
         apiProvider.updateAPI(originalAPI, oldApi);
 
         return originalAPI;

@@ -52,17 +52,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         this.tenantManager = tenantManager;
     }
 
-    public AbstractAPIManagerWrapper(Registry registry) throws APIManagementException {
-        this.registry = registry;
-    }
-
-    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, Registry registry,
-            TenantManager tenantManager) throws APIManagementException {
-        this.genericArtifactManager = genericArtifactManager;
-        this.registry = registry;
-        this.tenantManager = tenantManager;
-    }
-
     public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
             Registry registry, TenantManager tenantManager) throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
