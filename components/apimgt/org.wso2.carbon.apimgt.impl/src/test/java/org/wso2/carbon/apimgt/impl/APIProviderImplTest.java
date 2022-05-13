@@ -3949,4 +3949,88 @@ public class APIProviderImplTest {
             Assert.fail(e.getMessage());
         }
     }
+
+    /**
+     * This method tests adding a new API Revision with organization Id
+     *
+     * @throws APIManagementException
+     */
+    @Test
+    public void testAddAPIRevisionByOrganization() throws APIManagementException, APIPersistenceException, APIImportExportException,
+            ArtifactSynchronizerException {
+        ImportExportAPI importExportAPI = Mockito.mock(ImportExportAPI.class);
+        ArtifactSaver artifactSaver = Mockito.mock(ArtifactSaver.class);
+        Mockito.doNothing().when(artifactSaver)
+                .saveArtifact(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.anyString(), Mockito.any(File.class));
+        Mockito.when(GatewayArtifactsMgtDAO.getInstance()).thenReturn(gatewayArtifactsMgtDAO);
+        APIProviderImplWrapper apiProvider =
+                new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, importExportAPI, gatewayArtifactsMgtDAO,
+                        artifactSaver);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+        api.setOrganization("7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        apiRevision.setDescription("test description revision 1");
+        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        try {
+            apiProvider.addAPIRevision(apiRevision, "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * This method tests adding a new API Revision and then retrieving API Revision by Revision UUID, API UUID and
+     * organization
+     *
+     * @throws APIManagementException
+     */
+    @Test
+    public void testGetAPIRevisionByOrganization() throws APIManagementException, APIPersistenceException {
+        ImportExportAPI importExportAPI = Mockito.mock(ImportExportAPI.class);
+        ArtifactSaver artifactSaver = Mockito.mock(ArtifactSaver.class);
+        APIProviderImplWrapper apiProvider =
+                new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, importExportAPI, gatewayArtifactsMgtDAO,
+                        artifactSaver);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+        api.setOrganization("7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        apiRevision.setDescription("test description revision 1");
+        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+
+        PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        try {
+            apiProvider.addAPIRevision(apiRevision, "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+            apiProvider.getAPIRevisionUUIDByOrganization("b55e0fc3-9829-4432-b99e-02056dc91838",
+                    "63e1e37e-a5b8-4be6-86a5-d6ae0749f131", "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
 }

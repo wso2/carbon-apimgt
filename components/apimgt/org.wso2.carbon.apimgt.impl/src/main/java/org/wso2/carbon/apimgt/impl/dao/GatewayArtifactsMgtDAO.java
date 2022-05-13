@@ -336,7 +336,7 @@ public class GatewayArtifactsMgtDAO {
     }
 
     public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByAPIIDAndLabel(String apiId, String[] labels,
-                                                                               String tenantDomain)
+                                                                               String organization)
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
@@ -350,7 +350,7 @@ public class GatewayArtifactsMgtDAO {
                 preparedStatement.setString(index, label);
                 index++;
             }
-            preparedStatement.setString(index, tenantDomain);
+            preparedStatement.setString(index, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();

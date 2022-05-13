@@ -204,4 +204,48 @@ public class GatewayArtifactsMgtDAOTest {
         Assert.assertNotNull(artifact);
         Assert.assertEquals(context, artifacts.get(0).getContext());
     }
+
+    @Test
+    public void testAddGatewayAPIArtifactAndMetaDataByOrganization() throws APIManagementException {
+        String uuid = UUID.randomUUID().toString();
+        String name = "apiname";
+        String version = "1.0.0";
+        String revision = UUID.randomUUID().toString();
+        URL resource = getClass().getClassLoader().getResource("admin-PizzaShackAPI-1.0.0.zip");
+        File file = new File(resource.getPath());
+        gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(uuid, name, version, revision, "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5",
+                APIConstants.HTTP_PROTOCOL, file);
+
+        API api = new API(new APIIdentifier("test-provider", name, version));
+        api.setContext("/context1");
+        api.setContextTemplate("/context1/{version}");
+        api.setUUID(uuid);
+        apiMgtDAO.addAPI(api, -1234, "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+
+        String gatewayAPIId = gatewayArtifactsMgtDAO.getGatewayAPIId(name, version, "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+        Assert.assertEquals(gatewayAPIId, uuid);
+        Map<String, String> gatewayVhosts = new HashMap<>();
+        gatewayVhosts.put("label1", "dev.wso2.com");
+        gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"),
+                gatewayVhosts);
+        List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid,
+                new String[]{"label1"}, "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+        Assert.assertEquals(artifacts.size(), 1);
+        RuntimeArtifactDto artifact = artifacts.get(0);
+        Assert.assertNotNull(artifact);
+        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+        apiRevisionDeployment.setRevisionUUID(revision);
+        apiRevisionDeployment.setDeployment("label1");
+        gatewayVhosts = new HashMap<>();
+        gatewayVhosts.put("label2", "prod.wso2.com");
+        gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label2"),
+                gatewayVhosts, Collections.asSet(apiRevisionDeployment));
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label1"}, "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+        Assert.assertEquals(artifacts.size(), 0);
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label2"},
+                "7a27a0db-2488-4d0f-8b8e-c4e6e74282d5");
+        Assert.assertEquals(artifacts.size(), 1);
+        artifact = artifacts.get(0);
+        Assert.assertNotNull(artifact);
+    }
 }
