@@ -71,22 +71,6 @@ public interface APIConsumer extends APIManager {
     Set<Tag> getAllTags(String organization) throws APIManagementException;
 
     /**
-     * Returns all tags with their descriptions.
-     *
-     * NOTE : The reason for having a separate method to get the tags with their attributes is,
-     * because of the implementation of addition tag attributes.
-     * Tag attributes are saved in a registry location with convention.
-     * e.g.  governance/apimgt/applicationdata/tags/{tag_name}/description.txt.
-     * In most of the use cases these attributes are not needed.
-     * So not fetching the description if it is not needed is healthy for performance.
-     *
-     * @param tenantDomain Tenant domain.
-     * @return The description of the tag.
-     * @throws APIManagementException if there is a failure in getting the description.
-     */
-    Set<Tag> getTagsWithAttributes(String tenantDomain)throws APIManagementException;
-
-    /**
      * Rate a particular API. This will be called when subscribers rate an API
      *
      * @param apiId  The API identifier
@@ -515,19 +499,6 @@ public interface APIConsumer extends APIManager {
     JSONArray getAPIRatings(String apiId) throws APIManagementException;
 
     /**
-     * Get a list of published APIs by the given provider.
-     *
-     * @param providerId , provider id
-     * @param loggedUser logged user
-     * @param limit Maximum number of results to return. Pass -1 to get all.
-     * @param apiOwner Owner name which is used to filter APIs
-     * @return set of API
-     * @throws APIManagementException if failed to get set of API
-     */
-    Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner,
-                                        String apiBizOwner) throws APIManagementException;
-
-    /**
      * Returns a list of Tiers denied for the current user
      *
      * @return Set<String>
@@ -668,20 +639,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to load monetization implementation class
      */
     Monetization getMonetizationImplClass() throws APIManagementException;
-
-    /**
-     * Returns wsdl document resource to be downloaded from the API store for a SOAP api
-     *
-     * @param username           user name of the logged in user
-     * @param tenantDomain       tenant domain
-     * @param resourceUrl        registry resource url to the wsdl
-     * @param environmentDetails map of gateway names and types
-     * @param apiDetails         api details
-     * @return converted wsdl document to be download
-     * @throws APIManagementException
-     */
-    String getWSDLDocument(String username, String tenantDomain, String resourceUrl, Map environmentDetails,
-                           Map apiDetails) throws APIManagementException;
 
     /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details

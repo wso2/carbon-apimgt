@@ -123,20 +123,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         }
     }
 
-    protected API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
-        try {
-
-            APIIdentifier apiIdentifier = new APIIdentifier(
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-            API api = new API(apiIdentifier);
-            return api;
-        } catch (GovernanceException e) {
-            throw new APIManagementException("Error while getting attribute", e);
-        }
-    }
-
     protected String getTenantDomain(Identifier identifier) {
         return "carbon.super";
     }

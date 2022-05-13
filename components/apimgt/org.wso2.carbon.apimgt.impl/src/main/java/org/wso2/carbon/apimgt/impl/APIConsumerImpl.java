@@ -19,9 +19,6 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.util.JavaUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -104,7 +101,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -120,7 +116,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
@@ -135,23 +130,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.Association;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.config.RegistryContext;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.pagination.PaginationContext;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -160,18 +138,11 @@ import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -190,7 +161,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Cache;
-import javax.wsdl.Definition;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -283,51 +253,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
     }
 
-    protected UserRegistry getGovernanceUserRegistry(int tenantId) throws RegistryException {
-        return ServiceReferenceHolder.getInstance().getRegistryService().
-                getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-    }
-
     protected int getTenantId(String requestedTenantDomain) throws UserStoreException {
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                                              .getTenantId(requestedTenantDomain);
     }
 
-
-    /**
-     * Returns the set of APIs with the given tag, retrieved from registry
-     *
-     * @param registry - Current registry; tenant/SuperTenant
-     * @param tag - The tag name
-     * @return A {@link Set} of {@link API} objects.
-     * @throws APIManagementException
-     */
-    private Set<API> getAPIsWithTag(Registry registry, String tag)
-            throws APIManagementException {
-        Set<API> apiSet = new TreeSet<API>(new APINameComparator());
-        try {
-            List<GovernanceArtifact> genericArtifacts =
-                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAGS_EQ_SEARCH_TYPE_PREFIX + tag), registry,
-                                                            APIConstants.API_RXT_MEDIA_TYPE);
-            for (GovernanceArtifact genericArtifact : genericArtifacts) {
-                try {
-                    String apiStatus = APIUtil.getLcStateFromArtifact(genericArtifact);
-                    if (genericArtifact != null && (APIConstants.PUBLISHED.equals(apiStatus)
-                         || APIConstants.PROTOTYPED.equals(apiStatus))) {
-                        API api = APIUtil.getAPI(genericArtifact);
-                        if (api != null) {
-                            apiSet.add(api);
-                        }
-                    }
-                } catch (RegistryException e) {
-                    log.warn("User is not authorized to get an API with tag " + tag, e);
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get API for tag " + tag, e);
-        }
-        return apiSet;
-    }
 
     /**
      * Regenerate consumer secret.
@@ -505,82 +435,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
-        // Fetch the all the tags first.
-        Set<Tag> tags = getAllTags(tenantDomain);
-        // For each and every tag get additional attributes from the registry.
-        String descriptionPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/description.txt";
-        String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
-
-        //if the tenantDomain is not specified super tenant domain is used
-        if (StringUtils.isBlank(tenantDomain)) {
-            try {
-                tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
-            } catch (org.wso2.carbon.user.core.UserStoreException e) {
-                handleException("Cannot get super tenant domain name", e);
-            }
-        }
-
-        //get the registry instance related to the tenant domain
-        UserRegistry govRegistry = null;
-        try {
-            int tenantId = getTenantId(tenantDomain);
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
-        } catch (UserStoreException e) {
-            handleException("Cannot get tenant id for tenant domain name:" + tenantDomain, e);
-        } catch (RegistryException e) {
-            handleException("Cannot get registry for tenant domain name:" + tenantDomain, e);
-        }
-
-        if (govRegistry != null) {
-            for (Tag tag : tags) {
-                // Get the description.
-                Resource descriptionResource = null;
-                String descriptionPath = String.format(descriptionPathPattern, tag.getName());
-                try {
-                    if (govRegistry.resourceExists(descriptionPath)) {
-                        descriptionResource = govRegistry.get(descriptionPath);
-                    }
-                } catch (RegistryException e) {
-                    //warn and proceed to the next tag
-                    log.warn(String.format("Error while querying the existence of the description for the tag '%s'",
-                            tag.getName()), e);
-                }
-                // The resource is assumed to be a byte array since its the content
-                // of a text file.
-                if (descriptionResource != null) {
-                    try {
-                        String description = new String((byte[]) descriptionResource.getContent(),
-                                                        Charset.defaultCharset());
-                        tag.setDescription(description);
-                    } catch (ClassCastException e) {
-                        //added warnings as it can then proceed to load rest of resources/tags
-                        log.warn(String.format("Cannot cast content of %s to byte[]", descriptionPath), e);
-                    } catch (RegistryException e) {
-                        //added warnings as it can then proceed to load rest of resources/tags
-                        log.warn(String.format("Cannot read content of %s", descriptionPath), e);
-                    }
-                }
-                // Checks whether the thumbnail exists.
-                String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
-                try {
-                    boolean isThumbnailExists = govRegistry.resourceExists(thumbnailPath);
-                    tag.setThumbnailExists(isThumbnailExists);
-                    if (isThumbnailExists) {
-                        tag.setThumbnailUrl(APIUtil.getRegistryResourcePathForUI(
-                                APIConstants.RegistryResourceTypesForUI.TAG_THUMBNAIL, tenantDomain, thumbnailPath));
-                    }
-                } catch (RegistryException e) {
-                    //warn and then proceed to load rest of tags
-                    log.warn(String.format("Error while querying the existence of %s", thumbnailPath), e);
-                }
-            }
-        }
-        return tags;
-    }
-
-    @Override
     public void rateAPI(String id, APIRating rating, String user) throws APIManagementException {
         apiMgtDAO.addRating(id, rating.getRating(), user);
     }
@@ -617,207 +471,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner,
-                                               String apiBizOwner) throws APIManagementException {
-        try {
-            Boolean allowMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-            Boolean showAllAPIs = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-
-            String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-            int tenantId = getTenantId(providerDomain);
-            final Registry registry = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getGovernanceSystemRegistry(tenantId);
-
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage =
-                        "Artifact manager is null when retrieving all published APIs by provider ID " + providerId;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            int publishedAPICount = 0;
-            Map<String, API> apiCollection = new HashMap<String, API>();
-
-            if(apiBizOwner != null && !apiBizOwner.isEmpty()){
-                try {
-                    final String bizOwner = apiBizOwner;
-                    Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-                    listMap.put(APIConstants.API_OVERVIEW_BUSS_OWNER, new ArrayList<String>() {{
-                        add(bizOwner);
-                    }});
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
-                    GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-
-                    if(genericArtifacts != null && genericArtifacts.length > 0){
-                        for(GenericArtifact artifact : genericArtifacts){
-                            if (publishedAPICount >= limit) {
-                                break;
-                            }
-                            if(isCandidateAPI(artifact.getPath(), loggedUsername, artifactManager, tenantId, showAllAPIs,
-                                              allowMultipleVersions, apiOwner, providerId, registry, apiCollection)){
-                                publishedAPICount += 1;
-                            }
-                        }
-                    }
-                } catch (GovernanceException e) {
-                    log.error("Error while finding APIs by business owner " + apiBizOwner, e);
-                    return null;
-                }
-            }
-            else{
-                String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + providerId;
-                Association[] associations = registry.getAssociations(providerPath, APIConstants.PROVIDER_ASSOCIATION);
-
-                for (Association association : associations) {
-                    if (publishedAPICount >= limit) {
-                        break;
-                    }
-                    String apiPath = association.getDestinationPath();
-
-                    if(isCandidateAPI(apiPath, loggedUsername, artifactManager, tenantId, showAllAPIs,
-                            allowMultipleVersions, apiOwner, providerId, registry, apiCollection)){
-
-                        publishedAPICount += 1;
-                    }
-                }
-            }
-
-            return new HashSet<API>(apiCollection.values());
-
-        } catch (RegistryException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-            return null;
-        } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-            return null;
-        } catch (UserStoreException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-            return null;
-        }
-    }
-
-    private boolean isCandidateAPI(String apiPath, String loggedUsername, GenericArtifactManager artifactManager,
-                                   int tenantId, boolean showAllAPIs, boolean allowMultipleVersions,
-                                   String apiOwner, String providerId, Registry registry, Map<String, API> apiCollection)
-            throws UserStoreException, RegistryException, APIManagementException {
-
-        AuthorizationManager manager = ServiceReferenceHolder.getInstance().getRealmService().
-                                                getTenantUserRealm(tenantId).getAuthorizationManager();
-        Comparator<API> versionComparator = new APIVersionComparator();
-
-        Resource resource;
-        String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                        apiPath);
-        boolean checkAuthorized;
-        String userNameWithoutDomain = loggedUsername;
-
-        if (!loggedUsername.isEmpty() && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(super.tenantDomain)) {
-            String[] nameParts = loggedUsername.split("@");
-            userNameWithoutDomain = nameParts[0];
-        }
-
-        int loggedInUserTenantDomain = -1;
-        if(!StringUtils.isEmpty(loggedUsername)) {
-            loggedInUserTenantDomain = APIUtil.getTenantId(loggedUsername);
-        }
-
-        if (loggedUsername.isEmpty()) {
-            // Anonymous user is viewing.
-            checkAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
-        } else if (tenantId != loggedInUserTenantDomain) {
-            //Cross tenant scenario
-            providerId = APIUtil.replaceEmailDomainBack(providerId);
-            String[] nameParts = providerId.split("@");
-            String provideNameWithoutDomain = nameParts[0];
-            checkAuthorized = manager.isUserAuthorized(provideNameWithoutDomain, path, ActionConstants.GET);
-        } else {
-            // Some user is logged in also user and api provider tenant domain are same.
-            checkAuthorized = manager.isUserAuthorized(userNameWithoutDomain, path, ActionConstants.GET);
-        }
-
-        String apiArtifactId = null;
-        if (checkAuthorized) {
-            resource = registry.get(apiPath);
-            apiArtifactId = resource.getUUID();
-        }
-
-        if (apiArtifactId != null) {
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-
-            // check the API status
-            String status = APIUtil.getLcStateFromArtifact(artifact);
-
-            API api = null;
-            //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-            if (!showAllAPIs) {
-                // then we are only interested in published APIs here...
-                if (APIConstants.PUBLISHED.equals(status)) {
-                    api = APIUtil.getAPI(artifact);
-                }
-            } else {   // else we are interested in both deprecated/published APIs here...
-                if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
-                    api = APIUtil.getAPI(artifact);
-                }
-
-            }
-            if (api != null) {
-                String apiVisibility = api.getVisibility();
-                if(!StringUtils.isEmpty(apiVisibility) && !APIConstants.API_GLOBAL_VISIBILITY.equalsIgnoreCase(apiVisibility)) {
-                    String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-                    String loginUserDomain = MultitenantUtils.getTenantDomain(loggedUsername);
-                    if(!StringUtils.isEmpty(providerDomain) && !StringUtils.isEmpty(loginUserDomain)
-                            && !providerDomain.equals(loginUserDomain)){
-                        return false;
-                    }
-                }
-                // apiOwner is the value coming from front end and compared against the API instance
-                if (apiOwner != null && !apiOwner.isEmpty()) {
-                    if (APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) &&
-                        api.getApiOwner() != null && !api.getApiOwner().isEmpty() &&
-                        !APIUtil.replaceEmailDomainBack(apiOwner)
-                                .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
-                        return false; // reject remote APIs when local admin user's API selected
-                    } else if (!APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) &&
-                               !APIUtil.replaceEmailDomainBack(apiOwner)
-                                       .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
-                        return false; // reject local admin's APIs when remote API selected
-                    }
-                }
-                String key;
-                //Check the configuration to allow showing multiple versions of an API true/false
-                if (!allowMultipleVersions) { //If allow only showing the latest version of an API
-                    key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                    API existingAPI = apiCollection.get(key);
-                    if (existingAPI != null) {
-                        // If we have already seen an API with the same name, make sure
-                        // this one has a higher version number
-                        if (versionComparator.compare(api, existingAPI) > 0) {
-                            apiCollection.put(key, api);
-                            return true;
-                        }
-                    } else {
-                        // We haven't seen this API before
-                        apiCollection.put(key, api);
-                        return true;
-                    }
-                } else { //If allow showing multiple versions of an API
-                    key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName() + COLON_CHAR + api.getId()
-                            .getVersion();
-                    //we're not really interested in the key, so generate one for the sake of adding this element to
-                    //the map.
-                    key = key + '_' + apiCollection.size();
-                    apiCollection.put(key, api);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
     public boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId) throws
             APIManagementException {
         boolean isSubscribed;
@@ -832,174 +485,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribed;
     }
 
-    /**
-	 * Pagination API search based on solr indexing
-	 *
-	 * @param registry
-	 * @param searchTerm
-	 * @param searchType
-	 * @return
-	 * @throws APIManagementException
-	 */
-
-    public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end, boolean limitAttributes) throws APIManagementException {
-        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        List<API> apiList = new ArrayList<API>();
-
-        searchTerm = searchTerm.trim();
-        Map<String,Object> result=new HashMap<String, Object>();
-        int totalLength=0;
-        boolean isMore = false;
-        String criteria=APIConstants.API_OVERVIEW_NAME;
-        try {
-            String paginationLimit = getAPIManagerConfiguration()
-                    .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
-
-            // If the Config exists use it to set the pagination limit
-            final int maxPaginationLimit;
-            if (paginationLimit != null) {
-                // The additional 1 added to the maxPaginationLimit is to help us determine if more
-                // APIs may exist so that we know that we are unable to determine the actual total
-                // API count. We will subtract this 1 later on so that it does not interfere with
-                // the logic of the rest of the application
-                int pagination = Integer.parseInt(paginationLimit);
-
-                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
-                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
-                // leading to some of the APIs not being displayed
-                if (pagination < 11) {
-                    pagination = 11;
-                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
-                }
-                maxPaginationLimit = start + pagination + 1;
-            }
-            // Else if the config is not specified we go with default functionality and load all
-            else {
-                maxPaginationLimit = Integer.MAX_VALUE;
-            }
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
-            if (artifactManager != null) {
-
-                if (APIConstants.API_PROVIDER.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_PROVIDER;
-                    searchTerm = searchTerm.replaceAll("@", "-AT-");
-                } else if (APIConstants.API_VERSION_LABEL.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_VERSION;
-                } else if (APIConstants.API_CONTEXT.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_CONTEXT;
-                } else if (APIConstants.API_DESCRIPTION.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_DESCRIPTION;
-                } else if (APIConstants.API_TAG.equalsIgnoreCase(searchType)) {
-                    criteria = APIConstants.API_OVERVIEW_TAG;
-                }
-
-                //Create the search attribute map for PUBLISHED APIs
-                final String searchValue = searchTerm;
-                Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-                listMap.put(criteria, new ArrayList<String>() {{
-                    add(searchValue);
-                }});
-
-                boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-
-                //This is due to take only the published APIs from the search if there is no need to return APIs with
-                //multiple status. This is because pagination is breaking when we do a another filtering with the API Status
-                if (!displayAPIsWithMultipleStatus) {
-                    listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-                        add(APIConstants.PUBLISHED);
-                    }});
-                }
-
-                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-                totalLength = PaginationContext.getInstance().getLength();
-
-                boolean isFound = true;
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-
-                    if (APIConstants.API_OVERVIEW_PROVIDER.equals(criteria)) {
-                        genericArtifacts = searchAPIsByOwner(artifactManager, searchValue);
-                        if (genericArtifacts == null || genericArtifacts.length == 0) {
-                            isFound = false;
-                        }
-                    }
-                    else {
-                        isFound = false;
-                    }
-                }
-
-                if (!isFound) {
-                    result.put("apis", apiSet);
-                    result.put("length", 0);
-                    result.put("isMore", isMore);
-                    return result;
-                }
-
-                // Check to see if we can speculate that there are more APIs to be loaded
-                if (maxPaginationLimit == totalLength) {
-                    isMore = true;  // More APIs exist, cannot determine total API count without incurring perf hit
-                    --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
-                }
-
-                int tempLength =0;
-                for (GenericArtifact artifact : genericArtifacts) {
-                    String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-
-                    if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
-                        if (APIConstants.PROTOTYPED.equals(status) || APIConstants.PUBLISHED.equals(status)
-                            || APIConstants.DEPRECATED.equals(status)) {
-                            API resultAPI;
-                            if (limitAttributes) {
-                                resultAPI = APIUtil.getAPI(artifact);
-                            } else {
-                                resultAPI = APIUtil.getAPI(artifact, registry);
-                            }
-                            if (resultAPI != null) {
-                                apiList.add(resultAPI);
-                            }
-                        }
-                    } else {
-                        if (APIConstants.PROTOTYPED.equals(status) || APIConstants.PUBLISHED.equals(status)) {
-                            API resultAPI;
-                            if (limitAttributes) {
-                                resultAPI = APIUtil.getAPI(artifact);
-                            } else {
-                                resultAPI = APIUtil.getAPI(artifact, registry);
-                            }
-                            if (resultAPI != null) {
-                                apiList.add(resultAPI);
-                            }
-                        }
-                    }
-                    // Ensure the APIs returned matches the length, there could be an additional API
-                    // returned due incrementing the pagination limit when getting from registry
-                    tempLength++;
-                    if (tempLength >= totalLength){
-                        break;
-                    }
-                }
-
-                apiSet.addAll(apiList);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to search APIs with type", e);
-        }
-        result.put("apis",apiSet);
-        result.put("length",totalLength);
-        result.put("isMore", isMore);
-        return result;
-    }
-
-
-    private  GenericArtifact[] searchAPIsByOwner(GenericArtifactManager artifactManager, final String searchValue) throws GovernanceException {
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        listMap.put(APIConstants.API_OVERVIEW_OWNER, new ArrayList<String>() {
-            {
-                add(searchValue);
-            }
-        });
-        return artifactManager.findGenericArtifacts(listMap);
-    }
 
     /**
      *This method will delete application key mapping table and application registration table.
@@ -3462,90 +2947,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return criteria;
     }
 
-    @Deprecated // Remove this method once the jaggery store app is removed.
-    @Override
-    public String getWSDLDocument(String username, String tenantDomain, String resourceUrl,
-            Map environmentDetails, Map apiDetails) throws APIManagementException {
-
-        if (username == null) {
-            username = APIConstants.END_USER_ANONYMOUS;
-        }
-        if (tenantDomain == null) {
-            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resourceUrl, tenantDomain);
-        String wsdlContent = "";
-        if (log.isDebugEnabled()) {
-            log.debug("WSDL document resource availability: " + docResourceMap.isEmpty());
-        }
-        if (!docResourceMap.isEmpty()) {
-            try {
-                ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-                IOUtils.copy((InputStream) docResourceMap.get("Data"), arrayOutputStream);
-                String apiName = (String) apiDetails.get(API_NAME);
-                String apiVersion = (String) apiDetails.get(API_VERSION);
-                String apiProvider = (String) apiDetails.get(API_PROVIDER);
-                String environmentName = (String) environmentDetails.get(ENVIRONMENT_NAME);
-                String environmentType = (String) environmentDetails.get(ENVIRONMENT_TYPE);
-                if (log.isDebugEnabled()) {
-                    log.debug("Published SOAP api gateway environment name: " + environmentName + " environment type: "
-                            + environmentType);
-                }
-                if (resourceUrl.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
-                    WSDLArchiveInfo archiveInfo = APIMWSDLReader
-                            .extractAndValidateWSDLArchive((InputStream) docResourceMap.get("Data"))
-                            .getWsdlArchiveInfo();
-                    File folderToImport = new File(
-                            archiveInfo.getLocation() + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY);
-                    Collection<File> wsdlFiles = APIFileUtil
-                            .searchFilesWithMatchingExtension(folderToImport, APIFileUtil.WSDL_FILE_EXTENSION);
-                    Collection<File> xsdFiles = APIFileUtil
-                            .searchFilesWithMatchingExtension(folderToImport, APIFileUtil.XSD_FILE_EXTENSION);
-                    if (wsdlFiles != null) {
-                        for (File foundWSDLFile : wsdlFiles) {
-                            Path fileLocation = Paths.get(foundWSDLFile.getAbsolutePath());
-                            byte[] updatedWSDLContent = this
-                                    .getUpdatedWSDLByEnvironment(resourceUrl, Files.readAllBytes(fileLocation),
-                                            environmentName, environmentType, apiName, apiVersion, apiProvider);
-                            File updatedWSDLFile = new File(foundWSDLFile.getPath());
-                            wsdlFiles.remove(foundWSDLFile);
-                            FileUtils.writeByteArrayToFile(updatedWSDLFile, updatedWSDLContent);
-                            wsdlFiles.add(updatedWSDLFile);
-                        }
-                        wsdlFiles.addAll(xsdFiles);
-                        ZIPUtils.zipFiles(folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP,
-                                wsdlFiles);
-                        wsdlContent = folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP;
-                    }
-                } else {
-                    arrayOutputStream = new ByteArrayOutputStream();
-                    IOUtils.copy((InputStream) docResourceMap.get("Data"), arrayOutputStream);
-                    byte[] updatedWSDLContent = this
-                            .getUpdatedWSDLByEnvironment(resourceUrl, arrayOutputStream.toByteArray(), environmentName,
-                                    environmentType, apiName, apiVersion, apiProvider);
-                    wsdlContent = new String(updatedWSDLContent);
-                }
-            } catch (IOException e) {
-                handleException("Error occurred while copying wsdl content into byte array stream for resource: "
-                        + resourceUrl, e);
-            }
-        } else {
-            handleException("No wsdl resource found for resource path: " + resourceUrl);
-        }
-        JSONObject data = new JSONObject();
-        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE,
-                docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE));
-        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME,
-                docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME));
-        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA, wsdlContent);
-        if (log.isDebugEnabled()) {
-            log.debug("Updated wsdl content details for wsdl resource: " + docResourceMap.get("name") + " is " +
-                    data.toJSONString());
-        }
-        return data.toJSONString();
-    }
-
     @Override
     public ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException {
@@ -3588,88 +2989,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant)
             throws APIManagementException {
         return getApplicationKeys(applicationId, xWso2Tenant);
-    }
-
-    /**
-     * This method is used to get the updated wsdl with the respective environment apis are published
-     *
-     * @param wsdlResourcePath registry resource path to the wsdl
-     * @param wsdlContent      wsdl resource content as byte array
-     * @param environmentType  gateway environment type
-     * @return updated wsdl content with environment endpoints
-     * @throws APIManagementException
-     */
-    private byte[] getUpdatedWSDLByEnvironment(String wsdlResourcePath, byte[] wsdlContent, String environmentName,
-            String environmentType, String apiName, String apiVersion, String apiProvider)
-            throws APIManagementException {
-        APIMWSDLReader apimwsdlReader = new APIMWSDLReader(wsdlResourcePath);
-        Definition definition = apimwsdlReader.getWSDLDefinitionFromByteContent(wsdlContent, false);
-
-        byte[] updatedWSDLContent = null;
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiProvider));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            int tenantId;
-            UserRegistry registry;
-
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                APIUtil.loadTenantRegistry(tenantId);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
-                API api = null;
-                if (!StringUtils.isEmpty(apiName) && !StringUtils.isEmpty(apiVersion)) {
-                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(apiProvider), apiName, apiVersion);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Api identifier for the soap api artifact: " + apiIdentifier + "for api name: "
-                                          + apiName + ", version: " + apiVersion);
-                    }
-                    GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
-                    api = APIUtil.getAPI(apiArtifact);
-                    if (log.isDebugEnabled()) {
-                        if (api != null) {
-                            log.debug(
-                                    "Api context for the artifact with id:" + api.getId() + " is " + api.getContext());
-                        } else {
-                            log.debug("Api does not exist for api name: " + apiIdentifier.getApiName());
-                        }
-                    }
-                } else {
-                    handleException("Artifact does not exist in the registry for api name: " + apiName +
-                                            " and version: " + apiVersion);
-                }
-
-                if (api != null) {
-                    try {
-                        apimwsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Soap api with context:" + api.getContext() + " in " + environmentName
-                                              + " with environment type" + environmentType);
-                        }
-                        updatedWSDLContent = apimwsdlReader.getWSDL(definition);
-                    } catch (APIManagementException e) {
-                        handleException("Error occurred while processing the wsdl for api: [" + api.getId() + "]", e);
-                    }
-                } else {
-                    handleException("Error while getting API object for wsdl artifact");
-                }
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information", e);
-            } catch (RegistryException e) {
-                handleException("Error when create registry instance", e);
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return updatedWSDLContent;
     }
 
     /**
@@ -3743,29 +3062,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantId);
     }
 
-    /**
-     * Store specific implementation of search paginated apis by content
-     * @param registry
-     * @param searchQuery
-     * @param start
-     * @param end
-     * @return
-     * @throws APIManagementException
-     */
-    public Map<String, Object> searchPaginatedAPIsByContent(Registry registry, int tenantId, String searchQuery,
-            int start, int end, boolean limitAttributes) throws APIManagementException {
-
-        Map<String, Object> searchResults = super
-                .searchPaginatedAPIsByContent(registry, tenantId, searchQuery, start, end, limitAttributes);
-        return filterMultipleVersionedAPIs(searchResults);
-    }
-
-
-    @Override
-    public String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId, organization);
-        return APIUtil.removeXMediationScriptsFromSwagger(definition);
-    }
 
     @Override
     public String getOpenAPIDefinition(String apiId, String organization) throws APIManagementException {

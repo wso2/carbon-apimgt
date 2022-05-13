@@ -29,8 +29,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
@@ -226,7 +225,7 @@ public class CertificateRestApiUtils {
      * @return : Certificates paginated URL
      */
     private static String getCertificatesPaginatedURL(String paginatedURL, Integer offset, Integer limit,
-            String query) {
+                                                      String query) {
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
@@ -243,7 +242,7 @@ public class CertificateRestApiUtils {
      * @return : The generated query string.
      */
     public static String buildQueryString(String firstParamName, String firstParamValue,
-            String secondParamName, String secondParamValue) {
+                                          String secondParamName, String secondParamValue) {
         String query = "";
         if (StringUtils.isNotBlank(firstParamValue)) {
             query = query + "&" + firstParamName + "=" + firstParamValue;
@@ -261,26 +260,25 @@ public class CertificateRestApiUtils {
     /**
      * To pre validate client certificate given for an alias
      *
-     * @param alias Alias of the certificate.
-     * @param apiIdentifier Identifier of the API.
+     * @param alias        Alias of the certificate.
      * @param organization Identifier of the organization.
      * @return Client certificate
      * @throws APIManagementException API Management Exception.
      */
-    public static ClientCertificateDTO preValidateClientCertificate(String alias, Identifier apiIdentifier,
-            String organization) throws APIManagementException {
+    public static ClientCertificateDTO preValidateClientCertificate(String alias, ApiTypeWrapper apiTypeWrapper,
+                                                                    String organization) throws APIManagementException {
 
-        int tenantId = APIUtil.getInternalOrganizationId(organization);
         if (StringUtils.isEmpty(alias)) {
             throw new APIManagementException("The alias cannot be empty", ExceptionCodes.ALIAS_CANNOT_BE_EMPTY);
         }
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         ClientCertificateDTO clientCertificate = apiProvider
-                .getClientCertificate(tenantId, alias, apiIdentifier, organization);
+                .getClientCertificate(alias, apiTypeWrapper, organization);
         if (clientCertificate == null) {
             if (log.isDebugEnabled()) {
-                log.debug(String.format("Could not find a client certificate in truststore which belongs to "
-                        + "tenant : %d and with alias : %s. Hence the operation is terminated.", tenantId, alias));
+                log.debug(String.format("Could not find a client certificate in truststore which belongs to " +
+                                "tenantDomain : %s and with alias : %s. Hence the operation is terminated.",
+                        organization, alias));
             }
             String message = "Certificate for alias '" + alias + "' is not found.";
             throw new APIMgtResourceNotFoundException(message);

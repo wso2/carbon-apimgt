@@ -892,7 +892,8 @@ public class ExportUtils {
                 }
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
+                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(currentApiUuid, api,
+                            apiProvider);
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
                             exportFormat,
                             formattedSwaggerJson);

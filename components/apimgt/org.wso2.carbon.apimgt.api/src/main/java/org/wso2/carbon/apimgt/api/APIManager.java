@@ -165,16 +165,6 @@ public interface APIManager {
     String getGraphqlSchemaDefinition(String apiId, String orgId) throws APIManagementException;
 
     /**
-     * Returns the swagger v2.0 definition as a string
-     *
-     * @param apiId  ID of the APIIdentifier
-     * @param organization  Identifier of an organization
-     * @return swagger string
-     * @throws APIManagementException
-     */
-    String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException;
-
-    /**
      * Returns the OpenAPI definition as a string
      *
      * @param apiId         ID of the API
