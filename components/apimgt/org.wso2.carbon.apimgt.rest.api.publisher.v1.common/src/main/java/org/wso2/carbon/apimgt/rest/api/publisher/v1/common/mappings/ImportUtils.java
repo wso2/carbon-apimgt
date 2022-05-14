@@ -305,7 +305,6 @@ public class ImportUtils {
             // Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in
             // implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
-            addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, organization);
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
             if (StringUtils
@@ -335,6 +334,12 @@ public class ImportUtils {
                         new HashMap<>());
             }
             importedApi.setStatus(targetStatus);
+
+            //Thumbnail image addition was shifted below the lifecycle action as thumbnail stored url is not
+            // updated in the importedAPI with current implementation. As we are updating the registry during the
+            // lifecycle transition state, it will override the thumbnail RXT field as it is null in the api object
+            // and without it, thumbnail is not be visible in publisher portal.
+            addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             if (deploymentInfoArray == null && !isAdvertiseOnlyAPI(importedApiDTO)) {
                 //If the params have not overwritten the deployment environments, yaml file will be read
