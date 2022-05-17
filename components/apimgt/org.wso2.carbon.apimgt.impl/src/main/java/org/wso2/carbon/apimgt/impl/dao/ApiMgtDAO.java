@@ -1003,6 +1003,7 @@ public class ApiMgtDAO {
                     subscribedAPI.setUpdatedTime(subscribedAPI.getCreatedTime());
                 }
                 subscribedAPI.setApplication(application);
+                subscribedAPI.setOrganization(resultSet.getString("ORGANIZATION"));
             }
             return subscribedAPI;
         } catch (SQLException e) {
