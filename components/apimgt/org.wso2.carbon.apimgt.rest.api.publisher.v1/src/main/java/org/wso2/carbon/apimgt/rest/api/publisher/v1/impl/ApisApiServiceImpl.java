@@ -4775,7 +4775,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         // validate api UUID
         validateAPIExistence(apiId);
         // validate environment UUID
-        validateEnvironment(envId);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        validateEnvironment(organization, envId);
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // get properties
@@ -4792,7 +4793,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         // validate api UUID
         validateAPIExistence(apiId);
         // validate environment UUID
-        validateEnvironment(envId);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        validateEnvironment(organization, envId);
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // adding properties
@@ -4819,11 +4821,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
     }
 
-    private void validateEnvironment(String envId) throws APIManagementException {
+    private void validateEnvironment(String organization, String envId) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        // if apiProvider.getEnvironment(tenantDomain, envId) return null, it will throw an exception
-        apiProvider.getEnvironment(tenantDomain, envId);
+        // if apiProvider.getEnvironment(organization, envId) return null, it will throw an exception
+        apiProvider.getEnvironment(organization, envId);
     }
 
 }
