@@ -29,6 +29,7 @@ public final class ImportExportConstants {
 
     // System independent file separator for zip files
     public static final char ZIP_FILE_SEPARATOR = '/';
+    public static final char WIN_ZIP_FILE_SEPARATOR = '\\';
 
     //length of the name of the temporary directory
     public static final int TEMP_FILENAME_LENGTH = 5;
