@@ -179,13 +179,15 @@ public class APIManagerComponent {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
-            CommonConfigDeployer configDeployer = new CommonConfigDeployer();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
-            TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
-            KeyMgtConfigDeployer keyMgtConfigDeployer = new KeyMgtConfigDeployer();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), keyMgtConfigDeployer, null);
-
+            String migrateFromVersionProperty = System.getProperty(APIConstants.MIGRATE_FROM_VERSION_PROPERTY);
+            if (migrateFromVersionProperty == null) {
+                CommonConfigDeployer configDeployer = new CommonConfigDeployer();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
+                TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
+                KeyMgtConfigDeployer keyMgtConfigDeployer = new KeyMgtConfigDeployer();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), keyMgtConfigDeployer, null);
+            }
             //Registering Notifiers
             bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ApisNotifier(), null);
@@ -203,25 +205,28 @@ public class APIManagerComponent {
             APIMgtDBUtil.initialize();
             APIMConfigService apimConfigService = new APIMConfigServiceImpl();
             bundleContext.registerService(APIMConfigService.class.getName(), apimConfigService, null);
-            APIUtil.loadAndSyncTenantConf(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            // load self sigup configuration to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            analyticsConfiguration.setAPIManagerConfiguration(configuration);
-            registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
-            KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
-            registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
-                    keyManagerConfigurationService,null);
-            JWTValidationService jwtValidationService = new JWTValidationServiceImpl();
-            registration = componentContext.getBundleContext().registerService(JWTValidationService.class,
-                    jwtValidationService, null);
-            ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
-            APIStatusObserverList.getInstance().init(configuration);
-            MonetizationDataHolder.getInstance().init();
+            if (migrateFromVersionProperty == null) {
+                APIUtil.loadAndSyncTenantConf(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                // load self sigup configuration to the registry
+                APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+                APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+                analyticsConfiguration.setAPIManagerConfiguration(configuration);
+                registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
+                KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
+                registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
+                        keyManagerConfigurationService, null);
+                JWTValidationService jwtValidationService = new JWTValidationServiceImpl();
+                registration = componentContext.getBundleContext().registerService(JWTValidationService.class,
+                        jwtValidationService, null);
+                ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
+                APIStatusObserverList.getInstance().init(configuration);
+                MonetizationDataHolder.getInstance().init();
+            }
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,

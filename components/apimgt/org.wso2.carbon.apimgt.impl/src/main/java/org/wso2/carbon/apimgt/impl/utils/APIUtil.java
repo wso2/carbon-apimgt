@@ -351,6 +351,8 @@ public final class APIUtil {
 
     private static final Log audit = CarbonConstants.AUDIT_LOG;
 
+    public static final String MIGRATE_FROM_VERSION_PROPERTY = "migrateFromVersion";
+
     private static boolean isContextCacheInitialized = false;
 
     public static final String DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION = "disableRoleValidationAtScopeCreation";
@@ -11149,8 +11151,13 @@ public final class APIUtil {
      * @return String uuid string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException{
-        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
+    public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization)
+            throws APIManagementException {
+        if (MIGRATE_FROM_VERSION_PROPERTY.equals("3.2.0") || MIGRATE_FROM_VERSION_PROPERTY.equals("3.2")) {
+            return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+        } else {
+            return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
+        }
     }
 
     /**

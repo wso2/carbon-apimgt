@@ -287,6 +287,13 @@ public interface APIProvider extends APIManager {
      */
     GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
 
+    /**
+     * Returns the graphql schema content in registry specified by the schema name
+     *
+     * @param  apiId  ID of the API
+     * @return schema content matching name if exist else null
+     */
+    String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns true if key template given by the global policy already exists.
@@ -989,6 +996,31 @@ public interface APIProvider extends APIManager {
      */
     List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
             APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException;
+
+    /**
+     * Method to search the client certificates for the provided tenant id, alias and api identifier.
+     *
+     * @param tenantId      : ID of the tenant.
+     * @param alias         : Alias of the certificate.
+     * @param apiIdentifier : Identifier of the API.
+     * @return list of client certificates that match search criteria.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException;
+
+    /**
+     * Method to search the client certificates for the provided tenant id, alias and api product identifier.
+     *
+     * @param tenantId      : ID of the tenant.
+     * @param alias         : Alias of the certificate.
+     * @param apiProductIdentifier : Identifier of the API Product.
+     * @return list of client certificates that match search criteria.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+                                                        APIProductIdentifier apiProductIdentifier)
+            throws APIManagementException;
 
     /**
      * Retrieve the total number of certificates which a specified tenant has.

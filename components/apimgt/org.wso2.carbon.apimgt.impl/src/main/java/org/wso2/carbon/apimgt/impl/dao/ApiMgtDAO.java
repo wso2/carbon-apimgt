@@ -6824,6 +6824,33 @@ public class ApiMgtDAO {
         return id;
     }
 
+    public int getAPIID(Identifier apiId, Connection connection) throws APIManagementException, SQLException {
+
+        int id = -1;
+        String getAPIQuery = SQLConstants.GET_API_ID_SQL;
+
+        if (apiId instanceof APIProductIdentifier) {
+            getAPIQuery = SQLConstants.GET_API_PRODUCT_ID_SQL;
+        }
+
+        try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            prepStmt.setString(2, apiId.getName());
+            prepStmt.setString(3, apiId.getVersion());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    id = rs.getInt("API_ID");
+                }
+                if (id == -1) {
+                    String msg = "Unable to find the API: " + apiId + " in the database";
+                    log.error(msg);
+                    throw new APIManagementException(msg);
+                }
+            }
+        }
+        return id;
+    }
+
     /**
      * Get product Id from the product name and the provider.
      *
@@ -8092,6 +8119,34 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException(
                     "Failed to get the UUID for API : " + identifier.getApiName() + '-' + identifier.getVersion(), e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Get API Product UUID by the API Product Identifier.
+     *
+     * @param identifier API Product Identifier
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    public String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException {
+
+        String uuid = null;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getName());
+            prepStmt.setString(3, identifier.getVersion());
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    uuid = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the UUID for the API Product : " + identifier.getName() + '-'
+                    + identifier.getVersion(), e);
         }
         return uuid;
     }
@@ -14904,6 +14959,39 @@ public class ApiMgtDAO {
         }
         return graphqlComplexityInfo;
     }
+
+    /**
+     * Get custom complexity details for a particular API
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @return info about the complexity details
+     * @throws APIManagementException[
+     */
+    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+
+        GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
+        String getCustomComplexityDetailsQuery = SQLConstants.GET_CUSTOM_COMPLEXITY_DETAILS_SQL;
+        List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement getCustomComplexityDetails = conn.prepareStatement(getCustomComplexityDetailsQuery)) {
+            int apiId = getAPIID(apiIdentifier, conn);
+            getCustomComplexityDetails.setInt(1, apiId);
+            try (ResultSet rs1 = getCustomComplexityDetails.executeQuery()) {
+                while (rs1.next()) {
+                    CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
+                    customComplexityDetails.setType(rs1.getString("TYPE"));
+                    customComplexityDetails.setField(rs1.getString("FIELD"));
+                    customComplexityDetails.setComplexityValue(rs1.getInt("COMPLEXITY_VALUE"));
+                    customComplexityDetailsList.add(customComplexityDetails);
+                }
+            }
+            graphqlComplexityInfo.setList(customComplexityDetailsList);
+        } catch (SQLException ex) {
+            handleException("Error while retrieving custom complexity details: ", ex);
+        }
+        return graphqlComplexityInfo;
+    }
+
 
     /**
      * Add a bot detection alert subscription

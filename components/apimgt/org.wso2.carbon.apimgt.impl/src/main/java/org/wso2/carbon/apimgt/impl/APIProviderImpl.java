@@ -4798,6 +4798,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return getGraphqlSchemaDefinition(apiId);
+    }
+
+    @Override
     public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
         return apiMgtDAO.getGlobalPolicy(policyName);
     }
@@ -4983,6 +4988,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIIdentifier apiIdentifier = new APIIdentifier(apiProductIdentifier.getProviderName(),
                 apiProductIdentifier.getName(), apiProductIdentifier.getVersion());
         return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
+    }
+
+    @Override
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException {
+        return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier);
+    }
+
+    @Override
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+             APIProductIdentifier apiProductIdentifier) throws APIManagementException {
+        APIIdentifier apiIdentifier = new APIIdentifier(apiProductIdentifier.getProviderName(),
+                apiProductIdentifier.getName(), apiProductIdentifier.getVersion());
+        return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier);
     }
 
     @Override

@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
@@ -387,6 +388,19 @@ public class CertificateManagerImpl implements CertificateManager {
 
         try {
             return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier, organization);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(
+                    "Error while retrieving client certificate information for the tenant : " + tenantId, e);
+        }
+    }
+
+    @Override
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+                                                               APIIdentifier apiIdentifier)
+            throws APIManagementException {
+
+        try {
+            return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
                     "Error while retrieving client certificate information for the tenant : " + tenantId, e);

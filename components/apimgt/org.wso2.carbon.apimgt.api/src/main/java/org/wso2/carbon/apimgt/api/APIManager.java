@@ -64,7 +64,14 @@ public interface APIManager {
      */
     List<API> getAllAPIs() throws APIManagementException;
 
-
+    /**
+     * Returns the GraphqlComplexityInfo object for a given API ID
+     *
+     * @param  apiId ID of the API
+     * @return GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to retrieve complexity details of the given API
+     */
+    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns the minimalistic information about the API given the UUID. This will only query from AM database AM_API
@@ -75,6 +82,8 @@ public interface APIManager {
      * @throws APIManagementException error while getting the API information from AM_API
      */
     APIInfo getAPIInfoByUUID(String id) throws APIManagementException;
+
+    String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Get API or APIProduct by registry artifact id

@@ -400,6 +400,40 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * Returns the graphQL content in registry specified by the wsdl name
+     *
+     * @param apiId Api Identifier
+     * @return graphQL content matching name if exist else null
+     */
+    @Override
+    public String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException {
+
+        String apiTenantDomain = getTenantDomain(apiId);
+        String schema;
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                int tenantId = getTenantManager().getTenantId(apiTenantDomain);
+                registryType = getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            schema = schemaDef.getGraphqlSchemaDefinition(apiId, registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException e) {
+            String msg = "Failed to get graphql schema definition of Graphql API : " + apiId;
+            throw new APIManagementException(msg, e);
+        }
+        return schema;
+    }
+
+    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+
+        return apiMgtDAO.getComplexityDetails(apiIdentifier);
+    }
+
+    /**
      * To check authorization of the API against current logged in user. If the user is not authorized an exception
      * will be thrown.
      *
