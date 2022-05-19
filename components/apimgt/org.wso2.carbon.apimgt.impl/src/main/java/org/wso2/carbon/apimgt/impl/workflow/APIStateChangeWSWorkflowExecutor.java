@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -47,9 +48,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
@@ -245,42 +250,30 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         String providerName = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_APIPROVIDER);
         String version = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_APIVERSION);
         String invoker = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_INVOKER);
-        String currentStatus = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_APISTATE);
 
         int tenantId = workflowDTO.getTenantId();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             // tenant flow is already started from the rest api service impl. no need to start from here
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceUserRegistry(invoker, tenantId);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
-            if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-                String targetStatus;
-                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
-                targetStatus = apiArtifact.getLifecycleState();
-                if (!currentStatus.equals(targetStatus)) {
-                    apiMgtDAO.recordAPILifeCycleEvent(apiArtifact.getId(), currentStatus.toUpperCase(),
-                            targetStatus.toUpperCase(), invoker, tenantId);
-                }
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
+            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+            String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, tenantDomain);
+            if (StringUtils.isNotEmpty(uuid)) {
+                ApiTypeWrapper apIorAPIProductByUUID = apiProvider.getAPIorAPIProductByUUID(uuid, tenantDomain);
+                apiProvider.changeLifeCycleStatus(tenantDomain, apIorAPIProductByUUID, action, Collections.emptyMap());
                 if (log.isDebugEnabled()) {
                     String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()
-                            + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
+                            + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + action;
                     log.debug(logMessage);
                 }
             }
-
-        } catch (RegistryException e) {
-            String errorMsg = "Could not complete api state change workflow";
-            log.error(errorMsg, e);
-            throw new WorkflowException(errorMsg, e);
         } catch (APIManagementException e) {
             String errorMsg = "Could not complete api state change workflow";
             log.error(errorMsg, e);
             throw new WorkflowException(errorMsg, e);
         }
-
         return new GeneralWorkflowResponse();
     }
 

@@ -310,8 +310,7 @@ public class ImportUtils {
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Importing client certificates.");
                 }
-                addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
-                        importedApi.getId().getProviderName(), organization);
+                addClientCertificates(extractedFolderPath, apiProvider, new ApiTypeWrapper(importedApi), organization);
             }
 
             // Change API lifecycle if state transition is required
@@ -1435,7 +1434,7 @@ public class ImportUtils {
             List<Documentation> documents = apiProvider.getAllDocumentation(uuidFromIdentifier, organization);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
+                    apiProvider.removeDocumentation(uuidFromIdentifier, documentation.getId(), tenantDomain);
                 }
             }
 
@@ -1742,23 +1741,20 @@ public class ImportUtils {
      *
      * @param pathToArchive Location of the extracted folder of the API
      * @param apiProvider   API Provider
-     * @param preserveProvider Decision to keep or replace the provider
-     * @param provider     Provider Id
      * @param organization Identifier of the organization
      * @throws APIImportExportException
      */
-    private static void addClientCertificates(String pathToArchive, APIProvider apiProvider, Boolean preserveProvider,
-                                              String provider, String organization) throws APIManagementException {
+    private static void addClientCertificates(String pathToArchive, APIProvider apiProvider,
+                                              ApiTypeWrapper apiTypeWrapper, String organization)
+            throws APIManagementException {
 
         try {
+            Identifier apiIdentifier  = apiTypeWrapper.getId();
             List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive);
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
-                APIIdentifier apiIdentifier = !preserveProvider ?
-                        new APIIdentifier(provider, certDTO.getApiIdentifier().getName(),
-                                certDTO.getApiIdentifier().getVersion()) :
-                        (APIIdentifier) certDTO.getApiIdentifier();
-                apiProvider.addClientCertificate(APIUtil.replaceEmailDomainBack(provider), apiIdentifier,
-                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), organization);
+                apiProvider.addClientCertificate(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()),
+                        apiTypeWrapper, certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(),
+                        organization);
             }
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while importing client certificate", e);
@@ -2001,8 +1997,7 @@ public class ImportUtils {
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Importing client certificates.");
             }
-            addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
-                    importedApiProduct.getId().getProviderName(), organization);
+            addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct, organization);
 
             // Change API Product lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {

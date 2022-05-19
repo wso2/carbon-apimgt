@@ -137,4 +137,33 @@ public class ApiTypeWrapper {
             api.setOrganization(organization);
         }
     }
+
+    public String getLifecycleState() {
+        if (isAPIProduct) {
+            return apiProduct.getState();
+        } else {
+            return api.getStatus();
+        }
+    }
+
+    public String getAccessControl() {
+        if (isAPIProduct) {
+            return apiProduct.getAccessControl();
+        }
+        return api.getAccessControl();
+    }
+
+    public String getAccessControlRoles() {
+        if (isAPIProduct) {
+            return apiProduct.getAccessControlRoles();
+        }
+        return api.getAccessControlRoles();
+    }
+
+    public String geType() {
+        if (isAPIProduct){
+            return apiProduct.getType();
+        }
+        return api.getType();
+    }
 }
