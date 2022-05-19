@@ -595,7 +595,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         StringBuilder challengeString = new StringBuilder();
         if (authenticators != null) {
             for (Authenticator authenticator : authenticators) {
-                challengeString.append(authenticator.getChallengeString()).append(" ");
+                challengeString.append(authenticator.getChallengeString()).append(", ");
             }
         }
         return challengeString.toString().trim();
@@ -661,7 +661,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
                 headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                        ", error=\"invalid_token\"" +
+                        " error=\"invalid_token\"" +
                         ", error_description=\"The provided token is invalid\"");
                 axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
             }
