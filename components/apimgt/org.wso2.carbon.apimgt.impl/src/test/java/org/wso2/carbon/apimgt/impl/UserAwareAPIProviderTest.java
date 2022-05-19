@@ -96,7 +96,6 @@ public class UserAwareAPIProviderTest {
                 .thenReturn(artifactManager);
         PowerMockito.when(APIUtil.getInternalOrganizationDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
                 .thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        PowerMockito.doNothing().when(ServiceReferenceHolder.class, "setUserRealm", Mockito.any());
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         PowerMockito.when(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName())).
                 thenReturn(apiIdentifier.getProviderName());

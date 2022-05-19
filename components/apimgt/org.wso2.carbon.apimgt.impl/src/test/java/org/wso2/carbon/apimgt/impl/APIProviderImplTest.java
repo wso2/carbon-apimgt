@@ -825,36 +825,6 @@ public class APIProviderImplTest {
     }
 
 
-    private void prepareForLCStateChangeOfAPIProduct(APIProviderImplWrapper apiProvider, APIProduct apiProduct)
-            throws Exception {
-
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
-        RealmService realmService = Mockito.mock(RealmService.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-
-        PrivilegedCarbonContext prContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(prContext);
-
-        PowerMockito.doNothing().when(prContext).setUsername(Mockito.anyString());
-        PowerMockito.doNothing().when(prContext).setTenantDomain(Mockito.anyString(), Mockito.anyBoolean());
-
-        Mockito.when(artifactManager.getGenericArtifact(any(String.class))).thenReturn(artifact);
-        PowerMockito.when(RegistryPersistenceUtil.createAPIProductArtifactContent(artifact, apiProduct))
-                .thenReturn(artifact);
-        PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, artifact.getId()))
-                .thenReturn(artifactPath);
-        Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
-        Mockito.when(apiProvider.registry.resourceExists(artifactPath)).thenReturn(false);
-    }
-
     private APIProduct createMockAPIProduct(String provider) {
 
         APIProductIdentifier productIdentifier = new APIProductIdentifier(provider, APIConstants.API_PRODUCT,
@@ -1165,45 +1135,6 @@ public class APIProviderImplTest {
         content.setResourceFile(resourceFile);
 
         apiProvider.addDocumentationContent(apiUUID, docUUID, "carbon.super", content);
-    }
-
-    @Test
-    public void testSaveGraphqlSchemaDefinition() throws Exception {
-        Resource resource = new ResourceImpl();
-        String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + "admin" + RegistryConstants.PATH_SEPARATOR +
-                "API1" + RegistryConstants.PATH_SEPARATOR + "1.0.0" + RegistryConstants.PATH_SEPARATOR;
-        String schemaContent = "sample schema";
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-        API api = new API(apiId);
-        Mockito.when(APIUtil.getGraphqlDefinitionFilePath("API1", "1.0.0", "admin")).thenReturn(resourcePath);
-
-        Resource resourceMock = Mockito.mock(Resource.class);
-        resourceMock.setContent(schemaContent);
-        resourceMock.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
-
-        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-        Mockito.when(userRegistry.newResource()).thenReturn(resource);
-
-        PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
-                Mockito.anyInt());
-        PowerMockito.doNothing().when(APIUtil.class, "setResourcePermissions", Mockito.any(), Mockito.any(),
-                Mockito.any(),Mockito.any());
-
-        GraphQLSchemaDefinition graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);
-        PowerMockito.doCallRealMethod().when(graphQLSchemaDefinition).saveGraphQLSchemaDefinition(api, schemaContent, userRegistry);
-
-        //org.wso2.carbon.registry.api.RegistryException
-        Mockito.doThrow(RegistryException.class).when(registry).put(Matchers.anyString(), any(Resource.class));
-        try {
-            graphQLSchemaDefinition.saveGraphQLSchemaDefinition(api, schemaContent, registry);
-        } catch (APIManagementException e) {
-            String msg = "Error while adding Graphql Definition for API1-1.0.0";
-            Assert.assertEquals(msg, e.getMessage());
-        }
     }
 
     /**
