@@ -140,61 +140,6 @@ public class AbstractAPIManagerTestCase {
     }
 
     @Test
-    public void testConstructor() throws Exception {
-
-        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
-        ServiceReferenceHolderMockCreator.initContextService();
-        holderMockCreator.initRegistryServiceMockCreator(false, new Object());
-        RegistryAuthorizationManager registryAuthorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
-        Mockito.doThrow(UserStoreException.class).doNothing().when(registryAuthorizationManager)
-                .authorizeRole(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
-        PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
-                .thenReturn(registryAuthorizationManager);
-        PowerMockito.mockStatic(RegistryUtils.class);
-        PowerMockito.when(RegistryUtils.getAbsolutePath((RegistryContext) Mockito.any(), Mockito.anyString()))
-                .thenReturn("/test");
-        try {
-            new AbstractAPIManager(null) {
-                @Override
-                public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
-                    return null;
-                }
-
-                @Override
-                public API getLightweightAPIByUUID(String uuid, String organization)
-                        throws APIManagementException {
-                    return null;
-                }
-
-                @Override
-                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start,
-                        int end, String sortBy, String sortOrder) throws APIManagementException {
-                    return null;
-                }
-
-                @Override
-                public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start,
-                        int end) throws APIManagementException {
-                    return null;
-                }
-            };
-            Assert.fail("User store exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while setting the permissions"));
-        }
-
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
-        PowerMockito.mockStatic(MultitenantUtils.class);
-        PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn(SAMPLE_TENANT_DOMAIN_1);
-        String userName = "admin";
-
-        Mockito.verify(
-                holderMockCreator.getRegistryServiceMockCreator().getMock().getConfigSystemRegistry(Mockito.anyInt()),
-                Mockito.atLeastOnce());
-    }
-
-    @Test
     public void testGetAllApis() throws GovernanceException, APIManagementException, APIPersistenceException {
         PowerMockito.mockStatic(APIUtil.class);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiPersistenceInstance);

@@ -26,7 +26,6 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -77,75 +76,28 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
-import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
-import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
-import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.UserContext;
-import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
+import org.wso2.carbon.apimgt.persistence.dto.*;
+import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
-import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.config.RegistryContext;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -448,31 +400,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
 
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-
-        //Add default API LC if it is not there
-        try {
-            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
-                    registryService.getConfigSystemRegistry(tenantId))) {
-                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
-                        + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
-                File file = new File(defaultLifecyclePath);
-                String content = null;
-                if (file != null && file.exists()) {
-                    content = FileUtils.readFileToString(file);
-                }
-                if (content != null) {
-                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
-                            CommonUtil.getRootSystemRegistry(tenantId));
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Error occurred while adding default APILifeCycle.", e);
-        } catch (IOException e) {
-            handleException("Error occurred while loading APILifeCycle.xml.", e);
-        } catch (XMLStreamException e) {
-            handleException("Error occurred while adding default API LifeCycle.", e);
-        }
         //Set version timestamp to the API
         String latestTimestamp = calculateVersionTimestamp(provider, apiName,
                 api.getId().getVersion(), api.getOrganization());
@@ -2049,25 +1976,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return exist;
     }
 
-    private String[] getAuthorizedRoles(String artifactPath) throws UserStoreException {
-        String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                        artifactPath);
-
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantManager().getTenantId(tenantDomain);
-            AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(tenantId).getAuthorizationManager();
-            return authManager.getAllowedRolesForResource(resourcePath, ActionConstants.GET);
-        } else {
-            RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
-                    (ServiceReferenceHolder.getUserRealm());
-            return authorizationManager.getAllowedRolesForResource(resourcePath, ActionConstants.GET);
-        }
-    }
-
     /**
      * Returns the details of all the life-cycle changes done per API or API Product
      *
@@ -3129,50 +3037,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
-        }
-    }
-
-    @Override
-    public void configureMonetizationInAPIProductArtifact(APIProduct apiProduct) throws APIManagementException {
-
-        boolean transactionCommitted = false;
-        try {
-            registry.beginTransaction();
-            String apiArtifactId = registry.get(APIUtil.getAPIProductPath(apiProduct.getId())).getId();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                handleException("Artifact manager is null when updating monetization data for API ID " + apiProduct.getId());
-            }
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiProduct.getUuid());
-            //set monetization status (i.e - enabled or disabled)
-            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS,
-                    Boolean.toString(apiProduct.getMonetizationStatus()));
-            //clear existing monetization properties
-            artifact.removeAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
-            //set new additional monetization data
-            if (apiProduct.getMonetizationProperties() != null) {
-                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
-                        apiProduct.getMonetizationProperties().toJSONString());
-            }
-            artifactManager.updateGenericArtifact(artifact);
-            registry.commitTransaction();
-            transactionCommitted = true;
-        } catch (Exception e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                handleException("Error while rolling back the transaction (monetization status update) for API product : " +
-                        apiProduct.getId().getName(), re);
-            }
-            handleException("Error while performing registry transaction (monetization status update) operation", e);
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException e) {
-                handleException("Error occurred while rolling back the transaction (monetization status update).", e);
-            }
         }
     }
 

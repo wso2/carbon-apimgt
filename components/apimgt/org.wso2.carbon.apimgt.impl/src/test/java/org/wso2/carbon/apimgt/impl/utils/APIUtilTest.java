@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.catalina.Realm;
 import org.apache.commons.collections.SetUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -34,6 +35,7 @@ import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -114,7 +116,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(
         {LogFactory.class, APIUtil.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class,
-                GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class,
+                GovernanceUtils.class, MultitenantUtils.class,
                 GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
@@ -881,25 +883,6 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetRoleNamesSuperTenant() throws Exception {
-
-        String userName = "John";
-
-        String[] roleNames = {"role1", "role2"};
-
-        AuthorizationManager authorizationManager = Mockito.mock(AuthorizationManager.class);
-
-        PowerMockito.mockStatic(MultitenantUtils.class);
-        PowerMockito.mockStatic(AuthorizationManager.class);
-        Mockito.when(MultitenantUtils.getTenantDomain(userName)).
-                thenReturn(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        Mockito.when(AuthorizationManager.getInstance()).thenReturn(authorizationManager);
-        Mockito.when(authorizationManager.getRoleNames()).thenReturn(roleNames);
-
-        Assert.assertEquals(roleNames, APIUtil.getRoleNames(userName));
-    }
-
-    @Test
     public void testCreateAPIArtifactContent() throws Exception {
 
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
@@ -1109,33 +1092,6 @@ public class APIUtilTest {
             PrivilegedCarbonContext.endTenantFlow();
         }
 
-    }
-
-    @Test
-    public void testGetRoleNamesNonSuperTenant() throws Exception {
-
-        String userName = "John";
-
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
-
-        String[] roleNames = {"role1", "role2"};
-
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(MultitenantUtils.class);
-        Mockito.when(MultitenantUtils.getTenantDomain(userName)).
-                thenReturn("test.com");
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
-        Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
-        Mockito.when(userStoreManager.getRoleNames()).thenReturn(roleNames);
-
-        Assert.assertEquals(roleNames, APIUtil.getRoleNames(userName));
     }
 
     @Test
@@ -1822,13 +1778,6 @@ public class APIUtilTest {
                 .when(authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
 
-        org.wso2.carbon.user.core.UserRealm userRealm2 = Mockito.mock(org.wso2.carbon.user.core.UserRealm.class);
-        Mockito.when(ServiceReferenceHolder.getUserRealm()).thenReturn((userRealm2));
-
-        PowerMockito.mockStatic(AuthorizationManager.class);
-        AuthorizationManager authorizationManager1 = Mockito.mock(AuthorizationManager.class);
-        Mockito.when(AuthorizationManager.getInstance()).thenReturn(authorizationManager1);
-        Mockito.when(authorizationManager1.isUserAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
 
         Log logMock = Mockito.mock(Log.class);
         PowerMockito.mockStatic(LogFactory.class);
@@ -2055,17 +2004,25 @@ public class APIUtilTest {
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
         String tenantDomain = "carbon.super";
         String tenantAwareUsername = "Insta_User";
-
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        RealmService realmService  = Mockito.mock(RealmService.class);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(-1234);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        Mockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
+        UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
+        Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(null)
                 .when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn(tenantDomain);
-        PowerMockito.mockStatic(AuthorizationManager.class);
-        AuthorizationManager authorizationManager = Mockito.mock(AuthorizationManager.class);
-        Mockito.when(AuthorizationManager.getInstance()).thenReturn(authorizationManager);
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
-        Mockito.when(authorizationManager.getRolesOfUser(tenantAwareUsername)).thenReturn(roles);
+        Mockito.when(userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username))).thenReturn(roles);
         PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(), Mockito.any(), Mockito.any());
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));

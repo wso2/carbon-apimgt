@@ -31,8 +31,6 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.util.List;
 import java.util.Map;
@@ -92,12 +90,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     public int getTenantId() {
 
         return tenantId;
-    }
-
-    @Override
-    protected void registerCustomQueries(UserRegistry registry, String username)
-            throws RegistryException, APIManagementException {
-        // do nothing
     }
 
     @Override
