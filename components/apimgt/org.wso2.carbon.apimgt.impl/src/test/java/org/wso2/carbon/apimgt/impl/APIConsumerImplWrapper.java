@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -49,11 +48,6 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
         this.apiMgtDAO = apiMgtDAO;
         this.tenantDomain = organization;
         this.organization = organization;
-    }
-
-    public APIConsumerImplWrapper(Registry registry, ApiMgtDAO apiMgtDAO) throws APIManagementException {
-        this.apiMgtDAO = apiMgtDAO;
-        this.registry = registry;
     }
 
     public APIConsumerImplWrapper(ApiMgtDAO apiMgtDAO, APIPersistence apiPersistenceInstance)

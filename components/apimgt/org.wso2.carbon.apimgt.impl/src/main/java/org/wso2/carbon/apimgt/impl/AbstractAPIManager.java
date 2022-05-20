@@ -64,7 +64,6 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -72,7 +71,10 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.LRUCache;
+import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
@@ -112,10 +114,6 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -343,35 +341,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
     }
 
-    /**
-     * Get API UUID by passed parameters.
-     *
-     * @param provider Provider of the API
-     * @param apiName  Name of the API
-     * @param version  Version of the API
-     * @return String UUID
-     * @throws APIManagementException if an error occurs
-     */
-    public String getUUIDFromIdentifier(String provider, String apiName, String version) throws APIManagementException {
-
-        String uuid = null;
-        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            PreparedStatement prepStmt = connection.prepareStatement(sql);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
-            prepStmt.setString(2, apiName);
-            prepStmt.setString(3, version);
-            try (ResultSet resultSet = prepStmt.executeQuery()) {
-                while (resultSet.next()) {
-                    uuid = resultSet.getString(1);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get the UUID for API : ", e);
-        }
-        return uuid;
-    }
-
     public List<API> getAllAPIs() throws APIManagementException {
 
         List<API> apiSortedList = new ArrayList<API>();
@@ -582,7 +551,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String definition = null;
         String id;
         if (apiId.getUUID() != null) {
-            id = apiId.getUUID() ;
+            id = apiId.getUUID();
         } else {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
         }

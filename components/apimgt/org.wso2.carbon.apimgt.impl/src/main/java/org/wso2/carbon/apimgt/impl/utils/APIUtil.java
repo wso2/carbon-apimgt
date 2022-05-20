@@ -132,7 +132,6 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -172,7 +171,6 @@ import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
@@ -195,7 +193,6 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
-import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -216,7 +213,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -247,25 +243,14 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -309,7 +294,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -478,6 +462,76 @@ public final class APIUtil {
         }
     }
 
+    public static void loadloadTenantAPIRXT(String tenant, int tenantID) throws APIManagementException {
+
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        UserRegistry registry = null;
+        try {
+
+            registry = registryService.getGovernanceSystemRegistry(tenantID);
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error when create registry instance ", e);
+        }
+
+        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" +
+                File.separator + "rxts";
+        File file = new File(rxtDir);
+        FilenameFilter filenameFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                // if the file extension is .rxt return true, else false
+                return name.endsWith(".rxt");
+            }
+        };
+        String[] rxtFilePaths = file.list(filenameFilter);
+
+        if (rxtFilePaths == null) {
+            throw new APIManagementException("rxt files not found in directory " + rxtDir);
+        }
+
+        for (String rxtPath : rxtFilePaths) {
+            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH + RegistryConstants.PATH_SEPARATOR + rxtPath;
+
+            //This is  "registry" is a governance registry instance, therefore calculate the relative path to governance.
+            String govRelativePath = RegistryUtils.getRelativePathToOriginal(resourcePath,
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH));
+            try {
+                // calculate resource path
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
+                        (ServiceReferenceHolder.getUserRealm());
+                resourcePath = authorizationManager.computePathOnMount(resourcePath);
+
+                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
+                        getTenantUserRealm(tenantID).getAuthorizationManager();
+
+                if (registry.resourceExists(govRelativePath)) {
+                    // set anonymous user permission to RXTs
+                    authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                    continue;
+                }
+
+                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+                Resource resource = registry.newResource();
+                resource.setContent(rxt.getBytes(Charset.defaultCharset()));
+                resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
+                registry.put(govRelativePath, resource);
+
+                authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+
+            } catch (UserStoreException e) {
+                throw new APIManagementException("Error while adding role permissions to API", e);
+            } catch (IOException e) {
+                String msg = "Failed to read rxt files";
+                throw new APIManagementException(msg, e);
+            } catch (RegistryException e) {
+                String msg = "Failed to add rxt to registry ";
+                throw new APIManagementException(msg, e);
+            }
+        }
+
+    }
+    
     /**
      * This method is used to execute an HTTP request
      *
@@ -1693,204 +1747,6 @@ public final class APIUtil {
     }
 
     /**
-     * Crate an WSDL from given wsdl url. Reset the endpoint details to gateway node
-     * *
-     *
-     * @param registry - Governance Registry space to save the WSDL
-     * @param api      -API instance
-     * @return Path of the created resource
-     * @throws APIManagementException If an error occurs while adding the WSDL
-     */
-
-    public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {
-
-        try {
-            APIIdentifier apiId = api.getId();
-            String apiPath = APIUtil.getAPIPath(apiId);
-            int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
-            String apiSourcePath = apiPath.substring(0, prependIndex );
-            String wsdlResourcePath =
-                    apiSourcePath + RegistryConstants.PATH_SEPARATOR + createWsdlFileName(api.getId().getProviderName(),
-                            api.getId().getApiName(), api.getId().getVersion());
-
-            String absoluteWSDLResourcePath = RegistryUtils
-                    .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                    + wsdlResourcePath;
-
-            APIMWSDLReader wsdlReader = new APIMWSDLReader();
-            OMElement wsdlContentEle;
-            String wsdlRegistryPath;
-
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                    .equalsIgnoreCase(tenantDomain)) {
-                wsdlRegistryPath =
-                        RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR + "resource"
-                                + absoluteWSDLResourcePath;
-            } else {
-                wsdlRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
-                        + RegistryConstants.PATH_SEPARATOR + "resource" + absoluteWSDLResourcePath;
-            }
-
-            Resource wsdlResource = registry.newResource();
-            // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
-            // Hence if this is a registry url, should not go in to the following if block
-            if (!api.getWsdlUrl().matches(wsdlRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
-                    .startsWith("https:") || api.getWsdlUrl().startsWith("file:") || api.getWsdlUrl().startsWith("/t"))) {
-                URL wsdlUrl;
-                try {
-                    wsdlUrl = new URL(api.getWsdlUrl());
-                } catch (MalformedURLException e) {
-                    throw new APIManagementException("Invalid/Malformed WSDL URL : " + api.getWsdlUrl(), e,
-                            ExceptionCodes.INVALID_WSDL_URL_EXCEPTION);
-                }
-                // Get the WSDL 1.1 or 2.0 processor and process the content based on the version
-                WSDLProcessor wsdlProcessor = APIMWSDLReader.getWSDLProcessorForUrl(wsdlUrl);
-                InputStream wsdlContent = wsdlProcessor.getWSDL();
-                wsdlResource.setContentStream(wsdlContent);
-
-            } else {
-                byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
-                if (isWSDL2Resource(wsdl)) {
-                    wsdlContentEle = wsdlReader.updateWSDL2(wsdl, api);
-                    wsdlResource.setContent(wsdlContentEle.toString());
-                } else {
-                    wsdlContentEle = wsdlReader.updateWSDL(wsdl, api);
-                    wsdlResource.setContent(wsdlContentEle.toString());
-                }
-            }
-
-            registry.put(wsdlResourcePath, wsdlResource);
-            //set the anonymous role for wsld resource to avoid basicauth security.
-            String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null) {
-                visibleRoles = api.getVisibleRoles().split(",");
-            }
-            setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                    wsdlResourcePath);
-
-            //Delete any WSDL archives if exists
-            String wsdlArchivePath = APIUtil.getWsdlArchivePath(api.getId());
-            if (registry.resourceExists(wsdlArchivePath)) {
-                registry.delete(wsdlArchivePath);
-            }
-
-            //set the wsdl resource permlink as the wsdlURL.
-            api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
-
-            return wsdlRegistryPath;
-
-        } catch (RegistryException e) {
-            String msg = "Failed to add WSDL " + api.getWsdlUrl() + " to the registry";
-            log.error(msg, e);
-            throw new RegistryException(msg, e);
-        } catch (APIManagementException e) {
-            String msg = "Failed to process the WSDL : " + api.getWsdlUrl();
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
-     * Save the provided wsdl archive file to the registry for the api
-     *
-     * @param registry Governance Registry space to save the WSDL
-     * @param api      API instance
-     * @return
-     * @throws RegistryException
-     * @throws APIManagementException
-     */
-    public static String saveWSDLResource(Registry registry, API api) throws RegistryException, APIManagementException {
-
-        ResourceFile wsdlResource = api.getWsdlResource();
-        String wsdlResourcePath;
-        boolean isZip = false;
-        APIIdentifier apiId = api.getId();
-        String apiPath = APIUtil.getAPIPath(apiId);
-        int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
-        String apiSourcePath = apiPath.substring(0, prependIndex );
-        String wsdlResourcePathArchive =
-                apiSourcePath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
-                        .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
-                        api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
-        String wsdlResourcePathFile = apiSourcePath + RegistryConstants.PATH_SEPARATOR +
-                createWsdlFileName(api.getId().getProviderName(), api.getId().getApiName(), api.getId().getVersion());
-
-        if (wsdlResource.getContentType().equals(APIConstants.APPLICATION_ZIP)) {
-            wsdlResourcePath = wsdlResourcePathArchive;
-            isZip = true;
-        } else {
-            wsdlResourcePath = wsdlResourcePathFile;
-        }
-
-        String absoluteWSDLResourcePath = RegistryUtils
-                .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                + wsdlResourcePath;
-        try {
-            Resource wsdlResourceToUpdate = registry.newResource();
-            wsdlResourceToUpdate.setContentStream(api.getWsdlResource().getContent());
-            wsdlResourceToUpdate.setMediaType(api.getWsdlResource().getContentType());
-            registry.put(wsdlResourcePath, wsdlResourceToUpdate);
-            String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null) {
-                visibleRoles = api.getVisibleRoles().split(",");
-            }
-            setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                    wsdlResourcePath);
-
-            if (isZip) {
-                //Delete any WSDL file if exists
-                if (registry.resourceExists(wsdlResourcePathFile)) {
-                    registry.delete(wsdlResourcePathFile);
-                }
-            } else {
-                //Delete any WSDL archives if exists
-                if (registry.resourceExists(wsdlResourcePathArchive)) {
-                    registry.delete(wsdlResourcePathArchive);
-                }
-            }
-
-            api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
-        } catch (RegistryException e) {
-            String msg = "Failed to add WSDL Archive " + api.getWsdlUrl() + " to the registry";
-            log.error(msg, e);
-            throw new RegistryException(msg, e);
-        } catch (APIManagementException e) {
-            String msg = "Failed to process the WSDL Archive: " + api.getWsdlUrl();
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-        return wsdlResourcePath;
-    }
-
-    /**
-     * Given a URL, this method checks if the underlying document is a WSDL2
-     *
-     * @param url URL to check
-     * @return true if the underlying document is a WSDL2
-     * @throws APIManagementException if error occurred while validating the URI
-     */
-    public static boolean isWSDL2Document(String url) throws APIManagementException {
-
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
-        return wsdlReader.isWSDL2BaseURI();
-    }
-
-    /**
-     * Given a wsdl resource, this method checks if the underlying document is a WSDL2
-     *
-     * @param wsdl byte array of wsdl definition saved in registry
-     * @return true if wsdl2 definition
-     * @throws APIManagementException
-     */
-    private static boolean isWSDL2Resource(byte[] wsdl) throws APIManagementException {
-
-        String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
-        String wsdlContent = new String(wsdl);
-        return wsdlContent.indexOf(wsdl2NameSpace) > 0;
-    }
-
-    /**
      * Get the External IDP host name when UIs use an external IDP for SSO or other purpose
      * By default this is equal to $ref{server.base_path} (i:e https://localhost:9443)
      *
@@ -2500,68 +2356,6 @@ public final class APIUtil {
     /**
      * Checks whether the specified user has the specified permission.
      *
-     * @param username   A username
-     * @param permission A valid Carbon permission
-     * @throws APIManagementException If the user does not have the specified permission or if an error occurs
-     */
-    public static void checkPermission(String username, String permission)
-            throws APIManagementException {
-
-        if (username == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" +
-                    " the anonymous user");
-        }
-
-        if (isPermissionCheckDisabled()) {
-            log.debug("Permission verification is disabled by APIStore configuration");
-            return;
-        }
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-        boolean authorized;
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
-
-            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                org.wso2.carbon.user.api.AuthorizationManager manager =
-                        ServiceReferenceHolder.getInstance()
-                                .getRealmService()
-                                .getTenantUserRealm(tenantId)
-                                .getAuthorizationManager();
-                authorized =
-                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
-                                CarbonConstants.UI_PERMISSION_ACTION);
-            } else {
-                // On the first login attempt to publisher (without browsing the
-                // store), the user realm will be null.
-                if (ServiceReferenceHolder.getUserRealm() == null) {
-                    ServiceReferenceHolder.setUserRealm((UserRealm) ServiceReferenceHolder.getInstance()
-                            .getRealmService()
-                            .getTenantUserRealm(tenantId));
-                }
-                authorized =
-                        AuthorizationManager.getInstance()
-                                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username),
-                                        permission);
-            }
-            if (!authorized) {
-                throw new APIManagementException("User '" + username + "' does not have the " +
-                        "required permission: " + permission);
-            }
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while checking the user:" + username + " authorized or not", e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-    }
-
-    /**
-     * Checks whether the specified user has the specified permission.
-     *
      * @param userNameWithoutChange A username
      * @param permission            A valid Carbon permission
      * @throws APIManagementException If the user does not have the specified permission or if an error occurs
@@ -2596,7 +2390,6 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(tenantDomain);
 
-            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 org.wso2.carbon.user.api.AuthorizationManager manager =
                         ServiceReferenceHolder.getInstance()
                                 .getRealmService()
@@ -2605,19 +2398,6 @@ public final class APIUtil {
                 authorized =
                         manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
                                 CarbonConstants.UI_PERMISSION_ACTION);
-            } else {
-                // On the first login attempt to publisher (without browsing the
-                // store), the user realm will be null.
-                if (ServiceReferenceHolder.getUserRealm() == null) {
-                    ServiceReferenceHolder.setUserRealm((UserRealm) ServiceReferenceHolder.getInstance()
-                            .getRealmService()
-                            .getTenantUserRealm(tenantId));
-                }
-                authorized =
-                        AuthorizationManager.getInstance()
-                                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange),
-                                        permission);
-            }
             if (APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
                 addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange,
                         authorized ? 1 : 2);
@@ -2647,29 +2427,6 @@ public final class APIUtil {
         }
 
         return Boolean.parseBoolean(disablePermissionCheck);
-    }
-
-    /**
-     * Checks whether the specified user has the specified permission without throwing
-     * any exceptions.
-     *
-     * @param username   A username
-     * @param permission A valid Carbon permission
-     * @return true if the user has the specified permission and false otherwise
-     */
-    public static boolean checkPermissionQuietly(String username, String permission) {
-
-        try {
-            checkPermission(username, permission);
-            return true;
-        } catch (APIManagementException ignore) {
-            // Ignore the exception.
-            // Logging it on debug mode so if needed we can see the exception stacktrace.
-            if (log.isDebugEnabled()) {
-                log.debug("User does not have permission", ignore);
-            }
-            return false;
-        }
     }
 
     /**
@@ -2706,25 +2463,17 @@ public final class APIUtil {
                     " the anonymous user");
         }
 
-        String[] roles = null;
-
-        roles = getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username);
+        String[] roles = getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username);
         if (roles != null) {
             return roles;
         }
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         try {
-            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                    .equals(tenantDomain)) {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                UserStoreManager manager = ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(tenantId).getUserStoreManager();
-                roles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-            } else {
-                roles = AuthorizationManager.getInstance()
-                        .getRolesOfUser(MultitenantUtils.getTenantAwareUsername(username));
-            }
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            UserStoreManager manager = ServiceReferenceHolder.getInstance().getRealmService()
+                    .getTenantUserRealm(tenantId).getUserStoreManager();
+            roles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
             addToRolesCache(APIConstants.API_USER_ROLE_CACHE, username, roles);
             return roles;
         } catch (UserStoreException e) {
@@ -3076,199 +2825,6 @@ public final class APIUtil {
     }
 
     /**
-     * This function is to set resource permissions based on its visibility
-     *
-     * @param username     Username
-     * @param visibility   API visibility
-     * @param roles        Authorized roles
-     * @param artifactPath API resource path
-     * @throws APIManagementException Throwing exception
-     */
-    public static void setResourcePermissions(String username, String visibility, String[] roles, String
-            artifactPath) throws APIManagementException {
-
-        setResourcePermissions(username, visibility, roles, artifactPath, null);
-    }
-
-    /**
-     * This function is to set resource permissions based on its visibility
-     *
-     * @param visibility   API/Product visibility
-     * @param roles        Authorized roles
-     * @param artifactPath API/Product resource path
-     * @param registry     Registry
-     * @throws APIManagementException Throwing exception
-     */
-    public static void setResourcePermissions(String username, String visibility, String[] roles, String
-            artifactPath, Registry registry) throws APIManagementException {
-
-        try {
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                            + artifactPath);
-            Resource registryResource = null;
-
-            if (registry != null && registry.resourceExists(artifactPath)) {
-                registryResource = registry.get(artifactPath);
-            }
-            StringBuilder publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
-
-            if (registryResource != null) {
-                String publisherRole = registryResource.getProperty(APIConstants.PUBLISHER_ROLES);
-                if (publisherRole != null) {
-                    publisherAccessRoles = new StringBuilder(publisherRole);
-                }
-                if (StringUtils.isEmpty(publisherAccessRoles.toString())) {
-                    publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
-                }
-
-                if (APIConstants.API_GLOBAL_VISIBILITY.equalsIgnoreCase(visibility)
-                        || APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
-                    registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
-                    publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST); // set publisher
-                    // access roles null since store visibility is global. We do not need to add any roles to
-                    // store_view_role property.
-                } else {
-                    registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, publisherAccessRoles.toString());
-                }
-            }
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
-            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantManager().getTenantId(tenantDomain);
-                // calculate resource path
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
-                        (ServiceReferenceHolder.getUserRealm());
-                resourcePath = authorizationManager.computePathOnMount(resourcePath);
-                org.wso2.carbon.user.api.AuthorizationManager authManager =
-                        ServiceReferenceHolder.getInstance().getRealmService().
-                                getTenantUserRealm(tenantId).getAuthorizationManager();
-                if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
-                    boolean isRoleEveryOne = false;
-                    /*If no roles have defined, authorize for everyone role */
-                    if (roles != null) {
-                        if (roles.length == 1 && "".equals(roles[0])) {
-                            authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                            isRoleEveryOne = true;
-                        } else {
-                            for (String role : roles) {
-                                if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
-                                    isRoleEveryOne = true;
-                                }
-                                authManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
-                                publisherAccessRoles.append(",").append(role.trim().toLowerCase());
-                            }
-                        }
-                    }
-                    if (!isRoleEveryOne) {
-                        authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                    }
-                    authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                } else if (visibility != null && APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
-                    authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                    authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                } else if (visibility != null && APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(visibility)) {
-
-                    /*If no roles have defined, deny access for everyone & anonymous role */
-                    if (roles == null) {
-                        authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                        authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                    } else {
-                        for (String role : roles) {
-                            authManager.denyRole(role.trim(), resourcePath, ActionConstants.GET);
-
-                        }
-                    }
-                } else {
-                    authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                    authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                }
-            } else {
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
-                        (ServiceReferenceHolder.getUserRealm());
-
-                if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
-                    boolean isRoleEveryOne = false;
-                    if (roles != null) {
-                        for (String role : roles) {
-                            if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
-                                isRoleEveryOne = true;
-                            }
-                            authorizationManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
-                            publisherAccessRoles.append(",").append(role.toLowerCase());
-                        }
-                    }
-                    if (!isRoleEveryOne) {
-                        authorizationManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                    }
-                    authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-
-                } else if (visibility != null && APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
-                    authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                    authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                } else if (visibility != null && APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(visibility)) {
-                    /*If no roles have defined, deny access for everyone & anonymous role */
-                    if (roles == null) {
-                        authorizationManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                        authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                    } else {
-                        for (String role : roles) {
-                            authorizationManager.denyRole(role.trim(), resourcePath, ActionConstants.GET);
-
-                        }
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Store view roles for " + artifactPath + " : " + publisherAccessRoles.toString());
-                    }
-                    authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-                    authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                }
-            }
-            if (registryResource != null) {
-                registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, publisherAccessRoles.toString());
-                registry.put(artifactPath, registryResource);
-            }
-
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while adding role permissions to API", e);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Registry exception while adding role permissions to API", e);
-        }
-    }
-
-    /**
-     * This function is to set resource permissions based on its visibility
-     *
-     * @param artifactPath API/Product resource path
-     * @throws APIManagementException Throwing exception
-     */
-    public static void clearResourcePermissions(String artifactPath, Identifier id, int tenantId)
-            throws APIManagementException {
-
-        try {
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(id.getProviderName()));
-            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                    .equals(tenantDomain)) {
-                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
-                        .getRealmService().getTenantUserRealm(tenantId).getAuthorizationManager();
-                authManager.clearResourceAuthorizations(resourcePath);
-            } else {
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
-                        ServiceReferenceHolder.getUserRealm());
-                authorizationManager.clearResourceAuthorizations(resourcePath);
-            }
-        } catch (UserStoreException e) {
-            handleException("Error while adding role permissions to API", e);
-        }
-    }
-
-    /**
      * Load the External API Store Configuration  to the registry
      *
      * @param organization
@@ -3601,84 +3157,6 @@ public final class APIUtil {
             accessControlEnabled = true;
         }
         return accessControlEnabled;
-    }
-
-    /**
-     * Load the  API RXT to the registry for tenants
-     *
-     * @param tenant
-     * @param tenantID
-     * @throws APIManagementException
-     */
-
-    public static void loadloadTenantAPIRXT(String tenant, int tenantID) throws APIManagementException {
-
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        UserRegistry registry = null;
-        try {
-
-            registry = registryService.getGovernanceSystemRegistry(tenantID);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error when create registry instance ", e);
-        }
-
-        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" +
-                File.separator + "rxts";
-        File file = new File(rxtDir);
-        FilenameFilter filenameFilter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                // if the file extension is .rxt return true, else false
-                return name.endsWith(".rxt");
-            }
-        };
-        String[] rxtFilePaths = file.list(filenameFilter);
-
-        if (rxtFilePaths == null) {
-            throw new APIManagementException("rxt files not found in directory " + rxtDir);
-        }
-
-        for (String rxtPath : rxtFilePaths) {
-            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH + RegistryConstants.PATH_SEPARATOR + rxtPath;
-
-            //This is  "registry" is a governance registry instance, therefore calculate the relative path to governance.
-            String govRelativePath = RegistryUtils.getRelativePathToOriginal(resourcePath,
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH));
-            try {
-                // calculate resource path
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
-                        (ServiceReferenceHolder.getUserRealm());
-                resourcePath = authorizationManager.computePathOnMount(resourcePath);
-
-                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantUserRealm(tenantID).getAuthorizationManager();
-
-                if (registry.resourceExists(govRelativePath)) {
-                    // set anonymous user permission to RXTs
-                    authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                    continue;
-                }
-
-                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
-                Resource resource = registry.newResource();
-                resource.setContent(rxt.getBytes(Charset.defaultCharset()));
-                resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
-                registry.put(govRelativePath, resource);
-
-                authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-
-            } catch (UserStoreException e) {
-                throw new APIManagementException("Error while adding role permissions to API", e);
-            } catch (IOException e) {
-                String msg = "Failed to read rxt files";
-                throw new APIManagementException(msg, e);
-            } catch (RegistryException e) {
-                String msg = "Failed to add rxt to registry ";
-                throw new APIManagementException(msg, e);
-            }
-        }
-
     }
 
     /**
@@ -4197,32 +3675,6 @@ public final class APIUtil {
 
     public static boolean isInternalOrganization(String organization) throws UserStoreException {
         return isTenantAvailable(organization);
-    }
-
-    /**
-     * Retrieves the role list of system
-     *
-     * @throws APIManagementException If an error occurs
-     */
-    public static String[] getRoleNames(String username) throws APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        try {
-            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                UserStoreManager manager = ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(tenantId).getUserStoreManager();
-
-                return manager.getRoleNames();
-            } else {
-                return AuthorizationManager.getInstance().getRoleNames();
-            }
-        } catch (UserStoreException e) {
-            log.error("Error while getting all the roles", e);
-            return new String[0];
-
-        }
     }
 
     /**
@@ -4800,69 +4252,6 @@ public final class APIUtil {
         TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
         ServiceReferenceHolder.getInstance().getIndexLoaderService().loadTenantIndex(tenantId);
         tenantRegistryLoader.loadTenantRegistry(tenantId);
-    }
-
-    /**
-     * This is to get the registry resource's HTTP permlink path.
-     * Once this issue is fixed (https://wso2.org/jira/browse/REGISTRY-2110),
-     * we can remove this method, and get permlink from the resource.
-     *
-     * @param path - Registry resource path
-     * @return {@link String} -HTTP permlink
-     */
-    public static String getRegistryResourceHTTPPermlink(String path) {
-
-        String schemeHttp = APIConstants.HTTP_PROTOCOL;
-        String schemeHttps = APIConstants.HTTPS_PROTOCOL;
-
-        ConfigurationContextService contetxservice = ServiceReferenceHolder.getContextService();
-        //First we will try to generate http permalink and if its disabled then only we will consider https
-        int port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), schemeHttp);
-        if (port == -1) {
-            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), schemeHttp);
-        }
-        //getting https parameters if http is disabled. If proxy port is not present we will go for default port
-        if (port == -1) {
-            port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), schemeHttps);
-        }
-        if (port == -1) {
-            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), schemeHttps);
-        }
-
-        String webContext = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
-
-        if (webContext == null || "/".equals(webContext)) {
-            webContext = "";
-        }
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        String version = "";
-        if (registryService == null) {
-            log.error("Registry Service has not been set.");
-        } else if (path != null) {
-            try {
-                String[] versions = registryService.getRegistry(
-                        CarbonConstants.REGISTRY_SYSTEM_USERNAME,
-                        CarbonContext.getThreadLocalCarbonContext().getTenantId()).getVersions(path);
-                if (versions != null && versions.length > 0) {
-                    version = versions[0].substring(versions[0].lastIndexOf(";version:"));
-                }
-            } catch (RegistryException e) {
-                log.error("An error occurred while determining the latest version of the " +
-                        "resource at the given path: " + path, e);
-            }
-        }
-        if (port != -1 && path != null) {
-            String tenantDomain =
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
-            return webContext +
-                    ((tenantDomain != null &&
-                            !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) ?
-                            "/" + MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain :
-                            "") +
-                    "/registry/resource" +
-                    org.wso2.carbon.registry.app.Utils.encodeRegistryPath(path) + version;
-        }
-        return null;
     }
 
     public static boolean isSandboxEndpointsExists(String endpointConfig) {

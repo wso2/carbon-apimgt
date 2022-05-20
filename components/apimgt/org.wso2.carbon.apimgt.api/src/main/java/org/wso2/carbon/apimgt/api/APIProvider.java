@@ -627,8 +627,6 @@ public interface APIProvider extends APIManager {
      */
     void configureMonetizationInAPIArtifact(API api) throws APIManagementException;
 
-    void configureMonetizationInAPIProductArtifact(APIProduct apiProduct) throws APIManagementException;
-
     /**
      * This method is used to get the implementation class for monetization
      *

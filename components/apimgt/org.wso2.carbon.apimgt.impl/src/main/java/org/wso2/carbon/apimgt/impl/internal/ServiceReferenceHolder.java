@@ -90,11 +90,6 @@ public class ServiceReferenceHolder {
         ServiceReferenceHolder.contextService = contextService;
     }
 
-    public static ServiceReferenceHolder getInstance() {
-
-        return instance;
-    }
-
     public static UserRealm getUserRealm() {
 
         return userRealm;
@@ -103,6 +98,11 @@ public class ServiceReferenceHolder {
     public static void setUserRealm(UserRealm realm) {
 
         userRealm = realm;
+    }
+
+    public static ServiceReferenceHolder getInstance() {
+
+        return instance;
     }
 
     public RegistryService getRegistryService() {

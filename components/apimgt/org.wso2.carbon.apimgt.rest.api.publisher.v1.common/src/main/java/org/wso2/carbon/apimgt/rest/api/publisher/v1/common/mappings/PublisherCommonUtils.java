@@ -1566,8 +1566,6 @@ public class PublisherCommonUtils {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
         apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
 
-        //preserve monetization status in the update flow
-        apiProvider.configureMonetizationInAPIProductArtifact(product);
         return apiProvider.getAPIProduct(productIdentifier);
     }
 
