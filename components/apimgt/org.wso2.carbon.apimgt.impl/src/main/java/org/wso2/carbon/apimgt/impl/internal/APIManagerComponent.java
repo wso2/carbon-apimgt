@@ -179,7 +179,7 @@ public class APIManagerComponent {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
-            String migrateFromVersionProperty = System.getProperty(APIConstants.MIGRATE_FROM_VERSION_PROPERTY);
+            String migrateFromVersionProperty = System.getProperty(APIConstants.MIGRATE);
             if (migrateFromVersionProperty == null) {
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
@@ -216,7 +216,6 @@ public class APIManagerComponent {
 
                 APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
                 analyticsConfiguration.setAPIManagerConfiguration(configuration);
-                registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
                 KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
                 registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
                         keyManagerConfigurationService, null);
@@ -227,6 +226,7 @@ public class APIManagerComponent {
                 APIStatusObserverList.getInstance().init(configuration);
                 MonetizationDataHolder.getInstance().init();
             }
+            registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,

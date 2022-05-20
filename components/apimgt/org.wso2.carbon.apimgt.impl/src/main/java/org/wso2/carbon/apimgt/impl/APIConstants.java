@@ -2929,5 +2929,5 @@ public final class APIConstants {
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 
-    public static final String MIGRATE_FROM_VERSION_PROPERTY = "migrateFromVersion";
+    public static final String MIGRATE = "migrate";
 }
