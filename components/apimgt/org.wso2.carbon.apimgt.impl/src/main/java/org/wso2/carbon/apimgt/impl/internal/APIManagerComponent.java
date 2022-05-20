@@ -253,31 +253,33 @@ public class APIManagerComponent {
                     contextCache.put(context, Boolean.TRUE);
                 }
             }
-            try {
-                APIUtil.createDefaultRoles(MultitenantConstants.SUPER_TENANT_ID);
-            } catch (APIManagementException e) {
-                log.error("Failed create default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
-            } catch (Exception e) {
-                // The generic Exception is handled explicitly so execution does not stop during config deployment
-                log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
-            }
-            // Adding default throttle policies
-            addDefaultAdvancedThrottlePolicies();
-            // Update all NULL THROTTLING_TIER values to Unlimited
-            boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
-            try {
-                if (isNullThrottlingTierConversionEnabled) {
-                    ApiMgtDAO.getInstance().convertNullThrottlingTiers();
+            if (migrateFromVersionProperty == null) {
+                try {
+                    APIUtil.createDefaultRoles(MultitenantConstants.SUPER_TENANT_ID);
+                } catch (APIManagementException e) {
+                    log.error("Failed create default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
+                } catch (Exception e) {
+                    // The generic Exception is handled explicitly so execution does not stop during config deployment
+                    log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
                 }
-            } catch (APIManagementException e) {
-                log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
-            }
+                // Adding default throttle policies
+                addDefaultAdvancedThrottlePolicies();
+                // Update all NULL THROTTLING_TIER values to Unlimited
+                boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
+                try {
+                    if (isNullThrottlingTierConversionEnabled) {
+                        ApiMgtDAO.getInstance().convertNullThrottlingTiers();
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
+                }
 //            // Initialise KeyManager.
 //            KeyManagerHolder.initializeKeyManager(configuration);
-            // Initialise sql constants
-            SQLConstantManagerFactory.initializeSQLConstantManager();
-            // Initialize PasswordResolver
-            PasswordResolverFactory.initializePasswordResolver();
+                // Initialise sql constants
+                SQLConstantManagerFactory.initializeSQLConstantManager();
+                // Initialize PasswordResolver
+                PasswordResolverFactory.initializePasswordResolver();
+            }
 
             APIUtil.init();
 

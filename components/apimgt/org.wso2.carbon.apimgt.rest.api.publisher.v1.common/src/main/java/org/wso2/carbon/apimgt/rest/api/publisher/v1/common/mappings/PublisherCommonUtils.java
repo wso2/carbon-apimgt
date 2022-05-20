@@ -1758,12 +1758,7 @@ public class PublisherCommonUtils {
             }
         }
 
-        try {
-            return apiProvider.changeLifeCycleStatus(organization, apiTypeWrapper, action, lcMap);
-        } catch (FaultGatewaysException e) {
-            throw new APIManagementException("Error while change the state of artifact with name - "
-                    + apiTypeWrapper.getName(), e);
-        }
+        return apiProvider.changeLifeCycleStatus(organization, apiTypeWrapper, action, lcMap);
     }
 
     /**

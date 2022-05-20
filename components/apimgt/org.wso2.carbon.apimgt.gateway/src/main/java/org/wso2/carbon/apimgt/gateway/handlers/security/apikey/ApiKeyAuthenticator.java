@@ -636,7 +636,7 @@ public class ApiKeyAuthenticator implements Authenticator {
 
     @Override
     public String getChallengeString() {
-        return null;
+        return "API Key realm=\"WSO2 API Manager\"";
     }
 
     @Override

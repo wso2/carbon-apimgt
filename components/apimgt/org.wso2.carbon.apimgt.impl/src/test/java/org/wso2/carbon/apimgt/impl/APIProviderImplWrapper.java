@@ -101,11 +101,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
-        //do nothing
-    }
-
-    @Override
     protected int getTenantId(String tenantDomain) {
 
         return -1234;
