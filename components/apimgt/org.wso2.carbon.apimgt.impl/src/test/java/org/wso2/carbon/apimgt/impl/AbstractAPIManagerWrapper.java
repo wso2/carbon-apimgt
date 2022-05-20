@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -145,4 +146,9 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         // TODO Auto-generated method stub
         return null;
     }
+
+    protected RegistryService getRegistryService() {
+        return ServiceReferenceHolder.getInstance().getRegistryService();
+    }
+
 }

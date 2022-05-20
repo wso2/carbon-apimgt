@@ -140,8 +140,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
     // API definitions from swagger v2.0
     protected Log log = LogFactory.getLog(getClass());
-    protected Registry registry;
-    protected UserRegistry configRegistry;
     protected ApiMgtDAO apiMgtDAO;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
@@ -149,6 +147,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected String tenantDomain;
     protected String organization;
     protected String username;
+    protected Registry registry;
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
     APIPersistence apiPersistenceInstance;
@@ -170,13 +169,9 @@ public abstract class AbstractAPIManager implements APIManager {
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
 
         try {
+            this.registry = getRegistryService().getGovernanceUserRegistry();
             if (username == null) {
-
-                this.registry = getRegistryService().getGovernanceUserRegistry();
-                this.configRegistry = getRegistryService().getConfigSystemRegistry();
-
                 this.username = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
-                ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
                 String tenantDomainName = APIUtil.getInternalOrganizationDomain(organization);
                 String tenantUserName = getTenantAwareUsername(username);
@@ -185,156 +180,14 @@ public abstract class AbstractAPIManager implements APIManager {
                 this.tenantDomain = tenantDomainName;
                 this.organization = organization;
                 this.username = tenantUserName;
-
-                loadTenantRegistry(tenantId);
-
-                this.registry = getRegistryService().getGovernanceUserRegistry(tenantUserName, tenantId);
-
-                this.configRegistry = getRegistryService().getConfigSystemRegistry(tenantId);
-
-                //load resources for each tenants.
-                APIUtil.loadloadTenantAPIRXT(tenantUserName, tenantId);
-
-                ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().
-                        getRealmService().getTenantUserRealm(tenantId)));
             }
-            ServiceReferenceHolder.setUserRealm(getRegistryService().getConfigSystemRegistry().getUserRealm());
-            registerCustomQueries(configRegistry, username);
-        } catch (RegistryException e) {
-            String msg = "Error while obtaining registry objects";
-            throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            e.printStackTrace();
         }
         apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
-    }
-
-    /**
-     * method to register custom registry queries
-     *
-     * @param registry Registry instance to use
-     * @throws RegistryException n error
-     */
-    protected void registerCustomQueries(UserRegistry registry, String username)
-            throws RegistryException, APIManagementException {
-
-        String tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
-        String latestAPIsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/latest-apis";
-        String resourcesByTag = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
-        String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                        APIConstants.GOVERNANCE_COMPONENT_REGISTRY_LOCATION);
-        if (username == null) {
-            try {
-                UserRealm realm = ServiceReferenceHolder.getUserRealm();
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(realm);
-                authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
-
-            } catch (UserStoreException e) {
-                String msg = "Error while setting the permissions";
-                throw new APIManagementException(msg, e);
-            }
-        } else if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            int tenantId;
-            try {
-                tenantId = getTenantManager().getTenantId(tenantDomain);
-                AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantUserRealm(tenantId).getAuthorizationManager();
-                authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
-            } catch (org.wso2.carbon.user.api.UserStoreException e) {
-                String msg = "Error while setting the permissions";
-                throw new APIManagementException(msg, e);
-            }
-
-        }
-
-        if (!registry.resourceExists(tagsQueryPath)) {
-            Resource resource = registry.newResource();
-
-            //Tag Search Query
-            //'MOCK_PATH' used to bypass ChrootWrapper -> filterSearchResult. A valid registry path is
-            // a must for executeQuery results to be passed to client side
-            String sql1 =
-                    "SELECT '" + APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                            APIConstants.GOVERNANCE_COMPONENT_REGISTRY_LOCATION + "' AS MOCK_PATH, " +
-                            "   RT.REG_TAG_NAME AS TAG_NAME, " +
-                            "   COUNT(RT.REG_TAG_NAME) AS USED_COUNT " +
-                            "FROM " +
-                            "   REG_RESOURCE_TAG RRT, " +
-                            "   REG_TAG RT, " +
-                            "   REG_RESOURCE R, " +
-                            "   REG_RESOURCE_PROPERTY RRP, " +
-                            "   REG_PROPERTY RP " +
-                            "WHERE " +
-                            "   RT.REG_ID = RRT.REG_TAG_ID  " +
-                            "   AND R.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
-                            "   AND RRT.REG_VERSION = R.REG_VERSION " +
-                            "   AND RRP.REG_VERSION = R.REG_VERSION " +
-                            "   AND RP.REG_NAME = 'STATUS' " +
-                            "   AND RRP.REG_PROPERTY_ID = RP.REG_ID " +
-                            "   AND (RP.REG_VALUE !='DEPRECATED' AND RP.REG_VALUE !='CREATED' AND RP.REG_VALUE !='BLOCKED' AND RP.REG_VALUE !='RETIRED') " +
-                            "GROUP BY " +
-                            "   RT.REG_TAG_NAME";
-            resource.setContent(sql1);
-            resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
-            resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
-                    RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
-            registry.put(tagsQueryPath, resource);
-        }
-        if (!registry.resourceExists(latestAPIsQueryPath)) {
-            //Recently added APIs
-            Resource resource = registry.newResource();
-            String sql =
-                    "SELECT " +
-                            "   RR.REG_PATH_ID AS REG_PATH_ID, " +
-                            "   RR.REG_NAME AS REG_NAME " +
-                            "FROM " +
-                            "   REG_RESOURCE RR, " +
-                            "   REG_RESOURCE_PROPERTY RRP, " +
-                            "   REG_PROPERTY RP " +
-                            "WHERE " +
-                            "   RR.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
-                            "   AND RRP.REG_VERSION = RR.REG_VERSION " +
-                            "   AND RP.REG_NAME = 'STATUS' " +
-                            "   AND RRP.REG_PROPERTY_ID = RP.REG_ID " +
-                            "   AND (RP.REG_VALUE !='DEPRECATED' AND RP.REG_VALUE !='CREATED') " +
-                            "ORDER BY " +
-                            "   RR.REG_LAST_UPDATED_TIME " +
-                            "DESC ";
-            resource.setContent(sql);
-            resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
-            resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
-                    RegistryConstants.RESOURCES_RESULT_TYPE);
-            registry.put(latestAPIsQueryPath, resource);
-        }
-        if (!registry.resourceExists(resourcesByTag)) {
-            Resource resource = registry.newResource();
-            String sql =
-                    "SELECT '" + APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                            APIConstants.GOVERNANCE_COMPONENT_REGISTRY_LOCATION + "' AS MOCK_PATH, " +
-                            "   R.REG_UUID AS REG_UUID " +
-                            "FROM " +
-                            "   REG_RESOURCE_TAG RRT, " +
-                            "   REG_TAG RT, " +
-                            "   REG_RESOURCE R, " +
-                            "   REG_PATH RP " +
-                            "WHERE " +
-                            "   RT.REG_TAG_NAME = ? " +
-                            "   AND R.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
-                            "   AND RP.REG_PATH_ID = R.REG_PATH_ID " +
-                            "   AND RT.REG_ID = RRT.REG_TAG_ID " +
-                            "   AND RRT.REG_VERSION = R.REG_VERSION ";
-
-            resource.setContent(sql);
-            resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
-            resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
-                    RegistryConstants.RESOURCE_UUID_RESULT_TYPE);
-            registry.put(resourcesByTag, resource);
-        }
     }
 
     public void cleanup() {
@@ -424,17 +277,10 @@ public abstract class AbstractAPIManager implements APIManager {
                 APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
     }
 
-    protected void loadTenantRegistry(int apiTenantId) throws RegistryException {
-
-        APIUtil.loadTenantRegistry(apiTenantId);
-    }
-
     protected void populateDefaultVersion(API api) throws APIManagementException {
 
         apiMgtDAO.setDefaultVersion(api);
     }
-
-
 
     /**
      * Returns the minimalistic information about the API given the UUID. This will only query from AM database AM_API
@@ -601,23 +447,6 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         return convertedList;
-    }
-
-    protected GenericArtifactManager getAPIGenericArtifactManager(Registry registryType, String keyType) throws
-            APIManagementException {
-
-        try {
-            return new GenericArtifactManager(registryType, keyType);
-        } catch (RegistryException e) {
-            handleException("Error while retrieving generic artifact manager object", e);
-        }
-        return null;
-    }
-
-    protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType)
-            throws APIManagementException {
-
-        return APIUtil.getArtifactManager(registry, keyType);
     }
 
     private boolean isTenantDomainNotMatching(String tenantDomain) {
@@ -1173,11 +1002,6 @@ public abstract class AbstractAPIManager implements APIManager {
     public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String username,
             String organization) throws APIManagementException {
         return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, username, organization);
-    }
-
-    protected RegistryService getRegistryService() {
-
-        return ServiceReferenceHolder.getInstance().getRegistryService();
     }
 
     /**
@@ -1832,5 +1656,10 @@ public abstract class AbstractAPIManager implements APIManager {
             return Boolean.parseBoolean(oauthAppValidation);
         }
         return true;
+    }
+
+    protected RegistryService getRegistryService() {
+
+        return ServiceReferenceHolder.getInstance().getRegistryService();
     }
 }
