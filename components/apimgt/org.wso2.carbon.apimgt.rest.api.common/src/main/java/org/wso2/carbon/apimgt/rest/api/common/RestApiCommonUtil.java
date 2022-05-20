@@ -430,13 +430,20 @@ public class RestApiCommonUtil {
      * @param apiProvider API Provider
      * @return String with the swagger definition
      */
-    public static String retrieveSwaggerDefinition(String uuid, API api, APIProvider apiProvider)
+    public static String retrieveSwaggerDefinition(API api, APIProvider apiProvider)
             throws APIManagementException {
 
-        String apiSwagger = apiProvider.getOpenAPIDefinition(uuid, api.getOrganization());
+        String apiSwagger = null;
+        if (api.getUuid() != null) {
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), api.getOrganization());
+        } else {
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), api.getOrganization());
+        }
+
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
         return parser.getOASDefinitionForPublisher(api, apiSwagger);
     }
+
 
     /**
      * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an
@@ -548,5 +555,4 @@ public class RestApiCommonUtil {
         openAPI.addExtension(X_WSO2_DISABLE_SECURITY, true);
         return Json.mapper().writeValueAsString(openAPI);
     }
-
 }
