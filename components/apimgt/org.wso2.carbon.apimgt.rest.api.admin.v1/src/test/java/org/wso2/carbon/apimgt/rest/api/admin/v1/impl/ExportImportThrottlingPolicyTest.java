@@ -24,8 +24,6 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
 import org.wso2.carbon.context.CarbonContext;
 
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 import static org.mockito.Mockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -35,7 +33,8 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API
         APIProvider.class, ThrottlingApiServiceImpl.class,
         RestApiAdminUtils.class }) public class ExportImportThrottlingPolicyTest {
 
-    @Test public void exportThrottlePolicyTest() throws IOException, APIManagementException {
+    @Test
+    public void exportThrottlePolicyTest() throws APIManagementException {
         PowerMockito.mockStatic(APIProvider.class);
         APIProvider testApiProvider = Mockito.mock(APIProvider.class);
 
@@ -62,20 +61,21 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API
         when(RestApiAdminUtils.isPolicyAccessibleToUser(Mockito.anyString(), Mockito.any())).thenReturn(true);
         ThrottlingApiServiceImpl throttlingApiService = new ThrottlingApiServiceImpl();
 
-        Response response = throttlingApiService.exportThrottlingPolicy("1e360827-6925-4ce6-95f9-12b521109278",
-                "Test", "app", "YAML", null);
+        Response response = throttlingApiService.exportThrottlingPolicy("1e360827-6925-4ce6-95f9-12b521109278", "Test",
+                "app", "YAML", null);
 
         String json = null;
         try {
             json = mapper.writeValueAsString(response.getEntity());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        } catch (JsonProcessingException ignored) {
+
         }
         Assert.assertEquals(expected, json);
 
     }
 
-    @Test public void importThrottlePolicyTestWrite() throws IOException, APIManagementException, URISyntaxException {
+    @Test
+    public void importThrottlePolicyTestWrite() throws APIManagementException {
         ExportThrottlePolicyDTO exportedPolicy = new ExportThrottlePolicyDTO();
         SubscriptionThrottlePolicyDTO testSubPolicy = new SubscriptionThrottlePolicyDTO();
         testSubPolicy.setPolicyName("Test");
@@ -100,7 +100,8 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API
         Assert.assertEquals(message, response.getEntity().toString());
     }
 
-    @Test public void importThrottlePolicyTestUpdate() throws IOException, APIManagementException, URISyntaxException {
+    @Test
+    public void importThrottlePolicyTestUpdate() throws APIManagementException {
         ExportThrottlePolicyDTO exportedPolicy = new ExportThrottlePolicyDTO();
         SubscriptionThrottlePolicyDTO testSubPolicy = new SubscriptionThrottlePolicyDTO();
         testSubPolicy.setPolicyName("Test");

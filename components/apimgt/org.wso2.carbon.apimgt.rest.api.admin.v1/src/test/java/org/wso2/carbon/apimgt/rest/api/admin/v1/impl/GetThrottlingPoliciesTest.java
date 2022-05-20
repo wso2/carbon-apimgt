@@ -18,7 +18,8 @@ import java.util.List;
 @RunWith(PowerMockRunner.class) @PrepareForTest({
         ThrottlingApiServiceImpl.class, }) public class GetThrottlingPoliciesTest {
 
-    @Test public void getThrottlePolicyTest() throws Exception {
+    @Test
+    public void getThrottlePolicyTest() throws Exception {
 
         ThrottlePolicyDetailsDTO mockPolicy = new ThrottlePolicyDetailsDTO();
         mockPolicy.setIsDeployed(true);
