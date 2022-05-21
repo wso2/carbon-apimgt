@@ -8113,11 +8113,11 @@ paths:
   # The "API Collection" Endpoint APIs
   ######################################################
 
-  /apis/{apiId}/operation-endpoints:
+  /apis/{apiId}/endpoints:
     get:
       tags:
-        - Operation Endpoints APIs
-      summary: Get All Available Operation Endpoints of an API
+        - API Endpoints
+      summary: Get All Available Endpoints of an API
       description: |
         This operation can be used to get all the available resource endpoints of an API.
       parameters:
@@ -8139,7 +8139,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationEndpointList'
+                $ref: '#/components/schemas/APIEndpointList'
         500:
           $ref: '#/components/responses/InternalServerError'
         404:
@@ -8151,8 +8151,8 @@ paths:
 
     post:
       tags:
-        - Operation Endpoints APIs
-      summary: Add Operation Endpoint
+        - API Endpoints
+      summary: Add an Endpoint
       description: |
         This operation can be used to add a resource endpoint for an API.
       parameters:
@@ -8162,7 +8162,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OperationEndpoint'
+              $ref: '#/components/schemas/Endpoint'
         required: true
 
       responses:
@@ -8185,7 +8185,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationEndpoint'
+                $ref: '#/components/schemas/APIEndpoint'
         400:
           $ref: '#/components/responses/BadRequest'
         415:
@@ -8198,11 +8198,11 @@ paths:
 
       operationId: addOperationEndpoint
 
-  /apis/{apiId}/operation-endpoints/{endpointId}:
+  /apis/{apiId}/endpoints/{endpointId}:
     get:
       tags:
-        - Operation Endpoints APIs
-      summary: Get Operation Endpoint
+        - API Endpoints
+      summary: Get an Endpoint
       description: |
         This operation can be used to get all the available resource endpoints of an API.
       parameters:
@@ -8223,7 +8223,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationEndpoint'
+                $ref: '#/components/schemas/APIEndpoint'
         500:
           $ref: '#/components/responses/InternalServerError'
         404:
@@ -8235,8 +8235,8 @@ paths:
 
     put:
       tags:
-        - Operation Endpoints APIs
-      summary: Update Operation Endpoint
+        - API Endpoints
+      summary: Update an Endpoint
       description: |
         This operation can be used to update a resource endpoint.
       operationId: updateOperationEndpoint
@@ -8248,7 +8248,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OperationEndpoint'
+              $ref: '#/components/schemas/APIEndpoint'
       responses:
         200:
           description: |
@@ -8263,7 +8263,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationEndpoint'
+                $ref: '#/components/schemas/APIEndpoint'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -8279,8 +8279,8 @@ paths:
 
     delete:
       tags:
-        - Operation Endpoints APIs
-      summary: Delete Operation Endpoint
+        - API Endpoints
+      summary: Delete an Endpoint
       description: |
         This operation can be used to delete a resource endpoint.
       operationId: deleteOperationEndpoint
@@ -8304,114 +8304,28 @@ paths:
 
 components:
   schemas:
-    OperationEndpoint:
-      title: Operation Endpoints
+    APIEndpoint:
+      title: Endpoint
       required:
         - name
-        - endpointType
-        - url
       properties:
         id:
           type: string
         name:
           type: string
+        endpointType:
+          type : string
         endpointConfig:
           type: object
           properties: { }
           description: |
             Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.
-            
-            `Simple REST Endpoint`
-              {
-                "endpoint_type": "http",
-                "sandbox_endpoints":       {
-                   "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
-                },
-                "production_endpoints":       {
-                   "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
-                }
-              }
-            
-            `Loadbalanced Endpoint`
-            
-              {
-                "endpoint_type": "load_balance",
-                "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
-                "sessionManagement": "",
-                "sandbox_endpoints":       [
-                            {
-                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/1"
-                   },
-                            {
-                      "endpoint_type": "http",
-                      "template_not_supported": false,
-                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/2"
-                   }
-                ],
-                "production_endpoints":       [
-                            {
-                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/3"
-                   },
-                            {
-                      "endpoint_type": "http",
-                      "template_not_supported": false,
-                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/4"
-                   }
-                ],
-                "sessionTimeOut": "",
-                "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
-              }
-            
-            `Failover Endpoint`
-            
-              {
-                "production_failovers":[
-                   {
-                      "endpoint_type":"http",
-                      "template_not_supported":false,
-                      "url":"https://localhost:9443/am/sample/pizzashack/v1/api/1"
-                   }
-                ],
-                "endpoint_type":"failover",
-                "sandbox_endpoints":{
-                   "url":"https://localhost:9443/am/sample/pizzashack/v1/api/2"
-                },
-                "production_endpoints":{
-                   "url":"https://localhost:9443/am/sample/pizzashack/v1/api/3"
-                },
-                "sandbox_failovers":[
-                   {
-                      "endpoint_type":"http",
-                      "template_not_supported":false,
-                      "url":"https://localhost:9443/am/sample/pizzashack/v1/api/4"
-                   }
-                ]
-              }
-            
-            `Default Endpoint`
-            
-              {
-                "endpoint_type":"default",
-                "sandbox_endpoints":{
-                   "url":"default"
-                },
-                "production_endpoints":{
-                   "url":"default"
-                }
-              }
-            
-            `Endpoint from Endpoint Registry`
-              {
-                "endpoint_type": "Registry",
-                "endpoint_id": "{registry-name:entry-name:version}",
-              }
           example:
-            endpoint_type: http
+            endpoint_type: REST
             url: https://localhost:9443/am/sample/pizzashack/v1/api/
 
-
-    OperationEndpointList:
-      title: Operation Endpoints List
+    APIEndpointList:
+      title: Endpoints List
       type: object
       properties:
         count:
@@ -8422,25 +8336,10 @@ components:
         list:
           type: array
           items:
-            $ref: '#/components/schemas/OperationEndpoint'
+            $ref: '#/components/schemas/APIEndpoint'
         pagination:
           $ref: '#/components/schemas/Pagination'
 
-    EndpointSecurity:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          example: false
-        type:
-          type: string
-          example: basic
-        username:
-          type: string
-          example: user_name
-        password:
-          type: string
-          example: Test_1User
 
     Comment:
       title: Comment
