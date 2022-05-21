@@ -1156,6 +1156,7 @@ public class PublisherCommonUtils {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fall if user does not have access to the API or the API does not exist
+        API oldapi = apiProvider.getAPIbyUUID(apiId, organization);
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setOrganization(organization);
         String apiDefinition = response.getJsonContent();
@@ -1176,7 +1177,7 @@ public class PublisherCommonUtils {
         //updating APi with the new AsyncAPI definition
         existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
-        apiProvider.updateAPI(existingAPI);
+        apiProvider.updateAPI(existingAPI, oldapi);
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId().getUUID(), organization);
     }
@@ -1272,6 +1273,7 @@ public class PublisherCommonUtils {
      */
     public static API addGraphQLSchema(API originalAPI, String schemaDefinition, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
+        API oldApi = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
 
         List<APIOperationsDTO> operationListWithOldData = APIMappingUtil
                 .getOperationListWithOldData(originalAPI.getUriTemplates(),
@@ -1280,8 +1282,8 @@ public class PublisherCommonUtils {
         Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationListWithOldData);
         originalAPI.setUriTemplates(uriTemplates);
 
-        apiProvider.saveGraphqlSchemaDefinition(originalAPI, schemaDefinition);
-        apiProvider.updateAPI(originalAPI);
+        apiProvider.saveGraphqlSchemaDefinition(originalAPI.getUuid(), schemaDefinition, originalAPI.getOrganization());
+        apiProvider.updateAPI(originalAPI, oldApi);
 
         return originalAPI;
     }
@@ -1552,8 +1554,6 @@ public class PublisherCommonUtils {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
         apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
 
-        //preserve monetization status in the update flow
-        apiProvider.configureMonetizationInAPIProductArtifact(product);
         return apiProvider.getAPIProduct(productIdentifier);
     }
 
@@ -1744,12 +1744,7 @@ public class PublisherCommonUtils {
             }
         }
 
-        try {
-            return apiProvider.changeLifeCycleStatus(organization, apiTypeWrapper, action, lcMap);
-        } catch (FaultGatewaysException e) {
-            throw new APIManagementException("Error while change the state of artifact with name - "
-                    + apiTypeWrapper.getName(), e);
-        }
+        return apiProvider.changeLifeCycleStatus(organization, apiTypeWrapper, action, lcMap);
     }
 
     /**

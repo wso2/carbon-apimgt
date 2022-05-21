@@ -21,7 +21,7 @@
     <parent>
         <artifactId>apimgt-feature</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.20.83-SNAPSHOT</version>
+        <version>9.21.8-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -42,6 +42,10 @@
         <dependency>
             <groupId>org.wso2.orbit.io.jaeger</groupId>
             <artifactId>jaeger-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.opentelemetry</groupId>
+            <artifactId>opentelemetry-all</artifactId>
         </dependency>
         <dependency>
             <groupId>io.zipkin.zipkin2</groupId>
@@ -96,6 +100,7 @@
                                 </bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.jaeger:jaeger-client</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.opentelemetry:opentelemetry-all</bundleDef>
                                 <bundleDef>io.zipkin.zipkin2:zipkin</bundleDef>
                                 <bundleDef>io.zipkin.reporter2:zipkin-reporter</bundleDef>
                                 <bundleDef>io.zipkin.reporter2:zipkin-sender-okhttp3</bundleDef>

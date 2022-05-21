@@ -20,7 +20,10 @@ package org.wso2.carbon.apimgt.tracing;
 
 /**
  * This Interface used to register Tracers.
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService} instead</p>
  */
+@Deprecated
 public interface TracingService {
 
     TracingTracer buildTracer(String serviceName);

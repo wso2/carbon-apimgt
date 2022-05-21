@@ -21,7 +21,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -168,8 +168,8 @@ public interface CertificateManager {
      * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,CERTIFICATE_EXPIRED : If the
      * certificate is expired.
      */
-    ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias, String tierName,
-            int tenantId, String organization);
+    ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias, String tierName,
+                                      int tenantId, String organization);
 
     /**
      * Method to delete the client certificate from publisher node.
@@ -181,7 +181,7 @@ public interface CertificateManager {
      * INTERNAL_SERVER_ERROR: If any internal error occurred
      * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
-    ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId);
+    ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, int tenantId);
 
     /**
      * Method to add client certificate to gateway nodes.
@@ -210,7 +210,7 @@ public interface CertificateManager {
      * @return List of certificates that match the criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, Identifier apiIdentifier,
             String organization) throws APIManagementException;
 
     /**

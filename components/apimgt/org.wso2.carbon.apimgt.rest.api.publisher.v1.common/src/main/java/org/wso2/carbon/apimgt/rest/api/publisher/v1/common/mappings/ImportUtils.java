@@ -33,10 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.parser.ParseException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -67,19 +63,21 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
-import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycle;
-import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycleTransition;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
+import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -96,18 +94,14 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -119,10 +113,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * This class usesd to utility for Import API.
@@ -272,11 +262,12 @@ public class ImportUtils {
             if (!extractedPoliciesMap.isEmpty()) {
                 importedApi.setUriTemplates(validateOperationPolicies(importedApi, apiProvider, extractedFolderPath,
                         extractedPoliciesMap, currentTenantDomain));
-                apiProvider.updateAPI(importedApi);
+                API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
+                apiProvider.updateAPI(importedApi, oldAPI);
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
-            lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
+            lifecycleAction = getLifeCycleAction(currentStatus, targetStatus);
 
             // Add/update swagger content except for streaming APIs and GraphQL APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
@@ -319,20 +310,20 @@ public class ImportUtils {
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Importing client certificates.");
                 }
-                addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
-                        importedApi.getId().getProviderName(), organization);
+                addClientCertificates(extractedFolderPath, apiProvider, new ApiTypeWrapper(importedApi), organization);
             }
 
             // Change API lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {
                 apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
                 log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
+                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(importedApi);
+                String lcCheckList = "";
                 if (StringUtils.equals(lifecycleAction, APIConstants.LC_PUBLISH_LC_STATE)) {
-                    apiProvider.changeAPILCCheckListItems(importedApi.getId(),
-                            ImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
+                    lcCheckList = "Requires re-subscription when publishing the API:" + true;
                 }
-                apiProvider.changeLifeCycleStatus(currentTenantDomain, new ApiTypeWrapper(importedApi), lifecycleAction,
-                        new HashMap<>());
+                PublisherCommonUtils.changeApiOrApiProductLifecycle(lifecycleAction, apiTypeWrapper, lcCheckList,
+                        importedApi.getOrganization());
             }
             importedApi.setStatus(targetStatus);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -1438,10 +1429,12 @@ public class ImportUtils {
 
         try {
             // Remove all documents associated with the API before update
-            List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
+
+            String uuidFromIdentifier = ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
+            List<Documentation> documents = apiProvider.getAllDocumentation(uuidFromIdentifier, organization);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
+                    apiProvider.removeDocumentation(uuidFromIdentifier, documentation.getId(), tenantDomain);
                 }
             }
 
@@ -1748,23 +1741,20 @@ public class ImportUtils {
      *
      * @param pathToArchive Location of the extracted folder of the API
      * @param apiProvider   API Provider
-     * @param preserveProvider Decision to keep or replace the provider
-     * @param provider     Provider Id
      * @param organization Identifier of the organization
      * @throws APIImportExportException
      */
-    private static void addClientCertificates(String pathToArchive, APIProvider apiProvider, Boolean preserveProvider,
-                                              String provider, String organization) throws APIManagementException {
+    private static void addClientCertificates(String pathToArchive, APIProvider apiProvider,
+                                              ApiTypeWrapper apiTypeWrapper, String organization)
+            throws APIManagementException {
 
         try {
+            Identifier apiIdentifier  = apiTypeWrapper.getId();
             List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive);
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
-                APIIdentifier apiIdentifier = !preserveProvider ?
-                        new APIIdentifier(provider, certDTO.getApiIdentifier().getApiName(),
-                                certDTO.getApiIdentifier().getVersion()) :
-                        certDTO.getApiIdentifier();
-                apiProvider.addClientCertificate(APIUtil.replaceEmailDomainBack(provider), apiIdentifier,
-                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), organization);
+                apiProvider.addClientCertificate(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()),
+                        apiTypeWrapper, certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(),
+                        organization);
             }
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while importing client certificate", e);
@@ -1891,69 +1881,23 @@ public class ImportUtils {
     /**
      * This method returns the lifecycle action which can be used to transit from currentStatus to targetStatus.
      *
-     * @param tenantDomain  Tenant domain
      * @param currentStatus Current status to do status transition
      * @param targetStatus  Target status to do status transition
      * @return Lifecycle action or null if target is not reachable
      * @throws APIImportExportException If getting lifecycle action failed
      */
-    public static String getLifeCycleAction(String tenantDomain, String currentStatus, String targetStatus,
-                                            APIProvider provider) throws APIManagementException {
+    public static String getLifeCycleAction(String currentStatus, String targetStatus) throws APIManagementException {
 
         // No need to change the lifecycle if both the statuses are same
         if (StringUtils.equalsIgnoreCase(currentStatus, targetStatus)) {
             return null;
         }
-        LifeCycle lifeCycle = new LifeCycle();
-        // Parse DOM of APILifeCycle
         try {
-            String data = provider.getLifecycleConfiguration(tenantDomain);
-            DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
-            Document doc = builder.parse(inputStream);
-            Element root = doc.getDocumentElement();
-
-            // Get all nodes with state
-            NodeList states = root.getElementsByTagName("state");
-            int nStates = states.getLength();
-            for (int i = 0; i < nStates; i++) {
-                Node node = states.item(i);
-                Node id = node.getAttributes().getNamedItem("id");
-                if (id != null && !id.getNodeValue().isEmpty()) {
-                    LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
-                    NodeList transitions = node.getChildNodes();
-                    int nTransitions = transitions.getLength();
-                    for (int j = 0; j < nTransitions; j++) {
-                        Node transition = transitions.item(j);
-                        // Add transitions
-                        if (ImportExportConstants.NODE_TRANSITION.equals(transition.getNodeName())) {
-                            Node target = transition.getAttributes().getNamedItem("target");
-                            Node action = transition.getAttributes().getNamedItem("event");
-                            if (target != null && action != null) {
-                                lifeCycleTransition
-                                        .addTransition(target.getNodeValue().toLowerCase(), action.getNodeValue());
-                            }
-                        }
-                    }
-                    lifeCycle.addLifeCycleState(id.getNodeValue().toLowerCase(), lifeCycleTransition);
-                }
-            }
-        } catch (ParserConfigurationException | SAXException e) {
-            throw new APIManagementException("Error parsing APILifeCycle for tenant: " + tenantDomain, e);
-        } catch (UnsupportedEncodingException e) {
-            throw new APIManagementException(
-                    "Error parsing unsupported encoding for APILifeCycle in tenant: " + tenantDomain, e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error reading APILifeCycle for tenant: " + tenantDomain, e);
+            RegistryLCManager lcManager = LCManagerFactory.getInstance().getLCManager();
+            return lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase());
+        } catch (PersistenceException e) {
+            throw new APIManagementException("Error while retrieving lifecycle configuration", e);
         }
-
-        // Retrieve lifecycle action
-        LifeCycleTransition transition = lifeCycle.getTransition(currentStatus.toLowerCase());
-        if (transition != null) {
-            return transition.getAction(targetStatus.toLowerCase());
-        }
-        return null;
     }
 
     /**
@@ -2038,7 +1982,7 @@ public class ImportUtils {
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
-            lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
+            lifecycleAction = getLifeCycleAction(currentStatus, targetStatus);
 
             // Add/update swagger of API Product
             importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct.getUuid(),
@@ -2053,8 +1997,7 @@ public class ImportUtils {
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Importing client certificates.");
             }
-            addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
-                    importedApiProduct.getId().getProviderName(), organization);
+            addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct, organization);
 
             // Change API Product lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {

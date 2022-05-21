@@ -15,28 +15,6 @@
  */
 package org.wso2.carbon.apimgt.persistence;
 
-import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -51,48 +29,15 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentContent.ContentSourceType;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
+import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.Mediation;
-import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
-import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
-import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.UserContext;
-import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentContent.ContentSourceType;
+import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
@@ -112,6 +57,7 @@ import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.TermData;
 import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
@@ -134,6 +80,25 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
 public class RegistryPersistenceImpl implements APIPersistence {
 
@@ -3033,27 +2998,25 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(id);
                     registry = getRegistryService().getGovernanceSystemRegistry(id);
                     holder.setTenantId(id);
-                    ServiceReferenceHolder
-                            .setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
                 } else {
                     log.debug("Same tenant accessing registry of tenant " + userTenantDomain + ":" + tenantId);
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
+                    RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
+                    RegistryPersistenceUtil.registerCustomQueries(registry, null, userTenantDomain);
                     holder.setTenantId(tenantId);
-                    ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
-                            .getRealmService().getTenantUserRealm(tenantId)));
                 }
             } else {
                 log.debug("Same tenant user accessing registry of tenant " + userTenantDomain + ":" + tenantId);
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(tenantId)));
+                RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
+                RegistryPersistenceUtil.registerCustomQueries(registry, null, userTenantDomain);
                 holder.setTenantId(tenantId);
             }
-        } catch (RegistryException | UserStoreException | APIManagementException e) {
+        } catch (RegistryException | UserStoreException | PersistenceException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
         }
@@ -3089,8 +3052,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(id);
                     registry = getRegistryService().getGovernanceSystemRegistry(id);
                     holder.setTenantId(id);
-                    ServiceReferenceHolder
-                            .setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
                 } else {
                     log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant "
                             + userTenantDomain + ":" + tenantId);
@@ -3098,8 +3059,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
                     holder.setTenantId(tenantId);
-                    ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
-                            .getRealmService().getTenantUserRealm(tenantId)));
                 }
             } else {
                 log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant "
@@ -3107,11 +3066,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
-                ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(tenantId)));
                 holder.setTenantId(tenantId);
             }
-        } catch (RegistryException | UserStoreException | APIManagementException e) {
+            RegistryPersistenceUtil.registerCustomQueries(registry, username, userTenantDomain);
+            RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
+        } catch (RegistryException | UserStoreException | PersistenceException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
         }

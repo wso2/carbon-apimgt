@@ -22,8 +22,6 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
@@ -33,8 +31,6 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.util.List;
 import java.util.Map;
@@ -97,40 +93,9 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    protected void registerCustomQueries(UserRegistry registry, String username)
-            throws RegistryException, APIManagementException {
-        // do nothing
-    }
-
-    @Override
-    protected String createAPI(API api) throws APIManagementException {
-
-        this.api = api;
-        return super.createAPI(api);
-    }
-
-    @Override
-    public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
-        //do nothing
-    }
-
-    @Override
-    public List<Documentation> getAllDocumentation(Identifier apiId) throws APIManagementException {
-
-        return documentationList;
-    }
-
-    @Override
     protected int getTenantId(String tenantDomain) {
 
         return -1234;
-    }
-
-    @Override
-    public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
-            throws APIManagementException {
-
-        return null;
     }
 
     @Override
@@ -153,11 +118,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     public boolean hasValidLength(String field, int maxLength) {
 
         return true;
-    }
-
-    @Override
-    public void updateWsdlFromUrl(API api) throws APIManagementException {
-        // do nothing
     }
 
 }

@@ -8041,10 +8041,9 @@ public class ApiMgtDAO {
         String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection.prepareStatement(sql)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getApiName());
-            prepStmt.setString(3, identifier.getVersion());
-            prepStmt.setString(4, organization);
+            prepStmt.setString(1, identifier.getApiName());
+            prepStmt.setString(2, identifier.getVersion());
+            prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);
@@ -8074,10 +8073,9 @@ public class ApiMgtDAO {
         String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection.prepareStatement(sql)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
-            prepStmt.setString(2, apiName);
-            prepStmt.setString(3, version);
-            prepStmt.setString(4, organization);
+            prepStmt.setString(1, apiName);
+            prepStmt.setString(2, version);
+            prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);
@@ -8124,10 +8122,9 @@ public class ApiMgtDAO {
                 isNewConnection = true;
             }
             prepStmt = connection.prepareStatement(sql);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getName());
-            prepStmt.setString(3, identifier.getVersion());
-            prepStmt.setString(4, organization);
+            prepStmt.setString(1, identifier.getName());
+            prepStmt.setString(2, identifier.getVersion());
+            prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);
@@ -9289,7 +9286,7 @@ public class ApiMgtDAO {
                                 .updatedBy(resultSet.getString("UPDATED_BY"))
                                 .updatedTime(resultSet.getString("UPDATED_TIME"))
                                 .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
-                                .isRevision(apiRevision != null);
+                                .isRevision(apiRevision != null).organization(resultSet.getString("ORGANIZATION"));
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
                                     apiRevision.getApiUUID(), apiId));
@@ -18438,6 +18435,14 @@ public class ApiMgtDAO {
             handleException("Error while fetching URI templates with operation endpoints for " + apiUUID, e);
         }
         return uriTemplateList;
+    }
+    
+    public String getUUIDFromIdentifier(Identifier apiIdentifier, String organization) throws APIManagementException {
+        if (apiIdentifier instanceof APIProductIdentifier) {
+            return getUUIDFromIdentifier((APIProductIdentifier) apiIdentifier, organization);
+        } else {
+            return getUUIDFromIdentifier((APIIdentifier) apiIdentifier, organization);
+        }
     }
 
     private class SubscriptionInfo {

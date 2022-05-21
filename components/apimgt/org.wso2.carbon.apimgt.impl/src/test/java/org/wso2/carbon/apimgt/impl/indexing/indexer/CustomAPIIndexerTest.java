@@ -83,8 +83,6 @@ public class CustomAPIIndexerTest {
                 thenReturn(artifactManager);
         Mockito.when(artifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY)).thenReturn("public");
-        PowerMockito.when(APIUtil.getAPI(genericArtifact, userRegistry))
-                .thenReturn(Mockito.mock(API.class));
         resource.setProperty(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + APIConstants.
                 CUSTOM_API_INDEXER_PROPERTY, APIConstants.CUSTOM_API_INDEXER_PROPERTY);
         Assert.assertEquals(APIConstants.OVERVIEW_PREFIX + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX +
@@ -108,8 +106,6 @@ public class CustomAPIIndexerTest {
         GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(artifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY)).thenReturn("public");
-        PowerMockito.when(APIUtil.getAPI(genericArtifact, userRegistry))
-                .thenReturn(Mockito.mock(API.class));
         resource.setProperty(APIConstants.ACCESS_CONTROL, APIConstants.NO_ACCESS_CONTROL);
         resource.setProperty(APIConstants.PUBLISHER_ROLES, APIConstants.NULL_USER_ROLE_LIST);
         resource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);

@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.20.83-SNAPSHOT</version>
+        <version>9.21.8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -72,6 +72,10 @@
         <dependency>
             <groupId>io.opentracing</groupId>
             <artifactId>opentracing-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.opentelemetry</groupId>
+            <artifactId>opentelemetry-all</artifactId>
         </dependency>
     </dependencies>
 
@@ -129,6 +133,7 @@
                             org.slf4j.*,
                             io.opentracing.*; version="${jaeger.client.version}",
                             io.opentracing.*; version="${jaeger.client.version}",
+                            io.opentelemetry.*; version="${opentelemetry.all.version}",
                             zipkin2.reporter.*; version="${zipkin.reporter.version}",
                             zipkin2.reporter.okhttp3.*; version="${zipkin.sender.okhttp3.version}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",

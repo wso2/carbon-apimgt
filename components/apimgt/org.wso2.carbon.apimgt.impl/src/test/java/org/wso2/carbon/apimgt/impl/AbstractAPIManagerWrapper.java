@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
@@ -31,10 +32,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.API_PROVIDER;
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_NAME;
-import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_VERSION;
 
 import java.util.Map;
 
@@ -49,27 +46,8 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
-            TenantManager tenantManager) throws APIManagementException {
-        this.genericArtifactManager = genericArtifactManager;
-        this.registryService = registryService;
-        this.tenantManager = tenantManager;
-    }
-
-    public AbstractAPIManagerWrapper(Registry registry) throws APIManagementException {
-        this.registry = registry;
-    }
-
-    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, Registry registry,
-            TenantManager tenantManager) throws APIManagementException {
-        this.genericArtifactManager = genericArtifactManager;
-        this.registry = registry;
-        this.tenantManager = tenantManager;
-    }
-
-    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
             Registry registry, TenantManager tenantManager) throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
-        this.registry = registry;
         this.tenantManager = tenantManager;
         this.registryService = registryService;
     }
@@ -87,7 +65,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
             Registry registry, TenantManager tenantManager, ApiMgtDAO apiMgtDAO) throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
-        this.registry = registry;
         this.tenantManager = tenantManager;
         this.registryService = registryService;
         this.apiMgtDAO = apiMgtDAO;
@@ -97,28 +74,10 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
                                      Registry registry, TenantManager tenantManager, ApiMgtDAO apiMgtDAO, APIPersistence persistance)
             throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
-        this.registry = registry;
         this.tenantManager = tenantManager;
         this.registryService = registryService;
         this.apiMgtDAO = apiMgtDAO;
         this.apiPersistenceInstance = persistance;
-    }
-
-    @Override
-    protected GenericArtifactManager getAPIGenericArtifactManager(Registry registry, String keyType) throws
-            APIManagementException {
-        return genericArtifactManager;
-    }
-
-    @Override
-    protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType) throws
-            APIManagementException {
-        return genericArtifactManager;
-    }
-
-    @Override
-    protected RegistryService getRegistryService() {
-        return registryService;
     }
 
     @Override
@@ -135,24 +94,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         } catch (GovernanceException e) {
             throw new APIManagementException("Error while getting attribute", e);
         }
-    }
-
-    protected API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
-        try {
-
-            APIIdentifier apiIdentifier = new APIIdentifier(
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-            API api = new API(apiIdentifier);
-            return api;
-        } catch (GovernanceException e) {
-            throw new APIManagementException("Error while getting attribute", e);
-        }
-    }
-
-    protected API getApiInformation(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
-        return getApi(apiArtifact);
     }
 
     protected String getTenantDomain(Identifier identifier) {
@@ -179,8 +120,9 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         return "admin";
     }
 
+
     @Override
-    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         return null;
     }
 

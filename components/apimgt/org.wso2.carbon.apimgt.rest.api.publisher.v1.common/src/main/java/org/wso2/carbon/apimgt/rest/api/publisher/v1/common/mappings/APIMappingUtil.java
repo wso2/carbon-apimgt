@@ -1019,7 +1019,7 @@ public class APIMappingUtil {
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), tenantDomain);
+                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
 
             //We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table: table
@@ -2233,7 +2233,7 @@ public class APIMappingUtil {
         productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId()
                 .getProviderName()));
-        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId(), tenantDomain);
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getUuid(), tenantDomain);
         List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
         productDto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
 
