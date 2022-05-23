@@ -250,7 +250,15 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -460,76 +468,6 @@ public final class APIUtil {
                 usedByProduct.setUUID(apiProductPath);
             }
         }
-    }
-
-    public static void loadloadTenantAPIRXT(String tenant, int tenantID) throws APIManagementException {
-
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        UserRegistry registry = null;
-        try {
-
-            registry = registryService.getGovernanceSystemRegistry(tenantID);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error when create registry instance ", e);
-        }
-
-        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" +
-                File.separator + "rxts";
-        File file = new File(rxtDir);
-        FilenameFilter filenameFilter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                // if the file extension is .rxt return true, else false
-                return name.endsWith(".rxt");
-            }
-        };
-        String[] rxtFilePaths = file.list(filenameFilter);
-
-        if (rxtFilePaths == null) {
-            throw new APIManagementException("rxt files not found in directory " + rxtDir);
-        }
-
-        for (String rxtPath : rxtFilePaths) {
-            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH + RegistryConstants.PATH_SEPARATOR + rxtPath;
-
-            //This is  "registry" is a governance registry instance, therefore calculate the relative path to governance.
-            String govRelativePath = RegistryUtils.getRelativePathToOriginal(resourcePath,
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH));
-            try {
-                // calculate resource path
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
-                        (ServiceReferenceHolder.getUserRealm());
-                resourcePath = authorizationManager.computePathOnMount(resourcePath);
-
-                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantUserRealm(tenantID).getAuthorizationManager();
-
-                if (registry.resourceExists(govRelativePath)) {
-                    // set anonymous user permission to RXTs
-                    authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                    continue;
-                }
-
-                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
-                Resource resource = registry.newResource();
-                resource.setContent(rxt.getBytes(Charset.defaultCharset()));
-                resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
-                registry.put(govRelativePath, resource);
-
-                authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-
-            } catch (UserStoreException e) {
-                throw new APIManagementException("Error while adding role permissions to API", e);
-            } catch (IOException e) {
-                String msg = "Failed to read rxt files";
-                throw new APIManagementException(msg, e);
-            } catch (RegistryException e) {
-                String msg = "Failed to add rxt to registry ";
-                throw new APIManagementException(msg, e);
-            }
-        }
-
     }
     
     /**
