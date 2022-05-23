@@ -387,20 +387,13 @@ public class CertificateManagerImpl implements CertificateManager {
             throws APIManagementException {
 
         try {
-            return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier, organization);
-        } catch (CertificateManagementException e) {
-            throw new APIManagementException(
-                    "Error while retrieving client certificate information for the tenant : " + tenantId, e);
-        }
-    }
-
-    @Override
-    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
-                                                               APIIdentifier apiIdentifier)
-            throws APIManagementException {
-
-        try {
-            return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier);
+            if (organization != null) {
+                return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias,
+                        apiIdentifier, organization);
+            } else {
+                return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias,
+                        (APIIdentifier) apiIdentifier);
+            }
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
                     "Error while retrieving client certificate information for the tenant : " + tenantId, e);

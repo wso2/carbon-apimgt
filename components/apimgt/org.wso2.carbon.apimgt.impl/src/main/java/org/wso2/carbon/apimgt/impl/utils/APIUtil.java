@@ -9647,10 +9647,10 @@ public final class APIUtil {
      */
     public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization)
             throws APIManagementException {
-        if (MIGRATE_FROM_VERSION_PROPERTY.equals("3.2.0") || MIGRATE_FROM_VERSION_PROPERTY.equals("3.2")) {
-            return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
-        } else {
+        if (organization != null) {
             return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
+        } else {
+            return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
         }
     }
 

@@ -215,18 +215,6 @@ public interface CertificateManager {
             String organization) throws APIManagementException;
 
     /**
-     * This method is used to search client certificates based on different parameters.
-     *
-     * @param tenantId      : ID of the tenant.
-     * @param alias         : Alias of the certificate.
-     * @param apiIdentifier : Identifier of the API.
-     * @return List of certificates that match the criteria.
-     * @throws APIManagementException API Management Exception.
-     */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException;
-
-    /**
      * Method to update an existing client certificate.
      *
      * @param certificate : The base64 encoded certificate string.

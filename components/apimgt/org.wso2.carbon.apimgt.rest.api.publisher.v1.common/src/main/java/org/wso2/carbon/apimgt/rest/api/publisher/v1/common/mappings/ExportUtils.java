@@ -223,19 +223,11 @@ public class ExportUtils {
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Exporting client certificates.");
             }
-            if (MIGRATE_FROM_VERSION_PROPERTY.equals("3.2.0") || MIGRATE_FROM_VERSION_PROPERTY.equals("3.2")) {
-                addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat);
-            } else {
                 addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
                         organization);
             }
-        }
-        if (MIGRATE_FROM_VERSION_PROPERTY.equals("3.2.0") || MIGRATE_FROM_VERSION_PROPERTY.equals("3.2")) {
-            addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
-        } else {
             addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
                     organization, currentApiUuid);
-        }
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -874,6 +866,8 @@ public class ExportUtils {
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
             ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization,
             String currentApiUuid) throws APIImportExportException {
+        String apiTenantDomain = null;
+        String schemaContent;
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
@@ -882,12 +876,21 @@ public class ExportUtils {
             // Therefore swagger export is only required for REST or SOAP based APIs
             String apiType = apiDtoToReturn.getType().toString();
             API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
-            api.setOrganization(organization);
+            if (organization != null) {
+                api.setOrganization(organization);
+            } else {
+                apiTenantDomain = getTenantDomain(apiIdentifier);
+                api.setOrganization(apiTenantDomain);
+            }
             api.setId(apiIdentifier);
             if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
-                    String schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, organization);
+                    if (organization != null) {
+                        schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, organization);
+                    } else {
+                        schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, apiTenantDomain);
+                    }
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
                     GraphqlComplexityInfo graphqlComplexityInfo = apiProvider
@@ -947,78 +950,13 @@ public class ExportUtils {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
             JsonObject apiJson = (JsonObject) apiObj;
-            apiJson.addProperty("organizationId", organization);
-
-            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
-                    ImportExportConstants.TYPE_API, apiJson);
-        } catch (APIManagementException e) {
-            throw new APIImportExportException(
-                    "Error while retrieving Swagger definition for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
-                            + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion(), e);
-        } catch (IOException e) {
-            throw new APIImportExportException(
-                    "Error while retrieving saving as YAML for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
-                            + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion(), e);
-        }
-    }
-
-    /**
-     * Retrieve meta information of the API to export and store those in the archive directory.
-     * URL template information are stored in swagger.json definition while rest of the required
-     * data are in api.json
-     *
-     * @param archivePath    Folder path to export meta information to export
-     * @param apiDtoToReturn API DTO to be exported
-     * @param exportFormat   Export format of file
-     * @param apiProvider    API Provider
-     * @param apiIdentifier  API Identifier
-     * @throws APIImportExportException If an error occurs while exporting meta information
-     */
-    public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-                                                      ExportFormat exportFormat, APIProvider apiProvider,
-                                                      APIIdentifier apiIdentifier)
-            throws APIImportExportException {
-
-        CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
-
-        try {
-            // If a streaming API is exported, it does not contain a swagger file.
-            // Therefore swagger export is only required for REST or SOAP based APIs
-            String apiType = apiDtoToReturn.getType().toString();
-            if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
-                // For Graphql APIs, the graphql schema definition should be exported.
-                if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
-                    String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
-                    CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
-                            schemaContent);
-                    GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
-                    if (graphqlComplexityInfo.getList().size() != 0) {
-                        GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
-                                GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
-                        CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION,
-                                exportFormat, ImportExportConstants.GRAPHQL_COMPLEXITY, graphQLQueryComplexityInfoDTO);
-                    }
-                }
-                // For GraphQL APIs, swagger export is not needed
-                if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(
-                            APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
-                    CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
-                            exportFormat,
-                            formattedSwaggerJson);
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Meta information retrieved successfully for API: " + apiDtoToReturn.getName()
-                            + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion());
-                }
+            if (organization != null) {
+                apiJson.addProperty("organizationId", organization);
             } else {
-                String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(
-                        APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
-                CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
-                        exportFormat, asyncApiJson);
+                apiJson.addProperty("organizationId", apiTenantDomain);
             }
             CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
-                    ImportExportConstants.TYPE_API, apiDtoToReturn);
+                    ImportExportConstants.TYPE_API, apiJson);
         } catch (APIManagementException e) {
             throw new APIImportExportException(
                     "Error while retrieving Swagger definition for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
@@ -1053,49 +991,6 @@ public class ExportUtils {
             } else {
                 certificateMetadataDTOs = provider
                         .searchClientCertificates(tenantId, null, (APIIdentifier) identifier, organization);
-            }
-            if (!certificateMetadataDTOs.isEmpty()) {
-                String clientCertsDirectoryPath =
-                        archivePath + File.separator + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY;
-                CommonUtil.createDirectory(clientCertsDirectoryPath);
-
-                JsonArray certificateList = getClientCertificateContentAndMetaData(certificateMetadataDTOs,
-                        clientCertsDirectoryPath);
-
-                if (certificateList.size() > 0) {
-                    CommonUtil.writeDtoToFile(clientCertsDirectoryPath + ImportExportConstants.CLIENT_CERTIFICATE_FILE,
-                            exportFormat, ImportExportConstants.TYPE_CLIENT_CERTIFICATES, certificateList);
-                }
-            }
-        } catch (IOException e) {
-            throw new APIImportExportException("Error while saving as YAML or JSON", e);
-        } catch (APIManagementException e) {
-            throw new APIImportExportException(
-                    "Error retrieving certificate meta data. tenantId [" + tenantId + "] api [" + tenantId + "]", e);
-        }
-    }
-
-    /**
-     * Retrieve Mutual SSL related certificates and store those in the archive directory.
-     *
-     * @param archivePath  Folder path to export client certificates
-     * @param identifier   Identifier
-     * @param tenantId     Tenant id of the user
-     * @param provider     Api Provider
-     * @param exportFormat Export format of file
-     * @throws APIImportExportException If an error occurs when writing to file or retrieving certificate metadata
-     */
-    public static void addClientCertificatesToArchive(String archivePath, Identifier identifier, int tenantId,
-                                                      APIProvider provider, ExportFormat exportFormat)
-            throws APIImportExportException {
-
-        List<ClientCertificateDTO> certificateMetadataDTOs;
-        try {
-            if (identifier instanceof APIProductIdentifier) {
-                certificateMetadataDTOs = provider
-                        .searchClientCertificates(tenantId, null, (APIProductIdentifier) identifier);
-            } else {
-                certificateMetadataDTOs = provider.searchClientCertificates(tenantId, null, (APIIdentifier) identifier);
             }
             if (!certificateMetadataDTOs.isEmpty()) {
                 String clientCertsDirectoryPath =
@@ -1218,5 +1113,11 @@ public class ExportUtils {
                     isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
+    }
+
+    protected static String getTenantDomain(Identifier identifier) {
+
+        return MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
     }
 }
