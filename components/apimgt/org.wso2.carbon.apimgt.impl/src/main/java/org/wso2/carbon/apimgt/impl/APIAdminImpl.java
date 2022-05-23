@@ -678,16 +678,18 @@ public class APIAdminImpl implements APIAdmin {
     private String getDecryptedValue(String value) throws APIManagementException {
 
         try {
-            JsonElement encryptedJsonValue = new JsonParser().parse(value);
-            if (encryptedJsonValue instanceof JsonObject) {
-                JsonObject jsonObject = (JsonObject) encryptedJsonValue;
-                JsonPrimitive encryptedValue = jsonObject.getAsJsonPrimitive(APIConstants.ENCRYPTED_VALUE);
-                if (encryptedValue.isBoolean()) {
-                    JsonPrimitive valueElement = jsonObject.getAsJsonPrimitive(APIConstants.VALUE);
-                    if (encryptedValue.getAsBoolean()) {
-                        if (valueElement.isString()) {
-                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                            return new String(cryptoUtil.decrypt(valueElement.getAsString().getBytes()));
+            if (value.trim().startsWith("{")) {
+                JsonElement encryptedJsonValue = new JsonParser().parse(value);
+                if (encryptedJsonValue instanceof JsonObject) {
+                    JsonObject jsonObject = (JsonObject) encryptedJsonValue;
+                    JsonPrimitive encryptedValue = jsonObject.getAsJsonPrimitive(APIConstants.ENCRYPTED_VALUE);
+                    if (encryptedValue.isBoolean()) {
+                        JsonPrimitive valueElement = jsonObject.getAsJsonPrimitive(APIConstants.VALUE);
+                        if (encryptedValue.getAsBoolean()) {
+                            if (valueElement.isString()) {
+                                CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                                return new String(cryptoUtil.decrypt(valueElement.getAsString().getBytes()));
+                            }
                         }
                     }
                 }
