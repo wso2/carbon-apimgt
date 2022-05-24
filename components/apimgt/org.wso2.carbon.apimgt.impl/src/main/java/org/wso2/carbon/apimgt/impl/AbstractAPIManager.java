@@ -216,17 +216,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiSortedList;
     }
 
-    /**
-     * To check authorization of the API against current logged in user. If the user is not authorized an exception
-     * will be thrown.
-     *
-     * @param identifier API identifier
-     * @throws APIManagementException APIManagementException
-     */
-    protected void checkAccessControlPermission(Identifier identifier) throws APIManagementException {
-        // Implementation different based on invocation come from publisher or store
-    }
-
     protected String getTenantAwareUsername(String username) {
 
         return MultitenantUtils.getTenantAwareUsername(username);
