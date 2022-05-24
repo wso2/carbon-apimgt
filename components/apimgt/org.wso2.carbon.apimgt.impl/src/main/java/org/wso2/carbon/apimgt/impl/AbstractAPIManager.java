@@ -442,7 +442,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getComplexityDetails(uuid);
     }
 
-    public void addOrUpdateComplexityDetails(String uuid,  GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+    public void addOrUpdateComplexityDetails(String uuid, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
 
         apiMgtDAO.addOrUpdateComplexityDetails(uuid, graphqlComplexityInfo);
     }
@@ -1584,5 +1584,4 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return true;
     }
-
 }
