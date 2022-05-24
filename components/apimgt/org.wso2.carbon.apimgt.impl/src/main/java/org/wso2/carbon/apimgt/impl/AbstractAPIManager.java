@@ -147,11 +147,9 @@ public abstract class AbstractAPIManager implements APIManager {
     protected String tenantDomain;
     protected String organization;
     protected String username;
-    protected Registry registry;
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
     APIPersistence apiPersistenceInstance;
-    protected static final GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
 
     public AbstractAPIManager() throws APIManagementException {
 
@@ -169,7 +167,6 @@ public abstract class AbstractAPIManager implements APIManager {
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
 
         try {
-            this.registry = getRegistryService().getGovernanceUserRegistry();
             if (username == null) {
                 this.username = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
             } else {
@@ -184,8 +181,6 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            e.printStackTrace();
         }
         apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
     }
@@ -219,35 +214,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Collections.sort(apiSortedList, new APINameComparator());
         return apiSortedList;
-    }
-
-    /**
-     * Returns the graphQL content in registry specified by the wsdl name
-     *
-     * @param apiId Api Identifier
-     * @return graphQL content matching name if exist else null
-     */
-    @Override
-    public String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException {
-
-        String apiTenantDomain = getTenantDomain(apiId);
-        String schema;
-        try {
-            Registry registryType;
-            //Tenant store anonymous mode if current tenant and the required tenant is not matching
-            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
-                int tenantId = getTenantManager().getTenantId(apiTenantDomain);
-                registryType = getRegistryService().getGovernanceUserRegistry(
-                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                registryType = registry;
-            }
-            schema = schemaDef.getGraphqlSchemaDefinition(apiId, registryType);
-        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException e) {
-            String msg = "Failed to get graphql schema definition of Graphql API : " + apiId;
-            throw new APIManagementException(msg, e);
-        }
-        return schema;
     }
 
     public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
@@ -383,32 +349,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return definition;
     }
 
-    /**
-     * Returns the swagger 2.0 definition of the given API
-     *
-     * @param apiId id of the APIIdentifier
-     * @return An String containing the swagger 2.0 definition
-     * @throws APIManagementException
-     */
-    @Override
-    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
-
-        String apiTenantDomain = getTenantDomain(apiId);
-        String definition = null;
-        String id;
-        if (apiId.getUUID() != null) {
-            id = apiId.getUUID();
-        } else {
-            id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
-        }
-        try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(orgId), id);
-        } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
-        }
-        return definition;
-    }
-
     @Override
     public String getAsyncAPIDefinition(String apiId, String organization) throws APIManagementException {
 
@@ -447,14 +387,6 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         return convertedList;
-    }
-
-    private boolean isTenantDomainNotMatching(String tenantDomain) {
-
-        if (this.tenantDomain != null) {
-            return !(this.tenantDomain.equals(tenantDomain));
-        }
-        return true;
     }
 
     /**
@@ -1658,8 +1590,4 @@ public abstract class AbstractAPIManager implements APIManager {
         return true;
     }
 
-    protected RegistryService getRegistryService() {
-
-        return ServiceReferenceHolder.getInstance().getRegistryService();
-    }
 }

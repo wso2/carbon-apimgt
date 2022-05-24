@@ -3499,11 +3499,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
-        return getGraphqlSchemaDefinition(apiId);
-    }
-
-    @Override
     public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
         return apiMgtDAO.getGlobalPolicy(policyName);
     }

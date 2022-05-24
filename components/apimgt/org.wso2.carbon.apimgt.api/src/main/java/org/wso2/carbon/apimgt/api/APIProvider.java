@@ -270,14 +270,6 @@ public interface APIProvider extends APIManager {
     GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
 
     /**
-     * Returns the graphql schema content in registry specified by the schema name
-     *
-     * @param  apiId  ID of the API
-     * @return schema content matching name if exist else null
-     */
-    String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException;
-
-    /**
      * Returns true if key template given by the global policy already exists.
      * But this check will exclude the policy represented by the policy name
      *

@@ -65,15 +65,6 @@ public interface APIManager {
     List<API> getAllAPIs() throws APIManagementException;
 
     /**
-     * Returns the GraphqlComplexityInfo object for a given API ID
-     *
-     * @param  apiId ID of the API
-     * @return GraphqlComplexityInfo object
-     * @throws APIManagementException if failed to retrieve complexity details of the given API
-     */
-    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
-
-    /**
      * Returns the minimalistic information about the API given the UUID. This will only query from AM database AM_API
      * table.
      *
@@ -82,8 +73,6 @@ public interface APIManager {
      * @throws APIManagementException error while getting the API information from AM_API
      */
     APIInfo getAPIInfoByUUID(String id) throws APIManagementException;
-
-    String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Get API or APIProduct by registry artifact id
@@ -182,16 +171,6 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getOpenAPIDefinition(String apiId, String organization) throws APIManagementException;
-
-    /**
-     * Returns the swagger v2.0 definition as a string
-     *
-     * @param apiId  ID of the APIIdentifier
-     * @param orgId  Identifier of an organization
-     * @return swagger string
-     * @throws APIManagementException
-     */
-    String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException;
 
     /**
      * Returns the async-api v2.0 definition as a string

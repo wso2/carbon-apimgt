@@ -91,7 +91,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPO
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_SANDBOX_ENDPOINTS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_DEFAULT_SUBSCRIBER;
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.MIGRATE_FROM_VERSION_PROPERTY;
+
 
 /**
  * This class uses for Export API functionality.
@@ -904,7 +904,8 @@ public class ExportUtils {
                 }
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
+                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(currentApiUuid, api,
+                            apiProvider);
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
                             exportFormat,
                             formattedSwaggerJson);
