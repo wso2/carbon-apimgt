@@ -146,9 +146,4 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         // TODO Auto-generated method stub
         return null;
     }
-
-    protected RegistryService getRegistryService() {
-        return ServiceReferenceHolder.getInstance().getRegistryService();
-    }
-
 }

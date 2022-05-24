@@ -8193,7 +8193,19 @@ public class ApiMgtDAO {
      */
     public String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
             throws APIManagementException {
-        return getUUIDFromIdentifier(identifier, organization, null);
+        if (organization != null) {
+            return getUUIDFromIdentifier(identifier, organization, null);
+        } else {
+            String apiTenantDomain = getTenantDomain(identifier);
+            return getUUIDFromIdentifier(identifier, apiTenantDomain, null);
+        }
+    }
+
+
+    protected static String getTenantDomain(Identifier identifier) {
+
+        return MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
     }
 
     /**
