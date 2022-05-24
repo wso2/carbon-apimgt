@@ -216,11 +216,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiSortedList;
     }
 
-    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
-
-        return apiMgtDAO.getComplexityDetails(apiIdentifier);
-    }
-
     /**
      * To check authorization of the API against current logged in user. If the user is not authorized an exception
      * will be thrown.
@@ -447,7 +442,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getComplexityDetails(uuid);
     }
 
-    public void addOrUpdateComplexityDetails(String uuid, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+    public void addOrUpdateComplexityDetails(String uuid,  GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
 
         apiMgtDAO.addOrUpdateComplexityDetails(uuid, graphqlComplexityInfo);
     }

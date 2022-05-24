@@ -15002,39 +15002,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get custom complexity details for a particular API
-     *
-     * @param apiIdentifier APIIdentifier object to retrieve API ID
-     * @return info about the complexity details
-     * @throws APIManagementException[
-     */
-    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
-
-        GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
-        String getCustomComplexityDetailsQuery = SQLConstants.GET_CUSTOM_COMPLEXITY_DETAILS_SQL;
-        List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement getCustomComplexityDetails = conn.prepareStatement(getCustomComplexityDetailsQuery)) {
-            int apiId = getAPIID(apiIdentifier, conn);
-            getCustomComplexityDetails.setInt(1, apiId);
-            try (ResultSet rs1 = getCustomComplexityDetails.executeQuery()) {
-                while (rs1.next()) {
-                    CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
-                    customComplexityDetails.setType(rs1.getString("TYPE"));
-                    customComplexityDetails.setField(rs1.getString("FIELD"));
-                    customComplexityDetails.setComplexityValue(rs1.getInt("COMPLEXITY_VALUE"));
-                    customComplexityDetailsList.add(customComplexityDetails);
-                }
-            }
-            graphqlComplexityInfo.setList(customComplexityDetailsList);
-        } catch (SQLException ex) {
-            handleException("Error while retrieving custom complexity details: ", ex);
-        }
-        return graphqlComplexityInfo;
-    }
-
-
-    /**
      * Add a bot detection alert subscription
      *
      * @param email email to be registered for the subscription
