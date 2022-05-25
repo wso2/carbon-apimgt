@@ -16210,9 +16210,10 @@ public class ApiMgtDAO {
                         uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
                     }
                 }
-
-                setOperationPoliciesToURITemplatesMap(apiRevision.getApiUUID(), uriTemplateMap);
-
+                String migrate =  System.getProperty(APIConstants.MIGRATE);
+                if (migrate == null) {
+                    setOperationPoliciesToURITemplatesMap(apiRevision.getApiUUID(), uriTemplateMap);
+                }
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
@@ -18164,7 +18165,11 @@ public class ApiMgtDAO {
         if (apiIdentifier instanceof APIProductIdentifier) {
             return getUUIDFromIdentifier((APIProductIdentifier) apiIdentifier, organization);
         } else {
-            return getUUIDFromIdentifier((APIIdentifier) apiIdentifier, organization);
+            if (organization != null) {
+                return getUUIDFromIdentifier((APIIdentifier) apiIdentifier, organization);
+            } else {
+                return getUUIDFromIdentifier((APIIdentifier) apiIdentifier);
+            }
         }
     }
 
