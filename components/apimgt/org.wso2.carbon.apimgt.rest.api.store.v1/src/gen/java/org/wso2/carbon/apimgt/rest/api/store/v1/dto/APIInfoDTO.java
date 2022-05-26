@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import javax.validation.constraints.*;
 
@@ -40,6 +41,7 @@ public class APIInfoDTO   {
     private APIBusinessInformationDTO businessInformation = null;
     private Boolean isSubscriptionAvailable = null;
     private String monetizationLabel = null;
+    private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
 
   /**
    **/
@@ -318,6 +320,25 @@ public class APIInfoDTO   {
     this.monetizationLabel = monetizationLabel;
   }
 
+  /**
+   * Custom(user defined) properties of API 
+   **/
+  public APIInfoDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "{}", value = "Custom(user defined) properties of API ")
+      @Valid
+  @JsonProperty("additionalProperties")
+  public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -343,12 +364,13 @@ public class APIInfoDTO   {
         Objects.equals(advertiseInfo, apIInfo.advertiseInfo) &&
         Objects.equals(businessInformation, apIInfo.businessInformation) &&
         Objects.equals(isSubscriptionAvailable, apIInfo.isSubscriptionAvailable) &&
-        Objects.equals(monetizationLabel, apIInfo.monetizationLabel);
+        Objects.equals(monetizationLabel, apIInfo.monetizationLabel) &&
+        Objects.equals(additionalProperties, apIInfo.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel);
+    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel, additionalProperties);
   }
 
   @Override
@@ -372,6 +394,7 @@ public class APIInfoDTO   {
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
     sb.append("    monetizationLabel: ").append(toIndentedString(monetizationLabel)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }
