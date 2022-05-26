@@ -46,7 +46,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
@@ -218,9 +218,9 @@ public class APIMappingUtil {
 
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
-            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
-                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
+                APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
                 int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
                 additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
@@ -407,9 +407,9 @@ public class APIMappingUtil {
 
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
-            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
-                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
+                APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
                 int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
                 additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
@@ -790,6 +790,23 @@ public class APIMappingUtil {
         apiInfoDTO.setAvgRating(String.valueOf(api.getRating()));
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+
+        if (api.getAdditionalProperties() != null) {
+            JSONObject additionalProperties = api.getAdditionalProperties();
+            List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            for (Object propertyKey : additionalProperties.keySet()) {
+                APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
+                String key = (String) propertyKey;
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                    additionalPropertiesList.add(additionalPropertiesDTO);
+                }
+            }
+            apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
+        }
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(api.getBusinessOwner());
         apiBusinessInformationDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
