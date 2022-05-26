@@ -20,7 +20,7 @@ info:
     Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/src/main/resources/admin-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
 
     # Authentication
-    The Admin REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+    The Admin REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
     the the API you need to obtain an access token with the required scopes. This guide will walk you through the steps
     that you will need to follow to obtain an access token.
     First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
@@ -96,10 +96,10 @@ info:
     * Make sure you have an API Manager instance up and running.
     * Update the `basepath` parameter to match the hostname and port of the APIM instance.
 
-    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/f5ac2ca9fb22afef6ed6)
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://god.gw.postman.com/run-collection/17491134-b263aa69-7494-4fc5-90fa-daa2f63880ae)
   contact:
     name: WSO2
-    url: http://wso2.com/products/api-manager/
+    url: https://wso2.com/api-manager/
     email: architecture@wso2.com
   license:
     name: Apache 2.0
@@ -142,7 +142,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application"'
 
@@ -205,7 +205,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application"'
 
@@ -258,7 +258,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
 
@@ -321,7 +321,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
 
@@ -346,7 +346,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
 
@@ -385,7 +385,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription"'
 
@@ -453,7 +453,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription"'
 
@@ -511,7 +511,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
 
@@ -579,7 +579,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
 
@@ -604,7 +604,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
 
@@ -645,7 +645,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom"'
 
@@ -710,7 +710,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom"'
 
@@ -765,7 +765,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
 
@@ -830,7 +830,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
 
@@ -858,7 +858,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
 
@@ -896,7 +896,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced"'
 
@@ -959,7 +959,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced"'
 
@@ -1012,7 +1012,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
 
@@ -1075,7 +1075,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
 
@@ -1100,7 +1100,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
 
@@ -1138,7 +1138,7 @@ paths:
             - apim:admin
             - apim:bl_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policies"'
 
@@ -1188,7 +1188,7 @@ paths:
             - apim:admin
             - apim:bl_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policies"'
 
@@ -1228,7 +1228,7 @@ paths:
             - apim:admin
             - apim:bl_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
@@ -1253,7 +1253,7 @@ paths:
             - apim:admin
             - apim:bl_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
@@ -1292,7 +1292,7 @@ paths:
             - apim:admin
             - apim:bl_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
@@ -1370,7 +1370,7 @@ paths:
             - apim:app_import_export
             - apim:admin_application_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/applications"'
 
@@ -1408,7 +1408,7 @@ paths:
             - apim:app_import_export
             - apim:admin_application_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"'
 
@@ -1448,7 +1448,7 @@ paths:
             - apim:admin
             - apim:app_import_export
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"'
 
@@ -1482,7 +1482,7 @@ paths:
             - apim:admin
             - apim:app_owner_change
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/change-owner?owner=admin"'
 
@@ -1519,7 +1519,7 @@ paths:
         - Environments
       summary: Add an Environment
       description: |
-        Add a new geteway environment
+        Add a new gateway environment
       requestBody:
         description: |
           Environment object that should to be added
@@ -1649,7 +1649,7 @@ paths:
             - apim:admin
             - apim:bot_data
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/bot-detection-data"'
 
@@ -1685,7 +1685,7 @@ paths:
             - apim:admin
             - apim:monetization_usage_publish
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/monetization/publish-usage"'
 
@@ -1710,7 +1710,7 @@ paths:
             - apim:admin
             - apim:monetization_usage_publish
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/monetization/publish-usage/status"'
 
@@ -1772,7 +1772,7 @@ paths:
             - apim:admin
             - apim:api_workflow_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/workflows"'
 
@@ -1815,7 +1815,7 @@ paths:
             - apim:admin
             - apim:api_workflow_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"'
 
@@ -1860,7 +1860,7 @@ paths:
             - apim:admin
             - apim:api_workflow_approve
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
 
@@ -1909,7 +1909,7 @@ paths:
             - apim:admin
             - apim:tenantInfo
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/tenant-info/john"'
 
@@ -1957,7 +1957,7 @@ paths:
             - apim:admin
             - apim:tenantInfo
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/custom-urls/wso2.com"'
 
@@ -1985,7 +1985,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/api-categories"'
 
@@ -2019,7 +2019,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/api-categories"'
 
@@ -2061,7 +2061,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 
@@ -2086,7 +2086,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 
@@ -2116,7 +2116,7 @@ paths:
             - apim:admin
             - apim:admin_settings
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/settings"'
 
@@ -2154,7 +2154,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-types"'
 
@@ -2189,7 +2189,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions"'
 
@@ -2232,7 +2232,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions"'
 
@@ -2263,7 +2263,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions"'
 
@@ -2298,7 +2298,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection"'
 
@@ -2341,7 +2341,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection"'
 
@@ -2381,7 +2381,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection"'
 
@@ -2421,7 +2421,7 @@ paths:
             - apim:admin
             - apim:scope_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/system-scopes/YXBpbTpzdWJzY3JpYmU?username=john"'
 
@@ -2456,7 +2456,7 @@ paths:
             - apim:scope_manage
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/system-scopes"'
 
@@ -2500,7 +2500,7 @@ paths:
             - apim:admin
             - apim:scope_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/system-scopes"'
 
@@ -2533,7 +2533,7 @@ paths:
             - apim:admin
             - apim:scope_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/system-scopes/role-aliases"'
 
@@ -2568,7 +2568,7 @@ paths:
             - apim:scope_manage
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/system-scopes/role-aliases"'
 
@@ -2640,7 +2640,7 @@ paths:
             - apim:admin
             - apim:tenant_theme_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/tenant-theme" > theme.zip'
 
@@ -2681,7 +2681,7 @@ paths:
             - apim:admin
             - apim:tenant_theme_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@theme.zip "https://127.0.0.1:9443/api/am/admin/v3/tenant-theme"'
 
@@ -2825,7 +2825,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/key-managers"'
 
@@ -2859,7 +2859,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/key-managers"'
 
@@ -2899,7 +2899,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
 
@@ -2937,7 +2937,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
 
@@ -2962,7 +2962,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
 
@@ -3000,7 +3000,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F "type=WSO2-IS" "https://127.0.0.1:9443/api/am/admin/v3/key-managers/discover"'
 
@@ -4298,7 +4298,7 @@ components:
           example: true
         tooltip:
           type: string
-          example: Entet username to connect to key manager
+          example: Enter username to connect to key manager
         default:
           type: object
           properties: {}
