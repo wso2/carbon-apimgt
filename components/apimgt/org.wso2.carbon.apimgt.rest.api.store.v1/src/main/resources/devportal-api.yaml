@@ -170,8 +170,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis"
-      x-examples:
-        $ref: docs/examples/apis/apis.yaml#/get
 
   /apis/{apiId}:
     get:
@@ -432,8 +430,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/wsdl"
-      x-examples:
-        $ref: docs/examples/apis/wsdl/apiId_wsdl_get.yaml
 
   ######################################################
   # The "Document Collection" resource APIs
@@ -696,8 +692,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
-      x-examples:
-        $ref: docs/examples/apis/apis_id_ratings_get.yaml
 
   /apis/{apiId}/user-rating:
     get:
@@ -750,8 +744,6 @@ paths:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
-      x-examples:
-        $ref: docs/examples/apis/apis_id_user-rating.yaml#/get
 
     put:
       tags:
@@ -798,8 +790,6 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"'
-      x-examples:
-        $ref: docs/examples/apis/apis_id_user-rating.yaml#/put
 
     delete:
       tags:
@@ -826,8 +816,6 @@ paths:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
-      x-examples:
-        $ref: docs/examples/apis/apis_id_user-rating.yaml#/delete
 
   /apis/{apiId}/comments:
     get:
@@ -861,8 +849,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
-      x-examples:
-        $ref: docs/examples/apis/comments.yaml#/get
 
     post:
       tags:
@@ -933,8 +919,6 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
-      x-examples:
-        $ref: docs/examples/apis/comments.yaml#/post
 
   /apis/{apiId}/comments/{commentId}:
     get:
@@ -987,8 +971,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
-      x-examples:
-        $ref: docs/examples/apis/comment_id-comments.yaml#/get
 
     patch:
       tags:
@@ -1062,8 +1044,6 @@ paths:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
-      x-examples:
-        $ref: docs/examples/apis/comments.yaml#/post
 
     delete:
       tags:
@@ -1106,8 +1086,6 @@ paths:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
-      x-examples:
-        $ref: docs/examples/apis/comment_id-comments.yaml#/delete
 
   /apis/{apiId}/comments/{commentId}/replies:
     get:
@@ -1160,8 +1138,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/store/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
-      x-examples:
-        $ref: docs/examples/apis/comment_id-comments.yaml#/get
 
   /apis/{apiId}/topics:
     get:
@@ -3209,8 +3185,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/tenants"
-      x-examples:
-        $ref: docs/examples/tenants/tenants.yam
 
   ######################################################
   # The "Recommendations" resource API
