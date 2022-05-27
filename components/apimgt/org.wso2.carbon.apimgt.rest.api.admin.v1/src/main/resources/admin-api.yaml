@@ -68,11 +68,11 @@ info:
     ```
     curl -k -d "grant_type=password&username=<admin_username>&password=<admin_passowrd>&scope=<scopes seperated by space>"
     \ -H "Authorization: Basic base64(cliet_id:client_secret)"
-    \ https://<host>:<gateway_port>/token
+    \ https://<host>:<gateway_port>/oauth2/token
     ```
     **Sample request**
     ```
-    curl https://localhost:8243/token -k \
+    curl https://localhost:8243/oauth2/token -k \
     -H "Authorization: Basic Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h" \
     -d "grant_type=password&username=admin&password=admin&scope=apim:admin apim:tier_view"
     ```

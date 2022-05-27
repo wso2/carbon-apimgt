@@ -91,7 +91,7 @@ paths:
             $ref: '#/definitions/Error'
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+          source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
           -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
 
@@ -131,7 +131,7 @@ paths:
             $ref: '#/definitions/Error'
         x-code-samples:
           - lang: Curl
-            source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+            source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
             -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /server-startup-healthcheck:
@@ -161,7 +161,7 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck"
+          source: 'curl -k "https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck"'
 
   /api-artifact:
 
@@ -326,7 +326,7 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/apis?context=/pizza/1.0.0&version=1.0&tenantDomain=registry.com"
+          source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/apis?context=/pizza/1.0.0&version=1.0&tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get the list of APIS by providing context and version.
 
@@ -372,7 +372,7 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com"
+          source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get the subscription information of an api by providing the api uuid.
 
@@ -413,7 +413,7 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/applications?name=PizzaAPP&tenantDomain=registry.com\"
+          source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/applications?name=PizzaAPP&tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get the applications information by providing the application name or uuid.
 
@@ -458,7 +458,7 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/subscriptions?apiUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&appUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&tenantDomain=registry.com\"
+          source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/subscriptions?apiUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&appUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get the subscriptions meta information of an api by providing the api uuid and application uuid.
 
@@ -600,7 +600,7 @@ definitions:
         type: array
         items:
           type: string
-          example: "<endpoint xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></endpoint>"
+          example: "<endpoint xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v2/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v2/api/\"/></endpoint>"
 
   #-----------------------------------------------------
   # The Sequence response resource
@@ -614,7 +614,7 @@ definitions:
         type: array
         items:
           type: string
-          example: "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></sequnce>"
+          example: "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v2/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v2/api/\"/></sequnce>"
 
   #-----------------------------------------------------
   # The Local Entry response resource

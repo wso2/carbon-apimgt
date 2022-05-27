@@ -19,7 +19,7 @@ info:
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Publisher**.
 
     # Authentication
-    The Publisher REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+    The Publisher REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
     the the API you need to obtain an access token with the required scopes. This guide will walk you through the steps
     that you will need to follow to obtain an access token.
     First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
@@ -95,10 +95,10 @@ info:
     * Make sure you have an API Manager instance up and running.
     * Update the `basepath` parameter to match the hostname and port of the APIM instance.
 
-    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/a09044034b5c3c1b01a9)
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://god.gw.postman.com/run-collection/17491134-edb4ef7a-1ac7-420b-8651-2d9fd5585f6c)
   contact:
     name: WSO2
-    url: http://wso2.com/products/api-manager/
+    url: https://wso2.com/api-manager/
     email: architecture@wso2.com
   license:
     name: Apache 2.0
@@ -146,7 +146,8 @@ paths:
             name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
 
             Supported attribute modifiers are [**version, context, name, status,
-            description, doc, provider**]
+            description, provider, api-category, tags, doc, contexttemplate,
+            lcstate, content, type, label, enablestore, thirdparty**]
 
             If no advanced attribute modifier has been specified,  the API names containing
             the search term will be returned as a result.
@@ -427,8 +428,8 @@ paths:
     put:
       tags:
         - APIs
-      summary: Update Topics
-      description: This operation can be used to update topics of an existing API.
+      summary: Update Topics of an Async API
+      description: This operation can be used to update topics of an existing async API.
       operationId: updateTopics
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -476,6 +477,11 @@ paths:
             - apim:api_create
             - apim:api_manage
             - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f/topics"'
 
   /apis/{apiId}/reimport-service:
     put:
@@ -1706,8 +1712,8 @@ paths:
             - apim:api_publish
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+                "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/undeploy-revision:
     #--------------------------------------------
@@ -1890,7 +1896,7 @@ paths:
             - apim:comment_manage
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
+          source: curl -k "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
 
     post:
       tags:
@@ -1961,7 +1967,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
+          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
 
   /apis/{apiId}/comments/{commentId}:
     get:
@@ -2016,7 +2022,7 @@ paths:
             - apim:comment_manage
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+          source: curl -k "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
 
     patch:
       tags:
@@ -2088,7 +2094,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
+          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
 
     delete:
       tags:
@@ -2128,7 +2134,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+            "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
 
   /apis/{apiId}/comments/{commentId}/replies:
     get:
@@ -2183,7 +2189,7 @@ paths:
             - apim:comment_manage
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
+          source: curl -k "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
 
   /apis/import-openapi:
     post:
@@ -2491,6 +2497,7 @@ paths:
             type: string
         - name: apiId
           in: query
+          description: API ID consisting of the UUID of the API
           schema:
             type: string
       responses:
@@ -2788,7 +2795,7 @@ paths:
             - apim:api_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F schemaDefinition=@schema.graphql "https://127.0.0.1:9443/api/am/publisher/v3/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/graphql-schema"'
       operationId: updateAPIGraphQLSchema
 
@@ -4427,7 +4434,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v3/throttling-policies/subscription?tierQuotaType=RequestCountLimit"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/throttling-policies/streaming/subscription?limit=10&offset=0"'
 
   ######################################################
   # The "Individual Throttling Tier" resource APIs
@@ -4599,8 +4606,8 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon
-          -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates"'
+          -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon -F tier=Gold
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates"'
       operationId: addAPIClientCertificate
 
   /apis/{apiId}/client-certificates/{alias}:
@@ -7489,7 +7496,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
 
     post:
       tags:
@@ -7556,7 +7563,7 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
 
 
   /apis/{apiId}/operation-policies/{operationPolicyId}:
@@ -7601,7 +7608,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
     delete:
       tags:
@@ -7634,7 +7641,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
   /apis/{apiId}/operation-policies/{operationPolicyId}/content:
     get:
@@ -7677,7 +7684,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
   /operation-policies:
     get:
@@ -7721,7 +7728,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies"'
 
     post:
       tags:
@@ -7783,7 +7790,7 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies"'
 
   /operation-policies/{operationPolicyId}:
     get:
@@ -7823,7 +7830,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
     delete:
       tags:
@@ -7852,7 +7859,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
 
   /operation-policies/{operationPolicyId}/content:
     get:
@@ -7891,7 +7898,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
   /api-products/change-lifecycle:
     post:
@@ -8578,10 +8585,10 @@ components:
               {
                 "endpoint_type": "http",
                 "sandbox_endpoints":       {
-                   "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+                   "url": "https://localhost:9443/am/sample/pizzashack/v3/api/"
                 },
                 "production_endpoints":       {
-                   "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+                   "url": "https://localhost:9443/am/sample/pizzashack/v3/api/"
                 }
               }
 
@@ -8593,22 +8600,22 @@ components:
                 "sessionManagement": "",
                 "sandbox_endpoints":       [
                             {
-                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/1"
+                      "url": "https://localhost:9443/am/sample/pizzashack/v3/api/1"
                    },
                             {
                       "endpoint_type": "http",
                       "template_not_supported": false,
-                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/2"
+                      "url": "https://localhost:9443/am/sample/pizzashack/v3/api/2"
                    }
                 ],
                 "production_endpoints":       [
                             {
-                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/3"
+                      "url": "https://localhost:9443/am/sample/pizzashack/v3/api/3"
                    },
                             {
                       "endpoint_type": "http",
                       "template_not_supported": false,
-                      "url": "https://localhost:9443/am/sample/pizzashack/v1/api/4"
+                      "url": "https://localhost:9443/am/sample/pizzashack/v3/api/4"
                    }
                 ],
                 "sessionTimeOut": "",
@@ -8622,21 +8629,21 @@ components:
                    {
                       "endpoint_type":"http",
                       "template_not_supported":false,
-                      "url":"https://localhost:9443/am/sample/pizzashack/v1/api/1"
+                      "url":"https://localhost:9443/am/sample/pizzashack/v3/api/1"
                    }
                 ],
                 "endpoint_type":"failover",
                 "sandbox_endpoints":{
-                   "url":"https://localhost:9443/am/sample/pizzashack/v1/api/2"
+                   "url":"https://localhost:9443/am/sample/pizzashack/v3/api/2"
                 },
                 "production_endpoints":{
-                   "url":"https://localhost:9443/am/sample/pizzashack/v1/api/3"
+                   "url":"https://localhost:9443/am/sample/pizzashack/v3/api/3"
                 },
                 "sandbox_failovers":[
                    {
                       "endpoint_type":"http",
                       "template_not_supported":false,
-                      "url":"https://localhost:9443/am/sample/pizzashack/v1/api/4"
+                      "url":"https://localhost:9443/am/sample/pizzashack/v3/api/4"
                    }
                 ]
               }
@@ -8661,9 +8668,9 @@ components:
           example:
             endpoint_type: http
             sandbox_endpoints:
-              url: https://localhost:9443/am/sample/pizzashack/v1/api/
+              url: https://localhost:9443/am/sample/pizzashack/v3/api/
             production_endpoints:
-              url: https://localhost:9443/am/sample/pizzashack/v1/api/
+              url: https://localhost:9443/am/sample/pizzashack/v3/api/
         endpointImplementationType:
           type: string
           example: INLINE
@@ -10712,7 +10719,7 @@ components:
                 contains host/servers specified in the OpenAPI file/URL
               items:
                 type: string
-                example: https://localhost:9443/am/sample/pizzashack/v1/api/
+                example: https://localhost:9443/am/sample/pizzashack/v3/api/
           description: |
             API definition information
         errors:
@@ -11372,8 +11379,8 @@ components:
       additionalProperties:
         type: string
       example:
-        productionEndpoint: https://localhost:9443/pizzashack/v1/api/
-        sandboxEndpoint: https://localhost:9443/pizzashack/v1/api/
+        productionEndpoint: https://localhost:9443/pizzashack/v3/api/
+        sandboxEndpoint: https://localhost:9443/pizzashack/v3/api/
     AsyncAPISpecificationValidationResponse:
       title: AsyncAPI Specification Validation Response
       required:
@@ -11416,7 +11423,7 @@ components:
                 contains host/servers specified in the AsyncAPI file/URL
               items:
                 type: string
-                example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
+                example: "https://localhost:9443/am/sample/pizzashack/v3/api/"
             gatewayVendor:
               type: string
               example: wso2
