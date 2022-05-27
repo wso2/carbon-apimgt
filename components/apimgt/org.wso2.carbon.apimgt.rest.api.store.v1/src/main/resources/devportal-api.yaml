@@ -3468,6 +3468,20 @@ components:
         monetizationLabel:
           type: string
           example: Free
+        additionalProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+          description: |
+            Custom(user defined) properties of API
+          example: { }
     APIInfoList:
       title: API Info List
       type: object
