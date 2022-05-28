@@ -40,7 +40,7 @@ import java.util.List;
 
         PowerMockito.doReturn(list).when(throttlingApiServiceMock, "getThrottlingPolicies", Mockito.anyString());
 
-        Response response = throttlingApiServiceMock.search(1, 0, "null", "null", null);
+        Response response = throttlingApiServiceMock.throttlingPolicySearch( "null", null);
 
         Assert.assertEquals(expectedResult, response.getEntity());
     }

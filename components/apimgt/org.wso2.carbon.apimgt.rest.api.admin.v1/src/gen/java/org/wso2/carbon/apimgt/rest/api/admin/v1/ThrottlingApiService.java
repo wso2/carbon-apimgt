@@ -35,7 +35,6 @@ import javax.ws.rs.core.SecurityContext;
 public interface ThrottlingApiService {
       public Response exportThrottlingPolicy(String policyId, String name, String type, String format, MessageContext messageContext) throws APIManagementException;
       public Response importThrottlingPolicy(ExportThrottlePolicyDTO exportThrottlePolicyDTO, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
-      public Response search(Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPoliciesGet(String accept, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPoliciesPost(String contentType, BlockingConditionDTO blockingConditionDTO, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPolicyConditionIdDelete(String conditionId, MessageContext messageContext) throws APIManagementException;
@@ -61,4 +60,5 @@ public interface ThrottlingApiService {
       public Response throttlingPoliciesSubscriptionPolicyIdGet(String policyId, MessageContext messageContext) throws APIManagementException;
       public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, String contentType, SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO, MessageContext messageContext) throws APIManagementException;
       public Response throttlingPoliciesSubscriptionPost(String contentType, SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPolicySearch(String query, MessageContext messageContext) throws APIManagementException;
 }

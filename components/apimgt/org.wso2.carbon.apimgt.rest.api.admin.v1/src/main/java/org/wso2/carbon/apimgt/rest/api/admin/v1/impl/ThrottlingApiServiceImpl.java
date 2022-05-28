@@ -507,6 +507,34 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     }
 
     /**
+     * Returns list of throttling policy details filtered using query parameters
+     *
+     * @param query          filtering parameters
+     * @return Retrieves Throttle Policies List
+     * @throws APIManagementException
+     */
+    @Override public Response throttlingPolicySearch(String query, MessageContext messageContext)
+            throws APIManagementException {
+        ThrottlePolicyDetailsListDTO resultListDTO = new ThrottlePolicyDetailsListDTO();
+
+        String policyType;
+        Map<String, String> filters;
+        List<ThrottlePolicyDetailsDTO> result = null;
+        log.debug("Extracting query info...");
+        filters = Splitter.on(" ").withKeyValueSeparator(":").split(query);
+        try {
+            policyType = filters.get("type");
+            result = getThrottlingPolicies(policyType);
+        } catch (NullPointerException e) {
+            String errorMessage = "Error while resolving policy type";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        resultListDTO.setCount(result.size());
+        resultListDTO.setList(result);
+        return Response.ok().entity(resultListDTO).build();
+    }
+
+    /**
      * Validates the permission element of the subscription throttle policy
      *
      * @param body subscription throttle policy
@@ -1129,7 +1157,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         List<ThrottlePolicyDetailsDTO> policies = new ArrayList<>();
-        if (policyLevel.equals("*") || policyLevel.equals(PolicyConstants.POLICY_LEVEL_APP)) {
+        if (policyLevel.equals("all") || policyLevel.equals(PolicyConstants.POLICY_LEVEL_APP)) {
             temp = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_APP);
             for (Policy policy : temp) {
                 ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
@@ -1138,7 +1166,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 policies.add(policyDetails);
             }
         }
-        if (policyLevel.equals("*") || policyLevel.equals(PolicyConstants.POLICY_LEVEL_SUB)) {
+        if (policyLevel.equals("all") || policyLevel.equals(PolicyConstants.POLICY_LEVEL_SUB)) {
             temp = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_SUB);
             for (Policy policy : temp) {
                 ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
@@ -1147,7 +1175,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 policies.add(policyDetails);
             }
         }
-        if (policyLevel.equals("*") || policyLevel.equals(PolicyConstants.POLICY_LEVEL_API)) {
+        if (policyLevel.equals("all") || policyLevel.equals(PolicyConstants.POLICY_LEVEL_API)) {
             temp = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_API);
             for (Policy policy : temp) {
                 ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
@@ -1156,7 +1184,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 policies.add(policyDetails);
             }
         }
-        if (policyLevel.equals("*") || policyLevel.equals(PolicyConstants.POLICY_LEVEL_GLOBAL)) {
+        if (policyLevel.equals("all") || policyLevel.equals(PolicyConstants.POLICY_LEVEL_GLOBAL)) {
             temp = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_GLOBAL);
             for (Policy policy : temp) {
                 ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
@@ -1165,44 +1193,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 policies.add(policyDetails);
             }
         }
-
         return policies;
-    }
-
-    /**
-     * Returns list of throttling policy details filtered using query parameters
-     *
-     * @param limit     limit of the search results(for future use)
-     * @param offset    offset from the start of the list(for future use)
-     * @param query          filtering parameters
-     * @param ifNoneMatch
-     * @return Retrieves Throttle Policies List
-     * @throws APIManagementException
-     */
-    @Override public Response search(Integer limit, Integer offset, String query, String ifNoneMatch,
-            MessageContext messageContext) throws APIManagementException {
-        ThrottlePolicyDetailsListDTO resultListDTO = new ThrottlePolicyDetailsListDTO();
-//        Need to consider further filtering properties
-//        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-//        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String policyType;
-        Map<String, String> filters;
-        List<ThrottlePolicyDetailsDTO> result = null;
-        if (query.equals(PolicyConstants.NULL_CHECK)) {
-            policyType = "*";
-            result = getThrottlingPolicies(policyType);
-        } else {
-            filters = Splitter.on(" ").withKeyValueSeparator(":").split(query);
-            try {
-                policyType = filters.get("type");
-                result = getThrottlingPolicies(policyType);
-            } catch (NullPointerException e) {
-                String errorMessage = "Error while resolving policy type";
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        resultListDTO.setList(result);
-        return Response.ok().entity(resultListDTO).build();
     }
 
     /**

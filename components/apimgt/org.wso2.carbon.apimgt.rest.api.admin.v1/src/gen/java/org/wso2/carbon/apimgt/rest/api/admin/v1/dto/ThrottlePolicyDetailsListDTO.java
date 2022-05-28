@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDetailsDTO;
 import javax.validation.constraints.*;
 
@@ -26,7 +25,6 @@ public class ThrottlePolicyDetailsListDTO   {
   
     private Integer count = null;
     private List<ThrottlePolicyDetailsDTO> list = new ArrayList<ThrottlePolicyDetailsDTO>();
-    private PaginationDTO pagination = null;
 
   /**
    * Number of Throttling Policies returned. 
@@ -64,24 +62,6 @@ public class ThrottlePolicyDetailsListDTO   {
     this.list = list;
   }
 
-  /**
-   **/
-  public ThrottlePolicyDetailsListDTO pagination(PaginationDTO pagination) {
-    this.pagination = pagination;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("pagination")
-  public PaginationDTO getPagination() {
-    return pagination;
-  }
-  public void setPagination(PaginationDTO pagination) {
-    this.pagination = pagination;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -93,13 +73,12 @@ public class ThrottlePolicyDetailsListDTO   {
     }
     ThrottlePolicyDetailsListDTO throttlePolicyDetailsList = (ThrottlePolicyDetailsListDTO) o;
     return Objects.equals(count, throttlePolicyDetailsList.count) &&
-        Objects.equals(list, throttlePolicyDetailsList.list) &&
-        Objects.equals(pagination, throttlePolicyDetailsList.pagination);
+        Objects.equals(list, throttlePolicyDetailsList.list);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, list, pagination);
+    return Objects.hash(count, list);
   }
 
   @Override
@@ -109,7 +88,6 @@ public class ThrottlePolicyDetailsListDTO   {
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
-    sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");
     return sb.toString();
   }

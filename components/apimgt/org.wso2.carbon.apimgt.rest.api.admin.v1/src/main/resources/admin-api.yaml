@@ -120,17 +120,14 @@ paths:
       description: |
         This operation provides you a list of available Throttling Policies qualifying the given keyword match.
       parameters:
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
         - name: query
           in: query
           description: |
             **Search**.
-
-            You can search by providing a keyword.
+            You can search by providing a keyword. Allowed to search by type only.
           schema:
             type: string
-        - $ref: '#/components/parameters/If-None-Match'
+          required: true
       responses:
         200:
           description: |
@@ -153,7 +150,7 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/search?query=type:sub"'
-      operationId: search
+      operationId: throttlingPolicySearch
 
   ######################################################
   # The "Application Throttling Policy Collection" resource API
@@ -3269,8 +3266,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ThrottlePolicyDetails'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
     ThrottlePolicyDetails:
       title: Generic Policy
       required:
@@ -5196,7 +5191,7 @@ components:
           tokenUrl: https://localhost:9443/oauth2/token
           scopes:
             openid: Authorize access to user details
-            apim:policies_import_export: Export and import throttling policies related operations
+            apim:policies_import_export: Export and import policies related operations
             apim:admin: Manage all admin operations
             apim:tier_view: View throttling policies
             apim:tier_manage: Update and delete throttling policies

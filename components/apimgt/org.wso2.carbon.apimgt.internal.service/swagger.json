@@ -230,6 +230,13 @@
           "required" : false,
           "type" : "string"
         }, {
+          "name" : "expand",
+          "in" : "query",
+          "description" : "Defines whether the returned response should contain full details of API\n",
+          "required" : false,
+          "type" : "boolean",
+          "default" : true
+        }, {
           "name" : "Accept",
           "in" : "header",
           "description" : "Media types acceptable for the response. Default is application/json.\n",
@@ -1311,8 +1318,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "default" : "DIRECT",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
+          "default" : "DIRECT"
         }
       }
     },

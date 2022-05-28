@@ -56,7 +56,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
-            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import throttling policies related operations")
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 
@@ -75,7 +75,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
-            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import throttling policies related operations")
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 
@@ -86,22 +86,6 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response importThrottlingPolicy(@ApiParam(value = "Throttling Policy object that should to be imported " ,required=true) ExportThrottlePolicyDTO exportThrottlePolicyDTO,  @ApiParam(value = "Update an existing throttlingpolicy with the same name ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
         return delegate.importThrottlingPolicy(exportThrottlePolicyDTO, overwrite, securityContext);
-    }
-
-    @GET
-    @Path("/policies/search")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve/Search Throttling Polcies ", notes = "This operation provides you a list of available Throttling Policies qualifying the given keyword match. ", response = ThrottlePolicyDetailsListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
-        })
-    }, tags={ "Unified Search",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. List of qualifying Throttling Policies is returned. ", response = ThrottlePolicyDetailsListDTO.class) })
-    public Response search( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "**Search**.  You can search by providing a keyword. ")  @QueryParam("query") String query,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.search(limit, offset, query, ifNoneMatch, securityContext);
     }
 
     @GET
@@ -535,12 +519,28 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
         })
-    }, tags={ "Subscription Policy (Collection)" })
+    }, tags={ "Subscription Policy (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = SubscriptionThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
     public Response throttlingPoliciesSubscriptionPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Subscripion level policy object that should to be added " ,required=true) SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO) throws APIManagementException{
         return delegate.throttlingPoliciesSubscriptionPost(contentType, subscriptionThrottlePolicyDTO, securityContext);
+    }
+
+    @GET
+    @Path("/policies/search")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve/Search Throttling Polcies ", notes = "This operation provides you a list of available Throttling Policies qualifying the given keyword match. ", response = ThrottlePolicyDetailsListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+        })
+    }, tags={ "Unified Search" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of qualifying Throttling Policies is returned. ", response = ThrottlePolicyDetailsListDTO.class) })
+    public Response throttlingPolicySearch( @NotNull @ApiParam(value = "**Search**. You can search by providing a keyword. Allowed to search by type only. ",required=true)  @QueryParam("query") String query) throws APIManagementException{
+        return delegate.throttlingPolicySearch(query, securityContext);
     }
 }
