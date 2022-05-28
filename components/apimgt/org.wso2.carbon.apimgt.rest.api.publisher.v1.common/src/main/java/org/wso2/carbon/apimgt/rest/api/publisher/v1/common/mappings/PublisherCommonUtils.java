@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
@@ -292,8 +293,10 @@ public class PublisherCommonUtils {
                     if (!uriTemplate.getOperationPolicies().isEmpty()) {
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
                     }
-                    operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, uriTemplate.getSandboxEndpoint());
-                    operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, uriTemplate.getProductionEndpoint());
+                    operationEndpointPerURITemplate.put(key +
+                            APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, uriTemplate.getSandboxEndpoint());
+                    operationEndpointPerURITemplate.put(key +
+                            APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, uriTemplate.getProductionEndpoint());
                 }
 
                 for (URITemplate uriTemplate : uriTemplates) {
@@ -457,6 +460,62 @@ public class PublisherCommonUtils {
                     endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
                     apidto.setEndpointConfig(endpointConfig);
                 }
+            }
+        }
+    }
+
+    /**
+     * This method will encrypt the OAuth 2.0 API Key and API Secret
+     *
+     * @param cryptoUtil             cryptography util
+     * @param oldApiSecret           existing API secret
+     * @param apiEndpointDTO          APIendpointDto
+     * @param endpointConfig          endpointDTO config
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
+     */
+    public static void encryptEndpointSecurityOAuthCredentials(APIEndpointDTO apiEndpointDTO, CryptoUtil cryptoUtil,
+                                                               String oldApiSecret, Map endpointConfig)
+            throws CryptoException, APIManagementException {
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        String customParametersString;
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                String endpointSecurityType = (String) endpointSecurity
+                        .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                // Change default value of customParameters JSONObject to String
+                if (!(endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                    LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
+                            endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                    customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                } else if (endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
+                    customParametersString = (String) endpointSecurity
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                } else {
+                    customParametersString = "{}";
+                }
+
+                endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
+                if (APIConstants.OAuthConstants.OAUTH.equals(endpointSecurityType)) {
+                    if (endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
+                            && StringUtils.isNotBlank(
+                            endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString())) {
+                        String apiSecret = endpointSecurity
+                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                        String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
+                        endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                    } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                        endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldApiSecret);
+                    } else {
+                        String errorMessage = "Client secret is not provided for production endpoint security";
+                        throw new APIManagementException(
+                                ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                    }
+                }
+                endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                apiEndpointDTO.setEndpointConfig(endpointConfig);
             }
         }
     }
@@ -1803,94 +1862,140 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Get All operation Endpoints of an API
+     * Get All Endpoints of an API
      *
      * @param uuid   Unique identifier of API
      * @param apiProvider
-     * @return OperationEndpointListDTO object
+     * @return APIEndpointListDTO object
      * @throws APIManagementException if there is en error while retrieving the lifecycle state information
      */
-    public static OperationEndpointListDTO getOperationEndpoints(String uuid, APIProvider apiProvider)
+    public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider)
             throws APIManagementException {
-        List<OperationEndpoint> operationEndpointsList = apiProvider.getAllOperationEndpointsByUUID(uuid);
-        if (operationEndpointsList == null) {
-            throw new APIManagementException("Error occurred while getting operation Endpoints of API " + uuid,
-                    ExceptionCodes.ERROR_FETCHING_OPERATION_ENDPOINTS_API);
+        List<API_Endpoint> ApiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid);
+        if (ApiEndpointsList == null) {
+            throw new APIManagementException("Error occurred while getting Endpoints of API " + uuid,
+                    ExceptionCodes.API_ENDPOINT_NOT_FOUND);
         } else {
-            return APIMappingUtil.fromOperationEndpointListToDTO(operationEndpointsList);
+            return APIMappingUtil.fromAPIEndpointListToDTO(ApiEndpointsList);
         }
 
     }
 
     /**
-     * Get operation Endpoint of an API By operation UUID
+     * Get Endpoint of an API By operation UUID
      *
      * @param apiUUID   Unique identifier of API
-     * @param endpointUUID   Unique identifier of API
+     * @param endpointUUID   Unique identifier of endpoint
      * @param apiProvider
-     * @return OperationEndpointDTO object
+     * @return APIEndpointDTO object
      * @throws APIManagementException if there is en error while retrieving the lifecycle state information
      */
-    public static OperationEndpointDTO getOperationEndpoint(
-            String apiUUID, String endpointUUID, APIProvider apiProvider) throws APIManagementException, JsonProcessingException {
-        OperationEndpoint operationEndpoint = apiProvider.getOperationEndpointByUUID(apiUUID, endpointUUID);
-        if (operationEndpoint == null) {
-            throw new APIManagementException("Error occurred while getting operation Endpoint of API " + apiUUID +
+    public static APIEndpointDTO getAPIEndpoint(String apiUUID, String endpointUUID, APIProvider apiProvider)
+            throws APIManagementException, JsonProcessingException {
+        API_Endpoint apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID);
+        if (apiEndpoint == null) {
+            throw new APIManagementException("Error occurred while getting Endpoint of API " + apiUUID +
                     "endpoint UUID" + endpointUUID,
-                    ExceptionCodes.ERROR_FETCHING_OPERATION_ENDPOINT_API);
-        } else {
-            return APIMappingUtil.fromOperationEndpointToDTO(operationEndpoint);
+                    ExceptionCodes.API_ENDPOINT_NOT_FOUND);
         }
-
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint);
     }
 
     /**
-     * Get operation Endpoint of an API By operation UUID
+     * Update Endpoint of an API By operation UUID
      *
      * @param apiId   Unique identifier of API
      * @param endpointId   Unique identifier of API
-     * @param operationEndpointDTO   Unique identifier of API
+     * @param apiEndpointDTO
      * @param organization
-     * @return OperationEndpointDTO object
+     * @return APIEndpointDTO object
      * @throws APIManagementException if there is en error while retrieving the lifecycle state information
      */
-    public static OperationEndpointDTO updateOperationEndpoint(String apiId, String endpointId,
-                                                               OperationEndpointDTO operationEndpointDTO,
-                                                               String organization,
-                                                               APIProvider apiProvider)
-            throws APIManagementException {
-        OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(operationEndpointDTO, organization);
-        OperationEndpoint operationEndpointUpdated = apiProvider.updateOperationEndpoint(apiId, endpointId, operationEndpoint);
-        if (operationEndpointUpdated == null) {
-            throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
-                    "endpoint UUID" + endpointId,
-                    ExceptionCodes.ERROR_UPDATING_OPERATION_ENDPOINT_API);
-        } else {
-            return APIMappingUtil.fromOperationEndpointToDTO(operationEndpointUpdated);
+    public static APIEndpointDTO updateAPIEndpoint(String apiId, String endpointId, APIEndpointDTO apiEndpointDTO,
+                                                   String organization, APIProvider apiProvider)
+            throws APIManagementException, CryptoException, JsonProcessingException {
+        String oldApiEndpointSecret = null;
+        APIEndpointDTO oldEndpointDto = getAPIEndpoint(apiId, endpointId, apiProvider);
+        Map oldEndpointConfig = (Map) oldEndpointDto.getEndpointConfig();
+        if (oldEndpointConfig != null) {
+            if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
+                JSONObject oldEndpointSecurity = (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
+                        && oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
+                    oldApiEndpointSecret = oldEndpointSecurity
+                            .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                }
+            }
         }
+
+        Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
+
+        // AWS Lambda: secret key encryption while updating the API
+        if (apiEndpointDTO.getEndpointConfig() != null) {
+            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                if (!StringUtils.isEmpty(secretKey)) {
+                    if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        apiEndpointDTO.setEndpointConfig(endpointConfig);
+                    } else {
+                        String encryptedSecretKey = (String) oldEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        apiEndpointDTO.setEndpointConfig(endpointConfig);
+                    }
+                }
+            }
+        }
+
+        API_Endpoint apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
+        API_Endpoint apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, endpointId, apiEndpoint);
+        if (apiEndpointUpdated == null) {
+            throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
+                    "endpoint UUID" + endpointId, ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
+        }
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpointUpdated);
     }
 
     /**
-     * Insert new operation endpoint for an API
+     * Insert new endpoint for an API
      *
-     * @param apiId
-     * @param operationEndpointDTO
+     * @param apiId Unique identifier of API
+     * @param apiEndpointDTO payload of Endpoint
      * @param organization
      * @param apiProvider
      * @return
-     * @throws APIManagementException
-     * @throws JsonProcessingException
+     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     * @throws CryptoException if there is en error while Crypto
      */
-    public static String addOperationEndpoint(String apiId, OperationEndpointDTO operationEndpointDTO,
-                                              String organization, APIProvider apiProvider)
-            throws APIManagementException {
-        OperationEndpoint operationEndpoint = APIMappingUtil.fromDTOtoOperationEndpoint(operationEndpointDTO, organization);
-        String operationEndpointId = apiProvider.addOperationEndpoint(apiId, operationEndpoint);
-        if (operationEndpointId == null) {
-            throw new APIManagementException("Error occurred while getting operation Endpoint of API " + apiId,
-                    ExceptionCodes.ERROR_INSERTING_OPERATION_ENDPOINT_API);
+    public static String addAPIEndpoint(String apiId, APIEndpointDTO apiEndpointDTO, String organization,
+                                        APIProvider apiProvider) throws APIManagementException, CryptoException {
+        Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
+        // AWS Lambda: secret key encryption while creating the API
+        if (apiEndpointDTO.getEndpointConfig() != null) {
+            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                if (!StringUtils.isEmpty(secretKey)) {
+                    String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                    endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+            }
         }
-        return operationEndpointId;
+        API_Endpoint apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
+        String ApiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint);
+        if (ApiEndpointId == null) {
+            throw new APIManagementException("Error occurred while getting Endpoint of API " + apiId,
+                    ExceptionCodes.ERROR_INSERTING_API_ENDPOINT_API);
+        }
+        return ApiEndpointId;
     }
 
     /**

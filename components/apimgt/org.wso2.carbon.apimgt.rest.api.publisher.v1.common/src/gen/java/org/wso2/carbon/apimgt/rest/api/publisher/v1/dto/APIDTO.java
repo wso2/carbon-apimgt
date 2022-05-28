@@ -271,6 +271,8 @@ return null;
     @Scope(name = "apim:api_manage", description="", value ="")
     private String lastUpdatedTime = null;
     private Object endpointConfig = null;
+    private String primaryProductionEndpointId = null;
+    private String primarySandboxEndpointId = null;
 
     @XmlType(name="EndpointImplementationTypeEnum")
     @XmlEnum(String.class)
@@ -1095,6 +1097,40 @@ return null;
 
   /**
    **/
+  public APIDTO primaryProductionEndpointId(String primaryProductionEndpointId) {
+    this.primaryProductionEndpointId = primaryProductionEndpointId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "232ewe-342d23", value = "")
+  @JsonProperty("primaryProductionEndpointId")
+  public String getPrimaryProductionEndpointId() {
+    return primaryProductionEndpointId;
+  }
+  public void setPrimaryProductionEndpointId(String primaryProductionEndpointId) {
+    this.primaryProductionEndpointId = primaryProductionEndpointId;
+  }
+
+  /**
+   **/
+  public APIDTO primarySandboxEndpointId(String primarySandboxEndpointId) {
+    this.primarySandboxEndpointId = primarySandboxEndpointId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "232ewe-342d23", value = "")
+  @JsonProperty("primarySandboxEndpointId")
+  public String getPrimarySandboxEndpointId() {
+    return primarySandboxEndpointId;
+  }
+  public void setPrimarySandboxEndpointId(String primarySandboxEndpointId) {
+    this.primarySandboxEndpointId = primarySandboxEndpointId;
+  }
+
+  /**
+   **/
   public APIDTO endpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
     this.endpointImplementationType = endpointImplementationType;
     return this;
@@ -1344,6 +1380,8 @@ return null;
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(endpointConfig, API.endpointConfig) &&
+        Objects.equals(primaryProductionEndpointId, API.primaryProductionEndpointId) &&
+        Objects.equals(primarySandboxEndpointId, API.primarySandboxEndpointId) &&
         Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
@@ -1359,7 +1397,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, primaryProductionEndpointId, primarySandboxEndpointId, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -1411,6 +1449,8 @@ return null;
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
+    sb.append("    primaryProductionEndpointId: ").append(toIndentedString(primaryProductionEndpointId)).append("\n");
+    sb.append("    primarySandboxEndpointId: ").append(toIndentedString(primarySandboxEndpointId)).append("\n");
     sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");

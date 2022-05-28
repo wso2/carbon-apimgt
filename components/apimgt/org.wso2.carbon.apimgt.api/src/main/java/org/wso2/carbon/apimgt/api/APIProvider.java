@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
@@ -1426,23 +1427,23 @@ public interface APIProvider extends APIManager {
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
 
     /**
-     * Get Operation Endpoint details by providing API UUID
+     * Get Endpoint details by providing API UUID
      *
      * @param uuid      Unique Identifier of API
-     * @return List<OperationEndpoint> Object
+     * @return List<API_Endpoint> Object
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
-    List<OperationEndpoint> getAllOperationEndpointsByUUID(String uuid) throws APIManagementException;
+    List<API_Endpoint> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException;
 
     /**
-     * Get Operation Endpoint details by providing API UUID
+     * Get Endpoint details by providing API UUID
      *
      * @param apiUUID      Unique Identifier of API
-     * @param endpointUUID      Unique Identifier of OperationEndpoint
-     * @return OperationEndpoint Object
+     * @param endpointUUID      Unique Identifier of Endpoint
+     * @return API_Endpoint Object
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
-    OperationEndpoint getOperationEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException;
+    API_Endpoint getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException;
 
     /**
      * Set existing operation policy mapping to the URI Templates
@@ -1605,34 +1606,34 @@ public interface APIProvider extends APIManager {
     void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
 
     /**
-     * Delete an operation endpoint by providing the endpoint ID
+     * Delete an API endpoint by providing the endpoint ID
      *
-     * @param endpointId     Operation Policy UUID
+     * @param endpointId     API Endpoint UUID
      * @throws APIManagementException
      */
-    void deleteOperationEndpointById(String endpointId, String organization) throws APIManagementException;
+    void deleteAPIEndpointById(String endpointId) throws APIManagementException;
 
     /**
-     *  Update an operation endpoint by providing the endpoint ID
+     *  Update an endpoint by providing the endpoint ID
      *
-     * @param apiUUID
-     * @param endpointUUID
-     * @param operationEndpoint
+     * @param apiUUID Unique identifier of API
+     * @param endpointUUID Unique identifier of endpoint
+     * @param apiEndpoint  Endpoint with updated details
      * @return
      * @throws APIManagementException
      */
-    OperationEndpoint updateOperationEndpoint(String apiUUID, String endpointUUID, OperationEndpoint operationEndpoint)
+    API_Endpoint updateAPIEndpoint(String apiUUID, String endpointUUID, API_Endpoint apiEndpoint)
             throws APIManagementException;
 
     /**
-     * Insert new operation endpoint an API
+     * Insert new endpoint an API
      *
-     * @param apiUUID
-     * @param operationEndpoint
+     * @param apiUUID Unique identifier of API
+     * @param apiEndpoint New Endpoint payload object
      * @return
      * @throws APIManagementException
      */
-    String addOperationEndpoint(String apiUUID, OperationEndpoint operationEndpoint) throws APIManagementException;
+    String addAPIEndpoint(String apiUUID, API_Endpoint apiEndpoint) throws APIManagementException;
 
     /**
      *

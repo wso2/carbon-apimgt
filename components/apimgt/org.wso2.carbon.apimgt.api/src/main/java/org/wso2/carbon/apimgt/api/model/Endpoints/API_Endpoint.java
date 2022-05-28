@@ -1,25 +1,17 @@
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.api.model.Endpoints;
 
 
 import java.io.ByteArrayInputStream;
 
-public class OperationEndpoint {
-    private int operationEndpointId;
+public class API_Endpoint {
+    private int EndpointId;
     private int apiId;
-    private String operationEndpointUuid;
+    private String EndpointUuid;
     private String revisionUuid;
     private String endpointName;
     private ByteArrayInputStream endpointConfig;
-    //private ByteArrayInputStream securityConfig;
     private String organization;
-
-    public int getOperationEndpointId() {
-        return operationEndpointId;
-    }
-
-    public void setOperationEndpointId(int operationEndpointId) {
-        this.operationEndpointId = operationEndpointId;
-    }
+    private String endpointType;
 
     public int getApiId() {
         return apiId;
@@ -27,14 +19,6 @@ public class OperationEndpoint {
 
     public void setApiId(int apiId) {
         this.apiId = apiId;
-    }
-
-    public String getOperationEndpointUuid() {
-        return operationEndpointUuid;
-    }
-
-    public void setOperationEndpointUuid(String operationEndpointUuid) {
-        this.operationEndpointUuid = operationEndpointUuid;
     }
 
     public String getRevisionUuid() {
@@ -68,4 +52,16 @@ public class OperationEndpoint {
     public void setOrganization(String organization) {
         this.organization = organization;
     }
+
+    public String getEndpointType() { return endpointType; }
+
+    public void setEndpointType(String endpointType) { this.endpointType = endpointType; }
+
+    public int getEndpointId() {return EndpointId; }
+
+    public void setEndpointId(int endpointId) {EndpointId = endpointId; }
+
+    public String getEndpointUuid() { return EndpointUuid; }
+
+    public void setEndpointUuid(String endpointUuid) { EndpointUuid = endpointUuid; }
 }

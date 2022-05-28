@@ -300,7 +300,7 @@ public final class ImportExportConstants {
     public static final String POLICIES_DIRECTORY = "Policies";
     public static final String SWAGGER_X_WSO2_APICTL_INIT = "x-wso2-apictl-init";
 
-    //OperationEndpoints Constants
-    public static final String OPERATION_ENDPOINTS_DIRECTORY = "Operation_endpoints";
-    public static final String TYPE_OPERATION_ENDPOINT = "operation-endpoints";
+    //APIEndpoints Constants
+    public static final String API_ENDPOINTS_DIRECTORY = "Api_endpoints";
+    public static final String TYPE_API_ENDPOINT = "api-endpoints";
 }

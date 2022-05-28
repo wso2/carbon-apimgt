@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
@@ -33,8 +35,6 @@ import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationEndpointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
@@ -183,6 +183,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
+    @Path("/{apiId}/endpoints")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Add an Endpoint", notes = "This operation can be used to add a endpoint for an API. ", response = APIEndpointDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created API Endpoint object in the body. ", response = APIEndpointDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
+    public Response addApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Endpoint Object that needs to be added" ,required=true) APIEndpointDTO apIEndpointDTO) throws APIManagementException{
+        return delegate.addApiEndpoint(apiId, apIEndpointDTO, securityContext);
+    }
+
+    @POST
     @Path("/{apiId}/comments")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -201,24 +218,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) PostRequestBodyDTO postRequestBodyDTO,  @ApiParam(value = "ID of the perent comment. ")  @QueryParam("replyTo") String replyTo) throws APIManagementException{
         return delegate.addCommentToAPI(apiId, postRequestBodyDTO, replyTo, securityContext);
-    }
-
-    @POST
-    @Path("/{apiId}/operation-endpoints")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Add Operation Endpoint", notes = "This operation can be used to add a resource endpoint for an API. ", response = OperationEndpointDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
-        })
-    }, tags={ "Operation Endpoints APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Created. Successful response with the newly created Resource Endpoint object in the body. ", response = OperationEndpointDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response addOperationEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Resource Endpoint Object that needs to be added" ,required=true) OperationEndpointDTO operationEndpointDTO) throws APIManagementException{
-        return delegate.addOperationEndpoint(apiId, operationEndpointDTO, securityContext);
     }
 
     @GET
@@ -497,6 +496,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @DELETE
+    @Path("/{apiId}/endpoints/{endpointId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete an Endpoint", notes = "This operation can be used to delete a API endpoint. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Endpoint deleted successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response deleteApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
+        return delegate.deleteApiEndpoint(apiId, endpointId, securityContext);
+    }
+
+    @DELETE
     @Path("/{apiId}/comments/{commentId}")
     
     @Produces({ "application/json" })
@@ -516,24 +532,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response deleteComment(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.deleteComment(commentId, apiId, ifMatch, securityContext);
-    }
-
-    @DELETE
-    @Path("/{apiId}/operation-endpoints/{endpointId}")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Delete Operation Endpoint", notes = "This operation can be used to delete a resource endpoint. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
-        })
-    }, tags={ "Operation Endpoints APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Updated Resource Endpoints is returned. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response deleteOperationEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
-        return delegate.deleteOperationEndpoint(apiId, endpointId, securityContext);
     }
 
     @POST
@@ -1168,6 +1166,40 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiId}/endpoints/{endpointId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get an Endpoint", notes = "This operation can be used to get the available endpoint of an API by UUID. ", response = APIEndpointDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Endpoint object is returned. ", response = APIEndpointDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
+        return delegate.getApiEndpoint(apiId, endpointId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/endpoints")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get All Available Endpoints of an API", notes = "This operation can be used to get all the available endpoints of an API. ", response = APIEndpointListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Endpoints list is returned. ", response = APIEndpointListDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getApiEndpoints(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
+        return delegate.getApiEndpoints(apiId, limit, offset, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/auditapi")
     
     @Produces({ "application/json" })
@@ -1260,40 +1292,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getGraphQLPolicyComplexityTypesOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getGraphQLPolicyComplexityTypesOfAPI(apiId, securityContext);
-    }
-
-    @GET
-    @Path("/{apiId}/operation-endpoints/{endpointId}")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get Operation Endpoint", notes = "This operation can be used to get all the available resource endpoints of an API. ", response = OperationEndpointDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "Operation Endpoints APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Resource Endpoint object is returned. ", response = OperationEndpointDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getOperationEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
-        return delegate.getOperationEndpoint(apiId, endpointId, securityContext);
-    }
-
-    @GET
-    @Path("/{apiId}/operation-endpoints")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get All Available Operation Endpoints of an API", notes = "This operation can be used to get all the available resource endpoints of an API. ", response = OperationEndpointListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "Operation Endpoints APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Resource Endpoints list is returned. ", response = OperationEndpointListDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getOperationEndpoints(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
-        return delegate.getOperationEndpoints(apiId, limit, offset, securityContext);
     }
 
     @GET
@@ -1723,6 +1721,25 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @PUT
+    @Path("/{apiId}/endpoints/{endpointId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update an Endpoint", notes = "This operation can be used to update a API endpoint. ", response = APIEndpointDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Updated API Endpoint is returned. ", response = APIEndpointDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response updateApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId, @ApiParam(value = "API Endpoint object with updated details" ) APIEndpointDTO apIEndpointDTO) throws APIManagementException{
+        return delegate.updateApiEndpoint(apiId, endpointId, apIEndpointDTO, securityContext);
+    }
+
+    @PUT
     @Path("/{apiId}/graphql-policies/complexity")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -1737,26 +1754,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response updateGraphQLPolicyComplexityOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added" ) GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO) throws APIManagementException{
         return delegate.updateGraphQLPolicyComplexityOfAPI(apiId, graphQLQueryComplexityInfoDTO, securityContext);
-    }
-
-    @PUT
-    @Path("/{apiId}/operation-endpoints/{endpointId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Update Operation Endpoint", notes = "This operation can be used to update a resource endpoint. ", response = OperationEndpointDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
-        })
-    }, tags={ "Operation Endpoints APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Updated Resource Endpoints is returned. ", response = OperationEndpointDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response updateOperationEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId, @ApiParam(value = "Resource Endpoint object with updated details" ) OperationEndpointDTO operationEndpointDTO) throws APIManagementException{
-        return delegate.updateOperationEndpoint(apiId, endpointId, operationEndpointDTO, securityContext);
     }
 
     @PUT

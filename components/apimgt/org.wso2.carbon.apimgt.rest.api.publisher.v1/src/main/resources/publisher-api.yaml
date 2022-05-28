@@ -8120,7 +8120,7 @@ paths:
         - API Endpoints
       summary: Get All Available Endpoints of an API
       description: |
-        This operation can be used to get all the available resource endpoints of an API.
+        This operation can be used to get all the available endpoints of an API.
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/limit'
@@ -8130,7 +8130,7 @@ paths:
         200:
           description: |
             OK.
-            Resource Endpoints list is returned.
+            API Endpoints list is returned.
           headers:
             Content-Type:
               description: |
@@ -8148,41 +8148,28 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-      operationId: getOperationEndpoints
+      operationId: getApiEndpoints
 
     post:
       tags:
         - API Endpoints
       summary: Add an Endpoint
       description: |
-        This operation can be used to add a resource endpoint for an API.
+        This operation can be used to add a endpoint for an API.
       parameters:
         - $ref: '#/components/parameters/apiId'
       requestBody:
-        description: Resource Endpoint Object that needs to be added
+        description: Endpoint Object that needs to be added
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Endpoint'
+              $ref: '#/components/schemas/APIEndpoint'
         required: true
-
       responses:
         201:
           description: |
             Created.
-            Successful response with the newly created Resource Endpoint object in the body.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the changed API. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the API lifecycle has been modified the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
+            Successful response with the newly created API Endpoint object in the body.
           content:
             application/json:
               schema:
@@ -8191,13 +8178,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
-
       security:
         - OAuth2Security:
             - apim:api_manage
-            - apim:api_import_export
-
-      operationId: addOperationEndpoint
+      operationId: addApiEndpoint
 
   /apis/{apiId}/endpoints/{endpointId}:
     get:
@@ -8205,16 +8189,15 @@ paths:
         - API Endpoints
       summary: Get an Endpoint
       description: |
-        This operation can be used to get all the available resource endpoints of an API.
+        This operation can be used to get the available endpoint of an API by UUID.
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/endpointId'
-
       responses:
         200:
           description: |
             OK.
-            Resource Endpoint object is returned.
+            API Endpoint object is returned.
           headers:
             Content-Type:
               description: |
@@ -8232,20 +8215,20 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-      operationId: getOperationEndpoint
+      operationId: getApiEndpoint
 
     put:
       tags:
         - API Endpoints
       summary: Update an Endpoint
       description: |
-        This operation can be used to update a resource endpoint.
-      operationId: updateOperationEndpoint
+        This operation can be used to update a API endpoint.
+      operationId: updateApiEndpoint
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/endpointId'
       requestBody:
-        description: Resource Endpoint object with updated details
+        description: API Endpoint object with updated details
         content:
           application/json:
             schema:
@@ -8254,7 +8237,7 @@ paths:
         200:
           description: |
             OK.
-            Updated Resource Endpoints is returned.
+            Updated API Endpoint is returned.
           headers:
             Content-Type:
               description: |
@@ -8275,7 +8258,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
             - apim:api_manage
 
     delete:
@@ -8283,8 +8265,8 @@ paths:
         - API Endpoints
       summary: Delete an Endpoint
       description: |
-        This operation can be used to delete a resource endpoint.
-      operationId: deleteOperationEndpoint
+        This operation can be used to delete a API endpoint.
+      operationId: deleteApiEndpoint
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/endpointId'
@@ -8292,7 +8274,7 @@ paths:
         200:
           description: |
             OK.
-            Updated Resource Endpoints is returned.
+            Endpoint deleted successfully.
           content: {}
         404:
           $ref: '#/components/responses/NotFound'
@@ -8300,7 +8282,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
             - apim:api_manage
 
 components:
@@ -8934,6 +8915,12 @@ components:
               url: https://localhost:9443/am/sample/pizzashack/v1/api/
             production_endpoints:
               url: https://localhost:9443/am/sample/pizzashack/v1/api/
+        primaryProductionEndpointId:
+          type: string
+          example: 232ewe-342d23
+        primarySandboxEndpointId:
+          type: string
+          example: 232ewe-342d23
         endpointImplementationType:
           type: string
           example: INLINE
@@ -10698,11 +10685,9 @@ components:
         sandBoxEndpointId:
           type: string
           example: ""
-          default: default
         productionEndpointId:
           type: string
           example: ""
-          default: default
         uriMapping:
           type: string
           example: ""

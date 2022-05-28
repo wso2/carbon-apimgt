@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
@@ -471,12 +472,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateOperationPolicyParameters(api, tenantDomain);
+        addNoneAPIEndpoint(apiId, api.getUuid());
         addURITemplates(apiId, api, tenantId);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+    }
+
+    /**
+     * Add None Endpoint to AM_API_ENDPOINTS
+     *
+     * @param apiId unique identifier of api (int)
+     * @param uuid  unique identifier of api (UUID)
+     * @throws APIManagementException
+     */
+    private void addNoneAPIEndpoint(int apiId, String uuid) throws APIManagementException{
+        API_Endpoint apiEndpoint = new API_Endpoint();
+        apiEndpoint.setEndpointUuid(uuid);
+        apiEndpoint.setApiId(apiId);
+        apiMgtDAO.addAPIEndpoint(uuid,apiEndpoint);
     }
 
     /**
@@ -907,6 +923,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
         updateAPIResources(api, tenantId);
+        updateAPIPrimaryEndpointsMapping(api);
+    }
+
+    /**
+     * Update primary endpoints of an API
+     *
+     * @param api API
+     * @throws APIManagementException If fails to update local scopes of the API.
+     */
+    private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
+        apiMgtDAO.updateAPIPrimaryEndpointsMapping(api);
     }
 
     /**
@@ -4709,6 +4736,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
                 populateAPIOperationEndpointsMapping(api);
+                populateAPIPrimaryEndpointsMapping(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -4723,6 +4751,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
         }
+    }
+
+    private void populateAPIPrimaryEndpointsMapping(API api) throws APIManagementException{
+        int apiId = apiMgtDAO.getAPIID(api.getUuid());
+        // Get primary production Endpoint mapping
+        String productionEndpointId =
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, "PRODUCTION");
+        api.setPrimaryProductionEndpointId(productionEndpointId);
+        // Get primary sandbox endpoint endpoint
+        String sandboxEndpointId =
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, "SANDBOX");
+        api.setPrimarySandboxEndpointId(sandboxEndpointId);
     }
 
     private void populateAPIOperationEndpointsMapping(API api) throws APIManagementException {
@@ -5931,14 +5971,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<OperationEndpoint> getAllOperationEndpointsByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getOperationEndpoints(uuid);
+    public List<API_Endpoint> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoints(uuid);
     }
 
     @Override
-    public OperationEndpoint getOperationEndpointByUUID(String apiUUID, String endpointUUID)
-            throws APIManagementException {
-        return apiMgtDAO.getOperationEndpoint(apiUUID, endpointUUID);
+    public API_Endpoint getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID);
     }
 
 
@@ -6162,21 +6201,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteOperationEndpointById(String endpointId, String tenantDomain) throws APIManagementException {
-        apiMgtDAO.deleteOperationEndpointByEndpointId(endpointId);
+    public void deleteAPIEndpointById(String endpointId) throws APIManagementException {
+        apiMgtDAO.deleteAPIEndpointByEndpointId(endpointId);
     }
 
     @Override
-    public OperationEndpoint updateOperationEndpoint(String apiUUID, String endpointUUID, OperationEndpoint operationEndpoint)
+    public API_Endpoint updateAPIEndpoint(String apiUUID, String endpointUUID, API_Endpoint apiEndpoint)
             throws APIManagementException {
-        return apiMgtDAO.updateOperationEndpoint(apiUUID, endpointUUID, operationEndpoint);
+        return apiMgtDAO.updateAPIEndpoint(apiUUID, endpointUUID, apiEndpoint);
     }
 
     @Override
-    public String addOperationEndpoint(String apiUUID, OperationEndpoint operationEndpoint) throws APIManagementException {
+    public String addAPIEndpoint(String apiUUID, API_Endpoint apiEndpoint) throws APIManagementException {
         int apiId = apiMgtDAO.getAPIID(apiUUID);
-        operationEndpoint.setApiId(apiId);
-        return apiMgtDAO.addOperationEndpoint(apiUUID, operationEndpoint);
+        apiEndpoint.setApiId(apiId);
+        return apiMgtDAO.addAPIEndpoint(apiUUID, apiEndpoint);
     }
 
     @Override

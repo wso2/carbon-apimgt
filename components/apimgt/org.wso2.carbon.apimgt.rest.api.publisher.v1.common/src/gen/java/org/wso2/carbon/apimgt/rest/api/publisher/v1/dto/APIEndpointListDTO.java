@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import javax.validation.constraints.*;
 
@@ -22,16 +22,16 @@ import javax.validation.Valid;
 
 
 
-public class OperationEndpointListDTO   {
+public class APIEndpointListDTO   {
   
     private Integer count = null;
-    private List<OperationEndpointDTO> list = new ArrayList<OperationEndpointDTO>();
+    private List<APIEndpointDTO> list = new ArrayList<APIEndpointDTO>();
     private PaginationDTO pagination = null;
 
   /**
    * Number of Resource Endpoints returned. 
    **/
-  public OperationEndpointListDTO count(Integer count) {
+  public APIEndpointListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -48,7 +48,7 @@ public class OperationEndpointListDTO   {
 
   /**
    **/
-  public OperationEndpointListDTO list(List<OperationEndpointDTO> list) {
+  public APIEndpointListDTO list(List<APIEndpointDTO> list) {
     this.list = list;
     return this;
   }
@@ -57,16 +57,16 @@ public class OperationEndpointListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<OperationEndpointDTO> getList() {
+  public List<APIEndpointDTO> getList() {
     return list;
   }
-  public void setList(List<OperationEndpointDTO> list) {
+  public void setList(List<APIEndpointDTO> list) {
     this.list = list;
   }
 
   /**
    **/
-  public OperationEndpointListDTO pagination(PaginationDTO pagination) {
+  public APIEndpointListDTO pagination(PaginationDTO pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -91,10 +91,10 @@ public class OperationEndpointListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    OperationEndpointListDTO operationEndpointList = (OperationEndpointListDTO) o;
-    return Objects.equals(count, operationEndpointList.count) &&
-        Objects.equals(list, operationEndpointList.list) &&
-        Objects.equals(pagination, operationEndpointList.pagination);
+    APIEndpointListDTO apIEndpointList = (APIEndpointListDTO) o;
+    return Objects.equals(count, apIEndpointList.count) &&
+        Objects.equals(list, apIEndpointList.list) &&
+        Objects.equals(pagination, apIEndpointList.pagination);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class OperationEndpointListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class OperationEndpointListDTO {\n");
+    sb.append("class APIEndpointListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

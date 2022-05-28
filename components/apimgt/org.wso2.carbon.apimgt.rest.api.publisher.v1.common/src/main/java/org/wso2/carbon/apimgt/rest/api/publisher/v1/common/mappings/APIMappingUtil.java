@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
@@ -69,8 +70,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.*;
 import java.net.URLDecoder;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -369,6 +368,10 @@ public class APIMappingUtil {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
         }
+
+        //Set primary endpoint mapping
+        model.setPrimaryProductionEndpointId(dto.getPrimaryProductionEndpointId());
+        model.setPrimarySandboxEndpointId(dto.getPrimarySandboxEndpointId());
 
         return model;
     }
@@ -1531,17 +1534,10 @@ public class APIMappingUtil {
                     template.setOperationPolicies(OperationPolicyMappingUtil
                             .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies()));
                 }
-                if(operation.getSandBoxEndpointId() != null || operation.getSandBoxEndpointId() != ""){
-                    template.setSandboxEndpoint(operation.getSandBoxEndpointId());
-                }
-                if(operation.getProductionEndpointId() != null || operation.getProductionEndpointId() != ""){
-                    template.setProductionEndpoint(operation.getProductionEndpointId());
-                }
-                if(operation.getProductionEndpointId() == null || operation.getProductionEndpointId().equals("") ||
-                        operation.getSandBoxEndpointId() == null || operation.getSandBoxEndpointId().equals("")){
-                    handleException("The resource mappings '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is empty");
-                }
+                //Add operation mapping endpoint UUIDs to template
+                template.setSandboxEndpoint(operation.getSandBoxEndpointId());
+                template.setProductionEndpoint(operation.getProductionEndpointId());
+
                 uriTemplates.add(template);
             } else {
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
@@ -1651,107 +1647,6 @@ public class APIMappingUtil {
         }
         return scopeSet;
     }
-//
-//    /**
-//     * This method returns endpoints according to the given endpoint config
-//     *
-//     * @param endpoints endpoints given
-//     * @return String endpoint config
-//     */
-//    public static String getEndpointConfigString(List<APIEndpointDTO> endpoints) {
-//        //todo improve this logic to support multiple endpoints such as failorver and load balance
-//        StringBuilder sb = new StringBuilder();
-//        if (endpoints != null && endpoints.size() > 0) {
-//            sb.append("{");
-//            for (APIEndpointDTO endpoint : endpoints) {
-//                sb.append("\"")
-//                        .append(endpoint.getType())
-//                        .append("\": {\"url\":\"")
-//                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
-//                        .append("\",\"timeout\":\"")
-//                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
-//                        .append("\"},");
-//            }
-//            sb.append("\"endpoint_type\" : \"")
-//                    .append(endpoints.get(0).getInline().getType())//assuming all the endpoints are same type
-//                    .append("\"}\n");
-//        }
-//        return sb.toString();
-//    }
-
-//    private static EndpointEndpointConfigDTO getEndpointEndpointConfigDTO(EndpointEndpointConfig
-//    endpointEndpointConfig) {
-//
-//        //map to EndpointEndpointConfig model to EndpointEndpointConfigDTO
-//        EndpointEndpointConfigDTO endpointEndpointConfigDTO = new EndpointEndpointConfigDTO();
-//        switch (endpointEndpointConfig.getEndpointType()) {
-//            case SINGLE:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.SINGLE);
-//            case LOAD_BALANCED:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.LOAD_BALANCED);
-//            case FAIL_OVER:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.FAIL_OVER);
-//        }
-//        List<EndpointConfigDTO> endpointConfigDTOList = new ArrayList<>();
-//        for (EndpointConfig endpointConfig : endpointEndpointConfig.getList()) {
-//            EndpointConfigDTO endpointConfigDTO = new EndpointConfigDTO();
-//            endpointConfigDTO.setUrl(endpointConfig.getUrl());
-//            endpointConfigDTO.setTimeout(endpointConfig.getTimeout());
-//
-//            //map EndpointConfigAttributes model to EndpointConfigAttributesDTO
-//            List<EndpointConfigAttributesDTO> endpointConfigAttributesList = new ArrayList<>();
-//            for (EndpointConfigAttributes endpointConfigAttributes : endpointConfig.getAttributes()) {
-//                EndpointConfigAttributesDTO endpointConfigAttributeDTO = new EndpointConfigAttributesDTO();
-//                endpointConfigAttributeDTO.setName(endpointConfigAttributes.getName());
-//                endpointConfigAttributeDTO.setValue(endpointConfigAttributes.getValue());
-//                endpointConfigAttributesList.add(endpointConfigAttributeDTO);
-//            }
-//            endpointConfigDTO.setAttributes(endpointConfigAttributesList);
-//            endpointConfigDTOList.add(endpointConfigDTO);
-//        }
-//        endpointEndpointConfigDTO.setList(endpointConfigDTOList);
-//        return endpointEndpointConfigDTO;
-//    }
-//
-//    /**
-//     * This method converts Endpoint:EndpontConfig DTO to corresponding model
-//     *
-//     * @param apiEndpointDTO1 egiven endpoint config
-//     * @param type            given endpoint type  SINGLE,  LOAD_BALANCED,  FAIL_OVER
-//     * @return EndpointConfig model
-//     */
-//    private EndpointEndpointConfig getEndpointEndpointConfigModel(EndpointEndpointConfigDTO apiEndpointDTO1,
-//                                                                  EndpointEndpointConfig.EndpointTypeEnum type) {
-//
-//        //mapping properties in EndpointConfigDTO to EndpointConfig model
-//        List<EndpointConfig> configList = new ArrayList<>();
-//        for (EndpointConfigDTO endpointConfigDTO : apiEndpointDTO1.getList()) {
-//            EndpointConfig endpointConfig1 = new EndpointConfig();
-//            endpointConfig1.setUrl(endpointConfigDTO.getUrl());
-//            endpointConfig1.setTimeout(endpointConfigDTO.getTimeout());
-//
-//            //mapping attributes in EndpointConfigAttributesDTO to EndpointConfigAttributes model
-//            List<EndpointConfigAttributes> endpointConfigAttributesList = new ArrayList<>();
-//            for (EndpointConfigAttributesDTO endpointConfigAttributesDTO : endpointConfigDTO.getAttributes()) {
-//                EndpointConfigAttributes endpointConfigAttribute = new EndpointConfigAttributes();
-//                endpointConfigAttribute.setName(endpointConfigAttributesDTO.getName());
-//                endpointConfigAttribute.setValue(endpointConfigAttributesDTO.getValue());
-//
-//                endpointConfigAttributesList.add(endpointConfigAttribute);
-//            }
-//
-//            endpointConfig1.setAttributes(endpointConfigAttributesList);
-//            configList.add(endpointConfig1);
-//        }
-//
-//        //mapping properties in EndpointEndpointConfigDTO to EndpointEndpointConfig model
-//        EndpointEndpointConfig endpointConfig = new EndpointEndpointConfig();
-//        endpointConfig.setEndpointType(type);
-//        endpointConfig.setList(configList);
-//
-//        return endpointConfig;
-//
-//    }
 
     /**
      * This method returns api security scheme as a comma seperated string.
@@ -3038,58 +2933,59 @@ public class APIMappingUtil {
         return dateFormat.parse(time);
     }
 
-    public static OperationEndpointListDTO fromOperationEndpointListToDTO(List<OperationEndpoint> operationEndpoints) {
-        OperationEndpointListDTO operationEndpointListDTO = new OperationEndpointListDTO();
-        List<OperationEndpointDTO> operationEndpointDTOS = new ArrayList<>();
-        for (OperationEndpoint operationEndpoint : operationEndpoints) {
-            operationEndpointDTOS.add(fromOperationEndpointToDTO(operationEndpoint));
+    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<API_Endpoint> apiEndpoints)
+            throws APIManagementException {
+        APIEndpointListDTO apiEndpointListDTO = new APIEndpointListDTO();
+        List<APIEndpointDTO> apiEndpointDTOs = new ArrayList<>();
+        for (API_Endpoint apiEndpoint : apiEndpoints) {
+            apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint));
         }
-        operationEndpointListDTO.setCount(operationEndpointDTOS.size());
-        operationEndpointListDTO.setList(operationEndpointDTOS);
-        return operationEndpointListDTO;
+        apiEndpointListDTO.setCount(apiEndpointDTOs.size());
+        apiEndpointListDTO.setList(apiEndpointDTOs);
+        return apiEndpointListDTO;
     }
 
-    public static OperationEndpointDTO fromOperationEndpointToDTO(OperationEndpoint operationEndpoint) {
-        OperationEndpointDTO operationEndpointDTO = new OperationEndpointDTO();
-        operationEndpointDTO.setId(operationEndpoint.getOperationEndpointUuid());
-        operationEndpointDTO.setName(operationEndpoint.getEndpointName());
-        ByteArrayInputStream endpointConfByteArrInStream = operationEndpoint.getEndpointConfig();
+    public static APIEndpointDTO fromAPIEndpointToDTO(API_Endpoint apiEndpoint) throws APIManagementException {
+        APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
+        apiEndpointDTO.setId(apiEndpoint.getEndpointUuid());
+        apiEndpointDTO.setName(apiEndpoint.getEndpointName());
+        apiEndpointDTO.setEndpointType(apiEndpoint.getEndpointType());
+        ByteArrayInputStream endpointConfByteArrInStream = apiEndpoint.getEndpointConfig();
         if(endpointConfByteArrInStream != null){
             ObjectInputStream objInEndpointConf;
             try {
                 objInEndpointConf = new ObjectInputStream(endpointConfByteArrInStream);
                 HashMap endpointConfigMap = (HashMap)  objInEndpointConf.readObject();
-                operationEndpointDTO.setEndpointConfig(endpointConfigMap);
+                apiEndpointDTO.setEndpointConfig(endpointConfigMap);
             } catch (ClassNotFoundException | IOException  e) {
-                // TODO : print message
-                e.printStackTrace();
+                throw new APIManagementException("Error occurred transform endpoint to DTO object", e);
             }
         }
-        return operationEndpointDTO;
+        return apiEndpointDTO;
     }
 
-    public static OperationEndpoint fromDTOtoOperationEndpoint(OperationEndpointDTO operationEndpointDTO
-            , String organization) throws APIManagementException {
-        OperationEndpoint operationEndpoint = new OperationEndpoint();
-        operationEndpoint.setOperationEndpointUuid(operationEndpointDTO.getId());
-        operationEndpoint.setEndpointName(operationEndpointDTO.getName());
-        HashMap endpointConfigHashMap = (HashMap) operationEndpointDTO.getEndpointConfig();
-
+    public static API_Endpoint fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)
+            throws APIManagementException {
+        API_Endpoint apiEndpoint = new API_Endpoint();
+        apiEndpoint.setEndpointUuid(apiEndpointDTO.getId());
+        apiEndpoint.setEndpointName(apiEndpointDTO.getName());
+        apiEndpoint.setEndpointType(apiEndpointDTO.getEndpointType());
+        HashMap endpointConfigHashMap = (HashMap) apiEndpointDTO.getEndpointConfig();
         if(endpointConfigHashMap != null){
             ByteArrayOutputStream bAoutEndPointConf = new ByteArrayOutputStream();
             try(ObjectOutputStream objOut = new ObjectOutputStream(bAoutEndPointConf)) {
                 objOut.writeObject(endpointConfigHashMap);
                 objOut.flush();
-                operationEndpoint.setEndpointConfig( new ByteArrayInputStream(bAoutEndPointConf.toByteArray()));
+                apiEndpoint.setEndpointConfig( new ByteArrayInputStream(bAoutEndPointConf.toByteArray()));
             } catch (IOException e) {
                 // TODO : print message
-                e.printStackTrace();
+                throw new APIManagementException("Error occurred transform endpoint to DTO object", e);
             }
         }else{
-            throw new APIManagementException("Error occurred while converting operation Endpoint of API ",
-                    ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_OPERATION_ENDPOINT_API);
+            throw new APIManagementException("Error occurred while converting Endpoint of API ",
+                    ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
         }
-        operationEndpoint.setOrganization(organization);
-        return operationEndpoint;
+        apiEndpoint.setOrganization(organization);
+        return apiEndpoint;
     }
 }
