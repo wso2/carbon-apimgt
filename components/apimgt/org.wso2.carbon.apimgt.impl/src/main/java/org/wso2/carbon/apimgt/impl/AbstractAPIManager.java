@@ -1121,11 +1121,16 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected void populateAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException, AsyncSpecPersistenceException {
-        Organization org = new Organization(organization);
         //UUID
         if (api.getUuid() == null) {
             api.setUuid(uuid);
         }
+        if (organization == null) {
+            APIIdentifier identifier = api.getId();
+            String tenantDomain = getTenantDomain(identifier);
+            organization = tenantDomain;
+        }
+        Organization org = new Organization(organization);
         api.setOrganization(organization);
         // environment
         String environmentString = null;
@@ -1573,4 +1578,5 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return true;
     }
+
 }
