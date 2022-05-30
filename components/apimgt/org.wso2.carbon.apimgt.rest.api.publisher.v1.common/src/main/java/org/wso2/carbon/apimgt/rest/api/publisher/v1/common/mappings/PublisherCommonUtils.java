@@ -1919,7 +1919,7 @@ public class PublisherCommonUtils {
         Map oldEndpointConfig = (Map) oldEndpointDto.getEndpointConfig();
         if (oldEndpointConfig != null) {
             if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
-                JSONObject oldEndpointSecurity = (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                Map oldEndpointSecurity = (Map) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
                 if (oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
                         && oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
                     oldApiEndpointSecret = oldEndpointSecurity
