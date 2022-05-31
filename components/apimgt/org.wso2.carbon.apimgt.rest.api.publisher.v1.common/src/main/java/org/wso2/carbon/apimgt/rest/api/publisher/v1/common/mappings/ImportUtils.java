@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -1288,9 +1289,17 @@ public class ImportUtils {
             APIDefinitionValidationResponse validationResponse = OASParserUtil
                     .validateAPIDefinition(swaggerContent, Boolean.TRUE);
             if (!validationResponse.isValid()) {
+                String errorDescription = "";
+                if (validationResponse.getErrorItems().size() > 0) {
+                    for (ErrorHandler errorHandler : validationResponse.getErrorItems()) {
+                        if (StringUtils.isNotBlank(errorDescription)) {
+                            errorDescription = errorDescription.concat(". ");
+                        }
+                        errorDescription = errorDescription.concat(errorHandler.getErrorDescription());
+                    }
+                }
                 throw new APIManagementException(
-                        "Error occurred while importing the API. Invalid Swagger definition found. "
-                                + validationResponse.getErrorItems(), ExceptionCodes.ERROR_READING_META_DATA);
+                        ExceptionCodes.from(ExceptionCodes.APICTL_OPENAPI_PARSE_EXCEPTION, errorDescription));
             }
             JsonObject swaggerContentJson = new JsonParser().parse(swaggerContent).getAsJsonObject();
             if (swaggerContentJson.has(APIConstants.SWAGGER_INFO)
