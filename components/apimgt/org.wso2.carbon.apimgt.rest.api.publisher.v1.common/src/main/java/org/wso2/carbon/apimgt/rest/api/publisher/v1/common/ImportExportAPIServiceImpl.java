@@ -111,6 +111,12 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+        if (organization == null) {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            if (tenantDomain != null) {
+                organization = tenantDomain;
+            }
+        }
         API api = apiProvider.getAPIbyUUID(revisionUUID, organization);
         api.setUuid(apiId);
         apiIdentifier.setUuid(apiId);

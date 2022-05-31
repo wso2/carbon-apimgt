@@ -14809,7 +14809,7 @@ public class ApiMgtDAO {
                                 }
                             }
                             String migrate =  System.getProperty(APIConstants.MIGRATE);
-                            if (migrate != null) {
+                            if (migrate == null) {
                                 try (PreparedStatement policiesStatement = connection.
                                         prepareStatement(
                                                 SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {

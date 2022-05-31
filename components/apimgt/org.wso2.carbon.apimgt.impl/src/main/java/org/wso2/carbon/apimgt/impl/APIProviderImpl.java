@@ -5344,6 +5344,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (organization ==  null) {
+          String tenantDomain = getTenantDomain(apiIdentifier);
+          if (tenantDomain != null) {
+              organization = tenantDomain;
+          }
+        }
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
