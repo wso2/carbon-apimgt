@@ -42,7 +42,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
@@ -223,12 +223,12 @@ public class ExportUtils {
     }
 
     /**
-     * Save All OperationEndpoints To Zip File
+     * Save All API Endpoints To Zip File.
      *
-     * @param archivePath path to save API Endpoints
-     * @param apiID       Unique Identifier of API
+     * @param archivePath  path to save API Endpoints
+     * @param apiID        Unique Identifier of API
      * @param exportFormat Format of export
-     * @param apiProvider API provider
+     * @param apiProvider  API provider
      * @throws APIManagementException
      */
     public static void addOperationEndpointsToArchive(String archivePath, String apiID, ExportFormat exportFormat,
@@ -236,7 +236,7 @@ public class ExportUtils {
         try {
             CommonUtil.createDirectory(archivePath + File.separator +
                     ImportExportConstants.API_ENDPOINTS_DIRECTORY);
-            List<API_Endpoint> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID);
+            List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID);
 
             if (apiEndpointList.size() > 0) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();

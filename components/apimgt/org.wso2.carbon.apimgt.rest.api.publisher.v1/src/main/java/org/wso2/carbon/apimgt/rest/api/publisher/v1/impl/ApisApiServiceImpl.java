@@ -62,7 +62,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -262,7 +262,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String createdAPIEndpointId = PublisherCommonUtils.addAPIEndpoint
                     (apiId, apiEndpointDTO, organization, apiProvider);
-            API_Endpoint createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId);
+            APIEndpointInfo createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId);
             APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint);
             removeAPIEndpointSecrets(createdAPIEndpointDTO);
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -485,13 +485,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Status of API Endpoint Deletion
      */
     @Override
-    public Response deleteApiEndpoint(String apiId, String endpointUuid, MessageContext messageContext) throws APIManagementException {
+    public Response deleteApiEndpoint(String apiId, String endpointUuid, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //validate if api exists
             validateAPIExistence(apiId);
             //validate API Endpoint
-            API_Endpoint existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid);
+            APIEndpointInfo existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid);
             if (existingApiEndpoint != null) {
                 apiProvider.deleteAPIEndpointById(endpointUuid);
                 if (log.isDebugEnabled()) {
@@ -624,7 +625,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             validateAPIExistence(apiId);
             PublisherCommonUtils.updateAPIEndpoint(apiId, endpointId, apIEndpointDTO, organization, apiProvider);
-            API_Endpoint updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId);
+            APIEndpointInfo updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId);
             APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint);
             removeAPIEndpointSecrets(updatedAPIEndpointDTO);
             return Response.ok().entity(updatedAPIEndpointDTO).build();
@@ -944,7 +945,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
             //get API endpoints
             APIEndpointListDTO apiEndpointListDTO = PublisherCommonUtils.getApiEndpoints(apiId, apiProvider);
-            for (APIEndpointDTO apiEndpointDTO: apiEndpointListDTO.getList()) {
+            for (APIEndpointDTO apiEndpointDTO : apiEndpointListDTO.getList()) {
                 removeAPIEndpointSecrets(apiEndpointDTO);
             }
             return Response.ok().entity(apiEndpointListDTO).build();

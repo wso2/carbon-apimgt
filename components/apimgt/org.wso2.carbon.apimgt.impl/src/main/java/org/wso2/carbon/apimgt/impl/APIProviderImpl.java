@@ -41,7 +41,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
@@ -488,11 +488,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param uuid  unique identifier of api (UUID)
      * @throws APIManagementException
      */
-    private void addNoneAPIEndpoint(int apiId, String uuid) throws APIManagementException{
-        API_Endpoint apiEndpoint = new API_Endpoint();
+    private void addNoneAPIEndpoint(int apiId, String uuid) throws APIManagementException {
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
         apiEndpoint.setEndpointUuid(uuid);
         apiEndpoint.setApiId(apiId);
-        apiMgtDAO.addAPIEndpoint(uuid,apiEndpoint);
+        apiMgtDAO.addAPIEndpoint(uuid, apiEndpoint);
     }
 
     /**
@@ -5971,12 +5971,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<API_Endpoint> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
+    public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
         return apiMgtDAO.getAPIEndpoints(uuid);
     }
 
     @Override
-    public API_Endpoint getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException {
+    public APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException {
         return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID);
     }
 
@@ -6016,18 +6016,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             for (URITemplate uriTemplate : uriTemplatesWithOperationEndpoints) {
                 String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, uriTemplate.getProductionEndpoint());
-                operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, uriTemplate.getSandboxEndpoint());
+                operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                        uriTemplate.getProductionEndpoint());
+                operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                        uriTemplate.getSandboxEndpoint());
             }
 
             for (URITemplate uriTemplate : uriTemplates) {
                 String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 String sandboxKey = key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS;
                 String productionKey = key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS;
-                if(operationEndpointPerURITemplate.containsKey(sandboxKey)){
+                if (operationEndpointPerURITemplate.containsKey(sandboxKey)) {
                     uriTemplate.setSandboxEndpoint(operationEndpointPerURITemplate.get(sandboxKey));
                 }
-                if(operationEndpointPerURITemplate.containsKey(productionKey)){
+                if (operationEndpointPerURITemplate.containsKey(productionKey)) {
                     uriTemplate.setProductionEndpoint(operationEndpointPerURITemplate.get(productionKey));
                 }
             }
@@ -6206,13 +6208,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public API_Endpoint updateAPIEndpoint(String apiUUID, String endpointUUID, API_Endpoint apiEndpoint)
+    public APIEndpointInfo updateAPIEndpoint(String apiUUID, String endpointUUID, APIEndpointInfo apiEndpoint)
             throws APIManagementException {
         return apiMgtDAO.updateAPIEndpoint(apiUUID, endpointUUID, apiEndpoint);
     }
 
     @Override
-    public String addAPIEndpoint(String apiUUID, API_Endpoint apiEndpoint) throws APIManagementException {
+    public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException {
         int apiId = apiMgtDAO.getAPIID(apiUUID);
         apiEndpoint.setApiId(apiId);
         return apiMgtDAO.addAPIEndpoint(apiUUID, apiEndpoint);

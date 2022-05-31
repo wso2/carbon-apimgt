@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
@@ -1794,5 +1795,57 @@ public class APIProviderImplTest {
 
         Assert.assertNull(api.getInSequence());
         Assert.assertNull(api.getInSequenceMediation());
+    }
+
+    @Test
+    public void testGetAllApiEndpointsByAPIUUID() throws APIManagementException {
+        String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apiProvider.getAllAPIEndpointsByUUID(apiuuid)).thenReturn(null);
+        Assert.assertNull(apiProvider.getAllAPIEndpointsByUUID(apiuuid));
+    }
+
+    @Test
+    public void testGetApiEndpointByAPIUUIDandEndpointUUID() throws APIManagementException {
+        String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
+        String endpointuuid = "322-24322-4basd3e6-86a5-3424efw24233";
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apiProvider.getAPIEndpointByUUID(apiuuid, endpointuuid)).thenReturn(null);
+        Assert.assertNull(apiProvider.getAPIEndpointByUUID(apiuuid, endpointuuid));
+    }
+
+    @Test
+    public void testAddApiEndpoint() throws APIManagementException {
+        String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
+        String endpointuuid = "322-24322-4basd3e6-86a5-3424efw24233";
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setApiId(1);
+        apiEndpoint.setEndpointName("TESTING_ENDPOINT");
+        apiEndpoint.setEndpointUuid(endpointuuid);
+        apiEndpoint.setOrganization("-1234");
+        apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(apiProvider.addAPIEndpoint(apiuuid, apiEndpoint)).thenReturn(new String());
+        Assert.assertNotNull(apiProvider.addAPIEndpoint(apiuuid, apiEndpoint));
+    }
+
+    @Test
+    public void testUpdateApiEndpoint() throws APIManagementException {
+        String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
+        String endpointuuid = "322-24322-4basd3e6-86a5-3424efw24233";
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        APIEndpointInfo dummyapiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setApiId(1);
+        apiEndpoint.setEndpointName("TESTING_ENDPOINT");
+        apiEndpoint.setEndpointUuid(endpointuuid);
+        apiEndpoint.setOrganization("-1234");
+        apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+
+        Mockito.when(apiProvider.updateAPIEndpoint(apiuuid, endpointuuid,apiEndpoint)).thenReturn(new APIEndpointInfo());
+        Mockito.when(apiProvider.updateAPIEndpoint(apiuuid, endpointuuid,dummyapiEndpoint)).thenReturn(null);
+
+        Assert.assertNotNull(apiProvider.updateAPIEndpoint(apiuuid, endpointuuid,apiEndpoint));
+        Assert.assertNull(apiProvider.updateAPIEndpoint(apiuuid, endpointuuid,dummyapiEndpoint));
     }
 }

@@ -37,7 +37,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
@@ -1908,7 +1908,7 @@ public class APIMappingUtil {
     }
 
     /**
-     * Reads operation-endpoints from the API object passed in, and sets them back to the API Operations DTO
+     * Reads operation-endpoints from the API object passed in, and sets them back to the API Operations DTO.
      *
      * @param api
      * @param apiOperationsDTO
@@ -2933,11 +2933,11 @@ public class APIMappingUtil {
         return dateFormat.parse(time);
     }
 
-    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<API_Endpoint> apiEndpoints)
+    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<APIEndpointInfo> apiEndpoints)
             throws APIManagementException {
         APIEndpointListDTO apiEndpointListDTO = new APIEndpointListDTO();
         List<APIEndpointDTO> apiEndpointDTOs = new ArrayList<>();
-        for (API_Endpoint apiEndpoint : apiEndpoints) {
+        for (APIEndpointInfo apiEndpoint : apiEndpoints) {
             apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint));
         }
         apiEndpointListDTO.setCount(apiEndpointDTOs.size());
@@ -2945,47 +2945,29 @@ public class APIMappingUtil {
         return apiEndpointListDTO;
     }
 
-    public static APIEndpointDTO fromAPIEndpointToDTO(API_Endpoint apiEndpoint) throws APIManagementException {
+    public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint) throws APIManagementException {
         APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
         apiEndpointDTO.setId(apiEndpoint.getEndpointUuid());
         apiEndpointDTO.setName(apiEndpoint.getEndpointName());
         apiEndpointDTO.setEndpointType(apiEndpoint.getEndpointType());
-        ByteArrayInputStream endpointConfByteArrInStream = apiEndpoint.getEndpointConfig();
-        if(endpointConfByteArrInStream != null){
-            ObjectInputStream objInEndpointConf;
-            try {
-                objInEndpointConf = new ObjectInputStream(endpointConfByteArrInStream);
-                HashMap endpointConfigMap = (HashMap)  objInEndpointConf.readObject();
-                apiEndpointDTO.setEndpointConfig(endpointConfigMap);
-            } catch (ClassNotFoundException | IOException  e) {
-                throw new APIManagementException("Error occurred transform endpoint to DTO object", e);
-            }
-        }
+        apiEndpointDTO.setEndpointConfig(apiEndpoint.getEndpointConfig());
         return apiEndpointDTO;
     }
 
-    public static API_Endpoint fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)
+    public static APIEndpointInfo fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)
             throws APIManagementException {
-        API_Endpoint apiEndpoint = new API_Endpoint();
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
         apiEndpoint.setEndpointUuid(apiEndpointDTO.getId());
         apiEndpoint.setEndpointName(apiEndpointDTO.getName());
         apiEndpoint.setEndpointType(apiEndpointDTO.getEndpointType());
         HashMap endpointConfigHashMap = (HashMap) apiEndpointDTO.getEndpointConfig();
-        if(endpointConfigHashMap != null){
-            ByteArrayOutputStream bAoutEndPointConf = new ByteArrayOutputStream();
-            try(ObjectOutputStream objOut = new ObjectOutputStream(bAoutEndPointConf)) {
-                objOut.writeObject(endpointConfigHashMap);
-                objOut.flush();
-                apiEndpoint.setEndpointConfig( new ByteArrayInputStream(bAoutEndPointConf.toByteArray()));
-            } catch (IOException e) {
-                // TODO : print message
-                throw new APIManagementException("Error occurred transform endpoint to DTO object", e);
-            }
-        }else{
-            throw new APIManagementException("Error occurred while converting Endpoint of API ",
+        if (endpointConfigHashMap == null) {
+            throw new APIManagementException("Endpoint Config is missing of API Endpoint.",
                     ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
         }
+        apiEndpoint.setEndpointConfig(endpointConfigHashMap);
         apiEndpoint.setOrganization(organization);
         return apiEndpoint;
     }
+
 }

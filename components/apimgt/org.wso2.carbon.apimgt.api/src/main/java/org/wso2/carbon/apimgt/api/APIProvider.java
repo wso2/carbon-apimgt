@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
@@ -1427,23 +1427,23 @@ public interface APIProvider extends APIManager {
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
 
     /**
-     * Get Endpoint details by providing API UUID
+     * Get Endpoint details by providing API UUID.
      *
      * @param uuid      Unique Identifier of API
-     * @return List<API_Endpoint> Object
+     * @return List<APIEndpointInfo> Object
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
-    List<API_Endpoint> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException;
+    List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException;
 
     /**
-     * Get Endpoint details by providing API UUID
+     * Get Endpoint details by providing API UUID.
      *
      * @param apiUUID      Unique Identifier of API
      * @param endpointUUID      Unique Identifier of Endpoint
-     * @return API_Endpoint Object
+     * @return APIEndpointInfo Object
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
-    API_Endpoint getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException;
+    APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException;
 
     /**
      * Set existing operation policy mapping to the URI Templates
@@ -1606,7 +1606,7 @@ public interface APIProvider extends APIManager {
     void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
 
     /**
-     * Delete an API endpoint by providing the endpoint ID
+     * Delete an API endpoint by providing the endpoint ID.
      *
      * @param endpointId     API Endpoint UUID
      * @throws APIManagementException
@@ -1614,7 +1614,7 @@ public interface APIProvider extends APIManager {
     void deleteAPIEndpointById(String endpointId) throws APIManagementException;
 
     /**
-     *  Update an endpoint by providing the endpoint ID
+     *  Update an endpoint by providing the endpoint ID.
      *
      * @param apiUUID Unique identifier of API
      * @param endpointUUID Unique identifier of endpoint
@@ -1622,18 +1622,18 @@ public interface APIProvider extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    API_Endpoint updateAPIEndpoint(String apiUUID, String endpointUUID, API_Endpoint apiEndpoint)
+    APIEndpointInfo updateAPIEndpoint(String apiUUID, String endpointUUID, APIEndpointInfo apiEndpoint)
             throws APIManagementException;
 
     /**
-     * Insert new endpoint an API
+     * Insert new endpoint an API.
      *
      * @param apiUUID Unique identifier of API
      * @param apiEndpoint New Endpoint payload object
      * @return
      * @throws APIManagementException
      */
-    String addAPIEndpoint(String apiUUID, API_Endpoint apiEndpoint) throws APIManagementException;
+    String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException;
 
     /**
      *
@@ -1657,7 +1657,7 @@ public interface APIProvider extends APIManager {
     APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
 
     /**
-     * Set existing Operation Endpoints to URI Templates
+     * Set existing Operation endpoints to URI Templates
      *
      * @param apiId
      * @param uriTemplates

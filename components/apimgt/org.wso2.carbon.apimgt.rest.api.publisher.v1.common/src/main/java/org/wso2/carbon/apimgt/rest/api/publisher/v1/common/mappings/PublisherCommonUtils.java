@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.TypeDefinition;
@@ -46,7 +47,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Endpoints.API_Endpoint;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
@@ -306,14 +307,13 @@ public class PublisherCommonUtils {
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
                     }
-                    if(operationEndpointPerURITemplate.containsKey(sandboxKey)){
+                    if (operationEndpointPerURITemplate.containsKey(sandboxKey)) {
                         uriTemplate.setSandboxEndpoint(operationEndpointPerURITemplate.get(sandboxKey));
                     }
-                    if(operationEndpointPerURITemplate.containsKey(productionKey)){
+                    if (operationEndpointPerURITemplate.containsKey(productionKey)) {
                         uriTemplate.setProductionEndpoint(operationEndpointPerURITemplate.get(productionKey));
                     }
                 }
-
                 apiToUpdate.setUriTemplates(uriTemplates);
             }
         } else {
@@ -349,7 +349,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * This method will encrypt the OAuth 2.0 API Key and API Secret
+     * This method will encrypt the OAuth 2.0 API Key and API Secret.
      *
      * @param endpointConfig         endpoint configuration of API
      * @param cryptoUtil             cryptography util
@@ -360,7 +360,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
      */
     public static void encryptEndpointSecurityOAuthCredentials(Map endpointConfig, CryptoUtil cryptoUtil,
-            String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto)
+                                                               String oldProductionApiSecret,
+                                                               String oldSandboxApiSecret, APIDTO apidto)
             throws CryptoException, APIManagementException {
         // OAuth 2.0 backend protection: API Key and API Secret encryption
         String customParametersString;
@@ -465,7 +466,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * This method will encrypt the OAuth 2.0 API Key and API Secret
+     * This method will encrypt the OAuth 2.0 API Key and API Secret.
      *
      * @param cryptoUtil             cryptography util
      * @param oldApiSecret           existing API secret
@@ -1302,7 +1303,7 @@ public class PublisherCommonUtils {
         //set existing operation policies to URI templates
         apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
 
-        //TODO set exiting operation endpoints to URI Templates... :):):)
+        //set existing operation endpoints mapping to URI templates
         apiProvider.setOperationEndpointsToURITemplates(apiId, uriTemplates);
 
         existingAPI.setUriTemplates(uriTemplates);
@@ -1862,7 +1863,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Get All Endpoints of an API
+     * Get All endpoints of an API.
      *
      * @param uuid   Unique identifier of API
      * @param apiProvider
@@ -1871,18 +1872,18 @@ public class PublisherCommonUtils {
      */
     public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider)
             throws APIManagementException {
-        List<API_Endpoint> ApiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid);
-        if (ApiEndpointsList == null) {
-            throw new APIManagementException("Error occurred while getting Endpoints of API " + uuid,
+        List<APIEndpointInfo> apiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid);
+        if (apiEndpointsList == null) {
+            throw new APIManagementException("Error occurred while getting endpoints of API " + uuid,
                     ExceptionCodes.API_ENDPOINT_NOT_FOUND);
         } else {
-            return APIMappingUtil.fromAPIEndpointListToDTO(ApiEndpointsList);
+            return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList);
         }
 
     }
 
     /**
-     * Get Endpoint of an API By operation UUID
+     * Get Endpoint of an API By operation UUID.
      *
      * @param apiUUID   Unique identifier of API
      * @param endpointUUID   Unique identifier of endpoint
@@ -1892,7 +1893,7 @@ public class PublisherCommonUtils {
      */
     public static APIEndpointDTO getAPIEndpoint(String apiUUID, String endpointUUID, APIProvider apiProvider)
             throws APIManagementException, JsonProcessingException {
-        API_Endpoint apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID);
+        APIEndpointInfo apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID);
         if (apiEndpoint == null) {
             throw new APIManagementException("Error occurred while getting Endpoint of API " + apiUUID +
                     "endpoint UUID" + endpointUUID,
@@ -1902,7 +1903,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Update Endpoint of an API By operation UUID
+     * Update Endpoint of an API By operation UUID.
      *
      * @param apiId   Unique identifier of API
      * @param endpointId   Unique identifier of API
@@ -1952,8 +1953,8 @@ public class PublisherCommonUtils {
             }
         }
 
-        API_Endpoint apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
-        API_Endpoint apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, endpointId, apiEndpoint);
+        APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
+        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, endpointId, apiEndpoint);
         if (apiEndpointUpdated == null) {
             throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
                     "endpoint UUID" + endpointId, ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
@@ -1962,9 +1963,9 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Insert new endpoint for an API
+     * Insert new endpoint for an API.
      *
-     * @param apiId Unique identifier of API
+     * @param apiId Unique identifier of API.
      * @param apiEndpointDTO payload of Endpoint
      * @param organization
      * @param apiProvider
@@ -1989,13 +1990,13 @@ public class PublisherCommonUtils {
                 }
             }
         }
-        API_Endpoint apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
-        String ApiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint);
-        if (ApiEndpointId == null) {
+        APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
+        String apiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint);
+        if (apiEndpointId == null) {
             throw new APIManagementException("Error occurred while getting Endpoint of API " + apiId,
                     ExceptionCodes.ERROR_INSERTING_API_ENDPOINT_API);
         }
-        return ApiEndpointId;
+        return apiEndpointId;
     }
 
     /**
