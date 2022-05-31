@@ -108,7 +108,7 @@ public class SubscriptionValidationDAO {
                 populateSubscriptionsList(subscriptions, resultSet);
             }
         } catch (SQLException e) {
-            log.error("Error in loading Subscriptions for organization : " + organization, e);}
+            log.error("Error in loading Subscriptions for the organization : " + organization, e);}
         return subscriptions;
     }
 
