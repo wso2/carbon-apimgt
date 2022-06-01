@@ -16551,9 +16551,12 @@ public class ApiMgtDAO {
                     connection.rollback();
                     // handle concurrent db entry update. Fix duplicate primary key issue.
                     if (e.getMessage().toLowerCase().contains("primary key violation") ||
-                            e.getMessage().toLowerCase().contains("duplicate entry")) {
-                        log.debug("Duplicate entries detected for Revision UUID " + apiRevisionId +
+                            e.getMessage().toLowerCase().contains("duplicate entry") ||
+                            e.getMessage().contains("Violation of PRIMARY KEY constraint")) {
+                        log.warn("Duplicate entries detected for Revision UUID " + apiRevisionId +
                                 " while adding deployed API revisions", e);
+                        throw new APIManagementException("Failed to add deployed API Revision for Revision UUID "
+                                + apiRevisionId,  e, ExceptionCodes.REVISION_ALREADY_DEPLOYED);
                     } else {
                         handleException("Failed to add deployed API Revision for Revision UUID "
                                 + apiRevisionId, e);
