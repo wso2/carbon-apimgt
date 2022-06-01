@@ -1176,10 +1176,10 @@ paths:
           schema:
             type: string
             enum:
-              - subscription
-              - application
-              - advanced
-              - custom
+              - sub
+              - app
+              - api
+              - global
         - name: format
           in: query
           description: |
@@ -1263,12 +1263,16 @@ paths:
           schema:
             type: boolean
       requestBody:
-        description: |
-          Throttling Policy object that should to be imported
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ExportThrottlePolicy'
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: Json File
+                  format: binary
         required: true
       responses:
         200:

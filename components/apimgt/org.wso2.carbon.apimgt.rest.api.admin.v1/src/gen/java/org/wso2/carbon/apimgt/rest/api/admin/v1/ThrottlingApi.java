@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ExportThrottlePolicyDTO;
+import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDetailsListDTO;
@@ -63,13 +64,13 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = ExportThrottlePolicyDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response exportThrottlingPolicy( @ApiParam(value = "UUID of the ThrottlingPolicy")  @QueryParam("policyId") String policyId,  @ApiParam(value = "Throttling Policy Name ")  @QueryParam("name") String name,  @ApiParam(value = "Type of the Throttling Policy ", allowableValues="subscription, application, advanced, custom")  @QueryParam("type") String type,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format) throws APIManagementException{
+    public Response exportThrottlingPolicy( @ApiParam(value = "UUID of the ThrottlingPolicy")  @QueryParam("policyId") String policyId,  @ApiParam(value = "Throttling Policy Name ")  @QueryParam("name") String name,  @ApiParam(value = "Type of the Throttling Policy ", allowableValues="sub, app, api, global")  @QueryParam("type") String type,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format) throws APIManagementException{
         return delegate.exportThrottlingPolicy(policyId, name, type, format, securityContext);
     }
 
     @POST
     @Path("/policies/import")
-    @Consumes({ "application/json" })
+    @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a Throttling Policy", notes = "This operation can be used to import a Throttling Policy ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -84,8 +85,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response importThrottlingPolicy(@ApiParam(value = "Throttling Policy object that should to be imported " ,required=true) ExportThrottlePolicyDTO exportThrottlePolicyDTO,  @ApiParam(value = "Update an existing throttlingpolicy with the same name ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
-        return delegate.importThrottlingPolicy(exportThrottlePolicyDTO, overwrite, securityContext);
+    public Response importThrottlingPolicy( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Update an existing throttlingpolicy with the same name ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
+        return delegate.importThrottlingPolicy(fileInputStream, fileDetail, overwrite, securityContext);
     }
 
     @GET
