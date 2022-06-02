@@ -5767,7 +5767,7 @@ public class ApiMgtDAO {
                     if ((uriTemplate.getProductionEndpoint() != null)) {
                         operationEndpointMappingPrepStmt.setInt(1, uriMappingId);
                         operationEndpointMappingPrepStmt.setInt(2, (
-                                uriTemplate.getProductionEndpoint()) == "none" ? getAPIEndpointId(api.getUuid())
+                                uriTemplate.getProductionEndpoint()).equals("none") ? getAPIEndpointId(api.getUuid())
                                 : getAPIEndpointId(uriTemplate.getProductionEndpoint()));
                         operationEndpointMappingPrepStmt.setString(3, APIConstants.API_KEY_TYPE_PRODUCTION);
                         operationEndpointMappingPrepStmt.addBatch();
@@ -5775,7 +5775,7 @@ public class ApiMgtDAO {
                     if (uriTemplate.getSandboxEndpoint() != null) {
                         operationEndpointMappingPrepStmt.setInt(1, uriMappingId);
                         operationEndpointMappingPrepStmt.setInt(2, (
-                                uriTemplate.getSandboxEndpoint()) == "none" ? getAPIEndpointId(api.getUuid()) :
+                                uriTemplate.getSandboxEndpoint()).equals("none") ? getAPIEndpointId(api.getUuid()) :
                                 getAPIEndpointId(uriTemplate.getSandboxEndpoint()));
                         operationEndpointMappingPrepStmt.setString(3, APIConstants.API_KEY_TYPE_SANDBOX);
                         operationEndpointMappingPrepStmt.addBatch();
@@ -16166,7 +16166,7 @@ public class ApiMgtDAO {
                             if ((urlMapping.getProductionEndpoint() != null)) {
                                 operationEndpointMappingPrepStmt.setInt(1, rs.getInt(1));
                                 operationEndpointMappingPrepStmt.setInt(2, (
-                                        urlMapping.getProductionEndpoint()) == "none" ?
+                                        urlMapping.getProductionEndpoint()).equals("none") ?
                                         getAPIEndpointId(apiRevision.getApiUUID()) :
                                         getAPIEndpointId(urlMapping.getProductionEndpoint()));
                                 operationEndpointMappingPrepStmt.
@@ -16176,7 +16176,7 @@ public class ApiMgtDAO {
                             if ((urlMapping.getSandboxEndpoint() != null)) {
                                 operationEndpointMappingPrepStmt.setInt(1, rs.getInt(1));
                                 operationEndpointMappingPrepStmt.setInt(2, (urlMapping.getSandboxEndpoint())
-                                        == "none" ? getAPIEndpointId(apiRevision.getApiUUID()) :
+                                       .equals("none") ? getAPIEndpointId(apiRevision.getApiUUID()) :
                                         getAPIEndpointId(urlMapping.getSandboxEndpoint()));
                                 operationEndpointMappingPrepStmt.
                                         setString(3, APIConstants.API_KEY_TYPE_SANDBOX);
@@ -17005,8 +17005,7 @@ public class ApiMgtDAO {
                             }
                         }
                     }
-                    if (!(urlMapping.getProductionEndpoint().equals("none")) ||
-                            !(urlMapping.getSandboxEndpoint().equals("none"))) {
+                    if (urlMapping.getProductionEndpoint() != null || urlMapping.getSandboxEndpoint() != null) {
                         //save operation endpoint mapping to AM_API_OPERATION_ENDPOINT_MAPPING : table
                         getCurrentAPIURLMappingsStatement.setInt(1, apiId);
                         getCurrentAPIURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -17018,7 +17017,7 @@ public class ApiMgtDAO {
                             if ((urlMapping.getProductionEndpoint() != null)) {
                                 operationEndpointMappingPrepStmt.setInt(1, rs.getInt(1));
                                 operationEndpointMappingPrepStmt.setInt(2, (
-                                        urlMapping.getProductionEndpoint()) == "none" ?
+                                        urlMapping.getProductionEndpoint()).equals("none") ?
                                         getAPIEndpointId(apiRevision.getApiUUID()) :
                                         getAPIEndpointId(urlMapping.getProductionEndpoint()));
                                 operationEndpointMappingPrepStmt.setString(3,
@@ -17028,7 +17027,7 @@ public class ApiMgtDAO {
                             if ((urlMapping.getSandboxEndpoint() != null)) {
                                 operationEndpointMappingPrepStmt.setInt(1, rs.getInt(1));
                                 operationEndpointMappingPrepStmt.setInt(2, (urlMapping.getSandboxEndpoint())
-                                        == "none" ? getAPIEndpointId(apiRevision.getApiUUID()) :
+                                        .equals("none") ? getAPIEndpointId(apiRevision.getApiUUID()) :
                                         getAPIEndpointId(urlMapping.getSandboxEndpoint()));
                                 operationEndpointMappingPrepStmt.setString(3,
                                         APIConstants.API_KEY_TYPE_SANDBOX);

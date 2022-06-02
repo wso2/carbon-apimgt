@@ -1221,6 +1221,9 @@ public class APIMappingUtil {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
 
+        //set primary endpoints
+        dto.setPrimaryProductionEndpointId(model.getPrimaryProductionEndpointId());
+        dto.setPrimarySandboxEndpointId(model.getPrimarySandboxEndpointId());
         return dto;
     }
 
