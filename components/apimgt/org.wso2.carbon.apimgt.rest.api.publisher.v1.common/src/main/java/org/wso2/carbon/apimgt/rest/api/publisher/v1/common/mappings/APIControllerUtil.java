@@ -144,17 +144,19 @@ public class APIControllerUtil {
             handleEndpointSecurityConfigs(envParams, jsonObject);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        HashMap<String, Object> endpointConfig;
-        try {
-            endpointConfig = mapper.readValue(jsonObject.toString(), HashMap.class);
-            convertValuesToStrings(endpointConfig);
-        } catch (JsonProcessingException e) {
-            String errorMessage = "Error while reading endpointConfig information in the params file.";
-            throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
+        // Handle endpoints configs
+        if (envParams.get(ImportExportConstants.ENDPOINTS_FIELD) != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            HashMap<String, Object> endpointConfig;
+            try {
+                endpointConfig = mapper.readValue(jsonObject.toString(), HashMap.class);
+                convertValuesToStrings(endpointConfig);
+            } catch (JsonProcessingException e) {
+                String errorMessage = "Error while reading endpointConfig information in the params file.";
+                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
+            }
+            importedApiDto.setEndpointConfig(endpointConfig);
         }
-        importedApiDto.setEndpointConfig(endpointConfig);
-
 
         //handle mutualSSL certificates
         handleMutualSslCertificates(envParams, importedApiDto, null, importedApi.getId(), pathToArchive);
