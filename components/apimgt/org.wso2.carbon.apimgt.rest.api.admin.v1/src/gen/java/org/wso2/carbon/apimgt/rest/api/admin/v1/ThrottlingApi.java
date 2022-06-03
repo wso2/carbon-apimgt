@@ -74,7 +74,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a Throttling Policy", notes = "This operation can be used to import a Throttling Policy ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
@@ -541,7 +541,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     }, tags={ "Unified Search" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying Throttling Policies is returned. ", response = ThrottlePolicyDetailsListDTO.class) })
-    public Response throttlingPolicySearch( @NotNull @ApiParam(value = "**Search**. You can search by providing a keyword. Allowed to search by type only. ",required=true)  @QueryParam("query") String query) throws APIManagementException{
+    public Response throttlingPolicySearch( @ApiParam(value = "**Search**. You can search by providing a keyword. Allowed to search by type only. ")  @QueryParam("query") String query) throws APIManagementException{
         return delegate.throttlingPolicySearch(query, securityContext);
     }
 }

@@ -127,7 +127,6 @@ paths:
             You can search by providing a keyword. Allowed to search by type only.
           schema:
             type: string
-          required: true
       responses:
         200:
           description: |
@@ -1289,7 +1288,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_import_export
+            - apim:admin
             - apim:tier_manage
             - apim:policies_import_export
       x-code-samples:
