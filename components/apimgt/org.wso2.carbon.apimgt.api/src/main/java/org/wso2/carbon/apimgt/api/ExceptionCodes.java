@@ -486,7 +486,9 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
-    INVALID_API_ID(9020002, "Invalid API ID", 404, "The provided API ID is not found %s", false);
+    INVALID_API_ID(9020002, "Invalid API ID", 404, "The provided API ID is not found %s", false),
+    REVISION_ALREADY_DEPLOYED(9020003, "Revision deployment state conflicted", 409,
+            "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false);
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
