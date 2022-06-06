@@ -53,7 +53,10 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -69,6 +72,56 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API
 public class ThrottlingApiServiceImpl implements ThrottlingApiService {
 
     private static final Log log = LogFactory.getLog(ThrottlingApiServiceImpl.class);
+    private static final String ALL_TYPES = "all";
+
+    /**
+     * Returns the ExportThrottlePolicyDTO by reading the file from input stream
+     *
+     * @param uploadedInputStream Input stream from the REST request
+     * @param fileDetail          Details of the file received via InputStream
+     * @return ExportThrottlePolicyDTO of the file to be imported
+     */
+    public static ExportThrottlePolicyDTO getImportPolicy(InputStream uploadedInputStream, Attachment fileDetail)
+            throws APIImportExportException, IOException {
+        File importFolder = CommonUtil.createTempDirectory(null);
+        String uploadFileName = fileDetail.getContentDisposition().getFilename();
+        String fileType = (uploadFileName.contains(ImportExportConstants.YAML_EXTENSION)) ?
+                PolicyConstants.EXPORT_POLICY_TYPE_YAML :
+                PolicyConstants.EXPORT_POLICY_TYPE_JSON;
+        String absolutePath = importFolder.getAbsolutePath() + File.separator + uploadFileName;
+        File targetFile = new File(absolutePath);
+        FileUtils.copyInputStreamToFile(uploadedInputStream, targetFile);
+        return preprocessImportedArtifact(absolutePath, fileType);
+    }
+
+    /**
+     * Preprocesses the either yaml or json file into the ExportThrottlePolicyDTO
+     *
+     * @param absolutePath temporary location of the throttle policy file
+     * @param fileType     Type of the file to be imported (.yaml/.json)
+     * @return ExportThrottlePolicyDTO from the file
+     */
+    private static ExportThrottlePolicyDTO preprocessImportedArtifact(String absolutePath, String fileType)
+            throws IOException {
+        ExportThrottlePolicyDTO importPolicy;
+
+        if (Objects.equals(fileType, PolicyConstants.EXPORT_POLICY_TYPE_YAML)) {
+            ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+            importPolicy = yamlMapper.readValue(new File(absolutePath), ExportThrottlePolicyDTO.class);
+        } else {
+            ObjectMapper mapper = new ObjectMapper();
+            JSONParser parser = new JSONParser();
+            Object obj;
+            try {
+                obj = parser.parse(new FileReader(absolutePath));
+            } catch (ParseException | IOException e) {
+                throw new RuntimeException(e);
+            }
+            JSONObject jsonObject = (JSONObject) obj;
+            importPolicy = mapper.convertValue(jsonObject, ExportThrottlePolicyDTO.class);
+        }
+        return importPolicy;
+    }
 
     /**
      * Retrieves all Advanced level policies
@@ -518,20 +571,19 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Returns list of throttling policy details filtered using query parameters
      *
-     * @param query          filtering parameters
+     * @param query filtering parameters
      * @return Retrieves Throttle Policies List
      */
     @Override public Response throttlingPolicySearch(String query, MessageContext messageContext)
             throws APIManagementException {
         ThrottlePolicyDetailsListDTO resultListDTO = new ThrottlePolicyDetailsListDTO();
-
         String policyType;
         Map<String, String> filters;
         List<ThrottlePolicyDetailsDTO> result = null;
+        query = (query == null) ? "type:"+ALL_TYPES : query;
         if (log.isDebugEnabled()) {
             log.debug("Extracting query info...");
         }
-        query=(query==null)?"type:all":query;
         filters = Splitter.on(" ").withKeyValueSeparator(":").split(query);
         try {
             policyType = filters.get("type");
@@ -540,9 +592,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             String errorMessage = "Error while resolving policy type";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-        assert result != null;
-        resultListDTO.setCount(result.size());
-        resultListDTO.setList(result);
+        if (result != null) {
+            resultListDTO.setCount(result.size());
+            resultListDTO.setList(result);
+        } else {
+            String errorMessage = "Error empty result list";
+            NullPointerException e = new NullPointerException();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return Response.ok().entity(resultListDTO).build();
     }
 
@@ -928,10 +985,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Export a Throttling Policy by the policy name with/without specifying the policy type
      * If policy type is not specified first found throttling policy is returned
      *
-     * @param policyId       UUID of the throttling policy to be exported(for future use)
-     * @param policyName     Name of the policy to be exported
-     * @param type           type of the policy to be exported
-     * @param format         format of the policy details
+     * @param policyId   UUID of the throttling policy to be exported(for future use)
+     * @param policyName Name of the policy to be exported
+     * @param type       type of the policy to be exported
+     * @param format     format of the policy details
      * @return required throttling policy
      */
     @Override public Response exportThrottlingPolicy(String policyId, String policyName, String type, String format,
@@ -943,7 +1000,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             ExportThrottlePolicyDTO exportPolicy = new ExportThrottlePolicyDTO();
             exportPolicy.type(RestApiConstants.RESOURCE_THROTTLING_POLICY);
             exportPolicy.version(APIM_VERSION);
-            type = (type== null) ? StringUtils.EMPTY : type;
+            type = (type == null) ? StringUtils.EMPTY : type;
             if ((type.equals(PolicyConstants.POLICY_LEVEL_APP) || type.equals(StringUtils.EMPTY))) {
                 try {
                     ApplicationPolicy appPolicy = apiProvider.getApplicationPolicy(userName, policyName);
@@ -1050,76 +1107,33 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     }
 
     /**
-     * Returns the ExportThrottlePolicyDTO by reading the file from input stream
-     *
-     * @param uploadedInputStream Input stream from the REST request
-     * @param fileDetail Details of the file received via InputStream
-     * @return ExportThrottlePolicyDTO of the file to be imported
-     */
-    public static ExportThrottlePolicyDTO getImportPolicy(InputStream uploadedInputStream, Attachment fileDetail)
-            throws APIImportExportException, IOException {
-        File importFolder = CommonUtil.createTempDirectory(null);
-        String uploadFileName = fileDetail.getContentDisposition().getFilename();
-        String fileType = (uploadFileName.contains(ImportExportConstants.YAML_EXTENSION)) ? PolicyConstants.EXPORT_POLICY_TYPE_YAML:PolicyConstants.EXPORT_POLICY_TYPE_JSON;
-        String absolutePath = importFolder.getAbsolutePath() + File.separator+uploadFileName;
-        File targetFile = new File(absolutePath);
-        FileUtils.copyInputStreamToFile(uploadedInputStream, targetFile);
-        return preprocessImportedArtifact(absolutePath,fileType);
-    }
-
-    /**
-     * Preprocesses the either yaml or json file into the ExportThrottlePolicyDTO
-     *
-     * @param absolutePath temporary location of the throttle policy file
-     * @param fileType Type of the file to be imported (.yaml/.json)
-     * @return ExportThrottlePolicyDTO from the file
-     */
-    private static ExportThrottlePolicyDTO preprocessImportedArtifact(String absolutePath, String fileType)
-            throws IOException {
-        ExportThrottlePolicyDTO importPolicy;
-        
-        if (Objects.equals(fileType, PolicyConstants.EXPORT_POLICY_TYPE_YAML)){
-            ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-            importPolicy = yamlMapper.readValue(new File(absolutePath), ExportThrottlePolicyDTO.class);
-        }else{
-            ObjectMapper mapper = new ObjectMapper();
-            JSONParser parser = new JSONParser();
-            Object obj;
-            try {
-                obj = parser.parse(new FileReader(absolutePath));
-            } catch (ParseException | IOException e) {
-                throw new RuntimeException(e);
-            }
-            JSONObject jsonObject = (JSONObject)obj;
-            importPolicy = mapper.convertValue(jsonObject,ExportThrottlePolicyDTO.class);
-        }
-        return importPolicy;
-    }
-
-    /**
      * Imports a Throttling policy with the overwriting capability
      *
      * @param fileInputStream Input stream from the REST request
-     * @param fileDetail exportThrottlePolicyDTO Exported Throttling policy details
-     * @param overwrite User can either update an existing throttling policy with the same name or let the conflict happen
-     * @return 200 OK response if successfully imported/updated the policy with a message
-     *
+     * @param fileDetail      exportThrottlePolicyDTO Exported Throttling policy details
+     * @param overwrite       User can either update an existing throttling policy with the same name or let the conflict happen
+     * @return Response message indicating the status of the importation and the imported/updated policy name
      */
     @Override public Response importThrottlingPolicy(InputStream fileInputStream, Attachment fileDetail,
             Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         ExportThrottlePolicyDTO exportThrottlePolicyDTO = null;
+        String policyType = "";
         try {
-            exportThrottlePolicyDTO =  getImportPolicy(fileInputStream,fileDetail);
-        }
-        catch (APIImportExportException | IOException e){
+            exportThrottlePolicyDTO = getImportPolicy(fileInputStream, fileDetail);
+        } catch (APIImportExportException | IOException e) {
             String errorMessage = "Error retrieving Throttling policy";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         ObjectMapper mapper = new ObjectMapper();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
-        assert exportThrottlePolicyDTO != null;
-        String policyType = exportThrottlePolicyDTO.getSubtype();
+        if (exportThrottlePolicyDTO != null) {
+            policyType = exportThrottlePolicyDTO.getSubtype();
+        } else {
+            String errorMessage = "Error resolving ExportThrottlePolicyDTO";
+            NullPointerException e = new NullPointerException();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         if (policyType.equals(RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY)) {
             SubscriptionThrottlePolicyDTO subscriptionPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
                     SubscriptionThrottlePolicyDTO.class);
@@ -1220,7 +1234,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Retrieves throttling policy list by type
      */
     private List<ThrottlePolicyDetailsDTO> getThrottlingPolicies(String policyLevel) throws APIManagementException {
-        final String ALL_TYPES ="all";
         APIAdmin apiAdmin = new APIAdminImpl();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
