@@ -2138,7 +2138,7 @@
         <swagger3-codegen-maven-plugin.version>3.0.19</swagger3-codegen-maven-plugin.version>
         <swagger3.core.version>2.1.12</swagger3.core.version>
         <javax.enterprise.version>2.0</javax.enterprise.version>
-        <jaeger.client.version>0.32.0.wso2v4</jaeger.client.version>
+        <jaeger.client.version>1.8.0.wso2v1</jaeger.client.version>
         <zipkin.sender.okhttp3.version>2.16.3</zipkin.sender.okhttp3.version>
         <zipkin.reporter.version>2.16.3</zipkin.reporter.version>
         <brave.opentracing.version>0.32.0</brave.opentracing.version>
