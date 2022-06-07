@@ -3034,6 +3034,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 + ". Requested tenant domain: " + requestedTenantDomain);
         boolean tenantFlowStarted = false;
         Registry registry;
+        Registry configRegistry;
         RegistryHolder holder = new RegistryHolder();
         try {
             if (requestedTenantDomain != null) {
@@ -3044,6 +3045,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     log.debug("Annonymous user from tenant " + userTenantDomain + " accessing the registry");
                     loadTenantRegistry(id);
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, id);
+                    configRegistry = getRegistryService().getConfigSystemRegistry();
                     holder.setTenantId(id);
                 } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross tenant
                     holder.setAnonymousMode(true);
@@ -3051,12 +3053,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             + requestedTenantDomain + " registry");
                     loadTenantRegistry(id);
                     registry = getRegistryService().getGovernanceSystemRegistry(id);
+                    configRegistry = getRegistryService().getConfigSystemRegistry(id);
                     holder.setTenantId(id);
                 } else {
                     log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant "
                             + userTenantDomain + ":" + tenantId);
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
+                    configRegistry = getRegistryService().getConfigSystemRegistry(tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
                     holder.setTenantId(tenantId);
                 }
@@ -3065,10 +3069,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         + userTenantDomain + ":" + tenantId);
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
+                configRegistry = getRegistryService().getConfigSystemRegistry(tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
                 holder.setTenantId(tenantId);
             }
-            RegistryPersistenceUtil.registerCustomQueries(registry, username, userTenantDomain);
+            RegistryPersistenceUtil.registerCustomQueries(configRegistry, username, userTenantDomain);
             RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
         } catch (RegistryException | UserStoreException | PersistenceException e) {
             String msg = "Failed to get API";
