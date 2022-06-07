@@ -1001,6 +1001,13 @@ public class PublisherCommonUtils {
         String context = body.getContext();
         //Make sure context starts with "/". ex: /pizza
         context = context.startsWith("/") ? context : ("/" + context);
+        String providerDomain = MultitenantUtils.getTenantDomain(username);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
+                !context.contains("/t/" + providerDomain)) {
+            //Create tenant aware context for API
+            context = "/t/" + providerDomain + context;
+        }
+        body.setContext(context);
 
         if (body.getAccessControlRoles() != null) {
             String errorMessage = PublisherCommonUtils.validateUserRoles(body.getAccessControlRoles());
