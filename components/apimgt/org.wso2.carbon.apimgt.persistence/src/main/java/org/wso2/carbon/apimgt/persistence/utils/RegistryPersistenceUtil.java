@@ -1659,10 +1659,10 @@ public class RegistryPersistenceUtil {
     /**
      * method to register custom registry queries
      *
-     * @param registry Registry instance to use
+     * @param configRegistry Registry instance to use
      * @throws RegistryException n error
      */
-    public static void registerCustomQueries(Registry registry, String username, String organization)
+    public static void registerCustomQueries(Registry configRegistry, String username, String organization)
             throws RegistryException, UserStoreException {
 
         String tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
@@ -1685,8 +1685,8 @@ public class RegistryPersistenceUtil {
                 authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
         }
 
-        if (!registry.resourceExists(tagsQueryPath)) {
-            Resource resource = registry.newResource();
+        if (!configRegistry.resourceExists(tagsQueryPath)) {
+            Resource resource = configRegistry.newResource();
 
             //Tag Search Query
             //'MOCK_PATH' used to bypass ChrootWrapper -> filterSearchResult. A valid registry path is
@@ -1717,11 +1717,11 @@ public class RegistryPersistenceUtil {
             resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
             resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
                     RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
-            registry.put(tagsQueryPath, resource);
+            configRegistry.put(tagsQueryPath, resource);
         }
-        if (!registry.resourceExists(latestAPIsQueryPath)) {
+        if (!configRegistry.resourceExists(latestAPIsQueryPath)) {
             //Recently added APIs
-            Resource resource = registry.newResource();
+            Resource resource = configRegistry.newResource();
             String sql =
                     "SELECT " +
                             "   RR.REG_PATH_ID AS REG_PATH_ID, " +
@@ -1743,10 +1743,10 @@ public class RegistryPersistenceUtil {
             resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
             resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
                     RegistryConstants.RESOURCES_RESULT_TYPE);
-            registry.put(latestAPIsQueryPath, resource);
+            configRegistry.put(latestAPIsQueryPath, resource);
         }
-        if (!registry.resourceExists(resourcesByTag)) {
-            Resource resource = registry.newResource();
+        if (!configRegistry.resourceExists(resourcesByTag)) {
+            Resource resource = configRegistry.newResource();
             String sql =
                     "SELECT '" + RegistryPersistenceUtil.getMountedPath(RegistryContext.getBaseInstance(),
                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
@@ -1768,7 +1768,7 @@ public class RegistryPersistenceUtil {
             resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
             resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
                     RegistryConstants.RESOURCE_UUID_RESULT_TYPE);
-            registry.put(resourcesByTag, resource);
+            configRegistry.put(resourcesByTag, resource);
         }
     }
 
