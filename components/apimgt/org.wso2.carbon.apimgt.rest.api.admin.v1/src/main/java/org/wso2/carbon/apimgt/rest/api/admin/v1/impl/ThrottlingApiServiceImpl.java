@@ -81,7 +81,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return ExportThrottlePolicyDTO of the file to be imported
      */
     public static ExportThrottlePolicyDTO getImportedPolicy(InputStream uploadedInputStream, Attachment fileDetail)
-            throws APIImportExportException, IOException {
+            throws APIImportExportException, IOException, ParseException {
         File importFolder = CommonUtil.createTempDirectory(null);
         String uploadFileName = fileDetail.getContentDisposition().getFilename();
         String fileType = (uploadFileName.contains(ImportExportConstants.YAML_EXTENSION)) ?
@@ -101,21 +101,17 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return ExportThrottlePolicyDTO from the file
      */
     private static ExportThrottlePolicyDTO preprocessImportedArtifact(String absolutePath, String fileType)
-            throws IOException {
+            throws IOException, ParseException {
         ExportThrottlePolicyDTO importPolicy;
-
+        FileReader fileReader = new FileReader(absolutePath);
         if (Objects.equals(fileType, PolicyConstants.EXPORT_POLICY_TYPE_YAML)) {
             ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-            importPolicy = yamlMapper.readValue(new File(absolutePath), ExportThrottlePolicyDTO.class);
+            importPolicy = yamlMapper.readValue(fileReader, ExportThrottlePolicyDTO.class);
         } else {
             ObjectMapper mapper = new ObjectMapper();
             JSONParser parser = new JSONParser();
             Object obj;
-            try {
-                obj = parser.parse(new FileReader(absolutePath));
-            } catch (ParseException | IOException e) {
-                throw new RuntimeException(e);
-            }
+            obj = parser.parse(fileReader);
             JSONObject jsonObject = (JSONObject) obj;
             importPolicy = mapper.convertValue(jsonObject, ExportThrottlePolicyDTO.class);
         }
@@ -1107,7 +1103,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         String policyType = "";
         try {
             exportThrottlePolicyDTO = getImportedPolicy(fileInputStream, fileDetail);
-        } catch (APIImportExportException | IOException e) {
+        } catch (APIImportExportException | IOException | ParseException e) {
             String errorMessage = "Error retrieving Throttling policy";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
