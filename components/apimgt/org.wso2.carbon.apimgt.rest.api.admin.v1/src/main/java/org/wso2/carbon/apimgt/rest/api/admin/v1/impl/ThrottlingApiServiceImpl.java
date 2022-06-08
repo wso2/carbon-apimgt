@@ -47,7 +47,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -81,7 +80,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param fileDetail          Details of the file received via InputStream
      * @return ExportThrottlePolicyDTO of the file to be imported
      */
-    public static ExportThrottlePolicyDTO getImportPolicy(InputStream uploadedInputStream, Attachment fileDetail)
+    public static ExportThrottlePolicyDTO getImportedPolicy(InputStream uploadedInputStream, Attachment fileDetail)
             throws APIImportExportException, IOException {
         File importFolder = CommonUtil.createTempDirectory(null);
         String uploadFileName = fileDetail.getContentDisposition().getFilename();
@@ -579,27 +578,20 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         ThrottlePolicyDetailsListDTO resultListDTO = new ThrottlePolicyDetailsListDTO();
         String policyType;
         Map<String, String> filters;
-        List<ThrottlePolicyDetailsDTO> result = null;
-        query = (query == null) ? "type:"+ALL_TYPES : query;
+        if (query == null) {
+            query = "type:" + ALL_TYPES;
+        } else if (query.toLowerCase().indexOf("type:") != 0) {
+            String errorMessage = "Invalid query format";
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        }
         if (log.isDebugEnabled()) {
             log.debug("Extracting query info...");
         }
         filters = Splitter.on(" ").withKeyValueSeparator(":").split(query);
-        try {
-            policyType = filters.get("type");
-            result = getThrottlingPolicies(policyType);
-        } catch (NullPointerException e) {
-            String errorMessage = "Error while resolving policy type";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        if (result != null) {
-            resultListDTO.setCount(result.size());
-            resultListDTO.setList(result);
-        } else {
-            String errorMessage = "Error empty result list";
-            NullPointerException e = new NullPointerException();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
+        policyType = filters.get("type");
+        List<ThrottlePolicyDetailsDTO> result = getThrottlingPolicies(policyType);
+        resultListDTO.setCount(result.size());
+        resultListDTO.setList(result);
         return Response.ok().entity(resultListDTO).build();
     }
 
@@ -996,12 +988,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            boolean policyFound = false;
             ExportThrottlePolicyDTO exportPolicy = new ExportThrottlePolicyDTO();
             exportPolicy.type(RestApiConstants.RESOURCE_THROTTLING_POLICY);
             exportPolicy.version(APIM_VERSION);
             type = (type == null) ? StringUtils.EMPTY : type;
-            if ((type.equals(PolicyConstants.POLICY_LEVEL_APP) || type.equals(StringUtils.EMPTY))) {
+            if (type.equals(StringUtils.EMPTY) || type.equals(PolicyConstants.POLICY_LEVEL_APP)) {
                 try {
                     ApplicationPolicy appPolicy = apiProvider.getApplicationPolicy(userName, policyName);
                     if (appPolicy != null) {
@@ -1013,7 +1004,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                 appPolicy);
                         exportPolicy.data(policyDTO);
                         exportPolicy.subtype(RestApiConstants.RESOURCE_APP_POLICY);
-                        policyFound = true;
+                        return Response.ok().entity(exportPolicy).build();
                     } else if (!type.equals(StringUtils.EMPTY)) {
                         RestApiUtil.handleResourceNotFoundError(
                                 RestApiConstants.RESOURCE_APP_POLICY + " not found by the name " + policyName, log);
@@ -1023,7 +1014,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             }
-            if ((type.equals(PolicyConstants.POLICY_LEVEL_SUB) || type.equals(StringUtils.EMPTY)) && !policyFound) {
+            if (type.equals(StringUtils.EMPTY) || type.equals(PolicyConstants.POLICY_LEVEL_SUB)) {
                 try {
                     SubscriptionPolicy subPolicy = apiProvider.getSubscriptionPolicy(userName, policyName);
                     if (subPolicy != null) {
@@ -1038,7 +1029,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                         setPolicyPermissionsToDTO(policyDTO);
                         exportPolicy.data(policyDTO);
                         exportPolicy.subtype(RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY);
-                        policyFound = true;
+                        return Response.ok().entity(exportPolicy).build();
                     } else if (!type.equals(StringUtils.EMPTY)) {
                         RestApiUtil.handleResourceNotFoundError(
                                 RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY + " not found by the name " + policyName,
@@ -1049,7 +1040,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             }
-            if ((type.equals(PolicyConstants.POLICY_LEVEL_API) || type.equals(StringUtils.EMPTY)) && !policyFound) {
+            if (type.equals(StringUtils.EMPTY) || type.equals(PolicyConstants.POLICY_LEVEL_API)) {
                 try {
                     exportPolicy.subtype(RestApiConstants.RESOURCE_ADVANCED_POLICY);
                     APIPolicy apiPolicy = apiProvider.getAPIPolicy(userName, policyName);
@@ -1062,7 +1053,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                         AdvancedThrottlePolicyDTO policyDTO = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(
                                 apiPolicy);
                         exportPolicy.data(policyDTO);
-                        policyFound = true;
+                        return Response.ok().entity(exportPolicy).build();
                     } else if (!type.equals(StringUtils.EMPTY)) {
                         RestApiUtil.handleResourceNotFoundError(
                                 RestApiConstants.RESOURCE_ADVANCED_POLICY + " not found by the name " + policyName,
@@ -1073,7 +1064,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             }
-            if ((type.equals(PolicyConstants.POLICY_LEVEL_GLOBAL) || type.equals(StringUtils.EMPTY)) && !policyFound) {
+            if (type.equals(StringUtils.EMPTY) || type.equals(PolicyConstants.POLICY_LEVEL_GLOBAL)) {
                 try {
                     //only super tenant is allowed to access global policies/custom rules
                     checkTenantDomainForCustomRules();
@@ -1084,7 +1075,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                 globalPolicy);
                         exportPolicy.data(policyDTO);
                         exportPolicy.subtype(RestApiConstants.RESOURCE_CUSTOM_RULE);
-                        policyFound = true;
+                        return Response.ok().entity(exportPolicy).build();
                     } else if (!type.equals(StringUtils.EMPTY)) {
                         RestApiUtil.handleResourceNotFoundError(
                                 RestApiConstants.RESOURCE_CUSTOM_RULE + " not found by the name " + policyName, log);
@@ -1094,11 +1085,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             }
-            if (policyFound) {
-                return Response.ok().entity(exportPolicy).build();
-            } else {
-                RestApiUtil.handleResourceNotFoundError("No throttle policy found by the name " + policyName, log);
-            }
+            RestApiUtil.handleResourceNotFoundError("No throttle policy found by the name " + policyName, log);
         } catch (APIManagementException | ParseException e) {
             String errorMessage = "Error while retrieving throttling policy. Name : " + policyName;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1112,119 +1099,148 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param fileInputStream Input stream from the REST request
      * @param fileDetail      exportThrottlePolicyDTO Exported Throttling policy details
      * @param overwrite       User can either update an existing throttling policy with the same name or let the conflict happen
-     * @return Response message indicating the status of the importation and the imported/updated policy name
+     * @return Response with message indicating the status of the importation and the imported/updated policy name
      */
     @Override public Response importThrottlingPolicy(InputStream fileInputStream, Attachment fileDetail,
             Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         ExportThrottlePolicyDTO exportThrottlePolicyDTO = null;
         String policyType = "";
         try {
-            exportThrottlePolicyDTO = getImportPolicy(fileInputStream, fileDetail);
+            exportThrottlePolicyDTO = getImportedPolicy(fileInputStream, fileDetail);
         } catch (APIImportExportException | IOException e) {
             String errorMessage = "Error retrieving Throttling policy";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-        ObjectMapper mapper = new ObjectMapper();
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String username = RestApiCommonUtil.getLoggedInUsername();
         if (exportThrottlePolicyDTO != null) {
             policyType = exportThrottlePolicyDTO.getSubtype();
         } else {
             String errorMessage = "Error resolving ExportThrottlePolicyDTO";
-            NullPointerException e = new NullPointerException();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            RestApiUtil.handleInternalServerError(errorMessage, log);
         }
+        return resolveUpdateThrottlingPolicy(policyType, overwrite, exportThrottlePolicyDTO, messageContext);
+    }
+
+    /**
+     * @param policyType              Throttling policy type
+     * @param overwrite               User can either update an existing throttling policy with the same name or let the conflict happen
+     * @param exportThrottlePolicyDTO the policy to be imported
+     * @return Response with  message indicating the status of the importation and the imported/updated policy name
+     */
+    private Response resolveUpdateThrottlingPolicy(String policyType, boolean overwrite,
+            ExportThrottlePolicyDTO exportThrottlePolicyDTO, MessageContext messageContext)
+            throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         if (policyType.equals(RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY)) {
             SubscriptionThrottlePolicyDTO subscriptionPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
                     SubscriptionThrottlePolicyDTO.class);
             try {
-                Response resp = throttlingPoliciesSubscriptionPost(RestApiConstants.APPLICATION_JSON,
-                        subscriptionPolicy, messageContext);
-                String message =
-                        "Successfully imported Subscription Throttling Policy : " + subscriptionPolicy.getPolicyName();
-                return Response.fromResponse(resp).entity(message).build();
-            } catch (ConflictException e) {
-                if (overwrite) {
-                    Policy policyIfExists = apiProvider.getSubscriptionPolicy(username,
-                            subscriptionPolicy.getPolicyName());
-                    String uuid = policyIfExists.getUUID();
-                    Response resp = throttlingPoliciesSubscriptionPolicyIdPut(uuid, RestApiConstants.APPLICATION_JSON,
+                Policy policyIfExists = apiProvider.getSubscriptionPolicy(username, subscriptionPolicy.getPolicyName());
+                if (policyIfExists != null) {
+                    if (overwrite) {
+                        String uuid = policyIfExists.getUUID();
+                        Response resp = throttlingPoliciesSubscriptionPolicyIdPut(uuid,
+                                RestApiConstants.APPLICATION_JSON, subscriptionPolicy, messageContext);
+                        String message = "Successfully updated Subscription Throttling Policy : "
+                                + subscriptionPolicy.getPolicyName();
+                        return Response.fromResponse(resp).entity(message).build();
+                    } else {
+                        RestApiUtil.handleResourceAlreadyExistsError(
+                                "Subscription Policy with name " + subscriptionPolicy.getPolicyName()
+                                        + " already exists", log);
+                    }
+                } else {
+                    Response resp = throttlingPoliciesSubscriptionPost(RestApiConstants.APPLICATION_JSON,
                             subscriptionPolicy, messageContext);
-                    String message = "Successfully updated Subscription Throttling Policy : "
+                    String message = "Successfully imported Subscription Throttling Policy : "
                             + subscriptionPolicy.getPolicyName();
                     return Response.fromResponse(resp).entity(message).build();
-                } else {
-                    throw e;
                 }
+            } catch (PolicyNotFoundException ignore) {
             }
-        }
-        if (policyType.equals(RestApiConstants.RESOURCE_APP_POLICY)) {
+        } else if (policyType.equals(RestApiConstants.RESOURCE_APP_POLICY)) {
             ApplicationThrottlePolicyDTO applicationPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
                     ApplicationThrottlePolicyDTO.class);
             try {
-                Response resp = throttlingPoliciesApplicationPost(RestApiConstants.APPLICATION_JSON, applicationPolicy,
-                        messageContext);
-                String message =
-                        "Successfully imported Application Throttling Policy : " + applicationPolicy.getPolicyName();
-                return Response.fromResponse(resp).entity(message).build();
-            } catch (ConflictException e) {
-                if (overwrite) {
-                    Policy policyIfExists = apiProvider.getApplicationPolicy(username,
-                            applicationPolicy.getPolicyName());
-                    String uuid = policyIfExists.getUUID();
-                    Response resp = throttlingPoliciesApplicationPolicyIdPut(uuid, RestApiConstants.APPLICATION_JSON,
-                            applicationPolicy, messageContext);
-                    String message =
-                            "Successfully updated Application Throttling Policy : " + applicationPolicy.getPolicyName();
-                    return Response.fromResponse(resp).entity(message).build();
+                Policy policyIfExists = apiProvider.getApplicationPolicy(username, applicationPolicy.getPolicyName());
+                if (policyIfExists != null) {
+                    if (overwrite) {
+                        String uuid = policyIfExists.getUUID();
+                        Response resp = throttlingPoliciesApplicationPolicyIdPut(uuid,
+                                RestApiConstants.APPLICATION_JSON, applicationPolicy, messageContext);
+                        String message = "Successfully updated Subscription Throttling Policy : "
+                                + applicationPolicy.getPolicyName();
+                        return Response.fromResponse(resp).entity(message).build();
+                    } else {
+                        RestApiUtil.handleResourceAlreadyExistsError(
+                                "Subscription Policy with name " + applicationPolicy.getPolicyName()
+                                        + " already exists", log);
+                    }
                 } else {
-                    throw e;
+                    Response resp = throttlingPoliciesApplicationPost(RestApiConstants.APPLICATION_JSON,
+                            applicationPolicy, messageContext);
+                    String message = "Successfully imported Application Throttling Policy : "
+                            + applicationPolicy.getPolicyName();
+                    return Response.fromResponse(resp).entity(message).build();
                 }
+            } catch (PolicyNotFoundException ignore) {
             }
-        }
-        if (policyType.equals(RestApiConstants.RESOURCE_ADVANCED_POLICY)) {
+        } else if (policyType.equals(RestApiConstants.RESOURCE_CUSTOM_RULE)) {
+            CustomRuleDTO customPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(), CustomRuleDTO.class);
+            try {
+                Policy policyIfExists = apiProvider.getGlobalPolicy(customPolicy.getPolicyName());
+                if (policyIfExists != null) {
+                    if (overwrite) {
+                        String uuid = policyIfExists.getUUID();
+                        Response resp = throttlingPoliciesCustomRuleIdPut(uuid, RestApiConstants.APPLICATION_JSON,
+                                customPolicy, messageContext);
+                        String message =
+                                "Successfully updated Custom Throttling Policy : " + customPolicy.getPolicyName();
+                        return Response.fromResponse(resp).entity(message).build();
+                    } else {
+                        RestApiUtil.handleResourceAlreadyExistsError(
+                                "Custom Policy with name " + customPolicy.getPolicyName() + " already exists", log);
+                    }
+                } else {
+                    Response resp = throttlingPoliciesCustomPost(RestApiConstants.APPLICATION_JSON, customPolicy,
+                            messageContext);
+                    String message = "Successfully imported Custom Throttling Policy : " + customPolicy.getPolicyName();
+                    return Response.fromResponse(resp).entity(message).build();
+                }
+            } catch (PolicyNotFoundException ignore) {
+            }
+        } else if (policyType.equals(RestApiConstants.RESOURCE_ADVANCED_POLICY)) {
             AdvancedThrottlePolicyDTO advancedPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
                     AdvancedThrottlePolicyDTO.class);
             try {
-                Response resp = throttlingPoliciesAdvancedPost(RestApiConstants.APPLICATION_JSON, advancedPolicy,
-                        messageContext);
-                String message = "Successfully imported Advanced Throttling Policy : " + advancedPolicy.getPolicyName();
-                return Response.fromResponse(resp).entity(message).build();
-            } catch (ConflictException e) {
-                if (overwrite) {
-                    Policy policyIfExists = apiProvider.getAPIPolicy(username, advancedPolicy.getPolicyName());
-                    String uuid = policyIfExists.getUUID();
-                    Response resp = throttlingPoliciesAdvancedPolicyIdPut(uuid, RestApiConstants.APPLICATION_JSON,
-                            advancedPolicy, messageContext);
+                Policy policyIfExists = apiProvider.getAPIPolicy(username, advancedPolicy.getPolicyName());
+                if (policyIfExists != null) {
+                    if (overwrite) {
+                        String uuid = policyIfExists.getUUID();
+                        Response resp = throttlingPoliciesAdvancedPolicyIdPut(uuid, RestApiConstants.APPLICATION_JSON,
+                                advancedPolicy, messageContext);
+                        String message =
+                                "Successfully updated Advanced Throttling Policy : " + advancedPolicy.getPolicyName();
+                        return Response.fromResponse(resp).entity(message).build();
+                    } else {
+                        RestApiUtil.handleResourceAlreadyExistsError(
+                                "Advanced Policy with name " + advancedPolicy.getPolicyName() + " already exists", log);
+                    }
+                } else {
+                    Response resp = throttlingPoliciesAdvancedPost(RestApiConstants.APPLICATION_JSON, advancedPolicy,
+                            messageContext);
                     String message =
-                            "Successfully updated Advanced Throttling Policy : " + advancedPolicy.getPolicyName();
+                            "Successfully imported Advanced Throttling Policy : " + advancedPolicy.getPolicyName();
                     return Response.fromResponse(resp).entity(message).build();
-                } else {
-                    throw e;
                 }
+            } catch (PolicyNotFoundException ignore) {
             }
+        } else {
+            String errorMessage = "Error with Throttling Policy Type : " + policyType;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
         }
-        if (policyType.equals(RestApiConstants.RESOURCE_CUSTOM_RULE)) {
-            CustomRuleDTO customPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(), CustomRuleDTO.class);
-            try {
-                Response resp = throttlingPoliciesCustomPost(RestApiConstants.APPLICATION_JSON, customPolicy,
-                        messageContext);
-                String message = "Successfully imported Custom Throttling Policy : " + customPolicy.getPolicyName();
-                return Response.fromResponse(resp).entity(message).build();
-            } catch (ConflictException e) {
-                if (overwrite) {
-                    Policy policyIfExists = apiProvider.getGlobalPolicy(customPolicy.getPolicyName());
-                    String uuid = policyIfExists.getUUID();
-                    Response resp = throttlingPoliciesCustomRuleIdPut(uuid, RestApiConstants.APPLICATION_JSON,
-                            customPolicy, messageContext);
-                    String message = "Successfully updated Custom Throttling Policy : " + customPolicy.getPolicyName();
-                    return Response.fromResponse(resp).entity(message).build();
-                } else {
-                    throw e;
-                }
-            }
-        }
-        return Response.ok().build();
+        return null;
     }
 
     /**
@@ -1237,43 +1253,39 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
-        Policy[] temp;
+        Policy[] temporaryPolicies;
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         List<ThrottlePolicyDetailsDTO> policies = new ArrayList<>();
         if (policyLevel.equals(ALL_TYPES) || policyLevel.equals(PolicyConstants.POLICY_LEVEL_APP)) {
-            temp = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_APP);
-            for (Policy policy : temp) {
+            temporaryPolicies = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_APP);
+            for (Policy policy : temporaryPolicies) {
                 ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
                 policyDetails.setType(PolicyConstants.POLICY_LEVEL_APP);
-                policyDetails.setIsDeployed(policy.isDeployed());
                 policies.add(policyDetails);
             }
         }
         if (policyLevel.equals(ALL_TYPES) || policyLevel.equals(PolicyConstants.POLICY_LEVEL_SUB)) {
-            temp = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_SUB);
-            for (Policy policy : temp) {
+            temporaryPolicies = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_SUB);
+            for (Policy policy : temporaryPolicies) {
                 ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
                 policyDetails.setType(PolicyConstants.POLICY_LEVEL_SUB);
-                policyDetails.setIsDeployed(policy.isDeployed());
                 policies.add(policyDetails);
             }
         }
         if (policyLevel.equals(ALL_TYPES) || policyLevel.equals(PolicyConstants.POLICY_LEVEL_API)) {
-            temp = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_API);
-            for (Policy policy : temp) {
+            temporaryPolicies = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_API);
+            for (Policy policy : temporaryPolicies) {
                 ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
                 policyDetails.setType(PolicyConstants.POLICY_LEVEL_API);
-                policyDetails.setIsDeployed(policy.isDeployed());
                 policies.add(policyDetails);
             }
         }
         if (policyLevel.equals(ALL_TYPES) || policyLevel.equals(PolicyConstants.POLICY_LEVEL_GLOBAL)) {
-            temp = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_GLOBAL);
-            for (Policy policy : temp) {
+            temporaryPolicies = apiAdmin.getPolicies(tenantId, PolicyConstants.POLICY_LEVEL_GLOBAL);
+            for (Policy policy : temporaryPolicies) {
                 ThrottlePolicyDetailsDTO policyDetails = mapper.convertValue(policy, ThrottlePolicyDetailsDTO.class);
                 policyDetails.setType(PolicyConstants.POLICY_LEVEL_GLOBAL);
-                policyDetails.setIsDeployed(policy.isDeployed());
                 policies.add(policyDetails);
             }
         }
