@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -105,7 +106,6 @@ public class ImportUtils {
         Subscriber subscriber = apiConsumer.getSubscriber(userId);
         try {
             if (subscriber == null && !APIUtil.isPermissionCheckDisabled()) {
-                APIUtil.checkPermission(userId, APIConstants.Permissions.API_SUBSCRIBE);
                 apiConsumer.addSubscriber(userId, groupId);
             }
         } catch (APIManagementException e) {
@@ -150,7 +150,7 @@ public class ImportUtils {
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-            Application application, Boolean update, APIConsumer apiConsumer, String organization)
+                                                          Application application, Boolean update, APIConsumer apiConsumer, String organization)
             throws APIManagementException,
             UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
@@ -159,37 +159,9 @@ public class ImportUtils {
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
             if (!StringUtils.isEmpty(tenantDomain) && APIUtil.isTenantAvailable(tenantDomain)) {
-                String name = apiIdentifier.getApiName();
-                String version = apiIdentifier.getVersion();
-                // Creating a solr compatible search query, here we will execute a search query without wildcard *s
-                StringBuilder searchQuery = new StringBuilder();
-                String[] searchCriteria = { name, "version:" + version };
-                for (int i = 0; i < searchCriteria.length; i++) {
-                    if (i == 0) {
-                        searchQuery = new StringBuilder(
-                                APIUtil.getSingleSearchCriteria(searchCriteria[i]).replace("*", ""));
-                    } else {
-                        searchQuery.append(APIConstants.SEARCH_AND_TAG)
-                                .append(APIUtil.getSingleSearchCriteria(searchCriteria[i]).replace("*", ""));
-                    }
-                }
-                Map matchedAPIs;
-                matchedAPIs = apiConsumer
-                        .searchPaginatedAPIs(searchQuery.toString(), tenantDomain, 0, Integer.MAX_VALUE, false);
-                Set<Object> apiSet = (Set<Object>) matchedAPIs.get("apis");
-                if (apiSet != null && !apiSet.isEmpty()) {
-                    Object type = apiSet.iterator().next();
-                    ApiTypeWrapper apiTypeWrapper = null;
-                    String apiOrApiProductUuid;
-                    //Check whether the object is ApiProduct
-                    if (isApiProduct(type)) {
-                        APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(apiProduct.getId(), organization);
-                    } else {
-                        API api = (API) apiSet.iterator().next();
-                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(api.getId(), organization);
-                    }
-                    apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiOrApiProductUuid, organization);
+                String uuidFromIdentifier = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier, tenantDomain);
+                if (StringUtils.isNotEmpty(uuidFromIdentifier)) {
+                    ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(uuidFromIdentifier, organization);
                     // Tier of the imported subscription
                     String targetTier = subscribedAPI.getThrottlingPolicy();
                     // Checking whether the target tier is available
@@ -206,12 +178,14 @@ public class ImportUtils {
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
                         }
                     } else {
-                        log.error("Failed to import Subscription as API/API Product " + name + "-" + version
-                                + " as one or more tiers may be unavailable or the API/API Product may not have been published ");
+                        log.error("Failed to import Subscription as API/API Product "
+                                + apiIdentifier.getName() + "-" + apiIdentifier.getVersion() + " as one or more tiers may "
+                                + "be unavailable or the API/API Product may not have been published ");
                         skippedAPIList.add(subscribedAPI.getApiId());
                     }
                 } else {
-                    log.error("Failed to import Subscription as API " + name + "-" + version + " is not available");
+                    log.error("Failed to import Subscription as API " + apiIdentifier.getName() + "-" +
+                            apiIdentifier.getVersion() + " is not available");
                     skippedAPIList.add(subscribedAPI.getApiId());
                 }
             } else {

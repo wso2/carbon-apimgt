@@ -354,53 +354,6 @@ public class GraphQLSchemaDefinition {
     }
 
     /**
-     * This method saves schema definition of GraphQL APIs in the registry
-     *
-     * @param api              API to be saved
-     * @param schemaDefinition Graphql API definition as String
-     * @param registry         user registry
-     * @throws APIManagementException
-     */
-    public void saveGraphQLSchemaDefinition(API api, String schemaDefinition, Registry registry)
-            throws APIManagementException {
-        String apiName = api.getId().getApiName();
-        String apiVersion = api.getId().getVersion();
-        String apiProviderName = api.getId().getProviderName();
-        String resourcePath = APIUtil.getGraphqlDefinitionFilePath(apiName, apiVersion, apiProviderName);
-        try {
-            String saveResourcePath = resourcePath + apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    apiName + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-            Resource resource;
-            if (!registry.resourceExists(saveResourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(saveResourcePath);
-            }
-
-            resource.setContent(schemaDefinition);
-            resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
-            registry.put(saveResourcePath, resource);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully imported the schema: " + schemaDefinition);
-            }
-
-            String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null) {
-                visibleRoles = api.getVisibleRoles().split(",");
-            }
-
-            //Need to set anonymous if the visibility is public
-            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
-
-        } catch (RegistryException e) {
-            String errorMessage = "Error while adding Graphql Definition for " + apiName + '-' + apiVersion;
-            log.error(errorMessage, e);
-            handleException(errorMessage, e);
-        }
-    }
-
-    /**
      * Returns the graphQL content in registry specified by the wsdl name
      *
      * @param apiId Api Identifier

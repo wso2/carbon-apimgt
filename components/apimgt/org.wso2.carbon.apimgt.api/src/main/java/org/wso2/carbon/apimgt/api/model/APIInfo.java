@@ -37,9 +37,14 @@ public class APIInfo {
     private APIStatus status;
     private int revisionsCreated;
     private boolean isRevision;
+    private String organization;
 
     private APIInfo() {
 
+    }
+
+    public String getOrganization() {
+        return organization;
     }
 
     public String getId() {
@@ -219,6 +224,7 @@ public class APIInfo {
         private APIStatus status;
         private int revisionsCreated;
         private boolean isRevision;
+        private String organization;
 
         public Builder id(String id) {
 
@@ -328,7 +334,13 @@ public class APIInfo {
             apiInfo.status = status;
             apiInfo.revisionsCreated = revisionsCreated;
             apiInfo.isRevision = isRevision;
+            apiInfo.organization = organization;
             return apiInfo;
+        }
+
+        public Builder organization(String organization) {
+            this.organization = organization;
+            return this;
         }
     }
 }

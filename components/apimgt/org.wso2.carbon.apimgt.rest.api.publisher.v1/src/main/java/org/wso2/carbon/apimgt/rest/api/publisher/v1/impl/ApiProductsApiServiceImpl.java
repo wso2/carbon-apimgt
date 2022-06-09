@@ -677,12 +677,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             if (log.isDebugEnabled()) {
                 log.debug("API Product list request by " + username);
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            Map<String, Object> result = apiProvider.searchPaginatedAPIProducts(query, tenantDomain, offset, limit);
+            Map<String, Object> result = apiProvider.searchPaginatedAPIProducts(query, organization, offset, limit);
 
             Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");
             allMatchedProducts.addAll(apiProducts);

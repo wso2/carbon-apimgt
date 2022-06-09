@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -27,6 +28,7 @@ import org.wso2.carbon.apimgt.internal.service.RuntimeMetadataApiService;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -38,9 +40,18 @@ public class RuntimeMetadataApiServiceImpl implements RuntimeMetadataApiService 
     public Response runtimeMetadataGet(String xWSO2Tenant, String apiId, String gatewayLabel, MessageContext messageContext)
             throws APIManagementException {
 
+        RuntimeArtifactDto runtimeArtifactDto;
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-        RuntimeArtifactDto runtimeArtifactDto =
-                RuntimeArtifactGeneratorUtil.generateMetadataArtifact(xWSO2Tenant, apiId, gatewayLabel);
+        String organization = RestApiUtil.getOrganization(messageContext);
+        if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+            xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
+        }
+        if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
+                xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllMetadataArtifact(apiId, gatewayLabel);
+        } else {
+            runtimeArtifactDto =  RuntimeArtifactGeneratorUtil.generateMetadataArtifact(xWSO2Tenant, apiId, gatewayLabel);
+        }
         if (runtimeArtifactDto != null) {
             File artifact = (File) runtimeArtifactDto.getArtifact();
             StreamingOutput streamingOutput = (outputStream) -> {

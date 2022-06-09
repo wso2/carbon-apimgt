@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
@@ -113,7 +113,7 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias,
+    public ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias,
                                              String tierName, int tenantId, String organization) {
 
         ResponseCode responseCode;
@@ -174,7 +174,7 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId) {
+    public ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, int tenantId) {
 
         try {
             boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, tenantId);
@@ -382,7 +382,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
-            APIIdentifier apiIdentifier, String organization)
+                                                               Identifier apiIdentifier, String organization)
             throws APIManagementException {
 
         try {

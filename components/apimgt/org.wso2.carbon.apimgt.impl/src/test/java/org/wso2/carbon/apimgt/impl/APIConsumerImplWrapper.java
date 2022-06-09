@@ -29,15 +29,9 @@ import org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.io.File;
 
 public class APIConsumerImplWrapper extends APIConsumerImpl {
 
@@ -54,11 +48,6 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
         this.apiMgtDAO = apiMgtDAO;
         this.tenantDomain = organization;
         this.organization = organization;
-    }
-
-    public APIConsumerImplWrapper(Registry registry, ApiMgtDAO apiMgtDAO) throws APIManagementException {
-        this.apiMgtDAO = apiMgtDAO;
-        this.registry = registry;
     }
 
     public APIConsumerImplWrapper(ApiMgtDAO apiMgtDAO, APIPersistence apiPersistenceInstance)
@@ -95,10 +84,6 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
 
     protected  int getTenantId(String requestedTenantDomain) throws UserStoreException {
         return -1234;
-    }
-
-    protected UserRegistry getGovernanceUserRegistry(int tenantId) throws RegistryException {
-        return null;
     }
 
     protected void setUsernameToThreadLocalCarbonContext(String username) {

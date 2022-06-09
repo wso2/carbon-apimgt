@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcesso
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import java.net.SocketAddress;
@@ -59,7 +60,7 @@ import java.util.UUID;
  * Test class for WebsocketInboundHandler.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WebSocketUtils.class, InboundWebsocketProcessorUtil.class})
+@PrepareForTest({WebSocketUtils.class, InboundWebsocketProcessorUtil.class, APIUtil.class})
 public class WebsocketInboundHandlerTestCase {
 
     private static final String channelIdString = "11111";
@@ -79,6 +80,7 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.when(channel.id()).thenReturn(channelId);
         Mockito.when(channelId.asLongText()).thenReturn(channelIdString);
         Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
+        PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(WebSocketUtils.class);
         SocketAddress socketAddress = Mockito.mock(SocketAddress.class);
         Mockito.when(channel.remoteAddress()).thenReturn(socketAddress);

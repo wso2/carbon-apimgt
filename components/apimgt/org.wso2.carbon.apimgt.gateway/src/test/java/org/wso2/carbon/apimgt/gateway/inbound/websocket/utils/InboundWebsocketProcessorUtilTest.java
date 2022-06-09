@@ -39,13 +39,14 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PrivilegedCarbonContext.class, ServiceReferenceHolder.class, WebsocketUtil.class,
-        ThrottleDataPublisher.class})
+        ThrottleDataPublisher.class, APIUtil.class})
 public class InboundWebsocketProcessorUtilTest {
 
     private DataPublisher dataPublisher;
@@ -66,6 +67,7 @@ public class InboundWebsocketProcessorUtilTest {
         PowerMockito.when(ThrottleDataPublisher.getDataPublisher()).thenReturn(dataPublisher);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(WebsocketUtil.class);
     }
 

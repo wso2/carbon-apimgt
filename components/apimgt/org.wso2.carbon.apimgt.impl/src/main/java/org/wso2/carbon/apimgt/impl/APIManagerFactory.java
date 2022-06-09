@@ -66,19 +66,7 @@ public class APIManagerFactory {
     }
 
     public APIProvider getAPIProvider(String username) throws APIManagementException {
-        APIProvider provider = providers.get(username);
-        if (provider == null) {
-            synchronized (username.intern()) {
-                provider = providers.get(username);
-                if (provider != null) {
-                    return provider;
-                }
-
-                provider = newProvider(username);
-                providers.put(username, provider);
-            }
-        }
-        return provider;
+        return newProvider(username);
     }
 
     public APIConsumer getAPIConsumer() throws APIManagementException {

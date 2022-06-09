@@ -49,7 +49,7 @@ import javax.cache.Caching;
 @PrepareForTest({WebsocketUtilTestCase.class, ServiceReferenceHolder.class, Caching.class, APIUtil.class,
         PrivilegedCarbonContext.class, MultitenantUtils.class,
         org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class, Caching.class,
-        Cache.class, APIManagerConfigurationService.class, CacheProvider.class})
+        Cache.class, APIManagerConfigurationService.class, CacheProvider.class, WebsocketUtil.class })
 public class WebsocketUtilTestCase {
     private String apiKey = "abc";
     private String apiContext = "/ishara";
@@ -93,10 +93,13 @@ public class WebsocketUtilTestCase {
         gwTokenCache = Mockito.mock(Cache.class);
         Mockito.when(cacheManager.getCache(APIConstants.GATEWAY_KEY_CACHE_NAME)).thenReturn(gwKeyCache);
         Mockito.when(cacheManager.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME)).thenReturn(gwTokenCache);
+        PowerMockito.mockStatic(APIUtil.class);
     }
 
     @Test
-    public void testValidateCache() {
+    public void testValidateCache() throws Exception {
+        Mockito.when(CacheProvider.getGatewayTokenCache()).thenReturn(gwTokenCache);
+        Mockito.when(CacheProvider.getGatewayKeyCache()).thenReturn(gwKeyCache);
         // returns null if cachedToken is not found
         Assert.assertNull(WebsocketUtil.validateCache(apiKey, cacheKey));
 
@@ -104,10 +107,6 @@ public class WebsocketUtilTestCase {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
         apiKeyValidationInfoDTO.setApiName(apiName);
         WebsocketUtil.putCache(apiKeyValidationInfoDTO, apiKey, cacheKey);
-        PowerMockito.mockStatic(APIUtil.class);
-
-        Mockito.when(CacheProvider.getGatewayTokenCache()).thenReturn(gwTokenCache);
-        Mockito.when(CacheProvider.getGatewayKeyCache()).thenReturn(gwKeyCache);
         Mockito.when(gwTokenCache.get(apiKey)).thenReturn(cachedToken);
         Mockito.when(gwKeyCache.get(cacheKey)).thenReturn(apiKeyValidationInfoDTO);
         PowerMockito.when(APIUtil.isAccessTokenExpired(apiKeyValidationInfoDTO)).thenReturn(true);
@@ -120,6 +119,7 @@ public class WebsocketUtilTestCase {
         apiKeyValidationInfoDTO.setApiName(apiName);
         Cache gwKeyCache = Mockito.mock(Cache.class);
         Cache gwTokenCache = Mockito.mock(Cache.class);
+        PowerMockito.mockStatic(WebsocketUtil.class);
 
         WebsocketUtil.putCache(apiKeyValidationInfoDTO, apiKey, cacheKey);
         Assert.assertEquals(apiName, apiKeyValidationInfoDTO.getApiName());

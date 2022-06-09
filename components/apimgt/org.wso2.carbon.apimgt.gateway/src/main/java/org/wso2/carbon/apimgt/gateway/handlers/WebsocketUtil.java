@@ -23,10 +23,12 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.description.InOutAxisOperation;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -36,6 +38,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.cache.Cache;
 
@@ -43,6 +48,8 @@ public class WebsocketUtil {
 	private static Logger log = LoggerFactory.getLogger(WebsocketUtil.class);
 	private static boolean removeOAuthHeadersFromOutMessage = true;
 	private static boolean gatewayTokenCacheEnabled = false;
+	public static Set<String> allowedOriginsConfigured = new HashSet<>();
+	public static String authorizationHeader = null;
 
 	static {
 		initParams();
@@ -53,15 +60,36 @@ public class WebsocketUtil {
 	 *
 	 */
 	protected static void initParams() {
-			APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-			String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
-			if (cacheEnabled != null) {
-				gatewayTokenCacheEnabled = Boolean.parseBoolean(cacheEnabled);
+
+		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+		String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+		if (cacheEnabled != null) {
+			gatewayTokenCacheEnabled = Boolean.parseBoolean(cacheEnabled);
+		}
+		String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
+		if (value != null) {
+			removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
+		}
+
+		if (authorizationHeader == null) {
+			try {
+				authorizationHeader = APIUtil
+						.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+				if (authorizationHeader == null) {
+					authorizationHeader = HttpHeaders.AUTHORIZATION;
+				}
+			} catch (APIManagementException e) {
+				log.error("Error while reading authorization header from APIM configurations", e);
 			}
-			String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
-			if (value != null) {
-				removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
+		}
+
+		//initialize CORS Configs
+		if (APIUtil.isCORSValidationEnabledForWS()) {
+			String allowedOriginsConfigured = APIUtil.getAllowedOrigins();
+			if (!allowedOriginsConfigured.isEmpty()) {
+				WebsocketUtil.allowedOriginsConfigured = new HashSet<>(Arrays.asList(allowedOriginsConfigured.split(",")));
 			}
+		}
 	}
 
 	public static boolean isRemoveOAuthHeadersFromOutMessage() {

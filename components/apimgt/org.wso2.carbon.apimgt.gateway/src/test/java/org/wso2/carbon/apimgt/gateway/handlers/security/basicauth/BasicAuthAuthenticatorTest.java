@@ -33,18 +33,22 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
 import java.util.TreeMap;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({OpenAPIUtils.class, BasicAuthAuthenticator.class, BasicAuthCredentialValidator.class})
+@PrepareForTest({OpenAPIUtils.class, BasicAuthAuthenticator.class, BasicAuthCredentialValidator.class,
+        ServiceReferenceHolder.class})
 public class BasicAuthAuthenticatorTest {
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
     private BasicAuthAuthenticator basicAuthAuthenticator;
     private final String CUSTOM_AUTH_HEADER = "AUTH-HEADER";
     private final String UNLIMITED_THROTTLE_POLICY= "Unlimited";
+    private APIManagerConfiguration apiManagerConfiguration;
 
     @Before
     public void setup() throws Exception {
@@ -98,6 +102,14 @@ public class BasicAuthAuthenticatorTest {
         PowerMockito.whenNew(BasicAuthCredentialValidator.class).withNoArguments().thenReturn(basicAuthCredentialValidator);
         Mockito.when(messageContext.getProperty(BasicAuthAuthenticator.PUBLISHER_TENANT_DOMAIN)).
                 thenReturn("carbon.super");
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
+                .thenReturn("true");
     }
 
     @Test
@@ -163,6 +175,8 @@ public class BasicAuthAuthenticatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
 
         Assert.assertTrue(basicAuthAuthenticator.authenticate(messageContext).isAuthenticated());
+        transportHeaders = (TreeMap) axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Assert.assertNull(transportHeaders.get(CUSTOM_AUTH_HEADER));
     }
 
     @Test
@@ -177,5 +191,22 @@ public class BasicAuthAuthenticatorTest {
         AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
         Assert.assertFalse(authenticationResponse.isAuthenticated());
         Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_CREDENTIALS);
+    }
+
+    @Test
+    public void testAuthenticateWithRemoveOAuthHeadersFromOutMessageSetToFalse() {
+        TreeMap transportHeaders = new TreeMap();
+        // encode64(test_username:test_password)='dGVzdF91c2VybmFtZTp0ZXN0X3Bhc3N3b3Jk'
+        transportHeaders.put(CUSTOM_AUTH_HEADER, "Basic dGVzdF91c2VybmFtZTp0ZXN0X3Bhc3N3b3Jk");
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(transportHeaders);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
+                .thenReturn("false");
+
+        Assert.assertTrue(basicAuthAuthenticator.authenticate(messageContext).isAuthenticated());
+        transportHeaders =
+                (TreeMap) axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Assert.assertNotNull(transportHeaders.get(CUSTOM_AUTH_HEADER));
+        Assert.assertEquals(transportHeaders.get(CUSTOM_AUTH_HEADER), "Basic dGVzdF91c2VybmFtZTp0ZXN0X3Bhc3N3b3Jk");
     }
 }

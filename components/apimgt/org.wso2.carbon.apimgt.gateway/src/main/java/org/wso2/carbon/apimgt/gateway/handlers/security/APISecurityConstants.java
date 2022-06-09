@@ -69,6 +69,9 @@ public class APISecurityConstants {
     public static final int OAUTH_TEMPORARY_SERVER_ERROR = 900424;
     public static final String OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE = "Temporary Server Error";
 
+    public static final int CORS_ORIGIN_HEADER_VALIDATION_FAILED = 900425;
+    public static final String CORS_ORIGIN_HEADER_VALIDATION_FAILED_MESSAGE = "CORS origin header validation failed";
+
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
     public static final String DESCRIPTION_SEPARATOR = ". ";

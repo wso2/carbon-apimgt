@@ -463,6 +463,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_UPLOADING_THUMBNAIL(900914,
             "Error while updating thumbnail of API/API Product", 500,
             "Error while updating thumbnail of API/API Product: %s-%s"),
+    APICTL_OPENAPI_PARSE_EXCEPTION(
+            OPENAPI_PARSE_EXCEPTION.getErrorCode(), OPENAPI_PARSE_EXCEPTION.getErrorMessage(),
+            OPENAPI_PARSE_EXCEPTION.getHttpStatusCode(), "%s"),
 
     //AsyncApi related error codes
     ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),

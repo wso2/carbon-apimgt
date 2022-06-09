@@ -48,6 +48,9 @@ import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
+import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.core.ServerShutdownHandler;
@@ -111,8 +114,15 @@ public class APIHandlerServiceComponent {
         // Start JWT revoked map cleaner.
         RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
         revokedJWTMapCleaner.startJWTRevokedMapCleaner();
-        ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
-                .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
+        if (TelemetryUtil.telemetryEnabled()) {
+            if (Util.legacy()) {
+                ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
+                        .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
+            } else {
+                ServiceReferenceHolder.getInstance().setTelemetry(ServiceReferenceHolder.getInstance().getTelemetryService
+                        ().buildTelemetryTracer(APIMgtGatewayConstants.SERVICE_NAME));
+            }
+        }
 
         RedisConfig redisConfig =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getRedisConfig();
@@ -288,6 +298,23 @@ public class APIHandlerServiceComponent {
 
         ServiceReferenceHolder.getInstance().setTracingService(null);
     }
+
+    @Reference(
+            name = "org.wso2.carbon.apimgt.tracing.telemetry",
+            service = org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTracingService")
+    protected void setTracingService(TelemetryService telemetryService) {
+
+        ServiceReferenceHolder.getInstance().setTelemetryService(telemetryService);
+    }
+
+    protected void unsetTracingService(TelemetryService telemetryService) {
+
+        ServiceReferenceHolder.getInstance().setTelemetryService(null);
+    }
+
 
     @Reference(
             name = "restapi.admin.service.component",

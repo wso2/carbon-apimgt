@@ -90,6 +90,29 @@ public class SubscriptionValidationDAO {
     }
 
     /*
+     * This method can be used to retrieve all the APIs of a given organization in the database
+     *
+     * @param organization : organization Id
+     * @return {@link List<Subscription>}
+     * */
+    public List<Subscription> getAllSubscriptionsByOrganization(String organization) throws APIManagementException {
+
+        List<Subscription> subscriptions = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ORGANIZATION_SUBSCRIPTIONS_SQL)) {
+
+            ps.setString(1, organization);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateSubscriptionsList(subscriptions, resultSet);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading Subscriptions for the organization : " + organization, e);}
+        return subscriptions;
+    }
+
+    /*
      * This method can be used to retrieve all the Applications in the database
      *
      * @return {@link List<Application>}
@@ -474,28 +497,19 @@ public class SubscriptionValidationDAO {
      * @param tenantId : tenant Id
      * @return {@link Subscription}
      * */
-    public List<Application> getAllApplications(String tenantDomain) {
+    public List<Application> getAllApplications(String organization) {
 
         ArrayList<Application> applications = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATIONS_SQL)) {
-            try {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                ps.setInt(1, tenantId);
-
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    addToApplicationList(applications, resultSet);
-                }
-            } catch (UserStoreException e) {
-                log.error("Error in getting tenant id for loading Applications for tenant : " + tenantDomain, e);
-            }
-
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATIONS_BY_ORGANIZATION_SQL)) {
+             ps.setString(1, organization);
+             try (ResultSet resultSet = ps.executeQuery()) {
+                 addToApplicationList(applications, resultSet);
+             }
         } catch (SQLException e) {
-            log.error("Error in loading Applications for tenantDomain : " + tenantDomain, e);
+            log.error("Error in loading Applications for organization : " + organization, e);
         }
-
         return applications;
     }
 
@@ -528,6 +542,43 @@ public class SubscriptionValidationDAO {
 
         return keyMappings;
     }
+
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappings() {
+
+        List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPING_SQL;
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(sql)) {
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateApplicationKeyMappingsList(keyMappings, resultSet);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading Application key mappings for all organizations ", e);
+        }
+        return keyMappings;
+    }
+
+    public List<ApplicationKeyMapping> getAllApplicationKeyMappingsByOrganization(String organization) {
+
+        List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_ORGANIZATION_AM_KEY_MAPPING_SQL;
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(sql)) {
+            ps.setString(1, organization);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateApplicationKeyMappingsList(keyMappings, resultSet);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading Application key mappings for organization : " + organization, e);
+        }
+
+        return keyMappings;
+    }
+
 
     private void populateApplicationKeyMappingsList(List<ApplicationKeyMapping> keyMappings, ResultSet resultSet)
             throws SQLException {

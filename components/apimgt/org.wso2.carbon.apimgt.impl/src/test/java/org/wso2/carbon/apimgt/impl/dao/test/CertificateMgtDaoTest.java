@@ -82,7 +82,7 @@ public class CertificateMgtDaoTest {
                     "d7HmgeAeiDPvUpZWSvuJPg81G/rC1Gu9yFuiR8HjzcTDRVMepkefA3IpHwYvoQGjeNC/GFGAH/9jih" +
                     "rqw8anwwPALocNSvzwB148w/viIOaopfrmMqBlBWAwUf2wYCU6W3rhhg7H6Zf2cTweLe4v57GVlOWt" +
                     "YOXlgJzeUuc=";
-    private APIIdentifier apiIdentifier = new APIIdentifier("CERTIFICATE", "API1", "1.0.0");
+    private APIIdentifier apiIdentifier = new APIIdentifier("CERTIFICATE", "CERTAPI", "1.0.0");
 
     @Before
     public void setUp() throws APIManagerDatabaseException, APIManagementException, SQLException,

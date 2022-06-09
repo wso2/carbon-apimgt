@@ -610,6 +610,8 @@ public final class APIConstants {
     public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "EnableAPIQuotaLimit";
     public static final String JWKS_URI = "jwksUri";
 
+    public static final String ORG_ALL_QUERY_PARAM = "ALL";
+
     public static class TokenStatus {
 
         public static final String ACTIVE = "ACTIVE";
@@ -882,6 +884,7 @@ public final class APIConstants {
 
     public static final String CORS_CONFIGURATION = "CORSConfiguration.";
     public static final String CORS_CONFIGURATION_ENABLED = CORS_CONFIGURATION + "Enabled";
+    public static final String CORS_CONFIGURATION_ENABLE_VALIDATION_FOR_WS = CORS_CONFIGURATION + "EnableValidationForWS";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN = CORS_CONFIGURATION
             + "Access-Control-Allow-Origin";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS = CORS_CONFIGURATION
