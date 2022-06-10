@@ -2144,7 +2144,7 @@
         <brave.opentracing.version>0.32.0</brave.opentracing.version>
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
-        <opentelemetry.all.version>1.11.0.wso2v1</opentelemetry.all.version>
+        <opentelemetry.all.version>1.11.0.wso2v2</opentelemetry.all.version>
         <aspectj.version>1.9.5</aspectj.version>
         <everit.version>1.5.0.wso2.v2</everit.version>
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
