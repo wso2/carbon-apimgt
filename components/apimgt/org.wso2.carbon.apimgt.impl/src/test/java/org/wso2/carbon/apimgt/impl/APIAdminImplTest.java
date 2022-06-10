@@ -19,16 +19,19 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.testng.annotations.BeforeTest;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -36,16 +39,20 @@ import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import sun.reflect.Reflection;
 
 import java.io.File;
+import java.io.IOException;
 
-@RunWith(PowerMockRunner.class) @PrepareForTest({ ServiceReferenceHolder.class, ApiMgtDAO.class,
-        APIUtil.class }) public class APIAdminImplTest {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class})
+public class APIAdminImplTest {
 
     ServiceReferenceHolder serviceReferenceHolder;
     APIMConfigService apimConfigService;
 
-    @Before public void setup() {
+    @Before
+    public void setup() {
 
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(ApiMgtDAO.class);
@@ -58,7 +65,8 @@ import java.io.File;
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
     }
 
-    @Test public void getTenantConfig() throws APIManagementException {
+    @Test
+    public void getTenantConfig() throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         Mockito.when(apimConfigService.getTenantConfig("abc.com")).thenReturn("abcde");
@@ -66,7 +74,8 @@ import java.io.File;
         Mockito.verify(apimConfigService, Mockito.times(1)).getTenantConfig("abc.com");
     }
 
-    @Test public void getTenantConfigException() throws APIManagementException {
+    @Test
+    public void getTenantConfigException() throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         Mockito.when(apimConfigService.getTenantConfig("abc.com")).thenThrow(APIManagementException.class);
@@ -78,10 +87,11 @@ import java.io.File;
         }
     }
 
-    @Test public void updateTenantConfig() throws Exception {
+    @Test
+    public void updateTenantConfig() throws Exception {
 
-        File siteConfFile = new File(
-                Thread.currentThread().getContextClassLoader().getResource("tenant-conf.json").getFile());
+        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("tenant-conf.json").getFile());
         String tenantConf = FileUtils.readFileToString(siteConfFile);
         PowerMockito.doNothing().when(APIUtil.class, "validateRestAPIScopes", tenantConf);
         Schema schema = Mockito.mock(Schema.class);
@@ -93,10 +103,11 @@ import java.io.File;
     }
 
     // Schema not present
-    @Test public void updateTenantConfigNegative1() throws Exception {
+    @Test
+    public void updateTenantConfigNegative1() throws Exception {
 
-        File siteConfFile = new File(
-                Thread.currentThread().getContextClassLoader().getResource("tenant-conf.json").getFile());
+        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("tenant-conf.json").getFile());
         String tenantConf = FileUtils.readFileToString(siteConfFile);
         PowerMockito.doNothing().when(APIUtil.class, "validateRestAPIScopes", tenantConf);
         Schema schema = Mockito.mock(Schema.class);
@@ -113,7 +124,8 @@ import java.io.File;
     }
 
     // invalid json
-    @Test public void updateTenantConfigNegative2() throws Exception {
+    @Test
+    public void updateTenantConfigNegative2() throws Exception {
 
         String tenantConf = "{\"hello\"";
         PowerMockito.doNothing().when(APIUtil.class, "validateRestAPIScopes", tenantConf);
@@ -131,7 +143,8 @@ import java.io.File;
     }
 
     // valid json element missing
-    @Test public void updateTenantConfigNegative3() throws Exception {
+    @Test
+    public void updateTenantConfigNegative3() throws Exception {
 
         String tenantConf = "{\"hello\":\"world\"}";
         PowerMockito.doNothing().when(APIUtil.class, "validateRestAPIScopes", tenantConf);
@@ -148,7 +161,8 @@ import java.io.File;
         }
     }
 
-    @Test public void getTenantConfigSchema() throws Exception {
+    @Test
+    public void getTenantConfigSchema() throws Exception {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         Schema schema = Mockito.mock(Schema.class);
@@ -156,7 +170,8 @@ import java.io.File;
         Assert.assertEquals(apiAdmin.getTenantConfigSchema("abc.com"), schema.toString());
     }
 
-    @Test public void getTenantConfigSchemaException() throws Exception {
+    @Test
+    public void getTenantConfigSchemaException() throws Exception {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         PowerMockito.when(APIUtil.class, "retrieveTenantConfigJsonSchema").thenThrow(APIManagementException.class);

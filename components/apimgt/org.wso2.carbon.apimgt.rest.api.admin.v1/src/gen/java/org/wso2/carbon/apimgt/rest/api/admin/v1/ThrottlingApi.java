@@ -520,7 +520,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
         })
-    }, tags={ "Subscription Policy (Collection)",  })
+    }, tags={ "Subscription Policy (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = SubscriptionThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
