@@ -120,8 +120,4 @@ public class PolicyConstants {
     
     public static final String  THROTTLING_TIER_CONTENT_AWARE_SEPERATOR = ">";
 
-    public static final String EXPORT_POLICY_TYPE_YAML ="YAML";
-
-    public static final String EXPORT_POLICY_TYPE_JSON ="JSON";
-
 }

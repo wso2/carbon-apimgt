@@ -1244,7 +1244,7 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/export?policyId=96077508-fd01-4fae-bc64-5de0e2baf43c&name=Bronze&type=subscription&format=YAML"'
       operationId: exportThrottlingPolicy
   ####################################################################
-  #Import Throttling Policy
+  # Import Throttling Policy
   ####################################################################
   /throttling/policies/import:
     post:

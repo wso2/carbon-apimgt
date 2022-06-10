@@ -1910,6 +1910,11 @@
                 <artifactId>log4j-slf4j-impl</artifactId>
                 <version>${log4j2.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.osgi.foundation</artifactId>
+                <version>${apache.felix.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2154,6 +2159,7 @@
         <org.wso2.orbit.commons-text.version>1.6.wso2v1</org.wso2.orbit.commons-text.version>
         <commons.lang.version>2.6.0.wso2v1</commons.lang.version>
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
+        <apache.felix.version>1.0.0</apache.felix.version>
         <maven.scr.plugin.version>1.26.0</maven.scr.plugin.version>
         <org.json.version.range>[3.0.0,4.0.0)</org.json.version.range>
         <pax.logging.api.version>1.11.2</pax.logging.api.version>
