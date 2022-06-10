@@ -489,7 +489,7 @@ paths:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/devportal/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java"
-            > Swagger Petstore_java_1.0.0.zip
+            > Petstore_java_1.0.0.zip
 
   /apis/{apiId}/wsdl:
     get:
@@ -766,7 +766,7 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail"
+          source: 'curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail" > image.jpeg'
 
   /apis/{apiId}/ratings:
     get:
@@ -1149,7 +1149,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
+          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
 
     delete:
       tags:
@@ -1243,7 +1243,7 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/store/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
+          source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
 
   /apis/{apiId}/topics:
     get:
@@ -1281,7 +1281,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://localhost:9443/api/am/store/v1/topics/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
+            "https://localhost:9443/api/am/devportal/v2/apis/5b65808c-cdf2-43e1-a695-de63e3ad0ae9/topics"
 
   /apis/{apiId}/subscription-policies:
     get:
@@ -2675,7 +2675,7 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/devportal/v2/subscriptions/e93fb282-b456-48fc-8981-003fb89086ae/additionalInfo"
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v2/subscriptions/e93fb282-b456-48fc-8981-003fb89086ae/additionalInfo"'
 
   ######################################################
   # The "Individual Subscription" resource APIs
@@ -3179,7 +3179,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://localhost:9443/api/am/store/v1/webhooks/subscriptions?applicationId=5b65808c-cdf2-43e1-a695-de63e3ad0ae9&apiId=ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/devportal/v2/webhooks/subscriptions?applicationId=5b65808c-cdf2-43e1-a695-de63e3ad0ae9&apiId=ae4eae22-3f65-387b-a171-d37eaa366fa8"
 
   ######################################################
   # The Developer Portal settings List

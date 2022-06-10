@@ -148,7 +148,7 @@ paths:
             Supported attribute modifiers are [**version, context, name, status,
             description, provider, api-category, tags, doc, contexttemplate,
             lcstate, content, type, label, enablestore, thirdparty**]
-
+            
             If no advanced attribute modifier has been specified,  the API names containing
             the search term will be returned as a result.
 
@@ -712,7 +712,6 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v3/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-mock-scripts"'
 
-
   /apis/{apiId}/generated-mock-scripts:
     get:
       tags:
@@ -1086,7 +1085,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=image.jpeg "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
+          -F file=@image.jpeg "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
 
   /apis/{apiId}/subscription-policies:
     get:
@@ -1526,7 +1525,7 @@ paths:
         - API Revisions
       summary: Retrieve Revision
       description: |
-        Retrieve a revision of an API
+        Retrieve a revision of an API (This resource is not supported at the moment)
       operationId: getAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -1769,7 +1768,7 @@ paths:
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
                 "https://127.0.0.1:9443/api/am/publisher/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/restore-revision:
@@ -1896,7 +1895,8 @@ paths:
             - apim:comment_manage
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
 
     post:
       tags:
@@ -2022,7 +2022,8 @@ paths:
             - apim:comment_manage
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+          source: 'curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
 
     patch:
       tags:
@@ -2189,7 +2190,8 @@ paths:
             - apim:comment_manage
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
+          source: 'curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/publisher/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"'
 
   /apis/import-openapi:
     post:
@@ -2910,7 +2912,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize"'
+          "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization"'
       operationId: getAPIMonetization
 
   /apis/{apiId}/revenue:
@@ -3575,7 +3577,7 @@ paths:
             - apim:api_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@api.wsdl "https://127.0.0.1:9443/api/am/publisher/v3/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/wsdl"'
 
   /apis/{apiId}/graphql-policies/complexity:
@@ -4807,7 +4809,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon/content"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon/content" > test.crt'
       operationId: getAPIClientCertificateContentByAlias
 
   ######################################################
@@ -4928,7 +4930,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=alias
-          -F "endpoint=endpoint=https://www.abc.com" "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/endpoint-certificates"'
+          -F endpoint=https://www.abc.com "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates"'
       operationId: addEndpointCertificate
 
   /endpoint-certificates/{alias}:
@@ -5038,7 +5040,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: multipart/form-data" -F certificate=@test.crt "https://127.0.0.1:9443/api/am/publisher/v3/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/endpoint-certificates/wso2carbon"'
+          -H "Content-Type: multipart/form-data" -F certificate=@test.crt "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates/wso2carbon"'
       operationId: updateEndpointCertificateByAlias
 
     delete:
@@ -5124,7 +5126,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates/wso2carbon/content"'
+            "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates/wso2carbon/content" > test.crt'
       operationId: getEndpointCertificateContentByAlias
 
   ######################################################
@@ -6206,7 +6208,7 @@ paths:
         - API Product Revisions
       summary: Retrieve Revision
       description: |
-        Retrieve a revision of an API Product
+        Retrieve a revision of an API Product (This resource is not supported at the moment)
       operationId: getAPIProductRevision
       parameters:
         - $ref: '#/components/parameters/apiProductId'
@@ -6394,7 +6396,7 @@ paths:
             - apim:api_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
             "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /api-products/{apiProductId}/undeploy-revision:
@@ -6647,7 +6649,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -F file=@admin-PizzaShackAPIProduct.zip "https://127.0.0.1:9443/api/am/admin/v3/api-products/importt?preserveProvider=false&overwriteAPIProduct=false&overwriteAPIs=false&importAPIs=false"'
+            -F file=@admin-PizzaShackAPIProduct.zip "https://127.0.0.1:9443/api/am/publisher/v3/api-products/import?preserveProvider=false&overwriteAPIProduct=false&overwriteAPIs=false&importAPIs=false"'
       operationId: importAPIProduct
 
   ######################################################
@@ -7206,12 +7208,16 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -F file=@streetlights.yml "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate-asyncapi"'
 
   /apis/import-asyncapi:
     post:
       tags:
         - APIs
-      summary: import an AsyncAPI Specification
+      summary: Import an AsyncAPI Specification
       description:
         This operation can be used to create and API from the AsyncAPI Specification. Provide either 'url' or 'file'
         to specify the definition.
@@ -7266,6 +7272,10 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                -F file=@streetlights.yml -F additionalProperties=@import-asyncapi.json "https://127.0.0.1:9443/api/am/publisher/v3/apis/import-asyncapi"'
 
   /apis/{apiId}/asyncapi:
     get:
@@ -7318,6 +7328,10 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_definition_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/01234567-0123-0123-0123-012345678901/asyncapi"'
 
     put:
       tags:
@@ -7387,11 +7401,15 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -F file=@streetlights.yml "https://127.0.0.1:9443/api/am/publisher/v3/apis/01234567-0123-0123-0123-012345678901/asyncapi"'
   /apis/{apiId}/environments/{envId}/keys:
     get:
       tags:
         - APIs
-      summary: get environment specific API properties
+      summary: Get environment specific API properties
       description: |
         This operation can be used to retrieve environment specific API properties from an existing API.
       parameters:
@@ -7416,6 +7434,10 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/01234567-0123-0123-0123-012345678901/environments/9b37ac57-78b9-4fac-b0d4-dc8f4b15c023/keys"'
     put:
       tags:
         - APIs
@@ -7450,6 +7472,10 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+            "https://127.0.0.1:9443/api/am/publisher/v3/apis/01234567-0123-0123-0123-012345678901/environments/9b37ac57-78b9-4fac-b0d4-dc8f4b15c023/keys"'
   /apis/{apiId}/operation-policies:
     get:
       tags:
@@ -8077,6 +8103,7 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v3/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
+
 components:
   schemas:
     Comment:
@@ -8270,9 +8297,9 @@ components:
           type: string
           example: PizzaShackAPI
         mode:
-          maxLength: 32766
+          maxLength: 20
           type: string
-          example: This is a simple API for Pizza Shack online pizza delivery store.
+          example: Pizza
         description:
           maxLength: 32766
           type: string
@@ -8476,17 +8503,6 @@ components:
           example: []
           items:
             type: string
-        mediationPolicies:
-          type: array
-          example:
-            - name: json_to_xml_in_message
-              type: in
-            - name: xml_to_json_out_message
-              type: out
-            - name: json_fault
-              type: fault
-          items:
-            $ref: '#/components/schemas/MediationPolicy'
         subscriptionAvailability:
           type: string
           description: The subscription availability. Accepts one of the following.
@@ -8847,7 +8863,7 @@ components:
           maxLength: 255
           minLength: 1
           type: string
-          example: default
+          example: Default
         vhost:
           maxLength: 255
           minLength: 1
@@ -9945,24 +9961,6 @@ components:
           additionalProperties:
             type: string
           description: Map of custom properties related to API revenue
-    MediationPolicy:
-      title: Mediation Policy
-      required:
-        - name
-      type: object
-      properties:
-        id:
-          type: string
-          example: 69ea3fa6-55c6-472e-896d-e449dd34a824
-        name:
-          type: string
-          example: log_in_message
-        type:
-          type: string
-          example: in
-        shared:
-          type: boolean
-          example: true
     Error:
       title: Error object returned with 4XX HTTP Status
       required:
@@ -12009,7 +12007,7 @@ components:
       name: scopeId
       in: path
       description: |
-        Scope name
+        Base64 URL encoded value of the scope name
       required: true
       schema:
         type: string

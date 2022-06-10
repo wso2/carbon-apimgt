@@ -1140,7 +1140,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policies"'
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policies"'
 
     post:
       tags:
@@ -1190,7 +1190,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policies"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policies"'
 
   ######################################################
   # The "Individual Deny Policy" resource API
@@ -1230,7 +1230,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
     delete:
       tags:
@@ -1255,7 +1255,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
     patch:
       tags:
@@ -1294,7 +1294,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
   ######################################################
   # The "Application Collection" resource APIs
@@ -2383,7 +2383,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection"'
+          "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection/7c9ee02d-37f5-4694-b99c-6d5641b28645"'
 
   ######################################################
   # System scopes resource API
@@ -2721,7 +2721,7 @@ paths:
         - OAuth2Security:
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/tenant-config" > tenant-config.json'
     put:
@@ -2757,7 +2757,7 @@ paths:
         - OAuth2Security:
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
            "https://127.0.0.1:9443/api/am/admin/v3/tenant-config"'
 
@@ -2797,7 +2797,7 @@ paths:
         - OAuth2Security:
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/tenant-config-schema" > tenant-config-schema.json'
 
@@ -4755,7 +4755,7 @@ components:
       name: scopeName
       in: path
       description: |
-        scope name to be validated
+        Base64 URL encoded value of the scope name to be validated
       required: true
       schema:
         type: string
