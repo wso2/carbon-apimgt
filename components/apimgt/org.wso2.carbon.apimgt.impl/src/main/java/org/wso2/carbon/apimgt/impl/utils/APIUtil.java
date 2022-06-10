@@ -8566,6 +8566,21 @@ public final class APIUtil {
         return properties;
     }
 
+    public static JSONObject getSubscriberAttributes() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getSubscriberAttributes();
+    }
+
+    public static String getSubscriberRecipient() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.SUBSCRIBER_CONFIGURATION_RECIPIENT);
+    }
+
+    public static String getSubscriberDelimeter() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.SUBSCRIBER_CONFIGURATION_DELIMITER);
+    }
+
     /**
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
      * in the super tenant

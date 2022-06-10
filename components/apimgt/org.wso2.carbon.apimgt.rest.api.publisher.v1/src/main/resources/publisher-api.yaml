@@ -11162,6 +11162,10 @@ components:
           example: []
           items:
             $ref: '#/components/schemas/MonetizationAttribute'
+        subscriberContactAttributes:
+          type: object
+          items:
+            $ref: '#/definitions/SubscriberContactAttribute'
         securityAuditProperties:
           type: object
           properties: {}
@@ -11238,6 +11242,20 @@ components:
           description: |
             Link to the previous subset of resources qualified.
             Empty if current subset is the first subset returned.
+    #-----------------------------------------------------
+    # The Subscriber Contact resource
+    #-----------------------------------------------------
+    SubscriberContactAttribute:
+      title: Subscriber Contact attribute object
+      properties:
+        recipient:
+          type: string
+          description: |
+            recipient type of the email
+        delimiter:
+          type: string
+          description: |
+            delimiter to seperate the email address
     MonetizationAttribute:
       title: Monetization attribute object
       type: object

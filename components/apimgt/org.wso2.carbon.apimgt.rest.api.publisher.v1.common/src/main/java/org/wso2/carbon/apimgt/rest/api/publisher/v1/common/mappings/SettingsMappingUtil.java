@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,6 +66,7 @@ public class SettingsMappingUtil {
             settingsDTO.setEnvironment(environmentListDTO.getList());
             String storeUrl = APIUtil.getStoreUrl();
             String loggedInUserTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            settingsDTO.setSubscriberContactAttributes(getSubscriberContactAttributes());
             Map<String, String> domainMappings =
                     APIUtil.getDomainMappings(loggedInUserTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_STORE);
             if (domainMappings.size() != 0) {
@@ -92,6 +94,26 @@ public class SettingsMappingUtil {
             settingsDTO.setAuthorizationHeader(authorizationHeader);
         }
         return settingsDTO;
+    }
+
+    /**
+     * This method returns the Subscriber Contact properties from configuration
+     *
+     * @return List<String> Subscriber Contact properties
+     * @throws APIManagementException
+     */
+    private List<SubscriberContactAttributeDTO> getSubscriberContactAttributes() {
+        List<SubscriberContactAttributeDTO> subscriberContactAttributeDTOsList = new ArrayList<>();
+        JSONObject subscriberContactAttribute = APIUtil.getSubscriberAttributes();
+        SubscriberContactAttributeDTO subscriberContactAttributeDTO = new SubscriberContactAttributeDTO();
+        if (subscriberContactAttribute.size() > 0) {
+            subscriberContactAttributeDTO.setDelimiter((String) subscriberContactAttribute
+                    .get(APIConstants.SUBSCRIBER_CONFIGURATION_DELIMITER));
+            subscriberContactAttributeDTO.setRecipient((String) subscriberContactAttribute
+                    .get(APIConstants.SUBSCRIBER_CONFIGURATION_RECIPIENT));
+            subscriberContactAttributeDTOsList.add(subscriberContactAttributeDTO);
+        }
+        return subscriberContactAttributeDTOsList;
     }
 
     /**
