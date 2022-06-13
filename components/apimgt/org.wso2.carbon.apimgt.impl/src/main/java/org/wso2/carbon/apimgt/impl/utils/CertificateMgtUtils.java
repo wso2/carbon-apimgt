@@ -747,9 +747,11 @@ public class CertificateMgtUtils {
                     String parent = srcFile.getParent();
                     String destPath = parent + File.separator + SENDER_PROFILE_JKS_NAME;
                     File destFile = new File(destPath);
-                    deletePreviousBackupJKSFile(destFile);
-                    FileUtils.copyFile(srcFile, destFile);
-                    updateSenderProfileTrustStoreLocation(destPath);
+                    if (!StringUtils.equals(destPath, srcFile.getPath())) {
+                        deletePreviousBackupJKSFile(destFile);
+                        FileUtils.copyFile(srcFile, destFile);
+                        updateSenderProfileTrustStoreLocation(destPath);
+                    }
                 }
                 File listenerProfileTrustStoreFile = new File(listenerProfileTrustStore.getLocation());
                 if (listenerProfileTrustStoreFile.exists()) {
