@@ -4803,6 +4803,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         // Import the API and Definition
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        // Add description from definition if it is not defined by user
+        if (validationResponseDTO.getInfo().getDescription() != null
+                && apiDTOFromProperties.getDescription() == null) {
+            apiDTOFromProperties.setDescription(validationResponse.getInfo().getDescription());
+        }
         if (isServiceAPI) {
             apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
         }

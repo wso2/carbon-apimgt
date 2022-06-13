@@ -5301,13 +5301,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Keeping the organization as tenant domain since MG does not support organization-wise deployment
                 // Artifacts will be deployed in ST for all organizations
                 gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
-                        apiId.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, APIConstants.HTTP_PROTOCOL,
+                        apiId.getVersion(), apiRevision.getRevisionUUID(), organization, APIConstants.HTTP_PROTOCOL,
                          artifact);
                 if (artifactSaver != null) {
                     // Keeping the organization as tenant domain since MG does not support organization-wise deployment
                     // Artifacts will be deployed in ST for all organizations
                     artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
-                            apiRevision.getRevisionUUID(), tenantDomain, artifact);
+                            apiRevision.getRevisionUUID(), organization, artifact);
                 }
             } catch (APIImportExportException | ArtifactSynchronizerException e) {
                 throw new APIManagementException("Error while Store the Revision Artifact",
@@ -5356,6 +5356,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String getAPIRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
         return apiMgtDAO.getRevisionUUID(revisionNum, apiUUID);
+    }
+
+    /**
+     * Get the revision UUID from the Revision no and API UUID
+     *
+     * @param revisionNum   revision number
+     * @param apiUUID       UUID of the API
+     * @param organization  organization ID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if failed to get the API revision uuid
+     */
+    @Override
+    public String getAPIRevisionUUIDByOrganization(String revisionNum, String apiUUID, String organization) throws APIManagementException {
+        return apiMgtDAO.getRevisionUUIDByOrganization(revisionNum, apiUUID, organization);
     }
 
     /**
@@ -5449,7 +5463,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
             // TODO remove this to organization once the microgateway can build gateway based on organization.
-            gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
+            gatewayManager.deployToGateway(api, organization, environmentsToAdd);
         }
         String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
         String defaultVersion = getDefaultVersion(apiIdentifier);
