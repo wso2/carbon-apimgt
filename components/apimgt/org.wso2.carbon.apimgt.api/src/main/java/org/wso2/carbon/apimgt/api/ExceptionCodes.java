@@ -516,7 +516,8 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902036, "Missing API endpoint's endpoint config", 404,
             "Cannot find endpoint config object."),
     INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),
-    INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true);
+    INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true),
+    ENDPOINT_HAS_MAPPING_WITH_RESOURCES(902034, "There is/are (a) mapping with operation(s).", 400, "Internal Server Error from API Endpoint deletion.")  ;
 
     private final long errorCode;
     private final String errorMessage;

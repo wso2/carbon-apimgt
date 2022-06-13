@@ -1695,4 +1695,12 @@ public interface APIProvider extends APIManager {
      */
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
+    /**
+     * Check whether it has operation mapping or not
+     *
+     * @param endpointUuid
+     * @return true if it has at least one mapping
+     * @throws APIManagementException
+     */
+    boolean hasOperationMapping(String endpointUuid) throws APIManagementException;
 }

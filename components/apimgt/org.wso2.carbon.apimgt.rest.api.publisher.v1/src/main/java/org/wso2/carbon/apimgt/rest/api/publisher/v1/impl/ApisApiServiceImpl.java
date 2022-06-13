@@ -494,9 +494,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate API Endpoint
             APIEndpointInfo existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid);
             if (existingApiEndpoint != null) {
-                apiProvider.deleteAPIEndpointById(endpointUuid);
-                if (log.isDebugEnabled()) {
-                    log.debug("The API endpoint " + endpointUuid + " has been deleted from the the API " + apiId);
+                if (!(apiProvider.hasOperationMapping(endpointUuid))) {
+                    apiProvider.deleteAPIEndpointById(endpointUuid);
+                    if (log.isDebugEnabled()) {
+                        log.debug("The API endpoint " + endpointUuid + " has been deleted from the the API " + apiId);
+                    }
+                } else {
+                    throw new APIManagementException("Could not delete endpoint : " + endpointUuid + " for API " +
+                            apiId, ExceptionCodes.ENDPOINT_HAS_MAPPING_WITH_RESOURCES);
                 }
                 return Response.ok().build();
             } else {

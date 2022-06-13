@@ -492,7 +492,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEndpointInfo apiEndpoint = new APIEndpointInfo();
         apiEndpoint.setEndpointUuid(uuid);
         apiEndpoint.setApiId(apiId);
-        apiMgtDAO.addAPIEndpoint(uuid, apiEndpoint);
+        apiMgtDAO.addAPIEndpoint(apiEndpoint);
     }
 
     /**
@@ -4758,6 +4758,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public boolean hasOperationMapping(String endpointUuid) throws APIManagementException {
+        return apiMgtDAO.hasOperationMapping(endpointUuid);
+    }
+
     private void populateAPIPrimaryEndpointsMapping(API api, String apiUuid) throws APIManagementException {
         int apiId = apiMgtDAO.getAPIID(apiUuid);
         // Get primary production Endpoint mapping
@@ -4775,11 +4780,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Get production Endpoint mapping
             String productionEndpointId =
                     apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "PRODUCTION");
-            uriTemplate.setProductionEndpoint(productionEndpointId.equals(apiId) ? "none" : productionEndpointId);
+            uriTemplate.setProductionEndpoint(apiId.equals(productionEndpointId) ? "none" : productionEndpointId);
             // Get sandbox endpoint endpoint
             String sandboxEndpointId =
                     apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "SANDBOX");
-            uriTemplate.setSandboxEndpoint(sandboxEndpointId.equals(apiId) ? "none" : sandboxEndpointId);
+            uriTemplate.setSandboxEndpoint(apiId.equals(sandboxEndpointId) ? "none" : sandboxEndpointId);
         }
     }
 
@@ -5977,7 +5982,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getAPIEndpoints(uuid);
+        return apiMgtDAO.getAPIEndpoints(uuid, null);
     }
 
     @Override
@@ -6222,7 +6227,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException {
         int apiId = apiMgtDAO.getAPIID(apiUUID);
         apiEndpoint.setApiId(apiId);
-        return apiMgtDAO.addAPIEndpoint(apiUUID, apiEndpoint);
+        return apiMgtDAO.addAPIEndpoint(apiEndpoint);
     }
 
     @Override
