@@ -374,7 +374,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
-      summary: Get the subscription information of an api by providing the api uuid.
+      summary: Get the subscription information of an API by providing the API uuid.
 
       description: |
         This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided

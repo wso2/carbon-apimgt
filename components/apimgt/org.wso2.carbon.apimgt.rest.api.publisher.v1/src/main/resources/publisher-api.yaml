@@ -1525,7 +1525,7 @@ paths:
         - API Revisions
       summary: Retrieve Revision
       description: |
-        Retrieve a revision of an API (This resource is not supported at the moment)
+        Retrieve a revision of an API (This resource is not supported in the current release)
       operationId: getAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -3543,13 +3543,13 @@ paths:
           headers:
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+                Entity Tag of the response resource. Used by caches, or in conditional requests (This is not supported by WSO2 API Manager as of yet).
               schema:
                 type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
+                Used by caches, or in conditional requests (This is not supported by WSO2 API Manager as of yet).
               schema:
                 type: string
             Location:
@@ -3584,9 +3584,9 @@ paths:
     get:
       tags:
         - GraphQL Policies
-      summary: Get the Complexity Related Details of an API
+      summary: Get the Complexity-Related Details of an API
       description: |
-        This operation can be used to retrieve complexity related details belonging to an API by providing the API id.
+        This operation can be used to retrieve complexity-related details belonging to an API by providing the API ID.
       parameters:
         - $ref: '#/components/parameters/apiId'
       responses:
@@ -3623,9 +3623,9 @@ paths:
     put:
       tags:
         - GraphQL Policies
-      summary: Update Complexity Related Details of an API
+      summary: Update Complexity-Related Details of an API
       description: |
-        This operation can be used to update complexity details belonging to an API by providing the id of the API.
+        This operation can be used to update complexity-related details belonging to an API by providing the API ID.
       parameters:
         - $ref: '#/components/parameters/apiId'
       requestBody:
@@ -3658,7 +3658,7 @@ paths:
         - GraphQL Policies
       summary: Retrieve Types and Fields of a GraphQL Schema
       description: |
-        This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id.
+        This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API ID.
       parameters:
         - $ref: '#/components/parameters/apiId'
       responses:
@@ -3697,7 +3697,7 @@ paths:
         - APIs
       summary: Get Resource Paths of an API
       description: |
-        This operation can be used to retrieve resource paths defined for a specific api.
+        This operation can be used to retrieve resource paths defined for a specific API.
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/limit'
@@ -3793,7 +3793,7 @@ paths:
         - External Stores
       summary: Get the List of External Stores to which an API is Published
       description: |
-        This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API.
+        This operation can be used to retrieve a list of external stores which an API is published to by providing the ID of the API.
       operationId: getAllPublishedExternalStoresByAPI
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -3857,13 +3857,13 @@ paths:
             ETag:
               description: |
                 Entity Tag of the blocked subscription.
-                Used by caches, or in conditional requests (Will be supported in future).
+                Used by caches, or in conditional requests (This is not supported by WSO2 API Manager as of yet).
               schema:
                 type: string
             Last-Modified:
               description: |
-                Date and time the subscription has been blocked.
-                Used by caches, or in conditional requests (Will be supported in future).
+                Date and time the subscription which was blocked.
+                Used by caches, or in conditional requests (This is not supported by WSO2 API Manager as of yet).
               schema:
                 type: string
           content:
@@ -3889,7 +3889,7 @@ paths:
         - APIs
       summary: Generate internal API Key to invoke APIS.
       description: |
-        This operation can be used to generate internal api key which used to invoke API.
+        This operation can be used to generate internal API key which used to invoke API.
       operationId: generateInternalAPIKey
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -3964,7 +3964,7 @@ paths:
         - name: preserveStatus
           in: query
           description: |
-            Preserve API Status on export
+            Preserve API Status during export
           schema:
             type: boolean
         - name: latestRevision
@@ -4046,7 +4046,7 @@ paths:
               properties:
                 file:
                   type: string
-                  description: Zip archive consisting on exported api configuration
+                  description: Zip archive consisting on exported API configuration
                   format: binary
       responses:
         200:
@@ -4573,7 +4573,7 @@ paths:
                   description: Alias for the certificate
                 tier:
                   type: string
-                  description: api tier to which the certificate should be applied.
+                  description: API tier to which the certificate should be applied.
         required: true
       responses:
         200:
@@ -5699,7 +5699,7 @@ paths:
         - API Product Documents
       summary: Get a List of Documents of an API Product
       description: |
-        This operation can be used to retrive a list of documents belonging to an API Product by providing the id of the API Product.
+        This operation can be used to retrive a list of documents belonging to an API Product by providing the ID of the API Product.
       parameters:
         - $ref: '#/components/parameters/apiProductId'
         - $ref: '#/components/parameters/limit'
@@ -8952,7 +8952,7 @@ components:
         state:
           type: string
           description: |
-            State of the API product. Only published api products are visible on the Developer Portal
+            State of the API product. Only published API products are visible on the Developer Portal
           enum:
             - CREATED
             - PUBLISHED
@@ -9011,7 +9011,7 @@ components:
         state:
           type: string
           description: |
-            State of the API product. Only published api products are visible on the Developer Portal
+            State of the API product. Only published API products are visible on the Developer Portal
           default: CREATED
           enum:
             - CREATED
