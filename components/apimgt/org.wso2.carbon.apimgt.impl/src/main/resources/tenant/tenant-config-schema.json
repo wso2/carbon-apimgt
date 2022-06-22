@@ -862,6 +862,197 @@
         }
       },
       "additionalProperties": true
+    },
+    "CustomUrls": {
+      "type": "array",
+      "default": [],
+      "title": "The CustomUrls Schema",
+      "items": {
+        "type": "object",
+        "default": {},
+        "title": "A Schema",
+        "required": [
+          "tenantDomain",
+          "publisher",
+          "devportal",
+          "gateway",
+          "admin"
+        ],
+        "properties": {
+          "tenantDomain": {
+            "type": "string",
+            "default": "",
+            "title": "The tenantDomain Schema",
+            "examples": [
+              "wso2.com"
+            ]
+          },
+          "publisher": {
+            "type": "object",
+            "default": {},
+            "title": "The publisher Schema",
+            "required": [
+              "domain",
+              "context"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string",
+                "default": "",
+                "title": "The domain Schema",
+                "examples": [
+                  "publisher.wso2.com"
+                ]
+              },
+              "context": {
+                "type": "string",
+                "default": "",
+                "title": "The context Schema",
+                "examples": [
+                  "publisher_context"
+                ]
+              }
+            },
+            "examples": [{
+              "domain": "publisher.wso2.com",
+              "context": "publisher_context"
+            }]
+          },
+          "devportal": {
+            "type": "object",
+            "default": {},
+            "title": "The devportal Schema",
+            "required": [
+              "domain",
+              "context"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string",
+                "default": "",
+                "title": "The domain Schema",
+                "examples": [
+                  "developer.wso2.com"
+                ]
+              },
+              "context": {
+                "type": "string",
+                "default": "",
+                "title": "The context Schema",
+                "examples": [
+                  "devportal_context"
+                ]
+              }
+            },
+            "examples": [{
+              "domain": "developer.wso2.com",
+              "context": "devportal_context"
+            }]
+          },
+          "gateway": {
+            "type": "object",
+            "default": {},
+            "title": "The gateway Schema",
+            "required": [
+              "domain",
+              "context"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string",
+                "default": "",
+                "title": "The domain Schema",
+                "examples": [
+                  "gw.wso2.com"
+                ]
+              },
+              "context": {
+                "type": "string",
+                "default": "",
+                "title": "The context Schema",
+                "examples": [
+                  "gateway_context"
+                ]
+              }
+            },
+            "examples": [{
+              "domain": "gw.wso2.com",
+              "context": "gateway_context"
+            }]
+          },
+          "admin": {
+            "type": "object",
+            "default": {},
+            "title": "The admin Schema",
+            "required": [
+              "domain",
+              "context"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string",
+                "default": "",
+                "title": "The domain Schema",
+                "examples": [
+                  "admin.wso2.com"
+                ]
+              },
+              "context": {
+                "type": "string",
+                "default": "",
+                "title": "The context Schema",
+                "examples": [
+                  "admin_context"
+                ]
+              }
+            },
+            "examples": [{
+              "domain": "admin.wso2.com",
+              "context": "admin_context"
+            }]
+          }
+        },
+        "examples": [{
+          "tenantDomain": "wso2.com",
+          "publisher": {
+            "domain": "publisher.wso2.com",
+            "context": "publisher_context"
+          },
+          "devportal": {
+            "domain": "developer.wso2.com",
+            "context": "devportal_context"
+          },
+          "gateway": {
+            "domain": "gw.wso2.com",
+            "context": "gateway_context"
+          },
+          "admin": {
+            "domain": "admin.wso2.com",
+            "context": "admin_context"
+          }
+        }]
+      },
+      "examples": [
+        [{
+          "tenantDomain": "wso2.com",
+          "publisher": {
+            "domain": "publisher.wso2.com",
+            "context": "publisher_context"
+          },
+          "devportal": {
+            "domain": "developer.wso2.com",
+            "context": "devportal_context"
+          },
+          "gateway": {
+            "domain": "gw.wso2.com",
+            "context": "gateway_context"
+          },
+          "admin": {
+            "domain": "admin.wso2.com",
+            "context": "admin_context"
+          }
+        }]
+      ]
     }
   },
   "additionalProperties": true

@@ -4643,49 +4643,48 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a map of gateway / store domains for the tenant
+     * Returns a map of publisher / admin / gateway / store domains for the tenant
      *
      * @return a Map of domain names for tenant
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the AM_SYSTEM_CONFIGS table
      */
     public static Map<String, String> getDomainMappings(String tenantDomain, String appType)
             throws APIManagementException {
 
         Map<String, String> domains = new HashMap<String, String>();
-        String resourcePath;
         try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry();
-            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
-            if (registry.resourceExists(resourcePath)) {
-                Resource resource = registry.get(resourcePath);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                JSONParser parser = new JSONParser();
-                JSONObject mappings = (JSONObject) parser.parse(content);
-                if (mappings.get(appType) != null) {
-                    mappings = (JSONObject) mappings.get(appType);
-                    for (Object o : mappings.entrySet()) {
-                        Entry thisEntry = (Entry) o;
-                        String key = (String) thisEntry.getKey();
-                        //Instead strictly comparing customUrl, checking whether name is starting with customUrl
-                        //to allow users to add multiple URLs if needed
-                        if (!StringUtils.isEmpty(key) && key.startsWith(APIConstants.CUSTOM_URL)) {
-                            String value = (String) thisEntry.getValue();
-                            domains.put(key, value);
+            // Get advance configuration file of the super tenant
+            String superTenantConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
+                    .getTenantConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            if (StringUtils.isNotEmpty(superTenantConfig)) {
+                JSONObject superTenantConfigJsonObject = (JSONObject) new JSONParser().parse(superTenantConfig);
+                JSONArray customUrlsArray = (JSONArray) superTenantConfigJsonObject.get("CustomUrls");
+                if (customUrlsArray != null) {
+                    Iterator<JSONObject> iterator = customUrlsArray.iterator();
+                    JSONObject customUrlsJsonObject;
+                    while (iterator.hasNext()) {
+                        customUrlsJsonObject = iterator.next();
+                        if (customUrlsJsonObject.get("tenantDomain").equals(tenantDomain)) {
+                            JSONObject appTypeJsonObject;
+                            if (appType.equals("store")) {
+                                appTypeJsonObject = (JSONObject) customUrlsJsonObject.get("devportal");
+                            } else {
+                                appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(appType);
+                            }
+                            if (appTypeJsonObject != null) {
+                                domains.put("customUrl", (String) appTypeJsonObject.get("domain"));
+                            }
+                            break;
                         }
                     }
                 }
             }
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving gateway domain mappings from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
         } catch (ClassCastException e) {
             String msg = "Invalid JSON found in the gateway tenant domain mappings";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ParseException e) {
-            String msg = "Malformed JSON found in the gateway tenant domain mappings";
+            String msg = "Malformed JSON found in the tenant domain mappings";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
