@@ -90,6 +90,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setName(model.getName());
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
+            apidto.setOrganization(model.getOrganization());
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -121,6 +122,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setName(model.getName());
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
+            apidto.setOrganization(model.getOrganization());
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {

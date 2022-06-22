@@ -41,7 +41,7 @@ public class GlobalPoliciesApiServiceImpl implements GlobalPoliciesApiService {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            if (APIConstants.CHAR_ASTERIX.equals(xWSO2Tenant)) {
+            if (APIConstants.CHAR_ASTERIX.equals(xWSO2Tenant) || APIConstants.ORG_ALL_QUERY_PARAM.equals(xWSO2Tenant)) {
                 return Response.ok().entity(SubscriptionValidationDataUtil.
                         fromGlobalPolicyToGlobalPolicyListDTO(subscriptionValidationDAO.
                                 getAllGlobalPolicies())).build();
