@@ -1942,7 +1942,7 @@
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.18.250</carbon.identity.version>
+        <carbon.identity.version>5.18.251</carbon.identity.version>
         <carbon.identity.governance.version>1.4.100</carbon.identity.governance.version>
         <carbon.identity-inbound-auth-oauth.version>6.4.176</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-oauth2-grant-jwt.version>1.1.0</carbon.identity-oauth2-grant-jwt.version>
