@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
@@ -39,29 +40,13 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.ArrayList;
+import javax.jms.*;
 import java.util.HashSet;
 import java.util.Set;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
 
 public class GatewayJMSMessageListener implements MessageListener {
 
@@ -173,6 +158,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                                 endTenantFlow();
                             }
                         }
+                        DataHolder.getInstance().removeAPIFromAllTenantMap(gatewayEvent.getContext(), gatewayEvent.getTenantDomain());
                     }
                 }
 
@@ -193,11 +179,12 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.API_UPDATE.toString().equals(eventType)) {
             APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateAPI(event);
+            DataHolder.getInstance().addAPIMetaData(event);
         } else if (EventType.API_LIFECYCLE_CHANGE.toString().equals(eventType)) {
             APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
-            if (APIStatus.CREATED.toString().equals(event.getApiStatus())
-                    || APIStatus.RETIRED.toString().equals(event.getApiStatus())) {
+            if (APIStatus.RETIRED.toString().equals(event.getApiStatus())) {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeAPI(event);
+                DataHolder.getInstance().removeAPIFromAllTenantMap(event.getApiContext(),event.getTenantDomain());
             } else {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateAPI(event);
             }

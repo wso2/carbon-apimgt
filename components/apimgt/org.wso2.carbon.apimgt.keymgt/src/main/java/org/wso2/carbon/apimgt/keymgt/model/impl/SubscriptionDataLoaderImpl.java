@@ -166,6 +166,36 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     }
 
     @Override
+    public List<API> loadAllTenantApiMetadata() throws DataLoadingException {
+
+        Set<String> gatewayLabels = gatewayArtifactSynchronizerProperties.getGatewayLabels();
+        List<API> apis = new ArrayList<>();
+        if (gatewayLabels != null && gatewayLabels.size() > 0) {
+            for (String gatewayLabel : gatewayLabels) {
+                String apisEP =
+                        APIConstants.SubscriptionValidationResources.APIS + "?gatewayLabel=" + getEncodedLabel(gatewayLabel);
+                String responseString;
+                try {
+                    responseString = invokeService(apisEP, APIConstants.ORG_ALL_QUERY_PARAM);
+                } catch (IOException e) {
+                    String msg = "Error while executing the http client " + apisEP;
+                    log.error(msg, e);
+                    throw new DataLoadingException(msg, e);
+                }
+                if (responseString != null && !responseString.isEmpty()) {
+                    APIList apiList = new Gson().fromJson(responseString, APIList.class);
+                    apis.addAll(apiList.getList());
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("apis :" + apis.get(0).toString());
+                }
+            }
+        }
+
+        return apis;
+    }
+
+    @Override
     public List<SubscriptionPolicy> loadAllSubscriptionPolicies(String tenantDomain) throws DataLoadingException {
 
         String subscriptionPoliciesEP = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES;

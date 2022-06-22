@@ -65,8 +65,16 @@ public class SubscriptionDataHolder {
     }
 
     public SubscriptionDataStore getTenantSubscriptionStore(String tenantDomain) {
-
-        return subscriptionStore.get(tenantDomain);
+        SubscriptionDataStore subscriptionDataStore = subscriptionStore.get(tenantDomain);
+        if (subscriptionDataStore == null) {
+            synchronized (tenantDomain.concat("getTenantSubscriptionStore").intern()) {
+                subscriptionDataStore = subscriptionStore.get(tenantDomain);
+                if (subscriptionDataStore == null) {
+                    subscriptionDataStore = registerTenantSubscriptionStore(tenantDomain);
+                }
+            }
+        }
+        return subscriptionDataStore;
     }
 
 }

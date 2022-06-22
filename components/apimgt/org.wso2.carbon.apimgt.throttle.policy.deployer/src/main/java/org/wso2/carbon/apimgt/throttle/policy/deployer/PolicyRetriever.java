@@ -84,7 +84,7 @@ public class PolicyRetriever {
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES;
-        return getPolicies(path, "*", SubscriptionPolicyList.class);
+        return getPolicies(path, APIConstants.ORG_ALL_QUERY_PARAM, SubscriptionPolicyList.class);
     }
 
     /**
@@ -117,7 +117,7 @@ public class PolicyRetriever {
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES;
-        return getPolicies(path, "*", ApplicationPolicyList.class);
+        return getPolicies(path, APIConstants.ORG_ALL_QUERY_PARAM, ApplicationPolicyList.class);
     }
 
     /**
@@ -148,7 +148,7 @@ public class PolicyRetriever {
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.API_POLICIES;
-        return getPolicies(path, "*", ApiPolicyList.class);
+        return getPolicies(path, APIConstants.ORG_ALL_QUERY_PARAM, ApiPolicyList.class);
     }
 
     /**
@@ -161,7 +161,7 @@ public class PolicyRetriever {
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.GLOBAL_POLICIES;
-        return getPolicies(path, "*", GlobalPolicyList.class);
+        return getPolicies(path, APIConstants.ORG_ALL_QUERY_PARAM, GlobalPolicyList.class);
     }
 
     /**

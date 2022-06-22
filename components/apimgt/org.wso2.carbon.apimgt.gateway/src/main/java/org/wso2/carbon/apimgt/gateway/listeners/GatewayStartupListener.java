@@ -44,6 +44,10 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
+import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.base.CarbonBaseUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerShutdownHandler;
@@ -57,6 +61,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Class for loading synapse artifacts to memory on initial server startup
@@ -166,6 +171,11 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             }
         }).start();
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        try {
+            retrieveAllAPIMetadata();
+        } catch (DataLoadingException e) {
+            log.error("Error while loading All API Metadata", e);
+        }
         ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         retrieveBlockConditionsAndKeyTemplates();
@@ -184,6 +194,14 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 new GatewayJMSMessageListener());
         copyTenantArtifacts();
         APILoggerManager.getInstance().initializeAPILoggerList();
+    }
+
+    private void retrieveAllAPIMetadata() throws DataLoadingException {
+        SubscriptionDataLoader subscriptionDataLoader = new SubscriptionDataLoaderImpl();
+        List<API> apis = subscriptionDataLoader.loadAllTenantApiMetadata();
+        if (apis != null && !apis.isEmpty()) {
+            apis.forEach(api -> DataHolder.getInstance().addAPIMetaData(api));
+        }
     }
 
     private void copyTenantArtifacts() {
@@ -344,6 +362,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         ServiceReferenceHolder.getInstance().removeUnloadedTenant(tenantDomain);
+        DataHolder.getInstance().markApisAsUnDeployedInTenant(tenantDomain);
         log.debug("UNRegistering ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
         log.debug("UNRegistered ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);

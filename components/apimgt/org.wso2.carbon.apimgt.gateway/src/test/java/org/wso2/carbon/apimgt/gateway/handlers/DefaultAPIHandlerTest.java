@@ -56,10 +56,11 @@ public class DefaultAPIHandlerTest {
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         Mockito.when(axis2MsgCntxt.getProperty(APIConstants.TRANSPORT_URL_IN)).thenReturn("/api1/abc/cde?c=a");
         PowerMockito.when(GatewayUtils.getTenantDomain()).thenReturn("carbon.super");
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(false);
         PowerMockito.when(ApiUtils.getFullRequestPath(messageContext)).thenReturn("/api1/abc/cde?c=a");
         TreeMap<String, API> apiTreeMap = new TreeMap<>();
         apiTreeMap.put("/api1/abc", new API("1234566", 1, "admin", "API1", "1.0.0", "/api1/abc/1.0.0", null,
-                "HTTP", "PUBLISHED", true));
+                "HTTP", "PUBLISHED", true,true));
         PowerMockito.when(Utils.getSelectedAPIList("/api1/abc/cde?c=a", "carbon.super")).thenReturn(apiTreeMap);
         Mockito.doNothing().when(axis2MsgCntxt).setProperty(APIConstants.TRANSPORT_URL_IN, "/api1/abc/1.0.0/cde?c=a");
         Set<String> properties = Mockito.mock(Set.class);
@@ -80,6 +81,7 @@ public class DefaultAPIHandlerTest {
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         Mockito.when(axis2MsgCntxt.getProperty(APIConstants.TRANSPORT_URL_IN)).thenReturn("/api1/abc/cde?c=a");
         PowerMockito.when(GatewayUtils.getTenantDomain()).thenReturn("carbon.super");
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(false);
         PowerMockito.when(ApiUtils.getFullRequestPath(messageContext)).thenReturn("/api1/abc/cde?c=a");
         TreeMap<String, API> apiTreeMap = new TreeMap<>();
         PowerMockito.when(Utils.getSelectedAPIList("/api1/abc/cde?c=a", "carbon.super")).thenReturn(apiTreeMap);
@@ -97,6 +99,7 @@ public class DefaultAPIHandlerTest {
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         Mockito.when(axis2MsgCntxt.getProperty(APIConstants.TRANSPORT_URL_IN)).thenReturn("/api1/abc/cde?c=a");
         PowerMockito.when(GatewayUtils.getTenantDomain()).thenReturn("carbon.super");
+        PowerMockito.when(GatewayUtils.isOnDemandLoading()).thenReturn(false);
         PowerMockito.when(ApiUtils.getFullRequestPath(messageContext)).thenReturn("/api1/abc/cde?c=a");
         TreeMap<String, API> apiTreeMap = new TreeMap<>();
         apiTreeMap.put("/api1/abc", new API("1234566", 1, "admin", "API1", "1.0.0", "/api1/abc/1.0.0", null,

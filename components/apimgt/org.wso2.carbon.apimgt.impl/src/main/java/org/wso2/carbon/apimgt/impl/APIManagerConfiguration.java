@@ -2033,6 +2033,11 @@ public class APIManagerConfiguration {
         } else {
             log.debug("Gateway Startup mode is not set. Set to Sync Mode");
         }
+        OMElement enableEagerLoading =
+                omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EnableOnDemandLoadingAPIS));
+        if (enableEagerLoading != null){
+            gatewayArtifactSynchronizerProperties.setOnDemandLoading(Boolean.parseBoolean(enableEagerLoading.getText()));
+        }
     }
 
     public GatewayArtifactSynchronizerProperties getGatewayArtifactSynchronizerProperties() {

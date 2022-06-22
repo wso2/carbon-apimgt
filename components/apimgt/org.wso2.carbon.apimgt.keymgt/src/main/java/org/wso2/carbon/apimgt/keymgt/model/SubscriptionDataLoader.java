@@ -155,4 +155,11 @@ public interface SubscriptionDataLoader {
     public ApiPolicy getAPIPolicy(String policyName, String tenantDomain) throws DataLoadingException;
 
     List<Scope> loadAllScopes(String tenantDomain) throws DataLoadingException;
-}
+
+    /**
+     * Load All Tenant API metadata.
+     * @return all apis from all tenants.
+     * @throws DataLoadingException
+     */
+    public List<API> loadAllTenantApiMetadata() throws DataLoadingException ;
+    }

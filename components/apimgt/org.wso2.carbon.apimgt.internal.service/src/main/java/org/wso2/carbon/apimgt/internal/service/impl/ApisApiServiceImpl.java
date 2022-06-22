@@ -54,27 +54,34 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String gatewayLabel,
             Boolean expand, String accept, MessageContext messageContext) throws APIManagementException {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
+        organization = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
         APIListDTO apiListDTO;
         if (StringUtils.isNotEmpty(gatewayLabel)) {
             if (StringUtils.isNotEmpty(apiId)) {
-                API api = subscriptionValidationDAO.getApiByUUID(apiId, gatewayLabel, xWSO2Tenant, expand);
+                API api = subscriptionValidationDAO.getApiByUUID(apiId, gatewayLabel, organization, expand);
                 apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
             } else if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
-                if (!context.startsWith("/t/" + xWSO2Tenant.toLowerCase())) {
+                if (!context.startsWith("/t/" + organization.toLowerCase())) {
                     apiListDTO = new APIListDTO();
                 }
                 API api = subscriptionValidationDAO
                         .getAPIByContextAndVersion(context, version, gatewayLabel, expand);
                 apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
             } else {
-                // Retrieve API Detail according to Gateway label.
-                apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                        subscriptionValidationDAO.getAllApis(xWSO2Tenant, gatewayLabel, expand));
+                if (APIConstants.ORG_ALL_QUERY_PARAM.equals(organization)) {
+                    // Retrieve API Detail according to Gateway label.
+                    apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
+                            subscriptionValidationDAO.getAllApisByLabel(gatewayLabel, expand));
+                } else {
+                    // Retrieve API Detail according to Gateway label.
+                    apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
+                            subscriptionValidationDAO.getAllApis(organization, gatewayLabel, expand));
+                }
             }
         } else {
             apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                    subscriptionValidationDAO.getAllApis(xWSO2Tenant, expand));
+                    subscriptionValidationDAO.getAllApis(organization, expand));
         }
         if (APIConstants.APPLICATION_GZIP.equals(accept)) {
             try {
