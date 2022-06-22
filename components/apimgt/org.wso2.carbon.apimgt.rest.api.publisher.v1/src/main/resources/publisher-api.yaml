@@ -19,7 +19,7 @@ info:
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Publisher**.
 
     # Authentication
-    The Publisher REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+    The Publisher REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
     the the API you need to obtain an access token with the required scopes. This guide will walk you through the steps
     that you will need to follow to obtain an access token.
     First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
@@ -8503,6 +8503,17 @@ components:
           example: []
           items:
             type: string
+        mediationPolicies:
+          type: array
+          example:
+            - name: json_to_xml_in_message
+              type: in
+            - name: xml_to_json_out_message
+              type: out
+            - name: json_fault
+              type: fault
+          items:
+            $ref: '#/components/schemas/MediationPolicy'
         subscriptionAvailability:
           type: string
           description: The subscription availability. Accepts one of the following.
@@ -9961,6 +9972,24 @@ components:
           additionalProperties:
             type: string
           description: Map of custom properties related to API revenue
+    MediationPolicy:
+      title: Mediation Policy
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          example: 69ea3fa6-55c6-472e-896d-e449dd34a824
+        name:
+          type: string
+          example: log_in_message
+        type:
+          type: string
+          example: in
+        shared:
+          type: boolean
+          example: true
     Error:
       title: Error object returned with 4XX HTTP Status
       required:
