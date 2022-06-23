@@ -30,15 +30,12 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.logging.Handler;
-import java.util.logging.Logger;
 
 /**
  * This class used to generate log telemetry tracer related logs.
  */
 public class LogExporter implements SpanExporter {
 
-    private static final Logger logger = Logger.getLogger(LogExporter.class.getName());
     private final Log log;
     private final JsonFactory jsonFactory = new JsonFactory();
 
@@ -85,25 +82,12 @@ public class LogExporter implements SpanExporter {
     @Override
     public CompletableResultCode flush() {
 
-        CompletableResultCode resultCode = new CompletableResultCode();
-        Handler[] var2 = logger.getHandlers();
-        int var3 = var2.length;
-
-        for (int var4 = 0; var4 < var3; ++var4) {
-            Handler handler = var2[var4];
-
-            try {
-                handler.flush();
-            } catch (Throwable var7) {
-                resultCode.fail();
-            }
-        }
-
-        return resultCode.succeed();
+        return CompletableResultCode.ofSuccess();
     }
 
+    @Override
     public CompletableResultCode shutdown() {
 
-        return this.flush();
+        return CompletableResultCode.ofSuccess();
     }
 }
