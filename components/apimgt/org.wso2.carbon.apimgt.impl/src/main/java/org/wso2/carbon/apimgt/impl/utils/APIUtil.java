@@ -4643,7 +4643,7 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a map of publisher / admin / gateway / store domains for the tenant
+     * Returns a map of publisher / gateway / store domains for the tenant
      *
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the AM_SYSTEM_CONFIGS table
@@ -4653,42 +4653,23 @@ public final class APIUtil {
 
         Map<String, String> domains = new HashMap<String, String>();
         try {
-            // Get advance configuration file of the super tenant
-            String superTenantConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
-                    .getTenantConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            if (StringUtils.isNotEmpty(superTenantConfig)) {
-                JSONObject superTenantConfigJsonObject = (JSONObject) new JSONParser().parse(superTenantConfig);
-                JSONArray customUrlsArray = (JSONArray) superTenantConfigJsonObject.get(
+            JSONObject tenantConfig = getTenantConfig(tenantDomain);
+            if (tenantConfig.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS)) {
+                JSONObject customUrlsJsonObject = (JSONObject) tenantConfig.get(
                         APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS);
-                if (customUrlsArray != null) {
-                    Iterator<JSONObject> iterator = customUrlsArray.iterator();
-                    JSONObject customUrlsJsonObject;
-                    while (iterator.hasNext()) {
-                        customUrlsJsonObject = iterator.next();
-                        if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                && customUrlsJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                .equals(tenantDomain)) {
-                            if (appType.equals(APIConstants.API_DOMAIN_MAPPINGS_STORE)) {
-                                appType = APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL;
-                            }
-                            if (customUrlsJsonObject.containsKey(appType)) {
-                                JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(appType);
-                                if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN)) {
-                                    domains.put(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URL,
-                                            (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN));
-                                }
-                            }
-                            break;
-                        }
+                if (appType.equals(APIConstants.API_DOMAIN_MAPPINGS_STORE)) {
+                    appType = APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL;
+                }
+                if (customUrlsJsonObject.containsKey(appType)) {
+                    JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(appType);
+                    if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN)) {
+                        domains.put(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URL,
+                                (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN));
                     }
                 }
             }
         } catch (ClassCastException e) {
             String msg = "Invalid JSON found in the tenant domain mappings";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "Malformed JSON found in the tenant domain mappings";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
@@ -8658,40 +8639,22 @@ public final class APIUtil {
 
         String context = null;
         try {
-            // Get advance configuration file of the super tenant
-            String superTenantConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
-                    .getTenantConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            if (StringUtils.isNotEmpty(superTenantConfig)) {
-                JSONObject superTenantConfigJsonObject = (JSONObject) new JSONParser().parse(superTenantConfig);
-                JSONArray customUrlsArray = (JSONArray) superTenantConfigJsonObject.get(
+            JSONObject tenantConfig = getTenantConfig(tenantDomain);
+            if (tenantConfig.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS)) {
+                JSONObject customUrlsJsonObject = (JSONObject) tenantConfig.get(
                         APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS);
-                if (customUrlsArray != null) {
-                    Iterator<JSONObject> iterator = customUrlsArray.iterator();
-                    JSONObject customUrlsJsonObject;
-                    while (iterator.hasNext()) {
-                        customUrlsJsonObject = iterator.next();
-                        if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                && customUrlsJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                .equals(tenantDomain)) {
-                            if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL)) {
-                                JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(
-                                        APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL);
-                                if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT)) {
-                                    context = (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT);
-                                } else {
-                                    context = "";
-                                }
-                            }
-                            break;
-                        }
+                if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL)) {
+                    JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(
+                            APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL);
+                    if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT)) {
+                        context = (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT);
+                    } else {
+                        context = "";
                     }
                 }
             }
         } catch (ClassCastException e) {
-            String msg = "Invalid JSON found in the publisher tenant domain mappings";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "Malformed JSON found in the publisher tenant domain mappings";
+            String msg = "Invalid JSON found in the devPortal tenant context mappings";
             throw new APIManagementException(msg, e);
         }
         return context;
@@ -8700,40 +8663,23 @@ public final class APIUtil {
     public static Map getTenantBasedStoreDomainMapping(String tenantDomain) throws APIManagementException {
 
         try {
-            // Get advance configuration file of the super tenant
-            String superTenantConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
-                    .getTenantConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            if (StringUtils.isNotEmpty(superTenantConfig)) {
-                JSONObject superTenantConfigJsonObject = (JSONObject) new JSONParser().parse(superTenantConfig);
-                JSONArray customUrlsArray = (JSONArray) superTenantConfigJsonObject.get("CustomUrls");
-                if (customUrlsArray != null) {
-                    Iterator<JSONObject> iterator = customUrlsArray.iterator();
-                    JSONObject customUrlsJsonObject;
-                    while (iterator.hasNext()) {
-                        customUrlsJsonObject = iterator.next();
-                        if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                && customUrlsJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                .equals(tenantDomain)) {
-                            if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL)) {
-                                JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(
-                                        APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL);
-                                if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN)) {
-                                    Map<String, String> domain = new HashMap<String, String>();
-                                    domain.put(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URL,
-                                            (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN));
-                                    return domain;
-                                }
-                            }
-                            break;
-                        }
+            JSONObject tenantConfig = getTenantConfig(tenantDomain);
+            if (tenantConfig.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS)) {
+                JSONObject customUrlsJsonObject = (JSONObject) tenantConfig.get(
+                        APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS);
+                if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL)) {
+                    JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(
+                            APIConstants.API_DOMAIN_MAPPINGS_DEVPORTAL);
+                    if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN)) {
+                        Map<String, String> domain = new HashMap<String, String>();
+                        domain.put(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URL,
+                                (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN));
+                        return domain;
                     }
                 }
             }
         } catch (ClassCastException e) {
-            String msg = "Invalid JSON found in the tenant domain mappings";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "Malformed JSON found in the tenant domain mappings";
+            String msg = "Invalid JSON found in the devPortal tenant domain mappings";
             throw new APIManagementException(msg, e);
         }
         return null;
@@ -8742,40 +8688,23 @@ public final class APIUtil {
     public static Map getTenantBasedPublisherDomainMapping(String tenantDomain) throws APIManagementException {
 
         try {
-            // Get advance configuration file of the super tenant
-            String superTenantConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
-                    .getTenantConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            if (StringUtils.isNotEmpty(superTenantConfig)) {
-                JSONObject superTenantConfigJsonObject = (JSONObject) new JSONParser().parse(superTenantConfig);
-                JSONArray customUrlsArray = (JSONArray) superTenantConfigJsonObject.get("CustomUrls");
-                if (customUrlsArray != null) {
-                    Iterator<JSONObject> iterator = customUrlsArray.iterator();
-                    JSONObject customUrlsJsonObject;
-                    while (iterator.hasNext()) {
-                        customUrlsJsonObject = iterator.next();
-                        if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                && customUrlsJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                .equals(tenantDomain)) {
-                            if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER)) {
-                                JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(
-                                        APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER);
-                                if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN)) {
-                                    Map<String, String> domain = new HashMap<String, String>();
-                                    domain.put(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URL,
-                                            (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN));
-                                    return domain;
-                                }
-                            }
-                            break;
-                        }
+            JSONObject tenantConfig = getTenantConfig(tenantDomain);
+            if (tenantConfig.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS)) {
+                JSONObject customUrlsJsonObject = (JSONObject) tenantConfig.get(
+                        APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS);
+                if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER)) {
+                    JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(
+                            APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER);
+                    if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN)) {
+                        Map<String, String> domain = new HashMap<String, String>();
+                        domain.put(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URL,
+                                (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_DOMAIN));
+                        return domain;
                     }
                 }
             }
         } catch (ClassCastException e) {
-            String msg = "Invalid JSON found in the tenant domain mappings";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "Malformed JSON found in the tenant domain mappings";
+            String msg = "Invalid JSON found in the publisher tenant domain mappings";
             throw new APIManagementException(msg, e);
         }
         return null;
@@ -8785,40 +8714,22 @@ public final class APIUtil {
 
         String context = null;
         try {
-            // Get advance configuration file of the super tenant
-            String superTenantConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
-                    .getTenantConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            if (StringUtils.isNotEmpty(superTenantConfig)) {
-                JSONObject superTenantConfigJsonObject = (JSONObject) new JSONParser().parse(superTenantConfig);
-                JSONArray customUrlsArray = (JSONArray) superTenantConfigJsonObject.get(
+            JSONObject tenantConfig = getTenantConfig(tenantDomain);
+            if (tenantConfig.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS)) {
+                JSONObject customUrlsJsonObject = (JSONObject) tenantConfig.get(
                         APIConstants.API_DOMAIN_MAPPINGS_CUSTOM_URLS);
-                if (customUrlsArray != null) {
-                    Iterator<JSONObject> iterator = customUrlsArray.iterator();
-                    JSONObject customUrlsJsonObject;
-                    while (iterator.hasNext()) {
-                        customUrlsJsonObject = iterator.next();
-                        if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                && customUrlsJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_TENANT_DOMAIN)
-                                .equals(tenantDomain)) {
-                            if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER)) {
-                                JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(
-                                        APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER);
-                                if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT)) {
-                                    context = (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT);
-                                } else {
-                                    context = "";
-                                }
-                            }
-                            break;
-                        }
+                if (customUrlsJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER)) {
+                    JSONObject appTypeJsonObject = (JSONObject) customUrlsJsonObject.get(
+                            APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER);
+                    if (appTypeJsonObject.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT)) {
+                        context = (String) appTypeJsonObject.get(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT);
+                    } else {
+                        context = "";
                     }
                 }
             }
         } catch (ClassCastException e) {
-            String msg = "Invalid JSON found in the publisher tenant domain mappings";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "Malformed JSON found in the publisher tenant domain mappings";
+            String msg = "Invalid JSON found in the publisher tenant context mappings";
             throw new APIManagementException(msg, e);
         }
         return context;
