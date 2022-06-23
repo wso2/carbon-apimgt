@@ -2963,12 +2963,13 @@ public class APIMappingUtil {
         apiEndpoint.setEndpointUuid(apiEndpointDTO.getId());
         apiEndpoint.setEndpointName(apiEndpointDTO.getName());
         apiEndpoint.setEndpointType(apiEndpointDTO.getEndpointType());
-        HashMap endpointConfigHashMap = (HashMap) apiEndpointDTO.getEndpointConfig();
-        if (endpointConfigHashMap == null) {
+        try {
+            HashMap endpointConfigHashMap = (HashMap) apiEndpointDTO.getEndpointConfig();
+            apiEndpoint.setEndpointConfig(endpointConfigHashMap);
+        } catch (ClassCastException e) {
             throw new APIManagementException("Endpoint Config is missing of API Endpoint.",
                     ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
         }
-        apiEndpoint.setEndpointConfig(endpointConfigHashMap);
         apiEndpoint.setOrganization(organization);
         return apiEndpoint;
     }

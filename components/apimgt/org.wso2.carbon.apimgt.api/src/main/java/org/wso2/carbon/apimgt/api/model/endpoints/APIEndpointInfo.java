@@ -26,40 +26,19 @@ import java.util.Map;
  * Details about an API Endpoint and API.
  */
 public class APIEndpointInfo {
-    private int endpointId;
-    private int apiId;
     private String endpointUuid;
-    private String revisionUuid;
     private String endpointName;
-    private Map endpointConfig;
+    private Map<String, Object> endpointConfig;
     private String organization;
     private String endpointType;
 
-    public int getApiId() {
-        return apiId;
-    }
-
-    public void setApiId(int apiId) {
-        this.apiId = apiId;
-    }
-
-    public String getRevisionUuid() {
-        return revisionUuid;
-    }
-
-    public void setRevisionUuid(String revisionUuid) {
-        this.revisionUuid = revisionUuid;
-    }
-
-    public String getEndpointName() {
-        return endpointName;
-    }
+    public String getEndpointName() { return endpointName; }
 
     public void setEndpointName(String endpointName) {
         this.endpointName = endpointName;
     }
 
-    public Map getEndpointConfig() {
+    public Map<String, Object> getEndpointConfig() {
         return endpointConfig;
     }
 
@@ -81,14 +60,6 @@ public class APIEndpointInfo {
 
     public void setEndpointType(String endpointType) {
         this.endpointType = endpointType;
-    }
-
-    public int getEndpointId() {
-        return endpointId;
-    }
-
-    public void setEndpointId(int endpointId) {
-        this.endpointId = endpointId;
     }
 
     public String getEndpointUuid() {

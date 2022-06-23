@@ -515,6 +515,16 @@ public class PublisherCommonUtils {
                                 ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
                     }
                 }
+
+                //encrypt password
+                if (endpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD)) {
+                    String passWordSecret = endpointSecurity.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD).toString();
+                    if (StringUtils.isNotBlank(passWordSecret)) {
+                        endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD,
+                                cryptoUtil.encryptAndBase64Encode(passWordSecret.getBytes()));
+                    }
+                }
                 endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
                 apiEndpointDTO.setEndpointConfig(endpointConfig);
             }
@@ -1954,7 +1964,7 @@ public class PublisherCommonUtils {
         }
 
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
-        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, endpointId, apiEndpoint);
+        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(endpointId, apiEndpoint);
         if (apiEndpointUpdated == null) {
             throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
                     "endpoint UUID" + endpointId, ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);

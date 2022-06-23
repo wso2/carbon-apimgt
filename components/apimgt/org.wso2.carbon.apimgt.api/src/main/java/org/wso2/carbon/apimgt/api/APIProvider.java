@@ -1628,13 +1628,12 @@ public interface APIProvider extends APIManager {
     /**
      *  Update an endpoint by providing the endpoint ID.
      *
-     * @param apiUUID Unique identifier of API
      * @param endpointUUID Unique identifier of endpoint
      * @param apiEndpoint  Endpoint with updated details
      * @return
      * @throws APIManagementException
      */
-    APIEndpointInfo updateAPIEndpoint(String apiUUID, String endpointUUID, APIEndpointInfo apiEndpoint)
+    APIEndpointInfo updateAPIEndpoint(String endpointUUID, APIEndpointInfo apiEndpoint)
             throws APIManagementException;
 
     /**

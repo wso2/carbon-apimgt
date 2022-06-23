@@ -478,7 +478,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Delete API Endpoint by UUID
+     * Delete API Endpoint by UUID.
      *
      * @param apiId         api identification UUID
      * @param endpointUuid    endpointUUID
@@ -625,6 +625,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateApiEndpoint(String apiId, String endpointId, APIEndpointDTO apIEndpointDTO,
                                       MessageContext messageContext) throws APIManagementException {
         try {
+            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                throw new APIManagementException("Cannot Update API Endpoint in Revision View : " + endpointId,
+                        ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
+            }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists

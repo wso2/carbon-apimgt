@@ -16016,7 +16016,7 @@ public class ApiMgtDAO {
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
 
                 //add REVISION API Endpoints
-                List<APIEndpointInfo> apiEndpointInfoList = getAPIEndpoints(apiRevision.getApiUUID(), null);
+                List<APIEndpointInfo> apiEndpointInfoList = getAPIEndpoints(apiRevision.getApiUUID());
                 PreparedStatement insertAPIEndpointStatement = connection
                         .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_NEW_API_ENDPOINT);
                 for (APIEndpointInfo apiEndpointInfo : apiEndpointInfoList) {
@@ -16025,7 +16025,7 @@ public class ApiMgtDAO {
                     insertAPIEndpointStatement.setString(3, apiRevision.getRevisionUUID());
                     insertAPIEndpointStatement.setString(4, apiEndpointInfo.getEndpointName());
                     insertAPIEndpointStatement.setString(5, apiEndpointInfo.getEndpointType());
-                    insertAPIEndpointStatement.setBlob(6,
+                    insertAPIEndpointStatement.setBinaryStream(6,
                             fromEndpointConfigMapToBA(apiEndpointInfo.getEndpointConfig()));
                     insertAPIEndpointStatement.setString(7, apiEndpointInfo.getOrganization());
                     insertAPIEndpointStatement.addBatch();
@@ -16899,8 +16899,7 @@ public class ApiMgtDAO {
                 removeAPIEndpointsStatement.executeUpdate();
 
                 // Restoring to AM_API_ENDPOINTS_TABLE
-                List<APIEndpointInfo> apiEndpointInfoList = getAPIEndpoints(
-                        apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+                List<APIEndpointInfo> apiEndpointInfoList = getAPIEndpoints(apiRevision.getRevisionUUID());
                 PreparedStatement insertAPIEndpointStatement = connection
                         .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_NEW_API_ENDPOINT);
                 for (APIEndpointInfo apiEndpointInfo : apiEndpointInfoList) {
@@ -16909,7 +16908,7 @@ public class ApiMgtDAO {
                     insertAPIEndpointStatement.setString(3, null);
                     insertAPIEndpointStatement.setString(4, apiEndpointInfo.getEndpointName());
                     insertAPIEndpointStatement.setString(5, apiEndpointInfo.getEndpointType());
-                    insertAPIEndpointStatement.setBlob(6,
+                    insertAPIEndpointStatement.setBinaryStream(6,
                             fromEndpointConfigMapToBA(apiEndpointInfo.getEndpointConfig()));
                     insertAPIEndpointStatement.setString(7, apiEndpointInfo.getOrganization());
                     insertAPIEndpointStatement.addBatch();
@@ -18088,57 +18087,47 @@ public class ApiMgtDAO {
 
     }
 
-    public List<APIEndpointInfo> getAPIEndpoints(String uuid, String revisionUUID) throws APIManagementException {
+    public List<APIEndpointInfo> getAPIEndpoints(String uuid) throws APIManagementException {
         List<APIEndpointInfo> apiEndpoints = null;
         String sql;
-        if (revisionUUID == null) {
-            sql = SQLConstants.APIEndpointsSQLConstants.GET_ALL_API_ENDPOINTS_BY_API_UUID;
-        } else {
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        String currentApiUuid;
+        boolean isRevision = false;
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
             sql = SQLConstants.APIEndpointsSQLConstants.GET_ALL_API_ENDPOINTS_BY_API_UUID_REVISION_SQL;
+            isRevision = true;
+        } else {
+            sql = SQLConstants.APIEndpointsSQLConstants.GET_ALL_API_ENDPOINTS_BY_API_UUID;
+            currentApiUuid = uuid;
         }
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(true);
-            int apiId = getAPIID(uuid, conn);
-            ps = conn.prepareStatement(sql);
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            int apiId = getAPIID(currentApiUuid, conn);
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, apiId);
             ps.setString(2, uuid);
-            if (revisionUUID != null) {
-                ps.setString(3, revisionUUID);
+            if (isRevision) {
+                ps.setString(3, apiRevision.getRevisionUUID());
             }
-            rs = ps.executeQuery();
-
-            if (rs != null) {
-                apiEndpoints = new ArrayList<>();
-                while (rs.next()) {
-                    APIEndpointInfo apiEndpoint = new APIEndpointInfo();
-                    apiEndpoint.setEndpointUuid(rs.getString("ENDPOINT_UUID"));
-                    apiEndpoint.setRevisionUuid(rs.getString("REVISION_UUID"));
-                    apiEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
-                    apiEndpoint.setEndpointType(rs.getString("ENDPOINT_TYPE"));
-                    Blob opEndpconfBlob = rs.getBlob("ENDPOINT_CONFIG");
-                    if (opEndpconfBlob != null) {
-                        apiEndpoint.setEndpointConfig(fromBAtoEndpointConfigMap(new ByteArrayInputStream(opEndpconfBlob.
-                                getBytes(1, (int) opEndpconfBlob.length()))));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs != null) {
+                    apiEndpoints = new ArrayList<>();
+                    while (rs.next()) {
+                        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+                        apiEndpoint.setEndpointUuid(rs.getString("ENDPOINT_UUID"));
+                        apiEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
+                        apiEndpoint.setEndpointType(rs.getString("ENDPOINT_TYPE"));
+                        apiEndpoint.setEndpointConfig(fromBAtoEndpointConfigMap(
+                                rs.getBinaryStream("ENDPOINT_CONFIG")));
+                        apiEndpoint.setOrganization(rs.getString("ORGANIZATION"));
+                        apiEndpoints.add(apiEndpoint);
                     }
-                    apiEndpoint.setOrganization(rs.getString("ORGANIZATION"));
-                    apiEndpoints.add(apiEndpoint);
                 }
+                return apiEndpoints;
             }
-            return apiEndpoints;
         } catch (SQLException e) {
-            log.error("Error occurred while fetching data: " + e.getMessage(), e);
-        } finally {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e.getMessage(), e);
-            }
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            handleException("Error occurred while fetching data: " + e.getMessage(), e);
         }
         return apiEndpoints;
     }
@@ -18180,41 +18169,25 @@ public class ApiMgtDAO {
     public APIEndpointInfo getAPIEndpoint(String apiUUID, String endpointUUID) throws APIManagementException {
         APIEndpointInfo apiEndpoint;
         String sql = SQLConstants.APIEndpointsSQLConstants.GET_API_ENDPOINT_BY_API_UUID_AND_ENDPOINT_UUID;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(true);
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
             int apiId = getAPIID(apiUUID, conn);
-            ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, apiId);
             ps.setString(2, endpointUUID);
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                apiEndpoint = new APIEndpointInfo();
-                apiEndpoint.setEndpointUuid(rs.getString("ENDPOINT_UUID"));
-                apiEndpoint.setRevisionUuid(rs.getString("REVISION_UUID"));
-                apiEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
-                apiEndpoint.setEndpointType(rs.getString("ENDPOINT_TYPE"));
-                Blob opEndpconfBlob = rs.getBlob("ENDPOINT_CONFIG");
-                if (opEndpconfBlob != null) {
-                    apiEndpoint.setEndpointConfig(fromBAtoEndpointConfigMap(new ByteArrayInputStream(opEndpconfBlob.
-                            getBytes(1, (int) opEndpconfBlob.length()))));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    apiEndpoint = new APIEndpointInfo();
+                    apiEndpoint.setEndpointUuid(rs.getString("ENDPOINT_UUID"));
+                    apiEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
+                    apiEndpoint.setEndpointType(rs.getString("ENDPOINT_TYPE"));
+                    apiEndpoint.setEndpointConfig(fromBAtoEndpointConfigMap(
+                            rs.getBinaryStream("ENDPOINT_CONFIG")));
+                    apiEndpoint.setOrganization(rs.getString("ORGANIZATION"));
+                    return apiEndpoint;
                 }
-                apiEndpoint.setOrganization(rs.getString("ORGANIZATION"));
-                return apiEndpoint;
             }
         } catch (SQLException e) {
-            log.error("Error occurred while fetching data: " + e.getMessage(), e);
-        } finally {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e.getMessage(), e);
-            }
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            handleException("Error occurred while fetching data: " + e.getMessage(), e);
         }
         return null;
     }
@@ -18270,12 +18243,12 @@ public class ApiMgtDAO {
         }
     }
 
-    public APIEndpointInfo updateAPIEndpoint(String apiUUID, String endpointUUID, APIEndpointInfo apiEndpoint)
+    public APIEndpointInfo updateAPIEndpoint(String endpointUUID, APIEndpointInfo apiEndpoint)
             throws APIManagementException {
         APIEndpointInfo apiEndpointUpdated = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            apiEndpointUpdated = updateAPIEndpoint(connection, apiUUID, endpointUUID, apiEndpoint);
+            apiEndpointUpdated = updateAPIEndpoint(connection, endpointUUID, apiEndpoint);
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to update the endpoint with ID " + endpointUUID, e);
@@ -18283,27 +18256,26 @@ public class ApiMgtDAO {
         return apiEndpointUpdated;
     }
 
-    private APIEndpointInfo updateAPIEndpoint(Connection connection, String apiUUID, String endpointUUID,
+    private APIEndpointInfo updateAPIEndpoint(Connection connection, String endpointUUID,
                                            APIEndpointInfo apiEndpoint) throws SQLException, APIManagementException {
         PreparedStatement statement = connection.prepareStatement(
                 SQLConstants.APIEndpointsSQLConstants.UPDATE_API_ENDPOINT_BY_UUID);
         statement.setString(1, apiEndpoint.getEndpointName());
-        statement.setBlob(2, fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
+        statement.setBinaryStream(2, fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
         statement.setString(3, apiEndpoint.getOrganization());
         statement.setString(4, endpointUUID);
         if (statement.executeUpdate() > 0) {
-            statement.close();
             return apiEndpoint;
         }
         return null;
     }
 
-    public String addAPIEndpoint(APIEndpointInfo apiEndpoint) throws APIManagementException {
+    public String addAPIEndpoint(int apiId, APIEndpointInfo apiEndpoint) throws APIManagementException {
         String endpointUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                endpointUUID = addAPIEndpoint(connection, apiEndpoint);
+                endpointUUID = addAPIEndpoint(apiId, connection, apiEndpoint);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18315,23 +18287,19 @@ public class ApiMgtDAO {
         return endpointUUID;
     }
 
-    private String addAPIEndpoint(Connection connection, APIEndpointInfo apiEndpoint)
+    private String addAPIEndpoint(int apiId, Connection connection, APIEndpointInfo apiEndpoint)
             throws SQLException, APIManagementException {
         String dbQuery = SQLConstants.APIEndpointsSQLConstants.ADD_NEW_API_ENDPOINT;
-        String endpointUUID = apiEndpoint.getEndpointUuid();
-        if (endpointUUID == null || endpointUUID.equals(""))
-            endpointUUID = UUID.randomUUID().toString();
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-            statement.setInt(1, apiEndpoint.getApiId());
-            statement.setString(2, endpointUUID);
-            statement.setString(3, apiEndpoint.getRevisionUuid());
+            statement.setInt(1, apiId);
+            statement.setString(2, apiEndpoint.getEndpointUuid());
+            statement.setString(3, null);
             statement.setString(4, apiEndpoint.getEndpointName());
             statement.setString(5, apiEndpoint.getEndpointType());
-            statement.setBlob(6, fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
+            statement.setBinaryStream(6, fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
             statement.setString(7, apiEndpoint.getOrganization());
             if (statement.executeUpdate() > 0) {
-                statement.close();
-                return endpointUUID;
+                return apiEndpoint.getEndpointUuid();
             }
         }
         return null;
@@ -18516,20 +18484,27 @@ public class ApiMgtDAO {
 
     public void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
         int apiId;
+        String workingEndpointIdsQuery = SQLConstants.APIEndpointsSQLConstants.GET_MAPPED_API_ENDPOINTS_IDS;
         String deleteOldPrimaryMappingsQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(deleteOldPrimaryMappingsQuery)) {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()){
+            PreparedStatement getEndpointIDsStmt = connection.prepareStatement(workingEndpointIdsQuery);
             connection.setAutoCommit(false);
             apiId = getAPIID(api.getUuid(), connection);
-            prepStmt.setInt(1, apiId);
-            try {
-                prepStmt.execute();
+            getEndpointIDsStmt.setInt(1, apiId);
+            try (ResultSet rs = getEndpointIDsStmt.executeQuery()) {
+                PreparedStatement deleteEndpointMappingStmt = connection.prepareStatement(deleteOldPrimaryMappingsQuery);
+                while (rs.next()){
+                    deleteEndpointMappingStmt.setInt(1, rs.getInt(1));
+                    deleteEndpointMappingStmt.addBatch();
+                }
+                deleteEndpointMappingStmt.executeBatch();
                 addPrimaryEndpointMapping(apiId, api, connection);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while deleting primary Endpoint(s) Mapping for API : " + api.getId(), e);
-            } catch (APIManagementException e){
+            } catch (APIManagementException e) {
                 handleException("Error while updating primary Endpoint(s) Mapping for API : " + api.getId(), e);
             }
         } catch (SQLException e) {
@@ -18556,16 +18531,26 @@ public class ApiMgtDAO {
         addPrimaryMapping.executeBatch();
     }
 
-    public String getPrimaryEndpointUUIDByApiIdAndEnv(int apiId, String env) throws APIManagementException {
-        String sql = SQLConstants.APIEndpointsSQLConstants.GET_API_PRIMARY_ENDPOINT_ID_BY_API_ID_AND_ENV;
+    public String getPrimaryEndpointUUIDByApiIdAndEnv(int apiId, String env, String revisionUuid)
+            throws APIManagementException {
+        String sql;
+        if (revisionUuid != null) {
+            sql = SQLConstants.APIEndpointsSQLConstants.GET_API_PRIMARY_ENDPOINT_UUID_BY_API_ID_AND_ENV_REVISION;
+        } else {
+            sql = SQLConstants.APIEndpointsSQLConstants.GET_API_PRIMARY_ENDPOINT_UUID_BY_API_ID_AND_ENV;
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, apiId);
-                preparedStatement.setString(2, env);
+                if (revisionUuid != null) {
+                    preparedStatement.setString(2, revisionUuid);
+                    preparedStatement.setString(3, env);
+                } else {
+                    preparedStatement.setString(2, env);
+                }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        int apiEndpointId = resultSet.getInt("ENDPOINT_ID");
-                        return getAPIEndpointUUIDFromID(connection, apiEndpointId);
+                        return resultSet.getString("ENDPOINT_UUID");
                     }
                     return null;
                 }
@@ -19941,13 +19926,13 @@ public class ApiMgtDAO {
         }
     }
 
-    private static HashMap fromBAtoEndpointConfigMap(ByteArrayInputStream endpointConfByteArrInStream)
+    private static HashMap<String, Object> fromBAtoEndpointConfigMap(InputStream endpointConfByteArrInStream)
             throws APIManagementException {
         if (endpointConfByteArrInStream != null) {
             ObjectInputStream objInEndpointConf;
             try {
                 objInEndpointConf = new ObjectInputStream(endpointConfByteArrInStream);
-                HashMap endpointConfigMap = (HashMap) objInEndpointConf.readObject();
+                HashMap<String, Object> endpointConfigMap = (HashMap) objInEndpointConf.readObject();
                 return endpointConfigMap;
             } catch (ClassNotFoundException | IOException e) {
                 throw new APIManagementException("Error occurred transform endpoint config BA to object", e);

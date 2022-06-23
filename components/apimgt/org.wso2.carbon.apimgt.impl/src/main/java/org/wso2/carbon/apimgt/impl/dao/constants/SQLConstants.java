@@ -4130,8 +4130,14 @@ public class SQLConstants {
                 "WHERE AUM.API_ID = ? " +
                 "AND  AUM.REVISION_UUID = ? ORDER BY AUM.URL_MAPPING_ID ASC";
 
+        public static final String GET_MAPPED_API_ENDPOINTS_IDS = "SELECT " +
+                "AMAE.ENDPOINT_ID " +
+                "FROM AM_API_ENDPOINTS AMAE INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM " +
+                "ON AMPM.ENDPOINT_ID = AMAE.ENDPOINT_ID" +
+                "WHERE AMAE.API_ID = ? AND AMAE.REVISION_UUID IS NULL";
+
         public static final String DELETE_PRIMARY_ENDPOINT_MAPPING =
-                "DELETE FROM AM_API_PRIMARY_ENDPOINT_MAPPING WHERE API_ID = ?";
+                "DELETE FROM AM_API_PRIMARY_ENDPOINT_MAPPING WHERE ENDPOINT_ID = ?";
 
         public static final String ADD_PRIMARY_ENDPOINT_MAPPING = " INSERT INTO " +
                 "AM_API_PRIMARY_ENDPOINT_MAPPING " +
@@ -4140,11 +4146,16 @@ public class SQLConstants {
                 "ENVIRONMENT) " +
                 "VALUES(?,?,?)";
 
-        public static final String GET_API_PRIMARY_ENDPOINT_ID_BY_API_ID_AND_ENV = "SELECT ENDPOINT_ID " +
-                "FROM AM_API_PRIMARY_ENDPOINT_MAPPING AMPEM " +
-                "WHERE " +
-                "AMPEM.API_ID = ? AND " +
-                "AMPEM.ENVIRONMENT = ? ";
+        public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_ID_AND_ENV = "SELECT ENDPOINT_UUID FROM " +
+                "(SELECT * FROM  AM_API_ENDPOINTS AME WHERE AME.REVISION_UUID IS NULL AND AME.API_ID = ?) AMEF " +
+                "INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM ON AMPM.ENDPOINT_ID = AMEF.ENDPOINT_ID " +
+                "WHERE AMPM.ENVIRONMENT = ? ";
+
+        public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_ID_AND_ENV_REVISION =
+                "SELECT ENDPOINT_UUID FROM " +
+                "(SELECT * FROM  AM_API_ENDPOINTS AME WHERE AME.API_ID = ? AND AME.REVISION_UUID = ?) AMEF " +
+                "INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM ON AMPM.ENDPOINT_ID = AMEF.ENDPOINT_ID " +
+                "WHERE AMPM.ENVIRONMENT = ? ";
 
         public static final String CHECK_AN_ENDPOINT_HAS_OPERATION_MAPPING = "SELECT AMAE.ENDPOINT_ID " +
                 "FROM AM_API_ENDPOINTS AMAE INNER JOIN " +

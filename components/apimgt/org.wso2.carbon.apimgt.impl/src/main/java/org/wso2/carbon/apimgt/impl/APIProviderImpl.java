@@ -491,8 +491,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addNoneAPIEndpoint(int apiId, String uuid) throws APIManagementException {
         APIEndpointInfo apiEndpoint = new APIEndpointInfo();
         apiEndpoint.setEndpointUuid(uuid);
-        apiEndpoint.setApiId(apiId);
-        apiMgtDAO.addAPIEndpoint(apiEndpoint);
+        apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
     }
 
     /**
@@ -4735,13 +4734,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
-                if (api.getRevisionedApiId() == null) {
-                    populateAPIOperationEndpointsMapping(api, api.getUuid());
-                    populateAPIPrimaryEndpointsMapping(api, api.getUuid());
-                } else {
-                    populateAPIOperationEndpointsMapping(api, api.getRevisionedApiId());
-                    populateAPIPrimaryEndpointsMapping(api, api.getRevisionedApiId());
-                }
+                populateAPIOperationEndpointsMapping(api, uuid);
+                populateAPIPrimaryEndpointsMapping(api, uuid);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -4763,28 +4757,45 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.hasOperationMapping(endpointUuid);
     }
 
-    private void populateAPIPrimaryEndpointsMapping(API api, String apiUuid) throws APIManagementException {
-        int apiId = apiMgtDAO.getAPIID(apiUuid);
+    private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
+        String currentApiUuid;
+        String revisionUuid = null;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+            revisionUuid = apiRevision.getRevisionUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        int apiId = apiMgtDAO.getAPIID(currentApiUuid);
         // Get primary production Endpoint mapping
         String productionEndpointId =
-                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, "PRODUCTION");
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, "PRODUCTION", revisionUuid);
         api.setPrimaryProductionEndpointId(productionEndpointId);
         // Get primary sandbox endpoint endpoint
         String sandboxEndpointId =
-                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, "SANDBOX");
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, "SANDBOX", revisionUuid);
         api.setPrimarySandboxEndpointId(sandboxEndpointId);
     }
 
-    private void populateAPIOperationEndpointsMapping(API api, String apiId) throws APIManagementException {
+    private void populateAPIOperationEndpointsMapping(API api, String uuid) throws APIManagementException {
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        String currentApiUuid;
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
         for (URITemplate uriTemplate : api.getUriTemplates()) {
             // Get production Endpoint mapping
             String productionEndpointId =
                     apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "PRODUCTION");
-            uriTemplate.setProductionEndpoint(apiId.equals(productionEndpointId) ? "none" : productionEndpointId);
+            uriTemplate.setProductionEndpoint(
+                    currentApiUuid.equals(productionEndpointId) ? "none" : productionEndpointId);
             // Get sandbox endpoint endpoint
             String sandboxEndpointId =
                     apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "SANDBOX");
-            uriTemplate.setSandboxEndpoint(apiId.equals(sandboxEndpointId) ? "none" : sandboxEndpointId);
+            uriTemplate.setSandboxEndpoint(currentApiUuid.equals(sandboxEndpointId) ? "none" : sandboxEndpointId);
         }
     }
 
@@ -5996,7 +6007,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getAPIEndpoints(uuid, null);
+        return apiMgtDAO.getAPIEndpoints(uuid);
     }
 
     @Override
@@ -6232,16 +6243,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIEndpointInfo updateAPIEndpoint(String apiUUID, String endpointUUID, APIEndpointInfo apiEndpoint)
+    public APIEndpointInfo updateAPIEndpoint(String endpointUUID, APIEndpointInfo apiEndpoint)
             throws APIManagementException {
-        return apiMgtDAO.updateAPIEndpoint(apiUUID, endpointUUID, apiEndpoint);
+        return apiMgtDAO.updateAPIEndpoint(endpointUUID, apiEndpoint);
     }
 
     @Override
     public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException {
         int apiId = apiMgtDAO.getAPIID(apiUUID);
-        apiEndpoint.setApiId(apiId);
-        return apiMgtDAO.addAPIEndpoint(apiEndpoint);
+        String endpointUUID = apiEndpoint.getEndpointUuid();
+        if (endpointUUID == null || endpointUUID.equals(""))
+            endpointUUID = UUID.randomUUID().toString();
+        apiEndpoint.setEndpointUuid(endpointUUID);
+        return apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
     }
 
     @Override

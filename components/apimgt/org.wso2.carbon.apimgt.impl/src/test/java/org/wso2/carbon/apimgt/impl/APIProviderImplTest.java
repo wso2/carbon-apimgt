@@ -1819,7 +1819,6 @@ public class APIProviderImplTest {
         String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
         String endpointuuid = "322-24322-4basd3e6-86a5-3424efw24233";
         APIEndpointInfo apiEndpoint = new APIEndpointInfo();
-        apiEndpoint.setApiId(1);
         apiEndpoint.setEndpointName("TESTING_ENDPOINT");
         apiEndpoint.setEndpointUuid(endpointuuid);
         apiEndpoint.setOrganization("-1234");
@@ -1831,21 +1830,19 @@ public class APIProviderImplTest {
 
     @Test
     public void testUpdateApiEndpoint() throws APIManagementException {
-        String apiuuid = "63e1e37e-a5b8-4be6-86a5-d6ae0749f131";
         String endpointuuid = "322-24322-4basd3e6-86a5-3424efw24233";
         APIEndpointInfo apiEndpoint = new APIEndpointInfo();
         APIEndpointInfo dummyapiEndpoint = new APIEndpointInfo();
-        apiEndpoint.setApiId(1);
         apiEndpoint.setEndpointName("TESTING_ENDPOINT");
         apiEndpoint.setEndpointUuid(endpointuuid);
         apiEndpoint.setOrganization("-1234");
         apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
 
-        Mockito.when(apiProvider.updateAPIEndpoint(apiuuid, endpointuuid,apiEndpoint)).thenReturn(new APIEndpointInfo());
-        Mockito.when(apiProvider.updateAPIEndpoint(apiuuid, endpointuuid,dummyapiEndpoint)).thenReturn(null);
+        Mockito.when(apiProvider.updateAPIEndpoint(endpointuuid,apiEndpoint)).thenReturn(new APIEndpointInfo());
+        Mockito.when(apiProvider.updateAPIEndpoint(endpointuuid,dummyapiEndpoint)).thenReturn(null);
 
-        Assert.assertNotNull(apiProvider.updateAPIEndpoint(apiuuid, endpointuuid,apiEndpoint));
-        Assert.assertNull(apiProvider.updateAPIEndpoint(apiuuid, endpointuuid,dummyapiEndpoint));
+        Assert.assertNotNull(apiProvider.updateAPIEndpoint(endpointuuid,apiEndpoint));
+        Assert.assertNull(apiProvider.updateAPIEndpoint(endpointuuid,dummyapiEndpoint));
     }
 }
