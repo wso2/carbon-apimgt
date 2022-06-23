@@ -10,7 +10,7 @@ info:
     Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway/src/main/resources/gateway-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
   contact:
     name: "WSO2"
-    url: "http://wso2.com/products/api-manager/"
+    url: "https://wso2.com/api-manager/"
     email: "architecture@wso2.com"
   license:
     name: "Apache 2.0"
@@ -61,7 +61,7 @@ paths:
     # Redeploy the API in the Gateway
     #-----------------------------------------------------
     post:
-      summary: Re Deploy the API in the gateway
+      summary: Redeploy the API in the gateway
       description: |
         This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super
         will be picked as the Tenant domain.
@@ -91,7 +91,7 @@ paths:
             $ref: '#/definitions/Error'
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+          source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
           -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
 
@@ -101,7 +101,7 @@ paths:
     # Undeploy the API in the Gateway
     #-----------------------------------------------------
     post:
-      summary: Uneploy the API in the gateway
+      summary: Undeploy the API in the gateway
       description: |
         This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will
         be picked as the Tenant domain.
@@ -129,10 +129,10 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
-        x-code-samples:
-          - lang: Curl
-            source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
-            -H "Authorization: Basic YWRtaW46YWRtaW4="'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v2/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+          -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /server-startup-healthcheck:
     get:
@@ -161,7 +161,7 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck"
+          source: 'curl -k "https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck" -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /api-artifact:
 
@@ -197,10 +197,10 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
-        x-code-samples:
-          - lang: Curl
-            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
-            -H "Authorization: Basic YWRtaW46YWRtaW4="'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+          -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /local-entry:
 
@@ -236,10 +236,10 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
-        x-code-samples:
-          - lang: Curl
-            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
-            -H "Authorization: Basic YWRtaW46YWRtaW4="'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+          -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /sequence:
     #-----------------------------------------------------
@@ -274,10 +274,10 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
-        x-code-samples:
-          - lang: Curl
-            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
-            -H "Authorization: Basic YWRtaW46YWRtaW4="'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+          -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /end-points:
 
@@ -313,10 +313,10 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
-        x-code-samples:
-          - lang: Curl
-            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
-            -H "Authorization: Basic YWRtaW46YWRtaW4="'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
+          -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
   /apis:
 
@@ -326,7 +326,7 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/apis?context=/pizza/1.0.0&version=1.0&tenantDomain=registry.com"
+          source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/apis?context=/pizza/1.0.0&version=1.0&tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get the list of APIS by providing context and version.
 
@@ -372,9 +372,9 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com"
+          source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
-      summary: Get the subscription information of an api by providing the api uuid.
+      summary: Get the subscription information of an API by providing the API uuid.
 
       description: |
         This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided
@@ -413,7 +413,7 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/applications?name=PizzaAPP&tenantDomain=registry.com\"
+          source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/applications?name=PizzaAPP&tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get the applications information by providing the application name or uuid.
 
@@ -458,7 +458,7 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/subscriptions?apiUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&appUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&tenantDomain=registry.com\"
+          source: 'curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v2/subscriptions?apiUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&appUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&tenantDomain=registry.com"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get the subscriptions meta information of an api by providing the api uuid and application uuid.
 

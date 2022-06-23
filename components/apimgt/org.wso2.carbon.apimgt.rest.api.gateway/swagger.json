@@ -6,7 +6,7 @@
     "title" : "WSO2 API Manager - Gateway",
     "contact" : {
       "name" : "WSO2",
-      "url" : "http://wso2.com/products/api-manager/",
+      "url" : "https://wso2.com/api-manager/",
       "email" : "architecture@wso2.com"
     },
     "license" : {
@@ -22,7 +22,7 @@
   "paths" : {
     "/redeploy-api" : {
       "post" : {
-        "summary" : "Re Deploy the API in the gateway",
+        "summary" : "Redeploy the API in the gateway",
         "description" : "This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
         "operationId" : "redployAPI",
         "parameters" : [ {
@@ -66,13 +66,13 @@
         },
         "x-code-samples" : [ {
           "lang" : "Curl",
-          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+          "source" : "curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
     },
     "/undeploy-api" : {
       "post" : {
-        "summary" : "Uneploy the API in the gateway",
+        "summary" : "Undeploy the API in the gateway",
         "description" : "This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
         "operationId" : "undeployAPI",
         "parameters" : [ {
@@ -113,7 +113,11 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v2/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/server-startup-healthcheck" : {
@@ -134,7 +138,7 @@
         } ],
         "x-code-samples" : [ {
           "lang" : "Curl",
-          "source" : "curl -k \"https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck\""
+          "source" : "curl -k \"https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
     },
@@ -181,7 +185,11 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "curl -k \"https://127.0.0.1:9443/api/am/gateway/v2/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/local-entry" : {
@@ -227,7 +235,11 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "curl -k \"https://127.0.0.1:9443/api/am/gateway/v2/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/sequence" : {
@@ -273,7 +285,11 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "curl -k \"https://127.0.0.1:9443/api/am/gateway/v2/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/end-points" : {
@@ -319,7 +335,11 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "curl -k \"https://127.0.0.1:9443/api/am/gateway/v2/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/apis" : {
@@ -386,14 +406,14 @@
         },
         "x-code-samples" : [ {
           "lang" : "Curl",
-          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/apis?context=/pizza/1.0.0&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+          "source" : "curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v2/apis?context=/pizza/1.0.0&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
     },
     "/apis/{apiId}" : {
       "get" : {
         "tags" : [ "Get API Info" ],
-        "summary" : "Get the subscription information of an api by providing the api uuid.",
+        "summary" : "Get the subscription information of an API by providing the API uuid.",
         "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiId",
@@ -448,7 +468,7 @@
         },
         "x-code-samples" : [ {
           "lang" : "Curl",
-          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+          "source" : "curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
     },
@@ -516,7 +536,7 @@
         },
         "x-code-samples" : [ {
           "lang" : "Curl",
-          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/applications?name=PizzaAPP&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+          "source" : "curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v2/applications?name=PizzaAPP&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
     },
@@ -584,7 +604,7 @@
         },
         "x-code-samples" : [ {
           "lang" : "Curl",
-          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/subscriptions?apiUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&appUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+          "source" : "curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v2/subscriptions?apiUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&appUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
     }
