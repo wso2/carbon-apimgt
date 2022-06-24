@@ -7869,7 +7869,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public boolean isContextExist(String context) {
+    public boolean isContextExist(String context, String organization) {
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -7880,6 +7880,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, context);
+            prepStmt.setString(2, organization);
             resultSet = prepStmt.executeQuery();
 
             while (resultSet.next()) {
@@ -10020,7 +10021,8 @@ public class ApiMgtDAO {
      * @return true if the name is already available
      * @throws APIManagementException
      */
-    public boolean isApiNameExist(String apiName, String tenantDomain) throws APIManagementException {
+    public boolean isApiNameExist(String apiName, String tenantDomain, String organization)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -10038,7 +10040,8 @@ public class ApiMgtDAO {
 
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, apiName);
-            prepStmt.setString(2, contextParam + '%');
+            prepStmt.setString(2, organization);
+            prepStmt.setString(3, contextParam + '%');
             resultSet = prepStmt.executeQuery();
 
             int apiCount = 0;
@@ -10067,7 +10070,8 @@ public class ApiMgtDAO {
      * @return true if a different letter case name is already available
      * @throws APIManagementException If failed to check different letter case api name availability
      */
-    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain) throws APIManagementException {
+    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain, String organization)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -10087,6 +10091,7 @@ public class ApiMgtDAO {
             prepStmt.setString(1, apiName);
             prepStmt.setString(2, contextParam + '%');
             prepStmt.setString(3, apiName);
+            prepStmt.setString(4, organization);
             resultSet = prepStmt.executeQuery();
 
             int apiCount = 0;
