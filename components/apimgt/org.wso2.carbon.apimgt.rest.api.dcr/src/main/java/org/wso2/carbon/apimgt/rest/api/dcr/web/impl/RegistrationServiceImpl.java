@@ -122,17 +122,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             //Validates if the application owner and logged in username is same.
             if (authUserName != null && ((authUserName.equals(owner))|| isUserSuperAdmin(authUserName))) {
-                if (!isUserAccessAllowed(authUserName)) {
-                    String errorMsg = "You do not have enough privileges to create an OAuth app";
-                    log.error("User " + authUserName +
-                            " does not have any of subscribe/create/publish privileges " +
-                            "to create an OAuth app");
-                    errorDTO =
-                            RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT,
-                                    403L, errorMsg);
-                    response = Response.status(Response.Status.FORBIDDEN).entity(errorDTO).build();
-                    return response;
-                }
                 //Getting client credentials from the profile
                 String grantTypes = profile.getGrantType();
                 oauthApplicationInfo.setClientName(profile.getClientName());
@@ -245,51 +234,6 @@ public class RegistrationServiceImpl implements RegistrationService {
                     entity(new FaultResponse(ErrorCode.INVALID_CLIENT_METADATA, msg)).build();
         }
         return response;
-    }
-
-    /**
-     * Check whether user have any of create, publish or subscribe permissions
-     *
-     * @param username username
-     * @return true if user has any of create, publish or subscribe permissions
-     */
-    private boolean isUserAccessAllowed(String username) {
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Checking 'subscribe' permission for user " + username);
-            }
-            APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
-            return true;
-        } catch (APIManagementException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("User " + username + " does not have subscriber permission", e);
-            }
-        }
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Checking 'api publish' permission for user " + username);
-            }
-            APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
-            return true;
-        } catch (APIManagementException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("User " + username + " does not have 'api publish' permission", e);
-            }
-        }
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Checking 'api create' permission for user " + username);
-            }
-            APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
-            return true;
-        } catch (APIManagementException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("User " + username + " does not have 'api create' permission", e);
-            }
-        }
-        return false;
     }
 
     /**

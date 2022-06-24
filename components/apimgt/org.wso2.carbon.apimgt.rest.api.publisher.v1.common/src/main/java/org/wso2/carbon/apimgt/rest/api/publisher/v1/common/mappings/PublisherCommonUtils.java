@@ -1022,7 +1022,7 @@ public class PublisherCommonUtils {
         } else if (body.getContext().endsWith("/")) {
             throw new APIManagementException("Context cannot end with '/' character", ExceptionCodes.INVALID_CONTEXT);
         }
-        if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
+        if (apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organization)) {
             throw new APIManagementException(
                     "Error occurred while adding API. API with name " + body.getName() + " already exists.",
                     ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, body.getName()));
@@ -1566,8 +1566,6 @@ public class PublisherCommonUtils {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
         apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
 
-        //preserve monetization status in the update flow
-        apiProvider.configureMonetizationInAPIProductArtifact(product);
         return apiProvider.getAPIProduct(productIdentifier);
     }
 
@@ -1639,7 +1637,7 @@ public class PublisherCommonUtils {
         //Make sure context starts with "/". ex: /pizzaProduct
         context = context.startsWith("/") ? context : ("/" + context);
         //Check whether the context already exists
-        if (apiProvider.isContextExist(context)) {
+        if (apiProvider.isContextExist(context, organization)) {
             throw new APIManagementException(
                     "Error occurred while adding API Product. API Product with the context " + context + " already " +
                             "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
@@ -1758,12 +1756,7 @@ public class PublisherCommonUtils {
             }
         }
 
-        try {
-            return apiProvider.changeLifeCycleStatus(organization, apiTypeWrapper, action, lcMap);
-        } catch (FaultGatewaysException e) {
-            throw new APIManagementException("Error while change the state of artifact with name - "
-                    + apiTypeWrapper.getName(), e);
-        }
+        return apiProvider.changeLifeCycleStatus(organization, apiTypeWrapper, action, lcMap);
     }
 
     /**

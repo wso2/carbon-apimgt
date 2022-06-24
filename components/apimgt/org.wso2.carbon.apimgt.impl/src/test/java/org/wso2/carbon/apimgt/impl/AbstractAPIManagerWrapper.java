@@ -46,16 +46,8 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
-            TenantManager tenantManager) throws APIManagementException {
-        this.genericArtifactManager = genericArtifactManager;
-        this.registryService = registryService;
-        this.tenantManager = tenantManager;
-    }
-
-    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
             Registry registry, TenantManager tenantManager) throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
-        this.registry = registry;
         this.tenantManager = tenantManager;
         this.registryService = registryService;
     }
@@ -73,7 +65,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
             Registry registry, TenantManager tenantManager, ApiMgtDAO apiMgtDAO) throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
-        this.registry = registry;
         this.tenantManager = tenantManager;
         this.registryService = registryService;
         this.apiMgtDAO = apiMgtDAO;
@@ -83,28 +74,10 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
                                      Registry registry, TenantManager tenantManager, ApiMgtDAO apiMgtDAO, APIPersistence persistance)
             throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
-        this.registry = registry;
         this.tenantManager = tenantManager;
         this.registryService = registryService;
         this.apiMgtDAO = apiMgtDAO;
         this.apiPersistenceInstance = persistance;
-    }
-
-    @Override
-    protected GenericArtifactManager getAPIGenericArtifactManager(Registry registry, String keyType) throws
-            APIManagementException {
-        return genericArtifactManager;
-    }
-
-    @Override
-    protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType) throws
-            APIManagementException {
-        return genericArtifactManager;
-    }
-
-    @Override
-    protected RegistryService getRegistryService() {
-        return registryService;
     }
 
     @Override
@@ -116,20 +89,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
             APIIdentifier apiIdentifier = new APIIdentifier(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
                     artifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
                     artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-            API api = new API(apiIdentifier);
-            return api;
-        } catch (GovernanceException e) {
-            throw new APIManagementException("Error while getting attribute", e);
-        }
-    }
-
-    protected API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
-        try {
-
-            APIIdentifier apiIdentifier = new APIIdentifier(
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
             API api = new API(apiIdentifier);
             return api;
         } catch (GovernanceException e) {

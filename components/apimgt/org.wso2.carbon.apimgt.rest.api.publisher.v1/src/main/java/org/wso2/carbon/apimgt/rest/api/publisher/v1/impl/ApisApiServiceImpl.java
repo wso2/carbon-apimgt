@@ -899,7 +899,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             APIIdentifier apiIdentifier = api.getId();
-            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, organization);
+            String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
             // Get configuration file, retrieve API token and collection id
             JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
             String apiToken = (String) securityAuditPropertyObject.get("apiToken");
@@ -1129,9 +1129,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    api.getId(), organization);
+                    apiTypeWrapper, organization);
             if (clientCertificateDTO != null) {
                 Object certificate = CertificateRestApiUtils
                         .getDecodedCertificate(clientCertificateDTO.getCertificate());
@@ -1165,11 +1165,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper.getId(), organization);
+                    apiTypeWrapper, organization);
             int responseCode = apiProvider
-                    .deleteClientCertificate(
-                            RestApiCommonUtil.getLoggedInUsername(), clientCertificateDTO.getApiIdentifier(),
-                            alias);
+                    .deleteClientCertificate(RestApiCommonUtil.getLoggedInUsername(), apiTypeWrapper, alias);
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
 
                 if (log.isDebugEnabled()) {
@@ -1201,9 +1199,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    api.getId(), organization);
+                    apiTypeWrapper, organization);
             CertificateInformationDTO certificateInformationDTO = certificateMgtUtils
                     .getCertificateInfo(clientCertificateDTO.getCertificate());
             if (certificateInformationDTO != null) {
@@ -1241,7 +1239,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper.getId(), organization);
+                    apiTypeWrapper, organization);
             if (certificateDetail != null) {
                 contentDisposition = certificateDetail.getContentDisposition();
                 fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
@@ -1253,7 +1251,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return Response.ok().entity("Client Certificate is not updated for alias " + alias).build();
             }
             int responseCode = apiProvider
-                    .updateClientCertificate(base64EncodedCert, alias, clientCertificateDTO.getApiIdentifier(), tier,
+                    .updateClientCertificate(base64EncodedCert, alias, apiTypeWrapper, tier,
                             tenantId, organization);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
@@ -1353,7 +1351,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider
-                    .addClientCertificate(userName, apiTypeWrapper.getId(), base64EncodedCert, alias, tier, organization);
+                    .addClientCertificate(userName, apiTypeWrapper, base64EncodedCert, alias, tier, organization);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
@@ -1901,8 +1899,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
-        APIIdentifier apiIdentifier = originalAPI.getId();
-        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, organization);
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
         Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
         List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
@@ -2702,7 +2699,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             api.setOrganization(organization);
-            String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
+            String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(apiId, api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
@@ -2898,23 +2895,25 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             if (query.contains(":")) {
                 String[] queryTokens = query.split(":");
                 switch (queryTokens[0]) {
                 case "name":
-                    isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1]) ||
-                            apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1]);
+                    isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1], organization) ||
+                            apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1], organization);
                     break;
                 case "context":
                 default: // API version validation.
-                    isSearchArtifactExists = apiProvider.isContextExist(queryTokens[1]);
+                    isSearchArtifactExists = apiProvider.isContextExist(queryTokens[1], organization);
                     break;
                 }
 
             } else { // consider the query as api name
                 isSearchArtifactExists =
-                        apiProvider.isApiNameExist(query) || apiProvider.isApiNameWithDifferentCaseExist(query);
+                        apiProvider.isApiNameExist(query, organization) ||
+                                apiProvider.isApiNameWithDifferentCaseExist(query, organization);
             }
         } catch(APIManagementException e){
             RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);
@@ -4644,6 +4643,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         // Import the API and Definition
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        // Add description from definition if it is not defined by user
+        if (validationResponseDTO.getInfo().getDescription() != null
+                && apiDTOFromProperties.getDescription() == null) {
+            apiDTOFromProperties.setDescription(validationResponse.getInfo().getDescription());
+        }
         if (isServiceAPI) {
             apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
         }

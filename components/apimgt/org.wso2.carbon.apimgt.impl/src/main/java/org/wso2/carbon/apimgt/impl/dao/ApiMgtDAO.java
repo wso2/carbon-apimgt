@@ -4140,6 +4140,8 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("APP_UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("APP_CREATED_TIME").getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(connection,application);
@@ -6014,6 +6016,8 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(connection, application);
@@ -6083,6 +6087,8 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
@@ -6134,6 +6140,14 @@ public class ApiMgtDAO {
                     application.setTier(rs.getString("APPLICATION_TIER"));
                     application.setTokenType(rs.getString("TOKEN_TYPE"));
                     subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                    if (rs.getTimestamp("CREATED_TIME") != null) {
+                        application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME")
+                                .getTime()));
+                    }
+                    if (rs.getTimestamp("UPDATED_TIME") != null) {
+                        application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME")
+                                .getTime()));
+                    }
 
                     if (multiGroupAppSharingEnabled) {
                         if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
@@ -6228,6 +6242,8 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
@@ -6298,6 +6314,8 @@ public class ApiMgtDAO {
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
                         application.setGroupId(getGroupId(connection, application.getId()));
@@ -7852,7 +7870,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public boolean isContextExist(String context) {
+    public boolean isContextExist(String context, String organization) {
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -7863,6 +7881,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, context);
+            prepStmt.setString(2, organization);
             resultSet = prepStmt.executeQuery();
 
             while (resultSet.next()) {
@@ -10003,7 +10022,8 @@ public class ApiMgtDAO {
      * @return true if the name is already available
      * @throws APIManagementException
      */
-    public boolean isApiNameExist(String apiName, String tenantDomain) throws APIManagementException {
+    public boolean isApiNameExist(String apiName, String tenantDomain, String organization)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -10021,7 +10041,8 @@ public class ApiMgtDAO {
 
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, apiName);
-            prepStmt.setString(2, contextParam + '%');
+            prepStmt.setString(2, organization);
+            prepStmt.setString(3, contextParam + '%');
             resultSet = prepStmt.executeQuery();
 
             int apiCount = 0;
@@ -10050,7 +10071,8 @@ public class ApiMgtDAO {
      * @return true if a different letter case name is already available
      * @throws APIManagementException If failed to check different letter case api name availability
      */
-    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain) throws APIManagementException {
+    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain, String organization)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -10070,6 +10092,7 @@ public class ApiMgtDAO {
             prepStmt.setString(1, apiName);
             prepStmt.setString(2, contextParam + '%');
             prepStmt.setString(3, apiName);
+            prepStmt.setString(4, organization);
             resultSet = prepStmt.executeQuery();
 
             int apiCount = 0;
@@ -13601,6 +13624,8 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setKeyType(rs.getString("KEY_TYPE"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
@@ -16311,6 +16336,36 @@ public class ApiMgtDAO {
                      .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID)) {
             statement.setString(1, apiUUID);
             statement.setInt(2, Integer.parseInt(revisionNum));
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revision UUID for Revision " + revisionNum, e);
+        }
+        return revisionUUID;
+    }
+
+    /**
+     * Get revision UUID providing revision number and organization
+     *
+     * @param revisionNum   Revision number
+     * @param apiUUID       UUID of the API
+     * @param organization  organization ID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getRevisionUUIDByOrganization(String revisionNum, String apiUUID, String organization) throws APIManagementException {
+
+        String revisionUUID = null;
+        String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID_BY_ORGANIZATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(sql)) {
+            statement.setString(1, apiUUID);
+            statement.setInt(2, Integer.parseInt(revisionNum));
+            statement.setString(3, organization);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     revisionUUID = rs.getString(1);

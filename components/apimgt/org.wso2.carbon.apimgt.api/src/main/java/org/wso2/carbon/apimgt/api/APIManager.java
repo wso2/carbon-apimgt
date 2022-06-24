@@ -120,29 +120,32 @@ public interface APIManager {
      * Checks whether the given API context is already registered in the system
      *
      * @param context A String representing an API context
+     * @param organization Organization
      * @return true if the context already exists and false otherwise
      * @throws APIManagementException if failed to check the context availability
      */
-    boolean isContextExist(String context) throws APIManagementException;
+    boolean isContextExist(String context, String organization) throws APIManagementException;
 
     /**
      * Checks whether the given API name is already registered in the system
      *
      * @param apiName A String representing an API name
+     * @param organization Organization
      * @return true if the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the api name availability
      */
-    boolean isApiNameExist(String apiName) throws APIManagementException;
+    boolean isApiNameExist(String apiName, String organization) throws APIManagementException;
 
 
     /**
      * Checks whether a different letter case of the given API name is already registered in the system
      *
      * @param apiName A String representing an API name
+     * @param organization Organization
      * @return true if a different letter case of the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the different letter case api name availability
      */
-    boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException;
+    boolean isApiNameWithDifferentCaseExist(String apiName, String organization) throws APIManagementException;
 
     /**
      * Returns a set of API versions for the given provider and API name
@@ -163,16 +166,6 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getGraphqlSchemaDefinition(String apiId, String orgId) throws APIManagementException;
-
-    /**
-     * Returns the swagger v2.0 definition as a string
-     *
-     * @param apiId  ID of the APIIdentifier
-     * @param organization  Identifier of an organization
-     * @return swagger string
-     * @throws APIManagementException
-     */
-    String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException;
 
     /**
      * Returns the OpenAPI definition as a string

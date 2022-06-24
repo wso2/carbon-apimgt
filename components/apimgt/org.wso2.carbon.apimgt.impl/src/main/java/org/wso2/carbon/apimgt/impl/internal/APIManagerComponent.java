@@ -325,7 +325,6 @@ public class APIManagerComponent {
 
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
-        org.wso2.carbon.apimgt.impl.utils.AuthorizationManager.getInstance().destroy();
     }
 
     @Reference(

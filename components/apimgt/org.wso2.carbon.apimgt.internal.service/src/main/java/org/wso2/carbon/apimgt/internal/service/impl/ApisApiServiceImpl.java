@@ -97,9 +97,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         List<String> revisionUUIDs = new ArrayList<>();
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
+            String organizationFromQueryParam = RestApiUtil.getOrganization(messageContext);
             // get revision uuid
             String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
                     deployedAPIRevisionDTO.getApiId());
+            if (StringUtils.isNotEmpty(organizationFromQueryParam) &&
+                    !organizationFromQueryParam.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM)) {
+                revisionUUID = apiProvider.getAPIRevisionUUIDByOrganization(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
+                        deployedAPIRevisionDTO.getApiId(), organizationFromQueryParam);
+            }
             if (revisionUUID == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }

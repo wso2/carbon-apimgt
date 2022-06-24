@@ -610,6 +610,8 @@ public final class APIConstants {
     public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "EnableAPIQuotaLimit";
     public static final String JWKS_URI = "jwksUri";
 
+    public static final String ORG_ALL_QUERY_PARAM = "ALL";
+
     public static class TokenStatus {
 
         public static final String ACTIVE = "ACTIVE";
