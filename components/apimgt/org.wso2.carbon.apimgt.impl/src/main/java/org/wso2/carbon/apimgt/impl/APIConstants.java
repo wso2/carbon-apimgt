@@ -150,7 +150,6 @@ public final class APIConstants {
     public static final String API_DOMAIN_MAPPINGS_CONTEXT = "context";
     public static final String API_DOMAIN_MAPPINGS_CUSTOM_URLS = "CustomUrls";
     public static final String API_DOMAIN_MAPPINGS_CUSTOM_URL = "customUrl";
-    public static final String API_DOMAIN_MAPPINGS_TENANT_DOMAIN = "tenantDomain";
     public static final String API_DOMAIN_MAPPINGS_DOMAIN = "domain";
     public static final String API_DOMAIN_MAPPINGS_LOGIN_CALLBACK = "login";
     public static final String API_DOMAIN_MAPPINGS_LOGOUT_CALLBACK = "logout";

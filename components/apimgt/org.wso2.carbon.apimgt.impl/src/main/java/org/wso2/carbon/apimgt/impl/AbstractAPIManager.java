@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.DomainMappingUtils;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
@@ -779,7 +780,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public Map<String, String> getTenantDomainMappings(String tenantDomain, String apiType) throws APIManagementException {
 
-        return APIUtil.getDomainMappings(tenantDomain, apiType);
+        return DomainMappingUtils.getDomainMappings(tenantDomain, apiType);
     }
 
     public boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String organization) throws APIManagementException {

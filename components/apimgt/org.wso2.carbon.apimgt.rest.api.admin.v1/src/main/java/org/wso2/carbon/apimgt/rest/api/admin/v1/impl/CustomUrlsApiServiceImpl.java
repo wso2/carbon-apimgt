@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.DomainMappingUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.CustomUrlsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDevPortalDTO;
@@ -48,7 +49,7 @@ public class CustomUrlsApiServiceImpl implements CustomUrlsApiService {
             CustomUrlInfoDTO customUrlInfoDTO = new CustomUrlInfoDTO();
             boolean perTenantServiceProviderEnabled = APIUtil.isPerTenantServiceProviderEnabled(tenantDomain);
             if (perTenantServiceProviderEnabled) {
-                Map tenantBasedStoreDomainMapping = APIUtil.getTenantBasedStoreDomainMapping(tenantDomain);
+                Map tenantBasedStoreDomainMapping = DomainMappingUtils.getTenantBasedStoreDomainMapping(tenantDomain);
                 if (tenantBasedStoreDomainMapping != null) {
                     CustomUrlInfoDevPortalDTO customUrlInfoDevPortalDTO = new CustomUrlInfoDevPortalDTO();
                     customUrlInfoDevPortalDTO.setUrl((String) tenantBasedStoreDomainMapping.get("customUrl"));

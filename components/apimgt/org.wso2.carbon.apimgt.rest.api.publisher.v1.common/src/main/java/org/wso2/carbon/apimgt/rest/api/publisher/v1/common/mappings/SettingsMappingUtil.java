@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.DomainMappingUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
@@ -65,8 +66,8 @@ public class SettingsMappingUtil {
             settingsDTO.setEnvironment(environmentListDTO.getList());
             String storeUrl = APIUtil.getStoreUrl();
             String loggedInUserTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            Map<String, String> domainMappings =
-                    APIUtil.getDomainMappings(loggedInUserTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_STORE);
+            Map<String, String> domainMappings = DomainMappingUtils.getDomainMappings(
+                    loggedInUserTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_STORE);
             if (domainMappings.size() != 0) {
                 Iterator entries = domainMappings.entrySet().iterator();
                 while (entries.hasNext()) {

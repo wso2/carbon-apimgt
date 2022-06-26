@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.DomainMappingUtils;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
@@ -604,7 +605,7 @@ public class AbstractAPIManagerTestCase {
         domainMappings.put("domain1", SAMPLE_TENANT_DOMAIN);
         domainMappings.put("domain2", SAMPLE_TENANT_DOMAIN);
         PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.getDomainMappings(Mockito.anyString(), Mockito.anyString())).thenReturn(domainMappings);
+        PowerMockito.when(DomainMappingUtils.getDomainMappings(Mockito.anyString(), Mockito.anyString())).thenReturn(domainMappings);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
         Assert.assertEquals(abstractAPIManager.getTenantDomainMappings(SAMPLE_TENANT_DOMAIN, "api").size(), 2);
     }
