@@ -36,13 +36,8 @@ import java.util.Iterator;
  */
 public class LogExporter implements SpanExporter {
 
-    private final Log log;
+    private final Log log = LogFactory.getLog(TelemetryConstants.TRACER);
     private final JsonFactory jsonFactory = new JsonFactory();
-
-    public LogExporter() {
-
-        this.log = LogFactory.getLog(TelemetryConstants.TRACER);
-    }
 
     public static LogExporter create() {
 
@@ -53,12 +48,10 @@ public class LogExporter implements SpanExporter {
     public CompletableResultCode export(Collection<SpanData> spans) {
 
         Iterator var3 = spans.iterator();
-        StringWriter writer;
-        JsonGenerator generator;
         while (var3.hasNext()) {
             try {
-                writer = new StringWriter();
-                generator = this.jsonFactory.createGenerator(writer);
+                StringWriter writer = new StringWriter();
+                JsonGenerator generator = this.jsonFactory.createGenerator(writer);
                 generator.writeStartObject();
                 SpanData span = (SpanData) var3.next();
                 generator.writeStringField(TelemetryConstants.SPAN_ID, span.getSpanId());
