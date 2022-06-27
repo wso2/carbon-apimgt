@@ -867,20 +867,13 @@
       "type": "object",
       "default": {},
       "title": "The CustomUrls Schema",
-      "required": [
-        "publisher",
-        "devportal",
-        "gateway"
-      ],
+      "required": [],
       "properties": {
         "publisher": {
           "type": "object",
           "default": {},
           "title": "The publisher Schema",
-          "required": [
-            "context",
-            "domain"
-          ],
+          "required": [],
           "properties": {
             "context": {
               "type": "string",
@@ -908,10 +901,7 @@
           "type": "object",
           "default": {},
           "title": "The devportal Schema",
-          "required": [
-            "context",
-            "domain"
-          ],
+          "required": [],
           "properties": {
             "context": {
               "type": "string",
@@ -939,10 +929,7 @@
           "type": "object",
           "default": {},
           "title": "The gateway Schema",
-          "required": [
-            "context",
-            "domain"
-          ],
+          "required": [],
           "properties": {
             "context": {
               "type": "string",

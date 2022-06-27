@@ -13,6 +13,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getTenantConfig;
 
 public class DomainMappingUtils {
     private static final Log log = LogFactory.getLog(APIUtil.class);
+
     /**
      * Returns a map of publisher / gateway / store domains for the tenant
      *
@@ -46,7 +47,6 @@ public class DomainMappingUtils {
         }
         return domains;
     }
-
 
     public static String getTenantBasedDevPortalContext(String tenantDomain) throws APIManagementException {
 
