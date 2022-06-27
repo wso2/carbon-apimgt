@@ -17,9 +17,11 @@ package org.wso2.carbon.apimgt.solace.notifiers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -36,6 +38,7 @@ import org.wso2.carbon.context.CarbonContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -67,7 +70,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
 
 
         if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
-            crateSubscription(subscriptionEvent);
+            createSubscription(subscriptionEvent);
         } else if (APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name().equals(event.getType())) {
             updateSubscription(subscriptionEvent);
         } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
@@ -81,7 +84,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @param event SubscriptionEvent to create Solace API subscriptions
      * @throws NotifierException if error occurs when creating subscription for Solace APIs
      */
-    private void crateSubscription(SubscriptionEvent event) throws NotifierException {
+    private void createSubscription(SubscriptionEvent event) throws NotifierException {
 
         String apiUUID = event.getApiUUID();
         String applicationUUID = event.getApplicationUUID();
@@ -90,41 +93,25 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
-            Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
 
-            //Check whether the subscription is belongs to an API deployed in Solace
-            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
-                ArrayList<String> solaceApiProducts = new ArrayList<>();
-                List<Environment> deployedSolaceEnvironments = SolaceNotifierUtils.
-                        getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
-                String applicationOrganizationName = SolaceNotifierUtils.getSolaceOrganizationName
-                        (deployedSolaceEnvironments);
-                if (applicationOrganizationName != null) {
-                    try {
-                        boolean apiProductDeployedIntoSolace = SolaceNotifierUtils.
-                                checkApiProductAlreadyDeployedIntoSolaceEnvironments(api, deployedSolaceEnvironments);
-                        if (apiProductDeployedIntoSolace) {
-                            for (Environment environment : deployedSolaceEnvironments) {
-                                solaceApiProducts.add(SolaceNotifierUtils.generateApiProductNameForSolaceBroker
-                                        (api, environment.getName()));
-                            }
-                            SolaceNotifierUtils.deployApplicationToSolaceBroker(application, solaceApiProducts,
-                                    applicationOrganizationName);
-                        }
-                    } catch (IOException e) {
-                        log.error(e.getMessage());
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.error("Cannot create solace application " + application.getName() + "with API product "
-                                + "deployed in different organizations...");
-                    }
-                    throw new APIManagementException("Cannot create solace application " + application.getName() +
-                            "with API product deployed in different organizations...");
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
+            Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
+            Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
+            for (APIKey apiKey : consumerKeys) {
+                if (SolaceConstants.OAUTH_CLIENT_PRODUCTION.equals(apiKey.getType())) {
+                    application.addKey(apiKey);
                 }
             }
+            // Send only the production keys to Solace broker.
+            if (application.getKeys().isEmpty()) {
+                return;
+            }
+            deployApplication(api, application);
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("Error while creating application solace Broker " + e.getMessage());
+        }  catch (IOException e) {
+            throw new NotifierException("I/O Error while creating application solace Broker " + e.getMessage());
         }
     }
 
@@ -142,41 +129,25 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
-            Application application = apiProvider.getApplicationByUUID(applicationUUID);
 
-            //Check whether the subscription is belongs to an API deployed in Solace
-            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
-                ArrayList<String> solaceApiProducts = new ArrayList<>();
-                List<Environment> deployedSolaceEnvironments =
-                        SolaceNotifierUtils.getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
-                String applicationOrganizationName = SolaceNotifierUtils.getSolaceOrganizationName
-                        (deployedSolaceEnvironments);
-                if (applicationOrganizationName != null) {
-                    try {
-                        boolean apiProductDeployedIntoSolace = SolaceNotifierUtils.
-                                checkApiProductAlreadyDeployedIntoSolaceEnvironments(api, deployedSolaceEnvironments);
-                        if (apiProductDeployedIntoSolace) {
-                            for (Environment environment : deployedSolaceEnvironments) {
-                                solaceApiProducts.add(SolaceNotifierUtils.generateApiProductNameForSolaceBroker
-                                        (api, environment.getName()));
-                            }
-                            SolaceNotifierUtils.deployApplicationToSolaceBroker(application, solaceApiProducts,
-                                    applicationOrganizationName);
-                        }
-                    } catch (IOException e) {
-                        log.error(e.getMessage());
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.error("Cannot create solace application " + application.getName() + "with API product "
-                                + "deployed in different organizations...");
-                    }
-                    throw new APIManagementException("Cannot create solace application " + application.getName() +
-                            "with API product deployed in different organizations...");
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
+            Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
+            Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
+            for (APIKey apiKey : consumerKeys) {
+                if (SolaceConstants.OAUTH_CLIENT_PRODUCTION.equals(apiKey.getType())) {
+                    application.addKey(apiKey);
                 }
             }
+            // Send only the production keys to Solace broker.
+            if (application.getKeys().isEmpty()) {
+                return;
+            }
+            deployApplication(api, application);
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("Error while updating application solace Broker " + e.getMessage());
+        }  catch (IOException e) {
+            throw new NotifierException("I/O Error while updating application solace Broker " + e.getMessage());
         }
     }
 
@@ -201,7 +172,57 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                 SolaceNotifierUtils.unsubscribeAPIProductFromSolaceApplication(api, application);
             }
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("Error while removing application solace Broker " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Deploy the application to solace Broker
+     *
+     * @param api Subscribed API of the application
+     * @param application Application which needs to be created/updated in solace broker
+     * @throws APIManagementException if error occurs when creating subscriptions from Solace APIs
+     */
+    public void deployApplication(API api, Application application) throws APIManagementException, IOException {
+        try {
+            //Check whether the subscription belong to an API deployed in Solace
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
+                ArrayList<String> solaceApiProducts = new ArrayList<>();
+                List<Environment> deployedSolaceEnvironments =
+                        SolaceNotifierUtils.getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
+                String applicationOrganizationName = SolaceNotifierUtils.getSolaceOrganizationName
+                        (deployedSolaceEnvironments);
+                if (applicationOrganizationName != null) {
+                    boolean apiProductDeployedIntoSolace = SolaceNotifierUtils.
+                            checkApiProductAlreadyDeployedIntoSolaceEnvironments(api, deployedSolaceEnvironments);
+                    if (apiProductDeployedIntoSolace) {
+                        for (Environment environment : deployedSolaceEnvironments) {
+                            solaceApiProducts.add(SolaceNotifierUtils.generateApiProductNameForSolaceBroker
+                                    (api, environment.getName()));
+                        }
+                        SolaceNotifierUtils.deployApplicationToSolaceBroker(application, solaceApiProducts,
+                                applicationOrganizationName);
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.error("Cannot create solace application " + application.getName() + "with API product "
+                                + "deployed in different organizations...");
+                    }
+                    throw new APIManagementException("Cannot create solace application " + application.getName() +
+                            "with API product deployed in different organizations...");
+                }
+            }
+        } catch (APIManagementException e) {
+            if (log.isDebugEnabled()) {
+                log.error("Error while creating application solace Broker" + e.getMessage());
+            }
+            throw new APIManagementException("I/O Error while creating application solace Broker" + e.getMessage());
+        }  catch (IOException e) {
+            if (log.isDebugEnabled()) {
+                log.error("I/O Error while creating application solace Broker" + e.getMessage());
+            }
+            throw new IOException("I/O Error while creating application solace Broker" + e.getMessage());
         }
     }
 

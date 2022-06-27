@@ -50,7 +50,6 @@ public class WebSocketApiConstants {
         public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
         public static final String ERROR_CODE = "code";
         public static final String ERROR_MESSAGE = "message";
-
     }
 
     //Constants for Websocket handshake error codes and messages

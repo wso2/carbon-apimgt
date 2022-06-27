@@ -1,0 +1,92 @@
+{
+  "paths": {
+    "/*": {
+      "get": {
+        "x-auth-type": "Application",
+        "x-throttling-tier": "Unlimited",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "responsesObject": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "x-auth-type": "Application User",
+        "x-throttling-tier": "Unlimited",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "responsesObject": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "x-auth-type": "None",
+        "x-throttling-tier": "Unlimited",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "responsesObject": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "x-throttling-tier": "Unlimited",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "responsesObject": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/abc": {
+      "get": {
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "responsesObject": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "x-wso2-security": {
+    "apim": {
+      "x-wso2-scopes": []
+    }
+  },
+  "swagger": "2.0",
+  "info": {
+    "title": "PhoneVerification",
+    "description": "Verify a phone number",
+    "contact": {
+      "email": "xx@ee.com",
+      "name": "xx"
+    },
+    "version": "1.0.0"
+  }
+}

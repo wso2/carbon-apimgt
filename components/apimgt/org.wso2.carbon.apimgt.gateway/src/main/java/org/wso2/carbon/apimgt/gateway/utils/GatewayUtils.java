@@ -72,6 +72,9 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
@@ -553,12 +556,14 @@ public class GatewayUtils {
         authContext.setApiKey(jti);
         authContext.setUsername(getEndUserFromJWTValidationInfo(jwtValidationInfo, apiKeyValidationInfoDTO));
         authContext.setRequestTokenScopes(jwtValidationInfo.getScopes());
+        authContext.setAccessToken(jwtValidationInfo.getRawPayload());
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
             authContext.setKeyType(apiKeyValidationInfoDTO.getType());
             authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
             authContext.setApplicationUUID(apiKeyValidationInfoDTO.getApplicationUUID());
+            authContext.setApplicationGroupIds(apiKeyValidationInfoDTO.getApplicationGroupIds());
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
@@ -1076,7 +1081,9 @@ public class GatewayUtils {
         return jwtInfoDto;
     }
 
+    //for OpenTracing
     public static void setAPIRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
+
         API api = GatewayUtils.getAPI(messageContext);
         Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         if (electedResource != null) {
@@ -1088,11 +1095,33 @@ public class GatewayUtils {
         }
         Object consumerKey = messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
         if (consumerKey != null) {
-            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY, (String) consumerKey);
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY,
+                    (String) consumerKey);
         }
     }
 
+    //for OpenTelemetry
+    public static void setAPIRelatedTags(TelemetrySpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
+
+        API api = GatewayUtils.getAPI(messageContext);
+        Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        if (electedResource != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, (String) electedResource);
+        }
+        if (api != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, api.getApiName());
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_VERSION, api.getApiVersion());
+        }
+        Object consumerKey = messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
+        if (consumerKey != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY,
+                    (String) consumerKey);
+        }
+    }
+
+    //for OpenTracing
     public static void setAPIResource(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
+
         Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
@@ -1103,13 +1132,32 @@ public class GatewayUtils {
         if (electedResource instanceof String && StringUtils.isNotEmpty((String) electedResource)) {
             Util.updateOperation(tracingSpan, (httpMethod.toUpperCase().concat("--").concat((String) electedResource)));
         }
+
     }
 
+    //for OpenTelemetry
+    public static void setAPIResource(TelemetrySpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
 
+        Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        String httpMethod = (String) axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD);
+        if (StringUtils.isEmpty(httpMethod)) {
+            httpMethod = (String) messageContext.getProperty(RESTConstants.REST_METHOD);
+        }
+        if (electedResource instanceof String && StringUtils.isNotEmpty((String) electedResource)) {
+            TelemetryUtil.updateOperation(tracingSpan,
+                    (httpMethod.toUpperCase().concat("--").concat((String) electedResource)));
+        }
+
+    }
+
+    //for OpenTracing
     private static void setTracingId(TracingSpan tracingSpan, MessageContext axis2MessageContext) {
 
         Map headersMap =
                 (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
         if (headersMap.containsKey(APIConstants.ACTIVITY_ID)) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ACTIVITY_ID,
                     (String) headersMap.get(APIConstants.ACTIVITY_ID));
@@ -1118,6 +1166,22 @@ public class GatewayUtils {
         }
     }
 
+    //for OpenTelemetry
+    private static void setTracingId(TelemetrySpan tracingSpan, MessageContext axis2MessageContext) {
+
+        Map headersMap =
+                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+        if (headersMap.containsKey(APIConstants.ACTIVITY_ID)) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ACTIVITY_ID,
+                    (String) headersMap.get(APIConstants.ACTIVITY_ID));
+        } else {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ACTIVITY_ID,
+                    axis2MessageContext.getMessageID());
+        }
+    }
+
+    //for OpenTracing
     public static void setRequestRelatedTags(TracingSpan tracingSpan,
                                              org.apache.synapse.MessageContext messageContext) {
 
@@ -1126,20 +1190,52 @@ public class GatewayUtils {
         Object restUrlPostfix = axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX);
         String httpMethod = (String) (axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD));
         if (restUrlPostfix != null) {
-            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_PATH, (String) restUrlPostfix);
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_PATH,
+                    (String) restUrlPostfix);
         }
         if (httpMethod != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_METHOD, httpMethod);
         }
         setTracingId(tracingSpan, axis2MessageContext);
+
     }
 
+    //for OpenTelemetry
+    public static void setRequestRelatedTags(TelemetrySpan tracingSpan,
+                                             org.apache.synapse.MessageContext messageContext) {
+
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Object restUrlPostfix = axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX);
+        String httpMethod = (String) (axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD));
+        if (restUrlPostfix != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_PATH,
+                    (String) restUrlPostfix);
+        }
+        if (httpMethod != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_METHOD, httpMethod);
+        }
+        setTracingId(tracingSpan, axis2MessageContext);
+
+    }
+
+    //for OpenTracing
     public static void setEndpointRelatedInformation(TracingSpan tracingSpan,
                                                      org.apache.synapse.MessageContext messageContext) {
 
         Object endpoint = messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
         if (endpoint != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
+        }
+    }
+
+    //for OpenTelemetry
+    public static void setEndpointRelatedInformation(TelemetrySpan tracingSpan,
+                                                     org.apache.synapse.MessageContext messageContext) {
+
+        Object endpoint = messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpoint != null) {
+            TelemetryUtil.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
         }
     }
 
@@ -1339,7 +1435,8 @@ public class GatewayUtils {
         if (tokenTypeClaim != null) {
             return APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
         }
-        return jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null;
+        return jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null
+                && jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY) == null;
     }
 
     public static boolean isInternalKey(JWTClaimsSet jwtClaimsSet) {

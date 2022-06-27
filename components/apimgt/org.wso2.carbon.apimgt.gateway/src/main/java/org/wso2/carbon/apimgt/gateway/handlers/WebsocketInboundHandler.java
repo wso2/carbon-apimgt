@@ -37,11 +37,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.SynapseConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
@@ -52,6 +53,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is a handler which is actually embedded to the netty pipeline which does operations such as
@@ -86,12 +89,22 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         String channelId = ctx.channel().id().asLongText();
+
+        // This block is for the health check of the ports 8099 and 9099
+        if (msg instanceof FullHttpRequest && ((FullHttpRequest) msg).headers() != null
+                && !((FullHttpRequest) msg).headers().contains(HttpHeaders.UPGRADE)
+                && ((FullHttpRequest) msg).uri().equals(APIConstants.WEB_SOCKET_HEALTH_CHECK_PATH)) {
+            ctx.fireChannelRead(msg);
+            return;
+        }
+
         InboundMessageContext inboundMessageContext;
         if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
             inboundMessageContext = InboundMessageContextDataHolder.getInstance()
                     .getInboundMessageContextForConnectionId(channelId);
         } else {
             inboundMessageContext = new InboundMessageContext();
+            inboundMessageContext.setCtx(ctx);
             InboundMessageContextDataHolder.getInstance()
                     .addInboundMessageContextForConnection(channelId, inboundMessageContext);
         }
@@ -108,6 +121,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
             populateContextHeaders(req, inboundMessageContext);
+            validateCorsHeaders(ctx, req);
+
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
             if (!responseDTO.isError()) {
@@ -144,18 +159,14 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                         log.debug("Error while handling Outbound Websocket frame. Closing connection for "
                                 + ctx.channel().toString());
                     }
+                    handlePublishFrameErrorEvent(ctx, responseDTO);
                     ctx.writeAndFlush(new CloseWebSocketFrame(responseDTO.getErrorCode(),
                             responseDTO.getErrorMessage() + StringUtils.SPACE + "Connection closed" + "!"));
                     ctx.close();
                 } else {
                     String errorMessage = responseDTO.getErrorResponseString();
                     ctx.writeAndFlush(new TextWebSocketFrame(errorMessage));
-                    if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Inbound Websocket frame is throttled. " + ctx.channel().toString());
-                        }
-                        publishPublishThrottledEvent(ctx);
-                    }
+                    handlePublishFrameErrorEvent(ctx, responseDTO);
                 }
             } else {
                 if (log.isDebugEnabled()) {
@@ -166,6 +177,27 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 publishPublishEvent(ctx);
             }
         }
+    }
+
+    private void handlePublishFrameErrorEvent(ChannelHandlerContext ctx, InboundProcessorResponseDTO responseDTO) {
+        if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR
+                || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX
+                || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP) {
+            if (log.isDebugEnabled()) {
+                log.debug("Inbound WebSocket frame is throttled. " + ctx.channel().toString());
+            }
+        } else if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR
+                || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS
+                || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR) {
+            if (log.isDebugEnabled()) {
+                log.debug("Inbound WebSocket frame failed due to auth error. " + ctx.channel().toString());
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Unclassified error in Inbound WebSocket frame. " + ctx.channel().toString());
+            }
+        }
+        publishPublishFrameErrorEvent(ctx, responseDTO);
     }
 
     /**
@@ -182,9 +214,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
     }
 
-    private void publishPublishThrottledEvent(ChannelHandlerContext ctx) {
+    private void publishPublishFrameErrorEvent(ChannelHandlerContext ctx, InboundProcessorResponseDTO responseDTO) {
         if (APIUtil.isAnalyticsEnabled()) {
-            addThrottledErrorPropertiesToChannel(ctx);
+            addErrorPropertiesToChannel(ctx, responseDTO);
             metricsHandler.handlePublish(ctx);
             removeErrorPropertiesFromChannel(ctx);
         }
@@ -199,10 +231,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_MESSAGE);
     }
 
-    private void addThrottledErrorPropertiesToChannel(ChannelHandlerContext ctx) {
-        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
-                APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE);
-        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, "Message Throttled Out");
+    private void addErrorPropertiesToChannel(ChannelHandlerContext ctx, InboundProcessorResponseDTO responseDTO) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE, responseDTO.getErrorCode());
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, responseDTO.getErrorMessage());
     }
 
     private void populateContextHeaders(FullHttpRequest request, InboundMessageContext inboundMessageContext) {
@@ -235,5 +266,43 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     inboundMessageContext.getMatchingResource());
             metricsHandler.handleHandshake(ctx);
         }
+    }
+
+    private void validateCorsHeaders(ChannelHandlerContext ctx, FullHttpRequest req) throws APISecurityException {
+        // Current implementation supports validating only the 'origin' header
+
+        if (!APIUtil.isCORSValidationEnabledForWS()) {
+            return;
+        }
+        String requestOrigin = req.headers().get(HttpHeaderNames.ORIGIN);
+        String allowedOrigin = assessAndGetAllowedOrigin(requestOrigin);
+        if (allowedOrigin == null) {
+            FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
+            ctx.writeAndFlush(httpResponse);
+            ctx.close();
+            log.warn("Validation of CORS origin header failed for WS request on: " + req.uri());
+            throw new APISecurityException(APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED,
+                    APISecurityConstants.CORS_ORIGIN_HEADER_VALIDATION_FAILED_MESSAGE);
+        }
+    }
+
+    private String assessAndGetAllowedOrigin(String origin) {
+
+        if (WebsocketUtil.allowedOriginsConfigured.contains("*")) {
+            return "*";
+        } else if (WebsocketUtil.allowedOriginsConfigured.contains(origin)) {
+            return origin;
+        } else if (origin != null) {
+            for (String allowedOrigin : WebsocketUtil.allowedOriginsConfigured) {
+                if (allowedOrigin.contains("*")) {
+                    Pattern pattern = Pattern.compile(allowedOrigin.replace("*", ".*"));
+                    Matcher matcher = pattern.matcher(origin);
+                    if (matcher.find()) {
+                        return origin;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

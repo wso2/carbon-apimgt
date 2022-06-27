@@ -1362,10 +1362,16 @@ public class RestApiUtil {
             APIDefinition oasParser = OASParserUtil.getOASParser(definition);
             Set<Scope> scopeSet = oasParser.getScopes(definition);
             for (Scope entry : scopeSet) {
-                List <String> list = new ArrayList<>();
+                List<String> list = new ArrayList<>();
                 list.add(entry.getDescription());
-                list.add((fileName.replaceAll("-api.yaml", "").replace("/","")));
-                portalScopeList.put(entry.getName(), list);
+                list.add((fileName.replaceAll("-api.yaml", "").replace("/", "")));
+                if (("/service-catalog-api.yaml".equals(fileName))) {
+                    if (!entry.getKey().contains("apim:api_view")) {
+                        portalScopeList.put(entry.getName(), list);
+                    }
+                } else {
+                    portalScopeList.put(entry.getName(), list);
+                }
             }
         }
         return portalScopeList;
@@ -1413,6 +1419,22 @@ public class RestApiUtil {
         if (organization == null) {
             throw new APIManagementException(
                     "Organization is not found in the request", ExceptionCodes.ORGANIZATION_NOT_FOUND);
+        }
+        return organization;
+    }
+
+
+    /**
+     * Method to extract the validated organization
+     * @param ctx MessageContext
+     * @return organization
+     */
+
+    public static String getValidatedSubjectOrganization(MessageContext ctx) throws APIManagementException{
+        String organization = (String) ctx.get(RestApiConstants.SUB_ORGANIZATION);
+        if (organization == null) {
+            throw new APIManagementException(
+                    "User's organization is not identified", ExceptionCodes.SUB_ORGANIZATION_NOT_IDENTIFIED);
         }
         return organization;
     }

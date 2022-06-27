@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -71,7 +72,7 @@ public class CertificateMgtDAO {
     }
 
 
-    private boolean addClientCertificate(Connection connection, String certificate, APIIdentifier apiIdentifier,
+    private boolean addClientCertificate(Connection connection, String certificate, Identifier apiIdentifier,
                                          String alias, String tierName,
                                          int tenantId, String organization) throws SQLException {
 
@@ -245,7 +246,7 @@ public class CertificateMgtDAO {
      * @param organization  : Organization
      * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
      */
-    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias, Identifier apiIdentifier,
             String organization) throws CertificateManagementException {
 
         Connection connection = null;
@@ -302,7 +303,7 @@ public class CertificateMgtDAO {
                     apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                 }
-                clientCertificateDTO.setApiIdentifier(apiIdentifier);
+                clientCertificateDTO.setApiIdentifier((APIIdentifier) apiIdentifier);
                 clientCertificateDTOS.add(clientCertificateDTO);
             }
         } catch (SQLException e) {
@@ -520,7 +521,7 @@ public class CertificateMgtDAO {
      * @param tenantId      : The Id of the tenant who owns the certificate.
      * @return : true if certificate deletion is successful, false otherwise.
      */
-    private boolean deleteClientCertificate(Connection connection, APIIdentifier apiIdentifier, String alias,
+    private boolean deleteClientCertificate(Connection connection, Identifier apiIdentifier, String alias,
                                             int tenantId) throws SQLException {
 
         boolean result;
@@ -560,7 +561,7 @@ public class CertificateMgtDAO {
         return result;
     }
 
-    public boolean deleteClientCertificate(APIIdentifier apiIdentifier, String alias, int tenantId)
+    public boolean deleteClientCertificate(Identifier apiIdentifier, String alias, int tenantId)
             throws CertificateManagementException {
 
         boolean result = false;
@@ -710,7 +711,7 @@ public class CertificateMgtDAO {
      * @return : True if the information is added successfully, false otherwise.
      * @throws CertificateManagementException if existing entry is found for the given endpoint or alias.
      */
-    public boolean addClientCertificate(String certificate, APIIdentifier apiIdentifier, String alias, String tierName,
+    public boolean addClientCertificate(String certificate, Identifier apiIdentifier, String alias, String tierName,
                                         int tenantId, String organization) throws CertificateManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {

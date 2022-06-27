@@ -64,14 +64,6 @@ public interface APIManager {
      */
     List<API> getAllAPIs() throws APIManagementException;
 
-    /**
-     * Returns details of an API
-     * @param uuid   UUID of the API's registry artifact
-     * @param organization  Identifier of an organization
-     * @return An API object related to the given artifact id or null
-     * @throws APIManagementException if failed get API from APIIdentifier
-     */
-    API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
 
     /**
@@ -128,29 +120,32 @@ public interface APIManager {
      * Checks whether the given API context is already registered in the system
      *
      * @param context A String representing an API context
+     * @param organization Organization
      * @return true if the context already exists and false otherwise
      * @throws APIManagementException if failed to check the context availability
      */
-    boolean isContextExist(String context) throws APIManagementException;
+    boolean isContextExist(String context, String organization) throws APIManagementException;
 
     /**
      * Checks whether the given API name is already registered in the system
      *
      * @param apiName A String representing an API name
+     * @param organization Organization
      * @return true if the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the api name availability
      */
-    boolean isApiNameExist(String apiName) throws APIManagementException;
+    boolean isApiNameExist(String apiName, String organization) throws APIManagementException;
 
 
     /**
      * Checks whether a different letter case of the given API name is already registered in the system
      *
      * @param apiName A String representing an API name
+     * @param organization Organization
      * @return true if a different letter case of the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the different letter case api name availability
      */
-    boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException;
+    boolean isApiNameWithDifferentCaseExist(String apiName, String organization) throws APIManagementException;
 
     /**
      * Returns a set of API versions for the given provider and API name
@@ -163,8 +158,6 @@ public interface APIManager {
      */
     Set<String> getAPIVersions(String providerName, String apiName, String organization) throws APIManagementException;
 
-    String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
-
     /**
      * Get graphql schema definition
      * @param apiId  ID of the API
@@ -173,16 +166,6 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getGraphqlSchemaDefinition(String apiId, String orgId) throws APIManagementException;
-
-    /**
-     * Returns the swagger v2.0 definition as a string
-     *
-     * @param apiId  ID of the APIIdentifier
-     * @param organization  Identifier of an organization
-     * @return swagger string
-     * @throws APIManagementException
-     */
-    String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException;
 
     /**
      * Returns the OpenAPI definition as a string
@@ -205,35 +188,6 @@ public interface APIManager {
     String getAsyncAPIDefinition(String apiId, String organization) throws APIManagementException;
 
     /**
-     * Checks whether the given document already exists for the given api/product
-     *
-     * @param identifier API/Product id
-     * @param docName    Name of the document
-     * @return true if document already exists for the given api/product
-     * @throws APIManagementException if failed to check existence of the documentation
-     */
-    boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException;
-
-    /**
-     * Returns a list of documentation attached to a particular API/API Product
-     *
-     * @param id Identifier
-     * @return List<Documentation>
-     * @throws APIManagementException if failed to get Documentations
-     */
-    List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException;
-
-    /**
-     * Returns a list of documentation attached to a particular API
-     *
-     * @param apiId APIIdentifier
-     * @return List<Documentation>
-     * @throws APIManagementException if failed to get Documentations
-     */
-    List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUserName)
-            throws APIManagementException;
-
-    /**
      * Returns a list of documentation attached to a particular API
      *
      * @param uuid id of the api
@@ -242,16 +196,6 @@ public interface APIManager {
      * @throws APIManagementException if failed to get Documentations
      */
     List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException;
-    /**
-     * Returns the specified document attached to the given API
-     *
-     * @param apiId   APIIdentifier
-     * @param docType type of the documentation
-     * @param docName name of the doc
-     * @return Documentation
-     * @throws APIManagementException if failed to get Documentation
-     */
-    Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType, String docName) throws APIManagementException;
 
     /**
      * Get a documentation by artifact Id
@@ -276,16 +220,6 @@ public interface APIManager {
      */
     DocumentationContent getDocumentationContent(String apiId, String docId, String organization)
             throws APIManagementException;
-
-    /**
-     * This method used to get the content of a documentation
-     *
-     * @param identifier        API/Product identifier
-     * @param documentationName name of the inline documentation
-     * @return if failed to get doc content
-     * @throws APIManagementException if the asking documentation content is unavailable
-     */
-    String getDocumentationContent(Identifier identifier, String documentationName) throws APIManagementException;
 
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
@@ -351,26 +285,6 @@ public interface APIManager {
      * @throws APIManagementException if failed to get Subscriber
      */
     Subscriber getSubscriber(int subscriberId) throws APIManagementException;
-
-    /**
-     * Associates the given icon image with the specified path.
-     * @param identifier ID representing the API
-     * @param resourcePath a String representing the relative path of a resource.
-     * @param resourceFile to be saved
-     * @return a String URL pointing to the image that was added
-     * @throws APIManagementException if an error occurs while adding the icon image
-     */
-    String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
-            throws APIManagementException;
-
-    /**
-     * Retrieves the icon image associated with a particular API as a stream.
-     *
-     * @param identifier ID representing the API
-     * @return an Icon containing image content and content type information
-     * @throws APIManagementException if an error occurs while retrieving the image
-     */
-    ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Retrieves the icon image associated with a particular API as a stream.
@@ -525,118 +439,6 @@ public interface APIManager {
      */
     Policy[] getPolicies(String username, String level) throws APIManagementException;
 
-    /**
-     * Returns API Search result based on the provided query. This search method supports '&' based concatenate
-     * search in multiple fields.
-     *
-     * @param searchQuery     search query. Ex: provider=*admin*&version=*1*
-     * @param tenantDomain    tenant domain
-     * @param start           starting number
-     * @param end             ending number
-     * @param limitAttributes whether or not to limit attributes in the search result
-     * @return API result
-     * @throws APIManagementException if search is failed
-     */
-    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end,
-                                           boolean limitAttributes) throws APIManagementException;
-
-    /**
-     * Returns API Search result based on the provided query. This search method supports '&' based concatenate
-     * search in multiple fields.
-     *
-     * @param searchQuery     search query. Ex: provider=*admin*&version=*1*
-     * @param orgId           Identifier of an organization
-     * @param start           starting number
-     * @param end             ending number
-     * @param limitAttributes whether or not to limit attributes in the search result
-     * @param isPublisherListing whether publisher listing or not
-     * @return API result
-     * @throws APIManagementException if search is failed
-     */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end,
-                                            boolean limitAttributes, boolean isPublisherListing) throws APIManagementException;
-
-    /**
-     * fetches the lastUpdated timestamp for the API swagger resource
-     *
-     * @param apiIdentifier
-     * @return long
-     * @throws APIManagementException
-     */
-    Map<String, String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException;
-
-    /**
-     * gets the updated timestamp for the API swagger resource
-     *
-     * @param apiIdentifier
-     * @return long
-     * @throws APIManagementException
-     */
-    String getThumbnailLastUpdatedTime(APIIdentifier apiIdentifier) throws APIManagementException;
-
-    /**
-     * Returns list of global mediation policies
-     *
-     * @return list of Mediation objects related to the given identifier or null
-     * @throws APIManagementException if failed to get global mediation policies
-     */
-    List<Mediation> getAllGlobalMediationPolicies() throws APIManagementException;
-
-    /**
-     * Delete existing global mediation policy
-     *
-     * @param mediationPolicyId uuid of the global mediation policy
-     * @return True is deletion successful
-     * @throws APIManagementException If failed to delete mediation policy
-     */
-    boolean deleteGlobalMediationPolicy(String mediationPolicyId) throws APIManagementException;
-
-
-    /**
-     * Return mediation specify by identifier
-     *
-     * @param mediationPolicyId uuid of the mediation policy resource
-     * @return A Mediation object related to the given identifier or null
-     * @throws APIManagementException If failed to get specified mediation policy
-     */
-    Mediation getGlobalMediationPolicy(String mediationPolicyId) throws APIManagementException;
-
-    /**
-     * Return the uuid of the mediation policy in given registry path
-     *
-     * @param mediationPolicyPath path to the registry resource
-     * @return uuid of the resource
-     */
-    String getCreatedResourceUuid(String mediationPolicyPath);
-
-    /**
-     * Returns registry resource specify by the mediation identifier
-     *
-     * @param mediationPolicyId uuid of the resource
-     * @return Registry resource correspond to identifier or null
-     */
-    Resource getCustomMediationResourceFromUuid(String mediationPolicyId) throws APIManagementException;
-
-    /**
-     * Returns Registry resource matching given mediation policy identifier
-     * @param identifier ID representing the API
-     * @param uuid         mediation policy identifier
-     * @param resourcePath registry path to the API resource
-     * @return Registry resource matches given identifier or null
-     * @throws APIManagementException If fails to get the resource matching given identifier
-     */
-    Resource getApiSpecificMediationResourceFromUuid(Identifier identifier, String uuid, String resourcePath)
-            throws APIManagementException;
-
-    /**
-     * Returns list of API specific mediation policies
-     *
-     * @param apiIdentifier API identifier
-     * @return list of mediation policy objects or null
-     * @throws APIManagementException If unable to return satisfied mediation object list
-     */
-    List<Mediation> getAllApiSpecificMediationPolicies(APIIdentifier apiIdentifier)
-            throws APIManagementException;
 
     /**
      * Returns the mediation policy name specify inside mediation config
@@ -645,34 +447,6 @@ public interface APIManager {
      * @return name of the mediation policy or null
      */
     String getMediationNameFromConfig(String config);
-
-    /**
-     * Returns API specific mediation policy specified by the identifier
-     * @param identifier ID representing the API
-     * @param apiResourcePath   registry path to the API resource
-     * @param mediationPolicyId mediation policy identifier
-     * @return Mediation object of given identifier or null
-     */
-    Mediation getApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath, String mediationPolicyId)
-            throws APIManagementException;
-
-    /**
-     * Delete a API specific mediation policy identified by the identifier
-     *
-     * @param apiResourcePath   registry path to the API resource
-     * @param mediationPolicyId mediation policy identifier
-     * @throws APIManagementException If failed to delete the given mediation policy
-     */
-    Boolean deleteApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath, String mediationPolicyId)
-            throws APIManagementException;
-
-    /**
-     * Returns true if resource already exists in registry
-     *
-     * @param mediationPolicyPath resource path
-     * @return true, If resource exists
-     */
-    boolean checkIfResourceExists(String mediationPolicyPath) throws APIManagementException;
 
     /**
      * Returns a list of api versions that matches the given context template
@@ -687,73 +461,6 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
-     * Returns list of wsdls
-     *
-     * @return list of wsdl objects or null
-     * @throws APIManagementException If unable to return satisfied wsdl object list
-     */
-    @Deprecated
-    List<Wsdl> getAllWsdls() throws APIManagementException;
-
-    /**
-     * Return Wsdl specify by identifier
-     *
-     * @param wsdlId uuid of the wsdl resource
-     * @return A Wsdl object related to the given identifier or null
-     * @throws APIManagementException If failed to get specified wsdl
-     */
-    @Deprecated
-    Wsdl getWsdlById(String wsdlId) throws APIManagementException;
-
-    /**
-     * Returns Registry resource matching given wsdl identifier
-     *
-     * @param wsdlId wsdl identifier
-     * @return Registry resource matches given identifier or null
-     * @throws APIManagementException If fails to get the resource matching given identifier
-     */
-    @Deprecated
-    Resource getWsdlResourceFromUuid(String wsdlId) throws APIManagementException;
-
-    /**
-     * Delete an existing wsdl
-     *
-     * @param wsdlId uuid of the wsdl
-     * @return true if deleted successfully
-     * @throws APIManagementException If failed to delete wsdl
-     */
-    @Deprecated
-    boolean deleteWsdl(String wsdlId) throws APIManagementException;
-
-    /**
-     * Create a wsdl in the path specified.
-     *
-     * @param resourcePath   Registry path of the resource
-     * @param wsdlDefinition wsdl content
-     */
-    @Deprecated
-    // Only used in old CXF REST APIS. Remove this once old CXF REST APIs are removed.
-    void uploadWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException;
-
-    /**
-     * Update a existing wsdl in the path specified
-     *
-     * @param resourcePath   Registry path of the resource
-     * @param wsdlDefinition wsdl content
-     */
-    @Deprecated
-    void updateWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException;
-
-    /**
-     * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
-     * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
-     *
-     * @param apiId api identifier of the API
-     * @return wsdl content matching name if exist else throws an APIManagementException
-     */
-    ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException;
-
-    /**
      * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
      * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
      *
@@ -762,14 +469,6 @@ public interface APIManager {
      * @return wsdl content matching name if exist else throws an APIManagementException
      */
     ResourceFile getWSDL(String apiId, String organization) throws APIManagementException;
-
-    /**
-     * Returns the graphql schema content in registry specified by the schema name
-     *
-     * @param  apiId  ID of the API
-     * @return schema content matching name if exist else null
-     */
-    String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns the corresponding application given the subscriberId and application name
@@ -781,37 +480,7 @@ public interface APIManager {
      */
     Application getApplicationBySubscriberIdAndName(int subscriberId, String applicationName) throws APIManagementException;
 
-    /**
-     * Returns details of an APIProduct
-     *
-     * @param uuid                  UUID of the API Product's registry artifact
-     * @param requestedTenantDomain tenantDomain for the registry
-     * @return An API Product object related to the given artifact id or null
-     * @throws APIManagementException if failed get APIProduct from UUID
-     */
-    APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
 
-    /**
-     * Returns details of an APIProduct
-     *
-     * @param identifier APIProductIdentifier
-     * @return An APIProduct object related to the given identifier or null
-     * @throws APIManagementException if failed get APIProduct from APIProductIdentifier
-     */
-    APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
-
-    /**
-     * Returns APIProduct Search result based on the provided query.
-     *
-     * @param searchQuery     search query. Ex: provider=*admin*
-     * @param tenantDomain    tenant domain
-     * @param start           starting number
-     * @param end             ending number
-     * @return APIProduct result
-     * @throws APIManagementException if search is failed
-     */
-    Map<String,Object> searchPaginatedAPIProducts(String searchQuery, String tenantDomain,int start,int end) throws
-            APIManagementException;
 
     /**
      * Returns resource list of the api product
@@ -822,34 +491,6 @@ public interface APIManager {
      */
     List<APIProductResource> getResourcesOfAPIProduct(APIProductIdentifier productIdentifier)
             throws APIManagementException;
-
-    /**
-     * Retrieves the icon image associated with a particular API Product as a stream.
-     *
-     * @param identifier ID representing the API Product
-     * @return an Icon containing image content and content type information
-     * @throws APIManagementException if an error occurs while retrieving the image
-     */
-    ResourceFile getProductIcon(APIProductIdentifier identifier) throws APIManagementException;
-
-    /**
-     * Associates the given product resource with the specified path.
-     * @param identifier ID representing the API Product
-     * @param resourcePath a String representing the relative path of a resource.
-     * @param resourceFile to be saved
-     * @return a String URL pointing to the image that was added
-     * @throws APIManagementException if an error occurs while adding the icon image
-     */
-    String addProductResourceFile(APIProductIdentifier identifier, String resourcePath, ResourceFile resourceFile)
-            throws APIManagementException;
-
-    /**
-     * Get open api definition for the product
-     * @param  product
-     * @return openapidoc
-     * @throws APIManagementException
-     */
-    String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
 
     /**
      * @param searchQuery search query. ex : provider:admin

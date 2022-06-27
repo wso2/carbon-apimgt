@@ -392,30 +392,6 @@ public interface APIPersistence {
     void deleteDocumentation(Organization org, String apiId, String docId) throws DocumentationPersistenceException;
 
 
-    /* ======= Mediation Policy ========
-     =================================== */
-
-    /**
-     * Add mediation policy to the API
-     *
-     * @param org   Organization the mediation policy is owned by
-     * @param apiId API ID
-     * @return Mediation policy Id
-     * @throws MediationPolicyPersistenceException
-     */
-    Mediation addMediationPolicy(Organization org, String apiId, Mediation mediation) throws
-                                    MediationPolicyPersistenceException;
-
-    /**
-     * Update mediation policy of the API
-     *
-     * @param org       Organization the mediation policy is owned by
-     * @param apiId     API ID
-     * @param mediation Mediation policy
-     * @throws MediationPolicyPersistenceException
-     */
-    Mediation updateMediationPolicy(Organization org, String apiId, Mediation mediation) throws MediationPolicyPersistenceException;
-
     /**
      * Get mediation policy of API
      *
@@ -436,15 +412,6 @@ public interface APIPersistence {
      * @throws MediationPolicyPersistenceException
      */
     List<MediationInfo> getAllMediationPolicies(Organization org, String apiId) throws MediationPolicyPersistenceException;
-    /**
-     * Delete a mediation policy of the API
-     *
-     * @param org               Organization the mediation policy is owned by
-     * @param apiId             API ID
-     * @param mediationPolicyId Mediation policy ID
-     * @throws MediationPolicyPersistenceException
-     */
-    void deleteMediationPolicy(Organization org, String apiId, String mediationPolicyId) throws MediationPolicyPersistenceException;
 
 
     /* ======= Thumbnail Icon =======

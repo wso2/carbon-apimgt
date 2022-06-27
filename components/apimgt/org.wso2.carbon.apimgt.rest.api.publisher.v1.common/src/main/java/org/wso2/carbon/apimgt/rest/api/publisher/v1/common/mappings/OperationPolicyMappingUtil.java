@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicySpecAttri
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,6 +56,7 @@ public class OperationPolicyMappingUtil {
 
         OperationPolicy operationPolicy = new OperationPolicy();
         operationPolicy.setPolicyName(operationPolicyDTO.getPolicyName());
+        operationPolicy.setPolicyVersion(operationPolicyDTO.getPolicyVersion());
         operationPolicy.setPolicyId(operationPolicyDTO.getPolicyId());
         operationPolicy.setParameters(operationPolicyDTO.getParameters());
         return operationPolicy;
@@ -63,8 +66,8 @@ public class OperationPolicyMappingUtil {
 
         OperationPolicyDTO dto = new OperationPolicyDTO();
         dto.setPolicyName(operationPolicy.getPolicyName());
+        dto.setPolicyVersion(operationPolicy.getPolicyVersion());
         dto.setPolicyId(operationPolicy.getPolicyId());
-        dto.setOrder(operationPolicy.getOrder());
         dto.setParameters(operationPolicy.getParameters());
         return dto;
     }
@@ -75,7 +78,7 @@ public class OperationPolicyMappingUtil {
         List<OperationPolicyDTO> request = new ArrayList<>();
         List<OperationPolicyDTO> response = new ArrayList<>();
         List<OperationPolicyDTO> fault = new ArrayList<>();
-
+        Collections.sort(operationPolicyList, new OperationPolicyComparator());
         for (OperationPolicy op : operationPolicyList) {
             OperationPolicyDTO policyDTO = fromOperationPolicyToDTO(op);
             if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(op.getDirection())) {
@@ -173,7 +176,6 @@ public class OperationPolicyMappingUtil {
         policyDataDTO.setSupportedGateways(policySpecification.getSupportedGateways());
         policyDataDTO.setSupportedApiTypes(policySpecification.getSupportedApiTypes());
         policyDataDTO.setApplicableFlows(policySpecification.getApplicableFlows());
-        policyDataDTO.setMultipleAllowed(policySpecification.isMultipleAllowed());
         policyDataDTO.setCategory(policySpecification.getCategory().toString());
 
         if (policySpecification.getPolicyAttributes() != null) {
@@ -195,9 +197,13 @@ public class OperationPolicyMappingUtil {
         specAttributeDTO.setName(specAttribute.getName());
         specAttributeDTO.setDisplayName(specAttribute.getDisplayName());
         specAttributeDTO.setDescription(specAttribute.getDescription());
-        specAttributeDTO.setType(specAttribute.getType());
+        specAttributeDTO.setType(specAttribute.getType().toString());
         specAttributeDTO.setValidationRegex(specAttribute.getValidationRegex());
         specAttributeDTO.setRequired(specAttribute.isRequired());
+        specAttributeDTO.setDefaultValue(specAttribute.getDefaultValue());
+        if (specAttribute.getType().equals(OperationPolicySpecAttribute.AttributeType.Enum)) {
+            specAttributeDTO.setAllowedValues(specAttribute.getAllowedValues());
+        }
         return specAttributeDTO;
     }
 }

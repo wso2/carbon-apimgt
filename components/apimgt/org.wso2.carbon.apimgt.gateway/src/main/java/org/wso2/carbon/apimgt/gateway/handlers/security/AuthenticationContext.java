@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Contains some context information related to an authenticated request. This can be used
@@ -53,6 +54,8 @@ public class AuthenticationContext {
     private List<String> requestTokenScopes;
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
+    private String accessToken;
+    private Set<String> applicationGroupIds;
 
     public List<String> getRequestTokenScopes() {
         return requestTokenScopes;
@@ -279,5 +282,23 @@ public class AuthenticationContext {
 
     public void setGraphQLMaxComplexity(int graphQLMaxComplexity) {
         this.graphQLMaxComplexity = graphQLMaxComplexity;
+    }
+
+    public String getAccessToken() {
+
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+
+        this.accessToken = accessToken;
+    }
+
+    public Set<String> getApplicationGroupIds() {
+        return applicationGroupIds;
+    }
+
+    public void setApplicationGroupIds(Set<String> applicationGroupIds) {
+        this.applicationGroupIds = applicationGroupIds;
     }
 }

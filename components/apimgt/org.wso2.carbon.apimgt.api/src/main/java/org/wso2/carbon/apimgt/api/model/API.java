@@ -664,6 +664,7 @@ public class API implements Serializable {
     }
 
     public void setAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.removeAll(availableTiers);
         this.availableTiers.addAll(availableTiers);
     } 
     /**
@@ -1306,6 +1307,19 @@ public class API implements Serializable {
 
     public void setGatewayVendor(String gatewayVendor) {
         this.gatewayVendor = gatewayVendor;
+    }
+
+    /**
+     * Property to hold the gateway type relevant to the policies
+     */
+    private String gatewayType;
+
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
     }
 
     /**

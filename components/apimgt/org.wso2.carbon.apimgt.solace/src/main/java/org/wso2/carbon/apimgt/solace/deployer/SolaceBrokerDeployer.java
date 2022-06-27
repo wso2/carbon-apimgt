@@ -22,13 +22,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
@@ -37,6 +40,7 @@ import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  *  This is to register Solace Deployer as connector
@@ -49,6 +53,7 @@ import java.util.List;
 public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
 
     private static final Log log = LogFactory.getLog(SolaceBrokerDeployer.class);
+    protected ApiMgtDAO apiMgtDAO;
 
     /**
      * Get external vendor type as Solace
@@ -258,6 +263,12 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                         + "Application.");
             }
             throw new DeployerException(response1.getStatusLine().toString());
+        } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+            if (log.isDebugEnabled()) {
+                log.warn("Cannot undeploy. Solace API product '" + apiNameWithContext + "' is already "
+                        + " un deployed.");
+            }
+            return true;
         } else {
             if (log.isDebugEnabled()) {
                 log.error("Error occurred while deleting the API Product '" + apiNameWithContext + "' from Solace " +
@@ -270,23 +281,33 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     /**
      * Undeploy API artifact from provided environment in the external gateway when Api is retired
      *
-     * @param api         API to be undeployed from the external gateway
-     * @param environment Environment needed to be undeployed API from the external gateway
-     * @throws DeployerException if error occurs when undeploying APIs from the external gateway
+     * @param api         API to be un deployed from the external gateway
+     * @param environment Environment needed to be un deployed API from the external gateway
+     * @throws DeployerException if error occurs when un deploying APIs from the external gateway
      */
     public boolean undeployWhenRetire(API api, Environment environment) throws DeployerException {
         Application application;
         APIProvider apiProvider;
+        APIConsumer apiConsumer;
 
-        // Remove subscription
         try {
             apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
+            apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
             List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getUuid(), api.getOrganization());
+            apiMgtDAO = ApiMgtDAO.getInstance();
             for (SubscribedAPI usage : apiUsages) {
-                application = usage.getApplication();
-                // Check whether the subscription is belongs to an API deployed in Solace
-                if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
+                application = apiMgtDAO.getApplicationByUUID(usage.getApplication().getUUID());
+                Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
+                boolean isProductionKeysGenerated = false;
+                for (APIKey key : consumerKeys) {
+                    if (SolaceConstants.OAUTH_CLIENT_PRODUCTION.equals(key.getType())) {
+                      isProductionKeysGenerated = true;
+                    }
+                }
+                // Check whether the subscription belongs to an API deployed in Solace
+                if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor()) &&  isProductionKeysGenerated) {
                     SolaceNotifierUtils.unsubscribeAPIProductFromSolaceApplication(api, application);
                 }
             }

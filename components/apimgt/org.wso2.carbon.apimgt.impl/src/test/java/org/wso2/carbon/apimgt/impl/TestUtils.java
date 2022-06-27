@@ -98,14 +98,11 @@ public class TestUtils {
         UserRealm bootstrapRealm = Mockito.mock(UserRealm.class);
         
         PowerMockito.when(systemReg.getUserRealm()).thenReturn(userRealm);        
-        PowerMockito.doNothing().when(ServiceReferenceHolder.class); 
-        ServiceReferenceHolder.setUserRealm(userRealm);
         org.wso2.carbon.user.api.UserRealm userR = Mockito.mock(org.wso2.carbon.user.api.UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userR);
         AuthorizationManager authManager = Mockito.mock(AuthorizationManager.class);
         PowerMockito.when(userR.getAuthorizationManager()).thenReturn(authManager);
         PowerMockito.when(realmService.getBootstrapRealm()).thenReturn(bootstrapRealm);
-        ServiceReferenceHolder.setUserRealm(bootstrapRealm);
 
         PowerMockito.when(tm.getTenantId(Matchers.anyString())).thenReturn(tenantId);
 

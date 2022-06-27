@@ -115,10 +115,11 @@ public class InboundWebSocketProcessor {
                     inboundMessageContext.getTenantDomain(), true);
             if (validateOAuthHeader(req, inboundMessageContext)) {
                 setRequestHeaders(req, inboundMessageContext);
-                inboundMessageContext.getRequestHeaders().put(HttpHeaders.AUTHORIZATION, req.headers()
-                        .get(HttpHeaders.AUTHORIZATION));
+                inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, req.headers()
+                        .get(WebsocketUtil.authorizationHeader));
                 inboundProcessorResponseDTO =
                         handshakeProcessor.processHandshake(inboundMessageContext);
+                setRequestHeaders(req, inboundMessageContext);
             } else {
                 String errorMessage = "No Authorization Header or access_token query parameter present";
                 log.error(errorMessage + " in request for the websocket context "
@@ -126,7 +127,9 @@ public class InboundWebSocketProcessor {
                 inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
                         WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR, errorMessage);
             }
-            publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
+            if (inboundProcessorResponseDTO.isError()) {
+                publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
+            }
             return inboundProcessorResponseDTO;
         } catch (APISecurityException e) {
             log.error("Authentication Failure for the websocket context: " + inboundMessageContext.getApiContext()
@@ -206,11 +209,11 @@ public class InboundWebSocketProcessor {
     private boolean validateOAuthHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
 
-        if (!inboundMessageContext.getRequestHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+        if (!inboundMessageContext.getRequestHeaders().containsKey(WebsocketUtil.authorizationHeader)) {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
             if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
-                inboundMessageContext.getHeadersToAdd().put(HttpHeaders.AUTHORIZATION, APIConstants.CONSUMER_KEY_SEGMENT
+                inboundMessageContext.getHeadersToAdd().put(WebsocketUtil.authorizationHeader, APIConstants.CONSUMER_KEY_SEGMENT
                         + StringUtils.SPACE + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
                 InboundWebsocketProcessorUtil.removeTokenFromQuery(requestMap, inboundMessageContext);
                 req.setUri(inboundMessageContext.getFullRequestPath());

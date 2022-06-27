@@ -11,14 +11,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.18.4-SNAPSHOT</version>
+        <version>9.22.9-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.api</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Api for API Management</name>
+    <name>WSO2 Carbon - API Management API</name>
 
     <dependencies>
         <dependency>

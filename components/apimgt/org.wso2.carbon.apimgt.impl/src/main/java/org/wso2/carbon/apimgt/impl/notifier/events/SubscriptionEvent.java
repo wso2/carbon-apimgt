@@ -18,7 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * An Event Object which can holds the data related to Subscription which are required
@@ -52,6 +56,22 @@ public class SubscriptionEvent extends Event {
         this.tenantDomain = tenantDomain;
         this.applicationUUID = applicationUUID;
         this.apiUUID = apiUUID;
+    }
+
+    public SubscriptionEvent(String type,SubscribedAPI subscribedAPI,int tenantId,String tenantDomain) {
+        this.eventId = UUID.randomUUID().toString();
+        this.timeStamp = System.currentTimeMillis();
+        this.type = type;
+        this.tenantId = tenantId;
+        this.tenantDomain = tenantDomain;
+        this.subscriptionUUID = subscribedAPI.getUUID();
+        this.subscriptionId = subscribedAPI.getSubscriptionId();
+        this.apiId = subscribedAPI.getapiId();
+        this.apiUUID = subscribedAPI.getAPIUUId();
+        this.applicationId = subscribedAPI.getApplication().getId();
+        this.applicationUUID = subscribedAPI.getApplication().getUUID();
+        this.policyId = subscribedAPI.getTier().getName();
+        this.subscriptionState = subscribedAPI.getSubStatus();
     }
 
     @Override

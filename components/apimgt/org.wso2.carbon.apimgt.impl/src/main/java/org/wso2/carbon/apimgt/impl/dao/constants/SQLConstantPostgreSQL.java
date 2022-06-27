@@ -31,6 +31,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -51,7 +53,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    NAME like ?" +
                     " ORDER BY $1 $2 " +
                     " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
@@ -61,6 +63,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -81,7 +85,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
                     " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
             "select distinct x.*,bl.ENABLED from (" +
@@ -90,6 +94,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -115,7 +121,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    NAME like ?" +
                     " ORDER BY $1 $2 " +
                     " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
@@ -125,6 +131,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -151,7 +159,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
                     " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
@@ -161,6 +169,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -181,7 +191,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
                     " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
             "select distinct x.*,bl.ENABLED from (" +
@@ -190,6 +200,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   NAME," +
                     "   APPLICATION_TIER," +
                     "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   CALLBACK_URL,  " +
                     "   DESCRIPTION, " +
                     "   APPLICATION_STATUS, " +
@@ -210,7 +222,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
                     " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
@@ -218,6 +230,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.APPLICATION_ID as APPLICATION_ID, " +
                     "   SUB.CREATED_BY AS CREATED_BY," +
                     "   APP.GROUP_ID AS GROUP_ID, " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
                     "   SUB.TENANT_ID AS TENANT_ID, " +
                     "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID, " +
                     "   APP.UUID AS UUID," +

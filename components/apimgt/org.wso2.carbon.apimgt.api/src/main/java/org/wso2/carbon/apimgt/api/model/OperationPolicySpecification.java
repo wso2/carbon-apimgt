@@ -39,7 +39,6 @@ public class OperationPolicySpecification {
     private List<String> supportedGateways = new ArrayList<>();
     private List<String> supportedApiTypes = new ArrayList<>();
     private List<OperationPolicySpecAttribute> policyAttributes = new ArrayList<>();
-    private boolean multipleAllowed = false;
 
     public String getName() {
 
@@ -131,16 +130,6 @@ public class OperationPolicySpecification {
         this.category = category;
     }
 
-    public boolean isMultipleAllowed() {
-
-        return multipleAllowed;
-    }
-
-    public void setMultipleAllowed(boolean multipleAllowed) {
-
-        this.multipleAllowed = multipleAllowed;
-    }
-
     @Override
     public boolean equals(Object o) {
 
@@ -149,7 +138,7 @@ public class OperationPolicySpecification {
         if (!(o instanceof OperationPolicySpecification))
             return false;
         OperationPolicySpecification policySpecObj = (OperationPolicySpecification) o;
-        return multipleAllowed == policySpecObj.multipleAllowed && category == policySpecObj.category && name.equals(policySpecObj.name)
+        return category == policySpecObj.category && name.equals(policySpecObj.name)
                 && displayName.equals(policySpecObj.displayName) && Objects.equals(description, policySpecObj.description)
                 && applicableFlows.equals(policySpecObj.applicableFlows) && supportedGateways.equals(policySpecObj.supportedGateways)
                 && supportedApiTypes.equals(policySpecObj.supportedApiTypes) && Objects.equals(policyAttributes,
@@ -160,6 +149,6 @@ public class OperationPolicySpecification {
     public int hashCode() {
 
         return Objects.hash(category, name, displayName, description, applicableFlows, supportedGateways,
-                supportedApiTypes, policyAttributes, multipleAllowed);
+                supportedApiTypes, policyAttributes);
     }
 }

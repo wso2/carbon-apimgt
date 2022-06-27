@@ -116,6 +116,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE = "DevOpsRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_OBSERVER_ROLE = "ObserverRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_INTEGRATIONDEVELOPER_ROLE = "IntegrationDeveloperRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
     public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
@@ -283,7 +284,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_NAME = "overview_name";
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
-    public static final String API_OVERVIEW_VERSION_TIMESTAMP = "overview_versionTimestamp";
+    public static final String API_OVERVIEW_VERSION_COMPARABLE = "overview_versionComparable";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
@@ -310,7 +311,7 @@ public final class APIConstants {
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
-    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
+    public static final String API_OVERVIEW_GATEWAY_VENDOR = "overview_gatewayVendor";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
     public static final String API_OVERVIEW_TAG = "tags";
@@ -609,6 +610,8 @@ public final class APIConstants {
     public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "EnableAPIQuotaLimit";
     public static final String JWKS_URI = "jwksUri";
 
+    public static final String ORG_ALL_QUERY_PARAM = "ALL";
+
     public static class TokenStatus {
 
         public static final String ACTIVE = "ACTIVE";
@@ -881,6 +884,7 @@ public final class APIConstants {
 
     public static final String CORS_CONFIGURATION = "CORSConfiguration.";
     public static final String CORS_CONFIGURATION_ENABLED = CORS_CONFIGURATION + "Enabled";
+    public static final String CORS_CONFIGURATION_ENABLE_VALIDATION_FOR_WS = CORS_CONFIGURATION + "EnableValidationForWS";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN = CORS_CONFIGURATION
             + "Access-Control-Allow-Origin";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS = CORS_CONFIGURATION
@@ -2237,14 +2241,20 @@ public final class APIConstants {
         public static final String USAGE_PUBLISH_DEFAULT_GRANULARITY = "days";
         public static final String USAGE_PUBLISH_DEFAULT_TIME_GAP_IN_DAYS = "1";
         public static final String USAGE_PUBLISHER_JOB_NAME = "USAGE_PUBLISHER";
-        public static final String FROM_TIME_CONFIGURATION_PROPERTY =
-                "Monetization.UsagePubliser.PublishTimeDurationInDays";
+
         public static final String MONETIZATION_CONFIG = "Monetization";
-        public static final String MONETIZATION_IMPL = MONETIZATION_CONFIG + ".MonetizationImpl";
-        public static final String USAGE_PUBLISHER = MONETIZATION_CONFIG + ".UsagePublisher";
-        public static final String USAGE_PUBLISHER_GRANULARITY = USAGE_PUBLISHER + ".Granularity";
+        public static final String MONETIZATION_IMPL_CONFIG = "MonetizationImpl";
+        public static final String USAGE_PUBLISHER_CONFIG = "UsagePublisher";
+        public static final String INSIGHT_API_ENDPOINT_CONFIG = "ChoreoInsightAPIEndpoint";
+        public static final String ANALYTICS_ACCESS_TOKEN_CONFIG = "AnalyticsAccessToken";
+        public static final String CHOREO_TOKEN_URL_CONFIG = "ChoreoTokenEndpoint";
+        public static final String CHOREO_INSIGHT_APP_CONSUMER_KEY_CONFIG = "ChoreoInsightAppConsumerKey";
+        public static final String CHOREO_INSIGHT_APP_CONSUMER_SECRET_CONFIG = "ChoreoInsightAppConsumerSecret";
+        public static final String USAGE_PUBLISHER_GRANULARITY_CONFIG = "Granularity";
+        public static final String FROM_TIME_CONFIGURATION_PROPERTY = "PublishTimeDurationInDays";
         public static final String ADDITIONAL_ATTRIBUTES = "AdditionalAttributes";
         public static final String ATTRIBUTE = "Attribute";
+
         public static final String IS_ATTRIBITE_REQUIRED = "Required";
         public static final String IS_ATTRIBUTE_HIDDEN = "Hidden";
         public static final String ATTRIBUTE_DESCRIPTION = "Description";
@@ -2593,6 +2603,10 @@ public final class APIConstants {
         UDATE_API_LOG_LEVEL
     }
 
+    public enum EventAction {
+        DEFAULT_VERSION
+    }
+
     public static class GatewayArtifactSynchronizer {
 
         public static final String SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG = "SyncRuntimeArtifactsPublisher";
@@ -2866,14 +2880,20 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
-    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmp";
+    public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
     public static final String YAML_CONTENT_TYPE = "text/yaml";
     public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "specifications";
     public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "definitions";
+    public static final String OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE = "Synapse";
+    public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP = "HTTP";
+    public static final String DEFAULT_POLICY_VERSION = "v1";
+
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
+    public static final String WSO2_CHOREO_CONNECT_GATEWAY = "wso2/choreo-connect";
+    public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
 
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
@@ -2907,4 +2927,7 @@ public final class APIConstants {
         public static final String STANDARD = "STANDARD";
         public static final String FULL = "FULL";
     }
+
+    // Constants related to basic health check APIs
+    public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 }

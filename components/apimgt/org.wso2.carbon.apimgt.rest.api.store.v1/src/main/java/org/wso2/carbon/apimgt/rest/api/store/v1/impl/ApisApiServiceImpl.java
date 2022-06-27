@@ -181,10 +181,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
             API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
+                String schemaContent = apiConsumer.getGraphqlSchemaDefinition(apiId,organization);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
                 GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
                         GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
@@ -679,7 +678,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (api.getSwaggerDefinition() != null) {
-                api.setSwaggerDefinition(APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition()));
+                api.setSwaggerDefinition(APIUtil.removeInterceptorsFromSwagger(
+                        APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition())));
             } else {
                 api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, organization));
             }

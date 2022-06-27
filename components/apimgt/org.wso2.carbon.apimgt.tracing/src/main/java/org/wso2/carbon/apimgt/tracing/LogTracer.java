@@ -29,8 +29,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 /**
- * This class used to log tracing activities.
- */
+ * Class to log tracing activities
+ * @deprecated
+ * */
+@Deprecated
 public class LogTracer implements OpenTracer {
 
     private static final String NAME = "log";

@@ -22,7 +22,11 @@ import io.opentracing.Tracer;
 
 /**
  * A Wrapper class for io.opentracing Tracer
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer} instead</p>
  */
+
+@Deprecated
 public class TracingTracer {
 
     private Tracer tracer;

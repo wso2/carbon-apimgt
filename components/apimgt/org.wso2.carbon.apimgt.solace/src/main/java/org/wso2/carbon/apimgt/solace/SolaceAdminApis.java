@@ -275,10 +275,7 @@ public class SolaceAdminApis {
                                                                  ArrayList<String> apiProducts) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
-        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
-                "/apps/" + application.getUUID());
-        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
-        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        HttpPatch httpPatch = createHTTPPatchRequestBase(organization, application.getUUID());
         // retrieve existing API products in the app
         try {
             apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application.getUUID(),
@@ -310,10 +307,7 @@ public class SolaceAdminApis {
                                                            List<String> apiProductsToRemove) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
-        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
-                "/apps/" + application.getUUID());
-        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
-        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        HttpPatch httpPatch = createHTTPPatchRequestBase(organization, application.getUUID());
         // retrieve existing API products in the app
         ArrayList<String> apiProducts = new ArrayList<>();
         try {
@@ -326,7 +320,7 @@ public class SolaceAdminApis {
         apiProducts.removeAll(apiProductsToRemove);
 
         org.json.JSONObject requestBody = buildRequestBodyForApplicationPatchSubscriptions(apiProducts);
-        StringEntity params = null;
+        StringEntity params;
         try {
             params = new StringEntity(requestBody.toString());
             httpPatch.setEntity(params);
@@ -352,9 +346,9 @@ public class SolaceAdminApis {
         HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
-        StringEntity params = null;
+        StringEntity params;
         try {
+            org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
             params = new StringEntity(requestBody.toString());
             httpPost.setEntity(params);
             return APIUtil.executeHTTPRequest(httpPost, httpClient);
@@ -436,12 +430,9 @@ public class SolaceAdminApis {
     public CloseableHttpResponse renameApplication(String organization, Application application) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
-        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
-                "/apps/" + application.getUUID());
-        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
-        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        HttpPatch httpPatch = createHTTPPatchRequestBase(organization, application.getUUID());
         org.json.JSONObject requestBody = buildRequestBodyForRenamingApp(application);
-        StringEntity params = null;
+        StringEntity params;
         try {
             params = new StringEntity(requestBody.toString());
             httpPatch.setEntity(params);
@@ -463,14 +454,11 @@ public class SolaceAdminApis {
      */
     public CloseableHttpResponse patchClientIdForApplication(String organization, Application application,
                                                              String consumerKey, String consumerSecret) {
+        HttpPatch httpPatch = createHTTPPatchRequestBase(organization, application.getUUID());
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
-        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
-                "/apps/" + application.getUUID());
-        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
-        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForClientIdPatch(application, consumerKey, consumerSecret);
-        StringEntity params = null;
+        StringEntity params;
         try {
             params = new StringEntity(requestBody.toString());
             httpPatch.setEntity(params);
@@ -479,6 +467,14 @@ public class SolaceAdminApis {
             log.error(e.getMessage());
         }
         return null;
+    }
+
+    public HttpPatch createHTTPPatchRequestBase(String organization, String  applicationUUID) {
+        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
+                "/apps/" + applicationUUID);
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
+        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        return httpPatch;
     }
 
     /**
@@ -658,7 +654,8 @@ public class SolaceAdminApis {
      * @param apiProducts List of API products to add as subscriptions
      * @return org.json.JSON Object of request body
      */
-    private org.json.JSONObject buildRequestBodyForCreatingApp(Application application, ArrayList<String> apiProducts) {
+    private org.json.JSONObject buildRequestBodyForCreatingApp(Application application, ArrayList<String> apiProducts)
+            throws APIManagementException {
         org.json.JSONObject requestBody = new org.json.JSONObject();
         String appName = application.getName();
 
@@ -680,8 +677,7 @@ public class SolaceAdminApis {
         org.json.JSONObject credentialsSecret = new org.json.JSONObject();
         // Set consumer key and secret for new application
         if (application.getKeys().isEmpty()) {
-            credentialsSecret.put("consumerKey", appName + "-application-key");
-            credentialsSecret.put("consumerSecret", appName + "-application-secret");
+            throw new APIManagementException("Application keys are not generated for " + appName);
         } else {
             credentialsSecret.put("consumerKey", application.getKeys().get(0).getConsumerKey());
             credentialsSecret.put("consumerSecret", application.getKeys().get(0).getConsumerSecret());

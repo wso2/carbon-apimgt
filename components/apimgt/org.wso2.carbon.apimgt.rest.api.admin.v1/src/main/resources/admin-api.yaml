@@ -68,11 +68,11 @@ info:
     ```
     curl -k -d "grant_type=password&username=<admin_username>&password=<admin_passowrd>&scope=<scopes seperated by space>"
     \ -H "Authorization: Basic base64(cliet_id:client_secret)"
-    \ https://<host>:<gateway_port>/token
+    \ https://<host>:<server_port>/oauth2/token
     ```
     **Sample request**
     ```
-    curl https://localhost:8243/token -k \
+    curl https://localhost:9443/oauth2/token -k \
     -H "Authorization: Basic Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h" \
     -d "grant_type=password&username=admin&password=admin&scope=apim:admin apim:tier_view"
     ```
@@ -96,10 +96,10 @@ info:
     * Make sure you have an API Manager instance up and running.
     * Update the `basepath` parameter to match the hostname and port of the APIM instance.
 
-    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/f5ac2ca9fb22afef6ed6)
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://god.gw.postman.com/run-collection/17491134-b263aa69-7494-4fc5-90fa-daa2f63880ae)
   contact:
     name: WSO2
-    url: http://wso2.com/products/api-manager/
+    url: https://wso2.com/api-manager/
     email: architecture@wso2.com
   license:
     name: Apache 2.0
@@ -108,6 +108,49 @@ info:
 servers:
   - url: https://apis.wso2.com/api/am/admin/v3
 paths:
+  ######################################################
+  # The "Content Search Results" Throttling Policies
+  ######################################################
+  /throttling/policies/search:
+    get:
+      tags:
+        - Unified Search
+      summary: |
+        Retrieve/Search Throttling Polcies
+      description: |
+        This operation provides you a list of available Throttling Policies qualifying the given keyword match.
+      parameters:
+        - name: query
+          in: query
+          description: |
+            **Search**.
+            You can search by providing a keyword. Allowed to search by type only.
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying Throttling Policies is returned.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThrottlePolicyDetailsList'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tier_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v3/search?query=type:sub"'
+      operationId: throttlingPolicySearch
+
   ######################################################
   # The "Application Throttling Policy Collection" resource API
   ######################################################
@@ -142,7 +185,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application"'
 
@@ -205,7 +248,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application"'
 
@@ -258,7 +301,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
 
@@ -321,7 +364,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
 
@@ -346,222 +389,10 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
 
-  ######################################################
-  # The "Global Mediation Policy Collections" resource API
-  ######################################################
-  /policies/mediation:
-    get:
-      tags:
-        - Mediation Policy (Collection)
-      summary: |
-        Get all Global Mediation Policies
-      description: |
-        This operation provides you a list of all available global mediation policies.
-      parameters:
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
-        - name: query
-          in: query
-          description: -Not supported yet-
-          schema:
-            type: string
-        - $ref: '#/components/parameters/Accept'
-      responses:
-        200:
-          description: |
-            OK.
-            List of mediation policies is returned.
-          headers:
-            Content-Type:
-              description: The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/mediationList'
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:mediation_policy_view
-      x-code-samples:
-        - lang: Shell
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/policies/mediation"'
-
-    post:
-      tags:
-        - Mediation Policy (Collection)
-      summary: Add a Global Mediation Policy
-      description: |
-        This operation can be used to add a new global mediation policy.
-      parameters:
-        - $ref: '#/components/parameters/Content-Type'
-      requestBody:
-        description: mediation policy to upload
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Mediation'
-        required: true
-      responses:
-        200:
-          description: |
-            OK.
-            Mediation policy added successfully.
-          headers:
-            Location:
-              description: |
-                The URL of the uploaded thumbnail image of the API.
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Mediation'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:mediation_policy_create
-      x-code-samples:
-        - lang: Shell
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/policies/mediation"'
-
-  ######################################################
-  # The "Individual Global Mediation Policy" resource
-  ######################################################
-  /policies/mediation/{mediationPolicyId}:
-    get:
-      tags:
-        - Mediation Policy (Individual)
-      summary: Get a Global Mediation Policy
-      description: |
-        This operation can be used to retrieve a particular global mediation policy.
-      parameters:
-        - $ref: '#/components/parameters/mediationPolicyId'
-        - $ref: '#/components/parameters/Accept'
-      responses:
-        200:
-          description: |
-            OK.
-            Mediation Policy returned.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Mediation'
-        404:
-          $ref: '#/components/responses/NotFound'
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:mediation_policy_view
-      x-code-samples:
-        - lang: Shell
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/policies/mediation/2253cf01-0356-4cc1-9941-3034a8c29007"'
-
-    put:
-      tags:
-        - Mediation Policy (Individual)
-      summary: Update a Global Mediation Policy
-      description: |
-        This operation can be used to update an existing global mediation policy.
-      parameters:
-        - $ref: '#/components/parameters/mediationPolicyId'
-        - $ref: '#/components/parameters/Content-Type'
-      requestBody:
-        description: |
-          Mediation policy object that needs to be updated
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Mediation'
-        required: true
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with updated mediation policy object
-          headers:
-            Location:
-              description: |
-                The URL of the newly created resource.
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Mediation'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:mediation_policy_create
-      x-code-samples:
-        - lang: Shell
-          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/policies/mediation/2253cf01-0356-4cc1-9941-3034a8c29007"'
-
-    delete:
-      tags:
-        - Mediation Policy (Individual)
-      summary: Delete a Global Mediation Policy
-      description: |
-        This operation can be used to delete an existing global mediation policy providing the Id of the mediation policy.
-      parameters:
-        - $ref: '#/components/parameters/mediationPolicyId'
-      responses:
-        200:
-          description: |
-            OK.
-            Mediation policy successfully deleted.
-          content: {}
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:mediation_policy_create
-      x-code-samples:
-        - lang: Shell
-          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/policies/mediation/2253cf01-0356-4cc1-9941-3034a8c29007"'
 
   ######################################################
   # The "Subscription Throttling Policy Collection" resource API
@@ -597,7 +428,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription"'
 
@@ -665,7 +496,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription"'
 
@@ -723,7 +554,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
 
@@ -791,7 +622,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
 
@@ -816,7 +647,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
 
@@ -857,7 +688,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom"'
 
@@ -922,7 +753,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom"'
 
@@ -977,7 +808,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
 
@@ -1042,7 +873,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
 
@@ -1070,7 +901,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
 
@@ -1108,7 +939,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced"'
 
@@ -1171,7 +1002,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced"'
 
@@ -1224,7 +1055,7 @@ paths:
             - apim:admin
             - apim:tier_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
 
@@ -1287,7 +1118,7 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
 
@@ -1312,10 +1143,159 @@ paths:
             - apim:admin
             - apim:tier_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
-
+  ######################################################
+  # "Export Throttling Policy" resource API
+  ######################################################
+  /throttling/policies/export:
+    get:
+      tags:
+        - Import Export
+      summary: Export a Throttling Policy
+      description: |
+        This operation can be used to export the details of a particular Throttling Policy.
+      parameters:
+        - name: policyId
+          in: query
+          description: UUID of the ThrottlingPolicy
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: |
+            Throttling Policy Name
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: |
+            Type of the Throttling Policy
+          schema:
+            type: string
+            enum:
+              - sub
+              - app
+              - api
+              - global
+        - name: format
+          in: query
+          description: |
+            Format of output documents. Can be YAML or JSON.
+          schema:
+            type: string
+            enum:
+              - JSON
+              - YAML
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportThrottlePolicy'
+              example:
+                type: rate-limiting policy
+                subtype: application
+                version: v4.1.0
+                data:
+                  policyId: cd828243-a0db-430c-97e9-9e41fd865d48
+                  policyName: 50PerMin
+                  displayName: 50PerMin
+                  description: Allows 50 request per minute
+                  isDeployed: true
+                  type: ApplicationThrottlePolicy
+                  defaultLimit:
+                    type: BANDWIDTHLIMIT
+                    requestCount:
+                      timeUnit: min
+                      unitTime: 1
+                      requestCount: 50
+                    bandwidth:
+                      timeUnit: min
+                      unitTime: 5
+                      dataAmount: 100
+                      dataUnit: MB
+                    eventCount:
+                      timeUnit: min
+                      unitTime: 5
+                      eventCount: 16
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tier_manage
+            - apim:policies_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/export?policyId=96077508-fd01-4fae-bc64-5de0e2baf43c&name=Bronze&type=subscription&format=YAML"'
+      operationId: exportThrottlingPolicy
+  ####################################################################
+  # Import Throttling Policy
+  ####################################################################
+  /throttling/policies/import:
+    post:
+      tags:
+        - Import Export
+      summary: Import a Throttling Policy
+      description: |
+        This operation can be used to import a Throttling Policy
+      parameters:
+        - name: overwrite
+          in: query
+          description: |
+            Update an existing throttlingpolicy with the same name
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: Json File
+                  format: binary
+        required: true
+      responses:
+        200:
+          description: |
+            Created.
+            Throttling Policy Imported Successfully.
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tier_manage
+            - apim:policies_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/import?overwrite=True"'
+      operationId: importThrottlingPolicy
   ######################################################
   # The "Deny Policy Collection" resource API
   ######################################################
@@ -1350,9 +1330,9 @@ paths:
             - apim:admin
             - apim:bl_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policies"'
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policies"'
 
     post:
       tags:
@@ -1400,9 +1380,9 @@ paths:
             - apim:admin
             - apim:bl_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policies"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policies"'
 
   ######################################################
   # The "Individual Deny Policy" resource API
@@ -1440,9 +1420,9 @@ paths:
             - apim:admin
             - apim:bl_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
     delete:
       tags:
@@ -1465,9 +1445,9 @@ paths:
             - apim:admin
             - apim:bl_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
     patch:
       tags:
@@ -1504,9 +1484,9 @@ paths:
             - apim:admin
             - apim:bl_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/throttling/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
 
   ######################################################
   # The "Application Collection" resource APIs
@@ -1582,7 +1562,7 @@ paths:
             - apim:app_import_export
             - apim:admin_application_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/applications"'
 
@@ -1620,7 +1600,7 @@ paths:
             - apim:app_import_export
             - apim:admin_application_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"'
 
@@ -1660,7 +1640,7 @@ paths:
             - apim:admin
             - apim:app_import_export
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"'
 
@@ -1694,7 +1674,7 @@ paths:
             - apim:admin
             - apim:app_owner_change
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/change-owner?owner=admin"'
 
@@ -1731,7 +1711,7 @@ paths:
         - Environments
       summary: Add an Environment
       description: |
-        Add a new geteway environment
+        Add a new gateway environment
       requestBody:
         description: |
           Environment object that should to be added
@@ -1861,7 +1841,7 @@ paths:
             - apim:admin
             - apim:bot_data
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/bot-detection-data"'
 
@@ -1897,7 +1877,7 @@ paths:
             - apim:admin
             - apim:monetization_usage_publish
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/monetization/publish-usage"'
 
@@ -1922,7 +1902,7 @@ paths:
             - apim:admin
             - apim:monetization_usage_publish
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/monetization/publish-usage/status"'
 
@@ -1984,7 +1964,7 @@ paths:
             - apim:admin
             - apim:api_workflow_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/workflows"'
 
@@ -2027,7 +2007,7 @@ paths:
             - apim:admin
             - apim:api_workflow_view
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"'
 
@@ -2072,7 +2052,7 @@ paths:
             - apim:admin
             - apim:api_workflow_approve
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
 
@@ -2121,7 +2101,7 @@ paths:
             - apim:admin
             - apim:tenantInfo
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/tenant-info/john"'
 
@@ -2169,7 +2149,7 @@ paths:
             - apim:admin
             - apim:tenantInfo
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/custom-urls/wso2.com"'
 
@@ -2197,7 +2177,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/api-categories"'
 
@@ -2231,7 +2211,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/api-categories"'
 
@@ -2273,7 +2253,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 
@@ -2298,7 +2278,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 
@@ -2328,7 +2308,7 @@ paths:
             - apim:admin
             - apim:admin_settings
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/settings"'
 
@@ -2366,7 +2346,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-types"'
 
@@ -2401,7 +2381,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions"'
 
@@ -2444,7 +2424,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions"'
 
@@ -2475,7 +2455,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions"'
 
@@ -2510,7 +2490,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection"'
 
@@ -2553,7 +2533,7 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection"'
 
@@ -2593,9 +2573,9 @@ paths:
             - apim:admin
             - apim:admin_alert_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection"'
+          "https://127.0.0.1:9443/api/am/admin/v3/alert-subscriptions/bot-detection/7c9ee02d-37f5-4694-b99c-6d5641b28645"'
 
   ######################################################
   # System scopes resource API
@@ -2633,7 +2613,7 @@ paths:
             - apim:admin
             - apim:scope_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/system-scopes/YXBpbTpzdWJzY3JpYmU?username=john"'
 
@@ -2668,7 +2648,7 @@ paths:
             - apim:scope_manage
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/system-scopes"'
 
@@ -2712,7 +2692,7 @@ paths:
             - apim:admin
             - apim:scope_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/system-scopes"'
 
@@ -2745,7 +2725,7 @@ paths:
             - apim:admin
             - apim:scope_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/system-scopes/role-aliases"'
 
@@ -2780,7 +2760,7 @@ paths:
             - apim:scope_manage
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/system-scopes/role-aliases"'
 
@@ -2852,7 +2832,7 @@ paths:
             - apim:admin
             - apim:tenant_theme_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/tenant-theme" > theme.zip'
 
@@ -2893,7 +2873,7 @@ paths:
             - apim:admin
             - apim:tenant_theme_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@theme.zip "https://127.0.0.1:9443/api/am/admin/v3/tenant-theme"'
 
@@ -2933,7 +2913,7 @@ paths:
         - OAuth2Security:
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/tenant-config" > tenant-config.json'
     put:
@@ -2969,7 +2949,7 @@ paths:
         - OAuth2Security:
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
            "https://127.0.0.1:9443/api/am/admin/v3/tenant-config"'
 
@@ -3009,7 +2989,7 @@ paths:
         - OAuth2Security:
             - apim:admin
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/tenant-config-schema" > tenant-config-schema.json'
 
@@ -3037,7 +3017,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/key-managers"'
 
@@ -3071,7 +3051,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/key-managers"'
 
@@ -3111,7 +3091,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
 
@@ -3149,7 +3129,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
 
@@ -3174,7 +3154,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
 
@@ -3212,7 +3192,7 @@ paths:
             - apim:admin
             - apim:admin_operations
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F "type=WSO2-IS" "https://127.0.0.1:9443/api/am/admin/v3/key-managers/discover"'
 
@@ -3261,6 +3241,75 @@ components:
           type: string
           description: |
             Description about individual errors occurred
+    ThrottlePolicyList:
+      title: Throttle Policy List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Throttling Policies returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThrottlePolicy'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    ThrottlePolicyDetailsList:
+      title: Policy List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Throttling Policies returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThrottlePolicyDetails'
+    ThrottlePolicyDetails:
+      title: Generic Policy
+      required:
+        - policyName
+      type: object
+      properties:
+        policyId:
+          type: integer
+          description: Id of policy
+          readOnly: true
+          example: 3
+        uuid:
+          type: string
+          description: UUId of policy
+          readOnly: true
+          example: 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93
+        policyName:
+          maxLength: 60
+          minLength: 1
+          type: string
+          description: Name of policy
+          example: 30PerMin
+        displayName:
+          type: string
+          description: Display name of the policy
+          example: 30PerMin
+          maxLength: 512
+        description:
+          maxLength: 1024
+          type: string
+          description: Description of the policy
+          example: Allows 30 request per minute
+        isDeployed:
+          type: boolean
+          description: Indicates whether the policy is deployed successfully or not.
+          default: false
+        type:
+          type: string
+          description: Indicates the type of throttle policy
+      discriminator:
+        propertyName: type
     ThrottlePolicy:
       title: Generic Throttling Policy
       required:
@@ -3297,6 +3346,18 @@ components:
           description: Indicates the type of throttle policy
       discriminator:
         propertyName: type
+    ExportThrottlePolicy:
+      title: Export Throttling Policy
+      type : object
+      properties:
+        type:
+          type: string
+        subtype:
+          type: string
+        version:
+          type: string
+        data:
+          type: object
     AdvancedThrottlePolicyInfo:
       title: Advanced Throttling Policy
       allOf:
@@ -3807,79 +3868,6 @@ components:
           type: string
           description: Value of the custom attribute
           example: value1
-    mediationList:
-      title: Mediation List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of mediation sequences returned.
-          example: 1
-        next:
-          type: string
-          description: |
-            Link to the next subset of sequences qualified.
-            Empty if no more sequences are to be returned.
-          example: ""
-        previous:
-          type: string
-          description: |
-            Link to the previous subset of sequences qualified.
-            Empty if current subset is the first subset returned.
-          example: ""
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/MediationInfo'
-    MediationInfo:
-      title: MediationInfo
-      required:
-        - id
-        - name
-        - type
-      type: object
-      properties:
-        name:
-          type: string
-          example: json_fault.xml
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-        type:
-          type: string
-          example: in
-          enum:
-            - in
-            - out
-            - fault
-    Mediation:
-      title: Mediation
-      required:
-        - config
-        - name
-        - type
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-          example: 01234567-0123-0123-0123-012345678901
-        name:
-          type: string
-          example: custom_log_in_message.xml
-        type:
-          type: string
-          example: IN
-          enum:
-            - IN
-            - OUT
-            - FAULT
-        config:
-          type: string
-          example: <sequence xmlns="http://ws.apache.org/ns/synapse" name="custom_log_in_message">
-            <log level="full"> <property name="IN_MESSAGE" value="IN_MESSAGE_21133232"/>
-            </log> </sequence>
     ApplicationList:
       title: Application List
       type: object
@@ -4583,7 +4571,7 @@ components:
           example: true
         tooltip:
           type: string
-          example: Entet username to connect to key manager
+          example: Enter username to connect to key manager
         default:
           type: object
           properties: {}
@@ -5028,6 +5016,46 @@ components:
             moreInfo: ""
             error: []
   parameters:
+    If-None-Match:
+      name: If-None-Match
+      in: header
+      description: |
+        Validator for conditional requests; based on the ETag of the formerly retrieved
+        variant of the resource.
+      schema:
+        type: string
+    requestedTenant:
+      name: X-WSO2-Tenant
+      in: header
+      description: |
+        For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+          retirieved from.
+      schema:
+        type: string
+    sortBy:
+      name: sortBy
+      in: query
+      description: |
+        Criteria for sorting.
+      schema:
+        type: string
+        default: createdTime
+        enum:
+          - apiName
+          - version
+          - createdTime
+          - status
+    sortOrder:
+      name: sortOrder
+      in: query
+      description: |
+        Order of sorting(ascending/descending).
+      schema:
+        type: string
+        default: desc
+        enum:
+          - asc
+          - desc
     username:
       name: username
       in: query
@@ -5040,7 +5068,7 @@ components:
       name: scopeName
       in: path
       description: |
-        scope name to be validated
+        Base64 URL encoded value of the scope name to be validated
       required: true
       schema:
         type: string
@@ -5117,14 +5145,6 @@ components:
       schema:
         type: integer
         default: 0
-    mediationPolicyId:
-      name: mediationPolicyId
-      in: path
-      description: |
-        Mediation policy Id
-      required: true
-      schema:
-        type: string
     user:
       name: user
       in: query
@@ -5174,6 +5194,7 @@ components:
           tokenUrl: https://localhost:9443/oauth2/token
           scopes:
             openid: Authorize access to user details
+            apim:policies_import_export: Export and import policies related operations
             apim:admin: Manage all admin operations
             apim:tier_view: View throttling policies
             apim:tier_manage: Update and delete throttling policies

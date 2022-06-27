@@ -38,6 +38,7 @@ public final class RestApiConstants {
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
     public static final String ORGANIZATION = "organization";
+    public static final String SUB_ORGANIZATION = "sub_organization";
     public static final String MASKED_TOKEN = "maskedToken";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
@@ -72,7 +73,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_APP_CONSUMER_KEY = "application consumer key";
     public static final String RESOURCE_ADVANCED_POLICY = "advanced policy";
     public static final String RESOURCE_KEY_MANAGER = "key manager";
-    public static final String RESOURCE_SUBSCRIPTION_POLICY = "subcription policy";
+    public static final String RESOURCE_SUBSCRIPTION_POLICY = "subscription policy";
     public static final String RESOURCE_CUSTOM_RULE = "custom rule";
     public static final String RESOURCE_BLOCK_CONDITION = "block condition";
     public static final String RESOURCE_TIER = "tier";

@@ -66,7 +66,7 @@ public class MonetizationApiServiceImpl implements MonetizationApiService {
                 //when there is no record of the last publish time
                 APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                String gap = configuration.getFirstProperty(APIConstants.Monetization.FROM_TIME_CONFIGURATION_PROPERTY);
+                String gap = configuration.getMonetizationConfigurationDto().getPublishTimeDurationInDays();
                 //if the from time / last publish time is not set , set it to default
                 if (gap == null) {
                     gap = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_TIME_GAP_IN_DAYS;

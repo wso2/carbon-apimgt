@@ -30,6 +30,7 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import org.apache.http.HttpHeaders;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcesso
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import java.net.SocketAddress;
@@ -58,7 +60,7 @@ import java.util.UUID;
  * Test class for WebsocketInboundHandler.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WebSocketUtils.class, InboundWebsocketProcessorUtil.class})
+@PrepareForTest({WebSocketUtils.class, InboundWebsocketProcessorUtil.class, APIUtil.class})
 public class WebsocketInboundHandlerTestCase {
 
     private static final String channelIdString = "11111";
@@ -78,6 +80,7 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.when(channel.id()).thenReturn(channelId);
         Mockito.when(channelId.asLongText()).thenReturn(channelIdString);
         Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
+        PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(WebSocketUtils.class);
         SocketAddress socketAddress = Mockito.mock(SocketAddress.class);
         Mockito.when(channel.remoteAddress()).thenReturn(socketAddress);
@@ -125,10 +128,12 @@ public class WebsocketInboundHandlerTestCase {
                 inboundMessageContext);
         String headerName = "test-header";
         String headerValue = "test-header-value";
+        String strWebSocket = "websocket";
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         FullHttpRequest fullHttpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
                 "ws://localhost:8080/graphql");
         fullHttpRequest.headers().set(headerName, headerValue);
+        fullHttpRequest.headers().set(HttpHeaders.UPGRADE, strWebSocket);
         Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
                 inboundMessageContext)).thenReturn(responseDTO);
         websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
@@ -147,6 +152,7 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
                 inboundMessageContext)).thenReturn(responseDTO);
         fullHttpRequest.headers().set(headerName, headerValue);
+        fullHttpRequest.headers().set(HttpHeaders.UPGRADE, strWebSocket);
         websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
         Assert.assertFalse(InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
                 .containsKey(channelIdString));  // Closing connection error has occurred

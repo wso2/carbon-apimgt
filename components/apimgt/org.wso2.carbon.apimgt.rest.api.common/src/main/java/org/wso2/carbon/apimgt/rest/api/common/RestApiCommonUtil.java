@@ -418,6 +418,11 @@ public class RestApiCommonUtil {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
 
+    public static APIConsumer getConsumer(String subscriberName, String organization) throws APIManagementException {
+
+        return APIManagerFactory.getInstance().getAPIConsumer(subscriberName, organization);
+    }
+
     /**
      * This method retrieves the Swagger Definition for an API to be displayed
      *
@@ -425,16 +430,10 @@ public class RestApiCommonUtil {
      * @param apiProvider API Provider
      * @return String with the swagger definition
      */
-    public static String retrieveSwaggerDefinition(API api, APIProvider apiProvider)
+    public static String retrieveSwaggerDefinition(String uuid, API api, APIProvider apiProvider)
             throws APIManagementException {
 
-        String apiSwagger = null;
-        if (api.getUuid() != null) {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), api.getOrganization());
-        } else {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), api.getOrganization());
-        }
-
+        String apiSwagger = apiProvider.getOpenAPIDefinition(uuid, api.getOrganization());
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
         return parser.getOASDefinitionForPublisher(api, apiSwagger);
     }

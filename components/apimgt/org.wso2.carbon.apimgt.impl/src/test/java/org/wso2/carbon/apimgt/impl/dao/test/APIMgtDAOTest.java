@@ -829,6 +829,24 @@ public class APIMgtDAOTest {
     }
 
     @Test
+    public void testAPIGatewayTypeHandling() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIGatewayVendorByApiUUID",
+                "getAPIGatewayVendorByApiUUID", "1.0.0");
+        API api = new API(apiId);
+        api.setContext("/getAPIGatewayTypeHandling");
+        api.setContextTemplate("/getAPIGatewayTypeHandling/{version}");
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        api.setGatewayVendor("wso2");
+        api.setGatewayType("wso2/choreo-connect");
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+        String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(apiUUID);
+        assertNotNull(gatewayVendor);
+        assertTrue(gatewayVendor.equals("wso2"));
+        apiMgtDAO.deleteAPI(api.getUuid());
+    }
+
+    @Test
     public void testCreateApplicationRegistrationEntry() throws Exception {
         Subscriber subscriber = new Subscriber("testCreateApplicationRegistrationEntry");
         subscriber.setTenantId(-1234);
@@ -889,7 +907,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,subscriber.getName());
         int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application,
                 APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
-        assertTrue(apiMgtDAO.isContextExist(api.getContext()));
+        assertTrue(apiMgtDAO.isContextExist(api.getContext(), api.getOrganization()));
         assertTrue(api.getContext().equals(apiMgtDAO.getAPIContext(api.getUuid())));
         apiMgtDAO.removeSubscription(apiId, application.getId());
         apiMgtDAO.removeSubscriptionById(subsId);
@@ -984,12 +1002,6 @@ public class APIMgtDAOTest {
         apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId(), organization);
         subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.REJECTED);
         apiMgtDAO.updateSubscription(subscribedAPI);
-        assertTrue(apiMgtDAO.hasSubscription(subscriptionPolicy.getPolicyName(), subscriber.getName(),
-                PolicyConstants.POLICY_LEVEL_SUB));
-        assertTrue(apiMgtDAO.hasSubscription(applicationPolicy.getPolicyName(), subscriber.getName(),
-                PolicyConstants.POLICY_LEVEL_APP));
-        assertTrue(apiMgtDAO.hasSubscription(apiPolicy.getPolicyName(), subscriber.getName(),
-                PolicyConstants.POLICY_LEVEL_API));
         assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(api.getUuid()))));
         apiMgtDAO.recordAPILifeCycleEvent(api.getUuid(), "CREATED", "PUBLISHED",
                 "testCreateApplicationRegistrationEntry", -1234);

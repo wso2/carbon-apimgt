@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract class for jwt generation.
@@ -184,13 +185,16 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                     log.error("Error while reading claim values", e);
                 }
             } else if (JWTConstants.EXPIRY_TIME.equals(claimEntry.getKey())) {
-                jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(Long.parseLong((String) claimEntry.getValue())));
+                long exp = TimeUnit.SECONDS.toMillis(Long.parseLong((String) claimEntry.getValue()));
+                jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(exp));
             } else if (JWTConstants.ISSUED_TIME.equals(claimEntry.getKey())) {
-                jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(Long.parseLong((String) claimEntry.getValue())));
+                long iat = TimeUnit.SECONDS.toMillis(Long.parseLong((String) claimEntry.getValue()));
+                jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(iat));
             } else {
                 jwtClaimSetBuilder.claim(claimEntry.getKey(), claimEntry.getValue());
             }
         }
+
         //Adding JWT standard claim
         jwtClaimSetBuilder.jwtID(UUID.randomUUID().toString());
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();

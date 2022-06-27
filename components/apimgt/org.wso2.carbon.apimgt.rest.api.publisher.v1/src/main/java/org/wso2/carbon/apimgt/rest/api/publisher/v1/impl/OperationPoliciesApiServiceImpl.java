@@ -122,22 +122,17 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
 
                 OperationPolicyData existingPolicy =
-                        apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(), organization,
-                                false);
+                        apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(),
+                                policySpecification.getVersion(), organization, false);
                 String policyID;
-                if (existingPolicy != null) {
-                    policyID = existingPolicy.getPolicyId();
-                    apiProvider.updateOperationPolicy(policyID, operationPolicyData, organization);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Existing common operation policy with name " + policySpecification.getName()
-                                + " has been updated");
-                    }
-                } else {
+                if (existingPolicy == null) {
                     policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
                     if (log.isDebugEnabled()) {
-                        log.debug(
-                                "A common operation policy has been added with name " + policySpecification.getName());
+                        log.debug("A common operation policy has been added with name "
+                                + policySpecification.getName());
                     }
+                } else {
+                    throw new APIManagementException("Existing common operation policy found for the same name.");
                 }
                 operationPolicyData.setPolicyId(policyID);
                 OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil
@@ -197,15 +192,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                     + operationPolicyId, e, log);
         }
         return null;
-    }
-
-    @Override
-    public Response exportOperationPolicySpecificationSchema(MessageContext messageContext)
-            throws APIManagementException {
-
-        String schema = APIUtil.retrieveOperationPolicySpecificationJsonSchema().toString();
-        return Response.ok().entity(schema)
-                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
     }
 
     /**

@@ -25,7 +25,6 @@ import javax.ws.rs.core.SecurityContext;
 public interface OperationPoliciesApiService {
       public Response addCommonOperationPolicy(InputStream policySpecFileInputStream, Attachment policySpecFileDetail, InputStream synapsePolicyDefinitionFileInputStream, Attachment synapsePolicyDefinitionFileDetail, InputStream ccPolicyDefinitionFileInputStream, Attachment ccPolicyDefinitionFileDetail, MessageContext messageContext) throws APIManagementException;
       public Response deleteCommonOperationPolicyByPolicyId(String operationPolicyId, MessageContext messageContext) throws APIManagementException;
-      public Response exportOperationPolicySpecificationSchema(MessageContext messageContext) throws APIManagementException;
       public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query, MessageContext messageContext) throws APIManagementException;
       public Response getCommonOperationPolicyByPolicyId(String operationPolicyId, MessageContext messageContext) throws APIManagementException;
       public Response getCommonOperationPolicyContentByPolicyId(String operationPolicyId, MessageContext messageContext) throws APIManagementException;

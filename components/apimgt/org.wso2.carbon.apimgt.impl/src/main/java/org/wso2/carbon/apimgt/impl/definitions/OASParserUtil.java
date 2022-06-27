@@ -1084,47 +1084,6 @@ public class OASParserUtil {
     }
 
     /**
-     * This method saves api definition json in the registry
-     *
-     * @param api               API to be saved
-     * @param apiDefinitionJSON API definition as JSON string
-     * @param registry          user registry
-     * @throws APIManagementException
-     */
-    public static void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry)
-            throws APIManagementException {
-        String apiName = api.getId().getApiName();
-        String apiVersion = api.getId().getVersion();
-        String apiProviderName = api.getId().getProviderName();
-
-        try {
-            String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
-            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
-            Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(resourcePath);
-            }
-            resource.setContent(apiDefinitionJSON);
-            resource.setMediaType("application/json");
-            registry.put(resourcePath, resource);
-
-            String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null) {
-                visibleRoles = api.getVisibleRoles().split(",");
-            }
-
-            //Need to set anonymous if the visibility is public
-            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
-
-        } catch (RegistryException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + '-' + apiVersion, e);
-        }
-    }
-
-    /**
      * This method returns api definition json for given api
      *
      * @param apiIdentifier api identifier
@@ -1185,11 +1144,13 @@ public class OASParserUtil {
                                                   Set<Scope> apiScopes) throws APIManagementException {
 
         for (String scopeName : resourceScopes) {
-            Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
-            if (scope == null) {
-                throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+            if (StringUtils.isNotBlank(scopeName)) {
+                Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+                if (scope == null) {
+                    throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                }
+                template.setScopes(scope);
             }
-            template.setScopes(scope);
         }
         return template;
     }

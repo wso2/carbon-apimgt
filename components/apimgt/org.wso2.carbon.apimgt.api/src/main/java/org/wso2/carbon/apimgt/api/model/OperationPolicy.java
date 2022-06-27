@@ -24,6 +24,7 @@ import java.util.Objects;
 public class OperationPolicy implements Comparable<OperationPolicy> {
 
     private String policyName = "";
+    private String policyVersion = "v1";
     private String direction = null;
     private Map<String, Object> parameters = null;
     private String policyId = null;
@@ -37,6 +38,16 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
     public void setPolicyName(String policyName) {
 
         this.policyName = policyName;
+    }
+
+    public String getPolicyVersion() {
+
+        return policyVersion;
+    }
+
+    public void setPolicyVersion(String policyVersion) {
+
+        this.policyVersion = policyVersion;
     }
 
     public Map<String, Object> getParameters() {
@@ -87,14 +98,14 @@ public class OperationPolicy implements Comparable<OperationPolicy> {
         if (o == null || getClass() != o.getClass())
             return false;
         OperationPolicy policyObj = (OperationPolicy) o;
-        return policyId == policyObj.policyId && policyName == policyObj.policyName && direction.equals(
-                policyObj.direction) && parameters.equals(policyObj.parameters);
+        return policyId == policyObj.policyId && policyName == policyObj.policyName && policyVersion == policyObj.policyVersion
+                && direction.equals(policyObj.direction) && parameters.equals(policyObj.parameters);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(policyName, direction, parameters, policyId);
+        return Objects.hash(policyName, policyVersion, direction, parameters, policyId);
     }
 
     @Override

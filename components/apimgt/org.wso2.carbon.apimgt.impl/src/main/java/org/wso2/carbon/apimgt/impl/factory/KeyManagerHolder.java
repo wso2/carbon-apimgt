@@ -68,7 +68,7 @@ public class KeyManagerHolder {
             organizationKeyManagerDto = new OrganizationKeyManagerDto();
         }
         if (organizationKeyManagerDto.getKeyManagerByName(name) != null) {
-            log.error("Key Manager " + name + " already initialized in tenant " + organization);
+            log.warn("Key Manager " + name + " already initialized in tenant " + organization);
         }
         if (keyManagerConfiguration.isEnabled() && !KeyManagerConfiguration.TokenType.EXCHANGED
                 .equals(keyManagerConfiguration.getTokenType())) {

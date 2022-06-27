@@ -40,7 +40,8 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private String businessOwnerEmail;
     private String subscriptionAvailability; // e.g. "CURRENT_TENANT";who is allowed for subscriptions
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;    
-    private int cacheTimeout;    
+    private int cacheTimeout;
+    private String responseCache;
     private Set<String> availableTierNames;    
     private Set<String> environments;    
     private String transports;    
@@ -267,7 +268,14 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
         this.versionTimestamp = versionTimestamp;
     }
 
-    /*
+    public String getResponseCache() {
+        return responseCache;
+    }
+
+    public void setResponseCache(String responseCache) {
+        this.responseCache = responseCache;
+    }
+/*
     private String inSequence;
     private String outSequence;
     private String faultSequence;

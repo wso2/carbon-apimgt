@@ -21,18 +21,24 @@ import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.UnExecutableSchemaGenerator;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.GraphQLProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
@@ -41,12 +47,14 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Test class for GraphQLRequestProcessor.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({InboundWebsocketProcessorUtil.class})
+@PrepareForTest({InboundWebsocketProcessorUtil.class, WebSocketUtils.class})
 public class GraphQLRequestProcessorTest {
 
     @Test
@@ -87,6 +95,13 @@ public class GraphQLRequestProcessorTest {
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
                 inboundMessageContext, "1")).thenReturn(responseDTO);
         GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
+        inboundMessageContext.setCtx(ctx);
+        Channel channel = Mockito.mock(Channel.class);
+        Mockito.when(ctx.channel()).thenReturn(channel);
+        PowerMockito.mockStatic(WebSocketUtils.class);
+        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
+        PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
         InboundProcessorResponseDTO processorResponseDTO =
                 graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
         Assert.assertFalse(processorResponseDTO.isError());
@@ -284,6 +299,13 @@ public class GraphQLRequestProcessorTest {
         GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
         inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
 
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        verbInfoDTO.setAuthType("Any");
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("liftStatusChange",
+                inboundMessageContext)).thenReturn(verbInfoDTO);
+
         GraphQLProcessorResponseDTO graphQLProcessorResponseDTO = new GraphQLProcessorResponseDTO();
         graphQLProcessorResponseDTO.setError(true);
         graphQLProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR);
@@ -294,6 +316,13 @@ public class GraphQLRequestProcessorTest {
                 .thenReturn(graphQLProcessorResponseDTO);
 
         GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
+        inboundMessageContext.setCtx(ctx);
+        Channel channel = Mockito.mock(Channel.class);
+        Mockito.when(ctx.channel()).thenReturn(channel);
+        PowerMockito.mockStatic(WebSocketUtils.class);
+        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
+        PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
         InboundProcessorResponseDTO processorResponseDTO =
                 graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
         Assert.assertTrue(processorResponseDTO.isError());
@@ -313,6 +342,66 @@ public class GraphQLRequestProcessorTest {
         Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
                 String.valueOf(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR));
         Assert.assertFalse(processorResponseDTO.isCloseConnection());
+    }
+
+    @Test
+    public void testHandleRequestScopeValidationSkipWhenSecurityDisabled() throws Exception  {
+
+        InboundMessageContext inboundMessageContext = new InboundMessageContext();
+        int msgSize = 100;
+        String msgText = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{},\"extensions\":{},"
+                + "\"operationName\":null,\"query\":\"subscription {\\n  "
+                + "liftStatusChange {\\n    id\\n    name\\n }\\n}\\n\"}}";
+        PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
+        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
+                .thenReturn(responseDTO);
+
+        // Get schema and parse
+        String graphqlDirPath = "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_additional_props.graphql";
+        String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
+        GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+        GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+        inboundMessageContext.setGraphQLSchemaDTO(schemaDTO);
+
+        // VerbInfoDTO with security disabled
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("SUBSCRIPTION");
+        verbInfoDTO.setThrottling("Unlimited");
+        verbInfoDTO.setAuthType("None");
+        PowerMockito.when(InboundWebsocketProcessorUtil.findMatchingVerb("liftStatusChange",
+                inboundMessageContext)).thenReturn(verbInfoDTO);
+
+        // Creating response for scope validation
+        GraphQLProcessorResponseDTO graphQLProcessorResponseDTO = new GraphQLProcessorResponseDTO();
+        graphQLProcessorResponseDTO.setError(true);
+        graphQLProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR);
+        graphQLProcessorResponseDTO.setErrorMessage("User is NOT authorized to access the Resource");
+        graphQLProcessorResponseDTO.setCloseConnection(false);
+        graphQLProcessorResponseDTO.setId("1");
+
+        PowerMockito.when(InboundWebsocketProcessorUtil.validateScopes(inboundMessageContext,
+                "liftStatusChange", "1")).thenReturn(graphQLProcessorResponseDTO);
+        PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
+                inboundMessageContext, "1")).thenReturn(responseDTO);
+
+        GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
+        inboundMessageContext.setCtx(ctx);
+        Channel channel = Mockito.mock(Channel.class);
+        Mockito.when(ctx.channel()).thenReturn(channel);
+        PowerMockito.mockStatic(WebSocketUtils.class);
+        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
+        PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
+        InboundProcessorResponseDTO processorResponseDTO =
+                graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
+        Assert.assertFalse(processorResponseDTO.isError());
+        Assert.assertNull(processorResponseDTO.getErrorMessage());
+        Assert.assertNotEquals(processorResponseDTO.getErrorMessage(),
+                "User is NOT authorized to access the Resource");
     }
 
     @Test
@@ -351,6 +440,13 @@ public class GraphQLRequestProcessorTest {
         inboundMessageContext.setInfoDTO(infoDTO);
 
         GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
+        inboundMessageContext.setCtx(ctx);
+        Channel channel = Mockito.mock(Channel.class);
+        Mockito.when(ctx.channel()).thenReturn(channel);
+        PowerMockito.mockStatic(WebSocketUtils.class);
+        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
+        PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
         InboundProcessorResponseDTO processorResponseDTO =
                 graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
         Assert.assertTrue(processorResponseDTO.isError());
@@ -417,6 +513,13 @@ public class GraphQLRequestProcessorTest {
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
                 inboundMessageContext, "1")).thenReturn(throttleResponseDTO);
         GraphQLRequestProcessor graphQLRequestProcessor = new GraphQLRequestProcessor();
+        ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
+        inboundMessageContext.setCtx(ctx);
+        Channel channel = Mockito.mock(Channel.class);
+        Mockito.when(ctx.channel()).thenReturn(channel);
+        PowerMockito.mockStatic(WebSocketUtils.class);
+        Mockito.when(channel.attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(getChannelAttributeMap());
+        PowerMockito.when(WebSocketUtils.getApiProperties(ctx)).thenReturn(new HashMap<>());
         InboundProcessorResponseDTO processorResponseDTO =
                 graphQLRequestProcessor.handleRequest(msgSize, msgText, inboundMessageContext);
         Assert.assertTrue(processorResponseDTO.isError());
@@ -437,5 +540,49 @@ public class GraphQLRequestProcessorTest {
         Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
                 String.valueOf(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR));
         Assert.assertFalse(processorResponseDTO.isCloseConnection());
+    }
+
+    private Attribute<Map<String, Object>> getChannelAttributeMap() {
+        return new Attribute<Map<String, Object>>() {
+            @Override
+            public AttributeKey<Map<String, Object>> key() {
+                return null;
+            }
+
+            @Override
+            public Map<String, Object> get() {
+                return null;
+            }
+
+            @Override
+            public void set(Map<String, Object> stringObjectMap) {
+
+            }
+
+            @Override
+            public Map<String, Object> getAndSet(Map<String, Object> stringObjectMap) {
+                return null;
+            }
+
+            @Override
+            public Map<String, Object> setIfAbsent(Map<String, Object> stringObjectMap) {
+                return null;
+            }
+
+            @Override
+            public Map<String, Object> getAndRemove() {
+                return null;
+            }
+
+            @Override
+            public boolean compareAndSet(Map<String, Object> stringObjectMap, Map<String, Object> t1) {
+                return false;
+            }
+
+            @Override
+            public void remove() {
+
+            }
+        };
     }
 }

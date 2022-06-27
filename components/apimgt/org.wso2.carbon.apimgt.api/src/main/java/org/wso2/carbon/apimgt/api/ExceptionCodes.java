@@ -114,6 +114,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Environment specific api property config is not valid. %s", false),
     API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
+    SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -441,14 +442,6 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
 
-
-    //API mediation policies related
-    MEDIATION_POLICY_API_ALREADY_EXISTS(901800, "Mediation Policy Already Exists", 409,
-                                            "A mediation policy with the given name is already attached to the API"),
-
-    //mediation policies related common errors
-    MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
-                                                "The name of the mediation policy exceeds the max length (%s)"),
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),
     API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),
@@ -470,6 +463,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_UPLOADING_THUMBNAIL(900914,
             "Error while updating thumbnail of API/API Product", 500,
             "Error while updating thumbnail of API/API Product: %s-%s"),
+    APICTL_OPENAPI_PARSE_EXCEPTION(
+            OPENAPI_PARSE_EXCEPTION.getErrorCode(), OPENAPI_PARSE_EXCEPTION.getErrorMessage(),
+            OPENAPI_PARSE_EXCEPTION.getHttpStatusCode(), "%s"),
 
     //AsyncApi related error codes
     ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
@@ -497,22 +493,24 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
 
     //Operation Policies related error codes
-    INVALID_OPERATION_POLICY(900915, "Cannot find the selected operation policy", 400,
+    INVALID_OPERATION_POLICY(902005, "Cannot find the selected operation policy", 400,
             "Selected operation policy is not found"),
-    INVALID_OPERATION_POLICY_SPECIFICATION(900916, "Invalid operation policy specification found", 400,
+    INVALID_OPERATION_POLICY_SPECIFICATION(902006, "Invalid operation policy specification found", 400,
             "Invalid operation policy specification. %s", false),
 
-    INVALID_OPERATION_POLICY_PARAMETERS(900917, "Missing required parameters for operation policy specification", 400,
+    INVALID_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for operation policy specification", 400,
             "Required parameter(s) %s for operation policy specification %s are either missing or empty"),
-    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(900918, "Operation policy is not allowed in the applied flow", 400,
+    OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(902008, "Operation policy is not allowed in the applied flow", 400,
             "%s policy is not allowed in response flow"),
-    MISSING_MANDATORY_POLICY_ATTRIBUTES(900919, "Missing mandatory operation policy attribute", 400,
+    MISSING_MANDATORY_POLICY_ATTRIBUTES(902009, "Missing mandatory operation policy attribute", 400,
             "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
-    OPERATION_POLICY_NOT_FOUND(900920, "Operation Policy Not Found", 404,
+    OPERATION_POLICY_NOT_FOUND(902010, "Operation Policy Not Found", 404,
             "Requested operation policy with id '%s' not found"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
-            " not allowed for user %s ", false);
+            " not allowed for user %s ", false),
+    INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),
+    INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true);
 
     private final long errorCode;
     private final String errorMessage;

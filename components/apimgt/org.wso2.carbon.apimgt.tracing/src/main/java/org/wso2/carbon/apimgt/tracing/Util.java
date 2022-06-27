@@ -22,8 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
-import io.opentracing.propagation.TextMapExtractAdapter;
-import io.opentracing.propagation.TextMapInjectAdapter;
+import io.opentracing.propagation.TextMapAdapter;
 import io.opentracing.util.GlobalTracer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
@@ -32,7 +31,10 @@ import java.util.Map;
 
 /**
  * Span utility class
+ *
+ * @deprecated <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil} instead</p>
  */
+@Deprecated
 public class Util {
 
     /**
@@ -78,13 +80,14 @@ public class Util {
             ((Span) sp).setTag(key, value);
         }
     }
+
     /**
      * Update operation to the span
      *
      * @param span
      * @param name
      */
-    public static void updateOperation(TracingSpan span,  String name) {
+    public static void updateOperation(TracingSpan span, String name) {
 
         Object sp = span.getSpan();
         if (sp instanceof Span) {
@@ -133,10 +136,10 @@ public class Util {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             tracer.getTracingTracer().inject(((Span) sp).context(), Format.Builtin.HTTP_HEADERS,
-                    new TextMapInjectAdapter(tracerSpecificCarrier));
+                    new TextMapAdapter(tracerSpecificCarrier));
         } else if (sp instanceof SpanContext) {
             tracer.getTracingTracer().inject((SpanContext) sp, Format.Builtin.HTTP_HEADERS,
-                    new TextMapInjectAdapter(tracerSpecificCarrier));
+                    new TextMapAdapter(tracerSpecificCarrier));
         }
     }
 
@@ -150,7 +153,7 @@ public class Util {
     public static TracingSpan extract(TracingTracer tracer, Map<String, String> headerMap) {
 
         return new TracingSpan(tracer.getTracingTracer().extract(Format.Builtin.HTTP_HEADERS,
-                new TextMapExtractAdapter(headerMap)));
+                new TextMapAdapter(headerMap)));
     }
 
     public static TracingTracer getGlobalTracer() {
@@ -196,17 +199,15 @@ public class Util {
         return null;
     }
 
-    public static boolean tracingEnabled() {
+    public static boolean legacy() {
+
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
-            boolean remoteTracerEnabled =
-                    Boolean.parseBoolean(apiManagerConfiguration
-                            .getFirstProperty(TracingConstants.REMOTE_TRACER_ENABLED));
-            boolean logTracerEnabled =
-                    Boolean.parseBoolean(apiManagerConfiguration
-                            .getFirstProperty(TracingConstants.LOG_TRACER_ENABLED));
-            return remoteTracerEnabled || logTracerEnabled;
+            boolean legacy =
+                    Boolean.parseBoolean(apiManagerConfiguration.getFirstProperty(TracingConstants.LEGACY));
+
+            return legacy;
         }
         return false;
     }

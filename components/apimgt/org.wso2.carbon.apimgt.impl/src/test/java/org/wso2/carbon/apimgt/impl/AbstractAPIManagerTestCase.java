@@ -20,44 +20,23 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-import org.apache.http.entity.ContentType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
-import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.Wsdl;
-import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
@@ -68,14 +47,8 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -83,13 +56,8 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.CollectionImpl;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.ResourceImpl;
+import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.dataobjects.ResourceDO;
@@ -99,28 +67,17 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.UUID;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
+import java.util.*;
 
 import static org.mockito.Matchers.any;
 import static org.wso2.carbon.apimgt.impl.TestUtils.mockRegistryAndUserRealm;
@@ -141,6 +98,7 @@ public class AbstractAPIManagerTestCase {
     public static final String SAMPLE_RESOURCE_ID = "xyz";
     public static final String SAMPLE_API_RESOURCE_ID = "xyz";
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
+    public static final String SAMPLE_ORGANIZATION = "carbon.super";
     private PrivilegedCarbonContext privilegedCarbonContext;
     private PaginationContext paginationContext;
     private ApiMgtDAO apiMgtDAO;
@@ -180,61 +138,6 @@ public class AbstractAPIManagerTestCase {
         Map<String, KeyManagerDto> tenantKeyManagerDtoMap = new HashMap<>();
         tenantKeyManagerDtoMap.put("default", keyManagerDto);
         PowerMockito.when(KeyManagerHolder.getTenantKeyManagers("carbon.super")).thenReturn(tenantKeyManagerDtoMap);
-    }
-
-    @Test
-    public void testConstructor() throws Exception {
-
-        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
-        ServiceReferenceHolderMockCreator.initContextService();
-        holderMockCreator.initRegistryServiceMockCreator(false, new Object());
-        RegistryAuthorizationManager registryAuthorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
-        Mockito.doThrow(UserStoreException.class).doNothing().when(registryAuthorizationManager)
-                .authorizeRole(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
-        PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
-                .thenReturn(registryAuthorizationManager);
-        PowerMockito.mockStatic(RegistryUtils.class);
-        PowerMockito.when(RegistryUtils.getAbsolutePath((RegistryContext) Mockito.any(), Mockito.anyString()))
-                .thenReturn("/test");
-        try {
-            new AbstractAPIManager(null) {
-                @Override
-                public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
-                    return null;
-                }
-
-                @Override
-                public API getLightweightAPIByUUID(String uuid, String organization)
-                        throws APIManagementException {
-                    return null;
-                }
-
-                @Override
-                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start,
-                        int end, String sortBy, String sortOrder) throws APIManagementException {
-                    return null;
-                }
-
-                @Override
-                public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start,
-                        int end) throws APIManagementException {
-                    return null;
-                }
-            };
-            Assert.fail("User store exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while setting the permissions"));
-        }
-
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
-        PowerMockito.mockStatic(MultitenantUtils.class);
-        PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn(SAMPLE_TENANT_DOMAIN_1);
-        String userName = "admin";
-
-        Mockito.verify(
-                holderMockCreator.getRegistryServiceMockCreator().getMock().getConfigSystemRegistry(Mockito.anyInt()),
-                Mockito.atLeastOnce());
     }
 
     @Test
@@ -307,237 +210,7 @@ public class AbstractAPIManagerTestCase {
         Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier, organization));
     }
 
-    @Test
-    public void testGetAllGlobalMediationPolicies()
-            throws RegistryException, APIManagementException, IOException, XMLStreamException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Collection parentCollection = new CollectionImpl();
-        String mediationResourcePath = APIConstants.API_CUSTOM_SEQUENCE_LOCATION;
-        String childCollectionPath = mediationResourcePath + "/testMediation";
-        parentCollection.setChildren(new String[] { childCollectionPath });
-        Mockito.when(registry.get(mediationResourcePath)).thenReturn(parentCollection);
-        Collection childCollection = new CollectionImpl();
-        String resourcePath = childCollectionPath + "/policy1";
-        childCollection.setChildren(new String[] { resourcePath });
-        Mockito.when(registry.get(childCollectionPath)).thenReturn(childCollection);
-        Resource resource = new ResourceImpl();
-        resource.setUUID(SAMPLE_RESOURCE_ID);
 
-        Mockito.when(registry.get(resourcePath)).thenReturn(resource);
-        try {
-            abstractAPIManager.getAllGlobalMediationPolicies();
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get global mediation policies"));
-        }
-        String mediationPolicyContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"default-endpoint\">\n</sequence>";
-        resource.setContent(mediationPolicyContent);
-
-        List<Mediation> policies = abstractAPIManager.getAllGlobalMediationPolicies();
-        Assert.assertNotNull(policies);
-        Assert.assertEquals(policies.size(), 1);
-        PowerMockito.mockStatic(IOUtils.class);
-        PowerMockito.mockStatic(AXIOMUtil.class);
-        PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
-                .thenThrow(IOException.class).thenReturn(mediationPolicyContent);
-        PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(XMLStreamException.class);
-        abstractAPIManager.getAllGlobalMediationPolicies(); // cover the logged only exceptions
-        abstractAPIManager.getAllGlobalMediationPolicies(); // cover the logged only exceptions
-
-    }
-
-    @Test
-    public void testGetGlobalMediationPolicy()
-            throws RegistryException, APIManagementException, XMLStreamException, IOException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        String resourceUUID = SAMPLE_RESOURCE_ID;
-        Collection parentCollection = new CollectionImpl();
-        String mediationResourcePath = APIConstants.API_CUSTOM_SEQUENCE_LOCATION;
-        String childCollectionPath = mediationResourcePath + "/testMediation";
-        parentCollection.setChildren(new String[] { childCollectionPath });
-        Mockito.when(registry.get(mediationResourcePath)).thenThrow(RegistryException.class).thenReturn(parentCollection);
-        Collection childCollection = new CollectionImpl();
-        String resourcePath = childCollectionPath + "/policy1";
-        childCollection.setChildren(new String[] { resourcePath });
-        Mockito.when(registry.get(childCollectionPath)).thenReturn(childCollection);
-        Resource resource = new ResourceImpl(resourcePath, new ResourceDO());
-        resource.setUUID(resourceUUID);
-
-        Mockito.when(registry.get(resourcePath)).thenReturn(resource);
-        try {
-            abstractAPIManager.getGlobalMediationPolicy(resourceUUID);
-            Assert.fail("Registry Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while accessing registry objects"));
-        }
-        abstractAPIManager.getGlobalMediationPolicy(resourceUUID); // test for registry exception
-        String mediationPolicyContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"default-endpoint\">\n</sequence>";
-        resource.setContent(mediationPolicyContent);
-        Mediation policy = abstractAPIManager.getGlobalMediationPolicy(resourceUUID);
-        Assert.assertNotNull(policy);
-        PowerMockito.mockStatic(IOUtils.class);
-        PowerMockito.mockStatic(AXIOMUtil.class);
-        PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
-                .thenThrow(IOException.class).thenReturn(mediationPolicyContent);
-        PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(XMLStreamException.class);
-        abstractAPIManager.getGlobalMediationPolicy(resourceUUID); // cover the logged only exceptions
-        abstractAPIManager.getGlobalMediationPolicy(resourceUUID); // cover the logged only exceptions
-
-    }
-
-    @Test
-    public void testGetAllWsdls() throws RegistryException, APIManagementException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Collection parentCollection = new CollectionImpl();
-        String wsdlResourcepath = APIConstants.API_WSDL_RESOURCE;
-        String resourcePath = wsdlResourcepath + "/wsdl1";
-        parentCollection.setChildren(new String[] { resourcePath });
-        Mockito.when(registry.get(wsdlResourcepath)).thenReturn(parentCollection);
-        Resource resource = new ResourceImpl();
-        Mockito.when(registry.get(resourcePath)).thenThrow(RegistryException.class).thenReturn(resource);
-        Mockito.when(registry.resourceExists(wsdlResourcepath)).thenReturn(true);
-        try {
-            abstractAPIManager.getAllWsdls();
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get wsdl list"));
-        }
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-
-        List<Wsdl> wsdls = abstractAPIManager.getAllWsdls();
-        Assert.assertNotNull(wsdls);
-        Assert.assertEquals(wsdls.size(), 1);
-
-    }
-
-    @Test
-    public void testGetWsdlById() throws RegistryException, APIManagementException, IOException {
-        String resourceId = SAMPLE_RESOURCE_ID;
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Collection parentCollection = new CollectionImpl();
-        String wsdlResourcepath = APIConstants.API_WSDL_RESOURCE;
-        String resourcePath = wsdlResourcepath + "/wsdl1";
-        parentCollection.setChildren(new String[] { resourcePath });
-        Mockito.when(registry.get(wsdlResourcepath)).thenReturn(parentCollection);
-        Resource resource = new ResourceImpl(resourcePath, new ResourceDO());
-        Mockito.when(registry.get(resourcePath)).thenThrow(RegistryException.class).thenReturn(resource);
-        Mockito.when(registry.resourceExists(wsdlResourcepath)).thenReturn(false, true);
-        Assert.assertNull(abstractAPIManager.getWsdlById(resourceId));
-        resource.setUUID(resourceId);
-        try {
-            abstractAPIManager.getWsdlById(resourceId);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while accessing registry objects"));
-        }
-        String wsdlContent = "sample wsdl";
-        resource.setContent(wsdlContent);
-        Wsdl wsdl = abstractAPIManager.getWsdlById(resourceId);
-        Assert.assertNotNull(wsdl);
-        PowerMockito.mockStatic(IOUtils.class);
-        PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
-                .thenThrow(IOException.class);
-        abstractAPIManager.getWsdlById(resourceId);// covers logged only exception;
-
-    }
-
-    @Test
-    public void testDeleteWsdl() throws APIManagementException, RegistryException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Collection parentCollection = new CollectionImpl();
-        String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE;
-        String resourcePath = wsdlResourcePath + "/wsdl1";
-        parentCollection.setChildren(new String[] { resourcePath });
-        Mockito.when(registry.get(wsdlResourcePath)).thenReturn(parentCollection);
-        Resource resource = new ResourceImpl(resourcePath, new ResourceDO());
-        Mockito.when(registry.get(resourcePath)).thenThrow(RegistryException.class).thenReturn(resource);
-        Mockito.when(registry.resourceExists(wsdlResourcePath)).thenReturn(true);
-        try {
-            abstractAPIManager.deleteWsdl(SAMPLE_RESOURCE_ID);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while accessing registry objects"));
-        }
-
-        Mockito.when(registry.resourceExists(resourcePath)).thenReturn(true, true, true, true, false);
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-        Mockito.doThrow(RegistryException.class).doNothing().when(registry).delete(resourcePath);
-        try {
-            abstractAPIManager.deleteWsdl(SAMPLE_RESOURCE_ID);
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to delete wsdl"));
-        }
-        Assert.assertFalse(abstractAPIManager.deleteWsdl(SAMPLE_RESOURCE_ID));
-        Assert.assertTrue(abstractAPIManager.deleteWsdl(SAMPLE_RESOURCE_ID));
-    }
-
-    @Test
-    public void testGetWsdl() throws APIManagementException, RegistryException, IOException {
-        Resource resourceMock = Mockito.mock(Resource.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        String wsdlName =
-                identifier.getProviderName() + "--" + identifier.getApiName() + identifier.getVersion() + ".wsdl";
-        String wsdlResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + wsdlName;
-        Resource resource = new ResourceImpl(wsdlResourcePath, new ResourceDO());
-        Mockito.when(registry.get(wsdlResourcePath)).thenThrow(RegistryException.class).thenReturn(resource);
-        Mockito.when(registry.resourceExists(wsdlResourcePath)).thenReturn(true);
-        try {
-            abstractAPIManager.getWSDL(identifier);
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while getting wsdl file from the registry"));
-        }
-        String wsdlContent = "sample wsdl";
-        resource.setContent(wsdlContent);
-        InputStream inputStream = new ArrayInputStream();
-        Mockito.when(resourceMock.getContentStream()).thenReturn(inputStream);
-        Assert.assertEquals(wsdlContent, IOUtils.toString(abstractAPIManager.getWSDL(identifier).getContent()));
-        PowerMockito.mockStatic(IOUtils.class);
-    }
-
-    @Test
-    public void testUploadWsdl() throws RegistryException, APIManagementException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Resource resource = new ResourceImpl();
-        String resourcePath = "/test/wsdl";
-        String wsdlContent = "sample wsdl";
-        Resource resourceMock = Mockito.mock(Resource.class);
-        resourceMock.setContent(wsdlContent);
-        resourceMock.setMediaType(String.valueOf(ContentType.APPLICATION_XML));
-        Mockito.when(registry.newResource()).thenReturn(resource);
-        Mockito.doThrow(RegistryException.class).doReturn(resourcePath).when(registry).put(resourcePath, resource);
-        try {
-            abstractAPIManager.uploadWsdl(resourcePath, wsdlContent);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while uploading wsdl to from the registry"));
-        }
-        abstractAPIManager.uploadWsdl(resourcePath, wsdlContent);
-        Mockito.verify(registry, Mockito.atLeastOnce()).put(resourcePath, resource);
-    }
-
-    @Test
-    public void testUpdateWsdl() throws APIManagementException, RegistryException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Resource resource = new ResourceImpl();
-        String resourcePath = "/test/wsdl";
-        String wsdlContent = "sample wsdl";
-        Mockito.when(registry.get(resourcePath)).thenThrow(RegistryException.class).thenReturn(resource);
-        try {
-            abstractAPIManager.updateWsdl(resourcePath, wsdlContent);
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while updating the existing wsdl"));
-        }
-        try {
-            abstractAPIManager.updateWsdl(resourcePath, wsdlContent);
-        } catch (APIManagementException e) {
-            Assert.fail("Error while updating wsdl");
-        }
-    }
 //
 //    @Test
 //    public void testGetSwagger20Definition() throws Exception {
@@ -559,249 +232,6 @@ public class AbstractAPIManagerTestCase {
 //        Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(identifier), swaggerContent);
 //    }
 
-    @Test
-    public void testGetGraphqlSchemaDefinition() throws Exception {
-        int tenantId = -1234;
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, registryService, tenantManager);
-        Mockito.when(tenantManager.getTenantId(SAMPLE_TENANT_DOMAIN)).thenThrow(UserStoreException.class)
-                .thenReturn(tenantId);
-
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        try {
-            abstractAPIManager.getGraphqlSchemaDefinition(identifier);
-            Assert.fail("Use store exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get graphql schema definition of Graphql API"));
-        }
-        String schemaContent = "sample graphql schema";
-        setFinalStatic(AbstractAPIManager.class.getDeclaredField("schemaDef"),
-                graphQLSchemaDefinition);
-        Mockito.when(graphQLSchemaDefinition.getGraphqlSchemaDefinition(identifier, null)).thenReturn(schemaContent);
-        Assert.assertEquals(abstractAPIManager.getGraphqlSchemaDefinition(identifier), schemaContent);
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        Assert.assertEquals(abstractAPIManager.getGraphqlSchemaDefinition(identifier), schemaContent);
-        Mockito.when(registryService.getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId))
-                .thenThrow(RegistryException.class);
-        abstractAPIManager.tenantDomain = null;
-        try {
-            abstractAPIManager.getGraphqlSchemaDefinition(identifier);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get graphql schema definition of Graphql API"));
-        }
-    }
-
-    @Test
-    public void testAddResourceFile() throws APIManagementException, RegistryException, IOException {
-        Identifier identifier = Mockito.mock(Identifier.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Resource resource = new ResourceImpl();
-        Mockito.when(registry.newResource()).thenReturn(resource);
-        String resourcePath = "/test";
-        String contentType = "sampleType";
-        ResourceFile resourceFile = new ResourceFile(null, contentType);
-        try {
-            abstractAPIManager.addResourceFile(identifier, resourcePath, resourceFile);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while adding the resource to the registry"));
-        }
-        InputStream in = IOUtils.toInputStream("sample content", "UTF-8");
-        resourceFile = new ResourceFile(in, contentType);
-        String returnedPath = abstractAPIManager.addResourceFile(identifier, resourcePath, resourceFile);
-        Assert.assertTrue(returnedPath.contains(resourcePath) && returnedPath.contains("/t/"));
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        returnedPath = abstractAPIManager.addResourceFile(identifier, resourcePath, resourceFile);
-        Assert.assertTrue(returnedPath.contains(resourcePath) && !returnedPath.contains("/t/"));
-
-    }
-
-    @Test
-    public void testIsDocumentationExist() throws APIManagementException, RegistryException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        String docName = "sampleDoc";
-        String docPath =
-                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                        + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
-                        + RegistryConstants.PATH_SEPARATOR + docName;
-        Mockito.when(registry.resourceExists(docPath)).thenThrow(RegistryException.class).thenReturn(true);
-        try {
-            abstractAPIManager.isDocumentationExist(identifier, docName);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to check existence of the document"));
-        }
-        Assert.assertTrue(abstractAPIManager.isDocumentationExist(identifier, docName));
-    }
-
-    @Test
-    public void testGetAllDocumentation() throws APIManagementException, RegistryException {
-        Registry registry = Mockito.mock(UserRegistry.class);
-
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager,null, registry , null, apiMgtDAO);
-        abstractAPIManager.registry = registry;
-
-        GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
-                "sample");
-        genericArtifact.setAttribute(APIConstants.DOC_TYPE, "Other");
-        genericArtifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, "URL");
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        String apiDocPath =
-                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                        + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
-                        APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.getAPIOrAPIProductDocPath(identifier)).thenReturn(apiDocPath);
-        Resource resource1 = new ResourceImpl();
-        resource1.setUUID(SAMPLE_RESOURCE_ID);
-
-        Mockito.when(genericArtifact.getPath()).thenReturn("test");
-        String docName = "sample";
-        Documentation documentation = new Documentation(DocumentationType.HOWTO, docName);
-        PowerMockito.when(APIUtil.getDocumentation(genericArtifact)).thenReturn(documentation);
-        Mockito.when(registry.resourceExists(apiDocPath)).thenThrow(RegistryException.class).thenReturn(true);
-        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
-        try {
-            abstractAPIManager.getAllDocumentation(identifier);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get documentations for api"));
-        }
-
-        Resource resource2 = new ResourceImpl();
-        resource2.setUUID(SAMPLE_RESOURCE_ID);
-        Mockito.when(genericArtifactManager.getGenericArtifact(SAMPLE_RESOURCE_ID)).thenReturn(genericArtifact);
-
-        String documentationName = "doc1";
-        Collection documentCollection = new CollectionImpl();
-        documentCollection.setChildren(new String[] {
-                apiDocPath + documentationName, apiDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
-        });
-        Mockito.when(registry.get(apiDocPath)).thenReturn(documentCollection);
-        Mockito.when(registry.get(apiDocPath + documentationName)).thenReturn(resource2);
-        PowerMockito.when(APIUtil.getDocumentation(genericArtifact)).thenReturn(documentation);
-        List<Documentation> documentationList = abstractAPIManager.getAllDocumentation(identifier);
-        Assert.assertNotNull(documentationList);
-        Assert.assertEquals(documentationList.size(), 1);
-        String contentPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
-                + RegistryConstants.PATH_SEPARATOR + RegistryConstants.PATH_SEPARATOR + documentationName;
-        genericArtifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, "In line");
-        genericArtifact.setAttribute(APIConstants.DOC_NAME, documentationName);
-        ResourceDO resourceDO = new ResourceDO();
-        resourceDO.setLastUpdatedOn(12344567);
-        Resource resource3 = new ResourceImpl(contentPath, resourceDO);
-        Mockito.when(registry.get(contentPath)).thenReturn(resource3);
-        documentationList = abstractAPIManager.getAllDocumentation(identifier);
-        Assert.assertNotNull(documentationList);
-        Assert.assertEquals(documentationList.size(), 1);
-
-    }
-
-    @Test
-    public void testGetAllDocumentationWithLoggedUser()
-            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException {
-        int tenantId = -1234;
-        UserRegistry registry = Mockito.mock(UserRegistry.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
-                registry, tenantManager);
-        Mockito.when(tenantManager.getTenantId(SAMPLE_TENANT_DOMAIN)).thenThrow(UserStoreException.class)
-                .thenReturn(tenantId);
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        String loggedInUser = "admin";
-
-        abstractAPIManager.registry = registry;
-
-        GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
-                "sample");
-        genericArtifact.setAttribute(APIConstants.DOC_TYPE, "Other");
-        genericArtifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, "URL");
-        String apiDocPath =
-                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                        + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
-                        APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.getAPIOrAPIProductDocPath(identifier)).thenReturn(apiDocPath);
-        Resource resource1 = new ResourceImpl();
-        resource1.setUUID(SAMPLE_RESOURCE_ID);
-
-        Mockito.when(genericArtifact.getPath()).thenReturn("test");
-        String docName = "sample";
-        Documentation documentation = new Documentation(DocumentationType.HOWTO, docName);
-        PowerMockito.when(APIUtil.getDocumentation(genericArtifact)).thenReturn(documentation);
-        Mockito.when(registry.resourceExists(apiDocPath)).thenReturn(true);
-        try {
-            abstractAPIManager.getAllDocumentation(identifier, loggedInUser);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get documentations for api"));
-        }
-
-        Resource resource2 = new ResourceImpl();
-        resource2.setUUID(SAMPLE_RESOURCE_ID);
-        Mockito.when(genericArtifactManager.getGenericArtifact(SAMPLE_RESOURCE_ID)).thenReturn(genericArtifact);
-
-        String documentationName = "doc1";
-        Collection documentCollection = new CollectionImpl();
-        documentCollection.setChildren(new String[] {
-                apiDocPath + documentationName, apiDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
-        });
-        Mockito.when(registry.get(apiDocPath)).thenReturn(documentCollection);
-        Mockito.when(registry.get(apiDocPath + documentationName)).thenReturn(resource2);
-        PowerMockito.when(APIUtil.getDocumentation(genericArtifact,loggedInUser)).thenReturn(documentation);
-        List<Documentation> documentationList = abstractAPIManager.getAllDocumentation(identifier,loggedInUser);
-        Assert.assertNotNull(documentationList);
-        Assert.assertEquals(documentationList.size(), 1);
-        String contentPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
-                + RegistryConstants.PATH_SEPARATOR + RegistryConstants.PATH_SEPARATOR + documentationName;
-        genericArtifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, "In line");
-        genericArtifact.setAttribute(APIConstants.DOC_NAME, documentationName);
-        ResourceDO resourceDO = new ResourceDO();
-        resourceDO.setLastUpdatedOn(12344567);
-        Resource resource3 = new ResourceImpl(contentPath, resourceDO);
-        Mockito.when(registry.get(contentPath)).thenReturn(resource3);
-        documentationList = abstractAPIManager.getAllDocumentation(identifier, loggedInUser);
-        Assert.assertNotNull(documentationList);
-        Assert.assertEquals(documentationList.size(), 1);
-
-    }
-
-    @Test
-    public void testGetDocumentation() throws APIManagementException, RegistryException {
-        Registry registry = Mockito.mock(UserRegistry.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registry, null);
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        String documentationName = "doc1";
-        String contentPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
-                + RegistryConstants.PATH_SEPARATOR + documentationName;
-        GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
-                "sample");
-        String docType = "other";
-        genericArtifact.setAttribute(APIConstants.DOC_TYPE, docType);
-        genericArtifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, "URL");
-        Resource resource = new ResourceImpl();
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-        Mockito.when(registry.get(contentPath)).thenThrow(RegistryException.class).thenReturn(resource);
-        Mockito.when(genericArtifactManager.getGenericArtifact(SAMPLE_RESOURCE_ID)).thenReturn(genericArtifact);
-        try {
-            abstractAPIManager.getDocumentation(identifier, DocumentationType.OTHER, documentationName);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get documentation details"));
-        }
-        Assert.assertTrue(
-                abstractAPIManager.getDocumentation(identifier, DocumentationType.OTHER, documentationName).getId()
-                        .equals(genericArtifact.getId()));
-    }
 
     @Test
     public void testGetDocumentationFromId() throws Exception {
@@ -827,60 +257,14 @@ public class AbstractAPIManagerTestCase {
 
     }
 
-    @Test
-    public void testGetDocumentationContent()
-            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException {
-        int tenantId = -1234;
-        UserRegistry registry = Mockito.mock(UserRegistry.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapperExtended(genericArtifactManager,
-                registryService, registry, tenantManager);
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
-                .thenReturn(tenantId);
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        String docName  = "doc1";
-        try {
-            abstractAPIManager.getDocumentationContent(identifier, docName);
-            Assert.fail("User store exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get document content found for documentation:"));
-        }
-        Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt()))
-                .thenThrow(RegistryException.class).thenReturn(registry);
-        try {
-            abstractAPIManager.getDocumentationContent(identifier, docName);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("No document content found for documentation:"));
-        }
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(false,true,true);
-        String docContent = abstractAPIManager.getDocumentationContent(identifier, docName);
-        Assert.assertNull(docContent);
-        String docObject = "samlple doc content";
-        Resource resource = new ResourceImpl();
-        resource.setContent(docObject.getBytes(StandardCharsets.UTF_8));
-        Mockito.when(registry.get(Mockito.anyString())).thenReturn(resource);
-        docContent = abstractAPIManager.getDocumentationContent(identifier, docName);
-        Assert.assertEquals(docContent,docObject);
-        abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
-                registry, tenantManager);
-        docContent = abstractAPIManager.getDocumentationContent(identifier, docName);
-        Assert.assertEquals(docContent,docObject);
-        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt()))
-                .thenReturn(registry);
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        docContent = abstractAPIManager.getDocumentationContent(identifier, docName);
-        Assert.assertEquals(docContent,docObject);
-    }
-
-
 
     @Test
     public void testIsContextExist() throws APIManagementException {
         String context = "/t/sample";
-        Mockito.when(apiMgtDAO.isContextExist(Mockito.anyString())).thenReturn( true);
+        Mockito.when(apiMgtDAO.isContextExist(Mockito.anyString(), Mockito.anyString())).thenReturn( true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertTrue(abstractAPIManager.isContextExist(context));
+        Assert.assertTrue(abstractAPIManager.isContextExist(context, SAMPLE_ORGANIZATION));
     }
 
     @Test
@@ -910,11 +294,12 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsApiNameExist() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isApiNameExist(Mockito.anyString(), Mockito.anyString())).thenReturn(false, true);
+        Mockito.when(apiMgtDAO.isApiNameExist(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
-        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
+        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, SAMPLE_ORGANIZATION));
+        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, SAMPLE_ORGANIZATION));
 
     }
 
@@ -978,44 +363,7 @@ public class AbstractAPIManagerTestCase {
         Assert.assertTrue(abstractAPIManager.getSubscriber(1).getName().equals("sub1"));
     }
 
-    @Test
-    public void testGetIcon()
-            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException {
-        APIIdentifier identifier = new APIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        int tenantId = -1234;
-        UserRegistry registry = Mockito.mock(UserRegistry.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapperExtended(genericArtifactManager,
-                registryService, registry, tenantManager);
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
-                .thenReturn(tenantId);
-        try {
-            abstractAPIManager.getIcon(identifier);
-            Assert.fail("User store exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while loading API icon of API"));
-        }
-        Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenThrow(RegistryException.class)
-                .thenReturn(registry);
-        try {
-            abstractAPIManager.getIcon(identifier);
-            Assert.fail("User store exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while loading API icon of API"));
-        }
-        Assert.assertNull(abstractAPIManager.getIcon(identifier));
-        AbstractAPIManager abstractAPIManager1 = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
-                registry, tenantManager);
-        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt()))
-                .thenReturn(registry);
-        Assert.assertNull(abstractAPIManager1.getIcon(identifier));
-        abstractAPIManager1.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true);
-        Resource resource = new ResourceImpl();
-        resource.setContent("sample conetent");
-        resource.setMediaType("api");
-        Mockito.when(registry.get(Mockito.anyString())).thenReturn(resource);
-        Assert.assertTrue(abstractAPIManager1.getIcon(identifier).getContentType().equals("api"));
-    }
+
 
 
 
@@ -1416,168 +764,7 @@ public class AbstractAPIManagerTestCase {
 
         Assert.assertEquals(4, abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_SUB).length);
     }
-    @Test
-    public void testSearchPaginatedAPIs()
-            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException,
-            XMLStreamException {
-        Map<String, Object> subContextResult = new HashMap<String, Object>();
-        subContextResult.put("1", new Object());
-        UserRegistry registry = Mockito.mock(UserRegistry.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapperExtended(null, registryService, registry,
-                tenantManager);
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
-        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt()))
-                .thenThrow(RegistryException.class).thenReturn(registry);
 
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
-            Object[] args = invocation.getArguments();
-            return (String) args[0];
-        });
-
-        try {
-            abstractAPIManager.searchPaginatedAPIs("search", API_PROVIDER, 0, 5, false);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to Search APIs"));
-        }
-        API api = new API(getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION));
-        Documentation documentation = new Documentation(DocumentationType.HOWTO, "DOC1");
-        Map<Documentation, API> documentationAPIMap = new HashMap<>();
-        BDDMockito.when(APIUtil
-                .searchAPIsByDoc(Mockito.any(), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString())).thenReturn(documentationAPIMap);
-        Assert.assertEquals(
-                abstractAPIManager.searchPaginatedAPIs("doc=search", SAMPLE_TENANT_DOMAIN_1, 0, 5, false).get("length"),
-                0);
-        documentationAPIMap.put(documentation, api);
-        Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("doc=search", null, 0, 5, false).get("length"), 5);
-
-        // Test related with searches with custom properties
-        Map<String, Object> actualAPIs = abstractAPIManager
-                .searchPaginatedAPIs("secured=*true*", SAMPLE_TENANT_DOMAIN_1, 0, 5, false);
-        List<API> retrievedAPIs = (List<API>) actualAPIs.get("apis");
-        Assert.assertEquals("Searching with additional property failed", 1, actualAPIs.get("length"));
-        Assert.assertNotNull("Search with additional property failed", retrievedAPIs);
-        Assert.assertEquals("Search with additional property failed", 1, retrievedAPIs.size());
-        Assert.assertEquals("Search with additional property failed", "sxy", retrievedAPIs.get(0).getId().getApiName());
-
-        actualAPIs = abstractAPIManager
-                .searchPaginatedAPIs("name=*test*&secured=*true*", SAMPLE_TENANT_DOMAIN_1, 0, 5, false);
-        retrievedAPIs = (List<API>) actualAPIs.get("apis");
-        Assert.assertEquals("Searching with additional property failed", 1, actualAPIs.get("length"));
-        Assert.assertNotNull("Search with additional property failed", retrievedAPIs);
-        Assert.assertEquals("Search with additional property failed", 1, retrievedAPIs.size());
-        Assert.assertEquals("Search with additional property failed", "sxy12",
-                retrievedAPIs.get(0).getId().getApiName());
-
-        TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, null, -1234);
-        Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("search", null, 0, 5, false).get("length"), 0);
-        TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, "5", -1234);
-        GovernanceArtifact governanceArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
-                "qname");
-        List<GovernanceArtifact> governanceArtifactList = new ArrayList<GovernanceArtifact>();
-        governanceArtifactList.add(governanceArtifact);
-        Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("search", null, 0, 5, false).get("length"), 0);
-        Assert.assertEquals(
-                abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false)
-                        .get("length"), 0);
-        BDDMockito.when(GovernanceUtils
-                .findGovernanceArtifacts(Mockito.anyString(), Mockito.any(Registry.class), Mockito.anyString(),
-                        Mockito.anyBoolean())).thenThrow(RegistryException.class).thenReturn(governanceArtifactList);
-        try {
-            abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false);
-            Assert.fail("APIM exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to Search APIs"));
-        }
-        API api1 = new API(getAPIIdentifier("api1", API_PROVIDER, "v1"));
-        BDDMockito.when(APIUtil.getAPI((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any())).thenReturn(api1);
-        BDDMockito.when(APIUtil.getAPIIdentifierFromUUID((String) Mockito.any())).thenReturn(getAPIIdentifier("api1", API_PROVIDER, "v1"));
-        SortedSet<API> apiSet = (SortedSet<API>) abstractAPIManager
-                .searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false).get("apis");
-        Assert.assertEquals(apiSet.size(), 1);
-        Assert.assertEquals(apiSet.first().getId().getApiName(), "api1");
-        Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, true)
-                .get("length"), 0);
-        PowerMockito.when(paginationContext.getLength()).thenReturn(12);
-        Assert.assertTrue(
-                (Boolean) abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, true)
-                        .get("isMore"));
-    }
-
-    @Test
-    public void testDeleteGlobalMediationPolicy() throws APIManagementException, RegistryException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapperExtended(null, null, registry, null);
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true, false, true, false);
-        Mockito.doThrow(RegistryException.class).doNothing().when(registry).delete(Mockito.anyString());
-        try {
-            abstractAPIManager.deleteGlobalMediationPolicy(SAMPLE_RESOURCE_ID);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to delete global mediation policy"));
-        }
-        Assert.assertFalse(abstractAPIManager.deleteGlobalMediationPolicy(SAMPLE_RESOURCE_ID));
-        Assert.assertTrue(abstractAPIManager.deleteGlobalMediationPolicy(SAMPLE_RESOURCE_ID));
-    }
-
-    @Test
-    public void testGetCreatedResourceUuid() throws RegistryException, APIManagementException {
-        Resource resource = new ResourceImpl();
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-        Mockito.when(registry.get(Mockito.anyString())).thenThrow(RegistryException.class).thenReturn(resource);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Assert.assertNull(abstractAPIManager.getCreatedResourceUuid("/test/path"));
-        Assert.assertEquals(abstractAPIManager.getCreatedResourceUuid("/test/path"), SAMPLE_RESOURCE_ID);
-    }
-
-    @Test
-    public void testGetAllApiSpecificMediationPolicies()
-            throws RegistryException, APIManagementException, IOException, XMLStreamException {
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        String parentCollectionPath =
-                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                        + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
-        parentCollectionPath = parentCollectionPath.substring(0, parentCollectionPath.lastIndexOf("/"));
-        Collection parentCollection = new CollectionImpl();
-        parentCollection.setChildren(new String[] {
-                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
-                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
-                parentCollectionPath + RegistryConstants.PATH_SEPARATOR
-                        + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT });
-        Collection childCollection = new CollectionImpl();
-        childCollection.setChildren(new String[] { "mediation1" });
-        Mockito.when(registry.get(parentCollectionPath)).thenThrow(RegistryException.class)
-                .thenReturn(parentCollection);
-        Mockito.when(registry.get(
-                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN))
-                .thenReturn(childCollection);
-
-        Resource resource = new ResourceImpl();
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-
-        String mediationPolicyContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"default-endpoint\">\n</sequence>";
-        resource.setContent(mediationPolicyContent);
-        Mockito.when(registry.get("mediation1")).thenReturn(resource);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        try {
-            abstractAPIManager.getAllApiSpecificMediationPolicies(identifier);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(
-                    e.getMessage().contains("Error occurred  while getting Api Specific mediation policies "));
-        }
-        Assert.assertEquals(abstractAPIManager.getAllApiSpecificMediationPolicies(identifier).size(), 1);
-        PowerMockito.mockStatic(IOUtils.class);
-        PowerMockito.mockStatic(AXIOMUtil.class);
-        PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
-                .thenThrow(IOException.class).thenReturn(mediationPolicyContent);
-        PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(XMLStreamException.class);
-        abstractAPIManager.getAllApiSpecificMediationPolicies(identifier);// covers exception which is only logged
-        abstractAPIManager.getAllApiSpecificMediationPolicies(identifier);// covers exception which is only logged
-    }
 
     @Test
     public void testGetMediationNameFromConfig() throws Exception {
@@ -1599,156 +786,6 @@ public class AbstractAPIManagerTestCase {
 
     }
 
-    @Test
-    public void testGetApiSpecificMediationPolicy()
-            throws RegistryException, APIManagementException, IOException, XMLStreamException {
-        String parentCollectionPath = "config/mediation/";
-
-        parentCollectionPath = parentCollectionPath.substring(0, parentCollectionPath.lastIndexOf("/"));
-        Collection parentCollection = new CollectionImpl();
-        parentCollection.setChildren(new String[] {
-                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
-                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
-                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, });
-        Collection childCollection = new CollectionImpl();
-        childCollection.setChildren(new String[] { "mediation1" });
-        Mockito.when(registry.get(parentCollectionPath)).thenThrow(RegistryException.class)
-                .thenReturn(null, parentCollection);
-        Mockito.when(registry.get(
-                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN))
-                .thenReturn(childCollection);
-
-        Resource resource = new ResourceImpl("api/mediation/policy1", new ResourceDO());
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-
-        String mediationPolicyContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"default-endpoint\">\n</sequence>";
-        resource.setContent(mediationPolicyContent);
-        Mockito.when(registry.get("mediation1")).thenReturn(resource);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-
-        Identifier identifier = Mockito.mock(Identifier.class);
-        try {
-            abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while obtaining registry objects"));
-        }
-        Assert.assertNull(
-                abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID));
-        Assert.assertEquals(
-                abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID)
-                        .getName(), "default-endpoint");
-        PowerMockito.mockStatic(IOUtils.class);
-        PowerMockito.mockStatic(AXIOMUtil.class);
-        PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
-                .thenThrow(IOException.class).thenReturn(mediationPolicyContent);
-        PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(XMLStreamException.class);
-
-        try {
-            abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID);
-            Assert.fail("IO exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error occurred while converting content stream into string"));
-        }
-        try {
-            abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID);
-            Assert.fail("XMLStream exception  not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(
-                    e.getMessage().contains("Error occurred while getting omElement out of mediation content"));
-        }
-        resource.setContent(null);
-        try {
-            abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error occurred while accessing content stream of mediation"));
-        }
-    }
-
-    @Test
-    public void testDeleteApiSpecificMediationPolicy() throws RegistryException, APIManagementException {
-        String resourcePath = "config/mediation/";
-        Identifier identifier = Mockito.mock(Identifier.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapperExtended(null, null, registry, null);
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true, false, true, false);
-        Mockito.doThrow(RegistryException.class).doNothing().when(registry).delete(Mockito.anyString());
-        try {
-            abstractAPIManager.deleteApiSpecificMediationPolicy(identifier, resourcePath, SAMPLE_RESOURCE_ID);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to delete specific mediation policy"));
-        }
-        Assert.assertFalse(
-                abstractAPIManager.deleteApiSpecificMediationPolicy(identifier, resourcePath, SAMPLE_RESOURCE_ID));
-        Assert.assertTrue(
-                abstractAPIManager.deleteApiSpecificMediationPolicy(identifier, resourcePath, SAMPLE_RESOURCE_ID));
-    }
-
-    @Test
-    public void testCheckIfResourceExists() throws APIManagementException, RegistryException {
-        String resourcePath = "config/mediation/";
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenThrow(RegistryException.class)
-                .thenReturn(false, true);
-        try {
-            abstractAPIManager.checkIfResourceExists(resourcePath);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while obtaining registry objects"));
-        }
-        Assert.assertFalse(abstractAPIManager.checkIfResourceExists(resourcePath));
-        Assert.assertTrue(abstractAPIManager.checkIfResourceExists(resourcePath));
-    }
-
-    @Test
-    public void testGetThumbnailLastUpdatedTime()
-            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException {
-        APIIdentifier identifier = new APIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true, false, true);
-        ResourceDO resourceDO = new ResourceDO();
-        resourceDO.setLastUpdatedOn(34579002);
-        Resource resource = new ResourceImpl("test/", resourceDO);
-
-        Mockito.when(registry.get(Mockito.anyString())).thenThrow(RegistryException.class).thenReturn(resource);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-
-        try {
-            abstractAPIManager.getThumbnailLastUpdatedTime(identifier);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error while loading API icon from the registry"));
-        }
-        Assert.assertNull(abstractAPIManager.getThumbnailLastUpdatedTime(identifier));
-        Assert.assertEquals(abstractAPIManager.getThumbnailLastUpdatedTime(identifier), "34579002");
-    }
-
-    @Test
-    public void testGetSwaggerDefinitionTimeStamps() throws Exception {
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        UserRegistry registry = Mockito.mock(UserRegistry.class);
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
-                .thenReturn(-1234);
-        PowerMockito.mockStatic(OASParserUtil.class);
-        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt())).thenThrow
-                (RegistryException.class).thenReturn(registry);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, registryService,registry,
-                tenantManager);
-        Assert.assertNull(abstractAPIManager.getSwaggerDefinitionTimeStamps(identifier));
-        Assert.assertNull(abstractAPIManager.getSwaggerDefinitionTimeStamps(identifier));
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Map<String, String> result = new HashMap<String, String>();
-        result.put("swagger1","scopes:apim_create,resources:{get:/*}");
-        result.put("swagger2","scopes:apim_view,resources:{get:/menu}");
-//        Mockito.when(apiDefinitionFromOpenAPISpec.getAPIOpenAPIDefinitionTimeStamps((APIIdentifier) Mockito.any(),
-//                (org.wso2.carbon.registry.api.Registry) Mockito.any())).thenReturn(result);
-//        Assert.assertEquals(abstractAPIManager.getSwaggerDefinitionTimeStamps(identifier).size(),2);
-//        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-//        result.put("swagger3","");
-//        Assert.assertEquals(abstractAPIManager.getSwaggerDefinitionTimeStamps(identifier).size(),3);
-
-    }
 
     private static void setFinalStatic(Field field, Object newValue) throws Exception {
         field.setAccessible(true);
