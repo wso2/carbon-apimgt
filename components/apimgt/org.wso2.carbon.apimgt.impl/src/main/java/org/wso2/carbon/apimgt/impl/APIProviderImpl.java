@@ -4788,13 +4788,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         for (URITemplate uriTemplate : api.getUriTemplates()) {
             // Get production Endpoint mapping
-            String productionEndpointId =
-                    apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "PRODUCTION");
+            String productionEndpointId = apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(
+                    uriTemplate.getId(), APIConstants.APIEndpoint.PRODUCTION);
             uriTemplate.setProductionEndpoint(
                     currentApiUuid.equals(productionEndpointId) ? "none" : productionEndpointId);
             // Get sandbox endpoint endpoint
-            String sandboxEndpointId =
-                    apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(uriTemplate.getId(), "SANDBOX");
+            String sandboxEndpointId = apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(
+                    uriTemplate.getId(), APIConstants.APIEndpoint.SANDBOX);
             uriTemplate.setSandboxEndpoint(currentApiUuid.equals(sandboxEndpointId) ? "none" : sandboxEndpointId);
         }
     }

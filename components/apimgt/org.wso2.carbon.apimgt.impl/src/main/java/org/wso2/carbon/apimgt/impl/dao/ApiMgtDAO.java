@@ -16204,6 +16204,35 @@ public class ApiMgtDAO {
                 insertOperationPolicyMappingStatement.executeBatch();
                 operationEndpointMappingPrepStmt.executeBatch();
 
+                //Add Primary Production endpoint mapping
+                PreparedStatement addPrimaryMapping = connection
+                        .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
+                PreparedStatement getPrimaryEpMappingStmt = connection.prepareStatement(
+                        SQLConstants.APIEndpointsSQLConstants.GET_API_PRIMARY_ENDPOINT_UUID_BY_API_ID_AND_ENV);
+                getPrimaryEpMappingStmt.setInt(1, apiId);
+                getPrimaryEpMappingStmt.setString(2, APIConstants.APIEndpoint.PRODUCTION);
+                try (ResultSet resultSet = getPrimaryEpMappingStmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        addPrimaryMapping.setInt(1, apiId);
+                        addPrimaryMapping.setInt(2, getAPIEndpointIdFromUUID(connection,
+                                resultSet.getString("ENDPOINT_UUID"), apiRevision.getRevisionUUID()));
+                        addPrimaryMapping.setString(3, APIConstants.APIEndpoint.PRODUCTION);
+                        addPrimaryMapping.addBatch();
+                    }
+                }
+                getPrimaryEpMappingStmt.setInt(1, apiId);
+                getPrimaryEpMappingStmt.setString(2,APIConstants.APIEndpoint.SANDBOX);
+                try (ResultSet resultSet = getPrimaryEpMappingStmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        addPrimaryMapping.setInt(1, apiId);
+                        addPrimaryMapping.setInt(2, getAPIEndpointIdFromUUID(connection,
+                                resultSet.getString("ENDPOINT_UUID"), apiRevision.getRevisionUUID()));
+                        addPrimaryMapping.setString(3, APIConstants.APIEndpoint.SANDBOX);
+                        addPrimaryMapping.addBatch();
+                    }
+                }
+                addPrimaryMapping.executeBatch();
+
                 // Adding to AM_API_CLIENT_CERTIFICATE
                 PreparedStatement getClientCertificatesStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
@@ -17111,6 +17140,38 @@ public class ApiMgtDAO {
                 deleteOutdatedOperationPolicyStatement.executeBatch();
                 cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, apiRevision.getApiUUID());
                 operationEndpointMappingPrepStmt.executeBatch();
+
+                // Restoring AM_API_PRIMARY_ENDPOINT_MAPPING entries
+                PreparedStatement addPrimaryMapping = connection
+                        .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
+                PreparedStatement getPrimaryEpMappingStmt = connection.prepareStatement(
+                        SQLConstants.APIEndpointsSQLConstants.GET_API_PRIMARY_ENDPOINT_UUID_BY_API_ID_AND_ENV_REVISION);
+                getPrimaryEpMappingStmt.setInt(1, apiId);
+                getPrimaryEpMappingStmt.setString(2, apiRevision.getRevisionUUID());
+                getPrimaryEpMappingStmt.setString(3,APIConstants.APIEndpoint.PRODUCTION);
+                try (ResultSet resultSet = getPrimaryEpMappingStmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        addPrimaryMapping.setInt(1, apiId);
+                        addPrimaryMapping.setInt(2, getAPIEndpointIdFromUUID(connection,
+                                resultSet.getString("ENDPOINT_UUID"), null));
+                        addPrimaryMapping.setString(3, APIConstants.APIEndpoint.PRODUCTION);
+                        addPrimaryMapping.addBatch();
+                    }
+                }
+                getPrimaryEpMappingStmt.setInt(1, apiId);
+                getPrimaryEpMappingStmt.setString(2, apiRevision.getRevisionUUID());
+                getPrimaryEpMappingStmt.setString(3,APIConstants.APIEndpoint.SANDBOX);
+                try (ResultSet resultSet = getPrimaryEpMappingStmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        addPrimaryMapping.setInt(1, apiId);
+                        addPrimaryMapping.setInt(2, getAPIEndpointIdFromUUID(connection,
+                                resultSet.getString("ENDPOINT_UUID"), null));
+                        addPrimaryMapping.setString(3, APIConstants.APIEndpoint.SANDBOX);
+                        addPrimaryMapping.addBatch();
+                    }
+                }
+                addPrimaryMapping.executeBatch();
+
                 // Restoring AM_API_CLIENT_CERTIFICATE table entries
                 PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
                         .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
@@ -18519,13 +18580,13 @@ public class ApiMgtDAO {
         if (api.getPrimaryProductionEndpointId() != null) {
             addPrimaryMapping.setInt(1, apiId);
             addPrimaryMapping.setInt(2, getAPIEndpointId(api.getPrimaryProductionEndpointId(), null));
-            addPrimaryMapping.setString(3, "PRODUCTION");
+            addPrimaryMapping.setString(3, APIConstants.APIEndpoint.PRODUCTION);
             addPrimaryMapping.addBatch();
         }
         if (api.getPrimarySandboxEndpointId() != null) {
             addPrimaryMapping.setInt(1, apiId);
             addPrimaryMapping.setInt(2, getAPIEndpointId(api.getPrimarySandboxEndpointId(), null));
-            addPrimaryMapping.setString(3, "SANDBOX");
+            addPrimaryMapping.setString(3, APIConstants.APIEndpoint.SANDBOX);
             addPrimaryMapping.addBatch();
         }
         addPrimaryMapping.executeBatch();
@@ -19945,11 +20006,11 @@ public class ApiMgtDAO {
             throws APIManagementException {
         // Get production Endpoint mapping
         String productionEndpointId =
-                getEndpointUUIDByURIMappingIdAndEnv(url_mapping_id, "PRODUCTION");
+                getEndpointUUIDByURIMappingIdAndEnv(url_mapping_id, APIConstants.APIEndpoint.PRODUCTION);
         uriTemplate.setProductionEndpoint(apiId.equals(productionEndpointId) ? "none" : productionEndpointId);
         // Get sandbox endpoint endpoint
         String sandboxEndpointId =
-                getEndpointUUIDByURIMappingIdAndEnv(url_mapping_id, "SANDBOX");
+                getEndpointUUIDByURIMappingIdAndEnv(url_mapping_id, APIConstants.APIEndpoint.SANDBOX);
         uriTemplate.setSandboxEndpoint(apiId.equals(sandboxEndpointId) ? "none" : sandboxEndpointId);
     }
 
