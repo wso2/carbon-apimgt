@@ -37,6 +37,7 @@ import org.apache.synapse.util.xpath.SynapseXPath;
 import org.jaxen.JaxenException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -60,6 +61,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -89,6 +91,7 @@ public class ApiKeyAuthenticator implements Authenticator {
     private String securityParam;
     private String apiLevelPolicy;
     private boolean isMandatory;
+    private static volatile long ttl = -1L;
 
     public ApiKeyAuthenticator(String authorizationHeader, String apiLevelPolicy, boolean isApiKeyMandatory) {
         this.securityParam = authorizationHeader;
@@ -131,6 +134,26 @@ public class ApiKeyAuthenticator implements Authenticator {
                 apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                         .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
             }
+
+            String tenantDomain = GatewayUtils.getTenantDomain();
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+
+            if (jwtGenerationEnabled) {
+                // Set certificate to jwtConfigurationDto
+                if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
+                    this.jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
+                    this.jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
+                } else {
+                    this.jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+                    this.jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+                }
+                // Set ttl to jwtConfigurationDto
+                this.jwtConfigurationDto.setTtl(getTtl());
+
+                //setting the jwt configuration dto
+                apiMgtGatewayJWTGenerator.setJWTConfigurationDto(this.jwtConfigurationDto);
+            }
+            apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
 
             String splitToken[] = apiKey.split("\\.");
             JWSHeader decodedHeader;
@@ -201,7 +224,6 @@ public class ApiKeyAuthenticator implements Authenticator {
 
             String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
                     matchingResource, httpMethod);
-            String tenantDomain = GatewayUtils.getTenantDomain();
             boolean isVerified = false;
 
             // Validate from cache
@@ -399,6 +421,10 @@ public class ApiKeyAuthenticator implements Authenticator {
             log.error("Error while parsing API Key", e);
             return new AuthenticationResponse(false, isMandatory, true, APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        } catch (APIManagementException e) {
+            log.error("Error while setting public cert/private key for backend jwt generation", e);
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
     }
 
@@ -610,6 +636,41 @@ public class ApiKeyAuthenticator implements Authenticator {
         APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
         return jwtConfigDto.getJwtHeader();
+    }
+
+    private long getTtl() {
+        if (ttl != -1) {
+            return ttl;
+        }
+        synchronized (AbstractAPIMgtGatewayJWTGenerator.class) {
+            if (ttl != -1) {
+                return ttl;
+            }
+            APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+            String gwTokenCacheConfig = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+            boolean isGWTokenCacheEnabled = Boolean.parseBoolean(gwTokenCacheConfig);
+
+            if (isGWTokenCacheEnabled) {
+                String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+
+                if (apimKeyCacheExpiry != null) {
+                    ttl = Long.parseLong(apimKeyCacheExpiry);
+                } else {
+                    ttl = Long.valueOf(900);
+                }
+            } else {
+                String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
+                if (ttlValue != null) {
+                    ttl = Long.parseLong(ttlValue);
+                } else {
+                    // 15 * 60 (convert 15 minutes to seconds)
+                    ttl = Long.valueOf(900);
+                }
+            }
+            return ttl;
+        }
     }
 
     public void setContextHeader(String contextHeader) {
