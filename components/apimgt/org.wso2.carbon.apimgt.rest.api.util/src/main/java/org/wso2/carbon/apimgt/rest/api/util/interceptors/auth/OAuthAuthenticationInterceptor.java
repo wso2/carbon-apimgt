@@ -147,7 +147,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         if (StringUtils.isNotBlank(query)) {
             operation += "?" + query;
         }
-        OAuthTokenInfo tokenInfo = (OAuthTokenInfo) inMessage.get("AUTH_TOKEN_INFO");
+        OAuthTokenInfo tokenInfo = (OAuthTokenInfo) inMessage.get(RestApiConstants.AUTH_TOKEN_INFO);
         if (tokenInfo != null) {
             audit.info(operation + " user: " + tokenInfo.getEndUserName()
                     + " app: " + tokenInfo.getConsumerKey());
