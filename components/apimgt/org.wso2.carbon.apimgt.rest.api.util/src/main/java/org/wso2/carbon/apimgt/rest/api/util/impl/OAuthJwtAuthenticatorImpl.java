@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -137,6 +138,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         OAuthTokenInfo oauthTokenInfo = new OAuthTokenInfo();
         oauthTokenInfo.setAccessToken(accessToken);
         oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject());
+        oauthTokenInfo.setConsumerKey(signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY));
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
@@ -173,6 +175,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     carbonContext.setTenantDomain(tenantDomain);
                     carbonContext.setTenantId(tenantId);
                     carbonContext.setUsername(username);
+                    message.put("AUTH_TOKEN_INFO", oauthTokenInfo);
                     message.put(RestApiConstants.SUB_ORGANIZATION, orgId);
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
