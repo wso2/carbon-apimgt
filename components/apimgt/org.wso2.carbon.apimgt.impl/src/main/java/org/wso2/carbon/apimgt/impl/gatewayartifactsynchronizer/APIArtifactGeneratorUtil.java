@@ -51,6 +51,9 @@ public class APIArtifactGeneratorUtil {
                     gatewayArtifacts =
                             gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabels, organization);
                 }
+            } else if (!apiUuids.isEmpty()) {
+                gatewayArtifacts = gatewayArtifactsMgtDAO.
+                        retrieveGatewayArtifactsOnlyByAPIIDs(apiUuids, organization);
             } else {
                 gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(organization);
             }
