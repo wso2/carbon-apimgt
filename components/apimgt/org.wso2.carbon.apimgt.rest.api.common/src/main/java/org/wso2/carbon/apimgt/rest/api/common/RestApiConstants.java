@@ -328,4 +328,6 @@ public final class RestApiConstants {
     public static final int TAG_OFFSET_DEFAULT = 0;
 
     public static final String RESOURCE_PATH_OPERATION_POLICIES = "operation-policies";
+
+    public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";
 }
