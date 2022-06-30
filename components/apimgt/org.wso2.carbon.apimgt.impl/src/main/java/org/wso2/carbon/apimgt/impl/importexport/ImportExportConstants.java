@@ -303,4 +303,7 @@ public final class ImportExportConstants {
     //APIEndpoints Constants
     public static final String API_ENDPOINTS_DIRECTORY = "Api_endpoints";
     public static final String TYPE_API_ENDPOINT = "api-endpoints";
+    
+    public static final String EXPORT_POLICY_TYPE_YAML = "YAML";
+    public static final String EXPORT_POLICY_TYPE_JSON = "JSON";
 }

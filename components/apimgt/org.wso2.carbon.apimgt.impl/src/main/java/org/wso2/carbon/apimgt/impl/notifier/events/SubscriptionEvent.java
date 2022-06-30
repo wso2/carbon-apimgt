@@ -86,6 +86,7 @@ public class SubscriptionEvent extends Event {
                 ", applicationUUID='" + applicationUUID + '\'' +
                 ", policyId='" + policyId + '\'' +
                 ", subscriptionState='" + subscriptionState + '\'' +
+                ", tenantDomain='" + tenantDomain + '\'' +
                 '}';
     }
 

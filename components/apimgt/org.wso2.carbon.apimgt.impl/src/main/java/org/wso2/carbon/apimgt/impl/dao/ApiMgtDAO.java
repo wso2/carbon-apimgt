@@ -942,6 +942,7 @@ public class ApiMgtDAO {
                     subscribedAPI.setUpdatedTime(subscribedAPI.getCreatedTime());
                 }
                 subscribedAPI.setApplication(application);
+                subscribedAPI.setOrganization(resultSet.getString("ORGANIZATION"));
             }
             return subscribedAPI;
         } catch (SQLException e) {
@@ -4077,6 +4078,8 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("APP_UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("APP_CREATED_TIME").getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(connection,application);
@@ -5972,6 +5975,8 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(connection, application);
@@ -6041,6 +6046,8 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
@@ -6092,6 +6099,14 @@ public class ApiMgtDAO {
                     application.setTier(rs.getString("APPLICATION_TIER"));
                     application.setTokenType(rs.getString("TOKEN_TYPE"));
                     subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                    if (rs.getTimestamp("CREATED_TIME") != null) {
+                        application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME")
+                                .getTime()));
+                    }
+                    if (rs.getTimestamp("UPDATED_TIME") != null) {
+                        application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME")
+                                .getTime()));
+                    }
 
                     if (multiGroupAppSharingEnabled) {
                         if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
@@ -6186,6 +6201,8 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
@@ -6256,6 +6273,8 @@ public class ApiMgtDAO {
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
                         application.setGroupId(getGroupId(connection, application.getId()));
@@ -7810,7 +7829,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public boolean isContextExist(String context) {
+    public boolean isContextExist(String context, String organization) {
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -7821,6 +7840,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, context);
+            prepStmt.setString(2, organization);
             resultSet = prepStmt.executeQuery();
 
             while (resultSet.next()) {
@@ -9961,7 +9981,8 @@ public class ApiMgtDAO {
      * @return true if the name is already available
      * @throws APIManagementException
      */
-    public boolean isApiNameExist(String apiName, String tenantDomain) throws APIManagementException {
+    public boolean isApiNameExist(String apiName, String tenantDomain, String organization)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -9979,7 +10000,8 @@ public class ApiMgtDAO {
 
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, apiName);
-            prepStmt.setString(2, contextParam + '%');
+            prepStmt.setString(2, organization);
+            prepStmt.setString(3, contextParam + '%');
             resultSet = prepStmt.executeQuery();
 
             int apiCount = 0;
@@ -10008,7 +10030,8 @@ public class ApiMgtDAO {
      * @return true if a different letter case name is already available
      * @throws APIManagementException If failed to check different letter case api name availability
      */
-    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain) throws APIManagementException {
+    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain, String organization)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -10028,6 +10051,7 @@ public class ApiMgtDAO {
             prepStmt.setString(1, apiName);
             prepStmt.setString(2, contextParam + '%');
             prepStmt.setString(3, apiName);
+            prepStmt.setString(4, organization);
             resultSet = prepStmt.executeQuery();
 
             int apiCount = 0;
@@ -13559,6 +13583,8 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setKeyType(rs.getString("KEY_TYPE"));
+                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
+                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
@@ -16563,9 +16589,12 @@ public class ApiMgtDAO {
                     connection.rollback();
                     // handle concurrent db entry update. Fix duplicate primary key issue.
                     if (e.getMessage().toLowerCase().contains("primary key violation") ||
-                            e.getMessage().toLowerCase().contains("duplicate entry")) {
-                        log.debug("Duplicate entries detected for Revision UUID " + apiRevisionId +
+                            e.getMessage().toLowerCase().contains("duplicate entry") ||
+                            e.getMessage().contains("Violation of PRIMARY KEY constraint")) {
+                        log.warn("Duplicate entries detected for Revision UUID " + apiRevisionId +
                                 " while adding deployed API revisions", e);
+                        throw new APIManagementException("Failed to add deployed API Revision for Revision UUID "
+                                + apiRevisionId,  e, ExceptionCodes.REVISION_ALREADY_DEPLOYED);
                     } else {
                         handleException("Failed to add deployed API Revision for Revision UUID "
                                 + apiRevisionId, e);
@@ -16860,6 +16889,40 @@ public class ApiMgtDAO {
                 }
             } catch (SQLException e) {
                 handleException("Failed to remove deployed API Revision entry for API UUID "
+                        + apiUUID, e);
+            }
+        }
+    }
+
+    /**
+     * Set the deployed time of the un-deployed revision entry as NULL
+     *
+     * @param apiUUID     uuid of the revision
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void setUnDeployedAPIRevision(String apiUUID, Set<DeployedAPIRevision> deployments)
+            throws APIManagementException {
+        if (deployments.size() > 0) {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYED_REVISION table
+                try (PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.SET_UN_DEPLOYED_API_REVISION)) {
+                    for (DeployedAPIRevision deployment : deployments) {
+                        statement.setString(1, deployment.getDeployment());
+                        statement.setString(2, deployment.getRevisionUUID());
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    handleException("Failed to set un-deployed API Revision entry for API UUID "
+                            + apiUUID, e);
+                }
+            } catch (SQLException e) {
+                handleException("Failed to set un-deployed API Revision entry for API UUID "
                         + apiUUID, e);
             }
         }

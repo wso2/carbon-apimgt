@@ -68,7 +68,8 @@ public class SearchApiServiceImpl implements SearchApiService {
         if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
             result = apiProvider.searchPaginatedContent(query, organization, offset, limit);
         } else {
-            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, null, null);
+            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit,
+                    RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DEFAULT_SORT_ORDER);
         }
         ArrayList<Object> apis;
         /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs

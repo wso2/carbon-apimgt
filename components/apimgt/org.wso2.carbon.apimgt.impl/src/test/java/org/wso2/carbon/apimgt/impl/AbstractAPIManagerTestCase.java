@@ -98,6 +98,7 @@ public class AbstractAPIManagerTestCase {
     public static final String SAMPLE_RESOURCE_ID = "xyz";
     public static final String SAMPLE_API_RESOURCE_ID = "xyz";
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
+    public static final String SAMPLE_ORGANIZATION = "carbon.super";
     private PrivilegedCarbonContext privilegedCarbonContext;
     private PaginationContext paginationContext;
     private ApiMgtDAO apiMgtDAO;
@@ -260,10 +261,10 @@ public class AbstractAPIManagerTestCase {
     @Test
     public void testIsContextExist() throws APIManagementException {
         String context = "/t/sample";
-        Mockito.when(apiMgtDAO.isContextExist(Mockito.anyString())).thenReturn( true);
+        Mockito.when(apiMgtDAO.isContextExist(Mockito.anyString(), Mockito.anyString())).thenReturn( true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertTrue(abstractAPIManager.isContextExist(context));
+        Assert.assertTrue(abstractAPIManager.isContextExist(context, SAMPLE_ORGANIZATION));
     }
 
     @Test
@@ -293,11 +294,12 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsApiNameExist() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isApiNameExist(Mockito.anyString(), Mockito.anyString())).thenReturn(false, true);
+        Mockito.when(apiMgtDAO.isApiNameExist(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
-        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
+        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, SAMPLE_ORGANIZATION));
+        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, SAMPLE_ORGANIZATION));
 
     }
 

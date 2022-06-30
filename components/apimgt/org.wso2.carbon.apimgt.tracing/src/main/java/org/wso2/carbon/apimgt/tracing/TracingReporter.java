@@ -34,6 +34,8 @@ import java.util.Map;
 
 /**
  * This class used to generate log tracer related logs.
+ * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.LogExporter} instead</p>
  */
 @Deprecated
 public class TracingReporter implements Reporter {
