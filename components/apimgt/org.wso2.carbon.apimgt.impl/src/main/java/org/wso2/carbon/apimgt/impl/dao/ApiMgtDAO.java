@@ -16857,6 +16857,40 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Set the deployed time of the un-deployed revision entry as NULL
+     *
+     * @param apiUUID     uuid of the revision
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void setUnDeployedAPIRevision(String apiUUID, Set<DeployedAPIRevision> deployments)
+            throws APIManagementException {
+        if (deployments.size() > 0) {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYED_REVISION table
+                try (PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.SET_UN_DEPLOYED_API_REVISION)) {
+                    for (DeployedAPIRevision deployment : deployments) {
+                        statement.setString(1, deployment.getDeployment());
+                        statement.setString(2, deployment.getRevisionUUID());
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    handleException("Failed to set un-deployed API Revision entry for API UUID "
+                            + apiUUID, e);
+                }
+            } catch (SQLException e) {
+                handleException("Failed to set un-deployed API Revision entry for API UUID "
+                        + apiUUID, e);
+            }
+        }
+    }
+
+    /**
      * Update API revision Deployment mapping record
      *
      * @param apiUUID     API UUID
