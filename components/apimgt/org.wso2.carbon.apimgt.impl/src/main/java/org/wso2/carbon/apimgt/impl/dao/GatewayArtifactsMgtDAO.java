@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class GatewayArtifactsMgtDAO {
 
@@ -448,14 +450,8 @@ public class GatewayArtifactsMgtDAO {
         // Logging the API ID List
         log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
         // Split apiId list into smaller list of size 25
-        List<List<String>> apiIdsChunk = new ArrayList<>();
-        int apiIdListSize = apiIds.size();
-        int apiIdArrayIndex = 0;
         int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
-        while (apiIdArrayIndex < apiIdListSize) {
-            apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, Math.min(apiIdArrayIndex + apiIdsChunkSize, apiIdListSize)));
-            apiIdArrayIndex += apiIdsChunkSize;
-        }
+        Collection<List<String>> apiIdsChunk = getSlicedCollection(apiIds, apiIdsChunkSize);
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
 
         for (List<String> apiIdList: apiIdsChunk) {
@@ -520,16 +516,9 @@ public class GatewayArtifactsMgtDAO {
     public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsOnlyByAPIIDs(List<String> apiIds, String tenantDomain)
             throws APIManagementException {
         // Logging the API ID List
-        log.info("Getting runtime artifacts for the API ID List: " + apiIds.toString());
-        // Split apiId list into smaller list of size 25
-        List<List<String>> apiIdsChunk = new ArrayList<>();
-        int apiIdListSize = apiIds.size();
-        int apiIdArrayIndex = 0;
+        log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
         int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
-        while (apiIdArrayIndex < apiIdListSize) {
-            apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, Math.min(apiIdArrayIndex + apiIdsChunkSize, apiIdListSize)));
-            apiIdArrayIndex += apiIdsChunkSize;
-        }
+        Collection<List<String>> apiIdsChunk = getSlicedCollection(apiIds, apiIdsChunkSize);
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
 
         for (List<String> apiIdList: apiIdsChunk) {
@@ -573,9 +562,11 @@ public class GatewayArtifactsMgtDAO {
                             }
                         }
                         apiRuntimeArtifactDto.setFile(true);
-                        log.debug("Adding runtime artifact dto for the API ID: " + apiRuntimeArtifactDto.getApiId()
-                                + ", revision ID: " + apiRuntimeArtifactDto.getRevision() + ", label: "
-                                + apiRuntimeArtifactDto.getLabel());
+                        if (log.isDebugEnabled()){
+                            log.debug("Adding runtime artifact dto for the API ID: " + apiRuntimeArtifactDto.getApiId()
+                                    + ", revision ID: " + apiRuntimeArtifactDto.getRevision() + ", label: "
+                                    + apiRuntimeArtifactDto.getLabel());
+                        }
                         apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
                     }
                 }
@@ -584,6 +575,15 @@ public class GatewayArtifactsMgtDAO {
             }
         }
         return apiRuntimeArtifactDtoList;
+    }
+
+    private Collection<List<String>> getSlicedCollection(List<String> apiIds, int apiIdsChunkSize) {
+        Collection<List<String>> apiIdsChunk = IntStream.range(0, apiIds.size())
+                .boxed()
+                .collect(Collectors.groupingBy(partition -> (partition / apiIdsChunkSize),
+                        Collectors.mapping(elementIndex -> apiIds.get(elementIndex), Collectors.toList())))
+                .values();
+        return apiIdsChunk;
     }
 
     public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByAPIIDs(List<String> apiIds, String[] labels)
