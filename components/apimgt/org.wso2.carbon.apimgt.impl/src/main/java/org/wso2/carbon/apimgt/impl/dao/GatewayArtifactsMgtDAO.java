@@ -448,7 +448,9 @@ public class GatewayArtifactsMgtDAO {
                                                                         String tenantDomain)
             throws APIManagementException {
         // Logging the API ID List
-        log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
+        }
         // Split apiId list into smaller list of size 25
         int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
         Collection<List<String>> apiIdsChunk = getSlicedCollection(apiIds, apiIdsChunkSize);
@@ -516,7 +518,9 @@ public class GatewayArtifactsMgtDAO {
     public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsOnlyByAPIIDs(List<String> apiIds, String tenantDomain)
             throws APIManagementException {
         // Logging the API ID List
-        log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
+        }
         int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
         Collection<List<String>> apiIdsChunk = getSlicedCollection(apiIds, apiIdsChunkSize);
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
