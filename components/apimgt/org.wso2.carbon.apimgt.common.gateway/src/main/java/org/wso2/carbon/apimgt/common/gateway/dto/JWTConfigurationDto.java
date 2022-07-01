@@ -41,7 +41,6 @@ public class JWTConfigurationDto {
     private Certificate publicCert;
     private PrivateKey privateKey;
     private long ttl;
-    private boolean tenantBasedSigningEnabled;
 
     public JWTConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
 
@@ -171,13 +170,4 @@ public class JWTConfigurationDto {
         return ttl;
     }
 
-    public boolean isTenantBasedSigningEnabled() {
-
-        return tenantBasedSigningEnabled;
-    }
-
-    public void setTenantBasedSigningEnabled(boolean tenantBasedSigningEnabled) {
-
-        this.tenantBasedSigningEnabled = tenantBasedSigningEnabled;
-    }
 }
