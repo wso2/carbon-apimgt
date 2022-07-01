@@ -862,6 +862,156 @@
         }
       },
       "additionalProperties": true
+    },
+    "ExternalAPIStores": {
+      "type": "object",
+      "default": {},
+      "title": "The ExternalAPIStores Schema",
+      "required": [
+        "StoreURL",
+        "ExternalAPIStore"
+      ],
+      "properties": {
+        "StoreURL": {
+          "type": "string",
+          "default": "",
+          "title": "The StoreURL Schema",
+          "examples": [
+            "http://localhost:9443/devportal"
+          ]
+        },
+        "ExternalAPIStore": {
+          "type": "array",
+          "default": [],
+          "title": "The ExternalAPIStore Schema",
+          "items": {
+            "type": "object",
+            "title": "A Schema",
+            "required": [
+              "id",
+              "type",
+              "className",
+              "DisplayName",
+              "Endpoint",
+              "Username",
+              "Password"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "The id Schema",
+                "examples": [
+                  "DeveloperPortal1",
+                  "DeveloperPortal2"
+                ]
+              },
+              "type": {
+                "type": "string",
+                "title": "The type Schema",
+                "examples": [
+                  "wso2"
+                ]
+              },
+              "className": {
+                "type": "string",
+                "title": "The className Schema",
+                "examples": [
+                  "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher"
+                ]
+              },
+              "DisplayName": {
+                "type": "string",
+                "title": "The DisplayName Schema",
+                "examples": [
+                  "DeveloperPortal1",
+                  "DeveloperPortal2"
+                ]
+              },
+              "Endpoint": {
+                "type": "string",
+                "title": "The Endpoint Schema",
+                "examples": [
+                  "http://localhost:9444/devportal1",
+                  "http://localhost:9444/devportal2"
+                ]
+              },
+              "Username": {
+                "type": "string",
+                "title": "The Username Schema",
+                "examples": [
+                  "admin"
+                ]
+              },
+              "Password": {
+                "type": "string",
+                "title": "The Password Schema",
+                "examples": [
+                  "admin"
+                ]
+              }
+            },
+            "examples": [{
+              "id": "DeveloperPortal1",
+              "type": "wso2",
+              "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
+              "DisplayName": "DeveloperPortal1",
+              "Endpoint": "http://localhost:9444/devportal1",
+              "Username": "admin",
+              "Password": "admin"
+            },
+              {
+                "id": "DeveloperPortal2",
+                "type": "wso2",
+                "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
+                "DisplayName": "DeveloperPortal2",
+                "Endpoint": "http://localhost:9444/devportal2",
+                "Username": "admin",
+                "Password": "admin"
+              }]
+          },
+          "examples": [
+            [{
+              "id": "DeveloperPortal1",
+              "type": "wso2",
+              "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
+              "DisplayName": "DeveloperPortal1",
+              "Endpoint": "http://localhost:9444/devportal1",
+              "Username": "admin",
+              "Password": "admin"
+            },
+              {
+                "id": "DeveloperPortal2",
+                "type": "wso2",
+                "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
+                "DisplayName": "DeveloperPortal2",
+                "Endpoint": "http://localhost:9444/devportal2",
+                "Username": "admin",
+                "Password": "admin"
+              }]
+          ]
+        }
+      },
+      "examples": [{
+        "StoreURL": "http://localhost:9443/devportal",
+        "ExternalAPIStore": [{
+          "id": "DeveloperPortal1",
+          "type": "wso2",
+          "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
+          "DisplayName": "DeveloperPortal1",
+          "Endpoint": "http://localhost:9444/devportal1",
+          "Username": "admin",
+          "Password": "admin"
+        },
+          {
+            "id": "DeveloperPortal2",
+            "type": "wso2",
+            "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
+            "DisplayName": "DeveloperPortal2",
+            "Endpoint": "http://localhost:9444/devportal2",
+            "Username": "admin",
+            "Password": "admin"
+          }]
+      }]
     }
   },
   "additionalProperties": true

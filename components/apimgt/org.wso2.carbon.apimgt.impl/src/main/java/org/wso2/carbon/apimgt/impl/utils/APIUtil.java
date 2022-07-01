@@ -1882,7 +1882,7 @@ public final class APIUtil {
      */
     public static Set<APIStore> getExternalStores(int tenantId) throws APIManagementException {
         // First checking if ExternalStores are defined in api-manager.xml
-        Set<APIStore> externalAPIStores = getGlobalExternalStores();
+        Set<APIStore> externalAPIStores = getGlobalExternalStores();  //ask about this
         // If defined, return Store Config provided there.
         if (externalAPIStores != null && !externalAPIStores.isEmpty()) {
             return externalAPIStores;
@@ -1894,40 +1894,33 @@ public final class APIUtil {
             if (apiStoreIterator != null) {
                 while (apiStoreIterator.hasNext()) {
                     APIStore store = new APIStore();
-                    OMElement storeElem = (OMElement) apiStoreIterator.next();
-                    String type = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
-                    String className =
-                            storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
-                    store.setPublisher((APIPublisher) getClassInstance(className));
+                    JSONObject storeElem = (JSONObject) apiStoreIterator.next();
+                    String type = (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_TYPE);
+                    store.setPublisher((APIPublisher) getClassInstance(
+                            (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_CLASS_NAME)));
                     store.setType(type); //Set Store type [eg:wso2]
-                    String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
+                    String name = (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_ID);
                     if (name == null) {
-                        log.error("The ExternalAPIStore name attribute is not defined in external-api-stores.xml.");
+                        log.error("The ExternalAPIStore name attribute is not defined");
                     }
                     store.setName(name); //Set store name
-                    OMElement configDisplayName = storeElem.getFirstChildWithName
-                            (new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
-                    String displayName = (configDisplayName != null) ? replaceSystemProperty(
-                            configDisplayName.getText()) : name;
+                    String configDisplayName = (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME);
+                    String displayName = (configDisplayName != null) ? replaceSystemProperty(configDisplayName) : name;
                     store.setDisplayName(displayName);//Set store display name
-                    store.setEndpoint(replaceSystemProperty(storeElem.getFirstChildWithName(
-                            new QName(APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText()));
+                    store.setEndpoint(
+                            replaceSystemProperty((String) storeElem.get(APIConstants.EXTERNAL_API_STORE_ENDPOINT)));
                     //Set store endpoint, which is used to publish APIs
                     store.setPublished(false);
                     if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
-                        OMElement password = storeElem.getFirstChildWithName(new QName(
-                                APIConstants.EXTERNAL_API_STORE_PASSWORD));
+                        String password = (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_PASSWORD);
                         if (password != null) {
-
-                            String value = password.getText();
                             PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
-                            store.setPassword(replaceSystemProperty(passwordResolver.getPassword(value)));
-                            store.setUsername(replaceSystemProperty(storeElem.getFirstChildWithName(
-                                    new QName(APIConstants.EXTERNAL_API_STORE_USERNAME)).getText()));
+                            store.setPassword(replaceSystemProperty(passwordResolver.getPassword(password)));
+                            store.setUsername(replaceSystemProperty(
+                                    (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_USERNAME)));
                             //Set store login username
                         } else {
-                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
-                                    "config of external-api-stores.xml.");
+                            log.error("The user-credentials of API Publisher is not defined.");
                         }
                     }
                     externalAPIStores.add(store);
@@ -1956,16 +1949,11 @@ public final class APIUtil {
     private static Iterator getExternalStoresIteratorFromConfig(int tenantId) throws APIManagementException {
 
         Iterator apiStoreIterator = null;
-        try {
-            String content =
-                    ServiceReferenceHolder.getInstance().getApimConfigService().getExternalStoreConfig(getTenantDomainFromTenantId(tenantId));
-            OMElement element = AXIOMUtil.stringToOM(content);
-            apiStoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
-
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the External Stores Configuration resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+        JSONObject content = ServiceReferenceHolder.getInstance().getApimConfigService()
+                .getExternalStoreConfig(getTenantDomainFromTenantId(tenantId));
+        if (content.containsKey(APIConstants.EXTERNAL_API_STORE)) {
+            JSONArray externalAPIStore = (JSONArray) content.get(APIConstants.EXTERNAL_API_STORE);
+            apiStoreIterator = externalAPIStore.iterator();
         }
         return apiStoreIterator;
     }

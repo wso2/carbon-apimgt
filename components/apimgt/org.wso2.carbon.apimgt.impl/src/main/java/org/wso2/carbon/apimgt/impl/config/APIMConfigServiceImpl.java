@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.config;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
@@ -126,33 +127,22 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
-    public String getExternalStoreConfig(String organization) throws APIManagementException {
-
+    public JSONObject getExternalStoreConfig(String organization) throws APIManagementException {
+        JSONObject externalAPIStores = new JSONObject(); // This empty JSON object will be returned if the configuration
+        // is not included in the advance tenant configuration.
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
+            PrivilegedCarbonContext.startTenantFlow(); //ask about this
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true); //ask about this
+            JSONObject tenantConfig = APIUtil.getTenantConfig(organization);
+            if (tenantConfig.containsKey("ExternalAPIStores")) {
+                externalAPIStores = (JSONObject) tenantConfig.get("ExternalAPIStores");
             }
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
-                return new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            } else {
-                return null;
-            }
-
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+            return externalAPIStores;
+        } finally { //ask about this
+            PrivilegedCarbonContext.endTenantFlow(); //ask about this
         }
     }
 

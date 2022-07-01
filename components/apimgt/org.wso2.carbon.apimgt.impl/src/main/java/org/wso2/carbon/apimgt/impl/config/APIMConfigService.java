@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.config;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 /**
@@ -50,7 +51,7 @@ public interface APIMConfigService {
      * @return external-store configuration.
      * @throws APIManagementException throw if external-store configuration couldn't retrieve from store.
      */
-    public String getExternalStoreConfig(String organization) throws APIManagementException;
+    public JSONObject getExternalStoreConfig(String organization) throws APIManagementException;
 
     /**
      * store tenant-config relevant to organization.

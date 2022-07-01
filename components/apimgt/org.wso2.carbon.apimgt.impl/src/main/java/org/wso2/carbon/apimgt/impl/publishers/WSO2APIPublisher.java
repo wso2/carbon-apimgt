@@ -591,24 +591,16 @@ public class WSO2APIPublisher implements APIPublisher {
         if (redirectURL != null) {
             return redirectURL;
         }
-        try {
-            String content =
-                        ServiceReferenceHolder.getInstance().getApimConfigService().getExternalStoreConfig(APIUtil.getTenantDomainFromTenantId(tenantId));
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement storeURL = element.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORES_STORE_URL));
-                if (storeURL != null) {
-                    redirectURL = storeURL.getText();
-                } else {
-                    String msg = "Store URL element is missing in External APIStores configuration";
-                    log.error(msg);
-                    throw new APIManagementException(msg);
-                }
-            return redirectURL;
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the External Stores Configuration resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+        JSONObject content = ServiceReferenceHolder.getInstance().getApimConfigService()
+                .getExternalStoreConfig(APIUtil.getTenantDomainFromTenantId(tenantId));
+        if (content.containsKey(APIConstants.EXTERNAL_API_STORES_STORE_URL)) {
+            redirectURL = (String) content.get(APIConstants.EXTERNAL_API_STORES_STORE_URL);
+        } else {
+            String msg = "Store URL element is missing in External APIStores configuration";
+            log.error(msg);
+            throw new APIManagementException(msg);
         }
+        return redirectURL;
     }
 
     /**
