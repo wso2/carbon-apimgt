@@ -137,8 +137,8 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             PrivilegedCarbonContext.startTenantFlow(); //ask about this
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true); //ask about this
             JSONObject tenantConfig = APIUtil.getTenantConfig(organization);
-            if (tenantConfig.containsKey("ExternalAPIStores")) {
-                externalAPIStores = (JSONObject) tenantConfig.get("ExternalAPIStores");
+            if (tenantConfig.containsKey(APIConstants.EXTERNAL_API_STORES)) {
+                externalAPIStores = (JSONObject) tenantConfig.get(APIConstants.EXTERNAL_API_STORES);
             }
             return externalAPIStores;
         } finally { //ask about this
