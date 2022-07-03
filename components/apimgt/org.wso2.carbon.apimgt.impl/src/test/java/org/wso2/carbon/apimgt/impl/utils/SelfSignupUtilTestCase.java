@@ -17,6 +17,8 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -126,8 +128,7 @@ public class SelfSignupUtilTestCase {
         SelfSignUpUtil.isUserNameWithAllowedDomainName("bar.com/john", userRealm);
     }
 
-    @Test
-    public void testGetSelfSignupConfigFromRegistry() throws Exception {
+    @Test public void testGetSelfSignupConfigFromRegistry() throws Exception {
 
         System.setProperty(CARBON_HOME, "");
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
@@ -139,14 +140,28 @@ public class SelfSignupUtilTestCase {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        APIMConfigService apimConfigService  = Mockito.mock(APIMConfigService.class);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
         PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(apimConfigService.getSelfSighupConfig("foo.com")).thenReturn("wsdl");
+
+        JSONObject returnConfig = new JSONObject();
+        returnConfig.put("EnableSignup", false);
+        returnConfig.put("AdminUserName", "xxxx");
+        returnConfig.put("AdminPassword", "xxxx");
+        returnConfig.put("SignUpDomain", "PRIMARY");
+        JSONArray signUpRoles = new JSONArray();
+        JSONObject signUpRole = new JSONObject();
+        signUpRole.put("RoleName", "subscriber");
+        signUpRole.put("IsExternalRole", false);
+        signUpRoles.add(signUpRole);
+        returnConfig.put("SignUpRoles", signUpRoles);
+
+        Mockito.when(apimConfigService.getSelfSighupConfig("foo.com")).thenReturn(returnConfig);
         OMElement omElement = Mockito.mock(OMElement.class);
         Mockito.when(omElement.getFirstChildWithName(Matchers.any(QName.class))).thenReturn(omElement);
         PowerMockito.mockStatic(AXIOMUtil.class);
-        Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM)).thenReturn(Mockito.mock(Iterator.class));
+        Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM))
+                .thenReturn(Mockito.mock(Iterator.class));
         PowerMockito.when(AXIOMUtil.stringToOM("wsdl")).thenReturn(omElement);
         PowerMockito.mockStatic(PasswordResolverFactory.class);
         PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
@@ -156,21 +171,32 @@ public class SelfSignupUtilTestCase {
         Assert.assertNotNull(userRegistrationConfigDTO);
     }
 
-
-
-    @Test
-    public void testGetSelfSignupConfigFromRegistryTenant() throws Exception {
+    @Test public void testGetSelfSignupConfigFromRegistryTenant() throws Exception {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
         PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn("wsdl");
+
+        JSONObject returnConfig = new JSONObject();
+        returnConfig.put("EnableSignup", false);
+        returnConfig.put("AdminUserName", "xxxx");
+        returnConfig.put("AdminPassword", "xxxx");
+        returnConfig.put("SignUpDomain", "PRIMARY");
+        JSONArray signUpRoles = new JSONArray();
+        JSONObject signUpRole = new JSONObject();
+        signUpRole.put("RoleName", "subscriber");
+        signUpRole.put("IsExternalRole", false);
+        signUpRoles.add(signUpRole);
+        returnConfig.put("SignUpRoles", signUpRoles);
+
+        Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn(returnConfig);
         OMElement omElement = Mockito.mock(OMElement.class);
         Mockito.when(omElement.getFirstChildWithName(Matchers.any(QName.class))).thenReturn(omElement);
         PowerMockito.mockStatic(AXIOMUtil.class);
-        Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM)).thenReturn(Mockito.mock(Iterator.class));
+        Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM))
+                .thenReturn(Mockito.mock(Iterator.class));
         PowerMockito.when(AXIOMUtil.stringToOM("wsdl")).thenReturn(omElement);
         PowerMockito.mockStatic(PasswordResolverFactory.class);
         PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
