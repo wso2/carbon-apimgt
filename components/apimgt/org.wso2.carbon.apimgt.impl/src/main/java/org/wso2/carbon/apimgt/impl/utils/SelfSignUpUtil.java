@@ -62,17 +62,17 @@ public final class SelfSignUpUtil {
 	public static UserRegistrationConfigDTO getSignupConfiguration(String tenantDomain)
 			throws APIManagementException {
 
-		return getSignupConfigurationFromRegistry(tenantDomain);
+		return getSignupConfigurationFromAdvancedConfigurations(tenantDomain);
 	}
 
 	/**
-	 * load configuration from the registry
+	 * load configuration from the Advanced Configurations
 	 *
 	 * @param tenantDomain - The Tenant Domain
 	 * @return - A UserRegistrationConfigDTO instance
 	 * @throws APIManagementException
 	 */
-	private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
+	private static UserRegistrationConfigDTO getSignupConfigurationFromAdvancedConfigurations(String tenantDomain)
 			throws APIManagementException {
 
 		UserRegistrationConfigDTO config;
