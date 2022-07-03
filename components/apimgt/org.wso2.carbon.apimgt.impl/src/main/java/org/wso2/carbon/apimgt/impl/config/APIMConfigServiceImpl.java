@@ -134,15 +134,15 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
-            PrivilegedCarbonContext.startTenantFlow(); //ask about this
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true); //ask about this
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             JSONObject tenantConfig = APIUtil.getTenantConfig(organization);
             if (tenantConfig.containsKey(APIConstants.EXTERNAL_API_STORES)) {
                 externalAPIStores = (JSONObject) tenantConfig.get(APIConstants.EXTERNAL_API_STORES);
             }
             return externalAPIStores;
-        } finally { //ask about this
-            PrivilegedCarbonContext.endTenantFlow(); //ask about this
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
