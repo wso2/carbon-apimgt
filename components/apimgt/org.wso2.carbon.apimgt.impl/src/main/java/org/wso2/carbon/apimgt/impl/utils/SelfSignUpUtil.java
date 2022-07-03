@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -65,7 +67,7 @@ public final class SelfSignUpUtil {
 
 	/**
 	 * load configuration from the registry
-	 * 
+	 *
 	 * @param tenantDomain - The Tenant Domain
 	 * @return - A UserRegistrationConfigDTO instance
 	 * @throws APIManagementException
@@ -74,37 +76,23 @@ public final class SelfSignUpUtil {
 			throws APIManagementException {
 
 		UserRegistrationConfigDTO config;
-
-		try {
-			String selfSighupConfig =
-					ServiceReferenceHolder.getInstance().getApimConfigService().getSelfSighupConfig(tenantDomain);
-			OMElement element = AXIOMUtil.stringToOM(selfSighupConfig);
-			config = new UserRegistrationConfigDTO();
-			config.setSignUpDomain(element.getFirstChildWithName(
-					new QName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM)).getText());
-			config.setAdminUserName(APIUtil.replaceSystemProperty(
-					element.getFirstChildWithName(new QName(
-							APIConstants.SELF_SIGN_UP_REG_USERNAME)).getText()));
-			String encryptedPassword = element
-					.getFirstChildWithName(new QName(APIConstants.SELF_SIGN_UP_REG_PASSWORD)).getText();
-			PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
-			String resovledPassword = passwordResolver.getPassword(encryptedPassword);
-			config.setAdminPassword(APIUtil.replaceSystemProperty(resovledPassword));
-			config.setSignUpEnabled(Boolean.parseBoolean(element.getFirstChildWithName(
-					new QName(APIConstants.SELF_SIGN_UP_REG_ENABLED)).getText()));
-			OMElement rolesElement =
-					element.getFirstChildWithName(new QName(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM));
-			Iterator roleListIterator = rolesElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM);
-			while (roleListIterator.hasNext()) {
-				OMElement roleElement = (OMElement) roleListIterator.next();
-				String tmpRole = roleElement.getFirstChildWithName(
-						new QName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)).getText();
-				boolean tmpIsExternal = Boolean.parseBoolean(roleElement.getFirstChildWithName(
-						new QName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL)).getText());
-				config.getRoles().put(tmpRole, tmpIsExternal);
-			}
-		} catch (XMLStreamException e) {
-			throw new APIManagementException("Error while parsing configuration ", e);
+		JSONObject selfSighupConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
+				.getSelfSighupConfig(tenantDomain);
+		config = new UserRegistrationConfigDTO();
+		config.setSignUpDomain((String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM));
+		config.setAdminUserName((String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_USERNAME));
+		String encryptedPassword = (String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_PASSWORD);
+		PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
+		String resovledPassword = passwordResolver.getPassword(encryptedPassword);
+		config.setAdminPassword(APIUtil.replaceSystemProperty(resovledPassword));
+		config.setSignUpEnabled((Boolean) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ENABLED));
+		JSONArray rolesElement = (JSONArray) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM);
+		Iterator roleListIterator = rolesElement.iterator();
+		while (roleListIterator.hasNext()) {
+			JSONObject roleElement = (JSONObject) roleListIterator.next();
+			String tmpRole = (String) roleElement.get(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT);
+			boolean tmpIsExternal = (boolean) roleElement.get(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL);
+			config.getRoles().put(tmpRole, tmpIsExternal);
 		}
 		return config;
 	}

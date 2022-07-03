@@ -2909,8 +2909,6 @@ public final class APIUtil {
         return data;
     }
 
-
-
     /**
      * @param tenantId
      * @throws APIManagementException
@@ -2918,46 +2916,33 @@ public final class APIUtil {
     public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
 
         try {
-            String selfSighupConfig =
-                    ServiceReferenceHolder.getInstance().getApimConfigService()
-                            .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
+            JSONObject selfSighupConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
+                    .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
             DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-                factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                DocumentBuilder parser = factory.newDocumentBuilder();
-                InputStream inputStream = new ByteArrayInputStream(selfSighupConfig.getBytes());
-                Document dc = parser.parse(inputStream);
-                boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
-                String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0)
-                        .getFirstChild().getNodeValue();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
+            String signUpDomain = (String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM);
+            if (enableSubscriberRoleCreation) {
+                JSONArray signUpRoles = (JSONArray) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM);
+                Iterator signUpRolesIterator = signUpRoles.iterator();
+                while (signUpRolesIterator.hasNext()) {
+                    JSONObject signUpRole = (JSONObject) signUpRolesIterator.next();
+                    String roleName = (String) signUpRole.get(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT);
+                    boolean isExternalRole = (boolean) signUpRole.get(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL);
 
-                if (enableSubscriberRoleCreation) {
-                    int roleLength = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
-                            .getLength();
-
-                    for (int i = 0; i < roleLength; i++) {
-                        String roleName = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
-                                .item(i).getFirstChild().getNodeValue();
-                        boolean isExternalRole = Boolean.parseBoolean(dc
-                                .getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL).item(i)
-                                .getFirstChild().getNodeValue());
-                        if (roleName != null) {
-                            // If isExternalRole==false ;create the subscriber role as an internal role
-                            if (isExternalRole && signUpDomain != null) {
-                                roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
-                            } else {
-                                roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR
-                                        + roleName;
-                            }
-                            createSubscriberRole(roleName, tenantId);
+                    if (roleName != null) {
+                        // If isExternalRole==false ;create the subscriber role as an internal role
+                        if (isExternalRole && signUpDomain != null) {
+                            roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
+                        } else {
+                            roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + roleName;
                         }
+                        createSubscriberRole(roleName, tenantId);
                     }
+                }
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Adding Self signup configuration to the tenant's registry");
-            }
-
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new APIManagementException("Error while getting Self signup role information from the registry", e);
+        } catch (ParserConfigurationException e) {
+            throw new APIManagementException("Error while getting Self signup role information", e);
         }
     }
 

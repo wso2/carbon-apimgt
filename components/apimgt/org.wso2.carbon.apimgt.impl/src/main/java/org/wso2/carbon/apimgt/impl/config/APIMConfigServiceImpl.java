@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.impl.config;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
@@ -383,7 +385,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
-    public String getSelfSighupConfig(String organization) throws APIManagementException {
+    public JSONObject getSelfSighupConfig(String organization) throws APIManagementException {
 
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -391,23 +393,30 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
-                Resource resource = registry.get(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION);
-                return new String((byte[]) resource.getContent(), Charset.defaultCharset());
+            JSONObject returnConfig;
+            JSONObject tenantConfig = APIUtil.getTenantConfig(organization);
+            if (tenantConfig.containsKey(APIConstants.SELF_SIGN_UP_NAME)) {
+                returnConfig = (JSONObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME);
             } else {
-                return null;
+                returnConfig = new JSONObject();
+                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+                    returnConfig.put("EnableSignup", true);
+                    returnConfig.put("AdminUserName", "${admin.username}");
+                    returnConfig.put("AdminPassword", "${admin.password}");
+                } else {
+                    returnConfig.put("EnableSignup", false);
+                    returnConfig.put("AdminUserName", "xxxx");
+                    returnConfig.put("AdminPassword", "xxxx");
+                }
+                returnConfig.put("SignUpDomain", "PRIMARY");
+                JSONArray signUpRoles = new JSONArray();
+                JSONObject signUpRole = new JSONObject();
+                signUpRole.put("RoleName", "subscriber");
+                signUpRole.put("IsExternalRole", false);
+                signUpRoles.add(signUpRole);
+                returnConfig.put("SignUpRoles", signUpRoles);
             }
-
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving Self-SignUp Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            return returnConfig;
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

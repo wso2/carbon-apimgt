@@ -266,6 +266,7 @@ public final class APIConstants {
     public static final String ASSESSMENT_REPORT = "/assessmentreport?";
 
     //registry resource containing the self signup user config
+    public static final String SELF_SIGN_UP_NAME = "SelfSignUp";
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
     public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE = "signup-config";
 

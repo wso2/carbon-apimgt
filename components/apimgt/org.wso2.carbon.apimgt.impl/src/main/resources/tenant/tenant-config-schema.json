@@ -862,6 +862,113 @@
         }
       },
       "additionalProperties": true
+    },
+    "SelfSignUp": {
+      "type": "object",
+      "default": {},
+      "title": "The SelfSignUp Schema",
+      "required": [
+        "EnableSignup",
+        "SignUpDomain",
+        "AdminUserName",
+        "AdminPassword",
+        "SignUpRoles"
+      ],
+      "properties": {
+        "EnableSignup": {
+          "type": "boolean",
+          "default": false,
+          "title": "The EnableSignup Schema",
+          "examples": [
+            true
+          ]
+        },
+        "SignUpDomain": {
+          "type": "string",
+          "default": "",
+          "title": "The SignUpDomain Schema",
+          "examples": [
+            "PRIMARY"
+          ]
+        },
+        "AdminUserName": {
+          "type": "string",
+          "default": "",
+          "title": "The AdminUserName Schema",
+          "examples": [
+            "xxxx"
+          ]
+        },
+        "AdminPassword": {
+          "type": "string",
+          "default": "",
+          "title": "The AdminPassword Schema",
+          "examples": [
+            "xxxx"
+          ]
+        },
+        "SignUpRoles": {
+          "type": "array",
+          "default": [],
+          "title": "The SignUpRoles Schema",
+          "items": {
+            "type": "object",
+            "title": "A Schema",
+            "required": [
+              "RoleName",
+              "IsExternalRole"
+            ],
+            "properties": {
+              "RoleName": {
+                "type": "string",
+                "title": "The RoleName Schema",
+                "examples": [
+                  "subscriber"
+                ]
+              },
+              "IsExternalRole": {
+                "type": "boolean",
+                "title": "The IsExternalRole Schema",
+                "examples": [
+                  false
+                ]
+              }
+            },
+            "examples": [{
+              "RoleName": "subscriber",
+              "IsExternalRole": false
+            },
+              {
+                "RoleName": "subscriber",
+                "IsExternalRole": false
+              }]
+          },
+          "examples": [
+            [{
+              "RoleName": "subscriber",
+              "IsExternalRole": false
+            },
+              {
+                "RoleName": "subscriber",
+                "IsExternalRole": false
+              }]
+          ]
+        }
+      },
+      "examples": [{
+        "EnableSignup": true,
+        "SignUpDomain": "PRIMARY",
+        "AdminUserName": "xxxx",
+        "AdminPassword": "xxxx",
+        "SignUpRoles": [{
+          "RoleName": "subscriber",
+          "IsExternalRole": false
+        },
+          {
+            "RoleName": "subscriber",
+            "IsExternalRole": false
+          }]
+      }]
     }
   },
   "additionalProperties": true

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.config;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 /**
@@ -138,7 +139,7 @@ public interface APIMConfigService {
      * @param organization organization of the user.
      * @throws APIManagementException throw if self-signUp configuration couldn't retrieve.
      */
-    public String getSelfSighupConfig(String organization) throws APIManagementException;
+    public JSONObject getSelfSighupConfig(String organization) throws APIManagementException;
 
     /**
      * update self-signUp configuration relevant to to organization.
