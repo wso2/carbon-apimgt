@@ -140,14 +140,15 @@ paths:
             "provider:wso2" will match an API if the provider of the API contains "wso2".
             "provider:"wso2"" will match an API if the provider of the API is exactly "wso2".
             "status:PUBLISHED" will match an API if the API is in PUBLISHED state.
-
+            "fqdn:api.restapi.com" will match APIs that have base url "api.restapi.com".
+            
             Also you can use combined modifiers
             Eg.
             name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
 
             Supported attribute modifiers are [**version, context, name, status,
             description, provider, api-category, tags, doc, contexttemplate,
-            lcstate, content, type, label, enablestore, thirdparty**]
+            lcstate, content, type, label, enablestore, thirdparty**, fqdn]
             
             If no advanced attribute modifier has been specified,  the API names containing
             the search term will be returned as a result.

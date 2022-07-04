@@ -257,6 +257,10 @@ public class RegistrySearchUtil {
             if (query.contains("=")) {
                 String[] searchKeys = query.split("=");
 
+                if(searchKeys[0].toLowerCase().equals("fqdn")){
+                    searchKeys[0] = "endpointConfig";
+                }
+
                 if (searchKeys.length >= 2) {
                     if (!Arrays.asList(API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
                         if (log.isDebugEnabled()) {
