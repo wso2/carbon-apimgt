@@ -526,7 +526,7 @@ public class GatewayArtifactsMgtDAO {
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
 
         for (List<String> apiIdList: apiIdsChunk) {
-            String query = SQLConstants.RETRIEVE_ARTIFACTS_ONLY_BY_MULTIPLE_APIIDs_AND_LABEL;
+            String query = SQLConstants.RETRIEVE_ARTIFACTS_ONLY_BY_MULTIPLE_APIIDS;
             query = query.replaceAll(SQLConstants.API_ID_REGEX, String.join(",",Collections.nCopies(apiIdList.size(), "?")));
 
             try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
