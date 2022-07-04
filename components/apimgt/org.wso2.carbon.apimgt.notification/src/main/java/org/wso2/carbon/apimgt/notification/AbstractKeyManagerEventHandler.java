@@ -58,8 +58,10 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
                 tokenRevocationEvent.getExpiryTime(), tokenRevocationEvent.getTenantId());
         Application application = ApiMgtDAO.getInstance()
                 .getApplicationByClientId(tokenRevocationEvent.getConsumerKey());
-        String orgId = application.getOrganization();
-        properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
+        if (application != null) {
+            String orgId = application.getOrganization();
+            properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
+        }
 
         revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(),
                 tokenRevocationEvent.getExpiryTime(), properties);
