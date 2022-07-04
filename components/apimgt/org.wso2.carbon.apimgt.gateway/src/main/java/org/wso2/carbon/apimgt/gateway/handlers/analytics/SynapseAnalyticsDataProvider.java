@@ -51,6 +51,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.Arrays;
 import java.util.Map;
 
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.CONTEXT;
+
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private static final Log log = LogFactory.getLog(SynapseAnalyticsDataProvider.class);
@@ -302,6 +304,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         return null;
     }
+
+    @Override
+    public String getContext() {
+        if (messageContext.getPropertyKeySet().contains(CONTEXT)) {
+            return (String) messageContext.getProperty(CONTEXT);
+        }
+        return null;    }
 
     private boolean isSuccessRequest() {
 

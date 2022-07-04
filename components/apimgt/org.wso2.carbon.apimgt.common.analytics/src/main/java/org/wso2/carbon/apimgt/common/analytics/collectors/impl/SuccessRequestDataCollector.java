@@ -74,6 +74,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         if (userIp == null) {
             userIp = Constants.UNKNOWN_VALUE;
         }
+        String apiContext = provider.getContext();
 
         event.setApi(api);
         event.setOperation(operation);
@@ -85,6 +86,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         event.setMetaInfo(metaInfo);
         event.setUserAgentHeader(userAgent);
         event.setUserIp(userIp);
+        event.setContext(apiContext);
 
         this.processor.publish(event);
     }

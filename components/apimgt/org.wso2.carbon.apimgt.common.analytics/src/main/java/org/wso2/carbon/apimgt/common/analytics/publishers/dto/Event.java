@@ -44,6 +44,8 @@ public class Event {
 
     private String errorType;
 
+    private String context;
+
     public API getApi() {
         return api;
     }
@@ -138,5 +140,13 @@ public class Event {
 
     public void setUserIp(String userIp) {
         this.userIp = userIp;
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
     }
 }
