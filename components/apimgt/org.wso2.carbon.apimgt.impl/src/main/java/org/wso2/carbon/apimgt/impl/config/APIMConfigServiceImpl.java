@@ -405,15 +405,9 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             } else { // Following defaultConfig object will be used if the SelfSignUp configuration is not available in
                 // the Advanced tenant configuration
                 JSONObject defaultConfig = new JSONObject();
-                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                    defaultConfig.put("EnableSignup", true);
-                    defaultConfig.put("AdminUserName", "${admin.username}");
-                    defaultConfig.put("AdminPassword", "${admin.password}");
-                } else {
-                    defaultConfig.put("EnableSignup", false);
-                    defaultConfig.put("AdminUserName", "xxxx");
-                    defaultConfig.put("AdminPassword", "xxxx");
-                }
+                defaultConfig.put("EnableSignup", false);
+                defaultConfig.put("AdminUserName", "xxxx");
+                defaultConfig.put("AdminPassword", "xxxx");
                 defaultConfig.put("SignUpDomain", "PRIMARY");
                 JSONArray signUpRoles = new JSONArray();
                 JSONObject signUpRole = new JSONObject();
