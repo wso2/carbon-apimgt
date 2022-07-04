@@ -154,7 +154,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                 //setting the jwt configuration dto
                 apiMgtGatewayJWTGenerator.setJWTConfigurationDto(this.jwtConfigurationDto);
             }
-            apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
 
             String splitToken[] = apiKey.split("\\.");
             JWSHeader decodedHeader;
