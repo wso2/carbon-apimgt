@@ -2825,34 +2825,6 @@ public final class APIUtil {
     }
 
     /**
-     * @param organization
-     * @throws APIManagementException
-     */
-    public static void loadTenantSelfSignUpConfigurations(String organization)
-            throws APIManagementException {
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Adding Self signup configuration to the tenant's registry");
-            }
-            InputStream inputStream;
-            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                inputStream =
-                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/default-sign-up-config" +
-                                ".xml");
-            } else {
-                inputStream =
-                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/tenant-sign-up-config" +
-                                ".xml");
-            }
-
-            ServiceReferenceHolder.getInstance().getApimConfigService().addSelfSighupConfig(organization, IOUtils.toString(inputStream));
-        } catch (IOException  e) {
-            throw new APIManagementException("Error while reading Self signup configuration file content", e);
-        }
-    }
-
-    /**
      * Loads tenant-conf.json (tenant config) to registry from the tenant-conf.json available in the file system.
      * If any REST API scopes are added to the local tenant-conf.json, they will be updated in the registry.
      *
@@ -2916,19 +2888,18 @@ public final class APIUtil {
     public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
 
         try {
-            JSONObject selfSighupConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
-                    .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
+            UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) ServiceReferenceHolder.getInstance()
+                    .getApimConfigService().getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
             DocumentBuilderFactory factory = getSecuredDocumentBuilder();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
-            String signUpDomain = (String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM);
-            if (enableSubscriberRoleCreation) {
-                JSONArray signUpRoles = (JSONArray) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM);
-                Iterator signUpRolesIterator = signUpRoles.iterator();
+            String signUpDomain = selfSighupConfig.getSignUpDomain();
+            if (isSubscriberRoleCreationEnabled(tenantId)) {
+                Iterator<Map.Entry<String, Boolean>> signUpRolesIterator = selfSighupConfig.getRoles().entrySet()
+                        .iterator();
                 while (signUpRolesIterator.hasNext()) {
-                    JSONObject signUpRole = (JSONObject) signUpRolesIterator.next();
-                    String roleName = (String) signUpRole.get(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT);
-                    boolean isExternalRole = (boolean) signUpRole.get(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL);
+                    Map.Entry<String, Boolean> signUpRole = signUpRolesIterator.next();
+                    String roleName = signUpRole.getKey();
+                    boolean isExternalRole = signUpRole.getValue();
 
                     if (roleName != null) {
                         // If isExternalRole==false ;create the subscriber role as an internal role

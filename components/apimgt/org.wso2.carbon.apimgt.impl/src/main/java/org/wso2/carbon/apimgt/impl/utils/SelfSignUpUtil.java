@@ -62,39 +62,7 @@ public final class SelfSignUpUtil {
 	public static UserRegistrationConfigDTO getSignupConfiguration(String tenantDomain)
 			throws APIManagementException {
 
-		return getSignupConfigurationFromAdvancedConfigurations(tenantDomain);
-	}
-
-	/**
-	 * load configuration from the Advanced Configurations
-	 *
-	 * @param tenantDomain - The Tenant Domain
-	 * @return - A UserRegistrationConfigDTO instance
-	 * @throws APIManagementException
-	 */
-	private static UserRegistrationConfigDTO getSignupConfigurationFromAdvancedConfigurations(String tenantDomain)
-			throws APIManagementException {
-
-		UserRegistrationConfigDTO config;
-		JSONObject selfSighupConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
-				.getSelfSighupConfig(tenantDomain);
-		config = new UserRegistrationConfigDTO();
-		config.setSignUpDomain((String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM));
-		config.setAdminUserName((String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_USERNAME));
-		String encryptedPassword = (String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_PASSWORD);
-		PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
-		String resovledPassword = passwordResolver.getPassword(encryptedPassword);
-		config.setAdminPassword(APIUtil.replaceSystemProperty(resovledPassword));
-		config.setSignUpEnabled((Boolean) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ENABLED));
-		JSONArray rolesElement = (JSONArray) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM);
-		Iterator roleListIterator = rolesElement.iterator();
-		while (roleListIterator.hasNext()) {
-			JSONObject roleElement = (JSONObject) roleListIterator.next();
-			String tmpRole = (String) roleElement.get(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT);
-			boolean tmpIsExternal = (boolean) roleElement.get(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL);
-			config.getRoles().put(tmpRole, tmpIsExternal);
-		}
-		return config;
+		return (UserRegistrationConfigDTO) ServiceReferenceHolder.getInstance().getApimConfigService().getSelfSighupConfig(tenantDomain);
 	}
 
 	/**

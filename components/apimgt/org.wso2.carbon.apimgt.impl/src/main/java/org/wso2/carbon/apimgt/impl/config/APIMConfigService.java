@@ -139,7 +139,7 @@ public interface APIMConfigService {
      * @param organization organization of the user.
      * @throws APIManagementException throw if self-signUp configuration couldn't retrieve.
      */
-    public JSONObject getSelfSighupConfig(String organization) throws APIManagementException;
+    public Object getSelfSighupConfig(String organization) throws APIManagementException;
 
     /**
      * update self-signUp configuration relevant to to organization.

@@ -207,8 +207,6 @@ public class APIManagerComponent {
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            // load self sigup configuration to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
