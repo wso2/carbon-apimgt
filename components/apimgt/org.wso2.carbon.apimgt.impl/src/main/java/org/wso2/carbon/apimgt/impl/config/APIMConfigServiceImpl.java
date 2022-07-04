@@ -402,7 +402,8 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             if (tenantConfig.containsKey(APIConstants.SELF_SIGN_UP_NAME)) {
                 return getSignupConfigurationFromAdvancedConfigurations(
                         (JSONObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
-            } else { // Following defaultConfig object will be used if the SelfSignUp configuration is not available in the Advanced tenant configuration
+            } else { // Following defaultConfig object will be used if the SelfSignUp configuration is not available in
+                // the Advanced tenant configuration
                 JSONObject defaultConfig = new JSONObject();
                 if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                     defaultConfig.put("EnableSignup", true);

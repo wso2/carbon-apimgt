@@ -117,7 +117,8 @@ public class SelfSignupUtilTestCase {
         SelfSignUpUtil.isUserNameWithAllowedDomainName("bar.com/john", userRealm);
     }
 
-    @Test public void testGetSelfSignupConfigFromRegistry() throws Exception {
+    @Test
+    public void testGetSelfSignupConfigFromRegistry() throws Exception {
 
         System.setProperty(CARBON_HOME, "");
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
@@ -154,7 +155,8 @@ public class SelfSignupUtilTestCase {
         Assert.assertNotNull(userRegistrationConfigDTO);
     }
 
-    @Test public void testGetSelfSignupConfigFromRegistryTenant() throws Exception {
+    @Test
+    public void testGetSelfSignupConfigFromRegistryTenant() throws Exception {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
