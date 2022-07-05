@@ -161,7 +161,10 @@ public class WorkflowUtils {
                 WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equalsIgnoreCase(wfType)) {
             APIStateWorkflowDTO apiStateWFDto = (APIStateWorkflowDTO) workflowDTO;
             APIInfo apiInfo = ApiMgtDAO.getInstance().getAPIInfoByUUID(apiStateWFDto.getApiUUID());
-            String orgId = apiInfo.getOrganization();
+            String orgId = null;
+            if (apiInfo != null) {
+                orgId = apiInfo.getOrganization();
+            }
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), apiStateWFDto.getTenantId(),
                     orgId, apiStateWFDto.getMetadata("ApiName"),
