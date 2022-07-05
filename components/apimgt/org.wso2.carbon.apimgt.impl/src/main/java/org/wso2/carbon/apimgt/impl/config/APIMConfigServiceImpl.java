@@ -404,18 +404,10 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                         (JSONObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
             } else { // Following defaultConfig object will be used if the SelfSignUp configuration is not available in
                 // the Advanced tenant configuration
-                JSONObject defaultConfig = new JSONObject();
-                defaultConfig.put("EnableSignup", false);
-                defaultConfig.put("AdminUserName", "xxxx");
-                defaultConfig.put("AdminPassword", "xxxx");
-                defaultConfig.put("SignUpDomain", "PRIMARY");
-                JSONArray signUpRoles = new JSONArray();
-                JSONObject signUpRole = new JSONObject();
-                signUpRole.put("RoleName", "subscriber");
-                signUpRole.put("IsExternalRole", false);
-                signUpRoles.add(signUpRole);
-                defaultConfig.put("SignUpRoles", signUpRoles);
-                return getSignupConfigurationFromAdvancedConfigurations(defaultConfig);
+                UserRegistrationConfigDTO defaultConfig = new UserRegistrationConfigDTO();
+                defaultConfig.setSignUpEnabled(false);
+                defaultConfig.getRoles().put("subscriber", false);
+                return defaultConfig;
             }
         } catch (ParseException e) {
             throw new RuntimeException(e);

@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.config;
 
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 /**

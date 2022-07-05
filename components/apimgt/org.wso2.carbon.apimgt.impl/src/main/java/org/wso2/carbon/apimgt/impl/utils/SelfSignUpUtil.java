@@ -18,26 +18,15 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.PasswordResolver;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * This class contains the utility methods used for self signup
@@ -49,20 +38,21 @@ public final class SelfSignUpUtil {
 	private static final String DEFAULT = "DEFAULT";
 
 	/**
-	 * retrieve self signup configuration from the cache. if cache mises, load
-	 * to the cache from
-	 * the registry and return configuration
-	 * 
-	 * @param tenantDomain
-	 *            Domain name of the tenant
-	 * @return UserRegistrationConfigDTO self signup configuration for the
-	 *         tenant
+	 * Retrieve self signup configuration from the cache. if cache mises, load to the cache from the Advanced
+	 * Configuration and return the configuration
+	 *
+	 * @param tenantDomain Domain name of the tenant
+	 * @return UserRegistrationConfigDTO self signup configuration for the tenant
 	 * @throws APIManagementException
 	 */
-	public static UserRegistrationConfigDTO getSignupConfiguration(String tenantDomain)
-			throws APIManagementException {
+	public static UserRegistrationConfigDTO getSignupConfiguration(String tenantDomain) throws APIManagementException {
 
-		return (UserRegistrationConfigDTO) ServiceReferenceHolder.getInstance().getApimConfigService().getSelfSighupConfig(tenantDomain);
+		Object selfSighupConfigObject = ServiceReferenceHolder.getInstance().getApimConfigService()
+				.getSelfSighupConfig(tenantDomain);
+		if (selfSighupConfigObject instanceof UserRegistrationConfigDTO) {
+			return (UserRegistrationConfigDTO) selfSighupConfigObject;
+		}
+		return new UserRegistrationConfigDTO();
 	}
 
 	/**

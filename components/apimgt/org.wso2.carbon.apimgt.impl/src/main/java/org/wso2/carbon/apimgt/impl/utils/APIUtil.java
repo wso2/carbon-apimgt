@@ -92,7 +92,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -224,7 +223,6 @@ import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -245,8 +243,6 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.xml.sax.SAXException;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -316,9 +312,7 @@ import javax.cache.Caching;
 import javax.net.ssl.SSLContext;
 import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
@@ -2887,11 +2881,10 @@ public final class APIUtil {
      */
     public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
 
-        try {
-            UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) ServiceReferenceHolder.getInstance()
-                    .getApimConfigService().getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
-            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        Object selfSighupConfigObject = ServiceReferenceHolder.getInstance().getApimConfigService()
+                .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
+        if (selfSighupConfigObject instanceof UserRegistrationConfigDTO) {
+            UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
             String signUpDomain = selfSighupConfig.getSignUpDomain();
             if (isSubscriberRoleCreationEnabled(tenantId)) {
                 Iterator<Map.Entry<String, Boolean>> signUpRolesIterator = selfSighupConfig.getRoles().entrySet()
@@ -2900,7 +2893,6 @@ public final class APIUtil {
                     Map.Entry<String, Boolean> signUpRole = signUpRolesIterator.next();
                     String roleName = signUpRole.getKey();
                     boolean isExternalRole = signUpRole.getValue();
-
                     if (roleName != null) {
                         // If isExternalRole==false ;create the subscriber role as an internal role
                         if (isExternalRole && signUpDomain != null) {
@@ -2912,8 +2904,6 @@ public final class APIUtil {
                     }
                 }
             }
-        } catch (ParserConfigurationException e) {
-            throw new APIManagementException("Error while getting Self signup role information", e);
         }
     }
 
