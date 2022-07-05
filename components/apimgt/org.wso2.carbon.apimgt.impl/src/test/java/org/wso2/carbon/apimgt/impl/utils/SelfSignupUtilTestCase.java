@@ -15,7 +15,6 @@
 */
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.apache.axiom.om.util.AXIOMUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +23,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.PasswordResolver;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -38,8 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIUtil.class, ServiceReferenceHolder.class, PrivilegedCarbonContext.class, AXIOMUtil.class,
-                    PasswordResolverFactory.class})
+@PrepareForTest({ServiceReferenceHolder.class})
 public class SelfSignupUtilTestCase {
 
     @Test
@@ -116,7 +111,6 @@ public class SelfSignupUtilTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
-        PowerMockito.mockStatic(APIUtil.class);
 
         UserRegistrationConfigDTO config = new UserRegistrationConfigDTO();
         config.setSignUpDomain("PRIMARY");
@@ -126,9 +120,6 @@ public class SelfSignupUtilTestCase {
         config.getRoles().put("subscriber", false);
 
         Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn(config);
-        PowerMockito.mockStatic(PasswordResolverFactory.class);
-        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
-        PowerMockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
         UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
         Assert.assertNotNull(userRegistrationConfigDTO);
     }
@@ -140,12 +131,7 @@ public class SelfSignupUtilTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
-        PowerMockito.mockStatic(APIUtil.class);
         Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn(new String("Test String"));
-        PowerMockito.mockStatic(PasswordResolverFactory.class);
-        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
-        PowerMockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
-        UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
         Assert.assertNotNull(new UserRegistrationConfigDTO());
     }
 }
