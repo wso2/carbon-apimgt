@@ -148,7 +148,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v3/search?query=type:sub"'
+          "https://127.0.0.1:9443/api/am/admin/v3/throttling/policies/search?query=type:sub"'
       operationId: throttlingPolicySearch
 
   ######################################################
@@ -3308,8 +3308,6 @@ components:
         type:
           type: string
           description: Indicates the type of throttle policy
-      discriminator:
-        propertyName: type
     ThrottlePolicy:
       title: Generic Throttling Policy
       required:
