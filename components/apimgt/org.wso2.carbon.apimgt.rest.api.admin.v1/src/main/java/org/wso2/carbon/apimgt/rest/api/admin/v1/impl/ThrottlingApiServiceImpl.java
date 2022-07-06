@@ -1079,12 +1079,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 try {
                     GlobalPolicy globalPolicy = apiProvider.getGlobalPolicy(policyName);
                     if (globalPolicy != null) {
+                        //only super tenant is allowed to access global policies/custom rules
+                        checkTenantDomainForCustomRules();
                         CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(
                                 globalPolicy);
                         exportPolicy.data(policyDTO);
                         exportPolicy.subtype(RestApiConstants.RESOURCE_CUSTOM_RULE);
-                        //only super tenant is allowed to access global policies/custom rules
-                        checkTenantDomainForCustomRules();
                         return Response.ok().entity(exportPolicy).build();
                     } else if (!type.equals(StringUtils.EMPTY)) {
                         RestApiUtil.handleResourceNotFoundError(
