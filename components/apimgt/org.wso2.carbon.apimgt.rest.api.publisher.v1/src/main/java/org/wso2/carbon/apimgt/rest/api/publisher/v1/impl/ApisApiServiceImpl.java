@@ -821,7 +821,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             String endpointConfigString = api.getEndpointConfig();
-            if (!StringUtils.isEmpty(endpointConfigString)) {
+            if (StringUtils.isNotEmpty(endpointConfigString)) {
                 JSONParser jsonParser = new JSONParser();
                 JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
                 if (endpointConfig != null) {
@@ -848,8 +848,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 awsLambdaClient = AWSLambdaClientBuilder.standard()
                                         .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
                                         .build();
-                            } else if (!StringUtils.isEmpty(roleArn) && !StringUtils.isEmpty(roleSessionName)
-                                    && !StringUtils.isEmpty(roleRegion)) {
+                            } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                                    && StringUtils.isNotEmpty(roleRegion)) {
                                 AWSSecurityTokenService awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
                                         .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
                                         .build();
@@ -870,8 +870,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 log.error("Missing AWS STS configurations");
                                 return null;
                             }
-                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey) &&
-                                !StringUtils.isEmpty(region)) {
+                        } else if (StringUtils.isNotEmpty(accessKey) && StringUtils.isNotEmpty(secretKey) &&
+                                StringUtils.isNotEmpty(region)) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Using user given stored credentials");
                             }
@@ -882,13 +882,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                             }
                             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                             if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
-                                    && !StringUtils.isEmpty(roleRegion)) {
+                                    && StringUtils.isEmpty(roleRegion)) {
                                 awsLambdaClient = AWSLambdaClientBuilder.standard()
                                         .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                                         .withRegion(region)
                                         .build();
-                            } else if (!StringUtils.isEmpty(roleArn) && !StringUtils.isEmpty(roleSessionName)
-                                    && !StringUtils.isEmpty(roleRegion)) {
+                            } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                                    && StringUtils.isNotEmpty(roleRegion)) {
                                 AWSSecurityTokenService awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
                                         .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                                         .withRegion(region)

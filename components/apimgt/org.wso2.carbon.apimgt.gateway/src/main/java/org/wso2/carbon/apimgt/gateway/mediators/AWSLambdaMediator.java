@@ -175,8 +175,8 @@ public class AWSLambdaMediator extends AbstractMediator {
                     awsLambdaClient = AWSLambdaClientBuilder.standard()
                             .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
                             .build();
-                } else if (!StringUtils.isEmpty(roleArn) && !StringUtils.isEmpty(roleSessionName)
-                        && !StringUtils.isEmpty(roleRegion)) {
+                } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                        && StringUtils.isNotEmpty(roleRegion)) {
                     Credentials sessionCredentials = getSessionCredentials(
                             DefaultAWSCredentialsProviderChain.getInstance(), roleArn, roleSessionName, "");
                     BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
@@ -191,8 +191,8 @@ public class AWSLambdaMediator extends AbstractMediator {
                     log.error("Missing AWS STS configurations");
                     return null;
                 }
-            } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)
-                    && !StringUtils.isEmpty(region)) {
+            } else if (StringUtils.isNotEmpty(accessKey) && StringUtils.isNotEmpty(secretKey)
+                    && StringUtils.isNotEmpty(region)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Using user given stored credentials");
                 }
@@ -203,8 +203,8 @@ public class AWSLambdaMediator extends AbstractMediator {
                             .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                             .withRegion(region)
                             .build();
-                } else if (!StringUtils.isEmpty(roleArn) && !StringUtils.isEmpty(roleSessionName)
-                        && !StringUtils.isEmpty(roleRegion)) {
+                } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                        && StringUtils.isNotEmpty(roleRegion)) {
                     Credentials sessionCredentials = getSessionCredentials(
                             new AWSStaticCredentialsProvider(awsCredentials), roleArn, roleSessionName, region);
                     BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
