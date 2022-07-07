@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
 import java.util.UUID;
+import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
 
 /**
  * This class provides AspectJ configurations
@@ -40,9 +41,7 @@ import java.util.UUID;
 public class MethodTimeLogger
 {
     private static final Log log = LogFactory.getLog("correlation");
-    private static boolean isEnabled = false;
     private static boolean logAllMethods = false;
-    private static boolean isSet = false;
     private static boolean isLogAllSet = false;
 
     /**
@@ -85,14 +84,7 @@ public class MethodTimeLogger
      */
     @Pointcut("if()")
     public static boolean isConfigEnabled() {
-        if (!isSet) {
-            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
-            if (StringUtils.isNotEmpty(config)) {
-                isEnabled = Boolean.parseBoolean(config);
-                isSet = true;
-            }
-        }
-        return isEnabled;
+        return MethodCallsCorrelationConfigDataHolder.isEnable();
     }
 
     /**
