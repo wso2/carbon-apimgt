@@ -472,7 +472,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateOperationPolicyParameters(api, tenantDomain);
-        addNoneAPIEndpoint(apiId, api.getUuid());
+        addNoneAPIEndpoint(api.getUuid());
         addURITemplates(apiId, api, tenantId);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
@@ -484,14 +484,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Add None Endpoint to AM_API_ENDPOINTS
      *
-     * @param apiId unique identifier of api (int)
      * @param uuid  unique identifier of api (UUID)
      * @throws APIManagementException
      */
-    private void addNoneAPIEndpoint(int apiId, String uuid) throws APIManagementException {
+    private void addNoneAPIEndpoint(String uuid) throws APIManagementException {
         APIEndpointInfo apiEndpoint = new APIEndpointInfo();
-        apiEndpoint.setEndpointUuid(uuid);
-        apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+        apiEndpoint.setEndpointName(APIConstants.APIEndpoint.ENDPOINT_NONE_NAME);
+        addAPIEndpoint(uuid, apiEndpoint);
     }
 
     /**
@@ -4790,12 +4789,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Get production Endpoint mapping
             String productionEndpointId = apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(
                     uriTemplate.getId(), APIConstants.APIEndpoint.PRODUCTION);
-            uriTemplate.setProductionEndpoint(
-                    currentApiUuid.equals(productionEndpointId) ? "none" : productionEndpointId);
+            uriTemplate.setProductionEndpoint(productionEndpointId);
             // Get sandbox endpoint endpoint
             String sandboxEndpointId = apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(
                     uriTemplate.getId(), APIConstants.APIEndpoint.SANDBOX);
-            uriTemplate.setSandboxEndpoint(currentApiUuid.equals(sandboxEndpointId) ? "none" : sandboxEndpointId);
+            uriTemplate.setSandboxEndpoint(sandboxEndpointId);
         }
     }
 
@@ -6252,9 +6250,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException {
         int apiId = apiMgtDAO.getAPIID(apiUUID);
-        String endpointUUID = apiEndpoint.getEndpointUuid();
-        if (endpointUUID == null || endpointUUID.equals(""))
-            endpointUUID = UUID.randomUUID().toString();
+        String endpointUUID = UUID.randomUUID().toString();
         apiEndpoint.setEndpointUuid(endpointUUID);
         return apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
     }

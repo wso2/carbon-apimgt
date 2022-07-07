@@ -2934,5 +2934,7 @@ public final class APIConstants {
     public static class APIEndpoint {
         public static final String PRODUCTION = "PRODUCTION";
         public static final String SANDBOX = "SANDBOX";
+        public static final String ENDPOINT_NONE = "none";
+        public static final String ENDPOINT_NONE_NAME = "NoneEndpoint";
     }
 }

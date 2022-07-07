@@ -301,8 +301,8 @@ public final class ImportExportConstants {
     public static final String SWAGGER_X_WSO2_APICTL_INIT = "x-wso2-apictl-init";
 
     //APIEndpoints Constants
-    public static final String API_ENDPOINTS_DIRECTORY = "Api_endpoints";
-    public static final String TYPE_API_ENDPOINT = "api-endpoints";
+    public static final String API_ENDPOINTS_DIRECTORY = "Endpoints";
+    public static final String TYPE_API_ENDPOINT = "endpoints";
     
     public static final String EXPORT_POLICY_TYPE_YAML = "YAML";
     public static final String EXPORT_POLICY_TYPE_JSON = "JSON";

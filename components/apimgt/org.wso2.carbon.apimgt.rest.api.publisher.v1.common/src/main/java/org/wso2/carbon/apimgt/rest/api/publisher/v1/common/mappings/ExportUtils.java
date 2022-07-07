@@ -243,7 +243,7 @@ public class ExportUtils {
                 JsonElement apiEndpointObj = gson.toJsonTree(apiEndpointList);
                 JsonArray apiEndpointJson = (JsonArray) apiEndpointObj;
                 CommonUtil.writeDtoToFile(archivePath + File.separator +
-                                ImportExportConstants.API_ENDPOINTS_DIRECTORY + File.separator + apiID + "_OE",
+                                ImportExportConstants.API_ENDPOINTS_DIRECTORY + File.separator + apiID + "_AE",
                         exportFormat, ImportExportConstants.TYPE_API_ENDPOINT, apiEndpointJson);
             }
         } catch (APIImportExportException e) {

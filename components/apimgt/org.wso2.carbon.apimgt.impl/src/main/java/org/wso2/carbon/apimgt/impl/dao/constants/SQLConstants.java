@@ -4086,6 +4086,12 @@ public class SQLConstants {
                         "FROM AM_API_ENDPOINTS AMAE " +
                         "WHERE AMAE.ENDPOINT_UUID = ? AND AMAE.REVISION_UUID = ?";
 
+        public static final String GET_NONE_ENDPOINT_ID_SQL_BY_API_ID =
+                "SELECT " +
+                        "AMAE.ENDPOINT_ID " +
+                        "FROM AM_API_ENDPOINTS AMAE " +
+                        "WHERE AMAE.API_ID = ? AND AMAE.ENDPOINT_NAME = ?";
+
         public static final String UPDATE_API_ENDPOINT_BY_UUID = "UPDATE " +
                 " AM_API_ENDPOINTS " +
                 " SET " +
@@ -4119,6 +4125,7 @@ public class SQLConstants {
         public static final String GET_API_ENDPOINT_UUID_SQL_BY_ENDPOINT_ID =
                 "SELECT " +
                         "AMAE.ENDPOINT_UUID " +
+                        "AMAE.ENDPOINT_NAME " +
                         "FROM AM_API_ENDPOINTS AMAE " +
                         "WHERE AMAE.ENDPOINT_ID = ?";
 
