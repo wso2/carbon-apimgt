@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
@@ -32,12 +37,7 @@ import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.logging.APILogHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Set;
-import javax.xml.stream.XMLStreamException;
+import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
 
 /**
  * This Handler can be used to log all external calls done by the api manager via synapse.
@@ -71,14 +71,14 @@ public class LogsHandler extends AbstractSynapseHandler {
     }
 
     private boolean isEnabled() {
-        if(!isSet) {
+        if (!isSet) {
             String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
             if (config != null && !config.equals("")) {
                 isEnabled = Boolean.parseBoolean(config);
                 isSet = true;
             }
         }
-        return isEnabled;
+        return MethodCallsCorrelationConfigDataHolder.isEnable();
     }
 
     public boolean handleRequestInFlow(MessageContext messageContext) {

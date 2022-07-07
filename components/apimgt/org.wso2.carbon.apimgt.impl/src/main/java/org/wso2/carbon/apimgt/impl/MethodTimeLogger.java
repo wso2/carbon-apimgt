@@ -31,6 +31,7 @@ import org.slf4j.MDC;
 
 import java.util.Map;
 import java.util.UUID;
+import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
 
 /**
  * This class provides AspectJ configurations
@@ -61,8 +62,7 @@ public class MethodTimeLogger
      *
      * @return true if the property value matches this package name
      */
-    @Pointcut("execution(* *(..)) && " +
-            "!execution(* org.wso2.carbon.apimgt.impl.ConfigurableCorrelationLogService.*(..)) && if()")
+    @Pointcut("!within(org.wso2.carbon.apimgt.impl.correlation.*) && execution(* *(..)) && if()")
     public static boolean pointCutAll() {
         if (!isLogAllSet) {
             logAllMethods = ConfigurableCorrelationLogService.isLogAllMethods();
@@ -76,13 +76,19 @@ public class MethodTimeLogger
      *
      * @return true if the property value is given as true
      */
-    @Pointcut("if()")
+    @Pointcut("!within(org.wso2.carbon.apimgt.impl.correlation.*) && if()")
     public static boolean isConfigEnabled() {
         if (!isSet) {
-            isEnabled = ConfigurableCorrelationLogService.isEnable();
-            isSet = true;
+            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
+            if (StringUtils.isNotEmpty(config)) {
+                isEnabled = Boolean.parseBoolean(config);
+                if (isEnabled) {
+                    MethodCallsCorrelationConfigDataHolder.setEnable(true);
+                }
+                isSet = true;
+            }
         }
-        return isEnabled;
+        return MethodCallsCorrelationConfigDataHolder.isEnable();
     }
 
     /**
