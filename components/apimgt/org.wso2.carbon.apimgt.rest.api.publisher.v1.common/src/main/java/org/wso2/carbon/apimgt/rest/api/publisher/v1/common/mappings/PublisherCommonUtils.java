@@ -1906,7 +1906,7 @@ public class PublisherCommonUtils {
         APIEndpointInfo apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID);
         if (apiEndpoint == null) {
             throw new APIManagementException("Error occurred while getting Endpoint of API " + apiUUID +
-                    "endpoint UUID" + endpointUUID,
+                    " endpoint UUID " + endpointUUID,
                     ExceptionCodes.API_ENDPOINT_NOT_FOUND);
         }
         return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint);

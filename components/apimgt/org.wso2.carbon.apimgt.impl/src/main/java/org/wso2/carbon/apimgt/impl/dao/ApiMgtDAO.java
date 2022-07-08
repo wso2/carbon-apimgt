@@ -16988,7 +16988,7 @@ public class ApiMgtDAO {
                 PreparedStatement removeAPIEndpointsStatement = connection.prepareStatement(SQLConstants
                         .APIEndpointsSQLConstants.DELETE_CURRENT_API_ENDPOINTS);
                 removeAPIEndpointsStatement.setInt(1, apiId);
-                removeAPIEndpointsStatement.setString(2, apiRevision.getApiUUID());
+                removeAPIEndpointsStatement.setString(2, APIConstants.APIEndpoint.ENDPOINT_NONE_NAME);
                 removeAPIEndpointsStatement.executeUpdate();
 
                 // Restoring to AM_API_ENDPOINTS_TABLE
@@ -18226,7 +18226,7 @@ public class ApiMgtDAO {
             int apiId = getAPIID(currentApiUuid, conn);
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, apiId);
-            ps.setString(2, uuid);
+            ps.setString(2, APIConstants.APIEndpoint.ENDPOINT_NONE_NAME);
             if (isRevision) {
                 ps.setString(3, apiRevision.getRevisionUUID());
             }

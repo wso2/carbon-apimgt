@@ -4038,7 +4038,7 @@ public class SQLConstants {
                         " FROM " +
                         "   AM_API_ENDPOINTS  AMAE" +
                         " WHERE " +
-                        "   AMAE.API_ID = ? AND AMAE.ENDPOINT_UUID != ? AND REVISION_UUID IS NULL";
+                        "   AMAE.API_ID = ? AND AMAE.ENDPOINT_NAME != ? AND REVISION_UUID IS NULL";
 
         public static final String GET_ALL_API_ENDPOINTS_BY_API_UUID_REVISION_SQL =
                 " SELECT " +
@@ -4051,7 +4051,7 @@ public class SQLConstants {
                         " FROM " +
                         "   AM_API_ENDPOINTS  AMAE" +
                         " WHERE " +
-                        "   AMAE.API_ID = ? AND AMAE.ENDPOINT_UUID != ? AND AMAE.REVISION_UUID = ?";
+                        "   AMAE.API_ID = ? AND AMAE.ENDPOINT_NAME != ? AND AMAE.REVISION_UUID = ?";
 
 
         public static final String GET_API_ENDPOINT_BY_API_UUID_AND_ENDPOINT_UUID =
@@ -4072,7 +4072,7 @@ public class SQLConstants {
                 "DELETE FROM AM_API_ENDPOINTS WHERE ENDPOINT_UUID = ? AND REVISION_UUID IS NULL";
 
         public static final String DELETE_CURRENT_API_ENDPOINTS =
-                "DELETE FROM AM_API_ENDPOINTS WHERE API_ID = ? AND ENDPOINT_UUID != ? AND REVISION_UUID IS NULL";
+                "DELETE FROM AM_API_ENDPOINTS WHERE API_ID = ? AND ENDPOINT_NAME != ? AND REVISION_UUID IS NULL";
 
         public static final String GET_ENDPOINT_ID_SQL_BY_ENDPOINT_UUID =
                 "SELECT " +
@@ -4124,7 +4124,7 @@ public class SQLConstants {
 
         public static final String GET_API_ENDPOINT_UUID_SQL_BY_ENDPOINT_ID =
                 "SELECT " +
-                        "AMAE.ENDPOINT_UUID " +
+                        "AMAE.ENDPOINT_UUID, " +
                         "AMAE.ENDPOINT_NAME " +
                         "FROM AM_API_ENDPOINTS AMAE " +
                         "WHERE AMAE.ENDPOINT_ID = ?";
