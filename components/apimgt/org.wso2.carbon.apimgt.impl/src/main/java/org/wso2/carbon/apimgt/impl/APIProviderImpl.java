@@ -6021,7 +6021,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<URITemplate> uriTemplatesWithPolicies = apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
 
         if (!uriTemplatesWithPolicies.isEmpty()) {
-            //This is a temporary map to keep operation endpoints list of URI Templates against the URI mapping ID
+            //This is a temporary map to keep operation policies list of URI Templates against the URI mapping ID
             Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
             for (URITemplate uriTemplate : uriTemplatesWithPolicies) {
                 String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
