@@ -38,6 +38,8 @@ public abstract class AbstractNotifier implements Notifier {
         String loggingEvent = event.toString();
         EventPublisherEvent notificationEvent = new EventPublisherEvent(APIConstants.NOTIFICATION_STREAM_ID,
                 System.currentTimeMillis(), objects, loggingEvent);
+        String orgId = event.getTenantDomain();
+        notificationEvent.setOrgId(orgId);
         APIUtil.publishEvent(EventPublisherType.NOTIFICATION, notificationEvent, loggingEvent);
     }
 }

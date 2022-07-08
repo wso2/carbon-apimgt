@@ -2725,6 +2725,7 @@ public final class APIConstants {
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
+        public static final String ORG_ID = "org_id";
         public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
     }
 

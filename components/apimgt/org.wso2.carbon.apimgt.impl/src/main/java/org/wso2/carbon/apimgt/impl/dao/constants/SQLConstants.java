@@ -1573,6 +1573,7 @@ public class SQLConstants {
             "   APP.GROUP_ID," +
             "   APP.CREATED_BY," +
             "   APP.UUID, " +
+            "   APP.ORGANIZATION, " +
             "   APP.TOKEN_TYPE " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -1622,6 +1623,7 @@ public class SQLConstants {
                     "   APP.UUID," +
                     "   APP.CREATED_BY," +
                     "   APP.TOKEN_TYPE," +
+                    "   APP.ORGANIZATION," +
                     "   AM_APP_MAP.KEY_TYPE" +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING AM_APP_MAP," +
