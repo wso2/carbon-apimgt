@@ -1222,12 +1222,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     String uuid = policyIfExists.getUUID();
                     Response resp = throttlingPoliciesApplicationPolicyIdPut(uuid, RestApiConstants.APPLICATION_JSON,
                             applicationPolicy, messageContext);
-                    String message = "Successfully updated Subscription Throttling Policy : "
+                    String message = "Successfully updated Application Throttling Policy : "
                             + applicationPolicy.getPolicyName();
                     return Response.fromResponse(resp).entity(message).build();
                 } else {
                     RestApiUtil.handleResourceAlreadyExistsError(
-                            "Subscription Policy with name " + applicationPolicy.getPolicyName() + " already exists",
+                            "Application Policy with name " + applicationPolicy.getPolicyName() + " already exists",
                             log);
                 }
             } else {
