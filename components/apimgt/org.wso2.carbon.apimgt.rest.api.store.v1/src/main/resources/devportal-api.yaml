@@ -17,7 +17,7 @@ info:
   title: WSO2 API Manager - Developer Portal
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Developer Portal**.
-    Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources/devportal-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
+    Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources/devportal-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
 
     # Authentication
     The Developer Portal REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
@@ -96,10 +96,10 @@ info:
     * Make sure you have an API Manager instance up and running.
     * Update the `basepath` parameter to match the hostname and port of the APIM instance.
 
-    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/5bc0161b8aa7e701d7bf)
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://god.gw.postman.com/run-collection/17491134-b8760354-b3c3-4019-b60a-e813cba8d7c0)
   contact:
     name: WSO2
-    url: http://wso2.com/products/api-manager/
+    url: https://wso2.com/api-manager/
     email: architecture@wso2.com
   license:
     name: Apache 2.0
@@ -149,6 +149,13 @@ paths:
             Supported attribute modifiers are [**version, context, status,
             description, doc, provider, tag**]
 
+            To search by API Properties provide the query in below format.
+
+            **property_name:property_value**
+
+            Eg.
+            "environment:test" where environment is the property name and test is the propert value.
+
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
           schema:
@@ -170,8 +177,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis"
-      x-examples:
-        $ref: docs/examples/apis/apis.yaml#/get
 
   /apis/{apiId}:
     get:
@@ -301,7 +306,7 @@ paths:
       summary: |
         Get GraphQL Definition
       description: |
-        You can use this operation to retrieve the swagger definition of an API.
+        You can use this operation to retrieve the GraphQL schema definition of a GraphQL API.
 
          `X-WSO2-Tenant` header can be used to retrieve the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
 
@@ -328,7 +333,104 @@ paths:
                 Used by caches, or in conditional requests.
               schema:
                 type: string
-          content: {}
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'directive @cacheControl(
+                    maxAge: Int
+                    scope: CacheControlScope
+                  ) on FIELD_DEFINITION | OBJECT | INTERFACE
+                  enum CacheControlScope {
+                    PUBLIC
+                    PRIVATE
+                  }
+
+                  # A `Lift` is a chairlift, gondola, tram, funicular, pulley, rope tow, or other means of ascending a mountain.
+                  type Lift {
+                    # The unique identifier for a `Lift` (id: "panorama")
+                    id: ID!
+                    # The name of a `Lift`
+                    name: String!
+                    # The current status for a `Lift`: `OPEN`, `CLOSED`, `HOLD`
+                    status: LiftStatus
+                    # The number of people that a `Lift` can hold
+                    capacity: Int!
+                    # A boolean describing whether a `Lift` is open for night skiing
+                    night: Boolean!
+                    # The number of feet in elevation that a `Lift` ascends
+                    elevationGain: Int!
+                    # A list of trails that this `Lift` serves
+                    trailAccess: [Trail!]!
+                  }
+
+                  # An enum describing the options for `LiftStatus`: `OPEN`, `CLOSED`, `HOLD`
+                  enum LiftStatus {
+                    OPEN
+                    CLOSED
+                    HOLD
+                  }
+
+                  type Mutation {
+                    # Sets a `Lift` status by sending `id` and `status`
+                    setLiftStatus(id: ID!, status: LiftStatus!): Lift!
+                    # Sets a `Trail` status by sending `id` and `status`
+                    setTrailStatus(id: ID!, status: TrailStatus!): Trail!
+                  }
+
+                  type Query {
+                    # A list of all `Lift` objects
+                    allLifts(status: LiftStatus): [Lift!]!
+                    # A list of all `Trail` objects
+                    allTrails(status: TrailStatus): [Trail!]!
+                    # Returns a `Lift` by `id` (id: "panorama")
+                    Lift(id: ID!): Lift!
+                    # Returns a `Trail` by `id` (id: "old-witch")
+                    Trail(id: ID!): Trail!
+                    # Returns an `Int` of `Lift` objects with optional `LiftStatus` filter
+                    liftCount(status: LiftStatus): Int!
+                    # Returns an `Int` of `Trail` objects with optional `TrailStatus` filter
+                    trailCount(status: TrailStatus): Int!
+                    # Returns a list of `SearchResult` objects based on `term` or `status`
+                    search(term: String, status: LiftStatus): [SearchResult!]!
+                  }
+
+                  union SearchResult = Lift | Trail
+                  type Subscription {
+                    # Listens for changes in lift status
+                             liftStatusChange: Lift
+                    # Listens for changes in trail status
+                             trailStatusChange: Trail
+                  }
+
+                  # A `Trail` is a run at a ski resort
+                  type Trail {
+                    id: ID!
+                    # The name of a `Trail`
+                    name: String!
+                    # The current status for a `Trail`: OPEN, CLOSED
+                    status: TrailStatus
+                    # The difficulty rating for a `Trail`
+                    difficulty: String!
+                    # A boolean describing whether or not a `Trail` is groomed
+                    groomed: Boolean!
+                    # A boolean describing whether or not a `Trail` has trees
+                    trees: Boolean!
+                    # A boolean describing whether or not a `Trail` is open for night skiing
+                    night: Boolean!
+                    # A list of Lifts that provide access to this `Trail`
+                    accessedByLifts: [ Lift! ]!
+                  }
+
+                  # An enum describing the options for `TrailStatus`: `OPEN`, `CLOSED`
+                  enum TrailStatus {
+                  OPEN
+                  CLOSED
+                  }
+
+                  # The `Upload` scalar type
+                  represents a file upload.
+                  scalar Upload'
         304:
           description: |
             Not Modified.
@@ -358,6 +460,8 @@ paths:
           in: path
           description: |
             Programming language of the SDK that is required.
+
+            Languages supported by default are **Java**, **Javascript**, **Android** and **JMeter**.
           required: true
           schema:
             type: string
@@ -385,7 +489,7 @@ paths:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/devportal/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java"
-            > Swagger Petstore_java_1.0.0.zip
+            > Petstore_java_1.0.0.zip
 
   /apis/{apiId}/wsdl:
     get:
@@ -432,8 +536,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/wsdl"
-      x-examples:
-        $ref: docs/examples/apis/wsdl/apiId_wsdl_get.yaml
 
   ######################################################
   # The "Document Collection" resource APIs
@@ -664,7 +766,7 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail"
+          source: 'curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail" > image.jpeg'
 
   /apis/{apiId}/ratings:
     get:
@@ -696,8 +798,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
-      x-examples:
-        $ref: docs/examples/apis/apis_id_ratings_get.yaml
 
   /apis/{apiId}/user-rating:
     get:
@@ -750,8 +850,6 @@ paths:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
-      x-examples:
-        $ref: docs/examples/apis/apis_id_user-rating.yaml#/get
 
     put:
       tags:
@@ -798,8 +896,6 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"'
-      x-examples:
-        $ref: docs/examples/apis/apis_id_user-rating.yaml#/put
 
     delete:
       tags:
@@ -826,8 +922,6 @@ paths:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
-      x-examples:
-        $ref: docs/examples/apis/apis_id_user-rating.yaml#/delete
 
   /apis/{apiId}/comments:
     get:
@@ -861,8 +955,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
-      x-examples:
-        $ref: docs/examples/apis/comments.yaml#/get
 
     post:
       tags:
@@ -933,8 +1025,6 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
-      x-examples:
-        $ref: docs/examples/apis/comments.yaml#/post
 
   /apis/{apiId}/comments/{commentId}:
     get:
@@ -942,7 +1032,7 @@ paths:
         - Comments
       summary: Get Details of an API Comment
       description: |
-        Get the individual comment given by a username for a certain API.
+        Get the individual comment given by a user for a certain API.
       operationId: getCommentOfAPI
       parameters:
         - $ref: '#/components/parameters/commentId'
@@ -987,8 +1077,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
-      x-examples:
-        $ref: docs/examples/apis/comment_id-comments.yaml#/get
 
     patch:
       tags:
@@ -1061,9 +1149,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
-      x-examples:
-        $ref: docs/examples/apis/comments.yaml#/post
+          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
 
     delete:
       tags:
@@ -1106,8 +1192,6 @@ paths:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
-      x-examples:
-        $ref: docs/examples/apis/comment_id-comments.yaml#/delete
 
   /apis/{apiId}/comments/{commentId}/replies:
     get:
@@ -1159,21 +1243,19 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/store/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
-      x-examples:
-        $ref: docs/examples/apis/comment_id-comments.yaml#/get
+          source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
 
   /apis/{apiId}/topics:
     get:
       tags:
-      - Topics
+        - Topics
       summary: |
         Get a list of available topics for a given async API
       description: |
         This operation will provide a list of topics available for a given Async API, based on the provided API ID.
       parameters:
-      - $ref: '#/components/parameters/apiId'
-      - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -1195,11 +1277,11 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-      - OAuth2Security: []
+        - OAuth2Security: []
       x-code-samples:
-      - lang: Curl
-        source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://localhost:9443/api/am/store/v1/topics/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
+        - lang: Curl
+          source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/devportal/v2/apis/5b65808c-cdf2-43e1-a695-de63e3ad0ae9/topics"
 
   /apis/{apiId}/subscription-policies:
     get:
@@ -1329,7 +1411,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://localhost:9443/api/am/devportal/v2/applications"'
+          "https://localhost:9443/api/am/devportal/v2/applications?query=CalculatorApp"'
 
     post:
       tags:
@@ -1992,7 +2074,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v2/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
+          -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/devportal/v2/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
 
   /applications/{applicationId}/oauth-keys/{keyMappingId}/regenerate-secret:
     post:
@@ -2268,15 +2350,15 @@ paths:
         - OAuth2Security:
             - apim:app_import_export
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/devportal/v2/applications/import?appName=sampleApp&appOwner=admin&withKeys=true"
+          "https://localhost:9443/api/am/devportal/v2/applications/export?appName=sampleApp&appOwner=admin&withKeys=true"
           > exportedApplication.zip'
 
   /applications/import:
     post:
       tags:
-        - Application (Individual)
+        - Import Export
       summary: Import an Application
       description: |
         This operation can be used to import an application.
@@ -2355,7 +2437,7 @@ paths:
         - OAuth2Security:
             - apim:app_import_export
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@exportedApplication.zip "https://127.0.0.1:9443/api/am/devportal/v2/applications/import?preserveOwner=true&skipSubscriptions=false&appOwner=admin&skipApplicationKeys=false&update=true"'
 
@@ -2371,7 +2453,7 @@ paths:
       description: |
         This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
-        1. Retrieving applications which are subscibed to a specific API.
+        1. Retrieving applications which are subscribed to a specific API.
         `GET https://localhost:9443/api/am/devportal/v2/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
 
         2. Retrieving APIs which are subscribed by a specific application.
@@ -2435,6 +2517,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Subscription'
+            example:
+              applicationId: bbcc3be9-e29c-4ba2-a756-d922a5bd6c4d
+              apiId: abcff4cf-24c5-4298-a7b4-39a1fbd34693
+              throttlingPolicy: Unlimited
         required: true
       responses:
         201:
@@ -2503,6 +2589,13 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/Subscription'
+            example:
+              - applicationId: bbcc3be9-e29c-4ba2-a756-d922a5bd6c4d
+                apiId: abcff4cf-24c5-4298-a7b4-39a1fbd34693
+                throttlingPolicy: Unlimited
+              - applicationId: 67543be9-e29c-4ba2-7856-d922a5bd6c4d
+                apiId: abcff4cf-24c5-4298-a7b4-39a1f7896693
+                throttlingPolicy: Bronze
         required: true
       responses:
         200:
@@ -2582,7 +2675,7 @@ paths:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/devportal/v2/subscriptions/e93fb282-b456-48fc-8981-003fb89086ae/additionalInfo"
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v2/subscriptions/e93fb282-b456-48fc-8981-003fb89086ae/additionalInfo"'
 
   ######################################################
   # The "Individual Subscription" resource APIs
@@ -2755,11 +2848,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X DELETE "https://localhost:9443/api/am/devportal/v2/subscriptions/80369180-7d90-4ee8-99a1-19fa68512aa5"'
-      x-wso2-curl: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-        -X DELETE "https://localhost:9443/api/am/devportal/v2/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"'
-      x-wso2-request: |
-        DELETE https://localhost:9443/api/am/devportal/v2/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
-      x-wso2-response: HTTP/1.1 200 OK
 
   /subscriptions/{subscriptionId}/usage:
     get:
@@ -2820,7 +2908,7 @@ paths:
         - Throttling Policies
       summary: Get All Available Throttling Policies
       description: |
-        Get available Throttling Policies
+        This operation can be used to get all available application or subscription level throttling policies
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -3035,7 +3123,9 @@ paths:
           description: |
             OK.
             List of supported languages for generating SDKs.
-          content: {}
+          content:
+            application/json:
+              example : ["android","java","javascript","jmeter"]
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -3052,44 +3142,44 @@ paths:
   # The Web hook API topic details
   ######################################################
   /webhooks/subscriptions:
-      get:
-        tags:
+    get:
+      tags:
         - Webhooks
-        summary: |
-          Get available web hook subscriptions for a given application.
-        description: |
-          This operation will provide a list of web hook topic subscriptions for a given application. If the api id is provided
-          results will be filtered by the api Id.
-        parameters:
+      summary: |
+        Get available web hook subscriptions for a given application.
+      description: |
+        This operation will provide a list of web hook topic subscriptions for a given application. If the api id is provided
+        results will be filtered by the api Id.
+      parameters:
         - $ref: '#/components/parameters/applicationId-Q'
         - $ref: '#/components/parameters/apiId-Q'
         - $ref: '#/components/parameters/requestedTenant'
-        responses:
-          200:
-            description: |
-              OK.
-              Topic list returned.
-            headers:
-              ETag:
-                description: |
-                  Entity Tag of the response resource.
-                  Used by caches, or in conditional requests.
-                schema:
-                  type: string
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/WebhookSubscriptionList'
-          404:
-            $ref: '#/components/responses/NotFound'
-          500:
-            $ref: '#/components/responses/InternalServerError'
-        security:
+      responses:
+        200:
+          description: |
+            OK.
+            Topic list returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookSubscriptionList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
         - OAuth2Security: []
-        x-code-samples:
+      x-code-samples:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://localhost:9443/api/am/store/v1/webhooks/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
+            "https://localhost:9443/api/am/devportal/v2/webhooks/subscriptions?applicationId=5b65808c-cdf2-43e1-a695-de63e3ad0ae9&apiId=ae4eae22-3f65-387b-a171-d37eaa366fa8"
 
   ######################################################
   # The Developer Portal settings List
@@ -3100,7 +3190,7 @@ paths:
         - Settings
       summary: Retreive Developer Portal settings
       description: |
-        Retreive Developer Portal Settings
+        Retreive Developer Portal settings
       parameters:
         - $ref: '#/components/parameters/requestedTenant'
       responses:
@@ -3169,7 +3259,7 @@ paths:
       summary: |
         Get Tenants by State
       description: |
-        This operation is to get tenants by state
+        This operation is used to get tenants by state
       parameters:
         - name: state
           in: query
@@ -3209,8 +3299,6 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/tenants"
-      x-examples:
-        $ref: docs/examples/tenants/tenants.yam
 
   ######################################################
   # The "Recommendations" resource API
@@ -3253,7 +3341,7 @@ paths:
   /api-categories:
     get:
       tags:
-        - API Category (Collection)
+        - API Categories
       summary: Get All API Categories
       description: |
         Get all API categories
@@ -3280,7 +3368,7 @@ paths:
   /key-managers:
     get:
       tags:
-        - Key Managers (Collection)
+        - Key Managers
       summary: Get All Key Managers
       description: |
         Get all Key managers
@@ -3290,7 +3378,7 @@ paths:
         200:
           description: |
             OK.
-            Categories returned
+            Key Manager list returned
           content:
             application/json:
               schema:
@@ -3436,17 +3524,49 @@ components:
             description: A calculator API that supports basic operations
             context: /CalculatorAPI
             version: 1.0.0
+            type: HTTP
             provider: admin
             lifeCycleStatus: PUBLISHED
             thumbnailUri: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+            avgRating: 4.3
+            throttlingPolicies: [Unlimited]
+            advertiseInfo:
+              advertised: false,
+              apiExternalProductionEndpoint: null,
+              apiExternalSandboxEndpoint: null,
+              originalDevPortalUrl: null,
+              apiOwner: null
+            businessInformation:
+              businessOwner: Jane Roe
+              businessOwnerEmail: businessowner@wso2.com
+              technicalOwner: John Doe
+              technicalOwnerEmail: technicalowner@wso2.com
+            isSubscriptionAvailable: true
+            monetizationLabel: null
           - id: 01123567-1233-5453-0212-12353678901
             name: PizzaShackAPI
             description: A Pizza ordering API
             context: /PizzaShackAPI
             version: 1.0.0
+            type: HTTP
             provider: admin
             lifeCycleStatus: PUBLISHED
             thumbnailUri: /apis/01123567-1233-5453-0212-12353678901/thumbnail
+            avgRating: 4.3
+            throttlingPolicies: [ Unlimited ]
+            advertiseInfo:
+              advertised: false,
+              apiExternalProductionEndpoint: null,
+              apiExternalSandboxEndpoint: null,
+              originalDevPortalUrl: null,
+              apiOwner: null
+            businessInformation:
+              businessOwner: Jane Roe
+              businessOwnerEmail: businessowner@wso2.com
+              technicalOwner: John Doe
+              technicalOwnerEmail: technicalowner@wso2.com
+            isSubscriptionAvailable: true
+            monetizationLabel: null
         pagination:
           offset: 2
           limit: 2
@@ -3514,6 +3634,20 @@ components:
         gatewayVendor:
           type: string
           example: WSO2
+        additionalProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+          description: |
+            Custom(user defined) properties of API
+          example: { }
     APIInfoList:
       title: API Info List
       type: object
@@ -3585,7 +3719,7 @@ components:
         type:
           type: string
           description: This describes the transport type of the API
-          example: WS
+          example: HTTP
         transport:
           type: array
           example:
@@ -3722,7 +3856,7 @@ components:
                   wss:
                     type: string
                     description: WSS environment default URL
-                    example: ws://localhost:9099/phoneverify/
+                    example: wss://localhost:9099/phoneverify/
         businessInformation:
           $ref: '#/components/schemas/APIBusinessInformation'
         environmentList:
@@ -3753,12 +3887,13 @@ components:
             API categories
           items:
             type: string
-            example: ""
+            example: "Marketing"
         keyManagers:
           type: object
           properties: {}
           description: |
             API Key Managers
+          example: ["all"]
         createdTime:
           type: string
           example: 2020-10-31T13:57:16.229
@@ -4311,7 +4446,7 @@ components:
         createdTime:
           type: string
           readOnly: true
-          example : 2021-02-11-09:57:25
+          example: 2021-02-11-09:57:25
         createdBy:
           type: string
           readOnly: true
@@ -4319,7 +4454,7 @@ components:
         updatedTime:
           type: string
           readOnly: true
-          example : 2021-02-12-19:57:25
+          example: 2021-02-12-19:57:25
         category:
           type: string
           readOnly: true
@@ -4802,6 +4937,23 @@ components:
           type: array
           items:
             type: object
+          example:
+            - id: abcff4cf-24c5-4298-a7b4-39a1fbd34693
+              name: PizzaShackAPI
+              type: API
+              transportType:
+              description:
+              context: "/pizzashack"
+              version: 1.0.0
+              provider: admin
+              status: PUBLISHED
+              thumbnailUri:
+              businessInformation:
+                businessOwner: Jane Roe
+                businessOwnerEmail: businessowner@wso2.com
+                technicalOwner: John Doe
+                technicalOwnerEmail: technicalowner@wso2.com
+              avgRating: '4.0'
         pagination:
           $ref: '#/components/schemas/Pagination'
     SearchResult:
@@ -4938,22 +5090,22 @@ components:
           example: 0
         limit:
           type: integer
-          example: 1
+          example: 10
         total:
           type: integer
-          example: 10
+          example: 1
         next:
           type: string
           description: |
             Link to the next subset of resources qualified.
             Empty if no more resources are to be returned.
-            example: ""
+          example: ""
         previous:
           type: string
           description: |
             Link to the previous subset of resources qualified.
             Empty if current subset is the first subset returned.
-            example: ""
+          example: ""
     Settings:
       title: Settings
       type: object
@@ -4962,10 +5114,27 @@ components:
           type: array
           items:
             type: string
+          example:
+            - refresh_token
+            - urn:ietf:params:oauth:grant-type:saml2-bearer
+            - password
+            - client_credentials
+            - iwa:ntlm
+            - authorization_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         scopes:
           type: array
           items:
             type: string
+          example:
+            - apim:api_key
+            - apim:app_import_export
+            - apim:app_manage
+            - apim:store_settings
+            - apim:sub_alert_manage
+            - apim:sub_manage
+            - apim:subscribe
+            - openid
         applicationSharingEnabled:
           type: boolean
           default: false
@@ -4998,11 +5167,11 @@ components:
         userStorePasswordPattern:
           type: string
           description: The 'PasswordJavaRegEx' cofigured in the UserStoreManager
-          example: ""
+          example: "^[\\S]{5,30}$"
         passwordPolicyPattern:
           type: string
           description: The regex configured in the Password Policy property 'passwordPolicy.pattern'
-          example: ""
+          example: "^[\\S]{5,30}$"
         passwordPolicyMinLength:
           type: integer
           description: If Password Policy Feature is enabled, the property 'passwordPolicy.min.length'

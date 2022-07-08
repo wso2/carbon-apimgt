@@ -30,6 +30,12 @@ public class TelemetryConstants {
     static final String REMOTE_TELEMETRY_TRACER_ENABLED = "OpenTracer.RemoteTracer.Enabled";
     static final String LOG_TELEMETRY_TRACER_ENABLED = "OpenTracer.LogTracer.Enabled";
     static final String OPENTELEMETRY_INSTRUMENTATION_NAME = "org.wso2.carbon.apimgt.tracing.telemetry";
+    static final String LATENCY = "Latency";
+    static final String OPERATION_NAME = "Operation";
+    static final String ATTRIBUTES = "Tags";
+    static final String TRACER_ID = "Tracer Id";
+    static final String SPAN_ID = "Span Id";
+    static final String TRACER = "tracer";
     /**
      * Jaeger Constants.
      */
@@ -51,4 +57,5 @@ public class TelemetryConstants {
      * Log Constants.
      */
     static final String LOG = "log";
+    static final String LOG_ENABLED = "OpenTracer.LogTracer.Enabled";
 }
