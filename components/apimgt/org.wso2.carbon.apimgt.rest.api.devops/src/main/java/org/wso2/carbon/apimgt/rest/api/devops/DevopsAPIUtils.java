@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APILogInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentsListDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.LoggingApiOutputDTO;
@@ -99,4 +101,55 @@ public class DevopsAPIUtils {
         return correlationComponentDTO;
     }
 
+    public static CorrelationComponentsListDTO getCorrelationComponentsList(
+            List<CorrelationConfigDTO> correlationConfigDTOList) {
+        CorrelationComponentsListDTO correlationComponentsListDTO = new CorrelationComponentsListDTO();
+        List<CorrelationComponentDTO> correlationComponentDTOList = new ArrayList<>();
+
+        for (CorrelationConfigDTO correlationConfigDTO: correlationConfigDTOList) {
+            CorrelationComponentDTO correlationComponentDTO = new CorrelationComponentDTO();
+
+            correlationComponentDTO.setName(correlationConfigDTO.getName());
+            correlationComponentDTO.setEnabled(correlationConfigDTO.getEnabled());
+
+            List<CorrelationConfigPropertyDTO> correlationConfigPropertyDTOList = correlationConfigDTO.getProperties();
+            List<PropertyDTO> propertyDTOList = new ArrayList<>();
+
+            for (CorrelationConfigPropertyDTO correlationConfigPropertyDTO: correlationConfigPropertyDTOList) {
+                PropertyDTO propertyDTO = new PropertyDTO();
+                propertyDTO.setName(correlationConfigPropertyDTO.getName());
+                propertyDTO.setValue(Arrays.asList(correlationConfigPropertyDTO.getValue()));
+                propertyDTOList.add(propertyDTO);
+            }
+
+            correlationComponentDTO.setProperties(propertyDTOList);
+            correlationComponentDTOList.add(correlationComponentDTO);
+        }
+
+        correlationComponentsListDTO.setComponents(correlationComponentDTOList);
+        return correlationComponentsListDTO;
+
+    }
+
+    public static List<CorrelationConfigDTO> getCorrelationConfigDTOList(
+            CorrelationComponentsListDTO correlationComponentsListDTO) {
+        List<CorrelationConfigDTO> correlationConfigDTOList = new ArrayList<>();
+        List<CorrelationComponentDTO> correlationComponentDTOList = correlationComponentsListDTO.getComponents();
+
+        for (CorrelationComponentDTO correlationComponentDTO: correlationComponentDTOList) {
+            CorrelationConfigDTO correlationConfigDTO = new CorrelationConfigDTO();
+            correlationConfigDTO.setName(correlationComponentDTO.getName());
+            correlationConfigDTO.setEnabled(correlationComponentDTO.getEnabled());
+            List<CorrelationConfigPropertyDTO> properties = new ArrayList<>();
+            for (PropertyDTO propertyDTO: correlationComponentDTO.getProperties()) {
+                CorrelationConfigPropertyDTO correlationConfigPropertyDTO = new CorrelationConfigPropertyDTO();
+                correlationConfigPropertyDTO.setName(propertyDTO.getName());
+                correlationConfigPropertyDTO.setValue(propertyDTO.getValue().toArray(new String[0]));
+                properties.add(correlationConfigPropertyDTO);
+            }
+            correlationConfigDTO.setProperties(properties);
+            correlationConfigDTOList.add(correlationConfigDTO);
+        }
+        return correlationConfigDTOList;
+    }
 }

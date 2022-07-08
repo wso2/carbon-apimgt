@@ -62,7 +62,7 @@ public class MethodTimeLogger
      *
      * @return true if the property value matches this package name
      */
-    @Pointcut("!within(org.wso2.carbon.apimgt.impl.correlation.*) && execution(* *(..)) && if()")
+    @Pointcut("execution(* *(..)) && if()")
     public static boolean pointCutAll() {
         if (!isLogAllSet) {
             String config = System.getProperty(APIConstants.LOG_ALL_METHODS);

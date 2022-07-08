@@ -19,36 +19,29 @@
  */
 package org.wso2.carbon.apimgt.rest.api.devops.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.devops.impl.correlation.ConfigCorrelationImpl;
+import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.ConfigApiService;
 import org.wso2.carbon.apimgt.rest.api.devops.DevopsAPIUtils;
-import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentsListDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.devops.dto.PropertyDTO;
-import org.wso2.carbon.logging.correlation.CorrelationLogConfigurable;
-import org.wso2.carbon.logging.correlation.bean.ImmutableCorrelationLogConfig;
-import org.wso2.carbon.logging.correlation.internal.CorrelationLogManager;
 
 /**
  * The type Config api service.
  */
 public class ConfigApiServiceImpl implements ConfigApiService {
 
+
     public Response configCorrelationGet(MessageContext messageContext) throws APIManagementException {
-        String[] components = DevopsAPIUtils.CORRELATION_DEFAULT_COMPONENTS;
-        CorrelationComponentsListDTO correlationComponentsListDTO = new CorrelationComponentsListDTO();
-        List<CorrelationComponentDTO> correlationComponentDTOList = new ArrayList<>();
-        for (String componentName : components) {
-            CorrelationComponentDTO correlationComponentDTO = DevopsAPIUtils.getCorrelationComponentDTO(componentName);
-            correlationComponentDTOList.add(correlationComponentDTO);
-        }
-        correlationComponentsListDTO.setComponents(correlationComponentDTOList);
+        ConfigCorrelationImpl configCorrelationImpl = new ConfigCorrelationImpl();
+        List<CorrelationConfigDTO> correlationConfigDTOList =  configCorrelationImpl.getCorrelationConfigs();
+        CorrelationComponentsListDTO correlationComponentsListDTO =
+                DevopsAPIUtils.getCorrelationComponentsList(correlationConfigDTOList);
         Response.Status status = Response.Status.OK;
         return Response.status(status).entity(correlationComponentsListDTO).build();
     }
@@ -57,30 +50,25 @@ public class ConfigApiServiceImpl implements ConfigApiService {
             MessageContext messageContext) throws APIManagementException {
         String invalidComponentName = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
         if (invalidComponentName == null) {
-            List<CorrelationComponentDTO> correlationComponentDTOList = new ArrayList<>();
-            for (CorrelationComponentDTO component : correlationComponentsListDTO.getComponents()) {
-                String componentName = component.getName();
-                Boolean enabled = Boolean.parseBoolean(component.getEnabled());
-                String[] deniedThreads = new String[0];
-                if (componentName.equals(DevopsAPIUtils.JDBC_COMPONENT_NAME)) {
-                    List<PropertyDTO> propertyDTOs = component.getProperties();
-                    for (PropertyDTO propertyDTO : propertyDTOs) {
-                        if (propertyDTO.getName().equals(DevopsAPIUtils.DENIED_THREADS_NAME)) {
-                            List<String> deniedThreadsList = propertyDTO.getValue();
-                            deniedThreads = deniedThreadsList.toArray(new String[deniedThreadsList.size()]);
-                        }
-                    }
-                }
-                CorrelationLogConfigurable service = CorrelationLogManager.getLogServiceInstance(componentName);
-                service.onConfigure(new ImmutableCorrelationLogConfig(enabled, deniedThreads, false));
+            ConfigCorrelationImpl configCorrelationImpl = new ConfigCorrelationImpl();
 
-                CorrelationComponentDTO correlationComponentDTO =
-                        DevopsAPIUtils.getCorrelationComponentDTO(componentName);
-                correlationComponentDTOList.add(correlationComponentDTO);
+            List<CorrelationConfigDTO> correlationConfigDTOList =
+                    DevopsAPIUtils.getCorrelationConfigDTOList(correlationComponentsListDTO);
+
+            Boolean result = configCorrelationImpl.updateCorrelationConfigs(correlationConfigDTOList);
+
+            if (result) {
+                Response.Status status = Response.Status.OK;
+                return Response.status(status).entity(correlationComponentsListDTO).build();
+            } else {
+                ErrorDTO errorObject = new ErrorDTO();
+                Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+                errorObject.setCode((long) status.getStatusCode());
+                errorObject.setMessage(status.toString());
+                errorObject.setDescription("Failed to update the correlation configs");
+                return Response.status(status).entity(errorObject).build();
             }
-            correlationComponentsListDTO.setComponents(correlationComponentDTOList);
-            Response.Status status = Response.Status.OK;
-            return Response.status(status).entity(correlationComponentsListDTO).build();
+
         } else {
             ErrorDTO errorObject = new ErrorDTO();
             Response.Status status = Response.Status.BAD_REQUEST;
@@ -91,5 +79,7 @@ public class ConfigApiServiceImpl implements ConfigApiService {
                     "The valid component names : " + Arrays.toString(DevopsAPIUtils.CORRELATION_DEFAULT_COMPONENTS));
             return Response.status(status).entity(errorObject).build();
         }
+
     }
+
 }
