@@ -1573,6 +1573,7 @@ public class SQLConstants {
             "   APP.GROUP_ID," +
             "   APP.CREATED_BY," +
             "   APP.UUID, " +
+            "   APP.ORGANIZATION, " +
             "   APP.TOKEN_TYPE " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -1622,6 +1623,7 @@ public class SQLConstants {
                     "   APP.UUID," +
                     "   APP.CREATED_BY," +
                     "   APP.TOKEN_TYPE," +
+                    "   APP.ORGANIZATION," +
                     "   AM_APP_MAP.KEY_TYPE" +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING AM_APP_MAP," +
@@ -1929,7 +1931,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS.COMMENT_ID = ?";
 
     public static final String GET_API_CONTEXT_SQL =
-            "SELECT CONTEXT FROM AM_API " + " WHERE CONTEXT= ?";
+            "SELECT CONTEXT FROM AM_API WHERE CONTEXT= ? AND ORGANIZATION = ?";
 
     public static final String GET_API_IDENTIFIER_BY_UUID_SQL =
             "SELECT API_PROVIDER, API_NAME, API_VERSION FROM AM_API WHERE API_UUID = ?";
@@ -2153,16 +2155,18 @@ public class SQLConstants {
             "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ? ";
 
     public static final String GET_API_NAME_NOT_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ?";
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND ORGANIZATION = ? AND CONTEXT NOT LIKE ?";
 
     public static final String GET_API_NAME_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ?";
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND AND ORGANIZATION = ? CONTEXT LIKE ?";
 
     public static final String GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ? AND NOT (API_NAME = ?)";
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ? "
+        + "AND NOT (API_NAME = ?) AND ORGANIZATION = ?";
 
     public static final String GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ? AND NOT (API_NAME = ?)";
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ? " +
+                    "AND NOT (API_NAME = ?) AND ORGANIZATION = ?";
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION =
             "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE LOWER(CONTEXT_TEMPLATE) = ? " +
@@ -3644,6 +3648,8 @@ public class SQLConstants {
                 " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ?";
         public static final String REMOVE_DEPLOYED_API_REVISION =
                 " DELETE FROM AM_DEPLOYED_REVISION WHERE NAME = ? AND REVISION_UUID = ?";
+        public static final String SET_UN_DEPLOYED_API_REVISION =
+                "UPDATE AM_DEPLOYED_REVISION SET DEPLOYED_TIME = NULL WHERE NAME = ? AND REVISION_UUID = ?";
         public static final String UPDATE_API_REVISION_DEPLOYMENT_MAPPING =
                 " UPDATE AM_DEPLOYMENT_REVISION_MAPPING SET DISPLAY_ON_DEVPORTAL = ? WHERE NAME = ? AND REVISION_UUID = ? ";
         public static final String REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID =

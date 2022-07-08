@@ -16,13 +16,16 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
@@ -45,6 +48,7 @@ import java.util.regex.Pattern;
 public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(OAuthAuthenticationInterceptor.class);
+    private static final Log audit = CarbonConstants.AUDIT_LOG;
     private static final String OAUTH_AUTHENTICATOR = "OAuth";
     private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
     private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
@@ -85,6 +89,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Request has been Authenticated , authentication type : "+ authenticationType);
                     }
+                    logAuditOperation(inMessage);
                 } else {
                     logger.error("Failed to Authenticate , authentication type : "+ authenticationType);
                     throw new AuthenticationException("Unauthenticated request");
@@ -124,12 +129,30 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     if (logger.isDebugEnabled()) {
                         logger.debug("User logged into Web app using OAuth Authentication");
                     }
+                    logAuditOperation(inMessage);
                 } else {
                     throw new AuthenticationException("Unauthenticated request");
                 }
             } catch (APIManagementException e) {
                 logger.error("Error while authenticating incoming request to API Manager REST API", e);
             }
+        }
+    }
+
+    private void logAuditOperation(Message inMessage) {
+        String path = (String) inMessage.get(Message.REQUEST_URI);
+        String verb = (String) inMessage.get(Message.HTTP_REQUEST_METHOD);
+        String query = (String) inMessage.get(Message.QUERY_STRING);
+        String operation = verb + " " + path;
+        if (StringUtils.isNotBlank(query)) {
+            operation += "?" + query;
+        }
+        OAuthTokenInfo tokenInfo = (OAuthTokenInfo) inMessage.get(RestApiConstants.AUTH_TOKEN_INFO);
+        if (tokenInfo != null) {
+            audit.info(operation + " user: " + tokenInfo.getEndUserName()
+                    + " app: " + tokenInfo.getConsumerKey());
+        } else {
+            audit.info(operation + " user: unknown");
         }
     }
 }

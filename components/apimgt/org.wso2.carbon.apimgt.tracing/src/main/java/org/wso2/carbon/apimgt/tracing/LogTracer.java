@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 /**
  * Class to log tracing activities
  * @deprecated
+ * <p> Use {@link org.wso2.carbon.apimgt.tracing.telemetry.LogTelemetry} instead</p>
  * */
 @Deprecated
 public class LogTracer implements OpenTracer {
