@@ -2574,7 +2574,8 @@ public final class APIConstants {
         SUBSCRIPTIONS,
         SCOPE,
         CERTIFICATE,
-        GA_CONFIG
+        GA_CONFIG,
+        CORRELATION_CONFIG
     }
 
     // Supported Event Types
@@ -2603,7 +2604,8 @@ public final class APIConstants {
         ENDPOINT_CERTIFICATE_UPDATE,
         ENDPOINT_CERTIFICATE_REMOVE,
         GA_CONFIG_UPDATE,
-        UDATE_API_LOG_LEVEL
+        UDATE_API_LOG_LEVEL,
+        UPDATE_CORRELATION_CONFIGS
     }
 
     public enum EventAction {

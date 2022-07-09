@@ -26,6 +26,8 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.CorrelationConfigEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
@@ -50,7 +52,10 @@ public class ConfigCorrelationImpl {
 
     private void publishCorrelationConfigData(List<CorrelationConfigDTO> correlationConfigDTOList)
             throws APIManagementException {
-    //TODO - PASINDU
+
+        CorrelationConfigEvent event = new CorrelationConfigEvent(correlationConfigDTOList,
+                APIConstants.EventType.UPDATE_CORRELATION_CONFIGS.name());
+        APIUtil.sendNotification(event, APIConstants.NotifierType.CORRELATION_CONFIG.name());
     }
 
     public List<CorrelationConfigDTO> getCorrelationConfigs() throws APIManagementException {
