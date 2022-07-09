@@ -23,6 +23,9 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyReGenerateResp
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
@@ -38,6 +41,11 @@ import javax.ws.rs.core.SecurityContext;
 public interface ApplicationsApiService {
       public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdClientCertificateIdContentGet(String applicationId, String certificateId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdClientCertificateIdDelete(String certificateId, String applicationId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdClientCertificateIdGet(String certificateId, String applicationId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdClientCertificatesGet(String applicationId, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdClientCertificatesPost(String applicationId, InputStream certificateInputStream, Attachment certificateDetail, String name, String type, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;

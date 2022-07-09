@@ -27,6 +27,7 @@ public class CertificateInformationDTO {
     private String to;
     private String subject;
     private String version;
+    private String serialNumber;
 
     public String getStatus() {
 
@@ -76,5 +77,15 @@ public class CertificateInformationDTO {
     public void setVersion(String version) {
 
         this.version = version;
+    }
+
+    public String getSerialNumber() {
+
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+
+        this.serialNumber = serialNumber;
     }
 }

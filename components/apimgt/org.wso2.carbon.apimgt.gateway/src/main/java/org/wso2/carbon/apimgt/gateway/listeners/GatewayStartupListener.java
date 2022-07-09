@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
+import org.wso2.carbon.apimgt.gateway.ApplicationCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -159,6 +160,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
             try {
                 new EndpointCertificateDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
+                        .deployCertificatesAtStartup();
+                new ApplicationCertificateDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
                         .deployCertificatesAtStartup();
                 new GoogleAnalyticsConfigDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).deploy();
             } catch (APIManagementException e) {
@@ -330,6 +333,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         new Thread(() -> {
             try {
                 new EndpointCertificateDeployer(tenantDomain).deployCertificatesAtStartup();
+                new ApplicationCertificateDeployer(tenantDomain).deployCertificatesAtStartup();
                 new GoogleAnalyticsConfigDeployer(tenantDomain).deploy();
             } catch (APIManagementException e) {
                 log.error(e);

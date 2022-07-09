@@ -101,10 +101,8 @@ public class APIMappingUtil {
 
         for (Scope scope : scopes) {
             if (!uniqueScope.containsKey(scope.getKey())) {
-                ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().
-                        key(scope.getKey()).
-                        name(scope.getName()).
-                        description(scope.getDescription());
+                ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().key(scope.getKey()).name(scope.getName())
+                        .description(scope.getDescription());
                 if (StringUtils.isNotBlank(scope.getRoles())) {
                     scopeInfoDTO.roles(Arrays.asList(scope.getRoles().trim().split(",")));
                 }
@@ -182,19 +180,21 @@ public class APIMappingUtil {
                         Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
                         //check for the billing plan (fixed or price per request)
                         if (!StringUtils.isBlank(monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE))) {
-                            monetizationAttributesDTO.setFixedPrice(monetizationAttributes.get
-                                    (APIConstants.Monetization.FIXED_PRICE));
-                        } else if (!StringUtils.isBlank(monetizationAttributes.get(
-                                APIConstants.Monetization.PRICE_PER_REQUEST))) {
-                            monetizationAttributesDTO.setPricePerRequest(monetizationAttributes.get
-                                    (APIConstants.Monetization.PRICE_PER_REQUEST));
+                            monetizationAttributesDTO.setFixedPrice(
+                                    monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE));
+                        } else if (!StringUtils.isBlank(
+                                monetizationAttributes.get(APIConstants.Monetization.PRICE_PER_REQUEST))) {
+                            monetizationAttributesDTO.setPricePerRequest(
+                                    monetizationAttributes.get(APIConstants.Monetization.PRICE_PER_REQUEST));
                         }
-                        monetizationAttributesDTO.setCurrencyType(monetizationAttributes.get
-                                (APIConstants.Monetization.CURRENCY) != null ? monetizationAttributes.get
-                                (APIConstants.Monetization.CURRENCY) : StringUtils.EMPTY);
-                        monetizationAttributesDTO.setBillingCycle(monetizationAttributes.get
-                                (APIConstants.Monetization.BILLING_CYCLE) != null ? monetizationAttributes.get
-                                (APIConstants.Monetization.BILLING_CYCLE) : StringUtils.EMPTY);
+                        monetizationAttributesDTO.setCurrencyType(
+                                monetizationAttributes.get(APIConstants.Monetization.CURRENCY) != null ?
+                                        monetizationAttributes.get(APIConstants.Monetization.CURRENCY) :
+                                        StringUtils.EMPTY);
+                        monetizationAttributesDTO.setBillingCycle(
+                                monetizationAttributes.get(APIConstants.Monetization.BILLING_CYCLE) != null ?
+                                        monetizationAttributes.get(APIConstants.Monetization.BILLING_CYCLE) :
+                                        StringUtils.EMPTY);
                     }
                     apiTiersDTO.setMonetizationAttributes(monetizationAttributesDTO);
                 }
@@ -247,12 +247,12 @@ public class APIMappingUtil {
         }
 
         dto.setAdvertiseInfo(extractAdvertiseInfo(model));
-        String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
-                .getProviderName()));
+        String apiTenant = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(model.getId().getProviderName()));
         String subscriptionAvailability = model.getSubscriptionAvailability();
         String subscriptionAllowedTenants = model.getSubscriptionAvailableTenants();
-        dto.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
-                subscriptionAllowedTenants));
+        dto.setIsSubscriptionAvailable(
+                isSubscriptionAvailable(apiTenant, subscriptionAvailability, subscriptionAllowedTenants));
 
         List<APICategory> apiCategories = model.getApiCategories();
         List<String> categoryNamesList = new ArrayList<>();
@@ -334,33 +334,35 @@ public class APIMappingUtil {
         dto.setMonetization(monetizationInfoDTO);
 
         for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
-                APITiersDTO apiTiersDTO = new APITiersDTO();
-                apiTiersDTO.setTierName(currentTier.getName());
-                apiTiersDTO.setTierPlan(currentTier.getTierPlan());
-                //monetization attributes are applicable only for commercial tiers
-                if (APIConstants.COMMERCIAL_TIER_PLAN.equalsIgnoreCase(currentTier.getTierPlan())) {
-                    APIMonetizationAttributesDTO monetizationAttributesDTO = new APIMonetizationAttributesDTO();
-                    if (MapUtils.isNotEmpty(currentTier.getMonetizationAttributes())) {
-                        Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
-                        //check the billing plan (fixed or price per request)
-                        if (!StringUtils.isBlank(monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE))) {
-                            monetizationAttributesDTO.setFixedPrice(monetizationAttributes.get
-                                    (APIConstants.Monetization.FIXED_PRICE));
-                        } else if (!StringUtils.isBlank(monetizationAttributes.get(
-                                APIConstants.Monetization.PRICE_PER_REQUEST))) {
-                            monetizationAttributesDTO.setPricePerRequest(monetizationAttributes.get
-                                    (APIConstants.Monetization.PRICE_PER_REQUEST));
-                        }
-                        monetizationAttributesDTO.setCurrencyType(monetizationAttributes.get
-                                (APIConstants.Monetization.CURRENCY) != null ? monetizationAttributes.get
-                                (APIConstants.Monetization.CURRENCY) : StringUtils.EMPTY);
-                        monetizationAttributesDTO.setBillingCycle(monetizationAttributes.get
-                                (APIConstants.Monetization.BILLING_CYCLE) != null ? monetizationAttributes.get
-                                (APIConstants.Monetization.BILLING_CYCLE) : StringUtils.EMPTY);
+            APITiersDTO apiTiersDTO = new APITiersDTO();
+            apiTiersDTO.setTierName(currentTier.getName());
+            apiTiersDTO.setTierPlan(currentTier.getTierPlan());
+            //monetization attributes are applicable only for commercial tiers
+            if (APIConstants.COMMERCIAL_TIER_PLAN.equalsIgnoreCase(currentTier.getTierPlan())) {
+                APIMonetizationAttributesDTO monetizationAttributesDTO = new APIMonetizationAttributesDTO();
+                if (MapUtils.isNotEmpty(currentTier.getMonetizationAttributes())) {
+                    Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
+                    //check the billing plan (fixed or price per request)
+                    if (!StringUtils.isBlank(monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE))) {
+                        monetizationAttributesDTO.setFixedPrice(
+                                monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE));
+                    } else if (!StringUtils.isBlank(
+                            monetizationAttributes.get(APIConstants.Monetization.PRICE_PER_REQUEST))) {
+                        monetizationAttributesDTO.setPricePerRequest(
+                                monetizationAttributes.get(APIConstants.Monetization.PRICE_PER_REQUEST));
                     }
-                    apiTiersDTO.setMonetizationAttributes(monetizationAttributesDTO);
+                    monetizationAttributesDTO.setCurrencyType(
+                            monetizationAttributes.get(APIConstants.Monetization.CURRENCY) != null ?
+                                    monetizationAttributes.get(APIConstants.Monetization.CURRENCY) :
+                                    StringUtils.EMPTY);
+                    monetizationAttributesDTO.setBillingCycle(
+                            monetizationAttributes.get(APIConstants.Monetization.BILLING_CYCLE) != null ?
+                                    monetizationAttributes.get(APIConstants.Monetization.BILLING_CYCLE) :
+                                    StringUtils.EMPTY);
                 }
-                tiersToReturn.add(apiTiersDTO);
+                apiTiersDTO.setMonetizationAttributes(monetizationAttributesDTO);
+            }
+            tiersToReturn.add(apiTiersDTO);
         }
         dto.setTiers(tiersToReturn);
 
@@ -376,10 +378,8 @@ public class APIMappingUtil {
             List<Scope> scopes = uriTemplate.retrieveAllScopes();
             for (Scope scope : scopes) {
                 if (!uniqueScopes.containsKey(scope.getKey())) {
-                    ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().
-                            key(scope.getKey()).
-                            name(scope.getName()).
-                            description(scope.getDescription());
+                    ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().key(scope.getKey()).name(scope.getName())
+                            .description(scope.getDescription());
                     if (StringUtils.isNotBlank(scope.getRoles())) {
                         scopeInfoDTO.roles(Arrays.asList(scope.getRoles().trim().split(",")));
                     }
@@ -436,15 +436,14 @@ public class APIMappingUtil {
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(false);
         dto.setAdvertiseInfo(advertiseInfoDTO);
-        String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
-                .getProviderName()));
+        String apiTenant = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(model.getId().getProviderName()));
         String subscriptionAvailability = model.getSubscriptionAvailability();
         String subscriptionAllowedTenants = model.getSubscriptionAvailableTenants();
-        dto.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
-                subscriptionAllowedTenants));
+        dto.setIsSubscriptionAvailable(
+                isSubscriptionAvailable(apiTenant, subscriptionAvailability, subscriptionAllowedTenants));
         return dto;
     }
-
 
     public static APIDTO fromAPItoDTO(ApiTypeWrapper model, String organization) throws APIManagementException {
         APIDTO apidto;
@@ -463,14 +462,13 @@ public class APIMappingUtil {
 
         // Set Async protocols of API based on the gateway vendor
         if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
-            apidto.setAsyncTransportProtocols(AdditionalSubscriptionInfoMappingUtil.setEndpointURLsForApiDto(
-                    model.getApi(), organization));
+            apidto.setAsyncTransportProtocols(
+                    AdditionalSubscriptionInfoMappingUtil.setEndpointURLsForApiDto(model.getApi(), organization));
         }
         return apidto;
     }
 
-
-    private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization)
+    private static List<APIEndpointURLsDTO> setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization)
             throws APIManagementException {
         APIDTO apidto;
         apidto = fromAPItoDTO(model.getApi(), organization);
@@ -505,8 +503,7 @@ public class APIMappingUtil {
         // custom gateway URL of tenant
         Map<String, String> domains = new HashMap<>();
         if (organization != null) {
-            domains = apiConsumer.getTenantDomainMappings(organization,
-                    APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+            domains = apiConsumer.getTenantDomainMappings(organization, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         }
         String customGatewayUrl = domains.get(APIConstants.CUSTOM_URL);
 
@@ -525,9 +522,8 @@ public class APIMappingUtil {
         return endpointUrls;
     }
 
-    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto, Environment environment,
-                                                                 String host, String customGatewayUrl,
-                                                                 String tenantDomain) throws APIManagementException {
+    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto, Environment environment, String host,
+            String customGatewayUrl, String tenantDomain) throws APIManagementException {
         // Deployed VHost
         VHost vHost;
         String context = apidto.getContext();
@@ -537,13 +533,12 @@ public class APIMappingUtil {
             if (!StringUtils.contains(customGatewayUrl, "://")) {
                 customGatewayUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + customGatewayUrl;
             }
-            vHost = VHost.fromEndpointUrls(new String[]{customGatewayUrl});
+            vHost = VHost.fromEndpointUrls(new String[] { customGatewayUrl });
             context = context.replace("/t/" + tenantDomain, "");
         }
 
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
         apiEndpointURLsDTO.setEnvironmentName(environment.getName());
-        apiEndpointURLsDTO.setEnvironmentDisplayName(environment.getDisplayName());
         apiEndpointURLsDTO.setEnvironmentType(environment.getType());
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
@@ -595,8 +590,7 @@ public class APIMappingUtil {
 
         return apidto.getOperations().stream()
                 .filter(apiOperationsDTO -> APIConstants.GRAPHQL_SUBSCRIPTION.equalsIgnoreCase(
-                        apiOperationsDTO.getVerb()))
-                .findAny().orElse(null) != null;
+                        apiOperationsDTO.getVerb())).findAny().orElse(null) != null;
     }
 
     /**
@@ -607,8 +601,7 @@ public class APIMappingUtil {
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIInfoFromUUID(String apiUUID, String organization)
-            throws APIManagementException {
+    public static API getAPIInfoFromUUID(String apiUUID, String organization) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         API api = apiConsumer.getLightweightAPIByUUID(apiUUID, organization);
@@ -644,19 +637,19 @@ public class APIMappingUtil {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiCommonUtil
-                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+            paginatedPrevious = RestApiCommonUtil.getAPIPaginatedURL(
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiCommonUtil
-                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+            paginatedNext = RestApiCommonUtil.getAPIPaginatedURL(
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
-        PaginationDTO paginationDTO = CommonMappingUtil
-                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        PaginationDTO paginationDTO = CommonMappingUtil.getPaginationDTO(limit, offset, size, paginatedNext,
+                paginatedPrevious);
         apiListDTO.setPagination(paginationDTO);
     }
 
@@ -711,26 +704,26 @@ public class APIMappingUtil {
      * @param size          max offset
      */
     public static void setRatingPaginationParams(RatingListDTO ratingListDTO, String apiId, int offset, int limit,
-                                                 int size) {
+            int size) {
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
         String paginatedPrevious = "";
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiCommonUtil
-                    .getRatingPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId);
+            paginatedPrevious = RestApiCommonUtil.getRatingPaginatedURL(
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiCommonUtil
-                    .getRatingPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId);
+            paginatedNext = RestApiCommonUtil.getRatingPaginatedURL(
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId);
         }
 
-        PaginationDTO paginationDTO = CommonMappingUtil
-                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        PaginationDTO paginationDTO = CommonMappingUtil.getPaginationDTO(limit, offset, size, paginatedNext,
+                paginatedPrevious);
         ratingListDTO.setPagination(paginationDTO);
     }
 
@@ -739,13 +732,13 @@ public class APIMappingUtil {
      *
      * @param apiList List of APIs
      * @return APIListDTO object containing APIDTOs
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
-    public static APIListDTO fromAPIListToDTO(List<Object> apiList,String organization) throws APIManagementException {
+    public static APIListDTO fromAPIListToDTO(List<Object> apiList, String organization) throws APIManagementException {
         APIListDTO apiListDTO = new APIListDTO();
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
-        Map<String,Tier> tierMap = APIUtil.getTiers(organization);
+        Map<String, Tier> tierMap = APIUtil.getTiers(organization);
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiList != null) {
             for (Object api : apiList) {
@@ -821,12 +814,12 @@ public class APIMappingUtil {
             apiInfoDTO.setThumbnailUri(api.getThumbnailUrl());
         }
         apiInfoDTO.setAdvertiseInfo(extractAdvertiseInfo(api));
-        String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
-                .getProviderName()));
+        String apiTenant = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         String subscriptionAvailability = api.getSubscriptionAvailability();
         String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
-        apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
-                subscriptionAllowedTenants));
+        apiInfoDTO.setIsSubscriptionAvailable(
+                isSubscriptionAvailable(apiTenant, subscriptionAvailability, subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
 
         return apiInfoDTO;
@@ -837,9 +830,9 @@ public class APIMappingUtil {
      *
      * @param apiProduct API Product object
      * @return a minimal representation DTO
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
-    static APIInfoDTO fromAPIToInfoDTO(APIProduct apiProduct,String organization) throws APIManagementException {
+    static APIInfoDTO fromAPIToInfoDTO(APIProduct apiProduct, String organization) throws APIManagementException {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(apiProduct.getDescription());
         apiInfoDTO.setContext(apiProduct.getContext());
@@ -856,7 +849,7 @@ public class APIMappingUtil {
 
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(organization);
-        Map<String,Tier> tierMap = APIUtil.getTiers(organization);
+        Map<String, Tier> tierMap = APIUtil.getTiers(organization);
         setThrottlePoliciesAndMonetization(apiProduct, apiInfoDTO, deniedTiers, tierMap);
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(apiProduct.getBusinessOwner());
@@ -873,12 +866,12 @@ public class APIMappingUtil {
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(false);
         apiInfoDTO.setAdvertiseInfo(advertiseInfoDTO);
-        String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiProduct.getId()
-                .getProviderName()));
+        String apiTenant = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(apiProduct.getId().getProviderName()));
         String subscriptionAvailability = apiProduct.getSubscriptionAvailability();
         String subscriptionAllowedTenants = apiProduct.getSubscriptionAvailableTenants();
-        apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
-                subscriptionAllowedTenants));
+        apiInfoDTO.setIsSubscriptionAvailable(
+                isSubscriptionAvailable(apiTenant, subscriptionAvailability, subscriptionAllowedTenants));
         return apiInfoDTO;
     }
 
@@ -902,7 +895,6 @@ public class APIMappingUtil {
     //        }
     //        return scopeDto;
     //    }
-
 
     /**
      * Maps external store advertise API properties to AdvertiseInfoDTO object.
@@ -932,7 +924,7 @@ public class APIMappingUtil {
      * @return subscriptionAllowed
      */
     private static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
-                                                   String subscriptionAllowedTenants) {
+            String subscriptionAllowedTenants) {
 
         String userTenant = RestApiCommonUtil.getLoggedInUserTenantDomain();
         boolean subscriptionAllowed = false;
@@ -960,7 +952,7 @@ public class APIMappingUtil {
     }
 
     public static void setThrottlePoliciesAndMonetization(API api, APIInfoDTO apiInfoDTO, Set<String> deniedTiers,
-                                                          Map<String, Tier> tierMap) throws APIManagementException {
+            Map<String, Tier> tierMap) throws APIManagementException {
         Set<Tier> throttlingPolicies = new HashSet<Tier>();
         List<String> throttlingPolicyNames = new ArrayList<>();
         String tiers = null;

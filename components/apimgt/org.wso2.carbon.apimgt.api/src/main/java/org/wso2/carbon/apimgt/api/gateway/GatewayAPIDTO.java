@@ -36,6 +36,7 @@ public class GatewayAPIDTO implements Serializable {
     private String provider;
     private String tenantDomain;
     private String apiId;
+    private String applicationId;
     private String apiDefinition;
     private String graphQLSchema;
     private GatewayContentDTO[] sequenceToBeAdd;
@@ -44,6 +45,9 @@ public class GatewayAPIDTO implements Serializable {
     private String[] localEntriesToBeRemove;
     private GatewayContentDTO[] clientCertificatesToBeAdd;
     private String[] clientCertificatesToBeRemove;
+    private GatewayContentDTO[] applicationClientCertificatesToBeAdd;
+
+    private String[] applicationClientCertificatesToBeRemove;
     private GatewayContentDTO[] endpointEntriesToBeAdd;
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
@@ -97,6 +101,15 @@ public class GatewayAPIDTO implements Serializable {
     public void setApiId(String apiId) {
 
         this.apiId = apiId;
+    }
+    public String getApplicationId() {
+
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+
+        this.applicationId = applicationId;
     }
 
     public String getApiDefinition() {
@@ -167,6 +180,23 @@ public class GatewayAPIDTO implements Serializable {
     public void setClientCertificatesToBeRemove(String[] clientCertificatesToBeRemove) {
 
         this.clientCertificatesToBeRemove = clientCertificatesToBeRemove;
+    }
+
+    public GatewayContentDTO[] getApplicationClientCertificatesToBeAdd() {
+        return applicationClientCertificatesToBeAdd;
+    }
+
+    public void setApplicationClientCertificatesToBeAdd(GatewayContentDTO[] applicationClientCertificatesToBeAdd) {
+        this.applicationClientCertificatesToBeAdd = applicationClientCertificatesToBeAdd;
+    }
+
+    public String[] getApplicationClientCertificatesToBeRemove() {
+
+        return applicationClientCertificatesToBeRemove;
+    }
+
+    public void setApplicationClientCertificatesToBeRemove(String[] applicationClientCertificatesToBeRemove) {
+        this.applicationClientCertificatesToBeRemove = applicationClientCertificatesToBeRemove;
     }
 
     public GatewayContentDTO[] getEndpointEntriesToBeAdd() {

@@ -17,7 +17,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,21 +27,17 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.models.ExportedSubscribedAPI;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -54,6 +51,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ImportUtils {
+
     private static final Log log = LogFactory.getLog(ImportUtils.class);
     private static final String GRANT_TYPE_IMPLICIT = "implicit";
     private static final String GRANT_TYPE_CODE = "code";
@@ -66,8 +64,8 @@ public class ImportUtils {
      * @throws IOException            If an error occurs while reading the file
      * @throws APIManagementException If an error occurs while fetching the application definition
      */
-    public static String getApplicationDefinitionAsJson(String pathToArchive) throws IOException,
-            APIManagementException {
+    public static String getApplicationDefinitionAsJson(String pathToArchive)
+            throws IOException, APIManagementException {
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_APPLICATION_FILE_LOCATION;
         String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_APPLICATION_FILE_LOCATION;
@@ -150,18 +148,18 @@ public class ImportUtils {
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-                                                          Application application, Boolean update, APIConsumer apiConsumer, String organization)
-            throws APIManagementException,
-            UserStoreException {
+            Application application, Boolean update, APIConsumer apiConsumer, String organization)
+            throws APIManagementException, UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+            String tenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
             if (!StringUtils.isEmpty(tenantDomain) && APIUtil.isTenantAvailable(tenantDomain)) {
                 String uuidFromIdentifier = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier, tenantDomain);
                 if (StringUtils.isNotEmpty(uuidFromIdentifier)) {
-                    ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(uuidFromIdentifier, organization);
+                    ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(uuidFromIdentifier,
+                            organization);
                     // Tier of the imported subscription
                     String targetTier = subscribedAPI.getThrottlingPolicy();
                     // Checking whether the target tier is available
@@ -172,20 +170,20 @@ public class ImportUtils {
                         // It will throw an error if subscriber already exists
                         if (update == null || !update) {
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
-                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId
-                                , application.getId())) {
+                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId,
+                                application.getId())) {
                             // on update skip subscriptions that already exists
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
                         }
                     } else {
-                        log.error("Failed to import Subscription as API/API Product "
-                                + apiIdentifier.getName() + "-" + apiIdentifier.getVersion() + " as one or more tiers may "
+                        log.error("Failed to import Subscription as API/API Product " + apiIdentifier.getName() + "-"
+                                + apiIdentifier.getVersion() + " as one or more tiers may "
                                 + "be unavailable or the API/API Product may not have been published ");
                         skippedAPIList.add(subscribedAPI.getApiId());
                     }
                 } else {
-                    log.error("Failed to import Subscription as API " + apiIdentifier.getName() + "-" +
-                            apiIdentifier.getVersion() + " is not available");
+                    log.error("Failed to import Subscription as API " + apiIdentifier.getName() + "-"
+                            + apiIdentifier.getVersion() + " is not available");
                     skippedAPIList.add(subscribedAPI.getApiId());
                 }
             } else {
@@ -231,8 +229,8 @@ public class ImportUtils {
             }
         }
         if (!apiTypeWrapper.isAPIProduct()) {
-            log.error("Tier:" + targetTierName + " is not available for API " + api.getId().getApiName() + "-" + api
-                    .getId().getVersion());
+            log.error("Tier:" + targetTierName + " is not available for API " + api.getId().getApiName() + "-"
+                    + api.getId().getVersion());
         } else {
             log.error(
                     "Tier:" + targetTierName + " is not available for API Product " + apiProduct.getId().getName() + "-"

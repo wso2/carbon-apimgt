@@ -17,16 +17,23 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -50,6 +57,7 @@ import java.util.Set;
 import static org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil.createDirectory;
 
 public class ExportUtils {
+
     private static final Log log = LogFactory.getLog(ExportUtils.class);
 
     /**
@@ -95,8 +103,8 @@ public class ExportUtils {
             // Creates a temporary directory to store the exported application artifact
             File exportFolder = createTempApplicationDirectory(appName, appOwner);
             exportApplicationBasePath = exportFolder.toString();
-            archivePath = exportApplicationBasePath
-                    .concat(File.separator + appOwner.replace(File.separator, "#") + "-" + appName);
+            archivePath = exportApplicationBasePath.concat(
+                    File.separator + appOwner.replace(File.separator, "#") + "-" + appName);
         } catch (APIImportExportException e) {
             throw new APIManagementException("Unable to create the temporary directory to export the Application", e);
         }
@@ -105,9 +113,8 @@ public class ExportUtils {
         try {
             createDirectory(archivePath);
             // Export application details
-            CommonUtil
-                    .writeDtoToFile(archivePath + File.separator + ImportExportConstants.TYPE_APPLICATION, exportFormat,
-                            ImportExportConstants.TYPE_APPLICATION, applicationDtoToExport);
+            CommonUtil.writeDtoToFile(archivePath + File.separator + ImportExportConstants.TYPE_APPLICATION,
+                    exportFormat, ImportExportConstants.TYPE_APPLICATION, applicationDtoToExport);
             CommonUtil.archiveDirectory(exportApplicationBasePath);
             FileUtils.deleteQuietly(new File(exportApplicationBasePath));
             return new File(exportApplicationBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -145,8 +152,8 @@ public class ExportUtils {
         }
 
         // Get the subscribed API details and add it to a set
-        Set<SubscribedAPI> subscribedAPIs = apiConsumer
-                .getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
+        Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(application.getSubscriber(),
+                application.getName(), application.getGroupId());
         Set<ExportedSubscribedAPI> exportedSubscribedAPIs = new HashSet<>();
         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
             ExportedSubscribedAPI exportedSubscribedAPI = new ExportedSubscribedAPI(subscribedAPI.getApiId(),
@@ -180,4 +187,5 @@ public class ExportUtils {
         createDirectory(tempDirectory.getPath());
         return tempDirectory;
     }
+
 }

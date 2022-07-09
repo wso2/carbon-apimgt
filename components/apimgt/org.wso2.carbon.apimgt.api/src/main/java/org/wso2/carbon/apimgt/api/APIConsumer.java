@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,6 +81,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException If an error occurs while rating the API
      */
     void rateAPI(String apiId, APIRating rating, String user) throws APIManagementException;
+
     /**
      * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
      *
@@ -128,8 +131,8 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                               String applicationName, String keyType, String tokenType,
-                                               String keyManagerName,String tenantDomain) throws APIManagementException;
+            String applicationName, String keyType, String tokenType, String keyManagerName, String tenantDomain)
+            throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
@@ -150,7 +153,8 @@ public interface APIConsumer extends APIManager {
      *@return
      *@throws APIManagementException
      */
-    void cleanUpApplicationRegistrationByApplicationId(int applicationId, String tokenType) throws APIManagementException;
+    void cleanUpApplicationRegistrationByApplicationId(int applicationId, String tokenType)
+            throws APIManagementException;
 
     /**
      * Returns true if a given user has subscribed to the API
@@ -171,7 +175,8 @@ public interface APIConsumer extends APIManager {
      * @return true, if giving api identifier is already subscribed
      * @throws APIManagementException if failed to check the subscribed state
      */
-    boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId) throws APIManagementException;
+    boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId)
+            throws APIManagementException;
 
     /**
      * Returns the number of subscriptions for the given subscriber and app.
@@ -181,7 +186,8 @@ public interface APIConsumer extends APIManager {
      * @return The number of subscriptions
      * @throws APIManagementException if failed to count the number of subscriptions.
      */
-    Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId) throws APIManagementException;
+    Integer getSubscriptionCount(Subscriber subscriber, String applicationName, String groupingId)
+            throws APIManagementException;
 
     /**
      * Add new Subscriber
@@ -205,8 +211,8 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to add subscription details to database
      */
     SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application applicationId,
-                                            String subscriptionId, String currentThrottlingPolicy,
-                                            String requestedThrottlingPolicy) throws APIManagementException;
+            String subscriptionId, String currentThrottlingPolicy, String requestedThrottlingPolicy)
+            throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application
@@ -217,7 +223,8 @@ public interface APIConsumer extends APIManager {
      * @param organization  Organization
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(Identifier identifier, String userId, int applicationId, String organization) throws APIManagementException;
+    void removeSubscription(Identifier identifier, String userId, int applicationId, String organization)
+            throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application with GroupId
@@ -229,8 +236,8 @@ public interface APIConsumer extends APIManager {
      * @param organization  Organization
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId, String organization) throws
-            APIManagementException;
+    void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
+            String organization) throws APIManagementException;
 
     /** Removes a subscription specified by SubscribedAPI object
      *
@@ -286,8 +293,8 @@ public interface APIConsumer extends APIManager {
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
-            APIManagementException;
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset)
+            throws APIManagementException;
 
     /**
      * @param apiTypeWrapper  Api type wrapper
@@ -297,7 +304,8 @@ public interface APIConsumer extends APIManager {
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
+    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit,
+            Integer replyOffset) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
@@ -371,13 +379,9 @@ public interface APIConsumer extends APIManager {
      * @param isImportMode whether Application is being imported from controller or not
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String,Object> requestApprovalForApplicationRegistration(String userId, Application application,
-                                                                 String tokenType,
-                                                                 String callbackUrl, String[] allowedDomains,
-                                                                 String validityTime,
-                                                                 String tokenScope,
-                                                                 String jsonString, String keyManagerName,
-                                                                 String tenantDomain, boolean isImportMode)
+    Map<String, Object> requestApprovalForApplicationRegistration(String userId, Application application,
+            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
+            String jsonString, String keyManagerName, String tenantDomain, boolean isImportMode)
             throws APIManagementException;
 
     /**
@@ -398,14 +402,9 @@ public interface APIConsumer extends APIManager {
      * @deprecated Use {@link #requestApprovalForApplicationRegistration(String, Application, String, String, String[],
      * String, String, String, String, String, boolean)} instead
      */
-    @Deprecated
-    Map<String, Object> requestApprovalForApplicationRegistration(String userId, Application application,
-                                                                 String tokenType,
-                                                                 String callbackUrl, String[] allowedDomains,
-                                                                 String validityTime,
-                                                                 String tokenScope, String groupingId,
-                                                                 String jsonString, String keyManagerName,
-                                                                 String tenantDomain)
+    @Deprecated Map<String, Object> requestApprovalForApplicationRegistration(String userId, Application application,
+            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
+            String groupingId, String jsonString, String keyManagerName, String tenantDomain)
             throws APIManagementException;
 
     /**
@@ -423,14 +422,9 @@ public interface APIConsumer extends APIManager {
      * @param keyManagerName
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    OAuthApplicationInfo updateAuthClient(String userId, Application application,
-                                          String tokenType,
-                                          String callbackUrl, String[] allowedDomains,
-                                          String validityTime,
-                                          String tokenScope,
-                                          String groupingId,
-                                          String jsonString, String keyManagerName)
-            throws APIManagementException;
+    OAuthApplicationInfo updateAuthClient(String userId, Application application, String tokenType, String callbackUrl,
+            String[] allowedDomains, String validityTime, String tokenScope, String groupingId, String jsonString,
+            String keyManagerName) throws APIManagementException;
 
     /**
      * Updates the application owner of a given application
@@ -439,7 +433,8 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    boolean updateApplicationOwner(String newUserId , String organization, Application application ) throws APIManagementException;
+    boolean updateApplicationOwner(String newUserId, String organization, Application application)
+            throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber
@@ -455,8 +450,7 @@ public interface APIConsumer extends APIManager {
      */
 
     Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset,
-                                                String search, String sortColumn, String sortOrder, String organization)
-            throws APIManagementException;
+            String search, String sortColumn, String sortOrder, String organization) throws APIManagementException;
 
     /**
      * Returns the corresponding application given the Id
@@ -485,10 +479,10 @@ public interface APIConsumer extends APIManager {
      * @return the set of subscribed API's.
      * @throws APIManagementException
      */
-    Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                Identifier identifier, String groupingId, String organization) throws APIManagementException;
+    Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, Identifier identifier, String groupingId,
+            String organization) throws APIManagementException;
 
-    Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
+    Set<API> searchAPI(String searchTerm, String searchType, String tenantDomain) throws APIManagementException;
 
     int getUserRating(String apiId, String user) throws APIManagementException;
 
@@ -504,7 +498,7 @@ public interface APIConsumer extends APIManager {
      * @return Set<String>
      * @throws APIManagementException if failed to get the tiers
      */
-    Set<String> getDeniedTiers()throws APIManagementException;
+    Set<String> getDeniedTiers() throws APIManagementException;
 
     /**
      * Returns a list of Tiers denied based on restrictions defined for API provider tenant domain
@@ -513,8 +507,7 @@ public interface APIConsumer extends APIManager {
      * @return Set<String>
      * @throws APIManagementException if failed to get the tiers
      */
-    @Deprecated
-    Set<String> getDeniedTiers(int providerTenantId) throws APIManagementException;
+    @Deprecated Set<String> getDeniedTiers(int providerTenantId) throws APIManagementException;
 
     /**
      * Returns a list of Tiers denied based on restrictions defined for API provider tenant domain
@@ -550,8 +543,7 @@ public interface APIConsumer extends APIManager {
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
-            throws APIManagementException;
+    String getOpenAPIDefinitionForEnvironment(API api, String environmentName) throws APIManagementException;
 
     /**
      * Revokes the oldAccessToken generating a new one.
@@ -568,8 +560,8 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException Error when renewing access token
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] requestedScopes, String jsonInput, String keyManagerName,
-                                     String grantType) throws APIManagementException;
+            String[] requestedScopes, String jsonInput, String keyManagerName, String grantType)
+            throws APIManagementException;
 
     /**
      * Generates a new api key
@@ -583,8 +575,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     String generateApiKey(Application application, String userName, long validityPeriod, String permittedIP,
-                          String permittedReferer)
-            throws APIManagementException;
+            String permittedReferer) throws APIManagementException;
 
     /**
      * Regenerate new consumer secret.
@@ -624,7 +615,7 @@ public interface APIConsumer extends APIManager {
      * @return groupId of the application
      * @throws APIManagementException If failed to fetch the groupId
      */
-    String getGroupId (int appId) throws APIManagementException;
+    String getGroupId(int appId) throws APIManagementException;
 
     String[] getGroupIds(String response) throws APIManagementException;
 
@@ -652,6 +643,7 @@ public interface APIConsumer extends APIManager {
      */
     ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException;
+
     /**
      * Returns application attributes defined in configuration
      *
@@ -661,7 +653,8 @@ public interface APIConsumer extends APIManager {
      */
     JSONArray getAppAttributesFromConfig(String userId) throws APIManagementException;
 
-    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(String organization, Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
+    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(String organization, Subscriber subscriber,
+            APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 
@@ -731,8 +724,7 @@ public interface APIConsumer extends APIManager {
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
 
-    APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
-            throws APIManagementException;
+    APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId) throws APIManagementException;
 
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
 
@@ -744,8 +736,7 @@ public interface APIConsumer extends APIManager {
      * @return AsyncAPI definition string
      * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
      */
-    String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName)
-            throws APIManagementException;
+    String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException;
 
     /**
      * Get an API Revisions Deployment mapping details of API by providing API uuid
@@ -766,8 +757,8 @@ public interface APIConsumer extends APIManager {
      * @return SubscribedAPI set of application.
      * @throws APIManagementException if failed to retrieve Subscriptions of Application.
      */
-    Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset, Integer limit
-            , String organization) throws APIManagementException;
+    Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset, Integer limit,
+            String organization) throws APIManagementException;
 
     /**
      *Retrieves the ThrottlePolicies From organization.
@@ -788,4 +779,70 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to retrieve policy.
      */
     Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
+
+    /**
+     * Method to search the client certificates for the provided tenant id, uuid and applicationid.
+     *
+     * @param uuid      : UUID of the Certificate.
+     * @param serialNumber  : Serial Number of the certificate.
+     * @param applicationId : Identifier of the Application.
+     * @return list of client certificates that match search criteria.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> searchClientCertificates(String uuid, String serialNumber, int applicationId)
+            throws APIManagementException;
+
+    /**
+     * Method to add client certificate to gateway nodes to support mutual SSL based authentication.
+     *
+     * @param userName      : User name of the logged in user.
+     * @param applicationId :applicationId
+     * @param certificate   : Relevant public certificate.
+     * @param name         : Alias of the certificate.
+     * @param serialNumber         : Alias of the certificate.
+     * @param keyType         : Alias of the certificate.
+     * @return SUCCESS : If operation succeeded,
+     * INTERNAL_SERVER_ERROR : If any internal error occurred,
+     * ALIAS_EXISTS_IN_TRUST_STORE : If alias is already present in the trust store,
+     * CERTIFICATE_EXPIRED : If the certificate is expired.
+     * @throws APIManagementException API Management Exception.
+     */
+    int addClientCertificate(String userName, String uuid, int applicationId, String certificate, String name,
+            String serialNumber, String keyType) throws APIManagementException;
+
+    /**
+     * Method to check whether a client certificate for the given alias is present in trust store and whether it can
+     * be modified by current user.
+     * @param uuid    : Unique identifier of the relevant certificate.
+     * @param serialNumber: Serial Number of the certificate.
+     * @param applicationId: The identifier of the api.
+     * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
+     * modifiable by current user.
+     * @throws APIManagementException API Management Exception.
+     */
+    ClientCertificateDTO getClientCertificate(String uuid, String serialNumber, int applicationId)
+            throws APIManagementException;
+
+    /**
+     * Method to remove the client certificates which is mapped to given uuid and application from database.
+     *
+     * @param userName      : Name of the logged in user.
+     * @param application      : Application object
+     * @param uuid         : uuid of the certificate which needs to be deleted.
+     * @return 1: If delete succeeded,
+     * 2: If delete failed, due to an un-expected error.
+     * 4 : If certificate is not found in the trust store.
+     * @throws APIManagementException API Management Exception.
+     */
+    int deleteClientCertificate(String userName, Application application, String uuid) throws APIManagementException;
+
+    /**
+     * Method to check whether a certificate for the given alias is present in the trust store and the database.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : True if a certificate is present, false otherwise.
+     * @throws APIManagementException :
+     */
+    boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException;
+
 }

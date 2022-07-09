@@ -342,7 +342,8 @@ public class SubscriptionValidationDataUtil {
         return dto;
     }
 
-    public static ApplicationPolicyListDTO fromApplicationPolicyToApplicationPolicyListDTO(List<ApplicationPolicy> model) {
+    public static ApplicationPolicyListDTO fromApplicationPolicyToApplicationPolicyListDTO(
+            List<ApplicationPolicy> model) {
 
         ApplicationPolicyListDTO applicationPolicyListDTO = new ApplicationPolicyListDTO();
         if (model != null) {
@@ -389,13 +390,11 @@ public class SubscriptionValidationDataUtil {
                     group.setDefaultLimit(getThrottleLimitDTO(retGroup));
                     group.setPolicyId(retGroup.getPolicyId());
 
-                    List<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO> condition =
-                            new ArrayList<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO>();
+                    List<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO> condition = new ArrayList<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO>();
 
                     List<ConditionDTO> retrievedConditions = retGroup.getConditionDTOS();
                     for (ConditionDTO retrievedCondition : retrievedConditions) {
-                        org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO conditionDTO =
-                                new org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO();
+                        org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO conditionDTO = new org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO();
                         conditionDTO.setConditionType(retrievedCondition.getConditionType());
                         conditionDTO.setIsInverted(retrievedCondition.isInverted());
                         conditionDTO.setName(retrievedCondition.getConditionName());

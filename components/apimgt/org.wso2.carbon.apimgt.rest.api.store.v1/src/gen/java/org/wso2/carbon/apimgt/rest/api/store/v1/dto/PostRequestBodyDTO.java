@@ -35,7 +35,7 @@ public class PostRequestBodyDTO   {
   @ApiModelProperty(example = "This is a comment", required = true, value = "Content of the comment ")
   @JsonProperty("content")
   @NotNull
- @Size(max=512)  public String getContent() {
+  public String getContent() {
     return content;
   }
   public void setContent(String content) {

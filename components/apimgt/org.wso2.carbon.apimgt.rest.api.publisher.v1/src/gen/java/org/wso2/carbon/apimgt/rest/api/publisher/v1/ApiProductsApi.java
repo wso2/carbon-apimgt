@@ -326,7 +326,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/documents")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a List of Documents of an API Product", notes = "This operation can be used to retrive a list of documents belonging to an API Product by providing the id of the API Product. ", response = DocumentListDTO.class, authorizations = {
+    @ApiOperation(value = "Get a List of Documents of an API Product", notes = "This operation can be used to retrive a list of documents belonging to an API Product by providing the ID of the API Product. ", response = DocumentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
@@ -385,7 +385,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/revisions/{revisionId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve Revision", notes = "Retrieve a revision of an API Product ", response = APIRevisionDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve Revision", notes = "Retrieve a revision of an API Product (This resource is not supported at the moment) ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),

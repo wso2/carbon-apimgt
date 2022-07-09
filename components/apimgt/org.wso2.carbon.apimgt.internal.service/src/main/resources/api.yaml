@@ -21,7 +21,7 @@ paths:
       description: |
         This will provide access to throttled events in database.
       parameters:
-        - name : query
+        - name: query
           in: query
           description: |
             **Search condition**.
@@ -52,7 +52,7 @@ paths:
       description: |
         This will provide access to throttled events in database.
       parameters:
-        - name : query
+        - name: query
           in: query
           description: |
             **Search condition**.
@@ -81,7 +81,7 @@ paths:
       description: |
         This will provide access to throttled events in database.
       parameters:
-        - name : query
+        - name: query
           in: query
           description: |
             **Search condition**.
@@ -498,7 +498,7 @@ paths:
         - name: type
           in: query
           description: |
-             type of gateway
+            type of gateway
           type: string
         - name: uuidList
           in: body
@@ -520,21 +520,21 @@ paths:
       description: |
         This will provide access to the deployment metadata in json format
       parameters:
-      - $ref: '#/parameters/requestedTenant'
-      - name: apiId
-        in: query
-        description: |
-          **Search condition**.
-            Api ID
-        type: string
-      - name: gatewayLabel
-        in: query
-        description: |
-          **Search condition**.
-           label associated with the APIs
-        type: string
+        - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the APIs
+          type: string
       tags:
-      - Retrieving Runtime artifacts
+        - Retrieving Runtime artifacts
       responses:
         200:
           description: Json file of runtime metadata
@@ -560,6 +560,39 @@ paths:
       responses:
         200:
           description: List of endpoint certificates
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /client-certificates:
+    get:
+      summary: Get all the client certificates for given parameters.
+      description: |
+        This will provide access to
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: uuid
+          in: query
+          description: |
+            **Search condition**.
+              UUID
+          type: string
+        - name: serialNumber
+          in: query
+          description: |
+            **Search condition**.
+              Serial Number
+          type: string
+        - name: applicationId
+          in: query
+          description: |
+            **Search condition**.
+              Application Id
+          type: integer
+      responses:
+        200:
+          description: List of client certificates
         default:
           description: Unexpected error
           schema:
@@ -963,10 +996,10 @@ definitions:
         description: version of the API
       tenantDomain:
         type: string
-        description:  tenantDomain of the API
+        description: tenantDomain of the API
       gatewayLabel:
         type: string
-        description:  label of the API
+        description: label of the API
       gatewayInstruction:
         type: string
         description: Publish/Remove
@@ -1102,7 +1135,7 @@ definitions:
   # The Synapse Artifacts  List resource
   #-----------------------------------------------------
   SynapseArtifactList:
-    title:  SynapseArtifactList
+    title: SynapseArtifactList
     properties:
       count:
         type: integer
@@ -1112,7 +1145,7 @@ definitions:
       list:
         type: array
         items:
-          type : string
+          type: string
       pagination:
         $ref: '#/definitions/Pagination'
   #-----------------------------------------------------

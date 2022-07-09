@@ -68,7 +68,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @throws AxisFault
      */
     public boolean addApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
-                                   String tenantDomain) throws AxisFault {
+            String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         return restClient.addApi(apiConfig);
@@ -96,7 +96,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @throws AxisFault
      */
     public boolean addPrototypeApiScriptImplForTenant(String apiProviderName, String apiName, String version,
-                                                      String apiConfig, String tenantDomain) throws AxisFault {
+            String apiConfig, String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         return restClient.addApi(apiConfig);
@@ -110,7 +110,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     public boolean addDefaultAPIForTenant(String apiProviderName, String apiName, String version, String apiConfig,
-                                          String tenantDomain) throws AxisFault {
+            String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         return restClient.addApi(apiConfig);
@@ -130,9 +130,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @return
      * @throws AxisFault
      */
-    public org.wso2.carbon.apimgt.gateway.dto.APIData getApiForTenant(String apiName,
-                                                                      String version, String tenantDomain)
-            throws AxisFault {
+    public org.wso2.carbon.apimgt.gateway.dto.APIData getApiForTenant(String apiName, String version,
+            String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
@@ -140,8 +139,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return convert(apiData);
     }
 
-    public org.wso2.carbon.apimgt.gateway.dto.APIData getApi(String apiName, String version)
-            throws AxisFault {
+    public org.wso2.carbon.apimgt.gateway.dto.APIData getApi(String apiName, String version) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
@@ -149,9 +147,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return convert(apiData);
     }
 
-    public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApiForTenant(String apiName,
-                                                                             String version, String tenantDomain)
-            throws AxisFault {
+    public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApiForTenant(String apiName, String version,
+            String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
@@ -159,8 +156,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return convert(apiData);
     }
 
-    public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApi(String apiName,
-                                                                    String version) throws AxisFault {
+    public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApi(String apiName, String version) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
@@ -174,8 +170,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param tenantDomain
      * @throws AxisFault
      */
-    public boolean updateApiForTenant(String apiName, String version, String apiConfig,
-                                      String tenantDomain) throws AxisFault {
+    public boolean updateApiForTenant(String apiName, String version, String apiConfig, String tenantDomain)
+            throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
@@ -195,32 +191,30 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param tenantDomain
      * @throws AxisFault
      */
-    public boolean updateApiForInlineScriptForTenant(String apiName, String version,
-                                                     String apiConfig, String tenantDomain) throws AxisFault {
+    public boolean updateApiForInlineScriptForTenant(String apiName, String version, String apiConfig,
+            String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
-    public boolean updateApiForInlineScript(String apiName, String version, String apiConfig)
-            throws AxisFault {
+    public boolean updateApiForInlineScript(String apiName, String version, String apiConfig) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
-    public boolean updateDefaultApiForTenant(String apiName, String version, String apiConfig,
-                                             String tenantDomain) throws AxisFault {
+    public boolean updateDefaultApiForTenant(String apiName, String version, String apiConfig, String tenantDomain)
+            throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
-    public boolean updateDefaultApi(String apiName, String version, String apiConfig)
-            throws AxisFault {
+    public boolean updateDefaultApi(String apiName, String version, String apiConfig) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
@@ -243,11 +237,10 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return restClient.deleteApi(qualifiedName);
     }
 
-    protected void deleteRegistryProperty(String apiProviderName, String apiName, String version,
-                                          String tenantDomain) throws AxisFault {
+    protected void deleteRegistryProperty(String apiProviderName, String apiName, String version, String tenantDomain)
+            throws AxisFault {
 
-        GatewayUtils.deleteRegistryProperty(GatewayUtils.getAPIEndpointSecretAlias(apiProviderName, apiName,
-                version),
+        GatewayUtils.deleteRegistryProperty(GatewayUtils.getAPIEndpointSecretAlias(apiProviderName, apiName, version),
                 APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION, tenantDomain);
     }
 
@@ -260,9 +253,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return restClient.deleteApi(qualifiedName);
     }
 
-    public boolean deleteDefaultApiForTenant(String apiName, String version,
-                                             String tenantDomain)
-            throws AxisFault {
+    public boolean deleteDefaultApiForTenant(String apiName, String version, String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
@@ -288,8 +279,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         apiData.setName(data.getName());
         apiData.setPort(data.getPort());
         ResourceData[] resources = data.getResources();
-        List<org.wso2.carbon.apimgt.gateway.dto.ResourceData> resList =
-                new ArrayList<org.wso2.carbon.apimgt.gateway.dto.ResourceData>();
+        List<org.wso2.carbon.apimgt.gateway.dto.ResourceData> resList = new ArrayList<org.wso2.carbon.apimgt.gateway.dto.ResourceData>();
         if (resources != null && resources.length > 0) {
             for (ResourceData res : resources) {
                 if (res == null) {
@@ -306,8 +296,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     private org.wso2.carbon.apimgt.gateway.dto.ResourceData convert(ResourceData data) {
 
-        org.wso2.carbon.apimgt.gateway.dto.ResourceData resource =
-                new org.wso2.carbon.apimgt.gateway.dto.ResourceData();
+        org.wso2.carbon.apimgt.gateway.dto.ResourceData resource = new org.wso2.carbon.apimgt.gateway.dto.ResourceData();
         resource.setContentType(data.getContentType());
         resource.setFaultSequenceKey(data.getFaultSequenceKey());
         resource.setFaultSeqXml(data.getFaultSeqXml());
@@ -333,8 +322,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public boolean addEndpoint(String endpointData) throws AxisFault {
 
-        EndpointAdminServiceProxy endpointAdminServiceProxy =
-                getEndpointAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        EndpointAdminServiceProxy endpointAdminServiceProxy = getEndpointAdminServiceClient(
+                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return endpointAdminServiceProxy.addEndpoint(endpointData);
     }
 
@@ -361,8 +350,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public boolean deleteEndpoint(String endpointName) throws AxisFault {
 
-        EndpointAdminServiceProxy endpointAdminServiceProxy =
-                getEndpointAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        EndpointAdminServiceProxy endpointAdminServiceProxy = getEndpointAdminServiceClient(
+                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return endpointAdminServiceProxy.deleteEndpoint(endpointName);
     }
 
@@ -414,8 +403,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public boolean addSequence(String sequence) throws AxisFault {
 
-        SequenceAdminServiceProxy client =
-                getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SequenceAdminServiceProxy client = getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         if (sequence != null && !sequence.isEmpty()) {
             OMElement element = null;
             try {
@@ -465,8 +453,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public boolean deleteSequence(String sequenceName) throws AxisFault {
 
-        SequenceAdminServiceProxy client =
-                getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SequenceAdminServiceProxy client = getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         client.deleteSequence(sequenceName);
         return true;
     }
@@ -486,8 +473,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      */
     public OMElement getSequence(String sequenceName) throws AxisFault {
 
-        SequenceAdminServiceProxy client =
-                getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SequenceAdminServiceProxy client = getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return (OMElement) client.getSequence(sequenceName);
     }
 
@@ -499,8 +485,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean isExistingSequence(String sequenceName) throws AxisFault {
 
-        SequenceAdminServiceProxy client =
-                getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SequenceAdminServiceProxy client = getSequenceAdminServiceClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         return client.isExistingSequence(sequenceName);
     }
 
@@ -531,8 +516,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return encodedValue;
     }
 
-    protected void setRegistryProperty(String tenantDomain, String secureVaultAlias, String encodedValue) throws
-            APIManagementException {
+    protected void setRegistryProperty(String tenantDomain, String secureVaultAlias, String encodedValue)
+            throws APIManagementException {
 
         GatewayUtils.setRegistryProperty(secureVaultAlias, encodedValue,
                 APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION, tenantDomain);
@@ -544,7 +529,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     /**
-     * policy is writtent in to files
+     * policy is written in to files
      *
      * @param content  content to be written
      * @param fileName name of the file
@@ -653,14 +638,14 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public boolean deployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
 
         CertificateManager certificateManager = CertificateManagerImpl.getInstance();
-        SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
+        SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(
+                gatewayAPIDTO.getTenantDomain());
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
         LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-        EndpointAdminServiceProxy endpointAdminServiceProxy =
-                new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
-                new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+        EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(
+                gatewayAPIDTO.getTenantDomain());
+        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy = new MediationSecurityAdminServiceProxy(
+                gatewayAPIDTO.getTenantDomain());
         if (log.isDebugEnabled()) {
             log.debug("Start to undeploy API" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
@@ -699,7 +684,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         }
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Endpoints deployed");
-            log.debug("Start to deploy Client certificates" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            log.debug(
+                    "Start to deploy Client certificates" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
 
         // Add Client Certificates
@@ -719,8 +705,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 try {
                     String encryptedValue = mediationSecurityAdminServiceProxy.doEncryption(certificate.getPassword());
                     if (mediationSecurityAdminServiceProxy.isAliasExist(certificate.getAlias())) {
-                        setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(),
-                                encryptedValue);
+                        setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(), encryptedValue);
                     } else {
                         setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(), encryptedValue);
                     }
@@ -765,7 +750,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         }
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition deployed");
-            log.debug("Start to deploy Default API Definition" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            log.debug("Start to deploy Default API Definition" + gatewayAPIDTO.getName() + ":"
+                    + gatewayAPIDTO.getVersion());
         }
 
         if (log.isDebugEnabled()) {
@@ -776,38 +762,35 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return true;
     }
 
-    private void unDeployAPI(CertificateManager certificateManager,
-                             SequenceAdminServiceProxy sequenceAdminServiceProxy,
-                             RESTAPIAdminServiceProxy restapiAdminServiceProxy,
-                             LocalEntryServiceProxy localEntryServiceProxy,
-                             EndpointAdminServiceProxy endpointAdminServiceProxy, GatewayAPIDTO gatewayAPIDTO,
-                             MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy) throws AxisFault {
+    private void unDeployAPI(CertificateManager certificateManager, SequenceAdminServiceProxy sequenceAdminServiceProxy,
+            RESTAPIAdminServiceProxy restapiAdminServiceProxy, LocalEntryServiceProxy localEntryServiceProxy,
+            EndpointAdminServiceProxy endpointAdminServiceProxy, GatewayAPIDTO gatewayAPIDTO,
+            MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy) throws AxisFault {
 
         if (log.isDebugEnabled()) {
             log.debug("Start to undeploy default api " + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
         // Delete Default API
-        String qualifiedDefaultApiName = GatewayUtils.getQualifiedDefaultApiName(
-                gatewayAPIDTO.getName());
+        String qualifiedDefaultApiName = GatewayUtils.getQualifiedDefaultApiName(gatewayAPIDTO.getName());
         if (restapiAdminServiceProxy.getApi(qualifiedDefaultApiName) != null) {
             restapiAdminServiceProxy.deleteApi(qualifiedDefaultApiName);
         }
         if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Default API Definition " +
-                    "undeployed successfully");
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Default API Definition "
+                    + "undeployed successfully");
             log.debug("Start to undeploy API Definition" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
 
         // Delete API
-        String qualifiedName = GatewayUtils.getQualifiedApiName(
-                gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion());
+        String qualifiedName = GatewayUtils.getQualifiedApiName(gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion());
         if (restapiAdminServiceProxy.getApi(qualifiedName) != null) {
             restapiAdminServiceProxy.deleteApi(qualifiedName);
         }
         if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition undeployed " +
-                    "successfully");
-            log.debug("Start to undeploy custom sequences" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition undeployed "
+                    + "successfully");
+            log.debug(
+                    "Start to undeploy custom sequences" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
 
         // Remove Sequences to be remove.
@@ -819,8 +802,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " custom sequences undeployed " +
-                    "successfully");
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " custom sequences undeployed "
+                    + "successfully");
             log.debug("Start to undeploy endpoints" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
 
@@ -833,9 +816,10 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " endpoints undeployed " +
-                    "successfully");
-            log.debug("Start to undeploy client certificates" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " endpoints undeployed "
+                    + "successfully");
+            log.debug("Start to undeploy client certificates" + gatewayAPIDTO.getName() + ":"
+                    + gatewayAPIDTO.getVersion());
         }
 
         // Remove clientCertificates
@@ -845,8 +829,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " client certificates undeployed " +
-                    "successfully");
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " client certificates undeployed "
+                    + "successfully");
             log.debug("Start to undeploy local entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
         // Remove Local Entries if Exist
@@ -858,8 +842,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Local entries undeployed " +
-                    "successfully");
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Local entries undeployed "
+                    + "successfully");
             log.debug("Start to remove vault entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
         if (gatewayAPIDTO.getCredentialsToBeRemove() != null) {
@@ -877,8 +861,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Vault entries removed " +
-                    "successfully");
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Vault entries removed "
+                    + "successfully");
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + "undeployed successfully");
         }
     }
@@ -886,14 +870,14 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public boolean unDeployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
 
         CertificateManager certificateManager = CertificateManagerImpl.getInstance();
-        SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
+        SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(
+                gatewayAPIDTO.getTenantDomain());
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
         LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-        EndpointAdminServiceProxy endpointAdminServiceProxy =
-                new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
-                new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+        EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(
+                gatewayAPIDTO.getTenantDomain());
+        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy = new MediationSecurityAdminServiceProxy(
+                gatewayAPIDTO.getTenantDomain());
 
         unDeployAPI(certificateManager, sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                 endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);

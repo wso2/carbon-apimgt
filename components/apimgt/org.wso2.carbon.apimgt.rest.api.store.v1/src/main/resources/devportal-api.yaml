@@ -20,7 +20,7 @@ info:
     Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources/devportal-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
 
     # Authentication
-    The Developer Portal REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+    Our REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking    
     the API, you need to obtain an access token with the required scopes. This guide will walk you through the steps
     that you will need to follow to obtain an access token.
     First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
@@ -68,11 +68,10 @@ info:
     ```
     curl -k -d "grant_type=password&username=<admin_username>&password=<admin_password>&scope=<scopes separated by space>"
     \ -H "Authorization: Basic base64(cliet_id:client_secret)"
-    \ https://<host>:<servlet_port>/oauth2/token
-    ```
+    \ https://<host>:<gateway_port>/token    ```
     **Sample request**
     ```
-    curl https://localhost:9443/oauth2/token -k \
+    curl https://localhost:8243/token -k \    
     -H "Authorization: Basic Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h" \
     -d "grant_type=password&username=admin&password=admin&scope=apim:subscribe apim:api_key"
     ```
@@ -173,7 +172,7 @@ paths:
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis"
@@ -220,13 +219,13 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed"
@@ -246,7 +245,9 @@ paths:
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/labelName'
         - $ref: '#/components/parameters/environmentName'
+        - $ref: '#/components/parameters/clusterName'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
       responses:
@@ -288,13 +289,13 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
@@ -314,7 +315,9 @@ paths:
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/labelName'
         - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/clusterName'
         - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
@@ -435,13 +438,13 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/graphql-schema"
@@ -501,6 +504,7 @@ paths:
       operationId: getWSDLOfAPI
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/labelName'
         - $ref: '#/components/parameters/environmentName'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
@@ -521,18 +525,18 @@ paths:
                 Used by caches, or in conditional requests (Will be supported in future).
               schema:
                 type: string
-          content: {}
+          content: { }
         304:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/wsdl"
@@ -578,13 +582,13 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents"
@@ -630,13 +634,13 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c"
@@ -686,7 +690,7 @@ paths:
                 Used by caches, or in conditional requests.
               schema:
                 type: string
-          content: {}
+          content: { }
         303:
           description: |
             See Other.
@@ -697,18 +701,18 @@ paths:
                 The Source URL of the document.
               schema:
                 type: string
-          content: {}
+          content: { }
         304:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"
@@ -752,18 +756,18 @@ paths:
                 The content type of the body.
               schema:
                 type: string
-          content: {}
+          content: { }
         304:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: 'curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail" > image.jpeg'
@@ -794,7 +798,7 @@ paths:
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
@@ -838,7 +842,7 @@ paths:
           description: |
             Not Modified.
             Empty body because the client already has the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -914,7 +918,7 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
-          content: {}
+          content: { }
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -946,12 +950,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentList'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
@@ -975,7 +979,6 @@ paths:
               properties:
                 content:
                   type: string
-                  maxLength: 512
                   description: |
                     Content of the comment
                   example: This is a comment
@@ -1012,12 +1015,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         401:
           $ref: '#/components/responses/Unauthorized'
-        404:
-          $ref: '#/components/responses/NotFound'
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
-        500:
-          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -1064,16 +1063,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: { }
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
-        500:
-          $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
@@ -1099,7 +1101,6 @@ paths:
               properties:
                 content:
                   type: string
-                  maxLength: 512
                   description: |
                     Content of the comment
                   example: This is a comment
@@ -1120,7 +1121,7 @@ paths:
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               schema:
                 type: string
-            Location:
+            Location: #???
               description: |
                 Location to the newly created Comment.
               schema:
@@ -1133,16 +1134,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         401:
           $ref: '#/components/responses/Unauthorized'
-        403:
-          description: |
-            Forbidden.
-            The request must be conditional but no condition has been specified.
         404:
           $ref: '#/components/responses/NotFound'
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
-        500:
-          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -1167,27 +1162,17 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
-          content: {}
+          content: { }
         401:
           $ref: '#/components/responses/Unauthorized'
-        403:
-          description: |
-            Forbidden.
-            The request must be conditional but no condition has been specified.
-          content: {}
         404:
           $ref: '#/components/responses/NotFound'
-        405:
-          description: |
-            MethodNotAllowed.
-            Request method is known by the server but is not supported by the target resource.
-          content: {}
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:subscribe
-            - apim:admin # special scope added to moderate comments
+        #    - apim:admin # special scope added to moderate comments
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1231,16 +1216,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: { }
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
-        500:
-          $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
@@ -1277,7 +1265,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1323,13 +1311,13 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies"
@@ -1398,7 +1386,7 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         400:
           $ref: '#/components/responses/BadRequest'
         406:
@@ -1518,7 +1506,7 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -1606,7 +1594,7 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
-          content: {}
+          content: { }
         202:
           description: |
             Accepted.
@@ -1634,6 +1622,242 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -X DELETE "https://localhost:9443/api/am/devportal/v2/applications/896658a0-b4ee-4535-bbfa-806c894a4015"'
+
+  /applications/{applicationId}/client-certificates:
+    get:
+      tags:
+        - Client Certificates
+      summary: Retrive Uploaded Client Certificates
+      description: |
+        This operation can be used to retrieve and search the uploaded client certificates.
+      operationId: applicationsApplicationIdClientCertificatesGet
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/applicationId'
+      responses:
+        200:
+          description: OK. Successful response with the list of matching certificate information in the body.
+          headers:
+            Content-Type:
+              description: The content type of the body
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientCertificates'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:client_certificates_view
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+              "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/client-certificates"'
+
+    post:
+      tags:
+        - Client Certificates
+      summary: Upload a New Certificate
+      description: |
+        This operation can be used to upload a new certificate for an endpoint.
+      operationId: applicationsApplicationIdClientCertificatesPost
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - name
+                - certificate
+                - type
+              properties:
+                certificate:
+                  type: string
+                  description: The certificate that needs to be uploaded.
+                  format: binary
+                name:
+                  maxLength: 30
+                  minLength: 1
+                  type: string
+                  description: Display name for the certificate
+                type:
+                  maxLength: 30
+                  minLength: 1
+                  type: string
+                  description: Type of the Gateway Environment
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            The Certificate added successfully.
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientCertMetadata'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:client_certificates_add
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon
+            -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/store/v1/applications/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates"'
+
+
+  /applications/{applicationId}/client-certificates/{certificateId}:
+    get:
+      tags:
+        - Client Certificates
+      summary: Get the Certificate Information
+      description: |
+        This operation can be used to get the information about a certificate.
+      operationId: applicationsApplicationIdClientCertificateIdGet
+      parameters:
+        - name: certificateId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/applicationId'
+      responses:
+        200:
+          description: |
+            OK.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:client_certificates_view
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/store/v1/applications/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
+
+
+    delete:
+      tags:
+        - Client Certificates
+      summary: Delete a certificate
+      description: |
+        This operation can be used to delete an uploaded certificate.
+      operationId: applicationsApplicationIdClientCertificateIdDelete
+      parameters:
+        - name: certificateId
+          in: path
+          description: |
+            The UUID of the certificate that should be deleted.
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/applicationId'
+      responses:
+        200:
+          description: |
+            OK.
+            The Certificate deleted successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:client_certificates_update
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/store/v1/applications/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
+
+
+  /applications/{applicationId}/client-certificates/{certificateId}/content:
+    get:
+      tags:
+        - Client Certificates
+      summary: Download a Certificate
+      description: |
+        This operation can be used to download a certificate which matches the given alias.
+      operationId: applicationsApplicationIdClientCertificateIdContentGet
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - name: certificateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:client_certificates_view
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/store/v1/applications/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon/content"'
+
 
   /applications/{applicationId}/generate-keys:
     post:
@@ -1903,7 +2127,7 @@ paths:
           description: |
             OK.
             Clean up is performed
-          content: {}
+          content: { }
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -2145,7 +2369,7 @@ paths:
           description: |
             OK.
             Clean up is performed
-          content: {}
+          content: { }
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -2272,7 +2496,7 @@ paths:
           description: |
             OK.
             apikey revoked successfully.
-          content: {}
+          content: { }
         400:
           $ref: '#/components/responses/BadRequest'
         412:
@@ -2489,7 +2713,7 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -2670,9 +2894,9 @@ paths:
           description: |
             Not Found.
             Retrieving types and fields failed.
-          content: {}
+          content: { }
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v2/subscriptions/e93fb282-b456-48fc-8981-003fb89086ae/additionalInfo"'
@@ -2715,7 +2939,7 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -2784,19 +3008,19 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         400:
           $ref: '#/components/responses/BadRequest'
         404:
           description: |
             Not Found.
             Requested Subscription does not exist.
-          content: {}
+          content: { }
         415:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
-          content: {}
+          content: { }
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -2821,7 +3045,7 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
-          content: {}
+          content: { }
         202:
           description: |
             Accepted.
@@ -2887,7 +3111,7 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -2935,11 +3159,11 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/throttling-policies/application"
@@ -2988,13 +3212,13 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/throttling-policies/application/10PerMin"
@@ -3040,13 +3264,13 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
-          content: {}
+          content: { }
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/tags"
@@ -3098,11 +3322,11 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
+          content: { }
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/search?query=PizzaShackAPI"
@@ -3125,7 +3349,7 @@ paths:
             List of supported languages for generating SDKs.
           content:
             application/json:
-              example : ["android","java","javascript","jmeter"]
+              example: [ "android","java","javascript","jmeter" ]
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -3175,7 +3399,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3265,7 +3489,6 @@ paths:
           in: query
           description: |
             The state represents the current state of the tenant
-
             Supported states are [ active, inactive]
           schema:
             type: string
@@ -3295,7 +3518,7 @@ paths:
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/tenants"
@@ -3335,6 +3558,280 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/devportal/v2/recommendations"'
 
+  ####################################################
+  # Developer Portal Alerts management REST API
+  ####################################################
+  /alert-types:
+    get:
+      tags:
+        - Alerts
+      summary: |
+        Get the List of API Developer Portal Alert Types.
+      description: |
+        This operation is used to get the list of supportd alert types for the 'subscriber' agent.
+      operationId: getDevPortalAlertTypes
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscriber alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertTypesList'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://localhost:9443/api/am/devportal/v2/alert-types"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts.yaml#/get
+
+  /alert-subscriptions:
+    get:
+      tags:
+        - Alert Subscriptions
+      summary: |
+        Get the List of API Developer Portal Alert Types Subscribed by the User.
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      operationId: getSubscribedAlertTypes
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscribed alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertsInfo'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://localhost:9443/api/am/devportal/v2/alert-subscriptions"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/get
+
+    put:
+      tags:
+        - Alert Subscriptions
+      summary: |
+        Subscribe to the Selected Alert Types by the User.
+      description: |
+        This operation is used to subscribe to the selected alert types by the user.
+      operationId: subscribeToAlerts
+      requestBody:
+        description: The alerts list and the email list to subscribe.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertsInfo'
+        required: true
+      responses:
+        201:
+          description: |
+            OK.
+            Successful response with the newly subscribed alerts.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertsInfoResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid Request or request validation failure.
+          content: { }
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/devportal/v2/alert-subscriptions"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/put
+
+    delete:
+      tags:
+        - Alert Subscriptions
+      summary: |
+        Unsubscribe User from All the Alert Types.
+      description: |
+        This operation is used to unsubscribe the respective user from all the alert types.
+      operationId: unsubscribeAllAlerts
+      responses:
+        200:
+          description: |
+            OK.
+            The user is unsubscribed from the alerts successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: { }
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:sub alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://localhost:9443/api/am/devportal/v2/alert-subscriptions"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/delete
+
+  /alerts/{alertType}/configurations:
+    get:
+      tags:
+        - Alert Configuration
+      summary: |
+        Get All AbnormalRequestsPerMin Alert Configurations
+      description: |
+        This operation is used to get all configurations of the AbnormalRequestsPerMin alert type.
+      operationId: getAllAlertConfigs
+      parameters:
+        - $ref: '#/components/parameters/alertType'
+      responses:
+        200:
+          description: |
+            OK.
+            The Developer Portal alert configuration.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertConfigList'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://localhost:9443/api/am/devportal/v2/alerts/AbnormalRequestsPerMin/configurations"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/get
+
+  /alerts/{alertType}/configurations/{configurationId}:
+    put:
+      tags:
+        - Alert Configuration
+      summary: |
+        Add AbnormalRequestsPerMin Alert Configurations.
+      description: |
+        TThis operation is used to add configuration for the AbnormalRequestsPerMin alert type.
+      operationId: addAlertConfig
+      parameters:
+        - $ref: '#/components/parameters/alertType'
+        - $ref: '#/components/parameters/configurationId'
+      requestBody:
+        description: Configuration for AbnormalRequestCount alert type
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertConfigInfo'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with newly created object as entity.
+            Location header contains URL of newly created entity.
+          headers:
+            Location:
+              description: |
+                The location of the newly created entity.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertConfig'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/devportal/v2/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/put
+
+    delete:
+      tags:
+        - Alert Configuration
+      summary: |
+        Delete the Selected Configuration from AbnormalRequestsPerMin Alert Type.
+      description: |
+        This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
+      operationId: deleteAlertConfig
+      parameters:
+        - $ref: '#/components/parameters/alertType'
+        - $ref: '#/components/parameters/configurationId'
+      responses:
+        200:
+          description: |
+            OK.
+            The alert config is deleted successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:ub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://localhost:9443/api/am/devportal/v2/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/delete
+
   ######################################################
   # The "Category Collection" resource API
   ######################################################
@@ -3357,7 +3854,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/APICategoryList'
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/api-categories"
@@ -3423,9 +3920,9 @@ paths:
           description: |
             Not Found.
             Requested API does not contain any complexity details.
-          content: {}
+          content: { }
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity"
@@ -3459,9 +3956,9 @@ paths:
           description: |
             Not Found.
             Retrieving types and fields failed.
-          content: {}
+          content: { }
       security:
-        - OAuth2Security: []
+        - OAuth2Security: [ ]
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity/types"
@@ -3488,7 +3985,7 @@ paths:
       responses:
         200:
           description: OK. User password changed successfully
-          content: {}
+          content: { }
         400:
           $ref: '#/components/responses/BadRequest'
       security:
@@ -3529,7 +4026,7 @@ components:
             lifeCycleStatus: PUBLISHED
             thumbnailUri: /apis/01234567-0123-0123-0123-012345678901/thumbnail
             avgRating: 4.3
-            throttlingPolicies: [Unlimited]
+            throttlingPolicies: [ Unlimited ]
             advertiseInfo:
               advertised: false,
               apiExternalProductionEndpoint: null,
@@ -3731,7 +4228,7 @@ components:
               Supported transports for the API (http and/or https).
         operations:
           type: array
-          example: []
+          example: [ ]
           items:
             $ref: '#/components/schemas/APIOperations'
         authorizationHeader:
@@ -3802,9 +4299,21 @@ components:
                 type: boolean
           description: |
             Custom(user defined) properties of API
-          example: {}
+          example: { }
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
+        ingressURLs:
+          type: array
+          items:
+            type: object
+            properties:
+              deploymentEnvironmentName:
+                type: string
+                example: kubernetes
+              clusterDetails:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIDeploymentClusterInfo'
         endpointURLs:
           type: array
           items:
@@ -3812,10 +4321,7 @@ components:
             properties:
               environmentName:
                 type: string
-                example: Default
-              environmentDisplayName:
-                type: string
-                example: Default
+                example: Production and Sandbox
               environmentType:
                 type: string
                 example: hybrid
@@ -3859,6 +4365,12 @@ components:
                     example: wss://localhost:9099/phoneverify/
         businessInformation:
           $ref: '#/components/schemas/APIBusinessInformation'
+        labels:
+          type: array
+          description: |
+            Labels of micro-gateway environments attached to the API.
+          items:
+            $ref: '#/components/schemas/Label'
         environmentList:
           type: array
           description: The environment list configured with non empty endpoint URLs
@@ -3890,10 +4402,10 @@ components:
             example: "Marketing"
         keyManagers:
           type: object
-          properties: {}
+          properties: { }
           description: |
             API Key Managers
-          example: ["all"]
+          example: [ "all" ]
         createdTime:
           type: string
           example: 2020-10-31T13:57:16.229
@@ -3914,6 +4426,22 @@ components:
             - mqtt
           items:
             type: string
+    Label:
+      title: Label
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: Public
+        description:
+          type: string
+        accessUrls:
+          type: array
+          items:
+            type: string
+            example: http://localhost:9443/
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -3982,7 +4510,7 @@ components:
           default: ""
         groups:
           type: array
-          example: []
+          example: [ ]
           items:
             type: string
         subscriptionCount:
@@ -3991,17 +4519,17 @@ components:
         keys:
           type: array
           readOnly: true
-          example: []
+          example: [ ]
           items:
             $ref: '#/components/schemas/ApplicationKey'
         attributes:
           type: object
           additionalProperties:
             type: string
-          example: {}
+          example: { }
         subscriptionScopes:
           type: array
-          example: []
+          example: [ ]
           items:
             $ref: '#/components/schemas/ScopeInfo'
         owner:
@@ -4022,6 +4550,10 @@ components:
           type: string
           readOnly: true
           example: 1651555310208
+        mtlsEnabled:
+          type: boolean
+          readOnly: true
+          example: false
     ApplicationInfo:
       title: Application info object with basic application details
       type: object
@@ -4051,7 +4583,7 @@ components:
           type: integer
         attributes:
           type: object
-          properties: {}
+          properties: { }
           example: External Reference ID, Billing Tier
         owner:
           type: string
@@ -4164,7 +4696,7 @@ components:
             type: string
           description: |
             Custom attributes added to the throttling policy
-          example: {}
+          example: { }
         requestCount:
           type: integer
           description: |
@@ -4457,17 +4989,13 @@ components:
           example: 2021-02-12-19:57:25
         category:
           type: string
-          readOnly: true
           default: general
-          example : general
         parentCommentId:
           type: string
-          readOnly: true
           example: 6f38aea2-f41e-4ac9-b3f2-a9493d00ba97
         entryPoint:
           type: string
-          readOnly: true
-          enum: [devPortal, publisher]
+          enum: [ devPortal, publisher ]
         commenterInfo:
           $ref: '#/components/schemas/CommenterInfo'
         replies:
@@ -4478,13 +5006,11 @@ components:
       properties:
         count:
           type: integer
-          readOnly: true
           description: |
             Number of Comments returned.
           example: 1
         list:
           type: array
-          readOnly: true
           items:
             $ref: '#/components/schemas/Comment'
         pagination:
@@ -4610,13 +5136,6 @@ components:
           enum:
             - PRODUCTION
             - SANDBOX
-        mode:
-          type: string
-          description: Describe the which mode Application Mapped.
-          example: CREATED
-          enum:
-            - MAPPED
-            - CREATED
         groupId:
           type: string
           description: Application group id (if any).
@@ -4625,7 +5144,7 @@ components:
           $ref: '#/components/schemas/ApplicationToken'
         additionalProperties:
           type: object
-          properties: {}
+          properties: { }
           description: additionalProperties (if any).
     ApplicationKeyReGenerateResponse:
       title: Application key details after re generating consumer secret
@@ -4706,9 +5225,9 @@ components:
           example: nrs3YAP4htxnz_DqpvGhf9Um04oa
         additionalProperties:
           type: object
-          properties: {}
+          properties: { }
           description: Additional properties needed.
-          example: {}
+          example: { }
     ApplicationKeyMappingRequest:
       title: Application key provision request object
       required:
@@ -4765,7 +5284,7 @@ components:
             - TOKEN_EXCHANGE
         additionalProperties:
           type: object
-          properties: {}
+          properties: { }
           description: Additional parameters if Authorization server needs any
     APIKeyGenerateRequest:
       title: API Key generation request object
@@ -4778,7 +5297,7 @@ components:
           example: 3600
         additionalProperties:
           type: object
-          properties: {}
+          properties: { }
           description: Additional parameters if Authorization server needs any
     APIKeyRevokeRequest:
       title: API Key revoke request object
@@ -5283,6 +5802,122 @@ components:
           enum:
             - WSO2
             - AWS
+    AlertTypesList:
+      title: Alert Types List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: The number of alerts
+          example: 3
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertType'
+    AlertType:
+      title: Alert Type
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The alert Id
+          example: 3
+        name:
+          type: string
+          description: The name of the alert.
+          example: AbnormalRequestsPerMin
+        requireConfiguration:
+          type: boolean
+          description: Whether the alert type require additional configurations.
+          example: true
+    Alert:
+      title: Alert
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The alert Id
+          example: 1
+        name:
+          type: string
+          description: The name of the alert.
+          example: AbnormalRequestsPerMin
+        configuration:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertConfig'
+    AlertsInfo:
+      title: Alerts Info
+      type: object
+      properties:
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+        emailList:
+          type: array
+          example:
+            - abc@gmail.com
+          items:
+            type: string
+    AlertsInfoResponse:
+      title: Alerts Info Response
+      type: object
+      properties:
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+        emailList:
+          type: array
+          example:
+            - abc@gmail.com
+          items:
+            type: string
+        failedConfigurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertConfig'
+    AlertConfigList:
+      title: Alert Configuration List
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertConfig'
+    AlertConfig:
+      title: Alert Configuration
+      type: object
+      properties:
+        configurationId:
+          type: string
+          description: The alert config subscription id.
+          example: UGl6emFTaGFja0FQSSsxLjAuMCtEZWZhdWx0QXBwbGljYXRpb24K
+        configuration:
+          type: object
+          additionalProperties:
+            type: string
+          description: The config parameters.
+          example:
+            apiName: PizzaShackAPI
+            apiVersion: 1.0.0
+            applicationName: DefaultApplication
+            requestCount: "12"
+    AlertConfigInfo:
+      title: Alert Configuration Info
+      type: object
+      additionalProperties:
+        type: string
+      description: The config parameters.
+      example:
+        apiName: PizzaShackAPI
+        apiVersion: 1.0.0
+        applicationName: DefaultApplication
+        requestCount: "12"
     APICategory:
       title: API Category
       required:
@@ -5410,7 +6045,7 @@ components:
           example: https://localhost:9443/oauth2/token
         additionalProperties:
           type: object
-          properties: {}
+          properties: { }
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
@@ -5448,13 +6083,13 @@ components:
           example: Enter username to connect to key manager
         default:
           type: object
-          properties: {}
+          properties: { }
           example: admin
         values:
           type: array
           items:
             type: object
-            properties: {}
+            properties: { }
     KeyManagerList:
       title: Key Manager List
       type: object
@@ -5525,6 +6160,27 @@ components:
             - name
           items:
             type: string
+    APIDeploymentClusterInfo:
+      title: API Deployments ClusterInfo object
+      required:
+        - clusterName
+        - ingressURL
+      type: object
+      properties:
+        clusterName:
+          type: string
+          description: |
+            Name of the cluster
+          example: minikube
+        clusterDisplayName:
+          type: string
+          description: |
+            Display name of the cluster
+          example: Minikube Cluster
+        ingressURL:
+          type: string
+          description: ingress URL
+          example: http://wso2.com:9443
     CurrentAndNewPasswords:
       title: Current and new passowrd of the user
       type: object
@@ -5535,6 +6191,65 @@ components:
         newPassword:
           type: string
           example: newpassword1234
+    CertificateInfo:
+      title: Certificate information
+      type: object
+      properties:
+        status:
+          type: string
+          example: Active
+        validity:
+          $ref: '#/components/schemas/CertificateValidity'
+        version:
+          type: string
+          example: V3
+        subject:
+          type: string
+          example: CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK
+        serialNumber:
+          type: string
+          example: 76292708057987193002565060032465481997
+    CertificateValidity:
+      title: Certificate Valid period
+      type: object
+      properties:
+        from:
+          type: string
+          example: 12-12-2017
+        to:
+          type: string
+          example: 01-01-2019
+    ClientCertificates:
+      title: Client Certificates
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 1
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientCertMetadata'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      description: Representation of a list of client certificates
+    ClientCertMetadata:
+      title: Client certificate meta data
+      type: object
+      properties:
+        name:
+          type: string
+          example: wso2carbon
+        applicationId:
+          type: string
+          example: b3ade481-30b0-4b38-9a67-498a40873a6d
+        type:
+          type: string
+          example: SANDBOX
+        UUID:
+          type: string
+          example: b3ade481-30b0-4b38-9a67-498a40873a6d
+      description: Meta data of certificate
     AdditionalSubscriptionInfoList:
       title: Additional Subscription Info List
       type: object
@@ -5630,7 +6345,7 @@ components:
             message: Bad Request
             description: Invalid request or validation error
             moreInfo: ""
-            error: []
+            error: [ ]
     Conflict:
       description: Conflict. Specified resource already exists.
       content:
@@ -5642,7 +6357,7 @@ components:
             message: Conflict
             description: Specified resource already exists
             moreInfo: ""
-            error: []
+            error: [ ]
     InternalServerError:
       description: Internal Server Error.
       content:
@@ -5655,7 +6370,7 @@ components:
             description: The server encountered an internal error. Please contact
               administrator.
             moreInfo: ""
-            error: []
+            error: [ ]
     NotAcceptable:
       description: Not Acceptable. The requested media type is not supported.
       content:
@@ -5667,7 +6382,7 @@ components:
             message: Not Acceptable
             description: The requested media type is not supported
             moreInfo: ""
-            error: []
+            error: [ ]
     NotFound:
       description: Not Found. The specified resource does not exist.
       content:
@@ -5679,7 +6394,7 @@ components:
             message: Not Found
             description: The specified resource does not exist
             moreInfo: ""
-            error: []
+            error: [ ]
     PreconditionFailed:
       description: Precondition Failed. The request has not been performed because
         one of the preconditions is not met.
@@ -5693,7 +6408,7 @@ components:
             description: The request has not been performed because one of the preconditions
               is not met
             moreInfo: ""
-            error: []
+            error: [ ]
     Unauthorized:
       description: Unauthorized. The user is not authorized.
       content:
@@ -5705,7 +6420,7 @@ components:
             message: Unauthorized
             description: The user is not authorized
             moreInfo: ""
-            error: []
+            error: [ ]
     UnsupportedMediaType:
       description: Unsupported Media Type. The entity of the request was not in a
         supported format.
@@ -5718,7 +6433,7 @@ components:
             message: Unsupported media type
             description: The entity of the request was not in a supported format
             moreInfo: ""
-            error: []
+            error: [ ]
   parameters:
     parentCommentID:
       name: replyTo
@@ -5742,7 +6457,7 @@ components:
         Whether we need to display commentor details.
       schema:
         type: boolean
-        default : false
+        default: false
     apiId:
       name: apiId
       in: path
@@ -5871,11 +6586,25 @@ components:
         enum:
           - application
           - subscription
+    labelName:
+      name: labelName
+      in: query
+      description: |
+        Name of the API microgateway labels
+      schema:
+        type: string
     environmentName:
       name: environmentName
       in: query
       description: |
         Name of the API gateway environment.
+      schema:
+        type: string
+    clusterName:
+      name: clusterName
+      in: query
+      description: |
+        Name of the container managed cluster name.
       schema:
         type: string
     limit:
@@ -5968,4 +6697,6 @@ components:
             apim:store_settings: Retrieve Developer Portal settings
             apim:sub_alert_manage: Retrieve, subscribe and configure Developer Portal alert types
             apim:app_import_export: Import and export applications related operations
-            apim:admin: Manage all admin operations
+            apim:client_certificates_view: View client certificates
+            apim:client_certificates_add: Add client certificates
+            apim:client_certificates_update: Update and delete client certificates

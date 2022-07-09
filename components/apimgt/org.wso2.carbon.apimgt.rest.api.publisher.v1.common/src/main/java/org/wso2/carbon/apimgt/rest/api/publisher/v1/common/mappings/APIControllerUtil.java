@@ -67,8 +67,8 @@ public class APIControllerUtil {
     public static JsonObject resolveAPIControllerEnvParams(String pathToArchive) throws IOException {
 
         String jsonParamsContent;
-        jsonParamsContent = ImportUtils
-                .getFileContentAsJson(pathToArchive + ImportExportConstants.INTERMEDIATE_PARAMS_FILE_LOCATION);
+        jsonParamsContent = ImportUtils.getFileContentAsJson(
+                pathToArchive + ImportExportConstants.INTERMEDIATE_PARAMS_FILE_LOCATION);
         if (StringUtils.isEmpty(jsonParamsContent)) {
             return null;
         }
@@ -155,7 +155,6 @@ public class APIControllerUtil {
         }
         importedApiDto.setEndpointConfig(endpointConfig);
 
-
         //handle mutualSSL certificates
         handleMutualSslCertificates(envParams, importedApiDto, null, importedApi.getId(), pathToArchive);
 
@@ -209,8 +208,7 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error while generating client certificate information
      */
     private static void handleMutualSslCertificates(JsonObject envParams, APIDTO importedApiDto,
-                                                    APIProductDTO importedApiProductDto, Identifier identifier,
-                                                    String pathToArchive)
+            APIProductDTO importedApiProductDto, Identifier identifier, String pathToArchive)
             throws APIManagementException {
 
         JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
@@ -254,15 +252,14 @@ public class APIControllerUtil {
      * @return APIProductDTO Updated API Product DTO Object
      */
     public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams,
-                                                            String pathToArchive)
-            throws APIManagementException {
+            String pathToArchive) throws APIManagementException {
 
         if (envParams == null || envParams.isJsonNull()) {
             return importedApiProductDto;
         }
 
-        APIProduct importedApiProduct =
-                APIMappingUtil.fromDTOtoAPIProduct(importedApiProductDto, importedApiProductDto.getProvider());
+        APIProduct importedApiProduct = APIMappingUtil.fromDTOtoAPIProduct(importedApiProductDto,
+                importedApiProductDto.getProvider());
         //handle mutualSSL certificates
         handleMutualSslCertificates(envParams, null, importedApiProductDto, importedApiProduct.getId(), pathToArchive);
 
@@ -443,7 +440,7 @@ public class APIControllerUtil {
      * @param policies              policies with the values
      */
     private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto,
-                                                   APIProductDTO importedApiProductDto) {
+            APIProductDTO importedApiProductDto) {
 
         JsonArray definedPolicies = policies.getAsJsonArray();
         List<String> policiesListToAdd = new ArrayList<>();
@@ -495,11 +492,11 @@ public class APIControllerUtil {
 
         //default production and sandbox endpoints
         JsonObject defaultProductionEndpoint = new JsonObject();
-        defaultProductionEndpoint
-                .addProperty(ImportExportConstants.ENDPOINT_URL, ImportExportConstants.DEFAULT_PRODUCTION_ENDPOINT_URL);
+        defaultProductionEndpoint.addProperty(ImportExportConstants.ENDPOINT_URL,
+                ImportExportConstants.DEFAULT_PRODUCTION_ENDPOINT_URL);
         JsonObject defaultSandboxEndpoint = new JsonObject();
-        defaultSandboxEndpoint
-                .addProperty(ImportExportConstants.ENDPOINT_URL, ImportExportConstants.DEFAULT_SANDBOX_ENDPOINT_URL);
+        defaultSandboxEndpoint.addProperty(ImportExportConstants.ENDPOINT_URL,
+                ImportExportConstants.DEFAULT_SANDBOX_ENDPOINT_URL);
 
         JsonObject multipleEndpointsConfig = null;
         String routingPolicy = null;
@@ -516,8 +513,8 @@ public class APIControllerUtil {
         }
 
         // if endpoint type is HTTP/REST
-        if (StringUtils.equals(endpointType, ImportExportConstants.HTTP_TYPE_ENDPOINT) || StringUtils
-                .equals(endpointType, ImportExportConstants.REST_TYPE_ENDPOINT)) {
+        if (StringUtils.equals(endpointType, ImportExportConstants.HTTP_TYPE_ENDPOINT) || StringUtils.equals(
+                endpointType, ImportExportConstants.REST_TYPE_ENDPOINT)) {
             //add REST endpoint configs as endpoint configs
             multipleEndpointsConfig = handleRestEndpoints(routingPolicy, envParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
@@ -543,16 +540,16 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleDynamicAndAwsEndpoints(JsonObject envParams, JsonObject defaultProductionEndpoint,
-                                                           JsonObject defaultSandboxEndpoint, String endpointType)
-            throws APIManagementException {
+            JsonObject defaultSandboxEndpoint, String endpointType) throws APIManagementException {
 
         JsonObject endpointsObject = null;
         if (envParams.get(ImportExportConstants.ENDPOINTS_FIELD) != null) {
             endpointsObject = envParams.get(ImportExportConstants.ENDPOINTS_FIELD).getAsJsonObject();
         }
         // if the endpoint type is REST or SOAP return null
-        if (ImportExportConstants.REST_TYPE_ENDPOINT.equals(endpointType) || ImportExportConstants.SOAP_TYPE_ENDPOINT
-                .equals(endpointType) || ImportExportConstants.HTTP_TYPE_ENDPOINT.equals(endpointType)) {
+        if (ImportExportConstants.REST_TYPE_ENDPOINT.equals(endpointType)
+                || ImportExportConstants.SOAP_TYPE_ENDPOINT.equals(endpointType)
+                || ImportExportConstants.HTTP_TYPE_ENDPOINT.equals(endpointType)) {
             return null;
         }
         // if endpoint type is Dynamic
@@ -565,8 +562,8 @@ public class APIControllerUtil {
                     ImportExportConstants.DEFAULT_DYNAMIC_ENDPOINT_URL);
             updatedDynamicEndpointParams.addProperty(ImportExportConstants.ENDPOINT_TYPE_PROPERTY,
                     ImportExportConstants.DEFAULT_DYNAMIC_ENDPOINT_URL);
-            updatedDynamicEndpointParams
-                    .addProperty(ImportExportConstants.FAILOVER_ROUTING_POLICY, Boolean.FALSE.toString());
+            updatedDynamicEndpointParams.addProperty(ImportExportConstants.FAILOVER_ROUTING_POLICY,
+                    Boolean.FALSE.toString());
             handleEndpointValues(endpointsObject, updatedDynamicEndpointParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
             //add dynamic endpoint configs as endpoint configs
@@ -584,9 +581,9 @@ public class APIControllerUtil {
                     .getAsJsonObject();
             JsonObject updatedAwsEndpointParams = new JsonObject();
             //if the access method is provided with credentials
-            if (StringUtils
-                    .equals(awsEndpointParams.get(ImportExportConstants.AWS_ACCESS_METHOD_JSON_PROPERTY).getAsString(),
-                            ImportExportConstants.AWS_STORED_ACCESS_METHOD)) {
+            if (StringUtils.equals(
+                    awsEndpointParams.get(ImportExportConstants.AWS_ACCESS_METHOD_JSON_PROPERTY).getAsString(),
+                    ImportExportConstants.AWS_STORED_ACCESS_METHOD)) {
                 //get the same config object for aws configs
                 updatedAwsEndpointParams = awsEndpointParams;
                 updatedAwsEndpointParams.remove(ImportExportConstants.AWS_ACCESS_METHOD_JSON_PROPERTY);
@@ -621,8 +618,7 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleRestEndpoints(String routingPolicy, JsonObject envParams,
-                                                  JsonObject defaultProductionEndpoint,
-                                                  JsonObject defaultSandboxEndpoint) throws APIManagementException {
+            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         // if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual
         // scenario
@@ -636,8 +632,8 @@ public class APIControllerUtil {
                     ImportExportConstants.HTTP_TYPE_ENDPOINT);
             handleEndpointValues(endpoints, updatedRESTEndpointParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
-        } else if (ImportExportConstants.LOAD_BALANCE_ROUTING_POLICY
-                .equals(routingPolicy)) {  //if the routing policy is specified and it is load balanced
+        } else if (ImportExportConstants.LOAD_BALANCE_ROUTING_POLICY.equals(
+                routingPolicy)) {  //if the routing policy is specified and it is load balanced
 
             //get load balanced configs from params
             JsonElement loadBalancedConfigElement = envParams.get(ImportExportConstants.LOAD_BALANCE_ENDPOINTS_FIELD);
@@ -654,8 +650,8 @@ public class APIControllerUtil {
             updatedRESTEndpointParams.addProperty(ImportExportConstants.LOAD_BALANCE_ALGORITHM_CLASS_PROPERTY,
                     ImportExportConstants.DEFAULT_ALGORITHM_CLASS);
 
-            JsonElement sessionManagement = loadBalancedConfigs
-                    .get(ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY);
+            JsonElement sessionManagement = loadBalancedConfigs.get(
+                    ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY);
             if (sessionManagement != null) {
                 // If the user has specified this as "transport", this should be removed.
                 // Otherwise APIM won't recognize this as "transport".
@@ -663,14 +659,14 @@ public class APIControllerUtil {
                     if (!StringUtils.equals(sessionManagement.getAsString(),
                             ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_TRANSPORT_TYPE)) {
                         updatedRESTEndpointParams.add(ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY,
-                                loadBalancedConfigs
-                                        .get(ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY));
+                                loadBalancedConfigs.get(
+                                        ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY));
                     }
                 }
             }
 
-            JsonElement sessionTimeOut = loadBalancedConfigs
-                    .get(ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY);
+            JsonElement sessionTimeOut = loadBalancedConfigs.get(
+                    ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY);
             if (sessionTimeOut != null) {
                 updatedRESTEndpointParams.add(ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY,
                         loadBalancedConfigs.get(ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY));
@@ -678,8 +674,8 @@ public class APIControllerUtil {
             handleEndpointValues(loadBalancedConfigs, updatedRESTEndpointParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
 
-        } else if (ImportExportConstants.FAILOVER_ROUTING_POLICY
-                .equals(routingPolicy)) {  //if the routing policy is specified and it is failover
+        } else if (ImportExportConstants.FAILOVER_ROUTING_POLICY.equals(
+                routingPolicy)) {  //if the routing policy is specified and it is failover
 
             //get failover configs from params
             JsonElement failoverConfigElement = envParams.get(ImportExportConstants.FAILOVER_ENDPOINTS_FIELD);
@@ -693,13 +689,13 @@ public class APIControllerUtil {
             }
             updatedRESTEndpointParams.addProperty(ImportExportConstants.ENDPOINT_TYPE_PROPERTY,
                     ImportExportConstants.FAILOVER_ROUTING_POLICY);
-            updatedRESTEndpointParams
-                    .addProperty(ImportExportConstants.FAILOVER_TYPE_ENDPOINT, Boolean.TRUE.toString());
+            updatedRESTEndpointParams.addProperty(ImportExportConstants.FAILOVER_TYPE_ENDPOINT,
+                    Boolean.TRUE.toString());
             //check production failover endpoints
-            JsonElement productionEndpoints = failoverConfigs.get(ImportExportConstants.
-                    PRODUCTION_ENDPOINTS_JSON_PROPERTY);
-            JsonElement productionFailOvers = failoverConfigs.get(ImportExportConstants.
-                    PRODUCTION_FAILOVERS_ENDPOINTS_JSON_PROPERTY);
+            JsonElement productionEndpoints = failoverConfigs.get(
+                    ImportExportConstants.PRODUCTION_ENDPOINTS_JSON_PROPERTY);
+            JsonElement productionFailOvers = failoverConfigs.get(
+                    ImportExportConstants.PRODUCTION_FAILOVERS_ENDPOINTS_JSON_PROPERTY);
             if (productionFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (productionEndpoints != null) {
@@ -708,14 +704,13 @@ public class APIControllerUtil {
                             ExceptionCodes.ERROR_READING_PARAMS_FILE);
                 }
             } else if (!productionFailOvers.isJsonNull()) {
-                updatedRESTEndpointParams
-                        .add(ImportExportConstants.PRODUCTION_FAILOVERS_ENDPOINTS_PROPERTY, productionFailOvers);
+                updatedRESTEndpointParams.add(ImportExportConstants.PRODUCTION_FAILOVERS_ENDPOINTS_PROPERTY,
+                        productionFailOvers);
             }
             //check sandbox failover endpoints
-            JsonElement sandboxFailOvers = failoverConfigs.get(ImportExportConstants.
-                    SANDBOX_FAILOVERS_ENDPOINTS_JSON_PROPERTY);
-            JsonElement sandboxEndpoints = failoverConfigs.get(ImportExportConstants.
-                    SANDBOX_ENDPOINTS_JSON_PROPERTY);
+            JsonElement sandboxFailOvers = failoverConfigs.get(
+                    ImportExportConstants.SANDBOX_FAILOVERS_ENDPOINTS_JSON_PROPERTY);
+            JsonElement sandboxEndpoints = failoverConfigs.get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY);
             if (sandboxFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (sandboxEndpoints != null) {
@@ -724,8 +719,8 @@ public class APIControllerUtil {
                             ExceptionCodes.ERROR_READING_PARAMS_FILE);
                 }
             } else if (!sandboxFailOvers.isJsonNull()) {
-                updatedRESTEndpointParams
-                        .add(ImportExportConstants.SANDBOX_FAILOVERS_ENDPOINTS_PROPERTY, sandboxFailOvers);
+                updatedRESTEndpointParams.add(ImportExportConstants.SANDBOX_FAILOVERS_ENDPOINTS_PROPERTY,
+                        sandboxFailOvers);
             }
             handleEndpointValues(failoverConfigs, updatedRESTEndpointParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
@@ -744,8 +739,7 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleSoapEndpoints(String routingPolicy, JsonObject envParams,
-                                                  JsonObject defaultProductionEndpoint,
-                                                  JsonObject defaultSandboxEndpoint) throws APIManagementException {
+            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         JsonObject updatedSOAPEndpointParams = new JsonObject();
         JsonObject endpoints = null;
@@ -758,8 +752,8 @@ public class APIControllerUtil {
                     ImportExportConstants.SOAP_ENDPOINT_TYPE_FOR_JSON);
             handleEndpointValues(endpoints, updatedSOAPEndpointParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
-        } else if (ImportExportConstants.LOAD_BALANCE_ROUTING_POLICY
-                .equals(routingPolicy)) {    // if the endpoint routing policy is specified as load balanced
+        } else if (ImportExportConstants.LOAD_BALANCE_ROUTING_POLICY.equals(
+                routingPolicy)) {    // if the endpoint routing policy is specified as load balanced
 
             //get load balanced configs from params
             JsonElement loadBalancedConfigElement = envParams.get(ImportExportConstants.LOAD_BALANCE_ENDPOINTS_FIELD);
@@ -776,8 +770,8 @@ public class APIControllerUtil {
             updatedSOAPEndpointParams.addProperty(ImportExportConstants.LOAD_BALANCE_ALGORITHM_CLASS_PROPERTY,
                     ImportExportConstants.DEFAULT_ALGORITHM_CLASS);
 
-            JsonElement sessionManagement = loadBalancedConfigs
-                    .get(ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY);
+            JsonElement sessionManagement = loadBalancedConfigs.get(
+                    ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY);
             if (sessionManagement != null) {
                 // If the user has specified this as "transport", this should be removed.
                 // Otherwise APIM won't recognize this as "transport".
@@ -785,33 +779,33 @@ public class APIControllerUtil {
                     if (!StringUtils.equals(sessionManagement.getAsString(),
                             ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_TRANSPORT_TYPE)) {
                         updatedSOAPEndpointParams.add(ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY,
-                                loadBalancedConfigs
-                                        .get(ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY));
+                                loadBalancedConfigs.get(
+                                        ImportExportConstants.LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY));
                     }
                 }
             }
 
-            JsonElement sessionTimeOut = loadBalancedConfigs
-                    .get(ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY);
+            JsonElement sessionTimeOut = loadBalancedConfigs.get(
+                    ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY);
             if (sessionTimeOut != null) {
                 updatedSOAPEndpointParams.add(ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY,
                         loadBalancedConfigs.get(ImportExportConstants.LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY));
             }
-            JsonElement productionEndpoints = loadBalancedConfigs
-                    .get(ImportExportConstants.PRODUCTION_ENDPOINTS_JSON_PROPERTY);
+            JsonElement productionEndpoints = loadBalancedConfigs.get(
+                    ImportExportConstants.PRODUCTION_ENDPOINTS_JSON_PROPERTY);
             if (productionEndpoints != null) {
                 updatedSOAPEndpointParams.add(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY,
                         handleSoapFailoverAndLoadBalancedEndpointValues(productionEndpoints.getAsJsonArray()));
             }
-            JsonElement sandboxEndpoints = loadBalancedConfigs
-                    .get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY);
+            JsonElement sandboxEndpoints = loadBalancedConfigs.get(
+                    ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY);
             if (sandboxEndpoints != null) {
                 updatedSOAPEndpointParams.add(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY,
                         handleSoapFailoverAndLoadBalancedEndpointValues(sandboxEndpoints.getAsJsonArray()));
             }
 
-        } else if (ImportExportConstants.FAILOVER_ROUTING_POLICY
-                .equals(routingPolicy)) {  //if the routing policy is specified and it is failover
+        } else if (ImportExportConstants.FAILOVER_ROUTING_POLICY.equals(
+                routingPolicy)) {  //if the routing policy is specified and it is failover
 
             //get failover configs from params
             JsonElement failoverConfigElement = envParams.get(ImportExportConstants.FAILOVER_ENDPOINTS_FIELD);
@@ -825,13 +819,13 @@ public class APIControllerUtil {
             }
             updatedSOAPEndpointParams.addProperty(ImportExportConstants.ENDPOINT_TYPE_PROPERTY,
                     ImportExportConstants.FAILOVER_ROUTING_POLICY);
-            updatedSOAPEndpointParams
-                    .addProperty(ImportExportConstants.FAILOVER_TYPE_ENDPOINT, Boolean.TRUE.toString());
+            updatedSOAPEndpointParams.addProperty(ImportExportConstants.FAILOVER_TYPE_ENDPOINT,
+                    Boolean.TRUE.toString());
             //check production failover endpoints
-            JsonElement productionFailOvers = failoverConfigs.get(ImportExportConstants.
-                    PRODUCTION_FAILOVERS_ENDPOINTS_JSON_PROPERTY);
-            JsonElement productionEndpoints = failoverConfigs.get(ImportExportConstants.
-                    PRODUCTION_ENDPOINTS_JSON_PROPERTY);
+            JsonElement productionFailOvers = failoverConfigs.get(
+                    ImportExportConstants.PRODUCTION_FAILOVERS_ENDPOINTS_JSON_PROPERTY);
+            JsonElement productionEndpoints = failoverConfigs.get(
+                    ImportExportConstants.PRODUCTION_ENDPOINTS_JSON_PROPERTY);
             if (productionFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (productionEndpoints != null) {
@@ -844,10 +838,9 @@ public class APIControllerUtil {
                         handleSoapFailoverAndLoadBalancedEndpointValues(productionFailOvers.getAsJsonArray()));
             }
             //check sandbox failover endpoints
-            JsonElement sandboxFailOvers = failoverConfigs.get(ImportExportConstants.
-                    SANDBOX_FAILOVERS_ENDPOINTS_JSON_PROPERTY);
-            JsonElement sandboxEndpoints = failoverConfigs.get(ImportExportConstants.
-                    SANDBOX_ENDPOINTS_JSON_PROPERTY);
+            JsonElement sandboxFailOvers = failoverConfigs.get(
+                    ImportExportConstants.SANDBOX_FAILOVERS_ENDPOINTS_JSON_PROPERTY);
+            JsonElement sandboxEndpoints = failoverConfigs.get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY);
             if (sandboxFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (sandboxEndpoints != null) {
@@ -876,8 +869,7 @@ public class APIControllerUtil {
      * @param defaultSandboxEndpoint    Default sandbox endpoint json object
      */
     private static void handleEndpointValues(JsonObject endpointConfigs, JsonObject updatedEndpointParams,
-                                             JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint)
-            throws APIManagementException {
+            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         //check api params file to get provided endpoints
         if (endpointConfigs == null) {
@@ -959,8 +951,8 @@ public class APIControllerUtil {
      * @throws IOException            If an error occurs when generating new certs and yaml file or when moving certs
      * @throws APIManagementException If an error while generating new directory
      */
-    private static void handleClientCertificates(JsonArray certificates, Identifier identifier,
-                                                 String pathToArchive) throws IOException, APIManagementException {
+    private static void handleClientCertificates(JsonArray certificates, Identifier identifier, String pathToArchive)
+            throws IOException, APIManagementException {
 
         APIIdentifier apiIdentifier = new APIIdentifier(identifier.getProviderName(), identifier.getName(),
                 identifier.getVersion());
@@ -1037,8 +1029,8 @@ public class APIControllerUtil {
             String alias = certObject.get(ImportExportConstants.ALIAS_JSON_KEY).getAsString();
             CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
             certificateMetadataDTO.setAlias(alias);
-            certificateMetadataDTO
-                    .setEndpoint(certObject.get(ImportExportConstants.CERTIFICATE_HOST_NAME_PROPERTY).getAsString());
+            certificateMetadataDTO.setEndpoint(
+                    certObject.get(ImportExportConstants.CERTIFICATE_HOST_NAME_PROPERTY).getAsString());
 
             //Add certificate element to cert object
             JsonElement jsonElement = new Gson().toJsonTree(certificateMetadataDTO);

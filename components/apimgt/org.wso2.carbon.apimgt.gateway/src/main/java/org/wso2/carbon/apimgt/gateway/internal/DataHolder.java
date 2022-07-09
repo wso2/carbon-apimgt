@@ -29,6 +29,7 @@ public class DataHolder {
 
     private static final DataHolder Instance = new DataHolder();
     private Map<String, List<String>> apiToCertificatesMap = new HashMap();
+    private Map<String, List<String>> applicationToCertificatesMap = new HashMap();
     private Map<String, String> googleAnalyticsConfigMap = new HashMap<>();
     private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
@@ -47,7 +48,15 @@ public class DataHolder {
 
         this.apiToCertificatesMap = apiToCertificatesMap;
     }
+    public Map<String, List<String>> getApplicationToCertificatesMap() {
 
+        return applicationToCertificatesMap;
+    }
+
+    public void setApplicationToCertificatesMap(Map<String, List<String>> applicationToCertificatesMap) {
+
+        this.applicationToCertificatesMap = applicationToCertificatesMap;
+    }
     public static DataHolder getInstance() {
 
         return Instance;
@@ -61,6 +70,15 @@ public class DataHolder {
     public List<String> getCertificateAliasListForAPI(String apiId) {
 
         return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
+    }
+    public void addApplicationToAliasList(String applicationId, List<String> aliasList) {
+
+        applicationToCertificatesMap.put(applicationId, aliasList);
+    }
+
+    public List<String> getCertificateAliasListForApplication(String applicationId) {
+
+        return applicationToCertificatesMap.getOrDefault(applicationId, Collections.emptyList());
     }
 
     public void addGoogleAnalyticsConfig(String tenantDomain, String config) {
