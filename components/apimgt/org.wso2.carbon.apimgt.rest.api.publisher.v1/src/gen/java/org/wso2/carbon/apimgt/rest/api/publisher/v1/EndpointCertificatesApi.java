@@ -81,6 +81,27 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     }
 
     @GET
+    @Path("/{alias}/usage")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve all apis that use a given certificate by alias", notes = "This operation can be used to retrieve/identify apis that use a known certificate. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
+            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates")
+        })
+    }, tags={ "Endpoint Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getCertificateUsageByAlias(@ApiParam(value = "",required=true) @PathParam("alias") String alias,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Criteria for sorting. ", allowableValues="apiName, version, createdTime, status", defaultValue="createdTime") @DefaultValue("createdTime") @QueryParam("sortBy") String sortBy,  @ApiParam(value = "Order of sorting(ascending/descending). ", allowableValues="asc, desc", defaultValue="desc") @DefaultValue("desc") @QueryParam("sortOrder") String sortOrder) throws APIManagementException{
+        return delegate.getCertificateUsageByAlias(alias, limit, offset, sortBy, sortOrder, securityContext);
+    }
+
+    @GET
     @Path("/{alias}")
     
     @Produces({ "application/json" })

@@ -5129,6 +5129,52 @@ paths:
             "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates/wso2carbon/content" > test.crt'
       operationId: getEndpointCertificateContentByAlias
 
+  /endpoint-certificates/{alias}/usage:
+    get:
+      tags:
+        - Endpoint Certificates
+      summary: Retrieve all apis that use a given certificate by alias
+      description: |
+        This operation can be used to retrieve/identify apis that use a known certificate.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/sortOrder'
+        - name: alias
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:ep_certificates_view
+            - apim:ep_certificates_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+              "https://127.0.0.1:9443/api/am/publisher/v3/endpoint-certificates/wso2carbon/content" > test.crt'
+      operationId: getCertificateUsageByAlias
+
   ######################################################
   # The "Content Search Results" resource APIs
   ######################################################
