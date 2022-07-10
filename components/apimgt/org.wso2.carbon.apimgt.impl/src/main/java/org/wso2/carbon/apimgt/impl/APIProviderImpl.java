@@ -3643,6 +3643,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return certificateManager.isConfigured();
     }
 
+    @Override
+    public CertificateMetadataDTO getCertificate(String userName, String alias) throws APIManagementException {
+        int tenantId = 0;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return certificateManager.getCertificate(alias, tenantId);
+    }
 
     @Override
     public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {

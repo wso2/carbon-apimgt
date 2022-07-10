@@ -820,6 +820,14 @@ public interface APIProvider extends APIManager {
      */
     boolean isConfigured();
 
+    /**
+     * Method to retrieve certificate metadata uploaded for the tenant represent by the user.
+     * @param userName : User name of the logged in user.
+     * @param alias : The alias of the certificate.
+     * @return : CertificateMetadata
+     * @throws APIManagementException
+     */
+    CertificateMetadataDTO getCertificate(String userName, String alias) throws APIManagementException;
 
     /**
      * Method to retrieve all the certificates uploaded for the tenant represent by the user.
