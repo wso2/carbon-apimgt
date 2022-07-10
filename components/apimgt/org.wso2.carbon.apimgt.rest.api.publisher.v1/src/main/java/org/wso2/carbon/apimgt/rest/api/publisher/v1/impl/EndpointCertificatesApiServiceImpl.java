@@ -28,10 +28,14 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
@@ -39,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.registry.core.Registry;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -46,11 +51,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesApiService {
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
+
+    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
     public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -223,6 +233,66 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
                     alias + "'", log);
         }
+        return null;
+    }
+
+    @Override
+    public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException {
+
+        List<API> allMatchedApis = new ArrayList<>();
+        Object apiListDTO;
+
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        sortBy = sortBy != null ? sortBy : RestApiConstants.DEFAULT_SORT_CRITERION;
+        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
+
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        CertificateMetadataDTO certificateMetadataDTO;
+
+        try {
+
+            if (StringUtils.isEmpty(alias)) {
+                RestApiUtil.handleBadRequest("The alias should not be empty", log);
+            }
+
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            certificateMetadataDTO = apiProvider.getCertificate(userName, alias);
+            String endpoint = certificateMetadataDTO.getEndpoint();
+
+            if(endpoint.contains("://")){
+                String[] parts = endpoint.split(":");
+                endpoint = parts[parts.length-1];
+            }
+
+            String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + endpoint;
+
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+            Map<String, Object> searchResult = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, sortBy, sortOrder);
+
+            Set<API> apis = (Set<API>) searchResult.get("apis");
+            allMatchedApis.addAll(apis);
+
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+
+            //Add pagination section in the response
+            Object totalLength = searchResult.get("length");
+            Integer length = 0;
+            if (totalLength != null) {
+                length = (Integer) totalLength;
+            }
+
+            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
+
+            return Response.status(Response.Status.OK).entity(apiListDTO).build();
+
+            // endpointConfig=*abc.def.com*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)
+
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving the certificates.", e, log);
+        }
+
         return null;
     }
 

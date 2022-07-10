@@ -26,6 +26,7 @@ import javax.ws.rs.core.SecurityContext;
 public interface EndpointCertificatesApiService {
       public Response addEndpointCertificate(InputStream certificateInputStream, Attachment certificateDetail, String alias, String endpoint, MessageContext messageContext) throws APIManagementException;
       public Response deleteEndpointCertificateByAlias(String alias, MessageContext messageContext) throws APIManagementException;
+      public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException;
       public Response getEndpointCertificateByAlias(String alias, MessageContext messageContext) throws APIManagementException;
       public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) throws APIManagementException;
       public Response getEndpointCertificates(Integer limit, Integer offset, String alias, String endpoint, MessageContext messageContext) throws APIManagementException;
