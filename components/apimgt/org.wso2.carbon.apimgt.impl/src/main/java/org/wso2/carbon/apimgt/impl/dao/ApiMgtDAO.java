@@ -38,7 +38,47 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.api.model.Pagination;
+import org.wso2.carbon.apimgt.api.model.ResourcePath;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
@@ -84,13 +124,38 @@ import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -18315,6 +18380,12 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Delete the Endpoint of an API.
+     *
+     * @param endpointUuid unique identifier of Endpoint
+     * @throws APIManagementException throws if any error occurred in deletion of Endpoint
+     */
     public void deleteAPIEndpointByEndpointId(String endpointUuid) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -18338,7 +18409,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error occurred while fetching endpoint Id by UUID " + endpointUUID, e);
         }
-        throw new APIManagementException("Error occurred while getting endpoint Id by UUID : " + endpointUUID);
+        return 0;
     }
 
     private int getAPIEndpointIdFromUUID(Connection connection, String endpointUUID, String revisionUUID) throws
@@ -18367,10 +18438,8 @@ public class ApiMgtDAO {
     }
 
     private int getNoneAPIEndpointId(Connection connection, int apiId) throws SQLException, APIManagementException {
-
         String getAPIEndpointIdQuery =
                     SQLConstants.APIEndpointsSQLConstants.GET_NONE_ENDPOINT_ID_SQL_BY_API_ID;
-
         try (PreparedStatement prepStmt = connection.prepareStatement(getAPIEndpointIdQuery)) {
             prepStmt.setInt(1, apiId);
             prepStmt.setString(2, APIConstants.APIEndpoint.ENDPOINT_NONE_NAME);
@@ -18384,6 +18453,14 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Update the Endpoint of an API.
+     *
+     * @param endpointUUID unique identifier of an Endpoint
+     * @param apiEndpoint Endpoint Object model
+     * @return updated endpoint object
+     * @throws APIManagementException
+     */
     public APIEndpointInfo updateAPIEndpoint(String endpointUUID, APIEndpointInfo apiEndpoint)
             throws APIManagementException {
         APIEndpointInfo apiEndpointUpdated = null;
@@ -18411,6 +18488,14 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Insert new endpoint an API.
+     *
+     * @param apiId Unique identifier of API
+     * @param apiEndpoint New Endpoint payload object
+     * @return
+     * @throws APIManagementException
+     */
     public String addAPIEndpoint(int apiId, APIEndpointInfo apiEndpoint) throws APIManagementException {
         String endpointUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -18504,7 +18589,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get endpoint uuid from mapping urlId
+     * Get endpoint uuid from mapping urlId.
      *
      * @param urlMappingId
      * @param env
@@ -18551,10 +18636,10 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get Operation endpoints mapping for each resource
+     * Get Operation endpoints mapping for each resource.
      *
-     * @param apiUUID
-     * @return
+     * @param apiUUID unique identifier of an API
+     * @return Set of URI_Templates with Operation Endpoints mapping
      * @throws APIManagementException
      */
     public Set<URITemplate> getURITemplatesWithOperationEndpoints(String apiUUID) throws APIManagementException{
@@ -18625,6 +18710,12 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Update the primary endpoint mapping of an API.
+     *
+     * @param api Object of an API.
+     * @throws APIManagementException
+     */
     public void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
         int apiId;
         String workingEndpointIdsQuery = SQLConstants.APIEndpointsSQLConstants.GET_MAPPED_API_ENDPOINTS_IDS;
@@ -20078,7 +20169,7 @@ public class ApiMgtDAO {
                 HashMap<String, Object> endpointConfigMap = (HashMap) objInEndpointConf.readObject();
                 return endpointConfigMap;
             } catch (ClassNotFoundException | IOException e) {
-                throw new APIManagementException("Error occurred transform endpoint config BA to object", e);
+                throw new APIManagementException("Error occurred transform endpoint config Binary Array to object", e);
             }
         }
         return null;

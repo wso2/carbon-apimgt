@@ -6050,7 +6050,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Map<String, String> operationEndpointPerURITemplate = new HashMap<>();
 
             for (URITemplate uriTemplate : uriTemplatesWithOperationEndpoints) {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                String key = uriTemplate.getHTTPVerb() + APIConstants.DELEM_COLON + uriTemplate.getUriTemplate();
                 operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
                         uriTemplate.getProductionEndpoint());
                 operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
@@ -6058,7 +6058,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             for (URITemplate uriTemplate : uriTemplates) {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                String key = uriTemplate.getHTTPVerb() + APIConstants.DELEM_COLON + uriTemplate.getUriTemplate();
                 String sandboxKey = key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS;
                 String productionKey = key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS;
                 if (operationEndpointPerURITemplate.containsKey(sandboxKey)) {

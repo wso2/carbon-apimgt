@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.TypeDefinition;
@@ -46,7 +45,25 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -61,7 +78,18 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -1878,13 +1906,13 @@ public class PublisherCommonUtils {
      * @param uuid   Unique identifier of API
      * @param apiProvider
      * @return APIEndpointListDTO object
-     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     * @throws APIManagementException if there is en error while getting the API Endpoints' information
      */
     public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider)
             throws APIManagementException {
         List<APIEndpointInfo> apiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid);
         if (apiEndpointsList == null) {
-            throw new APIManagementException("Error occurred while getting endpoints of API " + uuid,
+            throw new APIManagementException("Error occurred while getting endpoints of API with UUID " + uuid,
                     ExceptionCodes.API_ENDPOINT_NOT_FOUND);
         } else {
             return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList);
@@ -1899,7 +1927,7 @@ public class PublisherCommonUtils {
      * @param endpointUUID   Unique identifier of endpoint
      * @param apiProvider
      * @return APIEndpointDTO object
-     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     * @throws APIManagementException if there is en error while getting the API Endpoint information
      */
     public static APIEndpointDTO getAPIEndpoint(String apiUUID, String endpointUUID, APIProvider apiProvider)
             throws APIManagementException, JsonProcessingException {
@@ -1920,7 +1948,7 @@ public class PublisherCommonUtils {
      * @param apiEndpointDTO
      * @param organization
      * @return APIEndpointDTO object
-     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     * @throws APIManagementException if there is en error while updating an API endpoint
      */
     public static APIEndpointDTO updateAPIEndpoint(String apiId, String endpointId, APIEndpointDTO apiEndpointDTO,
                                                    String organization, APIProvider apiProvider)
@@ -1980,7 +2008,7 @@ public class PublisherCommonUtils {
      * @param organization
      * @param apiProvider
      * @return
-     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     * @throws APIManagementException if there is en error while inserting an API Endpoint information
      * @throws CryptoException if there is en error while Crypto
      */
     public static String addAPIEndpoint(String apiId, APIEndpointDTO apiEndpointDTO, String organization,

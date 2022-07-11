@@ -506,7 +506,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return Response.ok().build();
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing API Endpoint with ID: "
-                        + endpointUuid + " for API " + apiId,
+                        + endpointUuid + " for API with UUID " + apiId,
                         ExceptionCodes.from(ExceptionCodes.API_ENDPOINT_NOT_FOUND, endpointUuid));
             }
         } catch (APIManagementException e) {
