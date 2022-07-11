@@ -18380,11 +18380,11 @@ public class ApiMgtDAO {
         return null;
     }
 
-    /**
+     /**
      * Delete the Endpoint of an API.
      *
      * @param endpointUuid unique identifier of Endpoint
-     * @throws APIManagementException throws if any error occurred in deletion of Endpoint
+     * @throws APIManagementException throws if any error occurred in deletion of endpoint
      */
     public void deleteAPIEndpointByEndpointId(String endpointUuid) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -18640,7 +18640,7 @@ public class ApiMgtDAO {
      *
      * @param apiUUID unique identifier of an API
      * @return Set of URI_Templates with Operation Endpoints mapping
-     * @throws APIManagementException
+     * @throws APIManagementException if any exception occurs while getting operation mappings
      */
     public Set<URITemplate> getURITemplatesWithOperationEndpoints(String apiUUID) throws APIManagementException{
         String query;
@@ -20155,8 +20155,7 @@ public class ApiMgtDAO {
             objOut.flush();
             return new ByteArrayInputStream(bAoutEndPointConf.toByteArray());
         } catch (IOException e) {
-            // TODO : print message
-            throw new APIManagementException("Error occurred transform endpoint config obj to BA object", e);
+            throw new APIManagementException("Error occurred transform endpoint config obj to Binary Array object", e);
         }
     }
 

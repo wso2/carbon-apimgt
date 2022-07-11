@@ -1443,7 +1443,7 @@ public interface APIProvider extends APIManager {
      *
      * @param uuid      Unique Identifier of API
      * @return List<APIEndpointInfo> Object
-     * @throws APIManagementException if an error occurs while retrieving revision details
+     * @throws APIManagementException if an error occurs while retrieving endpoints details
      */
     List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException;
 
@@ -1453,7 +1453,7 @@ public interface APIProvider extends APIManager {
      * @param apiUUID      Unique Identifier of API
      * @param endpointUUID      Unique Identifier of Endpoint
      * @return APIEndpointInfo Object
-     * @throws APIManagementException if an error occurs while retrieving revision details
+     * @throws APIManagementException if an error occurs while retrieving endpoint details
      */
     APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException;
 
@@ -1637,7 +1637,7 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
-     * Insert new endpoint an API.
+     * Insert new endpoint for an API.
      *
      * @param apiUUID Unique identifier of API
      * @param apiEndpoint New Endpoint payload object
@@ -1707,7 +1707,7 @@ public interface APIProvider extends APIManager {
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
     /**
-     * Check whether it has operation mapping or not
+     * Check whether the endpoint has an operation mapping
      *
      * @param endpointUuid
      * @return true if it has at least one mapping

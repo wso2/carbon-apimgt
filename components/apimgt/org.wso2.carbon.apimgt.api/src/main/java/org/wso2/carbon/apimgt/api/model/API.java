@@ -217,7 +217,7 @@ public class API implements Serializable {
      */
     private String primarySandboxEndpointId;
     /**
-     * Primary Endpoint of environment Sandbox
+     * Primary Endpoint of environment Production
      */
     private String primaryProductionEndpointId;
 

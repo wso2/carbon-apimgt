@@ -4770,11 +4770,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.getAPIID(currentApiUuid);
         // Get primary production Endpoint mapping
         String productionEndpointId =
-                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, "PRODUCTION", revisionUuid);
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, APIConstants.APIEndpoint.PRODUCTION, revisionUuid);
         api.setPrimaryProductionEndpointId(productionEndpointId);
         // Get primary sandbox endpoint endpoint
         String sandboxEndpointId =
-                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, "SANDBOX", revisionUuid);
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, APIConstants.APIEndpoint.SANDBOX, revisionUuid);
         api.setPrimarySandboxEndpointId(sandboxEndpointId);
     }
 

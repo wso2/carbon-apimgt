@@ -72,6 +72,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO.AudienceEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
@@ -117,8 +119,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWs
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
