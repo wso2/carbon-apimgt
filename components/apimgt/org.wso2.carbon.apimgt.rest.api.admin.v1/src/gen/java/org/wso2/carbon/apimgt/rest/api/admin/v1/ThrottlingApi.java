@@ -536,7 +536,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Retrieve/Search Throttling Polcies ", notes = "This operation provides you a list of available Throttling Policies qualifying the given keyword match. ", response = ThrottlePolicyDetailsListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Unified Search" })
     @ApiResponses(value = { 
