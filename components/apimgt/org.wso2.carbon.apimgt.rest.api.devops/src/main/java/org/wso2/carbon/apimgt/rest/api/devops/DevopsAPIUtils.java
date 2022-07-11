@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentsListDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.LoggingApiOutputDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.LoggingApiOutputListDTO;
-import org.wso2.carbon.apimgt.rest.api.devops.dto.PropertyDTO;
+import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentPropertyDTO;
 import org.wso2.carbon.logging.correlation.CorrelationLogConfigurable;
 import org.wso2.carbon.logging.correlation.bean.ImmutableCorrelationLogConfig;
 import org.wso2.carbon.logging.correlation.internal.CorrelationLogManager;
@@ -91,10 +91,10 @@ public class DevopsAPIUtils {
         correlationComponentDTO.setName(componentName);
         correlationComponentDTO.setEnabled(Boolean.toString(config.isEnable()));
         if (componentName.equals(JDBC_COMPONENT_NAME)) {
-            PropertyDTO propertyDTO = new PropertyDTO();
+            CorrelationComponentPropertyDTO propertyDTO = new CorrelationComponentPropertyDTO();
             propertyDTO.setName(DENIED_THREADS_NAME);
             propertyDTO.setValue(Arrays.asList(config.getDeniedThreads()));
-            List<PropertyDTO> properties = new ArrayList<>();
+            List<CorrelationComponentPropertyDTO> properties = new ArrayList<>();
             properties.add(propertyDTO);
             correlationComponentDTO.setProperties(properties);
         }
@@ -113,10 +113,10 @@ public class DevopsAPIUtils {
             correlationComponentDTO.setEnabled(correlationConfigDTO.getEnabled());
 
             List<CorrelationConfigPropertyDTO> correlationConfigPropertyDTOList = correlationConfigDTO.getProperties();
-            List<PropertyDTO> propertyDTOList = new ArrayList<>();
+            List<CorrelationComponentPropertyDTO> propertyDTOList = new ArrayList<>();
 
             for (CorrelationConfigPropertyDTO correlationConfigPropertyDTO: correlationConfigPropertyDTOList) {
-                PropertyDTO propertyDTO = new PropertyDTO();
+                CorrelationComponentPropertyDTO propertyDTO = new CorrelationComponentPropertyDTO();
                 propertyDTO.setName(correlationConfigPropertyDTO.getName());
                 propertyDTO.setValue(Arrays.asList(correlationConfigPropertyDTO.getValue()));
                 propertyDTOList.add(propertyDTO);
@@ -141,7 +141,7 @@ public class DevopsAPIUtils {
             correlationConfigDTO.setName(correlationComponentDTO.getName());
             correlationConfigDTO.setEnabled(correlationComponentDTO.getEnabled());
             List<CorrelationConfigPropertyDTO> properties = new ArrayList<>();
-            for (PropertyDTO propertyDTO: correlationComponentDTO.getProperties()) {
+            for (CorrelationComponentPropertyDTO propertyDTO: correlationComponentDTO.getProperties()) {
                 CorrelationConfigPropertyDTO correlationConfigPropertyDTO = new CorrelationConfigPropertyDTO();
                 correlationConfigPropertyDTO.setName(propertyDTO.getName());
                 correlationConfigPropertyDTO.setValue(propertyDTO.getValue().toArray(new String[0]));
