@@ -20,50 +20,170 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigPropertyDTO;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.logging.correlation.CorrelationLogConfigurable;
 import org.wso2.carbon.logging.correlation.bean.ImmutableCorrelationLogConfig;
 import org.wso2.carbon.logging.correlation.internal.CorrelationLogManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * Correlation Config Manager to configure correlation components and
  * invoke the internal API.
  */
 public class CorrelationConfigManager {
+    public static final int RETRIEVAL_RETRIES = 15;
+    public static final int RETRIEVAL_TIMEOUT_IN_SECONDS = 15;
+    public static final String UTF8 = "UTF-8";
+    private static final String DENIED_THREADS = "deniedThreads";
     private static final Log log = LogFactory.getLog(CorrelationConfigManager.class);
     private static final CorrelationConfigManager correlationConfigManager = new CorrelationConfigManager();
+    private final EventHubConfigurationDto eventHubConfigurationDto;
 
+    public CorrelationConfigManager() {
+        this.eventHubConfigurationDto =
+                ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().getAPIManagerConfiguration()
+                        .getEventHubConfigurationDto();
+    }
 
     public static CorrelationConfigManager getInstance() {
         return correlationConfigManager;
     }
 
+    public void initializeCorrelationComponentList() {
+        try {
+            String responseString =
+                    invokeService("/correlation-configs", MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            JSONObject responseJson = new JSONObject(responseString);
+            List<CorrelationConfigDTO> correlationConfigDTOList = new ArrayList<>();
+            JSONArray correlationComponentsArray = responseJson.getJSONArray("components");
+            for (int i = 0; i < correlationComponentsArray.length(); i++) {
+                JSONObject correlationComponentObject = correlationComponentsArray.getJSONObject(i);
+                CorrelationConfigDTO correlationConfigDTO = new CorrelationConfigDTO();
+                correlationConfigDTO.setName(correlationComponentObject.getString("name"));
+                correlationConfigDTO.setEnabled(correlationComponentObject.getString("enabled"));
+
+                List<CorrelationConfigPropertyDTO> correlationConfigPropertyDTOList = new ArrayList<>();
+                JSONArray correlationConfigPropertiesArray = correlationComponentObject.getJSONArray("properties");
+                for (int j = 0; j < correlationConfigPropertiesArray.length(); j++) {
+                    JSONObject correlationConfigPropertyObject = correlationConfigPropertiesArray.getJSONObject(j);
+                    CorrelationConfigPropertyDTO correlationConfigPropertyDTO = new CorrelationConfigPropertyDTO();
+                    correlationConfigPropertyDTO.setName(correlationConfigPropertyObject.getString("name"));
+
+                    List<String> propertyValueList = new ArrayList<>();
+                    JSONArray propertyValueArray = correlationConfigPropertyObject.getJSONArray("value");
+                    for (int k = 0; k < propertyValueArray.length(); k++) {
+                        String propertyValue = propertyValueArray.getString(k);
+                        propertyValueList.add(propertyValue);
+                    }
+                    correlationConfigPropertyDTO.setValue(
+                            propertyValueList.toArray(new String[propertyValueList.size()]));
+                    correlationConfigPropertyDTOList.add(correlationConfigPropertyDTO);
+                }
+                correlationConfigDTO.setProperties(correlationConfigPropertyDTOList);
+                correlationConfigDTOList.add(correlationConfigDTO);
+            }
+            log.debug("Updating Correlation Config in the gateway Start Up");
+            updateCorrelationConfigs(correlationConfigDTOList);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Response : " + responseString);
+            }
+        } catch (IOException | APIManagementException e) {
+            log.error("Error while calling internal service API for correlation configs", e);
+        }
+    }
 
     public void updateCorrelationConfigs(List<CorrelationConfigDTO> correlationConfigDTOList) {
-        for (CorrelationConfigDTO correlationConfigDTO: correlationConfigDTOList) {
+        for (CorrelationConfigDTO correlationConfigDTO : correlationConfigDTOList) {
             String componentName = correlationConfigDTO.getName();
-            String enabled       = correlationConfigDTO.getEnabled();
-            List<CorrelationConfigPropertyDTO> correlationConfigPropertyDTOList =
-                    correlationConfigDTO.getProperties();
+            String enabled = correlationConfigDTO.getEnabled();
+            List<CorrelationConfigPropertyDTO> correlationConfigPropertyDTOList = correlationConfigDTO.getProperties();
             String[] deniedThreads = new String[0];
-            for (CorrelationConfigPropertyDTO correlationConfigPropertyDTO: correlationConfigPropertyDTOList) {
-                if (correlationConfigPropertyDTO.getName().equals("deniedThreads")) {
+            for (CorrelationConfigPropertyDTO correlationConfigPropertyDTO : correlationConfigPropertyDTOList) {
+                if (correlationConfigPropertyDTO.getName().equals(DENIED_THREADS)) {
                     deniedThreads = correlationConfigPropertyDTO.getValue();
                 }
             }
 
-            CorrelationLogConfigurable service =  CorrelationLogManager.getLogServiceInstance(componentName);
+            CorrelationLogConfigurable service = CorrelationLogManager.getLogServiceInstance(componentName);
             if (service != null) {
-                service.onConfigure(new ImmutableCorrelationLogConfig(
-                        Boolean.parseBoolean(enabled),
-                        deniedThreads,
-                        false
-                ));
+                service.onConfigure(
+                        new ImmutableCorrelationLogConfig(Boolean.parseBoolean(enabled), deniedThreads, false));
             }
         }
+    }
+
+    private byte[] getServiceCredentials(EventHubConfigurationDto eventHubConfigurationDto) {
+
+        String username = eventHubConfigurationDto.getUsername();
+        String pw = eventHubConfigurationDto.getPassword();
+        return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String invokeService(String path, String tenantDomain) throws IOException, APIManagementException {
+
+        String serviceURLStr = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
+        HttpGet method = new HttpGet(serviceURLStr + path);
+
+        URL serviceURL = new URL(serviceURLStr + path);
+        byte[] credentials = getServiceCredentials(eventHubConfigurationDto);
+        int servicePort = serviceURL.getPort();
+        String serviceProtocol = serviceURL.getProtocol();
+        method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                APIConstants.AUTHORIZATION_BASIC + new String(credentials, StandardCharsets.UTF_8));
+        if (tenantDomain != null) {
+            method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
+
+        HttpResponse httpResponse = null;
+        int retryCount = 0;
+        boolean retry;
+        do {
+            try {
+                httpResponse = httpClient.execute(method);
+                retry = false;
+            } catch (IOException ex) {
+                retryCount++;
+                if (retryCount < RETRIEVAL_RETRIES) {
+                    retry = true;
+                    log.warn("Failed retrieving " + path + " from remote endpoint: " + ex.getMessage()
+                            + ". Retrying after " + RETRIEVAL_TIMEOUT_IN_SECONDS + " seconds.");
+                    try {
+                        Thread.sleep(RETRIEVAL_TIMEOUT_IN_SECONDS * 1000L);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                } else {
+                    throw new APIManagementException("Error while calling internal service", ex);
+                }
+            }
+        } while (retry);
+        if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
+            log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
+            throw new APIManagementException("Error while retrieving subscription from " + path);
+        }
+        return EntityUtils.toString(httpResponse.getEntity(), UTF8);
     }
 }
