@@ -20,14 +20,14 @@ import javax.validation.Valid;
 
 
 
-public class PropertyDTO   {
+public class CorrelationComponentPropertyDTO   {
   
     private String name = null;
     private List<String> value = new ArrayList<String>();
 
   /**
    **/
-  public PropertyDTO name(String name) {
+  public CorrelationComponentPropertyDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -44,7 +44,7 @@ public class PropertyDTO   {
 
   /**
    **/
-  public PropertyDTO value(List<String> value) {
+  public CorrelationComponentPropertyDTO value(List<String> value) {
     this.value = value;
     return this;
   }
@@ -68,9 +68,9 @@ public class PropertyDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PropertyDTO property = (PropertyDTO) o;
-    return Objects.equals(name, property.name) &&
-        Objects.equals(value, property.value);
+    CorrelationComponentPropertyDTO correlationComponentProperty = (CorrelationComponentPropertyDTO) o;
+    return Objects.equals(name, correlationComponentProperty.name) &&
+        Objects.equals(value, correlationComponentProperty.value);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class PropertyDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PropertyDTO {\n");
+    sb.append("class CorrelationComponentPropertyDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");

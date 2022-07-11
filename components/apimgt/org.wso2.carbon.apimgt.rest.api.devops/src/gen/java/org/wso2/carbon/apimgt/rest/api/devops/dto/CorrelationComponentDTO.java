@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.devops.dto.PropertyDTO;
+import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentPropertyDTO;
 import javax.validation.constraints.*;
 
 
@@ -25,7 +25,7 @@ public class CorrelationComponentDTO   {
   
     private String name = null;
     private String enabled = null;
-    private List<PropertyDTO> properties = new ArrayList<PropertyDTO>();
+    private List<CorrelationComponentPropertyDTO> properties = new ArrayList<CorrelationComponentPropertyDTO>();
 
   /**
    **/
@@ -63,7 +63,7 @@ public class CorrelationComponentDTO   {
 
   /**
    **/
-  public CorrelationComponentDTO properties(List<PropertyDTO> properties) {
+  public CorrelationComponentDTO properties(List<CorrelationComponentPropertyDTO> properties) {
     this.properties = properties;
     return this;
   }
@@ -72,10 +72,10 @@ public class CorrelationComponentDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("properties")
-  public List<PropertyDTO> getProperties() {
+  public List<CorrelationComponentPropertyDTO> getProperties() {
     return properties;
   }
-  public void setProperties(List<PropertyDTO> properties) {
+  public void setProperties(List<CorrelationComponentPropertyDTO> properties) {
     this.properties = properties;
   }
 
