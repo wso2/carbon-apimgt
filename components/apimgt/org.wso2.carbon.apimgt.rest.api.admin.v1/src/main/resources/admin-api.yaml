@@ -145,6 +145,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_view
+            - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"

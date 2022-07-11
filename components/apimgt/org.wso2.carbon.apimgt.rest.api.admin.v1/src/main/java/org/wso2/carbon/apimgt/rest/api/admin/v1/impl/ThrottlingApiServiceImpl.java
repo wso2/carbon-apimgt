@@ -995,7 +995,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response exportThrottlingPolicy(String policyId, String policyName, String type, String format,
-            MessageContext messageContext) throws APIManagementException {
+            MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
