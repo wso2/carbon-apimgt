@@ -560,7 +560,7 @@ public class APIAdminImpl implements APIAdmin {
 
     private void validateKeyManagerEndpointConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
             KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                     .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
             if (keyManagerConnectorConfiguration != null) {
@@ -1015,7 +1015,7 @@ public class APIAdminImpl implements APIAdmin {
         if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())) {
             throw new APIManagementException("Key Manager Name can't be empty", ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
         }
-        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
             KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                     .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
             if (keyManagerConnectorConfiguration != null) {
