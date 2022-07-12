@@ -20,15 +20,12 @@ package org.wso2.carbon.apimgt.impl.config;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.SystemConfigurationsDAO;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
@@ -44,12 +41,11 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
-
 import javax.cache.Cache;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * Config Service Implementation for retrieve configurations.
@@ -390,7 +386,8 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         }
     }
 
-    @Override public UserRegistrationConfigDTO getSelfSighupConfig(String organization) throws APIManagementException {
+    @Override
+    public UserRegistrationConfigDTO getSelfSighupConfig(String organization) throws APIManagementException {
 
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -402,15 +399,13 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             if (tenantConfig.containsKey(APIConstants.SELF_SIGN_UP_NAME)) {
                 return getSignupConfigurationFromAdvancedConfigurations(
                         (JSONObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
-            } else { // Following defaultConfig object will be used if the SelfSignUp configuration is not available in
-                // the Advanced tenant configuration
-                UserRegistrationConfigDTO defaultConfig = new UserRegistrationConfigDTO();
-                defaultConfig.setSignUpEnabled(false);
-                defaultConfig.getRoles().put("subscriber", false);
-                return defaultConfig;
+            } else {
+                return new UserRegistrationConfigDTO();
             }
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            String msg = "Error while parsing Advanced Tenant configuration JSON.";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -426,33 +421,19 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             JSONObject selfSighupConfig) {
 
         UserRegistrationConfigDTO config = new UserRegistrationConfigDTO();
+        ArrayList<String> roles = (ArrayList<String>) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM);
+        for (String role : roles) {
+            config.getRoles().add(role);
+        }
         config.setSignUpDomain((String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM));
-        config.setAdminUserName((String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_USERNAME));
-        String encryptedPassword = (String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_PASSWORD);
-        PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
-        if (passwordResolver != null) {
-            String resolvedPassword = passwordResolver.getPassword(encryptedPassword);
-            config.setAdminPassword(APIUtil.replaceSystemProperty(resolvedPassword));
-        }
-        config.setSignUpEnabled((Boolean) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ENABLED));
-        JSONArray rolesElement = (JSONArray) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM);
-        Iterator roleListIterator = rolesElement.iterator();
-        while (roleListIterator.hasNext()) {
-            JSONObject roleElement = (JSONObject) roleListIterator.next();
-            String tmpRole = (String) roleElement.get(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT);
-            boolean tmpIsExternal = (boolean) roleElement.get(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL);
-            config.getRoles().put(tmpRole, tmpIsExternal);
-        }
         return config;
     }
 
-    @Override public void updateSelfSighupConfig(String organization, String selfSignUpConfig)
-            throws APIManagementException {
-
+    @Override
+    public void updateSelfSighupConfig(String organization, String selfSignUpConfig) {
     }
 
-    @Override public void addSelfSighupConfig(String organization, String selfSignUpConfig)
-            throws APIManagementException {
-
+    @Override
+    public void addSelfSighupConfig(String organization, String selfSignUpConfig) {
     }
 }
