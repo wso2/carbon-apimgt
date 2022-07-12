@@ -25,7 +25,6 @@ import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
-import org.wso2.carbon.apimgt.gateway.CorrelationConfigManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
@@ -209,7 +208,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     new GatewayJMSMessageListener());
             copyTenantArtifacts();
             APILoggerManager.getInstance().initializeAPILoggerList();
-            CorrelationConfigManager.getInstance().initializeCorrelationComponentList();
+            // CorrelationConfigManager.getInstance().initializeCorrelationComponentList();
         } else {
             log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
         }
