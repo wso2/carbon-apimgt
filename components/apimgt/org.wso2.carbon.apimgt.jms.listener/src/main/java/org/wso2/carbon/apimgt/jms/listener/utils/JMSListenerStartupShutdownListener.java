@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.common.jms.JMSConstants;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.correlation.CorrelationConfigManager;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
@@ -31,7 +32,7 @@ import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 
 /**
- * This Class used to properly start and Close JMS listeners
+ * This Class used to properly start and Close JMS listeners.
  */
 public class JMSListenerStartupShutdownListener implements ServerStartupObserver, ServerShutdownHandler,
         JMSListenerShutDownService {
@@ -66,8 +67,12 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
             if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
                 jmsTransportHandlerForEventHub
                         .subscribeForJmsEvents(JMSConstants.TOPIC_KEY_MANAGER, new KeyManagerJMSMessageListener());
+                jmsTransportHandlerForEventHub.
+                        subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
+                        new CorrelationConfigJMSMessageListener());
             }
         }
+        CorrelationConfigManager.getInstance().initializeCorrelationComponentList();
     }
 
     @Override

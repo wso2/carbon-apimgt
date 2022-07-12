@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
-import org.wso2.carbon.apimgt.gateway.CorrelationConfigManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
@@ -302,8 +301,8 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.UPDATE_CORRELATION_CONFIGS.toString().equals(eventType)) {
             CorrelationConfigEvent correlationConfigEvent  =
                     new Gson().fromJson(eventJson, CorrelationConfigEvent.class);
-            CorrelationConfigManager.getInstance().updateCorrelationConfigs(
-                    correlationConfigEvent.getCorrelationConfigDTOList());
+//            CorrelationConfigManager.getInstance().updateCorrelationConfigs(
+//                    correlationConfigEvent.getCorrelationConfigDTOList());
         }
     }
 

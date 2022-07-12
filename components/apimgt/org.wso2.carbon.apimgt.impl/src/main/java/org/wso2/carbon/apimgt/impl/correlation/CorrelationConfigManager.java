@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway;
+package org.wso2.carbon.apimgt.impl.correlation;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,11 +36,11 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigPropertyDTO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.logging.correlation.CorrelationLogConfigurable;
 import org.wso2.carbon.logging.correlation.bean.ImmutableCorrelationLogConfig;
@@ -62,7 +62,7 @@ public class CorrelationConfigManager {
 
     public CorrelationConfigManager() {
         this.eventHubConfigurationDto =
-                ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().getAPIManagerConfiguration()
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getEventHubConfigurationDto();
     }
 
