@@ -234,15 +234,15 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     }
 
     @Override
-    public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException {
+    public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        sortBy = sortBy != null ? sortBy : RestApiConstants.DEFAULT_SORT_CRITERION;
-        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
+        String sortBy = RestApiConstants.DEFAULT_SORT_CRITERION;
+        String sortOrder = RestApiConstants.DESCENDING_SORT_ORDER;
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         CertificateMetadataDTO certificateMetadataDTO;
@@ -283,8 +283,6 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
 
             return Response.status(Response.Status.OK).entity(apiListDTO).build();
-
-            // endpointConfig=*abc.def.com*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)
 
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the certificates.", e, log);
