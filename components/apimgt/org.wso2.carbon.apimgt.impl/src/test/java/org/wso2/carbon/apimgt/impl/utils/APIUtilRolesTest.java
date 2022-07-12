@@ -68,7 +68,11 @@ public class APIUtilRolesTest {
             String tenantConfValue = FileUtils.readFileToString(siteConfFile);
 
             UserRegistrationConfigDTO config = new UserRegistrationConfigDTO();
-            config.getRoles().add("subscriber");
+            config.setSignUpDomain("PRIMARY");
+            config.setAdminUserName("${admin.username}");
+            config.setAdminPassword("${admin.password}");
+            config.setSignUpEnabled(true);
+            config.getRoles().put("subscriber", false);
 
             ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
             RealmService realmService = Mockito.mock(RealmService.class);

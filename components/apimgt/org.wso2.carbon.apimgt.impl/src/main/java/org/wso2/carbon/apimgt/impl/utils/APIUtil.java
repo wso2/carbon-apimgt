@@ -2828,24 +2828,15 @@ public final class APIUtil {
     public static void loadAndSyncTenantConf(String organization) throws APIManagementException {
 
         try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonElement jsonElement = getFileBaseTenantConfig();
             String currentConfig = ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
             if (currentConfig == null) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                JsonObject jsonElement = (JsonObject) getFileBaseTenantConfig();
-                if (organization.equals(APIConstants.SUPER_TENANT_DOMAIN)) {
-                    String selfSignUpJsonString = IOUtils.toString(APIManagerComponent.class.getResourceAsStream(
-                            APIConstants.SELF_SIGN_UP_DEFAULT_CONFIG_FILE_PATH_OF_THE_CARBON_SUPER_USER));
-                    JsonObject selfSignUpJsonElement = (JsonObject) new JsonParser().parse(selfSignUpJsonString);
-                    jsonElement.add(APIConstants.SELF_SIGN_UP_NAME, selfSignUpJsonElement);
-                }
                 ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
                         gson.toJson(jsonElement));
             }
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while saving tenant conf to the Advanced configuration of the " +
-                    "tenant " + organization, e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading Self signup configuration file content", e);
+            throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
         }
     }
 
@@ -2896,15 +2887,21 @@ public final class APIUtil {
             UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
             String signUpDomain = selfSighupConfig.getSignUpDomain();
             if (isSubscriberRoleCreationEnabled(tenantId)) {
-                Iterator<String> signUpRolesIterator = selfSighupConfig.getRoles().iterator();
+                Iterator<Map.Entry<String, Boolean>> signUpRolesIterator = selfSighupConfig.getRoles().entrySet()
+                        .iterator();
                 while (signUpRolesIterator.hasNext()) {
-                    String roleName;
-                    if (signUpDomain != null) {
-                        roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
-                    } else {
-                        roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
+                    Map.Entry<String, Boolean> signUpRole = signUpRolesIterator.next();
+                    String roleName = signUpRole.getKey();
+                    boolean isExternalRole = signUpRole.getValue();
+                    if (roleName != null) {
+                        // If isExternalRole==false ;create the subscriber role as an internal role
+                        if (isExternalRole && signUpDomain != null) {
+                            roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
+                        } else {
+                            roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + roleName;
+                        }
+                        createSubscriberRole(roleName, tenantId);
                     }
-                    createSubscriberRole(roleName, tenantId);
                 }
             }
         }
