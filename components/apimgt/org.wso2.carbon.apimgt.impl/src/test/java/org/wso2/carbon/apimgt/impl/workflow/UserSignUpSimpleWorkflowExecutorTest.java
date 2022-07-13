@@ -41,11 +41,8 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
-
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * UserSignUpSimpleWorkflowExecutor test cases
@@ -103,12 +100,10 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
     @Test
     public void testExecutingUserSignUpSimpleWorkflow() throws APIManagementException, UserStoreException {
-        Map<String, Boolean> roleMap = new HashMap<String, Boolean>();
-        roleMap.put(signUpRole, false);
+        ArrayList<String> roleMap = new ArrayList<String>();
+        roleMap.add(signUpRole);
 
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        userRegistrationConfigDTO.setAdminUserName("admin");
-        userRegistrationConfigDTO.setAdminPassword("admin");
         userRegistrationConfigDTO.setRoles(roleMap);
 
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
@@ -127,8 +122,8 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
     @Test
     public void testFailuresToCompleteUserSignUpSimpleWorkflow() throws Exception {
-        Map<String, Boolean> roleMap = new HashMap<String, Boolean>();
-        roleMap.put(signUpRole, false);
+        ArrayList<String> roleMap = new ArrayList<String>();
+        roleMap.add(signUpRole);
 
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);

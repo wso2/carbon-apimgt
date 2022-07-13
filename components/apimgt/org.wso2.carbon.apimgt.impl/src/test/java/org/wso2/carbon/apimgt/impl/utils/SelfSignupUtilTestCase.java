@@ -29,9 +29,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, APIUtil.class})
@@ -40,9 +39,9 @@ public class SelfSignupUtilTestCase {
     @Test
     public void testGetRoleNames() {
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        Map<String, Boolean> roles = new HashMap();
-        roles.put("subscriber", true);
-        roles.put("creator", false);
+        ArrayList<String> roles = new ArrayList<String>();
+        roles.add("subscriber");
+        roles.add("creator");
         userRegistrationConfigDTO.setRoles(roles);
         userRegistrationConfigDTO.setSignUpDomain("foo.com");
         List<String> roleList = SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO);
@@ -113,14 +112,8 @@ public class SelfSignupUtilTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
-
         UserRegistrationConfigDTO config = new UserRegistrationConfigDTO();
-        config.setSignUpDomain("PRIMARY");
-        config.setAdminUserName("xxxx");
-        config.setAdminPassword("xxxx");
-        config.setSignUpEnabled(false);
-        config.getRoles().put("subscriber", false);
-
+        config.getRoles().add("subscriber");
         Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn(config);
         UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
         Assert.assertNotNull(userRegistrationConfigDTO);

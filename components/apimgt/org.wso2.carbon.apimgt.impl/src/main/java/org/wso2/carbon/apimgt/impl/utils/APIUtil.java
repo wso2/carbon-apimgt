@@ -2896,21 +2896,15 @@ public final class APIUtil {
             UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
             String signUpDomain = selfSighupConfig.getSignUpDomain();
             if (isSubscriberRoleCreationEnabled(tenantId)) {
-                Iterator<Map.Entry<String, Boolean>> signUpRolesIterator = selfSighupConfig.getRoles().entrySet()
-                        .iterator();
+                Iterator<String> signUpRolesIterator = selfSighupConfig.getRoles().iterator();
                 while (signUpRolesIterator.hasNext()) {
-                    Map.Entry<String, Boolean> signUpRole = signUpRolesIterator.next();
-                    String roleName = signUpRole.getKey();
-                    boolean isExternalRole = signUpRole.getValue();
-                    if (roleName != null) {
-                        // If isExternalRole==false ;create the subscriber role as an internal role
-                        if (isExternalRole && signUpDomain != null) {
-                            roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
-                        } else {
-                            roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + roleName;
-                        }
-                        createSubscriberRole(roleName, tenantId);
+                    String roleName;
+                    if (signUpDomain != null) {
+                        roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
+                    } else {
+                        roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
                     }
+                    createSubscriberRole(roleName, tenantId);
                 }
             }
         }

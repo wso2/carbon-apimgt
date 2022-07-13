@@ -1,12 +1,5 @@
 {
-  "EnableSignup": true,
-  "SignUpDomain": "PRIMARY",
-  "AdminUserName": "xxxx",
-  "AdminPassword": "xxxx",
-  "SignUpRoles": [
-    {
-      "RoleName": "subscriber",
-      "IsExternalRole": false
-    }
+  "SignUpRoles":[
+    "subscriber"
   ]
 }

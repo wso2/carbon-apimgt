@@ -28,16 +28,12 @@ import org.wso2.carbon.user.core.UserRealm;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class contains the utility methods used for self signup
  */
 public final class SelfSignUpUtil {
 
-	private static final String PURPOSE = "purpose";
-	private static final String PII_CATEGORIES = "piiCategories";
-	private static final String DEFAULT = "DEFAULT";
 
 	/**
 	 * Retrieve self signup configuration from the cache. if cache mises, load to the cache from the Advanced
@@ -56,21 +52,15 @@ public final class SelfSignUpUtil {
 			int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 			String signUpDomain = selfSighupConfig.getSignUpDomain();
 			if (APIUtil.isSubscriberRoleCreationEnabled(tenantId)) {
-				Iterator<Map.Entry<String, Boolean>> signUpRolesIterator = selfSighupConfig.getRoles().entrySet()
-						.iterator();
+				Iterator<String> signUpRolesIterator = selfSighupConfig.getRoles().iterator();
 				while (signUpRolesIterator.hasNext()) {
-					Map.Entry<String, Boolean> signUpRole = signUpRolesIterator.next();
-					String roleName = signUpRole.getKey();
-					boolean isExternalRole = signUpRole.getValue();
-					if (roleName != null) {
-						// If isExternalRole==false ;create the subscriber role as an internal role
-						if (isExternalRole && signUpDomain != null) {
-							roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
-						} else {
-							roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + roleName;
-						}
-						APIUtil.createSubscriberRole(roleName, tenantId);
+					String roleName;
+					if (signUpDomain != null) {
+						roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
+					} else {
+						roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
 					}
+					APIUtil.createSubscriberRole(roleName, tenantId);
 				}
 			}
 			return selfSighupConfig;
@@ -79,10 +69,10 @@ public final class SelfSignUpUtil {
 	}
 
 	/**
-	 * Check whether user can signup to the tenant domain
-	 * 
-	 * @param userName - The user name
-	 * @param realm - The realm
+	 * Check whether user can sign up to the tenant domain
+	 *
+	 * @param userName - The username
+	 * @param realm    - The realm
 	 * @return - A boolean value
 	 * @throws APIManagementException
 	 */
@@ -93,78 +83,73 @@ public final class SelfSignUpUtil {
 
 		// Check whether we have a secondary UserStoreManager setup.
 		if (index > 0) {
-			// Using the short-circuit. User name comes with the domain name.
+			// Using the short-circuit. Username comes with the domain name.
 			try {
 				return !realm.getRealmConfiguration()
 						.isRestrictedDomainForSlefSignUp(userName.substring(0, index));
 			} catch (UserStoreException e) {
-				throw new APIManagementException(e.getMessage(), e);				
+				throw new APIManagementException(e.getMessage(), e);
 			}
 		}
-
 		return true;
 	}
 
 	/**
 	 * get the full role name list (ex: internal/subscriber)
-	 * 
+	 *
 	 * @param config - A UserRegistrationConfigDTO instance
 	 * @return - A list object containing role names
 	 */
 	public static List<String> getRoleNames(UserRegistrationConfigDTO config) {
 
 		ArrayList<String> roleNamesArr = new ArrayList<String>();
-		Map<String, Boolean> roles = config.getRoles();
-		for (Map.Entry<String, Boolean> entry : roles.entrySet()) {
+		Iterator<String> roles = config.getRoles().iterator();
+		while (roles.hasNext()) {
 			String roleName;
-			if (entry.getValue()) {
+			if (config.getSignUpDomain() != null) {
 				// external role
 				roleName =
 						config.getSignUpDomain().toUpperCase() +
-						UserCoreConstants.DOMAIN_SEPARATOR + entry.getKey();
+								UserCoreConstants.DOMAIN_SEPARATOR + roles.next();
 			} else {
 				// internal role
 				roleName =
 						UserCoreConstants.INTERNAL_DOMAIN + UserCoreConstants.DOMAIN_SEPARATOR +
-						entry.getKey();
+								roles.next();
 			}
 			roleNamesArr.add(roleName);
 		}
 		return roleNamesArr;
-
 	}
 
 	/**
-	 * modify user name with user storeage information. 
-	 * @param username - The user name
-	 * @param signupConfig - The sign up configuration
-	 * @return - The modified user name
+	 * modify username with user storage information.
+	 *
+	 * @param username     - The username
+	 * @param signupConfig - The sign-up configuration
+	 * @return - The modified username
 	 */
 	public static String getDomainSpecificUserName(String username, UserRegistrationConfigDTO signupConfig) {
-		String modifiedUsername = null;	
+		String modifiedUsername = null;
 		// set tenant specific sign up user storage
-		if (signupConfig != null && !signupConfig.getSignUpDomain().equals("")) {
-			
+		if (signupConfig != null && signupConfig.getSignUpDomain() != null && !signupConfig.getSignUpDomain().equals("")) {
 			int index = username.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
 			/*
-			 * if there is a different domain provided by the user other than one 
+			 * if there is a different domain provided by the user other than one
 			 * given in the configuration, add the correct signup domain. Here signup
 			 * domain refers to the user storage
 			 */
-		
 			if (index > 0) {
 				modifiedUsername =
 						signupConfig.getSignUpDomain().toUpperCase() +
-						UserCoreConstants.DOMAIN_SEPARATOR +
-						username.substring(index + 1);
+								UserCoreConstants.DOMAIN_SEPARATOR +
+								username.substring(index + 1);
 			} else {
 				modifiedUsername =
 						signupConfig.getSignUpDomain().toUpperCase() +
-						UserCoreConstants.DOMAIN_SEPARATOR + username;
+								UserCoreConstants.DOMAIN_SEPARATOR + username;
 			}
 		}
-		
 		return modifiedUsername;
 	}
-
 }
