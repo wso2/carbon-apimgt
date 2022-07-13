@@ -64,6 +64,4 @@ public interface AnalyticsDataProvider {
     String getUserAgentHeader();
 
     String getEndUserIP();
-
-    String getContext();
 }
