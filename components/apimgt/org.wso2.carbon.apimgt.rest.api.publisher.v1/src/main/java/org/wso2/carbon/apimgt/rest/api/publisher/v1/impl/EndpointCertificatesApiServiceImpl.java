@@ -241,8 +241,6 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String sortBy = RestApiConstants.DEFAULT_SORT_CRITERION;
-        String sortOrder = RestApiConstants.DESCENDING_SORT_ORDER;
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         CertificateMetadataDTO certificateMetadataDTO;
@@ -258,15 +256,14 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             String endpoint = certificateMetadataDTO.getEndpoint();
 
             if(endpoint.contains("://")){
-                String[] parts = endpoint.split(":");
+                String[] parts = endpoint.split("://");
                 endpoint = parts[parts.length-1];
             }
 
             String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + endpoint;
-
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            Map<String, Object> searchResult = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, sortBy, sortOrder);
+            Map<String, Object> searchResult = apiProvider.searchPaginatedAPIsByFQDN(query, organization, offset, limit);
 
             Set<API> apis = (Set<API>) searchResult.get("apis");
             allMatchedApis.addAll(apis);

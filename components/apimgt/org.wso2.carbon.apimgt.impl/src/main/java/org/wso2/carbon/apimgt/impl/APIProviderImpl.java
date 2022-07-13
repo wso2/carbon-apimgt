@@ -4737,6 +4737,46 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public Map<String, Object> searchPaginatedAPIsByFQDN(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+        Map<String, Object> result = new HashMap<String, Object>();
+
+        Organization org = new Organization(organization);
+        String[] roles = APIUtil.getFilteredUserRoles("admin");
+        Map<String, Object> properties = APIUtil.getUserProperties("admin");
+        UserContext userCtx = new UserContext("admin", org, properties, roles);
+
+        try {
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
+                    start, end, userCtx, "createdTime", "desc");
+            if (log.isDebugEnabled()) {
+                log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+            }
+            Set<Object> apiSet = new LinkedHashSet<>();
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                List<Object> apiList = new ArrayList<>();
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    populateAPIStatus(mappedAPI);
+                    populateDefaultVersion(mappedAPI);
+                    apiList.add(mappedAPI);
+                }
+                apiSet.addAll(apiList);
+                result.put("apis", apiSet);
+                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("isMore", true);
+            } else {
+                result.put("apis", apiSet);
+                result.put("length", 0);
+                result.put("isMore", false);
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
+        }
+        return result ;
+    }
+
     private void populateAPITier(APIProduct apiProduct) throws APIManagementException {
 
         if (apiProduct.isRevision()) {
