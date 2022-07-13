@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class})
+@PrepareForTest({ServiceReferenceHolder.class, APIUtil.class})
 public class SelfSignupUtilTestCase {
 
     @Test
@@ -108,6 +108,8 @@ public class SelfSignupUtilTestCase {
     public void testGetSignupConfiguration() throws Exception {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.isSubscriberRoleCreationEnabled(Mockito.anyInt())).thenReturn(false);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);

@@ -871,6 +871,8 @@ public final class APIConstants {
     //elements in the configuration file in the registry related to self signup
     public static final String SELF_SIGN_UP_REG_DOMAIN_ELEM = "SignUpDomain";
     public static final String SELF_SIGN_UP_REG_ROLES_ELEM = "SignUpRoles";
+    public static final String SELF_SIGN_UP_DEFAULT_CONFIG_FILE_PATH_OF_THE_CARBON_SUPER_USER = "/signupconfigurations/" +
+            "self-sign-up-config.json";
     public static final String SELF_SIGN_UP_REG_ROLE_ELEM = "SignUpRole";
     public static final String SELF_SIGN_UP_REG_USERNAME = "AdminUserName";
     public static final String SELF_SIGN_UP_REG_PASSWORD = "AdminPassword";

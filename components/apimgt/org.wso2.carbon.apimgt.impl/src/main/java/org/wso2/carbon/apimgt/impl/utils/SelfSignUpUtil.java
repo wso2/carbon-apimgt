@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -25,6 +26,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +52,28 @@ public final class SelfSignUpUtil {
 		Object selfSighupConfigObject = ServiceReferenceHolder.getInstance().getApimConfigService()
 				.getSelfSighupConfig(tenantDomain);
 		if (selfSighupConfigObject instanceof UserRegistrationConfigDTO) {
-			return (UserRegistrationConfigDTO) selfSighupConfigObject;
+			UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
+			int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+			String signUpDomain = selfSighupConfig.getSignUpDomain();
+			if (APIUtil.isSubscriberRoleCreationEnabled(tenantId)) {
+				Iterator<Map.Entry<String, Boolean>> signUpRolesIterator = selfSighupConfig.getRoles().entrySet()
+						.iterator();
+				while (signUpRolesIterator.hasNext()) {
+					Map.Entry<String, Boolean> signUpRole = signUpRolesIterator.next();
+					String roleName = signUpRole.getKey();
+					boolean isExternalRole = signUpRole.getValue();
+					if (roleName != null) {
+						// If isExternalRole==false ;create the subscriber role as an internal role
+						if (isExternalRole && signUpDomain != null) {
+							roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
+						} else {
+							roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + roleName;
+						}
+						APIUtil.createSubscriberRole(roleName, tenantId);
+					}
+				}
+			}
+			return selfSighupConfig;
 		}
 		return new UserRegistrationConfigDTO();
 	}
