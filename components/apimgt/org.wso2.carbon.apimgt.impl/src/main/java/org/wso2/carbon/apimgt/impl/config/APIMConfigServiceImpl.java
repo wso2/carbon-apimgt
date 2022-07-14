@@ -402,7 +402,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                         (JSONObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
             } else {
                 UserRegistrationConfigDTO defaultConfig = new UserRegistrationConfigDTO();
-                defaultConfig.getRoles().add("subscriber"); //remove this
                 return defaultConfig;
             }
         } catch (ParseException e) {
