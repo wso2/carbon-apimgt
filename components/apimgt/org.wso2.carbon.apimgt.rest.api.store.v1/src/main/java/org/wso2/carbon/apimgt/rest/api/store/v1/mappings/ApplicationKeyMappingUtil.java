@@ -49,26 +49,26 @@ public class ApplicationKeyMappingUtil {
      * @param applicationKeyType Key type of the application
      * @return DTO object with application related details
      */
-    @SuppressWarnings("unchecked") public static ApplicationKeyDTO fromApplicationKeyToDTO(
-            Map<String, Object> keyDetails, String applicationKeyType) {
+    @SuppressWarnings("unchecked")
+    public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails, String applicationKeyType) {
         ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
         applicationKeyDTO.setConsumerKey((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_KEY));
         applicationKeyDTO.setKeyMappingId((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID));
-        applicationKeyDTO.setConsumerSecret(
-                (String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_SECRET));
+        applicationKeyDTO
+                .setConsumerSecret((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_SECRET));
         applicationKeyDTO.setKeyState((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_STATE));
         applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(applicationKeyType));
         Object mode = keyDetails.get(APIConstants.FrontEndParameterNames.MODE);
         if (mode != null) {
-            // applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf((String) mode));
+           // applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf((String) mode));
         }
         try {
             String appDetailsString = (String) keyDetails.get(ApplicationConstants.OAUTH_APP_DETAILS);
             if (appDetailsString != null) {
                 JSONObject appDetailsJsonObj = (JSONObject) new JSONParser().parse(appDetailsString);
                 if (appDetailsJsonObj != null) {
-                    String supportedGrantTypes = (String) appDetailsJsonObj.get(
-                            ApplicationConstants.OAUTH_CLIENT_GRANT);
+                    String supportedGrantTypes = (String) appDetailsJsonObj
+                            .get(ApplicationConstants.OAUTH_CLIENT_GRANT);
                     if (supportedGrantTypes != null) {
                         applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(supportedGrantTypes.split(" ")));
                     }
@@ -119,7 +119,7 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
         applicationKeyDTO.setKeyState(apiKey.getState());
-        // applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf(apiKey.getCreateMode()));
+      //  applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf(apiKey.getCreateMode()));
         applicationKeyDTO.setKeyManager(apiKey.getKeyManager());
         applicationKeyDTO.setKeyMappingId(apiKey.getMappingId());
         if (apiKey.getGrantTypes() != null) {
@@ -140,7 +140,7 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime) {
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityTime(validityTime);

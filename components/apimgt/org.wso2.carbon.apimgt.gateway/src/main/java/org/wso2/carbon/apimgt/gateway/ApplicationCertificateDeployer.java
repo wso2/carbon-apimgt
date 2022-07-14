@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -51,7 +51,7 @@ public class ApplicationCertificateDeployer {
     private final EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfiguration().getEventHubConfigurationDto();
     private String baseURL = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
-
+    private boolean debugEnabled = log.isDebugEnabled();
     public ApplicationCertificateDeployer(String tenantDomain) {
 
         this.tenantDomain = tenantDomain;
@@ -63,7 +63,9 @@ public class ApplicationCertificateDeployer {
 
         try (CloseableHttpResponse closeableHttpResponse = invokeService(endpoint, tenantDomain)) {
             retrieveCertificatesAndDeploy(closeableHttpResponse);
-
+            if (debugEnabled) {
+                log.debug("Application certificates are deployed in the gateway");
+            }
         } catch (IOException | ArtifactSynchronizerException e) {
             throw new APIManagementException("Error while inserting certificates into truststore", e);
         }
@@ -71,13 +73,13 @@ public class ApplicationCertificateDeployer {
 
     public void deployCertificate(String uuid) throws APIManagementException {
 
-      //  String applicationIdd = String.valueOf(applicationId);
-
-        String endpoint = baseURL + APIConstants.APPLICATION_CERTIFICATE_RETRIEVAL.concat("?uuid=")
-                .concat(uuid);
+        String endpoint = baseURL + APIConstants.APPLICATION_CERTIFICATE_RETRIEVAL.concat("?uuid=").concat(uuid);
 
         try (CloseableHttpResponse closeableHttpResponse = invokeService(endpoint, tenantDomain)) {
             retrieveCertificatesAndDeploy(closeableHttpResponse);
+            if (debugEnabled) {
+                log.debug("Certificate with " + uuid + "is deployed in the gateway");
+            }
 
         } catch (IOException | ArtifactSynchronizerException e) {
             throw new APIManagementException("Error while inserting certificates into truststore", e);
