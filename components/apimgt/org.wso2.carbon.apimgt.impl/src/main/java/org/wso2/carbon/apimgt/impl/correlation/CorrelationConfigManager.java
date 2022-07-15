@@ -136,13 +136,6 @@ public class CorrelationConfigManager {
             CorrelationLogConfig correlationLogConfig = new CorrelationLogConfig(configEnable,
                     configComponentNames.toArray(new String[configComponentNames.size()]), configDeniedThreads);
             CorrelationLogHolder.getInstance().setCorrelationLogServiceConfigs(correlationLogConfig);
-
-//            CorrelationLogConfigurable service =
-//                    CorrelationLogHolder.getInstance().getLogServiceInstance(componentName);
-//            if (service != null) {
-//                service.onConfigure(
-//                        new ImmutableCorrelationLogConfig(Boolean.parseBoolean(enabled), deniedThreads, false));
-//            }
         }
     }
 

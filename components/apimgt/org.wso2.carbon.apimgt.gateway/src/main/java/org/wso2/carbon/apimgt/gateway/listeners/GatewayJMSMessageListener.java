@@ -45,7 +45,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.CorrelationConfigEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
@@ -297,12 +296,6 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.UDATE_API_LOG_LEVEL.toString().equals(eventType)) {
             APIEvent apiEvent = new Gson().fromJson(eventJson, APIEvent.class);
             APILoggerManager.getInstance().updateLoggerMap(apiEvent.getApiContext(), apiEvent.getLogLevel());
-
-        } else if (EventType.UPDATE_CORRELATION_CONFIGS.toString().equals(eventType)) {
-            CorrelationConfigEvent correlationConfigEvent  =
-                    new Gson().fromJson(eventJson, CorrelationConfigEvent.class);
-//            CorrelationConfigManager.getInstance().updateCorrelationConfigs(
-//                    correlationConfigEvent.getCorrelationConfigDTOList());
         }
     }
 

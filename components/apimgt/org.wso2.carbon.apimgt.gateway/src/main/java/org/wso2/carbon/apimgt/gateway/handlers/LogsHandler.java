@@ -44,8 +44,6 @@ import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataH
  */
 public class LogsHandler extends AbstractSynapseHandler {
     private static final Log log = LogFactory.getLog(APIConstants.CORRELATION_LOGGER);
-    private static boolean isEnabled = false;
-    private static boolean isSet = false;
     private String apiTo = null;
 
     private static final String AUTH_HEADER = "AUTH_HEADER";
@@ -71,13 +69,6 @@ public class LogsHandler extends AbstractSynapseHandler {
     }
 
     private boolean isEnabled() {
-        if (!isSet) {
-            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
-            if (config != null && !config.equals("")) {
-                isEnabled = Boolean.parseBoolean(config);
-                isSet = true;
-            }
-        }
         return MethodCallsCorrelationConfigDataHolder.isEnable();
     }
 
