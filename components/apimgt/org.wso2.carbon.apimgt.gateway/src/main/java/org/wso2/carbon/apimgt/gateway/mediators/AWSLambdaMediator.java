@@ -246,12 +246,16 @@ public class AWSLambdaMediator extends AbstractMediator {
                     .getObject(roleSessionName, Credentials.class);
             if (previousCredentialsObject != null) {
                 sessionCredentials = (Credentials) previousCredentialsObject;
-                long expirationTime = sessionCredentials.getExpiration().getTime();
-                long currentTime = System.currentTimeMillis();
-                long timeDifference = expirationTime - currentTime;
-                if (timeDifference > 1000) {
-                    return sessionCredentials;
-                }
+            }
+        } else {
+            sessionCredentials = CredentialsCache.getInstance().getCredentialsMap().get(roleSessionName);
+        }
+        if (sessionCredentials != null) {
+            long expirationTime = sessionCredentials.getExpiration().getTime();
+            long currentTime = System.currentTimeMillis();
+            long timeDifference = expirationTime - currentTime;
+            if (timeDifference > 1000) {
+                return sessionCredentials;
             }
         }
         AWSSecurityTokenService awsSTSClient;
@@ -273,6 +277,8 @@ public class AWSLambdaMediator extends AbstractMediator {
         if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
             new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
                     .addObject(roleSessionName, sessionCredentials);
+        } else {
+            CredentialsCache.getInstance().getCredentialsMap().put(roleSessionName, sessionCredentials);
         }
         return sessionCredentials;
     }
