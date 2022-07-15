@@ -208,7 +208,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     new GatewayJMSMessageListener());
             copyTenantArtifacts();
             APILoggerManager.getInstance().initializeAPILoggerList();
-            // CorrelationConfigManager.getInstance().initializeCorrelationComponentList();
         } else {
             log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
         }

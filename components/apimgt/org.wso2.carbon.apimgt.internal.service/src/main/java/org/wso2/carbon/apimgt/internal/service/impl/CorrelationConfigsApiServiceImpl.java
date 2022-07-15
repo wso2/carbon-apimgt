@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.CorrelationComponentPropertyD
 import org.wso2.carbon.apimgt.internal.service.dto.CorrelationComponentsListDTO;
 
 /**
- * Correlation Configs Internal Service Implementation
+ * Correlation Configs Internal Service Implementation.
  */
 public class CorrelationConfigsApiServiceImpl implements CorrelationConfigsApiService {
     private static final Log log = LogFactory.getLog(CorrelationConfigsApiServiceImpl.class);
