@@ -89,7 +89,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1003,11 +1002,10 @@ public class PublisherCommonUtils {
         String context = body.getContext();
         //Make sure context starts with "/". ex: /pizza
         context = context.startsWith("/") ? context : ("/" + context);
-        String providerDomain = MultitenantUtils.getTenantDomain(username);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
-                !context.contains("/t/" + providerDomain)) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(organization) &&
+                !context.contains("/t/" + organization)) {
             //Create tenant aware context for API
-            context = "/t/" + providerDomain + context;
+            context = "/t/" + organization + context;
         }
         body.setContext(context);
 
