@@ -78,7 +78,7 @@ public class ApplicationCertificateDeployer {
         try (CloseableHttpResponse closeableHttpResponse = invokeService(endpoint, tenantDomain)) {
             retrieveCertificatesAndDeploy(closeableHttpResponse);
             if (debugEnabled) {
-                log.debug("Certificate with " + uuid + "is deployed in the gateway");
+                log.debug("Certificate with " + uuid + "is successfully deployed in the gateway");
             }
 
         } catch (IOException | ArtifactSynchronizerException e) {
