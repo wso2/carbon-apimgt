@@ -42,9 +42,8 @@ import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigPropertyDTO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.logging.correlation.CorrelationLogConfigurable;
-import org.wso2.carbon.logging.correlation.bean.ImmutableCorrelationLogConfig;
-import org.wso2.carbon.logging.correlation.internal.CorrelationLogManager;
+import org.wso2.carbon.logging.correlation.bean.CorrelationLogConfig;
+import org.wso2.carbon.logging.correlation.utils.CorrelationLogHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
@@ -115,22 +114,35 @@ public class CorrelationConfigManager {
     }
 
     public void updateCorrelationConfigs(List<CorrelationConfigDTO> correlationConfigDTOList) {
+
+        boolean configEnable = true;
+        List<String> configComponentNames = new ArrayList<>();
+        String[] configDeniedThreads = new String[0];
         for (CorrelationConfigDTO correlationConfigDTO : correlationConfigDTOList) {
             String componentName = correlationConfigDTO.getName();
             String enabled = correlationConfigDTO.getEnabled();
+            if (Boolean.parseBoolean(enabled)) {
+                configComponentNames.add(componentName);
+            }
             List<CorrelationConfigPropertyDTO> correlationConfigPropertyDTOList = correlationConfigDTO.getProperties();
             String[] deniedThreads = new String[0];
             for (CorrelationConfigPropertyDTO correlationConfigPropertyDTO : correlationConfigPropertyDTOList) {
                 if (correlationConfigPropertyDTO.getName().equals(DENIED_THREADS)) {
                     deniedThreads = correlationConfigPropertyDTO.getValue();
+                    configDeniedThreads = deniedThreads;
                 }
             }
 
-            CorrelationLogConfigurable service = CorrelationLogManager.getLogServiceInstance(componentName);
-            if (service != null) {
-                service.onConfigure(
-                        new ImmutableCorrelationLogConfig(Boolean.parseBoolean(enabled), deniedThreads, false));
-            }
+            CorrelationLogConfig correlationLogConfig = new CorrelationLogConfig(configEnable,
+                    configComponentNames.toArray(new String[configComponentNames.size()]), configDeniedThreads);
+            CorrelationLogHolder.getInstance().setCorrelationLogServiceConfigs(correlationLogConfig);
+
+//            CorrelationLogConfigurable service =
+//                    CorrelationLogHolder.getInstance().getLogServiceInstance(componentName);
+//            if (service != null) {
+//                service.onConfigure(
+//                        new ImmutableCorrelationLogConfig(Boolean.parseBoolean(enabled), deniedThreads, false));
+//            }
         }
     }
 

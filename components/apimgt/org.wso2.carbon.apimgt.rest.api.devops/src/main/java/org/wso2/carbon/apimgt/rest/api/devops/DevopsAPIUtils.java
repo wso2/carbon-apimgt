@@ -30,9 +30,6 @@ import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentsListDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.LoggingApiOutputDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.LoggingApiOutputListDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentPropertyDTO;
-import org.wso2.carbon.logging.correlation.CorrelationLogConfigurable;
-import org.wso2.carbon.logging.correlation.bean.ImmutableCorrelationLogConfig;
-import org.wso2.carbon.logging.correlation.internal.CorrelationLogManager;
 
 /**
  * Devops util functions.
@@ -40,8 +37,7 @@ import org.wso2.carbon.logging.correlation.internal.CorrelationLogManager;
 public class DevopsAPIUtils {
 
     public static final String[] CORRELATION_DEFAULT_COMPONENTS = { "http", "ldap", "jdbc", "synapse", "method-calls" };
-    public static final String JDBC_COMPONENT_NAME = "jdbc";
-    public static final String DENIED_THREADS_NAME = "deniedThreads";
+
 
     public static boolean validateLogLevel(String logLevel) {
 
@@ -84,22 +80,6 @@ public class DevopsAPIUtils {
         return null;
     }
 
-    public static CorrelationComponentDTO getCorrelationComponentDTO(String componentName) {
-        CorrelationComponentDTO correlationComponentDTO = new CorrelationComponentDTO();
-        CorrelationLogConfigurable service = CorrelationLogManager.getLogServiceInstance(componentName);
-        ImmutableCorrelationLogConfig config = service.getConfiguration();
-        correlationComponentDTO.setName(componentName);
-        correlationComponentDTO.setEnabled(Boolean.toString(config.isEnable()));
-        if (componentName.equals(JDBC_COMPONENT_NAME)) {
-            CorrelationComponentPropertyDTO propertyDTO = new CorrelationComponentPropertyDTO();
-            propertyDTO.setName(DENIED_THREADS_NAME);
-            propertyDTO.setValue(Arrays.asList(config.getDeniedThreads()));
-            List<CorrelationComponentPropertyDTO> properties = new ArrayList<>();
-            properties.add(propertyDTO);
-            correlationComponentDTO.setProperties(properties);
-        }
-        return correlationComponentDTO;
-    }
 
     public static CorrelationComponentsListDTO getCorrelationComponentsList(
             List<CorrelationConfigDTO> correlationConfigDTOList) {
