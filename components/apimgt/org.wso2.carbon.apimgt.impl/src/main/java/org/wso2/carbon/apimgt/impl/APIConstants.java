@@ -1885,7 +1885,8 @@ public final class APIConstants {
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
-            "SSE", "ASYNC"};
+            "SSE", "ASYN" +
+            "C"};
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 

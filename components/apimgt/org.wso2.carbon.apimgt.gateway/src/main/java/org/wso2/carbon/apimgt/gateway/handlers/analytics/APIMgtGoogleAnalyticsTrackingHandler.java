@@ -81,19 +81,17 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         TelemetryTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
         if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy()) {
-                TracingSpan responseLatencySpan =
-                        (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-                tracingTracer = Util.getGlobalTracer();
-                tracingSpan = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
-                        tracingTracer);
-            } else {
-                TelemetrySpan responseLatencySpan =
-                        (TelemetrySpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-                tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
-                span = TelemetryUtil.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
-                        tracer);
-            }
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
+            span = TelemetryUtil.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
+                    tracer);
+        } else if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            tracingTracer = Util.getGlobalTracer();
+            tracingSpan = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan,
+                    tracingTracer);
         }
         try {
             if (configKey == null) {
@@ -136,8 +134,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 return true;
             }
             try {
-                if (TelemetryUtil.telemetryEnabled()) {
-                    if (Util.legacy()) {
+                if (TelemetryUtil.telemetryEnabled() || Util.tracingEnabled()) {
+                    if (Util.tracingEnabled()) {
                         Util.inject(tracingSpan, tracingTracer, tracerSpecificCarrier);
                     } else {
                         TelemetryUtil.inject(span, tracerSpecificCarrier);
@@ -158,10 +156,10 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             return true;
         } catch (Exception e) {
             if (TelemetryUtil.telemetryEnabled()) {
-                if (Util.legacy() && tracingSpan != null) {
+                if (Util.tracingEnabled() && tracingSpan != null) {
                     Util.setTag(tracingSpan, APIMgtGatewayConstants.ERROR,
                             APIMgtGatewayConstants.GOOGLE_ANALYTICS_ERROR);
-                } else if (!Util.legacy() && span != null) {
+                } else if (!Util.tracingEnabled() && span != null) {
                     TelemetryUtil.setTag(span, APIMgtGatewayConstants.ERROR,
                             APIMgtGatewayConstants.GOOGLE_ANALYTICS_ERROR);
                 }
@@ -169,11 +167,9 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             throw e;
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
-                if (Util.legacy()) {
-                    Util.finishSpan(tracingSpan);
-                } else {
-                    TelemetryUtil.finishSpan(span);
-                }
+                TelemetryUtil.finishSpan(span);
+            } else if (Util.tracingEnabled()) {
+                Util.finishSpan(tracingSpan);
             }
         }
     }
