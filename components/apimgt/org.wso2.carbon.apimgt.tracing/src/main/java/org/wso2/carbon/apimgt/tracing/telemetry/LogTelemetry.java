@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.tracing.telemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -67,7 +67,7 @@ public class LogTelemetry implements APIMOpenTelemetry {
 
             openTelemetry = OpenTelemetrySdk.builder()
                     .setTracerProvider(sdkTracerProvider)
-                    .setPropagators(ContextPropagators.create(B3Propagator.injectingMultiHeaders()))
+                    .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                     .build();
 
             if (log.isDebugEnabled()) {
