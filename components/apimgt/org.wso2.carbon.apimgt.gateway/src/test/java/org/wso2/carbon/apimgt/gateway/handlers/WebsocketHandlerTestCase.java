@@ -178,7 +178,7 @@ public class WebsocketHandlerTestCase {
         //close connection error
         responseDTO.setError(true);
         responseDTO.setCloseConnection(true);
-        websocketHandler.write(channelHandlerContext, msg, channelPromise);
+        websocketHandler.write(channelHandlerContext, msg.retain(), channelPromise);
         Assert.assertFalse(InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
                 .containsKey(channelIdString));  // Closing connection error has occurred
 
