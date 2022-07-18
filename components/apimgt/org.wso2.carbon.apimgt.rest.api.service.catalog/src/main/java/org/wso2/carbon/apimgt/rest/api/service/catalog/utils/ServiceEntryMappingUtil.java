@@ -82,8 +82,8 @@ public class ServiceEntryMappingUtil {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             service = mapper.readValue(file, ServiceEntry.class);
-            if (StringUtils.isBlank(service.getKey())) {
-                service.setKey(generateServiceKey(service));
+            if (StringUtils.isBlank(service.getServiceKey())) {
+                service.setServiceKey(generateServiceKey(service));
             }
         } catch (InvalidFormatException e) {
             RestApiUtil.handleBadRequest("One or more parameters contain disallowed values", e, log);
@@ -116,7 +116,7 @@ public class ServiceEntryMappingUtil {
                 try {
                     serviceInfo = fromFileToServiceEntry(metadataFile, serviceInfo);
                     serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(metadataFile)));
-                    key = serviceInfo.getKey();
+                    key = serviceInfo.getServiceKey();
                     serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(definitionFile)));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while reading service resource files. " +
@@ -186,7 +186,7 @@ public class ServiceEntryMappingUtil {
 
         serviceInfoDTO.setId(serviceEntry.getUuid());
         serviceInfoDTO.setName(serviceEntry.getName());
-        serviceInfoDTO.setKey(serviceEntry.getKey());
+        serviceInfoDTO.setKey(serviceEntry.getServiceKey());
         serviceInfoDTO.setVersion(serviceEntry.getVersion());
         serviceInfoDTO.setMd5(serviceEntry.getMd5());
 
@@ -199,7 +199,7 @@ public class ServiceEntryMappingUtil {
         serviceDTO.setName(service.getName());
         serviceDTO.setVersion(service.getVersion());
         serviceDTO.setMd5(service.getMd5());
-        serviceDTO.setServiceKey(service.getKey());
+        serviceDTO.setServiceKey(service.getServiceKey());
         if (!shrink) {
             serviceDTO.setServiceUrl(service.getServiceUrl());
             serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType()
@@ -351,9 +351,10 @@ public class ServiceEntryMappingUtil {
             return StringUtils.EMPTY;
         }
 
-        List<String> definitionTypeList = Arrays.asList(Stream.of(ServiceEntry.DefinitionType.values()).map(ServiceEntry.DefinitionType::name).toArray(String[]::new));
-        if (!definitionTypeList.contains(definitionType)) {
-            RestApiUtil.handleBadRequest("Error while retrieving the Services with invalid definition type " + definitionType, log);
+        try {
+            ServiceEntry.DefinitionType.valueOf(definitionType);
+        } catch (IllegalArgumentException e) {
+            RestApiUtil.handleBadRequest("Error while retrieving the Services with invalid definition type " + definitionType, e, log);
         }
 
         return definitionType;

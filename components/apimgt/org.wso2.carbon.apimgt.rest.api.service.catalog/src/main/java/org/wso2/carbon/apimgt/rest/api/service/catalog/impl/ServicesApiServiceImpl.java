@@ -282,7 +282,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 }
                 if (overwrite) {
                     if (StringUtils.isNotEmpty(verifier) && validationResults
-                            .containsKey(service.getKey()) && !validationResults.get(service.getKey())) {
+                            .containsKey(service.getServiceKey()) && !validationResults.get(service.getServiceKey())) {
                         serviceListToIgnore.add(service);
                     } else {
                         serviceListToImport.add(service);
@@ -328,7 +328,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                         "existing service", log);
             }
             for (ServiceEntry service : importedServiceList) {
-                retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
+                retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getServiceKey(), tenantId));
             }
             serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(retrievedServiceList);
             return Response.ok().entity(ServiceEntryMappingUtil
@@ -412,7 +412,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
                         .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, StringUtils.EMPTY)).build();
             }
-            if (!existingService.getKey().equals(service.getKey()) || !existingService.getName().equals(service
+            if (!existingService.getServiceKey().equals(service.getServiceKey()) || !existingService.getName().equals(service
                 .getName()) || !existingService.getDefinitionType().equals(service.getDefinitionType()) ||
                     !existingService.getVersion().equals(service.getVersion())) {
                 RestApiUtil.handleBadRequest("Cannot update the name or version or key or definition type of an " +
@@ -441,9 +441,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             ServiceEntry service = serviceCatalog.getServiceByKey(verifierJson.get("key").toString(), tenantId);
             if (service != null) {
                 if (service.getMd5().equals(verifierJson.get("md5").toString())) {
-                    validationResults.put(service.getKey(), true);
+                    validationResults.put(service.getServiceKey(), true);
                 } else {
-                    validationResults.put(service.getKey(), false);
+                    validationResults.put(service.getServiceKey(), false);
                 }
             }
         }

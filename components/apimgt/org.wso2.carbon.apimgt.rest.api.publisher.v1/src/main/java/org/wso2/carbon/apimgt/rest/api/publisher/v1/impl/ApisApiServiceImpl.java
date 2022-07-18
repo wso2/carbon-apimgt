@@ -4502,7 +4502,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiDto.setType(APIDTO.TypeEnum.fromValue("SOAP"));
                 API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto,
                         RestApiCommonUtil.getLoggedInUserProvider(), username, organization);
-                apiToAdd.setServiceInfo("key", service.getKey());
+                apiToAdd.setServiceInfo("key", service.getServiceKey());
                 apiToAdd.setServiceInfo("md5", service.getMd5());
                 apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
                         .getServiceUrl(), null));
@@ -4555,7 +4555,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             JSONObject serviceInfo = new JSONObject();
             serviceInfo.put("name", service.getName());
             serviceInfo.put("version", service.getVersion());
-            serviceInfo.put("key", service.getKey());
+            serviceInfo.put("key", service.getServiceKey());
             serviceInfo.put("md5", service.getMd5());
             api.setServiceInfo(serviceInfo);
             Map validationResponseMap = new HashMap();
@@ -4654,7 +4654,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         if (isServiceAPI) {
-            apiToAdd.setServiceInfo("key", service.getKey());
+            apiToAdd.setServiceInfo("key", service.getServiceKey());
             apiToAdd.setServiceInfo("md5", service.getMd5());
             apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
                     .getServiceUrl(), null));
