@@ -1643,6 +1643,32 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
         //Unused method
+        GenericArtifactManager artifactManager = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+
+            if (GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry) != null) {
+                artifactManager = new GenericArtifactManager(registry, APIConstants.API_KEY);
+                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            } else {
+                log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + APIConstants.API_KEY +
+                        ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
+                        ", Tenant domain set in PrivilegedCarbonContext: " +
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            }
+
+        } catch (GovernanceException e) {
+            throw new APIPersistenceException("Error while changing the lifecycle. ", e);
+        } catch (RegistryException e) {
+            throw new APIPersistenceException("Error while accessing the registry. ", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     @Override
