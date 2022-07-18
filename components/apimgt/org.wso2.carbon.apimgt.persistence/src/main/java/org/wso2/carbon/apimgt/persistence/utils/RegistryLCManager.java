@@ -50,6 +50,7 @@ public class RegistryLCManager {
 
     public RegistryLCManager(int tenantId)
             throws RegistryException, XMLStreamException, ParserConfigurationException, SAXException, IOException {
+
         UserRegistry registry;
 
         JSONObject jsonObject = getDefaultLCConfigJSON();
@@ -113,58 +114,58 @@ public class RegistryLCManager {
 
         //Created State
         JSONObject createdState = new JSONObject();
-        createdState.put("State","Created");
+        createdState.put("State", "Created");
         JSONArray transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Publish","Published"));
-        transitionArray.add(getTransitionObj("Deploy as a Prototype","Prototyped"));
-        createdState.put("Transitions",transitionArray);
-        createdState.put("CheckItems",getCheckItemsArray(
+        transitionArray.add(getTransitionObj("Publish", "Published"));
+        transitionArray.add(getTransitionObj("Deploy as a Prototype", "Prototyped"));
+        createdState.put("Transitions", transitionArray);
+        createdState.put("CheckItems", getCheckItemsArray(
                 new String[]{
                         "Deprecate old versions after publishing the API",
                         "Requires re-subscription when publishing the API"}));
 
         //Prototyped State
         JSONObject prototypedState = new JSONObject();
-        prototypedState.put("State","Prototyped");
+        prototypedState.put("State", "Prototyped");
         transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Publish","Published"));
-        transitionArray.add(getTransitionObj("Demote to Created","Created"));
-        transitionArray.add(getTransitionObj("Deploy as a Prototype","Prototyped"));
-        prototypedState.put("Transitions",transitionArray);
-        prototypedState.put("CheckItems",getCheckItemsArray(
+        transitionArray.add(getTransitionObj("Publish", "Published"));
+        transitionArray.add(getTransitionObj("Demote to Created", "Created"));
+        transitionArray.add(getTransitionObj("Deploy as a Prototype", "Prototyped"));
+        prototypedState.put("Transitions", transitionArray);
+        prototypedState.put("CheckItems", getCheckItemsArray(
                 new String[]{
                         "Deprecate old versions after publishing the API",
                         "Requires re-subscription when publishing the API"}));
 
         //Published State
         JSONObject publishedState = new JSONObject();
-        publishedState.put("State","Published");
+        publishedState.put("State", "Published");
         transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Block","Blocked"));
-        transitionArray.add(getTransitionObj("Deploy as a Prototype","Prototyped"));
-        transitionArray.add(getTransitionObj("Demote to Created","Created"));
-        transitionArray.add(getTransitionObj("Deprecate","Deprecated"));
-        transitionArray.add(getTransitionObj("Publish","Published"));
-        publishedState.put("Transitions",transitionArray);
+        transitionArray.add(getTransitionObj("Block", "Blocked"));
+        transitionArray.add(getTransitionObj("Deploy as a Prototype", "Prototyped"));
+        transitionArray.add(getTransitionObj("Demote to Created", "Created"));
+        transitionArray.add(getTransitionObj("Deprecate", "Deprecated"));
+        transitionArray.add(getTransitionObj("Publish", "Published"));
+        publishedState.put("Transitions", transitionArray);
 
         //Blocked State
         JSONObject blockedState = new JSONObject();
-        blockedState.put("State","Blocked");
+        blockedState.put("State", "Blocked");
         transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Deprecate","Deprecated"));
-        transitionArray.add(getTransitionObj("Re-Publish","Published"));
-        blockedState.put("Transitions",transitionArray);
+        transitionArray.add(getTransitionObj("Deprecate", "Deprecated"));
+        transitionArray.add(getTransitionObj("Re-Publish", "Published"));
+        blockedState.put("Transitions", transitionArray);
 
         //Deprecated State
         JSONObject deprecatedState = new JSONObject();
-        deprecatedState.put("State","Deprecated");
+        deprecatedState.put("State", "Deprecated");
         transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Retire","Retired"));
-        deprecatedState.put("Transitions",transitionArray);
+        transitionArray.add(getTransitionObj("Retire", "Retired"));
+        deprecatedState.put("Transitions", transitionArray);
 
         //Retired State
         JSONObject retiredState = new JSONObject();
-        retiredState.put("State","Retired");
+        retiredState.put("State", "Retired");
 
         //Adding the all State info objects to statesArray
         statesArray.add(createdState);
@@ -174,21 +175,23 @@ public class RegistryLCManager {
         statesArray.add(deprecatedState);
         statesArray.add(retiredState);
 
-        LCConfigObj.put("States",statesArray);
+        LCConfigObj.put("States", statesArray);
 
         return LCConfigObj;
     }
 
-    public JSONObject getTransitionObj(String event,String target){
+    public JSONObject getTransitionObj(String event, String target) {
+
         JSONObject transitionObj = new JSONObject();
-        transitionObj.put("Event",event);
-        transitionObj.put("Target",target);
+        transitionObj.put("Event", event);
+        transitionObj.put("Target", target);
         return transitionObj;
     }
 
-    public JSONArray getCheckItemsArray(String[] checkItems){
+    public JSONArray getCheckItemsArray(String[] checkItems) {
+
         JSONArray checkItemsArray = new JSONArray();
-        for(String checkItem:checkItems){
+        for (String checkItem : checkItems) {
             checkItemsArray.add(checkItem);
         }
         return checkItemsArray;
