@@ -26,6 +26,7 @@ public class OperationPolicyDataDTO   {
     private String category = null;
     private String id = null;
     private String name = null;
+    private String version = null;
     private String displayName = null;
     private String description = null;
     private List<String> applicableFlows = new ArrayList<String>();
@@ -84,6 +85,23 @@ public class OperationPolicyDataDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public OperationPolicyDataDTO version(String version) {
+    this.version = version;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "v1", value = "")
+  @JsonProperty("version")
+  public String getVersion() {
+    return version;
+  }
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   /**
@@ -236,6 +254,7 @@ public class OperationPolicyDataDTO   {
     return Objects.equals(category, operationPolicyData.category) &&
         Objects.equals(id, operationPolicyData.id) &&
         Objects.equals(name, operationPolicyData.name) &&
+        Objects.equals(version, operationPolicyData.version) &&
         Objects.equals(displayName, operationPolicyData.displayName) &&
         Objects.equals(description, operationPolicyData.description) &&
         Objects.equals(applicableFlows, operationPolicyData.applicableFlows) &&
@@ -248,7 +267,7 @@ public class OperationPolicyDataDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(category, id, name, displayName, description, applicableFlows, supportedGateways, supportedApiTypes, isAPISpecific, md5, policyAttributes);
+    return Objects.hash(category, id, name, version, displayName, description, applicableFlows, supportedGateways, supportedApiTypes, isAPISpecific, md5, policyAttributes);
   }
 
   @Override
@@ -259,6 +278,7 @@ public class OperationPolicyDataDTO   {
     sb.append("    category: ").append(toIndentedString(category)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    applicableFlows: ").append(toIndentedString(applicableFlows)).append("\n");

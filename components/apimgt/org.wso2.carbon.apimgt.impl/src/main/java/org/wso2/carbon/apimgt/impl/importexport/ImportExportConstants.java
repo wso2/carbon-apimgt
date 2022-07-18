@@ -68,6 +68,10 @@ public final class ImportExportConstants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YAML_EXTENSION = ".yaml";
 
+    public static final String SYNAPSE_EXTENSION = ".j2";
+
+    public static final String CHOREO_CONNECT_EXTENSION = ".gotmpl";
+
     // Image resource
     public static final String IMAGE_RESOURCE = "Image";
 
@@ -94,6 +98,8 @@ public final class ImportExportConstants {
 
     public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
 
+    public static final String UPLOAD_POLICY_FILE_NAME = "PolicyArchive.zip";
+
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "swagger.json";
@@ -115,6 +121,10 @@ public final class ImportExportConstants {
 
     // Name of the API name element tag of the api.json file
     public static final String API_NAME_ELEMENT = "name";
+
+    public static final String OPERATION_POLICY_TYPE = "type";
+
+    public static final String DEFAULT_OPERATION_POLICY_TYPE = "operation_policy_specification";
 
     // Name of the API version element tag of the api.json file
     public static final String VERSION_ELEMENT = "version";
