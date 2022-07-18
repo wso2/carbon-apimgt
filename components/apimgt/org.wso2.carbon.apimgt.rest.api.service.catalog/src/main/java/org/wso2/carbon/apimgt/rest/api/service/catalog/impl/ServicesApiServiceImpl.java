@@ -115,16 +115,27 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
+            ServiceEntry existingService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
             List<API> usedAPIs = serviceCatalog.getServiceUsage(serviceId, tenantId);
             if (usedAPIs != null && usedAPIs.size() > 0 ) {
                 String message = "Cannot remove the Service as it is used by one or more APIs";
                 RestApiUtil.handleConflict(message, log);
             }
+
+            String uuid = existingService.getUuid();
+            if (uuid == null) {
+                RestApiUtil.handleResourceNotFoundError("Service not found for service with ID: "
+                        + serviceId, log);
+            }
             serviceCatalog.deleteService(serviceId, tenantId);
             return Response.noContent().build();
         } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
+            }
             String errorMessage = "Error while deleting the service with key " + serviceId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+
         }
         return null;
     }
@@ -161,7 +172,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedFileName + "\"");
                 return responseBuilder.build();
             } else {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                String errorMsg = "Requested resource with name " + name + " and version " + version +" not found";
+                return Response.status(Response.Status.NOT_FOUND).entity(getErrorDTO(RestApiConstants
+                        .STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L, errorMsg, StringUtils.EMPTY)).type(MediaType.APPLICATION_JSON_TYPE).build();
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while exporting Services: " + archiveName, e, log);
