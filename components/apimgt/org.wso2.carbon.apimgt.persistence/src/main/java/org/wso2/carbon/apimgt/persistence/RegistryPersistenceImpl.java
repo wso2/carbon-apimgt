@@ -158,8 +158,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
-            //Attach the API lifecycle
-            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = RegistryPersistenceUtil.getAPIProviderPath(api.getId());
             //provider ------provides----> API
@@ -1647,7 +1645,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return result;
     }
-    
+
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
         GenericArtifactManager artifactManager = null;
@@ -1660,9 +1658,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry) != null) {
                 artifactManager = new GenericArtifactManager(registry, APIConstants.API_KEY);
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
-                String action = LCManagerFactory.getInstance().getLCManager()
-                        .getTransitionAction(apiArtifact.getLifecycleState().toUpperCase(), status.toUpperCase());
-                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
             } else {
                 log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + APIConstants.API_KEY +
                         ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
@@ -1674,14 +1669,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException("Error while changing the lifecycle. ", e);
         } catch (RegistryException e) {
             throw new APIPersistenceException("Error while accessing the registry. ", e);
-        } catch (PersistenceException e) {
-            throw new APIPersistenceException("Error while accessing the lifecycle. ", e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        
+
     }
 
     @Override

@@ -17,15 +17,12 @@
  */
 package org.wso2.carbon.apimgt.persistence.utils;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
@@ -33,12 +30,8 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.util.SecurityManager;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.xml.sax.SAXException;
@@ -59,77 +52,146 @@ public class RegistryLCManager {
             throws RegistryException, XMLStreamException, ParserConfigurationException, SAXException, IOException {
         UserRegistry registry;
 
-        registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
-        String data = CommonUtil.getLifecycleConfiguration("APILifeCycle", registry);
-        DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
-        Document doc = builder.parse(inputStream);
-        Element root = doc.getDocumentElement();
+        JSONObject jsonObject = getDefaultLCConfigJSON();
+        JSONArray states = (JSONArray) jsonObject.get("States");
 
-        // Get all nodes with state
-        NodeList states = root.getElementsByTagName("state");
-        int nStates = states.getLength();
-        for (int i = 0; i < nStates; i++) {
-            Node node = states.item(i);
-            Node id = node.getAttributes().getNamedItem("id");
-            if (id != null && !id.getNodeValue().isEmpty()) {
-                LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
-                List<String> actions = new ArrayList<String>();
-                List<String> checklistItems = new ArrayList<String>();
-                NodeList stateChiledNodes = node.getChildNodes();
-                int nTransitions = stateChiledNodes.getLength();
-                for (int j = 0; j < nTransitions; j++) {
-                    Node transition = stateChiledNodes.item(j);
-                    // Add transitions
-                    if ("transition".equals(transition.getNodeName())) {
-                        Node target = transition.getAttributes().getNamedItem("target");
-                        Node action = transition.getAttributes().getNamedItem("event");
-                        if (id.getNodeValue().equals(STATE_ID_PROTOTYPED)
-                                && (target.getNodeValue().equals(TRANSITION_TARGET_PROTOTYPED)
-                                )) {
-                            // skip adding "Publish" and "Deploy as a Prototype" transitions as having those transitions
-                            // in Prototyped state is invalid
-                        } else if (id.getNodeValue().equals(STATE_ID_PUBLISHED)
-                                && target.getNodeValue().equals(TRANSITION_TARGET_PUBLISHED)) {
-                            // skip adding "Publish" transition as having this transition in Published state is invalid
-                        } else {
-                            if (target != null && action != null) {
-                                lifeCycleTransition.addTransition(target.getNodeValue().toUpperCase(),
-                                        action.getNodeValue());
-                                stateTransitionMap.put(action.getNodeValue(), target.getNodeValue().toUpperCase());
-                                actions.add(action.getNodeValue());
-                            }
-                        }
-                    }
-                    if ("datamodel".equals(transition.getNodeName())) {
-                        NodeList datamodels = transition.getChildNodes();
-                        int nDatamodel = datamodels.getLength();
-                        for (int k = 0; k < nDatamodel; k++) {
-                            Node dataNode = datamodels.item(k);
-                            if (dataNode != null && dataNode.getAttributes() != null && "checkItems"
-                                    .equals(dataNode.getAttributes().getNamedItem("name").getNodeValue())) {
-                                NodeList items = dataNode.getChildNodes();
-                                for (int x = 0; x < items.getLength(); x++) {
-                                    Node item = items.item(x);
-                                    if (item != null && item.getAttributes() != null
-                                            && item.getAttributes().getNamedItem("name") != null) {
-                                        checklistItems.add(item.getAttributes().getNamedItem("name").getNodeValue());
+        for (Object state : states) {
+            JSONObject stateObj = (JSONObject) state;
+            String stateId = (String) stateObj.get("State");
+            LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
+            List<String> actions = new ArrayList<String>();
+            List<String> checklistItems = new ArrayList<String>();
+            if (stateObj.containsKey("Transitions")) {
+                JSONArray transitions = (JSONArray) stateObj.get("Transitions");
+                for (Object transition : transitions) {
+                    JSONObject transitionObj = (JSONObject) transition;
+                    String action = (String) transitionObj.get("Event");
+                    String target = (String) transitionObj.get("Target");
 
-                                    }
-                                }
-                            }
+                    if (stateId.equals(STATE_ID_PROTOTYPED)
+                            && (target.equals(TRANSITION_TARGET_PROTOTYPED)
+                    )) {
+                        // skip adding "Publish" and "Deploy as a Prototype" transitions as having those transitions
+                        // in Prototyped state is invalid
+                    } else if (stateId.equals(STATE_ID_PUBLISHED)
+                            && target.equals(TRANSITION_TARGET_PUBLISHED)) {
+                        // skip adding "Publish" transition as having this transition in Published state is invalid
+                    } else {
+                        if (target != null && action != null) {
+                            lifeCycleTransition.addTransition(target.toUpperCase(),
+                                    action);
+                            stateTransitionMap.put(action, target.toUpperCase());
+                            actions.add(action);
                         }
                     }
                 }
-                stateHashMap.put(id.getNodeValue().toUpperCase(), lifeCycleTransition);
-                StateInfo stateInfo = new StateInfo();
-                stateInfo.setCheckListItems(checklistItems);
-                stateInfo.setTransitions(actions);
-                stateInfoMap.put(id.getNodeValue().toUpperCase(), stateInfo);
             }
+
+            if (stateObj.containsKey("CheckItems")) {
+                JSONArray checkItems = (JSONArray) stateObj.get("CheckItems");
+
+                for (Object checkItem : checkItems) {
+                    checklistItems.add(checkItem.toString());
+                }
+
+            }
+
+            stateHashMap.put(stateId.toUpperCase(), lifeCycleTransition);
+            StateInfo stateInfo = new StateInfo();
+            stateInfo.setCheckListItems(checklistItems);
+            stateInfo.setTransitions(actions);
+            stateInfoMap.put(stateId.toUpperCase(), stateInfo);
         }
 
+    }
+
+    public JSONObject getDefaultLCConfigJSON() {
+
+        JSONObject LCConfigObj = new JSONObject();
+
+        JSONArray statesArray = new JSONArray();
+
+        //Created State
+        JSONObject createdState = new JSONObject();
+        createdState.put("State","Created");
+        JSONArray transitionArray = new JSONArray();
+        transitionArray.add(getTransitionObj("Publish","Published"));
+        transitionArray.add(getTransitionObj("Deploy as a Prototype","Prototyped"));
+        createdState.put("Transitions",transitionArray);
+        createdState.put("CheckItems",getCheckItemsArray(
+                new String[]{
+                        "Deprecate old versions after publishing the API",
+                        "Requires re-subscription when publishing the API"}));
+
+        //Prototyped State
+        JSONObject prototypedState = new JSONObject();
+        prototypedState.put("State","Prototyped");
+        transitionArray = new JSONArray();
+        transitionArray.add(getTransitionObj("Publish","Published"));
+        transitionArray.add(getTransitionObj("Demote to Created","Created"));
+        transitionArray.add(getTransitionObj("Deploy as a Prototype","Prototyped"));
+        prototypedState.put("Transitions",transitionArray);
+        prototypedState.put("CheckItems",getCheckItemsArray(
+                new String[]{
+                        "Deprecate old versions after publishing the API",
+                        "Requires re-subscription when publishing the API"}));
+
+        //Published State
+        JSONObject publishedState = new JSONObject();
+        publishedState.put("State","Published");
+        transitionArray = new JSONArray();
+        transitionArray.add(getTransitionObj("Block","Blocked"));
+        transitionArray.add(getTransitionObj("Deploy as a Prototype","Prototyped"));
+        transitionArray.add(getTransitionObj("Demote to Created","Created"));
+        transitionArray.add(getTransitionObj("Deprecate","Deprecated"));
+        transitionArray.add(getTransitionObj("Publish","Published"));
+        publishedState.put("Transitions",transitionArray);
+
+        //Blocked State
+        JSONObject blockedState = new JSONObject();
+        blockedState.put("State","Blocked");
+        transitionArray = new JSONArray();
+        transitionArray.add(getTransitionObj("Deprecate","Deprecated"));
+        transitionArray.add(getTransitionObj("Re-Publish","Published"));
+        blockedState.put("Transitions",transitionArray);
+
+        //Deprecated State
+        JSONObject deprecatedState = new JSONObject();
+        deprecatedState.put("State","Deprecated");
+        transitionArray = new JSONArray();
+        transitionArray.add(getTransitionObj("Retire","Retired"));
+        deprecatedState.put("Transitions",transitionArray);
+
+        //Retired State
+        JSONObject retiredState = new JSONObject();
+        retiredState.put("State","Retired");
+
+        //Adding the all State info objects to statesArray
+        statesArray.add(createdState);
+        statesArray.add(prototypedState);
+        statesArray.add(publishedState);
+        statesArray.add(blockedState);
+        statesArray.add(deprecatedState);
+        statesArray.add(retiredState);
+
+        LCConfigObj.put("States",statesArray);
+
+        return LCConfigObj;
+    }
+
+    public JSONObject getTransitionObj(String event,String target){
+        JSONObject transitionObj = new JSONObject();
+        transitionObj.put("Event",event);
+        transitionObj.put("Target",target);
+        return transitionObj;
+    }
+
+    public JSONArray getCheckItemsArray(String[] checkItems){
+        JSONArray checkItemsArray = new JSONArray();
+        for(String checkItem:checkItems){
+            checkItemsArray.add(checkItem);
+        }
+        return checkItemsArray;
     }
 
     public String getTransitionAction(String currentState, String targetState) {
