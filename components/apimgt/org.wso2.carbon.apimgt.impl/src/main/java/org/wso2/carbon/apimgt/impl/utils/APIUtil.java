@@ -2885,32 +2885,6 @@ public final class APIUtil {
     }
 
     /**
-     * @param tenantId
-     * @throws APIManagementException
-     */
-    public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
-
-        Object selfSighupConfigObject = ServiceReferenceHolder.getInstance().getApimConfigService()
-                .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
-        if (selfSighupConfigObject instanceof UserRegistrationConfigDTO) {
-            UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
-            String signUpDomain = selfSighupConfig.getSignUpDomain();
-            if (isSubscriberRoleCreationEnabled(tenantId)) {
-                Iterator<String> signUpRolesIterator = selfSighupConfig.getRoles().iterator();
-                while (signUpRolesIterator.hasNext()) {
-                    String roleName;
-                    if (signUpDomain != null) {
-                        roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
-                    } else {
-                        roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
-                    }
-                    createSubscriberRole(roleName, tenantId);
-                }
-            }
-        }
-    }
-
-    /**
      * Returns whether subscriber role creation enabled for the given tenant in tenant-conf.json
      *
      * @param tenantId id of the tenant
@@ -2953,14 +2927,27 @@ public final class APIUtil {
             }
 
             // create creator role if it's creation is enabled in tenant-conf.json
-            JSONObject creatorRoleConfig = (JSONObject) defaultRoles
-                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE);
+            JSONObject creatorRoleConfig = (JSONObject) defaultRoles.get(
+                    APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE);
             if (isRoleCreationEnabled(creatorRoleConfig)) {
-                String creatorRoleName = String.valueOf(creatorRoleConfig
-                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                String creatorRoleName = String.valueOf(
+                        creatorRoleConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
                 if (!StringUtils.isBlank(creatorRoleName)) {
                     createCreatorRole(creatorRoleName, tenantId);
                 }
+            }
+
+            // create subscriber role if it's creation is enabled in tenant-conf.json
+            JSONObject subscriberRoleConfig = (JSONObject) defaultRoles.get(
+                    APIConstants.API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE);
+            if (isRoleCreationEnabled(subscriberRoleConfig)) {
+                String subscriberRoleName = String.valueOf(
+                        subscriberRoleConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (subscriberRoleName.equals(APIConstants.NULL_SUBSCRIBER_ROLE) || StringUtils.isBlank(
+                        subscriberRoleName) || subscriberRoleName == null) {
+                    subscriberRoleName = APIConstants.SUBSCRIBER_ROLE;
+                }
+                createSubscriberRole(subscriberRoleName, tenantId);
             }
 
             // create devOps role if it's creation is enabled in tenant-conf.json
@@ -2997,7 +2984,6 @@ public final class APIUtil {
             }
 
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
-            createSelfSignUpRoles(tenantId);
         }
     }
 
