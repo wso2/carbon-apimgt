@@ -115,17 +115,13 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
-            ServiceEntry existingService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
+            // Check whether a service already exists for the given service ID
+            serviceCatalog.getServiceByUUID(serviceId, tenantId);
+
             List<API> usedAPIs = serviceCatalog.getServiceUsage(serviceId, tenantId);
             if (usedAPIs != null && usedAPIs.size() > 0 ) {
                 String message = "Cannot remove the Service as it is used by one or more APIs";
                 RestApiUtil.handleConflict(message, log);
-            }
-
-            String uuid = existingService.getUuid();
-            if (uuid == null) {
-                RestApiUtil.handleResourceNotFoundError("Service not found for service with ID: "
-                        + serviceId, log);
             }
             serviceCatalog.deleteService(serviceId, tenantId);
             return Response.noContent().build();
