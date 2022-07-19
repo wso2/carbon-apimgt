@@ -8215,7 +8215,7 @@ public final class APIUtil {
      * @param action      - The type of action performed. Ex: Create, Update
      * @param performedBy - The user who performs the action.
      */
-    public static void logAuditMessage(String entityType, JSONObject entityInfo, String action, String performedBy) {
+    public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy) {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("typ", entityType);
