@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -49,23 +48,9 @@ public final class SelfSignUpUtil {
 				.getSelfSighupConfig(tenantDomain);
 		if (selfSighupConfigObject instanceof UserRegistrationConfigDTO) {
 			UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
-			int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-			String signUpDomain = selfSighupConfig.getSignUpDomain();
-			if (APIUtil.isSubscriberRoleCreationEnabled(tenantId)) {
-				Iterator<String> signUpRolesIterator = selfSighupConfig.getRoles().iterator();
-				while (signUpRolesIterator.hasNext()) {
-					String roleName;
-					if (signUpDomain != null) {
-						roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
-					} else {
-						roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + signUpRolesIterator.next();
-					}
-					APIUtil.createSubscriberRole(roleName, tenantId);
-				}
-			}
 			return selfSighupConfig;
 		}
-		return null;
+		return new UserRegistrationConfigDTO();
 	}
 
 	/**

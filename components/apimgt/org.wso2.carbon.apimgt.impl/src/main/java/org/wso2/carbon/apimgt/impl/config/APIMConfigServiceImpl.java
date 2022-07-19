@@ -401,7 +401,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                 return getSignupConfigurationFromAdvancedConfigurations(
                         (JSONObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
             } else {
-                return null;
+                return new UserRegistrationConfigDTO();
             }
         } catch (ParseException e) {
             String msg = "Error while parsing Advanced Tenant configuration JSON.";
