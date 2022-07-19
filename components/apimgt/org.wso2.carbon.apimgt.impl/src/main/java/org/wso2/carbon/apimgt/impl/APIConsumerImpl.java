@@ -1289,7 +1289,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 JSONObject appLogObject = new JSONObject();
                 appLogObject.put("Re-Generated Keys for application with client Id", clientId);
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject,
                         APIConstants.AuditLogConstants.UPDATED, this.username);
 
                 return keyManager.getNewApplicationAccessToken(tokenRequest);
@@ -2854,7 +2854,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
                 subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
 
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject,
                         APIConstants.AuditLogConstants.CREATED, this.username);
 
                 if (workflowResponse == null) {
@@ -3042,7 +3042,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
                 subsLogObject.put(APIConstants.AuditLogConstants.REQUESTED_TIER, requestedThrottlingPolicy);
 
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject,
                         APIConstants.AuditLogConstants.UPDATED, this.username);
 
                 if (workflowResponse == null) {
@@ -3232,7 +3232,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
             subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
 
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject,
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
         } catch (WorkflowException e) {
@@ -3472,7 +3472,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         appLogObject.put(APIConstants.AuditLogConstants.GROUPS, application.getGroupId());
         appLogObject.put(APIConstants.AuditLogConstants.OWNER, application.getSubscriber().getName());
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject,
                 APIConstants.AuditLogConstants.CREATED, this.username);
 
         boolean isTenantFlowStarted = false;
@@ -3692,7 +3692,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         appLogObject.put(APIConstants.AuditLogConstants.GROUPS, application.getGroupId());
         appLogObject.put(APIConstants.AuditLogConstants.OWNER, application.getSubscriber().getName());
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject,
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
 
@@ -3884,7 +3884,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appLogObject.put(APIConstants.AuditLogConstants.GROUPS, application.getGroupId());
             appLogObject.put(APIConstants.AuditLogConstants.OWNER, application.getSubscriber().getName());
 
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject,
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
         } catch (WorkflowException e) {
@@ -4150,7 +4150,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             JSONObject appLogObject = new JSONObject();
             appLogObject.put("Generated keys for application", application.getName());
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject,
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
             String orgId = application.getOrganization();
@@ -4661,7 +4661,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appLogObject.put("Updated Oauth app with Call back URL", callbackUrl);
             appLogObject.put("Updated Oauth app with grant types", jsonString);
 
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject,
                     APIConstants.AuditLogConstants.UPDATED, this.username);
             return updatedAppInfo;
         } finally {
