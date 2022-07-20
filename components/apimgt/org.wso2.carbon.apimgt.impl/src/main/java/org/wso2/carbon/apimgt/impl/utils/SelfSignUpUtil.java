@@ -50,7 +50,7 @@ public final class SelfSignUpUtil {
 			UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
 			return selfSighupConfig;
 		}
-		return new UserRegistrationConfigDTO();
+		return null;
 	}
 
 	/**

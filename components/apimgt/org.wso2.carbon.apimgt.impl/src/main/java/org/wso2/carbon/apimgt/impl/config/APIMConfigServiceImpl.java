@@ -400,8 +400,14 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             if (tenantConfig.containsKey(APIConstants.SELF_SIGN_UP_NAME)) {
                 return getSignupConfigurationFromAdvancedConfigurations(
                         (JSONObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
+            } else if (!tenantConfig.containsKey(APIConstants.SELF_SIGN_UP_NAME) && organization.equals(
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                UserRegistrationConfigDTO defaultSelfSignUpConfigForCarbonSuperUser = new UserRegistrationConfigDTO();
+                defaultSelfSignUpConfigForCarbonSuperUser.getRoles()
+                        .add(APIConstants.SELF_SIGN_UP_CONFIG_SUBSCRIBER_ROLE);
+                return defaultSelfSignUpConfigForCarbonSuperUser;
             } else {
-                return new UserRegistrationConfigDTO();
+                return null;
             }
         } catch (ParseException e) {
             String msg = "Error while parsing Advanced Tenant configuration JSON.";
