@@ -211,23 +211,9 @@ public interface APIPersistence {
      *
      * @param org    Organization the API is owned by
      * @param apiId  API ID
-     * @param status status to which the API is to be updated
      * @throws APIPersistenceException
      */
-    void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException;
 
-    /* =========== WSDL ============
-       =========================== */
-
-    /**
-     * Save the passed WSDL schema definition of the API.  This includes initial creation operation and later
-     * update operations
-     *
-     * @param org              Organization the WSDL is owned by
-     * @param apiId            API ID
-     * @param wsdlResourceFile WSDL Resource File
-     * @throws WSDLPersistenceException
-     */
     void saveWSDL(Organization org, String apiId, ResourceFile wsdlResourceFile) throws WSDLPersistenceException;
 
     /**
