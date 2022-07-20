@@ -1639,8 +1639,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return result;
     }
-
-    @Override
+    
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
         //Unused method
         GenericArtifactManager artifactManager = null;
