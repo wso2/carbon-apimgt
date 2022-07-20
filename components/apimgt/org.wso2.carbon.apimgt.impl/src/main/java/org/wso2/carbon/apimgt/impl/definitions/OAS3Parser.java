@@ -1755,10 +1755,11 @@ public class OAS3Parser extends APIDefinition {
         if (defaultFlowScopes == null) {
             defaultFlowScopes = new Scopes();
         }
-
-        for (Map.Entry<String, String> input : noneDefaultFlowScopes.entrySet()) {
-            //Inject scopes set into default scheme
-            defaultFlowScopes.addString(input.getKey(), input.getValue());
+        if (noneDefaultFlowScopes != null) {
+            for (Map.Entry<String, String> input : noneDefaultFlowScopes.entrySet()) {
+                //Inject scopes set into default scheme
+                defaultFlowScopes.addString(input.getKey(), input.getValue());
+            }
         }
         defaultTypeFlow.setScopes(defaultFlowScopes);
         //Check X-Scope Bindings
