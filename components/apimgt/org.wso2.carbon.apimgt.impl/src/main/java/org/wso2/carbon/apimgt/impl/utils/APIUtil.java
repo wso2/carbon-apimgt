@@ -8215,13 +8215,18 @@ public final class APIUtil {
      * @param action      - The type of action performed. Ex: Create, Update
      * @param performedBy - The user who performs the action.
      */
-    public static void logAuditMessage(String entityType, JSONObject entityInfo, String action, String performedBy) {
+    public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy) {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("typ", entityType);
         jsonObject.put("action", action);
         jsonObject.put("performedBy", performedBy);
-        jsonObject.put("info", entityInfo);
+        try {
+            JSONObject entityInfoJson = (JSONObject) new JSONParser().parse(entityInfo);
+            jsonObject.put("info", entityInfoJson);
+        } catch (ParseException e) {
+            jsonObject.put("info", entityInfo);
+        }
         audit.info(StringEscapeUtils.unescapeJava(jsonObject.toString()));
     }
 

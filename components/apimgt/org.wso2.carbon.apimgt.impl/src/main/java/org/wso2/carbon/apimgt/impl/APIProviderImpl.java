@@ -708,7 +708,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject,
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.CREATED, this.username);
 
         if (log.isDebugEnabled()) {
@@ -1272,7 +1272,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject,
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
         //update doc visibility
         List<Documentation> docsList = getAllDocumentation(api.getId());
@@ -1390,7 +1390,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject,
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
         //Validate Transports
@@ -3387,7 +3387,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
             apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject,
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.DELETED, this.username);
         }
 
@@ -7010,7 +7010,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiLogObject.put(APIConstants.AuditLogConstants.VERSION, identifier.getVersion());
             apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
 
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject,
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiProduct.getUuid());
