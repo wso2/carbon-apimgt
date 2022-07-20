@@ -2840,6 +2840,17 @@ public final class APIUtil {
                 }
                 ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
                         gson.toJson(jsonElement));
+            } else if (currentConfig != null && organization.equals(APIConstants.SUPER_TENANT_DOMAIN)) {
+                JsonObject jsonElement = (JsonObject) new JsonParser().parse(currentConfig);
+                if (!jsonElement.has(APIConstants.SELF_SIGN_UP_NAME)) {
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    String selfSignUpJsonString = IOUtils.toString(APIManagerComponent.class.getResourceAsStream(
+                            APIConstants.SELF_SIGN_UP_DEFAULT_CONFIG_FILE_PATH_OF_THE_CARBON_SUPER_USER));
+                    JsonObject selfSignUpJsonElement = (JsonObject) new JsonParser().parse(selfSignUpJsonString);
+                    jsonElement.add(APIConstants.SELF_SIGN_UP_NAME, selfSignUpJsonElement);
+                    ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(organization,
+                            gson.toJson(jsonElement));
+                }
             }
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while saving tenant conf to the Advanced configuration of the " +
