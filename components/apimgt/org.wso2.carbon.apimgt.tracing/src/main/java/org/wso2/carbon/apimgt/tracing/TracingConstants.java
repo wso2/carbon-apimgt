@@ -40,7 +40,6 @@ class TracingConstants {
     static final String DEFAULT_TRACER_LOG_ENABLED = "false";
     static final String REMOTE_TRACER_ENABLED = "OpenTracer.RemoteTracer.Enabled";
     static final String LOG_TRACER_ENABLED = "OpenTracer.LogTracer.Enabled";
-    static final String LEGACY = "OpenTracer.Legacy";
 
     /**
      * Jaeger Tracer Constants

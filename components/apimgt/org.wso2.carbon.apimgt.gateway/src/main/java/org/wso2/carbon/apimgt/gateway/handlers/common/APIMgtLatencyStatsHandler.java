@@ -54,20 +54,18 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext messageContext) {
 
         if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy()) {
-                TracingSpan responseLatencySpan =
-                        (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-                TracingTracer tracer = Util.getGlobalTracer();
-                TracingSpan span = Util.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan, tracer);
-                messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
-            } else {
-                TelemetrySpan responseLatencySpan =
-                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-                TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
-                TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
-                        tracer);
-                messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
-            }
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TelemetryTracer tracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
+            TelemetrySpan span = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan,
+                    tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
+        } else if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan, tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
         }
         messageContext.setProperty(APIMgtGatewayConstants.API_UUID_PROPERTY, apiUUID);
         org.apache.axis2.context.MessageContext axis2MsgContext =

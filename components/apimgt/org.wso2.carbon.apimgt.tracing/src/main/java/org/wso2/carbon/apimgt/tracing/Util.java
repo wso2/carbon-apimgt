@@ -24,6 +24,8 @@ import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMapAdapter;
 import io.opentracing.util.GlobalTracer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
@@ -37,6 +39,7 @@ import java.util.Map;
 @Deprecated
 public class Util {
 
+    private static final Log log = LogFactory.getLog(Util.class);
     /**
      * Start the tracing span
      *
@@ -199,15 +202,32 @@ public class Util {
         return null;
     }
 
-    public static boolean legacy() {
+    /**
+     * Check whether OpenTracing is enabled.
+     **/
+    public static boolean tracingEnabled() {
 
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
-            boolean legacy =
-                    Boolean.parseBoolean(apiManagerConfiguration.getFirstProperty(TracingConstants.LEGACY));
-
-            return legacy;
+            if (log.isDebugEnabled()) {
+                log.debug("API Manager Configuration is set");
+            }
+            boolean remoteTracerEnabled =
+                    Boolean.parseBoolean(apiManagerConfiguration
+                            .getFirstProperty(TracingConstants.REMOTE_TRACER_ENABLED));
+            boolean logTracerEnabled =
+                    Boolean.parseBoolean(apiManagerConfiguration
+                            .getFirstProperty(TracingConstants.LOG_TRACER_ENABLED));
+            if (log.isDebugEnabled()) {
+                log.debug("Remote Tracer for OpenTracing Enabled: " + remoteTracerEnabled);
+                log.debug("Log Tracer for OpenTracing Enabled: " + logTracerEnabled);
+            }
+            return remoteTracerEnabled || logTracerEnabled;
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("API Manager Configuration is null");
+            }
         }
         return false;
     }
