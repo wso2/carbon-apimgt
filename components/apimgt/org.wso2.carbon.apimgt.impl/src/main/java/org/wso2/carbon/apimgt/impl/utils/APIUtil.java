@@ -8224,7 +8224,7 @@ public final class APIUtil {
         try {
             JSONObject entityInfoJson = (JSONObject) new JSONParser().parse(entityInfo);
             jsonObject.put("info", entityInfoJson);
-        } catch (ParseException e) {
+        } catch (ParseException ignored) { // if entityInfo cannot be parsed as json, log as a simple string 
             jsonObject.put("info", entityInfo);
         }
         audit.info(StringEscapeUtils.unescapeJava(jsonObject.toString()));
