@@ -632,6 +632,7 @@ public final class APIConstants {
         public static final String ON_HOLD = "ON_HOLD";
         public static final String TIER_UPDATE_PENDING = "TIER_UPDATE_PENDING";
         public static final String REJECTED = "REJECTED";
+        public static final String DELETE_PENDING = "DELETE_PENDING";
 
         private SubscriptionStatus() {
 
@@ -1225,6 +1226,7 @@ public final class APIConstants {
         public static final String APPLICATION_APPROVED = "APPROVED";
         public static final String APPLICATION_REJECTED = "REJECTED";
         public static final String APPLICATION_ONHOLD = "ON_HOLD";
+        public static final String DELETE_PENDING = "DELETE_PENDING";
     }
 
     public static class AppRegistrationStatus {
@@ -1885,7 +1887,8 @@ public final class APIConstants {
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
-            "SSE", "ASYNC"};
+            "SSE", "ASYN" +
+            "C"};
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2730,6 +2733,7 @@ public final class APIConstants {
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
+        public static final String ORG_ID = "org_id";
         public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
     }
 

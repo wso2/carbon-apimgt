@@ -675,6 +675,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (application != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     apiConsumer.removeApplication(application, username);
+                    if (APIConstants.ApplicationStatus.DELETE_PENDING.equals(application.getStatus())) {
+                        if (application.getId() == -1) {
+                            return Response.status(Response.Status.BAD_REQUEST).build();
+                        }
+                        return Response.status(Response.Status.CREATED).build();
+                    }
                     return Response.ok().build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
