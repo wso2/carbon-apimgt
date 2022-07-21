@@ -126,7 +126,8 @@ public class SelfSignupUtilTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
-        Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn(new String("Test String"));
-        Assert.assertNotNull(new UserRegistrationConfigDTO());
+        Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn("Test String");
+        UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
+        Assert.assertNull(userRegistrationConfigDTO);
     }
 }

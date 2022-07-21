@@ -17,10 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +29,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.SystemConfigurationsDAO;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
-import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -190,17 +185,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-//        if (organization.equals(APIConstants.SUPER_TENANT_DOMAIN)) {
-//            JsonObject tenantConfigJsonElement = (JsonObject) new JsonParser().parse(tenantConfig);
-//            if (!tenantConfigJsonElement.has(APIConstants.SELF_SIGN_UP_NAME)) {
-//                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//                String selfSignUpJsonString = IOUtils.toString(APIManagerComponent.class.getResourceAsStream(
-//                        APIConstants.SELF_SIGN_UP_DEFAULT_CONFIG_FILE_PATH_OF_THE_CARBON_SUPER_USER));
-//                JsonObject selfSignUpJsonElement = (JsonObject) new JsonParser().parse(selfSignUpJsonString);
-//                tenantConfigJsonElement.add(APIConstants.SELF_SIGN_UP_NAME, selfSignUpJsonElement);
-//                tenantConfig = gson.toJson(tenantConfigJsonElement);
-//            }
-//        }
         Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
         String cacheName = organization + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
         tenantConfigCache.remove(cacheName);
