@@ -544,6 +544,9 @@ public enum ExceptionCodes implements ErrorHandler {
      * @param errorDescription The error description.
      */
     ExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription) {
+        if(httpErrorCode>=500){
+                this.stackTrace=true;
+        }
         this.errorCode = errorCode;
         this.errorMessage = msg;
         this.httpStatusCode = httpErrorCode;
