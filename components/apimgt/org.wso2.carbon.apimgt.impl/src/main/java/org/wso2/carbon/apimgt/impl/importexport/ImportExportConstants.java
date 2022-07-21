@@ -122,10 +122,6 @@ public final class ImportExportConstants {
     // Name of the API name element tag of the api.json file
     public static final String API_NAME_ELEMENT = "name";
 
-    public static final String OPERATION_POLICY_TYPE = "type";
-
-    public static final String DEFAULT_OPERATION_POLICY_TYPE = "operation_policy_specification";
-
     // Name of the API version element tag of the api.json file
     public static final String VERSION_ELEMENT = "version";
 
