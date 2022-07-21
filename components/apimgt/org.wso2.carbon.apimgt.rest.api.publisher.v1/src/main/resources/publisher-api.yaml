@@ -5158,7 +5158,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIList'
+                $ref: '#/components/schemas/APIQuickInfoList'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -8353,7 +8353,21 @@ components:
             $ref: '#/components/schemas/APIInfo'
         pagination:
           $ref: '#/components/schemas/Pagination'
-
+    APIQuickInfoList:
+      title: API quick info List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of APIs returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIQuickInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     APIInfo:
       title: API Info object with basic API details.
       type: object
@@ -8437,6 +8451,27 @@ components:
         advertiseOnly:
           type: boolean
           example: true
+    APIQuickInfo:
+      title: API Info object with basic minimal API details.
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: CalculatorAPI
+        context:
+          type: string
+          example: CalculatorAPI
+        version:
+          type: string
+          example: 1.0.0
+        provider:
+          type: string
+          description: |
+            If the provider value is not given, the user invoking the API will be used as the provider.
+          example: admin
     Topic:
       title: Topic object
       required:

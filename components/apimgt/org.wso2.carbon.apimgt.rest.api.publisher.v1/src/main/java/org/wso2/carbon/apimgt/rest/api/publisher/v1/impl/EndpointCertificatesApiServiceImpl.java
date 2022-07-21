@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
+import org.apache.xpath.objects.XObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
@@ -34,10 +35,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -237,7 +235,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
 
         List<API> allMatchedApis = new ArrayList<>();
-        Object apiListDTO;
+        APIQuickInfoListDTO apiQuickInfoListDTO;
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -268,7 +266,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             Set<API> apis = (Set<API>) searchResult.get("apis");
             allMatchedApis.addAll(apis);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            apiQuickInfoListDTO = (APIQuickInfoListDTO) APIMappingUtil.fromAPIListToAPIQuickInfoListDTO(allMatchedApis);
 
             //Add pagination section in the response
             Object totalLength = searchResult.get("length");
@@ -277,9 +275,9 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 length = (Integer) totalLength;
             }
 
-            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
+            APIMappingUtil.setPaginationParamsForAPIQuickInfoListDTO(apiQuickInfoListDTO, query, offset, limit, length);
 
-            return Response.status(Response.Status.OK).entity(apiListDTO).build();
+            return Response.status(Response.Status.OK).entity(apiQuickInfoListDTO).build();
 
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the certificates.", e, log);

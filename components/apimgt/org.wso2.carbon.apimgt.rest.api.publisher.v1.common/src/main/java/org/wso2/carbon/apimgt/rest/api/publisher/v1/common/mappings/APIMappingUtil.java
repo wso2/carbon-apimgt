@@ -67,55 +67,9 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO.AudienceEnum;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
@@ -569,6 +523,33 @@ public class APIMappingUtil {
     }
 
     /**
+     * Converts a List object of APIs into a minimal DTO.
+     *
+     * @param apiList List of APIs
+     * @return APIQuickInfoListDTO object containing APIQuickInfoDTOs
+     */
+    public static Object fromAPIListToAPIQuickInfoListDTO(List<API> apiList) throws APIManagementException {
+        return fromAPIListToInfoDTO(apiList);
+    }
+
+    /**
+     * Converts a List object of APIs into quick info DTO List.
+     *
+     * @param apiList List of APIs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIQuickInfoListDTO fromAPIListToQuickInfoListDTO(List<API> apiList) throws APIManagementException {
+
+        APIQuickInfoListDTO apiQuickInfoListDTO = new APIQuickInfoListDTO();
+        List<APIQuickInfoDTO> apiInfoDTOs = apiQuickInfoListDTO.getList();
+        for (API api : apiList) {
+            apiInfoDTOs.add(fromAPIToAPIQuickInfoDTO(api));
+        }
+        apiQuickInfoListDTO.setCount(apiInfoDTOs.size());
+        return apiQuickInfoListDTO;
+    }
+
+    /**
      * Converts a List object of URITemplates into APIOperations DTO List.
      *
      * @param uriTemplateList uriTemplateList
@@ -667,6 +648,29 @@ public class APIMappingUtil {
             apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         }
         return apiInfoDTO;
+    }
+
+    /**
+     * Creates a very minimal DTO representation of an API object.
+     *
+     * @param api API object
+     * @return a very minimal representation DTO
+     */
+    public static APIQuickInfoDTO fromAPIToAPIQuickInfoDTO(API api) {
+
+        APIQuickInfoDTO apiQuickInfoDTO = new APIQuickInfoDTO();
+        String context = api.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        apiQuickInfoDTO.setContext(context);
+        apiQuickInfoDTO.setId(api.getUUID());
+        APIIdentifier apiId = api.getId();
+        apiQuickInfoDTO.setName(apiId.getApiName());
+        apiQuickInfoDTO.setVersion(apiId.getVersion());
+        String providerName = api.getId().getProviderName();
+        apiQuickInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        return apiQuickInfoDTO;
     }
 
     /**
@@ -770,6 +774,39 @@ public class APIMappingUtil {
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
         ((APIListDTO) apiListDTO).setPagination(paginationDTO);
+    }
+
+    /**
+     * Sets pagination urls for a APIQuickInfoListDTO object given pagination parameters and url parameters.
+     *
+     * @param apiQuickInfoListDTO a APIQuickInfoListDTO object
+     * @param query      search condition
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
+     */
+    public static void setPaginationParamsForAPIQuickInfoListDTO(Object apiQuickInfoListDTO, String query, int offset, int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiCommonUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiCommonUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        ((APIQuickInfoListDTO) apiQuickInfoListDTO).setPagination(paginationDTO);
     }
 
     private static String checkAndSetVersionParam(String context) {
