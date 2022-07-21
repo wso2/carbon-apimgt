@@ -508,6 +508,34 @@ public class CertificateMgtUtils {
     }
 
     /**
+     * To get the certificate information from base64 encoded certificate.
+     *
+     * @param base64EncodedCertificate Base 64 encoded certificate.
+     * @return Certificate information.
+     */
+    public ByteArrayInputStream getCertificateContentFromDB(String base64EncodedCertificate)
+            throws CertificateManagementException {
+
+        try {
+            byte[] cert = (Base64.decodeBase64(base64EncodedCertificate.getBytes(StandardCharsets.UTF_8)));
+            InputStream serverCert = new ByteArrayInputStream(cert);
+            if (serverCert.available() == 0) {
+                log.error("Provided certificate is empty for getting certificate information. Hence please provide a "
+                        + "non-empty certificate to overcome this issue.");
+            }
+            CertificateFactory cf = CertificateFactory.getInstance(certificateType);
+            if (serverCert.available() > 0) {
+                Certificate certificate = cf.generateCertificate(serverCert);
+                return new ByteArrayInputStream(certificate.getEncoded());
+            }
+        } catch (IOException | CertificateException e) {
+            throw new CertificateManagementException(
+                    "Error while getting the certificate information from the certificate", e);
+        }
+        return null;
+    }
+
+    /**
      * Retrieve the certificate which is represented by the given alias.
      *
      * @param alias : The alias of the required certificate.
