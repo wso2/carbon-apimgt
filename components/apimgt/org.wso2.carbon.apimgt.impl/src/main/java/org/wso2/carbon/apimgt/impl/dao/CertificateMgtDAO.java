@@ -412,6 +412,42 @@ public class CertificateMgtDAO {
         }
         throw new CertificateManagementException("Certificate didn't exist with alias" + alias);
     }
+
+    /**
+     * Method to retrieve certificate metadata from db for specific tenant which matches alias or endpoint.
+     * From alias and endpoint, only one parameter is required.
+     *
+     * @param tenantId : The id of the tenant which the certificate belongs to.
+     * @param alias    : Alias for the certificate. (Optional)
+     * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
+     */
+    public CertificateMetadataDTO getCertificate(String alias, int tenantId)
+            throws CertificateManagementException {
+
+        String getCertQuery;
+        getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_TENANT_ALIAS;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(getCertQuery)) {
+                preparedStatement.setInt(1, tenantId);
+                preparedStatement.setString(2, alias);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+                        certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
+                        certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
+                        try (InputStream certificate = resultSet.getBinaryStream("CERTIFICATE")) {
+                            certificateMetadataDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(certificate));
+                        }
+                        return certificateMetadataDTO;
+                    }
+                }
+            }
+        } catch (SQLException | IOException e) {
+            handleException("Error while retrieving certificate metadata.", e);
+        }
+        throw new CertificateManagementException("Certificate didn't exist with alias" + alias);
+    }
+
     /**
      * To remove the entries of updated certificates from gateway.
      *
