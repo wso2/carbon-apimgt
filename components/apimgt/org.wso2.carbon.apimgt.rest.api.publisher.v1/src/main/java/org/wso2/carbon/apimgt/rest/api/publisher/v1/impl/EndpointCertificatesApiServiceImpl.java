@@ -76,7 +76,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 RestApiUtil.handleResourceNotFoundError(message, log);
             }
 
-            Object certificate = apiProvider.getCertificateContent(RestApiCommonUtil.getLoggedInUsername(), alias);
+            Object certificate = apiProvider.getCertificateContent(tenantDomain, alias);
             if (certificate != null) {
                 Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
                 responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
@@ -149,8 +149,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 RestApiUtil.handleResourceNotFoundError(message, log);
             }
 
-            CertificateInformationDTO certificateInformationDTO =
-                    apiProvider.getCertificateStatus(RestApiCommonUtil.getLoggedInUsername(), alias);
+            CertificateInformationDTO certificateInformationDTO = apiProvider.getCertificateStatus(tenantDomain, alias);
             CertificateInfoDTO certificateInfoDTO =
                     CertificateMappingUtil.fromCertificateInformationToDTO(certificateInformationDTO);
             return Response.ok().entity(certificateInfoDTO).build();
