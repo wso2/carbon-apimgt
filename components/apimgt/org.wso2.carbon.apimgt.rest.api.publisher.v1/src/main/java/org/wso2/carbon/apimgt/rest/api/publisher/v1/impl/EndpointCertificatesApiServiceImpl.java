@@ -56,6 +56,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
 
     private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
+
+    private static final String URL_PROTOCOL_SEPARATOR = "://";
     public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -236,11 +238,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
         List<API> allMatchedApis = new ArrayList<>();
         APIQuickInfoListDTO apiQuickInfoListDTO;
-
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
-        String userName = RestApiCommonUtil.getLoggedInUsername();
         CertificateMetadataDTO certificateMetadataDTO;
 
         try {
@@ -250,22 +249,19 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             }
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            certificateMetadataDTO = apiProvider.getCertificate(userName, alias);
+            certificateMetadataDTO = apiProvider.getCertificate(alias);
             String endpoint = certificateMetadataDTO.getEndpoint();
 
-            if(endpoint.contains("://")){
-                String[] parts = endpoint.split("://");
+            if(endpoint.contains(URL_PROTOCOL_SEPARATOR)){
+                String[] parts = endpoint.split(URL_PROTOCOL_SEPARATOR);
                 endpoint = parts[parts.length-1];
             }
 
             String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + endpoint;
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-
             Map<String, Object> searchResult = apiProvider.searchPaginatedAPIsByFQDN(query, organization, offset, limit);
-
             Set<API> apis = (Set<API>) searchResult.get("apis");
             allMatchedApis.addAll(apis);
-
             apiQuickInfoListDTO = (APIQuickInfoListDTO) APIMappingUtil.fromAPIListToAPIQuickInfoListDTO(allMatchedApis);
 
             //Add pagination section in the response
@@ -276,13 +272,11 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             }
 
             APIMappingUtil.setPaginationParamsForAPIQuickInfoListDTO(apiQuickInfoListDTO, query, offset, limit, length);
-
             return Response.status(Response.Status.OK).entity(apiQuickInfoListDTO).build();
 
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the certificates.", e, log);
         }
-
         return null;
     }
 

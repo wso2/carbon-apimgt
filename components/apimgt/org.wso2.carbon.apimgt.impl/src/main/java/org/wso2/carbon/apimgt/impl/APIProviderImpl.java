@@ -130,6 +130,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private RecommendationEnvironment recommendationEnvironment;
     private GlobalMediationPolicyImpl globalMediationPolicyImpl;
+
+    private static final String ADMIN_USER = "admin";
+
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
@@ -3644,7 +3647,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public CertificateMetadataDTO getCertificate(String userName, String alias) throws APIManagementException {
+    public CertificateMetadataDTO getCertificate(String alias) throws APIManagementException {
         int tenantId = 0;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -4739,19 +4742,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public Map<String, Object> searchPaginatedAPIsByFQDN(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+
         Map<String, Object> result = new HashMap<String, Object>();
 
         Organization org = new Organization(organization);
-        String[] roles = APIUtil.getFilteredUserRoles("admin");
-        Map<String, Object> properties = APIUtil.getUserProperties("admin");
-        UserContext userCtx = new UserContext("admin", org, properties, roles);
+        String[] roles = APIUtil.getFilteredUserRoles(ADMIN_USER);
+        Map<String, Object> properties = APIUtil.getUserProperties(ADMIN_USER);
+        UserContext userCtx = new UserContext(ADMIN_USER, org, properties, roles);
 
         try {
+
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
                     start, end, userCtx, "createdTime", "desc");
+
             if (log.isDebugEnabled()) {
-                log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+                log.debug("Running query : " + searchQuery + " to retrieve :-> " + searchAPIs.toString());
             }
+
+            // Creating function response and adding metadata ( length, isMore )
             Set<Object> apiSet = new LinkedHashSet<>();
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
@@ -4771,9 +4779,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.put("length", 0);
                 result.put("isMore", false);
             }
+
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
+
         return result ;
     }
 

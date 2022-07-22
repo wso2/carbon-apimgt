@@ -335,9 +335,14 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public CertificateMetadataDTO getCertificate(String alias, int tenantId) {
+
         List<CertificateMetadataDTO> certificateMetadataList = null;
         CertificateMetadataDTO certificate = null;
+
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving certificate metadata for alias: " + alias + " and tenant:-> " + tenantId);
+            }
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, "", tenantId);
             if (certificateMetadataList != null && certificateMetadataList.size() == 1) {
                 certificate = certificateMetadataList.get(0);
