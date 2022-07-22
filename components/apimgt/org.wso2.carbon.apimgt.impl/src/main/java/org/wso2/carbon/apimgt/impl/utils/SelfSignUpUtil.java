@@ -21,9 +21,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.core.UserRealm;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,32 +49,6 @@ public final class SelfSignUpUtil {
 			return selfSighupConfig;
 		}
 		return null;
-	}
-
-	/**
-	 * Check whether user can sign up to the tenant domain
-	 *
-	 * @param userName - The username
-	 * @param realm    - The realm
-	 * @return - A boolean value
-	 * @throws APIManagementException
-	 */
-	public static boolean isUserNameWithAllowedDomainName(String userName, UserRealm realm)
-			throws APIManagementException {
-		int index;
-		index = userName.indexOf('/');
-
-		// Check whether we have a secondary UserStoreManager setup.
-		if (index > 0) {
-			// Using the short-circuit. Username comes with the domain name.
-			try {
-				return !realm.getRealmConfiguration()
-						.isRestrictedDomainForSlefSignUp(userName.substring(0, index));
-			} catch (UserStoreException e) {
-				throw new APIManagementException(e.getMessage(), e);
-			}
-		}
-		return true;
 	}
 
 	/**

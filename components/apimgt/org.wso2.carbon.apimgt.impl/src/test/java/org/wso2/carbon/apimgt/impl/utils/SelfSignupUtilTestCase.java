@@ -22,13 +22,9 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,50 +61,9 @@ public class SelfSignupUtilTestCase {
     }
 
     @Test
-    public void testIsUserNameWithAllowedDomainNameFalse() throws Exception {
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        RealmConfiguration realmConfiguration = new RealmConfiguration();
-        realmConfiguration.addRestrictedDomainForSelfSignUp("bar.com");
-        Mockito.when(userRealm.getRealmConfiguration()).thenReturn(realmConfiguration);
-        boolean result = SelfSignUpUtil.isUserNameWithAllowedDomainName("bar.com/john", userRealm);
-        Assert.assertFalse(result);
-    }
-
-    @Test
-    public void testIsUserNameWithAllowedDomainNameTrue() throws Exception {
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        RealmConfiguration realmConfiguration = new RealmConfiguration();
-        realmConfiguration.addRestrictedDomainForSelfSignUp("foo.com");
-        Mockito.when(userRealm.getRealmConfiguration()).thenReturn(realmConfiguration);
-        boolean result = SelfSignUpUtil.isUserNameWithAllowedDomainName("bar.com/john", userRealm);
-        Assert.assertTrue(result);
-    }
-
-    @Test
-    public void testIsUserNameWithAllowedDomainNameWhenDomainNotGiven() throws Exception {
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        RealmConfiguration realmConfiguration = new RealmConfiguration();
-        realmConfiguration.addRestrictedDomainForSelfSignUp("foo.com");
-        Mockito.when(userRealm.getRealmConfiguration()).thenReturn(realmConfiguration);
-        boolean result = SelfSignUpUtil.isUserNameWithAllowedDomainName("john", userRealm);
-        Assert.assertTrue(result);
-    }
-
-    @Test(expected = APIManagementException.class)
-    public void testIsUserNameWithAllowedDomainNameException() throws Exception {
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        RealmConfiguration realmConfiguration = new RealmConfiguration();
-        realmConfiguration.addRestrictedDomainForSelfSignUp("bar.com");
-        Mockito.when(userRealm.getRealmConfiguration()).thenThrow(new UserStoreException());
-        SelfSignUpUtil.isUserNameWithAllowedDomainName("bar.com/john", userRealm);
-    }
-
-    @Test
     public void testGetSignupConfiguration() throws Exception {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.isSubscriberRoleCreationEnabled(Mockito.anyInt())).thenReturn(false);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
