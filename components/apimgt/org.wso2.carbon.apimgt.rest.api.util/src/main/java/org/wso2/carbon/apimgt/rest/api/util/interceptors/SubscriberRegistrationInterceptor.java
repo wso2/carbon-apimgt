@@ -122,7 +122,6 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIUtil.loadTenantRegistry(tenantId);
-            APIUtil.loadTenantExternalStoreConfig(tenantDomain);
             APIUtil.loadTenantWorkFlowExtensions(tenantDomain);
             APIUtil.loadTenantSelfSignUpConfigurations(tenantDomain);
             APIUtil.loadAndSyncTenantConf(tenantDomain);

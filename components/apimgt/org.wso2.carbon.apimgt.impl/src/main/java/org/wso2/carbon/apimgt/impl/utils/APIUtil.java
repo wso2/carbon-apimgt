@@ -180,6 +180,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ExternalAPIStoresConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -224,7 +225,6 @@ import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -1874,57 +1874,54 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a set of External API Stores as defined in the underlying governance
-     * registry.
+     * Returns a set of External API Stores defined in the Advanced Configuration.
      *
      * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     * @throws APIManagementException if an error occurs when loading tiers from the Advanced Configuration
      */
     public static Set<APIStore> getExternalStores(int tenantId) throws APIManagementException {
         // First checking if ExternalStores are defined in api-manager.xml
-        Set<APIStore> externalAPIStores = getGlobalExternalStores();  //ask about this
+        Set<APIStore> externalAPIStores = getGlobalExternalStores();
         // If defined, return Store Config provided there.
         if (externalAPIStores != null && !externalAPIStores.isEmpty()) {
             return externalAPIStores;
         }
-        // Else Read the config from Tenant's Registry.
+        // Else Read the config from Tenant's AdvancedConfiguration.
         externalAPIStores = new HashSet<>();
         try {
             Iterator apiStoreIterator = getExternalStoresIteratorFromConfig(tenantId);
             if (apiStoreIterator != null) {
-                while (apiStoreIterator.hasNext()) {
-                    APIStore store = new APIStore();
-                    JSONObject storeElem = (JSONObject) apiStoreIterator.next();
-                    String type = (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_TYPE);
-                    store.setPublisher((APIPublisher) getClassInstance(
-                            (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_CLASS_NAME)));
-                    store.setType(type); //Set Store type [eg:wso2]
-                    String name = (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_ID);
-                    if (name == null) {
-                        log.error("The ExternalAPIStore name attribute is not defined");
-                    }
-                    store.setName(name); //Set store name
-                    String configDisplayName = (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME);
-                    String displayName = (configDisplayName != null) ? replaceSystemProperty(configDisplayName) : name;
-                    store.setDisplayName(displayName);//Set store display name
-                    store.setEndpoint(
-                            replaceSystemProperty((String) storeElem.get(APIConstants.EXTERNAL_API_STORE_ENDPOINT)));
-                    //Set store endpoint, which is used to publish APIs
-                    store.setPublished(false);
-                    if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
-                        String password = (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_PASSWORD);
-                        if (password != null) {
-                            PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
-                            store.setPassword(replaceSystemProperty(passwordResolver.getPassword(password)));
-                            store.setUsername(replaceSystemProperty(
-                                    (String) storeElem.get(APIConstants.EXTERNAL_API_STORE_USERNAME)));
-                            //Set store login username
-                        } else {
-                            log.error("The user-credentials of API Publisher is not defined.");
+                    while (apiStoreIterator.hasNext()) {
+                        APIStore store = new APIStore();
+                        ExternalAPIStoresConfigDTO.ExternalAPIStore storeElem = (ExternalAPIStoresConfigDTO.ExternalAPIStore) apiStoreIterator.next();
+                        String type = storeElem.getType();
+                        store.setPublisher((APIPublisher) getClassInstance(storeElem.getClassName()));
+                        store.setType(type); //Set Store type [eg:wso2]
+                        String name = storeElem.getId();
+                        if (name == null) {
+                            log.error("The ExternalAPIStore name attribute is not defined");
                         }
+                        store.setName(name); //Set store name
+                        String configDisplayName = storeElem.getDisplayName();
+                        String displayName = (configDisplayName != null) ?
+                                replaceSystemProperty(configDisplayName) :
+                                name;
+                        store.setDisplayName(displayName);//Set store display name
+                        store.setEndpoint(replaceSystemProperty(storeElem.getEndpoint()));
+                        //Set store endpoint, which is used to publish APIs
+                        store.setPublished(false);
+                        if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
+                            String password = storeElem.getPassword();
+                            if (password != null) {
+                                PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
+                                store.setPassword(replaceSystemProperty(passwordResolver.getPassword(password)));
+                                store.setUsername(replaceSystemProperty(storeElem.getUsername()));//Set store login username
+                            } else {
+                                log.error("The user-credentials of API Publisher is not defined.");
+                            }
+                        }
+                        externalAPIStores.add(store);
                     }
-                    externalAPIStores.add(store);
-                }
             }
         } catch (ClassNotFoundException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
@@ -1940,20 +1937,20 @@ public final class APIUtil {
     }
 
     /**
-     * Get OMElement iterator for external stores configured in external-store.xml in tenant registry.
+     * Get iterator for external stores configured in the Advanced Configuration.
      *
      * @param tenantId Tenant ID
-     * @return ExternalStores OMElement Iterator
-     * @throws APIManagementException If an error occurs while reading external-store.xml
+     * @return ExternalStores Iterator
+     * @throws APIManagementException If an error occurs while reading ExternalAPIStores config in the Advanced Configuration
      */
     private static Iterator getExternalStoresIteratorFromConfig(int tenantId) throws APIManagementException {
 
         Iterator apiStoreIterator = null;
-        JSONObject content = ServiceReferenceHolder.getInstance().getApimConfigService()
+        Object contentObject = ServiceReferenceHolder.getInstance().getApimConfigService()
                 .getExternalStoreConfig(getTenantDomainFromTenantId(tenantId));
-        if (content.containsKey(APIConstants.EXTERNAL_API_STORE)) {
-            JSONArray externalAPIStore = (JSONArray) content.get(APIConstants.EXTERNAL_API_STORE);
-            apiStoreIterator = externalAPIStore.iterator();
+        if (contentObject instanceof ExternalAPIStoresConfigDTO) {
+            ExternalAPIStoresConfigDTO externalAPIStoresConfig = (ExternalAPIStoresConfigDTO) contentObject;
+            apiStoreIterator = externalAPIStoresConfig.getExternalAPIStoresList().iterator();
         }
         return apiStoreIterator;
     }
@@ -1961,8 +1958,8 @@ public final class APIUtil {
     /**
      * Check if external stores are configured and exists for given tenant.
      *
-     * @param tenantDomain Tenant Domain of logged in user
-     * @return Whether external stores are configured and non empty
+     * @param tenantDomain Tenant Domain of logged-in user
+     * @return Whether external stores are configured and non-empty
      */
     public static boolean isExternalStoresEnabled(String tenantDomain) throws APIManagementException {
 
@@ -1972,7 +1969,7 @@ public final class APIUtil {
         if (globalExternalStores != null && !globalExternalStores.isEmpty()) {
             return true;
         }
-        //If not present check in registry
+        //If not present check in Advanced Configuration
         Iterator apiStoreIterator = getExternalStoresIteratorFromConfig(tenantId);
         return apiStoreIterator != null && apiStoreIterator.hasNext();
     }
@@ -2742,26 +2739,6 @@ public final class APIUtil {
 
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while adding role permissions to API", e);
-        }
-    }
-
-    /**
-     * Load the External API Store Configuration  to the registry
-     *
-     * @param organization
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     */
-
-    public static void loadTenantExternalStoreConfig(String organization) throws APIManagementException {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Adding External Stores configuration to the tenant's registry");
-        }
-        try (InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/externalstores/default" +
-                "-external-api-stores.xml")) {
-            ServiceReferenceHolder.getInstance().getApimConfigService().addExternalStoreConfig(organization, IOUtils.toString(inputStream));
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading External Stores configuration file content", e);
         }
     }
 

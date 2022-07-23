@@ -865,8 +865,9 @@
     },
     "ExternalAPIStores": {
       "type": "object",
-      "default": {},
-      "title": "The ExternalAPIStores Schema",
+      "default": {
+      },
+      "title": "Add this configuration to enable External API Stores",
       "required": [
         "StoreURL",
         "ExternalAPIStore"
@@ -875,15 +876,17 @@
         "StoreURL": {
           "type": "string",
           "default": "",
-          "title": "The StoreURL Schema",
+          "title": "Enter the Store URL",
+          "description": "The URL of the current API-M deployment's API Developer Portal. This is the URL to the API in the original publisher's Developer Portal. APIs that are published to external Developer Portals are redirected to this URL.",
           "examples": [
             "http://localhost:9443/devportal"
           ]
         },
         "ExternalAPIStore": {
           "type": "array",
-          "default": [],
-          "title": "The ExternalAPIStore Schema",
+          "default": [
+          ],
+          "title": "Add External API Stores objects to this array",
           "items": {
             "type": "object",
             "title": "A Schema",
@@ -899,7 +902,7 @@
             "properties": {
               "id": {
                 "type": "string",
-                "title": "The id Schema",
+                "title": "id : The external Developer Portal identifier, which is a unique value.",
                 "examples": [
                   "DeveloperPortal1",
                   "DeveloperPortal2"
@@ -907,21 +910,22 @@
               },
               "type": {
                 "type": "string",
-                "title": "The type Schema",
+                "title": "type : The type of the Developer Portal. This can be a WSO2-specific API Developer Portal or an external one, which has a different implementation from the default API Developer Portal.",
                 "examples": [
                   "wso2"
                 ]
               },
               "className": {
                 "type": "string",
-                "title": "The className Schema",
+                "title": "className : The implementation class inside the WSO2 API Manager distribution.",
+                "description": "The default className specified is org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher, which is used when WSO2 specific API Developer Portal is used. However, if you are using an external API Developer Portal, you need to customize the class by extending the org.wso2.carbon.apimgt.api.model.APIPublisher interface and you should use the fully qualified class name of the new implementation as the className parameter.",
                 "examples": [
                   "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher"
                 ]
               },
               "DisplayName": {
                 "type": "string",
-                "title": "The DisplayName Schema",
+                "title": "DisplayName: The name of the external API Developer Portal that is displayed in the Publisher UI.",
                 "examples": [
                   "DeveloperPortal1",
                   "DeveloperPortal2"
@@ -929,7 +933,7 @@
               },
               "Endpoint": {
                 "type": "string",
-                "title": "The Endpoint Schema",
+                "title": "Endpoint: The URL of the external API Developer Portal.",
                 "examples": [
                   "http://localhost:9444/devportal1",
                   "http://localhost:9444/devportal2"
@@ -937,81 +941,62 @@
               },
               "Username": {
                 "type": "string",
-                "title": "The Username Schema",
+                "title": "Username of a user who has permission to create and publish APIs.",
                 "examples": [
                   "admin"
                 ]
               },
               "Password": {
                 "type": "string",
-                "title": "The Password Schema",
+                "title": "Password of a user who has permission to create and publish APIs.",
                 "examples": [
                   "admin"
                 ]
               }
             },
-            "examples": [{
-              "id": "DeveloperPortal1",
-              "type": "wso2",
-              "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
-              "DisplayName": "DeveloperPortal1",
-              "Endpoint": "http://localhost:9444/devportal1",
-              "Username": "admin",
-              "Password": "admin"
-            },
+            "examples": [
               {
-                "id": "DeveloperPortal2",
+                "id": "DeveloperPortal1",
                 "type": "wso2",
                 "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
-                "DisplayName": "DeveloperPortal2",
-                "Endpoint": "http://localhost:9444/devportal2",
+                "DisplayName": "DeveloperPortal1",
+                "Endpoint": "http://localhost:9444/devportal1",
                 "Username": "admin",
                 "Password": "admin"
-              }]
+              }
+            ]
           },
           "examples": [
-            [{
-              "id": "DeveloperPortal1",
-              "type": "wso2",
-              "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
-              "DisplayName": "DeveloperPortal1",
-              "Endpoint": "http://localhost:9444/devportal1",
-              "Username": "admin",
-              "Password": "admin"
-            },
+            [
               {
-                "id": "DeveloperPortal2",
+                "id": "DeveloperPortal1",
                 "type": "wso2",
                 "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
-                "DisplayName": "DeveloperPortal2",
-                "Endpoint": "http://localhost:9444/devportal2",
+                "DisplayName": "DeveloperPortal1",
+                "Endpoint": "http://localhost:9444/devportal1",
                 "Username": "admin",
                 "Password": "admin"
-              }]
+              }
+            ]
           ]
         }
       },
-      "examples": [{
-        "StoreURL": "http://localhost:9443/devportal",
-        "ExternalAPIStore": [{
-          "id": "DeveloperPortal1",
-          "type": "wso2",
-          "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
-          "DisplayName": "DeveloperPortal1",
-          "Endpoint": "http://localhost:9444/devportal1",
-          "Username": "admin",
-          "Password": "admin"
-        },
-          {
-            "id": "DeveloperPortal2",
-            "type": "wso2",
-            "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
-            "DisplayName": "DeveloperPortal2",
-            "Endpoint": "http://localhost:9444/devportal2",
-            "Username": "admin",
-            "Password": "admin"
-          }]
-      }]
+      "examples": [
+        {
+          "StoreURL": "http://localhost:9443/devportal",
+          "ExternalAPIStore": [
+            {
+              "id": "DeveloperPortal1",
+              "type": "wso2",
+              "className": "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher",
+              "DisplayName": "DeveloperPortal1",
+              "Endpoint": "http://localhost:9444/devportal1",
+              "Username": "admin",
+              "Password": "admin"
+            }
+          ]
+        }
+      ]
     }
   },
   "additionalProperties": true

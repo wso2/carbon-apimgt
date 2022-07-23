@@ -82,12 +82,6 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            APIUtil.loadTenantExternalStoreConfig(tenantDomain);
-        } catch (Exception e) {
-            log.error("Failed to load external-stores.xml to tenant " + tenantDomain + "'s registry", e);
-        }
-
-        try {
             APIUtil.loadTenantGAConfig(tenantDomain);
         } catch (Exception e) {
             log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry", e);

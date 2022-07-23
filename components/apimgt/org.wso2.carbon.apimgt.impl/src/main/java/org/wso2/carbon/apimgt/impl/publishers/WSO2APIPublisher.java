@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.publishers;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dto.ExternalAPIStoresConfigDTO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -56,20 +55,14 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * This class handles all the Publisher functionality when publishing an API to an external WSO2 Store.
@@ -591,14 +584,17 @@ public class WSO2APIPublisher implements APIPublisher {
         if (redirectURL != null) {
             return redirectURL;
         }
-        JSONObject content = ServiceReferenceHolder.getInstance().getApimConfigService()
+        Object contentObject = ServiceReferenceHolder.getInstance().getApimConfigService()
                 .getExternalStoreConfig(APIUtil.getTenantDomainFromTenantId(tenantId));
-        if (content.containsKey(APIConstants.EXTERNAL_API_STORES_STORE_URL)) {
-            redirectURL = (String) content.get(APIConstants.EXTERNAL_API_STORES_STORE_URL);
-        } else {
-            String msg = "Store URL element is missing in External APIStores configuration";
-            log.error(msg);
-            throw new APIManagementException(msg);
+        if (contentObject instanceof ExternalAPIStoresConfigDTO) {
+            ExternalAPIStoresConfigDTO externalAPIStoresConfig = (ExternalAPIStoresConfigDTO) contentObject;
+            if (externalAPIStoresConfig.getStoreURL() != null) {
+                redirectURL = externalAPIStoresConfig.getStoreURL();
+            } else {
+                String msg = "Store URL element is missing in External APIStores configuration";
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
         }
         return redirectURL;
     }
