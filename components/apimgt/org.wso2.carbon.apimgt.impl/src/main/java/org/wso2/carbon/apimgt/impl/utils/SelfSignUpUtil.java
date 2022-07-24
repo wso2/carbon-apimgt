@@ -33,8 +33,7 @@ public final class SelfSignUpUtil {
 
 
 	/**
-	 * Retrieve self signup configuration from the cache. if cache mises, load to the cache from the Advanced
-	 * Configuration and return the configuration
+	 * Retrieve self signup configuration from the Advanced Configuration and return the configuration
 	 *
 	 * @param tenantDomain Domain name of the tenant
 	 * @return UserRegistrationConfigDTO self signup configuration for the tenant
@@ -66,14 +65,10 @@ public final class SelfSignUpUtil {
 				String roleName;
 				if (config.getSignUpDomain() != null) {
 					// external role
-					roleName =
-							config.getSignUpDomain().toUpperCase() +
-									UserCoreConstants.DOMAIN_SEPARATOR + roles.next();
+					roleName = config.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR + roles.next();
 				} else {
 					// internal role
-					roleName =
-							UserCoreConstants.INTERNAL_DOMAIN + UserCoreConstants.DOMAIN_SEPARATOR +
-									roles.next();
+					roleName = UserCoreConstants.INTERNAL_DOMAIN + UserCoreConstants.DOMAIN_SEPARATOR + roles.next();
 				}
 				roleNamesArr.add(roleName);
 			}
@@ -99,14 +94,11 @@ public final class SelfSignUpUtil {
 			 * domain refers to the user storage
 			 */
 			if (index > 0) {
-				modifiedUsername =
-						signupConfig.getSignUpDomain().toUpperCase() +
-								UserCoreConstants.DOMAIN_SEPARATOR +
+				modifiedUsername = signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
 								username.substring(index + 1);
 			} else {
-				modifiedUsername =
-						signupConfig.getSignUpDomain().toUpperCase() +
-								UserCoreConstants.DOMAIN_SEPARATOR + username;
+				modifiedUsername = signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
+						username;
 			}
 		}
 		return modifiedUsername;

@@ -17,12 +17,13 @@
  */
 package org.wso2.carbon.apimgt.impl.config;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
@@ -45,7 +46,6 @@ import javax.cache.Cache;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -396,38 +396,29 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            JSONObject tenantConfig = (JSONObject) new JSONParser().parse(getTenantConfig(organization));
-            if (tenantConfig.containsKey(APIConstants.SELF_SIGN_UP_NAME)) {
-                return getSignupConfigurationFromAdvancedConfigurations(
-                        (JSONObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
+            JsonObject tenantConfig = (JsonObject) new JsonParser().parse(getTenantConfig(organization));
+            if (tenantConfig.has(APIConstants.SELF_SIGN_UP_NAME)) {
+                return getSignupUserRegistrationConfigDTO(
+                        (JsonObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
             } else {
                 return null;
             }
-        } catch (ParseException e) {
-            String msg = "Error while parsing Advanced Tenant configuration JSON.";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
-    /**
-     * load configuration from the Advanced Configurations
-     *
-     * @param selfSighupConfig - Self Signup Config of the Tenant Domain
-     * @return - A UserRegistrationConfigDTO instance
-     */
-    private static UserRegistrationConfigDTO getSignupConfigurationFromAdvancedConfigurations(
-            JSONObject selfSighupConfig) {
+    private static UserRegistrationConfigDTO getSignupUserRegistrationConfigDTO(JsonObject selfSighupConfig) {
 
         UserRegistrationConfigDTO config = new UserRegistrationConfigDTO();
-        ArrayList<String> roles = (ArrayList<String>) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM);
-        Iterator<String> rolesIterator = roles.iterator();
+        JsonArray roles = (JsonArray) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM);
+        Iterator<JsonElement> rolesIterator = roles.iterator();
         while (rolesIterator.hasNext()) {
-            config.getRoles().add(rolesIterator.next());
+            config.getRoles().add(rolesIterator.next().getAsString());
         }
-        config.setSignUpDomain((String) selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM));
+        config.setSignUpDomain(selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM) != null ?
+                selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).getAsString() :
+                null);
         return config;
     }
 

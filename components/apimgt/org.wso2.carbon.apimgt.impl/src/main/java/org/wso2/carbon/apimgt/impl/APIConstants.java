@@ -267,8 +267,6 @@ public final class APIConstants {
 
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_NAME = "SelfSignUp";
-    public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
-    public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE = "signup-config";
 
     public static final String DOCUMENTATION_SEARCH_PATH_FIELD = "path";
 
