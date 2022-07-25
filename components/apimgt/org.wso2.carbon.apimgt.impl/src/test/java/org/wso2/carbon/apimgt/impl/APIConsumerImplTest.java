@@ -805,6 +805,39 @@ public class APIConsumerImplTest {
 
     }
 
+    @Test
+    public void testRemoveSubscriptionWhenDeletePending() throws APIManagementException, WorkflowException, APIPersistenceException {
+        String uuid = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
+        final String deletionWorkflowRef = "SUB_DELETION_WORKFLOW_REF";
+        WorkflowDTO deletionWorkflow = new SubscriptionWorkflowDTO();
+        deletionWorkflow.setStatus(org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus.CREATED);
+        Subscriber subscriber = new Subscriber("sub1");
+        Application application = new Application("app1", subscriber);
+        application.setId(1);
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
+        SubscribedAPI subscribedAPIOld = new SubscribedAPI(subscriber, identifier);
+        subscribedAPIOld.setApplication(application);
+        Mockito.when(apiMgtDAO.getExternalWorkflowReferenceForSubscriptionAndWFType(Mockito.anyInt(), Mockito.anyString()))
+                .thenReturn(deletionWorkflowRef);
+        Mockito.when(apiMgtDAO.retrieveWorkflow(deletionWorkflowRef)).thenReturn(deletionWorkflow);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
+        SubscribedAPI subscribedAPINew = new SubscribedAPI(subscriber, identifier);
+        subscribedAPINew.setUUID(uuid);
+        subscribedAPINew.setApplication(application);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
+        Assert.assertEquals(-1, subscribedAPINew.getSubscriptionId());
+        Assert.assertEquals(APIConstants.SubscriptionStatus.DELETE_PENDING, subscribedAPINew.getSubStatus());
+    }
+
 
     @Test
     public void testAddSubscription() throws APIManagementException {

@@ -136,12 +136,9 @@ public class WorkflowUtils {
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
-            SubscribedAPI sub = ApiMgtDAO.getInstance()
-                    .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
-            String orgId = sub.getOrganization();
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
-                    subWFDto.getTenantId(), orgId,
+                    subWFDto.getTenantId(), subWFDto.getTenantDomain(),
                     Integer.parseInt(subWFDto.getWorkflowReference()), subWFDto.getExternalWorkflowReference(), 0,
                     "", 0, "", "", "");
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
