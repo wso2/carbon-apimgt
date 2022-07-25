@@ -286,31 +286,5 @@ public class RegistryLCManager {
         }
         return null;
     }
-    /**
-     * Returns a secured DocumentBuilderFactory instance
-     *
-     * @return DocumentBuilderFactory
-     */
-    public static DocumentBuilderFactory getSecuredDocumentBuilder() {
 
-        org.apache.xerces.impl.Constants Constants = null;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        dbf.setXIncludeAware(false);
-        dbf.setExpandEntityReferences(false);
-        try {
-            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
-            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
-            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
-        } catch (ParserConfigurationException e) {
-            log.error("Failed to load XML Processor Feature " + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE + " or "
-                    + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE + " or " + Constants.LOAD_EXTERNAL_DTD_FEATURE);
-        }
-
-        SecurityManager securityManager = new SecurityManager();
-        securityManager.setEntityExpansionLimit(ENTITY_EXPANSION_LIMIT);
-        dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
-
-        return dbf;
-    }
 }
