@@ -18456,13 +18456,12 @@ public class ApiMgtDAO {
     /**
      * Update the Endpoint of an API.
      *
-     * @param endpointUUID unique identifier of an Endpoint
      * @param apiEndpoint Endpoint Object model
      * @return updated endpoint object
      * @throws APIManagementException
      */
-    public APIEndpointInfo updateAPIEndpoint(String endpointUUID, APIEndpointInfo apiEndpoint)
-            throws APIManagementException {
+    public APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint) throws APIManagementException {
+        String endpointUUID = apiEndpoint.getEndpointUuid();
         APIEndpointInfo apiEndpointUpdated = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);

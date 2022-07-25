@@ -6238,14 +6238,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteAPIEndpointById(String endpointId) throws APIManagementException {
-        apiMgtDAO.deleteAPIEndpointByEndpointId(endpointId);
+    public void deleteAPIEndpointById(String endpointUUID) throws APIManagementException {
+        apiMgtDAO.deleteAPIEndpointByEndpointId(endpointUUID);
     }
 
     @Override
-    public APIEndpointInfo updateAPIEndpoint(String endpointUUID, APIEndpointInfo apiEndpoint)
+    public APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint)
             throws APIManagementException {
-        return apiMgtDAO.updateAPIEndpoint(endpointUUID, apiEndpoint);
+        return apiMgtDAO.updateAPIEndpoint(apiEndpoint);
     }
 
     @Override

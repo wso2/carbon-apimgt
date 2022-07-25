@@ -1439,7 +1439,8 @@ public interface APIProvider extends APIManager {
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
 
     /**
-     * Get Endpoint details by providing API UUID.
+     * Get Endpoint details by providing API UUID if it is revision UUID of an API it returns the revision
+     * endpoint details.
      *
      * @param uuid      Unique Identifier of API
      * @return List<APIEndpointInfo> Object
@@ -1448,7 +1449,9 @@ public interface APIProvider extends APIManager {
     List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException;
 
     /**
-     * Get Endpoint details by providing API UUID.
+     * Get Endpoint details by providing API UUID and Endpoint UUID.
+     * We could not fetch endpoint details by only using endpoint UUID because endpoints also have revision
+     * endpoint UUID is similar to an endpoint which can have different revisions.
      *
      * @param apiUUID      Unique Identifier of API
      * @param endpointUUID      Unique Identifier of Endpoint
@@ -1620,20 +1623,19 @@ public interface APIProvider extends APIManager {
     /**
      * Delete an API endpoint by providing the endpoint ID.
      *
-     * @param endpointId     API Endpoint UUID
+     * @param endpointUUID     API Endpoint UUID
      * @throws APIManagementException
      */
-    void deleteAPIEndpointById(String endpointId) throws APIManagementException;
+    void deleteAPIEndpointById(String endpointUUID) throws APIManagementException;
 
     /**
      *  Update an endpoint by providing the endpoint ID.
      *
-     * @param endpointUUID Unique identifier of endpoint
      * @param apiEndpoint  Endpoint with updated details
      * @return
      * @throws APIManagementException
      */
-    APIEndpointInfo updateAPIEndpoint(String endpointUUID, APIEndpointInfo apiEndpoint)
+    APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint)
             throws APIManagementException;
 
     /**
@@ -1668,10 +1670,10 @@ public interface APIProvider extends APIManager {
     APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
 
     /**
-     * Set existing Operation endpoints to URI Templates
+     * Set Operation endpoints to URI Templates.
      *
-     * @param apiId
-     * @param uriTemplates
+     * @param apiId  Unique Identifier of  an API
+     * @param uriTemplates Set of URI Templates
      * @throws APIManagementException
      */
     void setOperationEndpointsToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
@@ -1707,7 +1709,7 @@ public interface APIProvider extends APIManager {
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
     /**
-     * Check whether the endpoint has an operation mapping
+     * Check whether the endpoint has an operation mapping.
      *
      * @param endpointUuid
      * @return true if it has at least one mapping

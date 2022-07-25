@@ -1839,10 +1839,10 @@ public class APIProviderImplTest {
         apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
 
-        Mockito.when(apiProvider.updateAPIEndpoint(endpointuuid,apiEndpoint)).thenReturn(new APIEndpointInfo());
-        Mockito.when(apiProvider.updateAPIEndpoint(endpointuuid,dummyapiEndpoint)).thenReturn(null);
+        Mockito.when(apiProvider.updateAPIEndpoint(apiEndpoint)).thenReturn(new APIEndpointInfo());
+        Mockito.when(apiProvider.updateAPIEndpoint(dummyapiEndpoint)).thenReturn(null);
 
-        Assert.assertNotNull(apiProvider.updateAPIEndpoint(endpointuuid,apiEndpoint));
-        Assert.assertNull(apiProvider.updateAPIEndpoint(endpointuuid,dummyapiEndpoint));
+        Assert.assertNotNull(apiProvider.updateAPIEndpoint(apiEndpoint));
+        Assert.assertNull(apiProvider.updateAPIEndpoint(dummyapiEndpoint));
     }
 }
