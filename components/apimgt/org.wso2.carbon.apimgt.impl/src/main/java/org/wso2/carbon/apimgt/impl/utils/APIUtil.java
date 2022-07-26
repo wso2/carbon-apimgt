@@ -338,9 +338,6 @@ public final class APIUtil {
 
     private static boolean isContextCacheInitialized = false;
 
-    /**
-     * The constant DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION.
-     */
     public static final String DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION = "disableRoleValidationAtScopeCreation";
 
     private static final int ENTITY_EXPANSION_LIMIT = 0;
@@ -354,25 +351,10 @@ public final class APIUtil {
     private static volatile Set<String> allowedScopes;
     private static boolean isPublisherRoleCacheEnabled = true;
 
-    /**
-     * The constant STRICT.
-     */
     public static final String STRICT = "Strict";
-    /**
-     * The constant ALLOW_ALL.
-     */
     public static final String ALLOW_ALL = "AllowAll";
-    /**
-     * The constant DEFAULT_AND_LOCALHOST.
-     */
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
-    /**
-     * The constant HOST_NAME_VERIFIER.
-     */
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
-    /**
-     * The constant multiGrpAppSharing.
-     */
     public static String multiGrpAppSharing = null;
 
     private static final String CONFIG_ELEM_OAUTH = "OAuth";
@@ -433,8 +415,6 @@ public final class APIUtil {
 
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
-     *
-     * @throws APIManagementException the api management exception
      */
     public static void init() throws APIManagementException {
 
@@ -471,8 +451,8 @@ public final class APIUtil {
     /**
      * This method used to retrieve the api resource dependencies
      *
-     * @param api api object
-     * @throws APIManagementException the api management exception
+     * @param api      api object
+     * @throws APIManagementException
      */
     public static void updateAPIProductDependencies(API api) throws APIManagementException {
 
@@ -489,11 +469,10 @@ public final class APIUtil {
     /**
      * This method is used to execute an HTTP request
      *
-     * @param method     HttpRequest Type
-     * @param httpClient HttpClient
-     * @return HTTPResponse closeable http response
-     * @throws IOException            the io exception
-     * @throws APIManagementException the api management exception
+     * @param method       HttpRequest Type
+     * @param httpClient   HttpClient
+     * @return HTTPResponse
+     * @throws IOException
      */
     public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient)
             throws IOException, APIManagementException {
@@ -548,10 +527,9 @@ public final class APIUtil {
     /**
      * This method used to extract environment list configured with non empty URLs.
      *
-     * @param endpointConfigs (Eg: {"production_endpoints":{"url":"http://www.test.com/v1/xxx","config":null,                        "template_not_supported":false},"endpoint_type":"http"})
-     * @return Set<String> set
-     * @throws ParseException     the parse exception
-     * @throws ClassCastException the class cast exception
+     * @param endpointConfigs (Eg: {"production_endpoints":{"url":"http://www.test.com/v1/xxx","config":null,
+     *                        "template_not_supported":false},"endpoint_type":"http"})
+     * @return Set<String>
      */
     public static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
             throws ParseException, ClassCastException {
@@ -576,7 +554,7 @@ public final class APIUtil {
      * This method used to check whether the endpoints JSON object has a non empty URL.
      *
      * @param endpoints (Eg: {"url":"http://www.test.com/v1/xxx","config":null,"template_not_supported":false})
-     * @return boolean boolean
+     * @return boolean
      */
     public static boolean isEndpointURLNonEmpty(Object endpoints) {
 
@@ -600,13 +578,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Gets api.
-     *
-     * @param artifact the artifact
-     * @return the api
-     * @throws APIManagementException the api management exception
-     */
     public static API getAPI(GovernanceArtifact artifact)
             throws APIManagementException {
 
@@ -831,7 +802,7 @@ public final class APIUtil {
      * This method used to get Provider from provider artifact
      *
      * @param artifact provider artifact
-     * @return Provider provider
+     * @return Provider
      * @throws APIManagementException if failed to get Provider from provider artifact.
      */
     public static Provider getProvider(GenericArtifact artifact) throws APIManagementException {
@@ -855,8 +826,8 @@ public final class APIUtil {
      *
      * @param artifact initial governance artifact
      * @param api      API object with the attributes value
-     * @return GenericArtifact generic artifact
-     * @throws APIManagementException the api management exception
+     * @return GenericArtifact
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create API
      */
     public static GenericArtifact createAPIArtifactContent(GenericArtifact artifact, API api)
             throws APIManagementException {
@@ -1038,7 +1009,7 @@ public final class APIUtil {
      *
      * @param artifact   initial governance artifact
      * @param apiProduct APIProduct object with the attributes value
-     * @return GenericArtifact generic artifact
+     * @return GenericArtifact
      * @throws APIManagementException if failed to create API Product
      */
     public static GenericArtifact createAPIProductArtifactContent(GenericArtifact artifact, APIProduct apiProduct)
@@ -1144,7 +1115,7 @@ public final class APIUtil {
      * Create the Documentation from artifact
      *
      * @param artifact Documentation artifact
-     * @return Documentation documentation
+     * @return Documentation
      * @throws APIManagementException if failed to create Documentation from artifact
      */
     public static Documentation getDocumentation(GenericArtifact artifact) throws APIManagementException {
@@ -1211,9 +1182,8 @@ public final class APIUtil {
     /**
      * Create the Documentation from artifact
      *
-     * @param artifact       Documentation artifact
-     * @param docCreatorName the doc creator name
-     * @return Documentation documentation
+     * @param artifact Documentation artifact
+     * @return Documentation
      * @throws APIManagementException if failed to create Documentation from artifact
      */
     public static Documentation getDocumentation(GenericArtifact artifact, String docCreatorName)
@@ -1286,13 +1256,6 @@ public final class APIUtil {
         return documentation;
     }
 
-    /**
-     * Gets api status.
-     *
-     * @param status the status
-     * @return the api status
-     * @throws APIManagementException the api management exception
-     */
     public static APIStatus getApiStatus(String status) throws APIManagementException {
 
         APIStatus apiStatus = null;
@@ -1304,13 +1267,6 @@ public final class APIUtil {
         return apiStatus;
     }
 
-    /**
-     * Gets lc state from artifact.
-     *
-     * @param artifact the artifact
-     * @return the lc state from artifact
-     * @throws GovernanceException the governance exception
-     */
     public static String getLcStateFromArtifact(GovernanceArtifact artifact) throws GovernanceException {
         String lcState = artifact.getLifecycleState();
         String state = (lcState != null) ? lcState : artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
@@ -1321,7 +1277,6 @@ public final class APIUtil {
      * Prepends the Tenant Prefix to a registry path. ex: /t/test1.com
      *
      * @param postfixUrl path to be prepended.
-     * @param username   the username
      * @return Path prepended with he Tenant domain prefix.
      */
     public static String prependTenantPrefix(String postfixUrl, String username) {
@@ -1384,7 +1339,6 @@ public final class APIUtil {
      * Utility method to generate the path for a file.
      *
      * @param identifier APIIdentifier
-     * @param fileName   the file name
      * @return Generated path.
      * @fileName File name.
      */
@@ -1399,27 +1353,12 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Gets open api definition file path.
-     *
-     * @param apiName     the api name
-     * @param apiVersion  the api version
-     * @param apiProvider the api provider
-     * @return the open api definition file path
-     */
     public static String getOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
-    /**
-     * Gets revision path.
-     *
-     * @param apiUUID    the api uuid
-     * @param revisionId the revision id
-     * @return the revision path
-     */
     public static String getRevisionPath(String apiUUID, int revisionId) {
         return APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiUUID +
@@ -1427,55 +1366,23 @@ public final class APIUtil {
                 RegistryConstants.PATH_SEPARATOR;
     }
 
-    /**
-     * Gets async api definition file path.
-     *
-     * @param apiName     the api name
-     * @param apipVersion the apip version
-     * @param apiProvider the api provider
-     * @return the async api definition file path
-     */
     public static String getAsyncAPIDefinitionFilePath(String apiName, String apipVersion, String apiProvider) {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apipVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
-    /**
-     * Gets graphql definition file path.
-     *
-     * @param apiName     the api name
-     * @param apiVersion  the api version
-     * @param apiProvider the api provider
-     * @return the graphql definition file path
-     */
     public static String getGraphqlDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
-    /**
-     * Gets api product open api definition file path.
-     *
-     * @param apiName     the api name
-     * @param apiVersion  the api version
-     * @param apiProvider the api provider
-     * @return the api product open api definition file path
-     */
     public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
-    /**
-     * Gets wsdl definition file path.
-     *
-     * @param apiName     the api name
-     * @param apiVersion  the api version
-     * @param apiProvider the api provider
-     * @return the wsdl definition file path
-     */
     public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 replaceEmailDomain(apiProvider) + RegistryConstants.PATH_SEPARATOR +
@@ -1602,7 +1509,7 @@ public final class APIUtil {
     /**
      * Utility method to get documentation path of the revision
      *
-     * @param apiUUID    API UUID
+     * @param apiUUID  API UUID
      * @param revisionId revision id
      * @return Doc path
      */
@@ -1643,11 +1550,11 @@ public final class APIUtil {
      * @param artifact      GovernanceArtifact
      * @param id            Identifier
      * @param documentation Documentation
-     * @return GenericArtifact generic artifact
+     * @return GenericArtifact
      * @throws APIManagementException if failed to get GovernanceArtifact from Documentation
      */
     public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, Identifier id,
-                                                           Documentation documentation) throws APIManagementException {
+            Documentation documentation) throws APIManagementException {
 
         try {
             artifact.setAttribute(APIConstants.DOC_NAME, documentation.getName());
@@ -1658,21 +1565,21 @@ public final class APIUtil {
             Documentation.DocumentSourceType sourceType = documentation.getSourceType();
 
             switch (sourceType) {
-                case INLINE:
-                    sourceType = Documentation.DocumentSourceType.INLINE;
-                    break;
-                case MARKDOWN:
-                    sourceType = Documentation.DocumentSourceType.MARKDOWN;
-                    break;
-                case URL:
-                    sourceType = Documentation.DocumentSourceType.URL;
-                    break;
-                case FILE: {
-                    sourceType = Documentation.DocumentSourceType.FILE;
-                }
+            case INLINE:
+                sourceType = Documentation.DocumentSourceType.INLINE;
                 break;
-                default:
-                    throw new APIManagementException("Unknown sourceType " + sourceType + " provided for documentation");
+            case MARKDOWN:
+                sourceType = Documentation.DocumentSourceType.MARKDOWN;
+                break;
+            case URL:
+                sourceType = Documentation.DocumentSourceType.URL;
+                break;
+            case FILE: {
+                sourceType = Documentation.DocumentSourceType.FILE;
+            }
+            break;
+            default:
+                throw new APIManagementException("Unknown sourceType " + sourceType + " provided for documentation");
             }
             //Documentation Source URL is a required field in the documentation.rxt for migrated setups
             //Therefore setting a default value if it is not set.
@@ -1699,7 +1606,7 @@ public final class APIUtil {
      *
      * @param registry Registry
      * @param key      , key name of the key
-     * @return GenericArtifactManager artifact manager
+     * @return GenericArtifactManager
      * @throws APIManagementException if failed to initialized GenericArtifactManager
      */
     public static GenericArtifactManager getArtifactManager(Registry registry, String key) throws APIManagementException {
@@ -1724,74 +1631,36 @@ public final class APIUtil {
         return artifactManager;
     }
 
-    /**
-     * Handle exception.
-     *
-     * @param msg the msg
-     * @throws APIManagementException the api management exception
-     */
     public static void handleException(String msg) throws APIManagementException {
 
         log.error(msg);
         throw new APIManagementException(msg);
     }
 
-    /**
-     * Handle exception.
-     *
-     * @param msg the msg
-     * @param t   the t
-     * @throws APIManagementException the api management exception
-     */
     public static void handleException(String msg, Throwable t) throws APIManagementException {
 
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
 
-    /**
-     * Handle internal exception.
-     *
-     * @param msg the msg
-     * @param t   the t
-     * @throws APIMgtInternalException the api mgt internal exception
-     */
     public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {
 
         log.error(msg, t);
         throw new APIMgtInternalException(msg, t);
     }
 
-    /**
-     * Handle resource already exists exception.
-     *
-     * @param msg the msg
-     * @throws APIMgtResourceAlreadyExistsException the api mgt resource already exists exception
-     */
     public static void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
 
         log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
 
-    /**
-     * Handle resource not found exception.
-     *
-     * @param msg the msg
-     * @throws APIMgtResourceNotFoundException the api mgt resource not found exception
-     */
     public static void handleResourceNotFoundException(String msg) throws APIMgtResourceNotFoundException {
 
         log.error(msg);
         throw new APIMgtResourceNotFoundException(msg);
     }
 
-    /**
-     * Handle auth failure exception.
-     *
-     * @param msg the msg
-     * @throws APIMgtAuthorizationFailedException the api mgt authorization failed exception
-     */
     public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
 
         log.error(msg);
@@ -1816,7 +1685,6 @@ public final class APIUtil {
      * By default this is equal to $ref{server.base_path} (i:e https://localhost:9443)
      *
      * @return Origin string of the external IDP
-     * @throws APIManagementException the api management exception
      */
     public static String getExternalIDPOrigin() throws APIManagementException {
 
@@ -1834,7 +1702,6 @@ public final class APIUtil {
      * Get the check session URL to load in the session management iframe
      *
      * @return URL to be used in iframe source for the check session with IDP
-     * @throws APIManagementException the api management exception
      */
     public static String getExternalIDPCheckSessionEndpoint() throws APIManagementException {
 
@@ -1855,11 +1722,9 @@ public final class APIUtil {
      * take only the production node's Endpoint.
      * Else, pick what is available as the gateway node.
      *
-     * @param transports   the transports
-     * @param organization the organization
      * @return {@link String} - Gateway URL
-     * @throws APIManagementException the api management exception
      */
+
     public static String getGatewayendpoint(String transports, String organization) throws APIManagementException {
 
         String gatewayURLs;
@@ -1902,12 +1767,10 @@ public final class APIUtil {
      * @param transports      transports allowed for gateway endpoint
      * @param environmentName gateway environment name
      * @param environmentType gateway environment type
-     * @param organization    the organization
      * @return Gateway URL
-     * @throws APIManagementException the api management exception
      */
     public static String getGatewayEndpoint(String transports, String environmentName, String environmentType,
-                                            String organization)
+            String organization)
             throws APIManagementException {
 
         String gatewayURLs;
@@ -2015,7 +1878,6 @@ public final class APIUtil {
      * Returns a set of External API Stores as defined in the underlying governance
      * registry.
      *
-     * @param tenantId the tenant id
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
@@ -2114,7 +1976,6 @@ public final class APIUtil {
      *
      * @param tenantDomain Tenant Domain of logged in user
      * @return Whether external stores are configured and non empty
-     * @throws APIManagementException the api management exception
      */
     public static boolean isExternalStoresEnabled(String tenantDomain) throws APIManagementException {
 
@@ -2155,10 +2016,9 @@ public final class APIUtil {
     /**
      * Returns the External API Store Configuration with the given Store Name
      *
-     * @param apiStoreName the api store name
-     * @param tenantId     the tenant id
-     * @return external api store
-     * @throws APIManagementException the api management exception
+     * @param apiStoreName
+     * @return
+     * @throws APIManagementException
      */
     public static APIStore getExternalAPIStore(String apiStoreName, int tenantId) throws APIManagementException {
 
@@ -2175,7 +2035,7 @@ public final class APIUtil {
      * Returns an unfiltered map of API availability tiers as defined in the underlying governance
      * registry.
      *
-     * @return Map<String, Tier>  an unfiltered Map of tier names and Tier objects - possibly empty
+     * @return Map<String ,   Tier> an unfiltered Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers() throws APIManagementException {
@@ -2187,8 +2047,7 @@ public final class APIUtil {
      * Returns an unfiltered map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
-     * @param tenantId the tenant id
-     * @return Map<String, Tier>  an unfiltered Map of tier names and Tier objects - possibly empty
+     * @return Map<String ,   Tier> an unfiltered Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers(int tenantId) throws APIManagementException {
@@ -2225,7 +2084,6 @@ public final class APIUtil {
      * Returns a map of API subscription tiers of the tenant as defined in database
      * registry.
      *
-     * @param tenantId the tenant id
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
@@ -2238,7 +2096,6 @@ public final class APIUtil {
      * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
-     * @param tenantId the tenant id
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
@@ -2251,7 +2108,7 @@ public final class APIUtil {
      * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
-     * @param tierType     type of the tiers
+     * @param tierType type of the tiers
      * @param organization identifier of the organization
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
@@ -2435,7 +2292,6 @@ public final class APIUtil {
      *
      * @param userNameWithoutChange A username
      * @param permission            A valid Carbon permission
-     * @return the boolean
      * @throws APIManagementException If the user does not have the specified permission or if an error occurs
      */
     public static boolean hasPermission(String userNameWithoutChange, String permission)
@@ -2468,14 +2324,14 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(tenantDomain);
 
-                org.wso2.carbon.user.api.AuthorizationManager manager =
-                        ServiceReferenceHolder.getInstance()
-                                .getRealmService()
-                                .getTenantUserRealm(tenantId)
-                                .getAuthorizationManager();
-                authorized =
-                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
-                                CarbonConstants.UI_PERMISSION_ACTION);
+            org.wso2.carbon.user.api.AuthorizationManager manager =
+                    ServiceReferenceHolder.getInstance()
+                            .getRealmService()
+                            .getTenantUserRealm(tenantId)
+                            .getAuthorizationManager();
+            authorized =
+                    manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
+                            CarbonConstants.UI_PERMISSION_ACTION);
             if (APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
                 addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange,
                         authorized ? 1 : 2);
@@ -2493,7 +2349,7 @@ public final class APIUtil {
     /**
      * Checks whether the disablePermissionCheck parameter enabled
      *
-     * @return boolean boolean
+     * @return boolean
      */
     public static boolean isPermissionCheckDisabled() {
 
@@ -2513,8 +2369,8 @@ public final class APIUtil {
      * @param cookie     Cookie of the previously logged in session.
      * @param serviceUrl Url of the authentication service.
      * @return LoggedUserInfo object containing details of the logged in user.
-     * @throws RemoteException    the remote exception
-     * @throws ExceptionException the exception exception
+     * @throws ExceptionException
+     * @throws RemoteException
      */
     public static LoggedUserInfo getLoggedInUserInfo(String cookie, String serviceUrl) throws RemoteException, ExceptionException {
 
@@ -2531,7 +2387,7 @@ public final class APIUtil {
      * Retrieves the role list of a user
      *
      * @param username A username
-     * @return the string [ ]
+     * @param username A username
      * @throws APIManagementException If an error occurs
      */
     public static String[] getListOfRoles(String username) throws APIManagementException {
@@ -2564,7 +2420,6 @@ public final class APIUtil {
      * Check whether user is exist
      *
      * @param username A username
-     * @return the boolean
      * @throws APIManagementException If an error occurs
      */
     public static boolean isUserExist(String username) throws APIManagementException {
@@ -2589,7 +2444,6 @@ public final class APIUtil {
     /**
      * To add the value to a cache.
      *
-     * @param <T>       the type parameter
      * @param cacheName - Name of the Cache
      * @param key       - Key of the entry that need to be added.
      * @param value     - Value of the entry that need to be added.
@@ -2608,7 +2462,6 @@ public final class APIUtil {
     /**
      * To get the value from the cache.
      *
-     * @param <T>       the type parameter
      * @param cacheName Name of the cache.
      * @param key       Key of the cache entry.
      * @return Role list from the cache, if a values exists, otherwise null.
@@ -2646,8 +2499,9 @@ public final class APIUtil {
      * Sets permission for uploaded file resource.
      *
      * @param filePath Registry path for the uploaded file
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
+
     public static void setFilePermission(String filePath) throws APIManagementException {
 
         try {
@@ -2668,11 +2522,9 @@ public final class APIUtil {
     /**
      * This method used to get API from governance artifact specific to copyAPI
      *
-     * @param artifact   API artifact
-     * @param registry   Registry
-     * @param oldId      the old id
-     * @param oldContext the old context
-     * @return API api
+     * @param artifact API artifact
+     * @param registry Registry
+     * @return API
      * @throws APIManagementException if failed to get API from artifact
      */
     public static API getAPI(GovernanceArtifact artifact, Registry registry, APIIdentifier oldId, String oldContext)
@@ -2803,21 +2655,11 @@ public final class APIUtil {
         return api;
     }
 
-    /**
-     * Check access token partitioning enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean checkAccessTokenPartitioningEnabled() {
 
         return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isAccessTokenPartitioningEnabled();
     }
 
-    /**
-     * Check user name assertion enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean checkUserNameAssertionEnabled() {
 
         return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isUserNameAssertionEnabled();
@@ -2826,7 +2668,7 @@ public final class APIUtil {
     /**
      * validates if an accessToken has expired or not
      *
-     * @param accessTokenDO the access token do
+     * @param accessTokenDO
      * @return true if token has expired else false
      */
     public static boolean isAccessTokenExpired(APIKeyValidationInfoDTO accessTokenDO) {
@@ -2883,14 +2725,6 @@ public final class APIUtil {
         return input;
     }
 
-    /**
-     * Copy resource permissions.
-     *
-     * @param username           the username
-     * @param sourceArtifactPath the source artifact path
-     * @param targetArtifactPath the target artifact path
-     * @throws APIManagementException the api management exception
-     */
     public static void copyResourcePermissions(String username, String sourceArtifactPath, String targetArtifactPath)
             throws APIManagementException {
 
@@ -2927,9 +2761,10 @@ public final class APIUtil {
     /**
      * Load the External API Store Configuration  to the registry
      *
-     * @param organization the organization
-     * @throws APIManagementException the api management exception
+     * @param organization
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
+
     public static void loadTenantExternalStoreConfig(String organization) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
@@ -2946,9 +2781,10 @@ public final class APIUtil {
     /**
      * Load the Google Analytics Configuration  to the registry
      *
-     * @param organization the organization
-     * @throws APIManagementException the api management exception
+     * @param organization
+     * @throws APIManagementException
      */
+
     public static void loadTenantGAConfig(String organization) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
@@ -2964,12 +2800,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Load tenant work flow extensions.
-     *
-     * @param organization the organization
-     * @throws APIManagementException the api management exception
-     */
     public static void loadTenantWorkFlowExtensions(String organization)
             throws APIManagementException {
 
@@ -2996,10 +2826,8 @@ public final class APIUtil {
     }
 
     /**
-     * Load tenant self sign up configurations.
-     *
-     * @param organization the organization
-     * @throws APIManagementException the api management exception
+     * @param organization
+     * @throws APIManagementException
      */
     public static void loadTenantSelfSignUpConfigurations(String organization)
             throws APIManagementException {
@@ -3082,11 +2910,11 @@ public final class APIUtil {
         return data;
     }
 
+
+
     /**
-     * Create self sign up roles.
-     *
-     * @param tenantId the tenant id
-     * @throws APIManagementException the api management exception
+     * @param tenantId
+     * @throws APIManagementException
      */
     public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
 
@@ -3095,35 +2923,35 @@ public final class APIUtil {
                     ServiceReferenceHolder.getInstance().getApimConfigService()
                             .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
             DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-                factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                DocumentBuilder parser = factory.newDocumentBuilder();
-                InputStream inputStream = new ByteArrayInputStream(selfSighupConfig.getBytes());
-                Document dc = parser.parse(inputStream);
-                boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
-                String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0)
-                        .getFirstChild().getNodeValue();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            DocumentBuilder parser = factory.newDocumentBuilder();
+            InputStream inputStream = new ByteArrayInputStream(selfSighupConfig.getBytes());
+            Document dc = parser.parse(inputStream);
+            boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
+            String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0)
+                    .getFirstChild().getNodeValue();
 
-                if (enableSubscriberRoleCreation) {
-                    int roleLength = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
-                            .getLength();
+            if (enableSubscriberRoleCreation) {
+                int roleLength = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
+                        .getLength();
 
-                    for (int i = 0; i < roleLength; i++) {
-                        String roleName = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
-                                .item(i).getFirstChild().getNodeValue();
-                        boolean isExternalRole = Boolean.parseBoolean(dc
-                                .getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL).item(i)
-                                .getFirstChild().getNodeValue());
-                        if (roleName != null) {
-                            // If isExternalRole==false ;create the subscriber role as an internal role
-                            if (isExternalRole && signUpDomain != null) {
-                                roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
-                            } else {
-                                roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR
-                                        + roleName;
-                            }
-                            createSubscriberRole(roleName, tenantId);
+                for (int i = 0; i < roleLength; i++) {
+                    String roleName = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
+                            .item(i).getFirstChild().getNodeValue();
+                    boolean isExternalRole = Boolean.parseBoolean(dc
+                            .getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL).item(i)
+                            .getFirstChild().getNodeValue());
+                    if (roleName != null) {
+                        // If isExternalRole==false ;create the subscriber role as an internal role
+                        if (isExternalRole && signUpDomain != null) {
+                            roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
+                        } else {
+                            roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR
+                                    + roleName;
                         }
+                        createSubscriberRole(roleName, tenantId);
                     }
+                }
             }
             if (log.isDebugEnabled()) {
                 log.debug("Adding Self signup configuration to the tenant's registry");
@@ -3139,7 +2967,6 @@ public final class APIUtil {
      *
      * @param tenantId id of the tenant
      * @return true if subscriber role creation enabled in tenant-conf.json
-     * @throws APIManagementException the api management exception
      */
     public static boolean isSubscriberRoleCreationEnabled(int tenantId) throws APIManagementException {
 
@@ -3158,7 +2985,7 @@ public final class APIUtil {
      * Create default roles specified in APIM per-tenant configuration file
      *
      * @param tenantId id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createDefaultRoles(int tenantId) throws APIManagementException {
 
@@ -3243,11 +3070,6 @@ public final class APIUtil {
         return roleCreationEnabled;
     }
 
-    /**
-     * Is analytics enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isAnalyticsEnabled() {
 
         return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
@@ -3295,7 +3117,7 @@ public final class APIUtil {
      *
      * @param roleName role name
      * @param tenantId id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createSubscriberRole(String roleName, int tenantId) throws APIManagementException {
 
@@ -3310,7 +3132,7 @@ public final class APIUtil {
      *
      * @param roleName role name
      * @param tenantId id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createPublisherRole(String roleName, int tenantId) throws APIManagementException {
 
@@ -3325,7 +3147,7 @@ public final class APIUtil {
      *
      * @param roleName role name
      * @param tenantId id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createCreatorRole(String roleName, int tenantId) throws APIManagementException {
 
@@ -3342,7 +3164,7 @@ public final class APIUtil {
      *
      * @param roleName role name
      * @param tenantId id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createDevOpsRole(String roleName, int tenantId) throws APIManagementException {
 
@@ -3360,7 +3182,7 @@ public final class APIUtil {
      *
      * @param roleName role name
      * @param tenantId id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createObserverRole(String roleName, int tenantId) throws APIManagementException {
 
@@ -3375,7 +3197,7 @@ public final class APIUtil {
      *
      * @param roleName role name
      * @param tenantId id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createIntegrationDeveloperRole(String roleName, int tenantId) throws APIManagementException {
 
@@ -3388,7 +3210,7 @@ public final class APIUtil {
      *
      * @param roleName role name
      * @param tenantId id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createAnalyticsRole(String roleName, int tenantId) throws APIManagementException {
 
@@ -3403,7 +3225,7 @@ public final class APIUtil {
      * @param roleName    role name
      * @param permissions a set of permissions to be associated with the role
      * @param tenantId    id of the tenant
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static void createRole(String roleName, Permission[] permissions, int tenantId)
             throws APIManagementException {
@@ -3435,13 +3257,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Sets self registration.
-     *
-     * @param config   the config
-     * @param tenantId the tenant id
-     * @throws APIManagementException the api management exception
-     */
     public void setupSelfRegistration(APIManagerConfiguration config, int tenantId) throws APIManagementException {
 
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
@@ -3488,12 +3303,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Remove any symbol from uri tempate string.
-     *
-     * @param uriTemplate the uri template
-     * @return the string
-     */
     public static String removeAnySymbolFromUriTempate(String uriTemplate) {
 
         if (uriTemplate != null) {
@@ -3505,36 +3314,16 @@ public final class APIUtil {
         return uriTemplate;
     }
 
-    /**
-     * Gets average rating.
-     *
-     * @param id the id
-     * @return the average rating
-     * @throws APIManagementException the api management exception
-     */
     public static float getAverageRating(String id) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(id);
     }
 
-    /**
-     * Gets average rating.
-     *
-     * @param apiId the api id
-     * @return the average rating
-     * @throws APIManagementException the api management exception
-     */
     public static float getAverageRating(int apiId) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(apiId);
     }
 
-    /**
-     * Gets all tenants with super tenant.
-     *
-     * @return the all tenants with super tenant
-     * @throws UserStoreException the user store exception
-     */
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
 
         Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
@@ -3555,7 +3344,7 @@ public final class APIUtil {
      *
      * @param loggedInUser   current logged in user to publisher
      * @param authorizedUser access token owner
-     * @return boolean
+     * @return
      */
     public static boolean isLoggedInUserAuthorizedToRevokeToken(String loggedInUser, String authorizedUser) {
 
@@ -3572,40 +3361,15 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Gets application uuid.
-     *
-     * @param appName the app name
-     * @param userId  the user id
-     * @return the application uuid
-     * @throws APIManagementException the api management exception
-     */
     public static String getApplicationUUID(String appName, String userId) throws APIManagementException {
         return ApiMgtDAO.getInstance().getApplicationUUID(appName, userId);
     }
 
-    /**
-     * Gets application id.
-     *
-     * @param appName the app name
-     * @param userId  the user id
-     * @return the application id
-     * @throws APIManagementException the api management exception
-     */
     public static int getApplicationId(String appName, String userId) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getApplicationId(appName, userId);
     }
 
-    /**
-     * Gets application id.
-     *
-     * @param appName the app name
-     * @param userId  the user id
-     * @param groupId the group id
-     * @return the application id
-     * @throws APIManagementException the api management exception
-     */
     public static int getApplicationId(String appName, String userId, String groupId) throws APIManagementException {
 
         Application application = ApiMgtDAO.getInstance().getApplicationByName(appName, userId, groupId);
@@ -3621,41 +3385,25 @@ public final class APIUtil {
      *
      * @param api API
      * @return GraphqlComplexityInfo object that contains the complexity details
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
+
     public static GraphqlComplexityInfo getComplexityDetails(API api) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getComplexityDetails(api.getUuid());
     }
 
-    /**
-     * Is api management enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isAPIManagementEnabled() {
 
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.Enabled"));
     }
 
-    /**
-     * Is load api contexts at startup boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isLoadAPIContextsAtStartup() {
 
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty(
                 "APIManagement.LoadAPIContextsInServerStartup"));
     }
 
-    /**
-     * Gets external api stores.
-     *
-     * @param tenantId the tenant id
-     * @return the external api stores
-     * @throws APIManagementException the api management exception
-     */
     public static Set<APIStore> getExternalAPIStores(int tenantId) throws APIManagementException {
 
         SortedSet<APIStore> apistoreSet = new TreeSet<APIStore>(new APIStoreNameComparator());
@@ -3664,11 +3412,6 @@ public final class APIUtil {
 
     }
 
-    /**
-     * Is allow display ap is with multiple status boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isAllowDisplayAPIsWithMultipleStatus() {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -3682,11 +3425,6 @@ public final class APIUtil {
         return Boolean.parseBoolean(displayAllAPIs);
     }
 
-    /**
-     * Is allow display multiple versions boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isAllowDisplayMultipleVersions() {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -3701,11 +3439,6 @@ public final class APIUtil {
         return Boolean.parseBoolean(displayMultiVersions);
     }
 
-    /**
-     * Update null throttling tier at startup boolean.
-     *
-     * @return the boolean
-     */
     public static boolean updateNullThrottlingTierAtStartup() {
 
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
@@ -3715,14 +3448,6 @@ public final class APIUtil {
         return isNullThrottlingTierUpdateEnabled == null || Boolean.parseBoolean(isNullThrottlingTierUpdateEnabled);
     }
 
-    /**
-     * Gets external api stores.
-     *
-     * @param inputStores the input stores
-     * @param tenantId    the tenant id
-     * @return the external api stores
-     * @throws APIManagementException the api management exception
-     */
     public static Set<APIStore> getExternalAPIStores(Set<APIStore> inputStores, int tenantId)
             throws APIManagementException {
 
@@ -3748,24 +3473,12 @@ public final class APIUtil {
         return inputStores;
     }
 
-    /**
-     * Is ap is publish to external api stores boolean.
-     *
-     * @param tenantId the tenant id
-     * @return the boolean
-     * @throws APIManagementException the api management exception
-     */
     public static boolean isAPIsPublishToExternalAPIStores(int tenantId)
             throws APIManagementException {
 
         return !getExternalStores(tenantId).isEmpty();
     }
 
-    /**
-     * Is api gateway key cache enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isAPIGatewayKeyCacheEnabled() {
 
         try {
@@ -3780,11 +3493,6 @@ public final class APIUtil {
         return true;
     }
 
-    /**
-     * Gets api context cache.
-     *
-     * @return the api context cache
-     */
     public static Cache getAPIContextCache() {
 
         CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
@@ -3793,7 +3501,7 @@ public final class APIUtil {
             isContextCacheInitialized = true;
             return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_CONTEXT_CACHE_MANAGER).
                     setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
-                            APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
+                    APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
         } else {
             return Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).getCache(
                     APIConstants.API_CONTEXT_CACHE);
@@ -3803,8 +3511,8 @@ public final class APIUtil {
     /**
      * Get active tenant domains
      *
-     * @return active tenant domains
-     * @throws UserStoreException the user store exception
+     * @return
+     * @throws UserStoreException
      */
     public static Set<String> getActiveTenantDomains() throws UserStoreException {
 
@@ -3831,7 +3539,7 @@ public final class APIUtil {
      *
      * @param state state of the tenant
      * @return set of tenants
-     * @throws UserStoreException the user store exception
+     * @throws UserStoreException
      */
     public static Set<String> getTenantDomainsByState(String state) throws UserStoreException {
 
@@ -3853,8 +3561,8 @@ public final class APIUtil {
      * Check if tenant is available
      *
      * @param tenantDomain tenant Domain
-     * @return isTenantAvailable boolean
-     * @throws UserStoreException the user store exception
+     * @return isTenantAvailable
+     * @throws UserStoreException
      */
     public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
 
@@ -3869,12 +3577,6 @@ public final class APIUtil {
                 .isTenantActive(tenantId);
     }
 
-    /**
-     * Gets organization resolver.
-     *
-     * @return the organization resolver
-     * @throws APIManagementException the api management exception
-     */
     public static OrganizationResolver getOrganizationResolver() throws APIManagementException {
 
         OrganizationResolver resolver = ServiceReferenceHolder.getInstance().getOrganizationResolver();
@@ -3884,23 +3586,11 @@ public final class APIUtil {
         return resolver;
     }
 
-    /**
-     * Is on prem resolver boolean.
-     *
-     * @return the boolean
-     * @throws APIManagementException the api management exception
-     */
     public static boolean isOnPremResolver() throws APIManagementException {
         OrganizationResolver resolver = APIUtil.getOrganizationResolver();
         return resolver instanceof OnPremResolver;
     }
 
-    /**
-     * Gets resource quota limiter.
-     *
-     * @return the resource quota limiter
-     * @throws APIManagementException the api management exception
-     */
     public static ResourceQuotaLimiter getResourceQuotaLimiter() throws APIManagementException {
         ResourceQuotaLimiter resourceQuotaLimiter = ServiceReferenceHolder.getInstance().getResourceQuotaLimiter();
         if (resourceQuotaLimiter == null) {
@@ -3909,35 +3599,14 @@ public final class APIUtil {
         return resourceQuotaLimiter;
     }
 
-    /**
-     * Gets internal organization id.
-     *
-     * @param organization the organization
-     * @return the internal organization id
-     * @throws APIManagementException the api management exception
-     */
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
         return getOrganizationResolver().getInternalId(organization);
     }
 
-    /**
-     * Gets internal organization domain.
-     *
-     * @param organization the organization
-     * @return the internal organization domain
-     * @throws APIManagementException the api management exception
-     */
     public static String getInternalOrganizationDomain(String organization) throws APIManagementException {
         return APIUtil.getTenantDomainFromTenantId(APIUtil.getInternalOrganizationId(organization));
     }
 
-    /**
-     * Is internal organization boolean.
-     *
-     * @param organization the organization
-     * @return the boolean
-     * @throws UserStoreException the user store exception
-     */
     public static boolean isInternalOrganization(String organization) throws UserStoreException {
         return isTenantAvailable(organization);
     }
@@ -3945,11 +3614,8 @@ public final class APIUtil {
     /**
      * Check whether the user has the given role
      *
-     * @param user the user
-     * @param role the role
-     * @return the boolean
-     * @throws UserStoreException     the user store exception
-     * @throws APIManagementException the api management exception
+     * @throws UserStoreException
+     * @throws APIManagementException
      */
     public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
 
@@ -4009,10 +3675,10 @@ public final class APIUtil {
     /**
      * Check whether roles exist for the user.
      *
-     * @param userName the user name
-     * @param roleName the role name
-     * @return boolean
-     * @throws APIManagementException the api management exception
+     * @param userName
+     * @param roleName
+     * @return
+     * @throws APIManagementException
      */
     public static boolean isRoleExistForUser(String userName, String roleName) throws APIManagementException {
 
@@ -4038,10 +3704,10 @@ public final class APIUtil {
      * Create API Definition in JSON
      *
      * @param api API
-     * @return the string
-     * @throws APIManagementException the api management exception
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to generate the content and save
      * @deprecated
      */
+
     @Deprecated
     public static String createSwaggerJSONContent(API api) throws APIManagementException {
 
@@ -4151,7 +3817,7 @@ public final class APIUtil {
      * Helper method to get tenantId from userName
      *
      * @param userName user name
-     * @return tenantId tenant id
+     * @return tenantId
      */
     public static int getTenantId(String userName) {
         //get tenant domain from user name
@@ -4163,7 +3829,7 @@ public final class APIUtil {
      * Helper method to get tenantId from tenantDomain
      *
      * @param tenantDomain tenant Domain
-     * @return tenantId tenant id from tenant domain
+     * @return tenantId
      */
     public static int getTenantIdFromTenantDomain(String tenantDomain) {
 
@@ -4186,7 +3852,7 @@ public final class APIUtil {
      * Helper method to get tenantId from organization
      *
      * @param organization Organization
-     * @return tenantId internal id from tenant domain or organization
+     * @return tenantId
      */
     public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
@@ -4205,7 +3871,7 @@ public final class APIUtil {
      * Helper method to get tenantDomain from tenantId
      *
      * @param tenantId tenant Id
-     * @return tenantId tenant domain from tenant id
+     * @return tenantId
      */
     public static String getTenantDomainFromTenantId(int tenantId) {
 
@@ -4223,11 +3889,6 @@ public final class APIUtil {
         return null;
     }
 
-    /**
-     * Gets super tenant id.
-     *
-     * @return the super tenant id
-     */
     public static int getSuperTenantId() {
 
         return MultitenantConstants.SUPER_TENANT_ID;
@@ -4236,7 +3897,7 @@ public final class APIUtil {
     /**
      * Helper method to get username with tenant domain.
      *
-     * @param userName the user name
+     * @param userName
      * @return userName with tenant domain
      */
     public static String getUserNameWithTenantSuffix(String userName) {
@@ -4254,9 +3915,9 @@ public final class APIUtil {
     /**
      * Build OMElement from inputstream
      *
-     * @param inputStream the input stream
-     * @return om element
-     * @throws Exception the exception
+     * @param inputStream
+     * @return
+     * @throws Exception
      */
     public static OMElement buildOMElement(InputStream inputStream) throws Exception {
 
@@ -4280,14 +3941,14 @@ public final class APIUtil {
      * Get stored in sequences, out sequences and fault sequences from the governanceSystem registry
      *
      * @param sequenceName -The sequence to be retrieved
-     * @param tenantId     the tenant id
-     * @param direction    - Direction indicates which sequences to fetch. Values would be                     "in", "out" or "fault"
-     * @param identifier   the identifier
-     * @return custom sequence
-     * @throws APIManagementException the api management exception
+     * @param tenantId
+     * @param direction    - Direction indicates which sequences to fetch. Values would be
+     *                     "in", "out" or "fault"
+     * @return
+     * @throws APIManagementException
      */
     public static OMElement getCustomSequence(String sequenceName, int tenantId, String direction,
-                                              APIIdentifier identifier) throws APIManagementException {
+            APIIdentifier identifier) throws APIManagementException {
 
         org.wso2.carbon.registry.api.Collection seqCollection = null;
 
@@ -4351,15 +4012,15 @@ public final class APIUtil {
     /**
      * Returns true if the sequence is a per API one
      *
-     * @param sequenceName the sequence name
-     * @param tenantId     the tenant id
+     * @param sequenceName
+     * @param tenantId
      * @param identifier   API identifier
      * @param sequenceType in/out/fault
-     * @return true /false
-     * @throws APIManagementException the api management exception
+     * @return true/false
+     * @throws APIManagementException
      */
     public static boolean isPerAPISequence(String sequenceName, int tenantId, APIIdentifier identifier,
-                                           String sequenceType) throws APIManagementException {
+            String sequenceType) throws APIManagementException {
 
         org.wso2.carbon.registry.api.Collection seqCollection = null;
         try {
@@ -4403,8 +4064,8 @@ public final class APIUtil {
     /**
      * Returns true if sequence is set
      *
-     * @param sequence the sequence
-     * @return boolean
+     * @param sequence
+     * @return
      */
     public static boolean isSequenceDefined(String sequence) {
 
@@ -4415,8 +4076,8 @@ public final class APIUtil {
      * Return the sequence extension name.
      * eg: admin--testAPi--v1.00
      *
-     * @param api the api
-     * @return sequence extension name
+     * @param api
+     * @return
      */
     public static String getSequenceExtensionName(API api) {
 
@@ -4427,9 +4088,7 @@ public final class APIUtil {
      * Return the sequence extension name.
      * eg: admin--testAPi--v1.00
      *
-     * @param name    the name
-     * @param version the version
-     * @return sequence extension name
+     * @return
      */
     public static String getSequenceExtensionName(String name, String version) {
 
@@ -4437,11 +4096,8 @@ public final class APIUtil {
     }
 
     /**
-     * Decrypt token string.
-     *
-     * @param token the token
-     * @return string
-     * @throws CryptoException the crypto exception
+     * @param token
+     * @return
      */
     public static String decryptToken(String token) throws CryptoException {
 
@@ -4460,12 +4116,8 @@ public final class APIUtil {
     }
 
     /**
-     * Encrypt token string.
-     *
-     * @param token the token
-     * @return string
-     * @throws CryptoException        the crypto exception
-     * @throws APIManagementException the api management exception
+     * @param token
+     * @return
      */
     public static String encryptToken(String token) throws CryptoException, APIManagementException {
 
@@ -4529,12 +4181,6 @@ public final class APIUtil {
         return result.toString();
     }
 
-    /**
-     * Load tenant registry.
-     *
-     * @param tenantId the tenant id
-     * @throws RegistryException the registry exception
-     */
     public static void loadTenantRegistry(int tenantId) throws RegistryException {
 
         TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
@@ -4542,12 +4188,6 @@ public final class APIUtil {
         tenantRegistryLoader.loadTenantRegistry(tenantId);
     }
 
-    /**
-     * Is sandbox endpoints exists boolean.
-     *
-     * @param endpointConfig the endpoint config
-     * @return the boolean
-     */
     public static boolean isSandboxEndpointsExists(String endpointConfig) {
 
         JSONParser parser = new JSONParser();
@@ -4572,12 +4212,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Is production endpoints exists boolean.
-     *
-     * @param endpointConfig the endpoint config
-     * @return the boolean
-     */
     public static boolean isProductionEndpointsExists(String endpointConfig) {
 
         JSONParser parser = new JSONParser();
@@ -4607,7 +4241,7 @@ public final class APIUtil {
      *
      * @param artifact API artifact
      * @param registry Registry
-     * @return API api information
+     * @return API
      * @throws APIManagementException if failed to get API from artifact
      */
     public static API getAPIInformation(GovernanceArtifact artifact, Registry registry) throws APIManagementException {
@@ -4663,7 +4297,7 @@ public final class APIUtil {
      * @return - The cache key
      */
     public static String getResourceInfoDTOCacheKey(String apiContext, String apiVersion,
-                                                    String resourceUri, String httpMethod) {
+            String resourceUri, String httpMethod) {
 
         return apiContext + "/" + apiVersion + resourceUri + ":" + httpMethod;
     }
@@ -4685,7 +4319,6 @@ public final class APIUtil {
      * Get the key of the Resource using context, version, uri template and http verb.( used in scopes)
      *
      * @param apiIdentifier - API Identifier
-     * @param context       the context
      * @param template      - URI Template
      * @return - The resource key
      */
@@ -4750,7 +4383,7 @@ public final class APIUtil {
      * @return - The Key which will be used to cache the access token
      */
     public static String getAccessTokenCacheKey(String accessToken, String apiContext, String apiVersion,
-                                                String resourceUri, String httpVerb, String authLevel) {
+            String resourceUri, String httpVerb, String authLevel) {
 
         return accessToken + ':' + apiContext + '/' + apiVersion + resourceUri + ':' + httpVerb + ':' + authLevel;
     }
@@ -4758,7 +4391,7 @@ public final class APIUtil {
     /**
      * Resolves system properties and replaces in given in text
      *
-     * @param text the text
+     * @param text
      * @return System properties resolved text
      */
     public static String replaceSystemProperty(String text) {
@@ -4811,13 +4444,6 @@ public final class APIUtil {
         return text;
     }
 
-    /**
-     * Encrypt password string.
-     *
-     * @param plainTextPassword the plain text password
-     * @return the string
-     * @throws APIManagementException the api management exception
-     */
     public static String encryptPassword(String plainTextPassword) throws APIManagementException {
 
         try {
@@ -4834,8 +4460,7 @@ public final class APIUtil {
      * otherwise we will mark it as invalid wsdl url. How ever here we do not
      * validate wsdl content.
      *
-     * @param wsdlURL  wsdl url tobe tested
-     * @param required the required
+     * @param wsdlURL wsdl url tobe tested
      * @return true if its valid url else fale
      */
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
@@ -4861,15 +4486,14 @@ public final class APIUtil {
     /**
      * Returns whether the provided URL content contains the string to match
      *
-     * @param url      URL
-     * @param match    string to match
-     * @param maxLines the max lines
+     * @param url   URL
+     * @param match string to match
      * @return whether the provided URL content contains the string to match
      */
     public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
 
         try (BufferedReader in =
-                     new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
+                new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
             while ((inputLine = in.readLine()) != null && maxLines > 0) {
@@ -4889,7 +4513,7 @@ public final class APIUtil {
     /**
      * load tenant axis configurations.
      *
-     * @param tenantDomain the tenant domain
+     * @param tenantDomain
      */
     public static void loadTenantConfig(String tenantDomain) {
 
@@ -4940,7 +4564,7 @@ public final class APIUtil {
     /**
      * load tenant axis configurations.
      *
-     * @param tenantDomain the tenant domain
+     * @param tenantDomain
      */
     public static void loadTenantConfigBlockingMode(String tenantDomain) {
 
@@ -4952,12 +4576,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Extract customer key from auth header string.
-     *
-     * @param headersMap the headers map
-     * @return the string
-     */
     public static String extractCustomerKeyFromAuthHeader(Map headersMap) {
 
         //From 1.0.7 version of this component onwards remove the OAuth authorization header from
@@ -5028,10 +4646,8 @@ public final class APIUtil {
     /**
      * Returns a map of gateway / store domains for the tenant
      *
-     * @param tenantDomain the tenant domain
-     * @param appType      the app type
      * @return a Map of domain names for tenant
-     * @throws APIManagementException the api management exception
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, String> getDomainMappings(String tenantDomain, String appType)
             throws APIManagementException {
@@ -5084,7 +4700,7 @@ public final class APIUtil {
      * @param resourceUrl  resource want to download
      * @param tenantDomain loggedUserTenantDomain
      * @return map that contains Data of the resource
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static Map<String, Object> getDocument(String userName, String resourceUrl, String tenantDomain)
             throws APIManagementException {
@@ -5143,7 +4759,6 @@ public final class APIUtil {
      *
      * @param environments environments values in json format
      * @return set of environments that Published
-     * @throws APIManagementException the api management exception
      */
     public static Set<String> extractEnvironmentsForAPI(String environments) throws APIManagementException {
 
@@ -5153,14 +4768,6 @@ public final class APIUtil {
         return environmentStringSet;
     }
 
-    /**
-     * Extract environments for api set.
-     *
-     * @param environments the environments
-     * @param organization the organization
-     * @return the set
-     * @throws APIManagementException the api management exception
-     */
     public static Set<String> extractEnvironmentsForAPI(String environments, String organization) throws APIManagementException {
 
         Set<String> environmentStringSet = null;
@@ -5190,7 +4797,6 @@ public final class APIUtil {
      * This method used to set environment values to governance artifact of API .
      *
      * @param api API object with the attributes value
-     * @return the string
      */
     public static String writeEnvironmentsToArtifact(API api) {
 
@@ -5216,7 +4822,6 @@ public final class APIUtil {
      * This method used to set environment values to governance artifact of APIProduct .
      *
      * @param apiProduct API object with the attributes value
-     * @return the string
      */
     public static String writeEnvironmentsToArtifact(APIProduct apiProduct) {
 
@@ -5242,8 +4847,6 @@ public final class APIUtil {
      * This method used to get the currently published gateway environments of an API .
      *
      * @param api API object with the attributes value
-     * @return the environments of api
-     * @throws APIManagementException the api management exception
      */
     public static List<Environment> getEnvironmentsOfAPI(API api) throws APIManagementException {
 
@@ -5268,7 +4871,8 @@ public final class APIUtil {
      *
      * @param apps The collection of applications
      * @param name The application to be checked if exists
-     * @return true - if an application of the name <name> already exists in the collection <apps> false-  if an application of the name <name>  does not already exists in the collection <apps>
+     * @return true - if an application of the name <name> already exists in the collection <apps>
+     * false-  if an application of the name <name>  does not already exists in the collection <apps>
      */
     public static boolean doesApplicationExist(Application[] apps, String name) {
 
@@ -5336,7 +4940,7 @@ public final class APIUtil {
      * @throws APIManagementException if failed to get applications for given subscriber
      */
     public static boolean isApplicationExist(String subscriber, String applicationName, String groupId,
-                                             String organization) throws APIManagementException {
+            String organization) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId, organization);
     }
@@ -5360,7 +4964,6 @@ public final class APIUtil {
      *
      * @param subscriber      subscriber name
      * @param applicationName application name
-     * @param organization    the organization
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
@@ -5370,11 +4973,6 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().isApplicationOwnedBySubscriber(applicationName, subscriber, organization);
     }
 
-    /**
-     * Gets host address.
-     *
-     * @return the host address
-     */
     public static String getHostAddress() {
 
         if (hostAddress != null) {
@@ -5419,12 +5017,6 @@ public final class APIUtil {
         return null;
     }
 
-    /**
-     * Is string array boolean.
-     *
-     * @param args the args
-     * @return the boolean
-     */
     public static boolean isStringArray(Object[] args) {
 
         for (Object arg : args) {
@@ -5435,13 +5027,6 @@ public final class APIUtil {
         return true;
     }
 
-    /**
-     * Append domain with user string.
-     *
-     * @param username the username
-     * @param domain   the domain
-     * @return the string
-     */
     public static String appendDomainWithUser(String username, String domain) {
 
         if (username.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR) || username.contains(
@@ -5451,12 +5036,6 @@ public final class APIUtil {
         return username + APIConstants.EMAIL_DOMAIN_SEPARATOR + domain;
     }
 
-    /**
-     * Convert to string string.
-     *
-     * @param obj the obj
-     * @return the string
-     */
     /*
      *  Util method to convert a java object to a json object
      *
@@ -5467,13 +5046,6 @@ public final class APIUtil {
         return gson.toJson(obj);
     }
 
-    /**
-     * Gets sequence path.
-     *
-     * @param identifier the identifier
-     * @param pathFlow   the path flow
-     * @return the sequence path
-     */
     public static String getSequencePath(APIIdentifier identifier, String pathFlow) {
 
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -5553,13 +5125,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Gets tiers.
-     *
-     * @param organization the organization
-     * @return the tiers
-     * @throws APIManagementException the api management exception
-     */
     public static Map<String, Tier> getTiers(String organization) throws APIManagementException {
 
         int requestedTenantId = getInternalOrganizationId(organization);
@@ -5571,11 +5136,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Clear tiers cache.
-     *
-     * @param tenantDomain the tenant domain
-     */
     public static void clearTiersCache(String tenantDomain) {
 
         try {
@@ -5597,10 +5157,10 @@ public final class APIUtil {
     /**
      * Return a http client instance
      *
-     * @param url - server url
-     * @return http client
-     * @throws APIManagementException the api management exception
+     * @param url      - server url
+     * @return
      */
+
     public static HttpClient getHttpClient(String url) throws APIManagementException {
         URL configUrl = null;
         try {
@@ -5676,9 +5236,9 @@ public final class APIUtil {
     /**
      * Return a http client instance
      *
-     * @param port     - server port
-     * @param protocol - service endpoint protocol http/https
-     * @return http client
+     * @param port      - server port
+     * @param protocol- service endpoint protocol http/https
+     * @return
      */
     public static HttpClient getHttpClient(int port, String protocol) {
 
@@ -5734,6 +5294,7 @@ public final class APIUtil {
         return clientBuilder.build();
     }
 
+
     /**
      * This method will return a relative URL for given registry resource which we can used to retrieve the resource
      * from the web UI. For example, URI for a thumbnail icon of a tag can be generated from this method.
@@ -5769,10 +5330,11 @@ public final class APIUtil {
      *
      * @param className the fully qualified name of the class.
      * @return an instance of the class with the given name
-     * @throws ClassNotFoundException the class not found exception
-     * @throws IllegalAccessException the illegal access exception
-     * @throws InstantiationException the instantiation exception
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
+
     public static Object getClassInstance(String className) throws ClassNotFoundException, IllegalAccessException,
             InstantiationException {
 
@@ -5784,10 +5346,11 @@ public final class APIUtil {
      *
      * @param className the fully qualified name of the class.
      * @return an instance of the class with the given name
-     * @throws ClassNotFoundException the class not found exception
-     * @throws IllegalAccessException the illegal access exception
-     * @throws InstantiationException the instantiation exception
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
+
     public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException,
             InstantiationException {
 
@@ -5816,11 +5379,9 @@ public final class APIUtil {
     }
 
     /**
-     * Gets tenant restapi scopes config.
-     *
      * @param tenantDomain Tenant domain to be used to get configurations for REST API scopes
      * @return JSON object which contains configuration for REST API scopes
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static JSONObject getTenantRESTAPIScopesConfig(String tenantDomain) throws APIManagementException {
 
@@ -5837,11 +5398,9 @@ public final class APIUtil {
     }
 
     /**
-     * Gets tenant restapi scope role mappings config.
-     *
      * @param tenantDomain Tenant domain to be used to get configurations for REST API scopes
      * @return JSON object which contains configuration for REST API scopes
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static JSONObject getTenantRESTAPIScopeRoleMappingsConfig(String tenantDomain) throws APIManagementException {
 
@@ -5858,23 +5417,18 @@ public final class APIUtil {
         return restAPIConfigJSON;
     }
 
-    /**
-     * Gets ga config from registry.
-     *
-     * @param tenantDomain the tenant domain
-     * @return the ga config from registry
-     * @throws APIManagementException the api management exception
-     */
     public static String getGAConfigFromRegistry(String tenantDomain) throws APIManagementException {
 
         return ServiceReferenceHolder.getInstance().getApimConfigService().getGAConfig(tenantDomain);
     }
 
+
+
     /**
      * Returns the tenant-conf.json in JSONObject format for the given tenant(id) from the registry.
      *
      * @param organization organization
-     * @return tenant -conf.json in JSONObject format for the given tenant(id)
+     * @return tenant-conf.json in JSONObject format for the given tenant(id)
      * @throws APIManagementException when tenant-conf.json is not available in registry
      */
     public static JSONObject getTenantConfig(String organization) throws APIManagementException {
@@ -5885,7 +5439,7 @@ public final class APIUtil {
             return (JSONObject) tenantConfigCache.get(cacheName);
         } else {
             String tenantConfig =
-             ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+                    ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
             if (StringUtils.isNotEmpty(tenantConfig)){
                 try {
                     JSONObject jsonObject = (JSONObject) new JSONParser().parse(tenantConfig);
@@ -5954,11 +5508,9 @@ public final class APIUtil {
     }
 
     /**
-     * Gets tenant default roles.
-     *
      * @param tenantDomain Tenant domain to be used to get default role configurations
      * @return JSON object which contains configuration for default roles
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static JSONObject getTenantDefaultRoles(String tenantDomain) throws APIManagementException {
 
@@ -5981,8 +5533,6 @@ public final class APIUtil {
     }
 
     /**
-     * Gets restapi scopes from config.
-     *
      * @param scopesConfig JSON configuration object with scopes and associated roles
      * @param roleMappings JSON Configuration object with role mappings
      * @return Map of scopes which contains scope names and associated role list
@@ -6054,12 +5604,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Gets management transport port.
-     *
-     * @param mgtTransport the mgt transport
-     * @return the management transport port
-     */
     public static int getManagementTransportPort(String mgtTransport) {
 
         if (StringUtils.isEmpty(mgtTransport)) {
@@ -6074,12 +5618,6 @@ public final class APIUtil {
         return mgtTransportPort;
     }
 
-    /**
-     * Gets carbon transport port.
-     *
-     * @param mgtTransport the mgt transport
-     * @return the carbon transport port
-     */
     public static int getCarbonTransportPort(String mgtTransport) {
 
         if (StringUtils.isEmpty(mgtTransport)) {
@@ -6091,12 +5629,6 @@ public final class APIUtil {
 
     }
 
-    /**
-     * Is proxy port enabled boolean.
-     *
-     * @param mgtTransport the mgt transport
-     * @return the boolean
-     */
     /*
      * Checks whether the proxy port is configured.
      * @param transport  The transport
@@ -6110,12 +5642,6 @@ public final class APIUtil {
         return mgtTransportProxyPort > 0;
     }
 
-    /**
-     * Gets server url.
-     *
-     * @return the server url
-     * @throws APIManagementException the api management exception
-     */
     public static String getServerURL() throws APIManagementException {
 
         String hostName = ServerConfiguration.getInstance().getFirstProperty(APIConstants.HOST_NAME);
@@ -6179,7 +5705,7 @@ public final class APIUtil {
      * @param apiVersion Version of the API
      * @param tenant     Tenant name
      * @return Provider name who created the API
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static String getAPIProviderFromAPINameVersionTenant(String apiName, String apiVersion, String tenant)
             throws APIManagementException {
@@ -6199,12 +5725,6 @@ public final class APIUtil {
 
     }
 
-    /**
-     * Gets websub subscription configuration dto from json.
-     *
-     * @param jsonString the json string
-     * @return the websub subscription configuration dto from json
-     */
     public static WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationDtoFromJson(String jsonString) {
         return new Gson().fromJson(jsonString, WebsubSubscriptionConfiguration.class);
     }
@@ -6220,23 +5740,11 @@ public final class APIUtil {
         return new Gson().toJson(corsConfiguration);
     }
 
-    /**
-     * Gets websub subscription configuration json from dto.
-     *
-     * @param websubSubscriptionConfiguration the websub subscription configuration
-     * @return the websub subscription configuration json from dto
-     */
     public static String getWebsubSubscriptionConfigurationJsonFromDto(
             WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
-            return new Gson().toJson(websubSubscriptionConfiguration);
+        return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
-    /**
-     * Gets ws uri mapping json from dto.
-     *
-     * @param mappings the mappings
-     * @return the ws uri mapping json from dto
-     */
     public static String getWsUriMappingJsonFromDto(Map<String, String> mappings) {
         return new Gson().toJson(mappings);
     }
@@ -6346,13 +5854,6 @@ public final class APIUtil {
         return corsConfiguration;
     }
 
-    /**
-     * Gets websub subscription configuration from artifact.
-     *
-     * @param artifact the artifact
-     * @return the websub subscription configuration from artifact
-     * @throws GovernanceException the governance exception
-     */
     public static WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationFromArtifact(
             GovernanceArtifact artifact) throws GovernanceException {
         WebsubSubscriptionConfiguration configuration = APIUtil.getWebsubSubscriptionConfigurationDtoFromJson(
@@ -6376,11 +5877,6 @@ public final class APIUtil {
         return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet, allowMethodsStringSet);
     }
 
-    /**
-     * Gets default websub subscription configuration.
-     *
-     * @return the default websub subscription configuration
-     */
     public static WebsubSubscriptionConfiguration getDefaultWebsubSubscriptionConfiguration() {
         return new WebsubSubscriptionConfiguration(false, "",
                 APIConstants.DEFAULT_WEBSUB_SIGNING_ALGO, APIConstants.DEFAULT_WEBSUB_SIGNATURE_HEADER);
@@ -6408,11 +5904,10 @@ public final class APIUtil {
     }
 
     /**
-     * Gets all alert type by stake holder.
-     *
-     * @param stakeHolder value "publisher" for publisher value "subscriber" for subscriber value "admin-dashboard" for admin                    Return all alert types.
+     * @param stakeHolder value "publisher" for publisher value "subscriber" for subscriber value "admin-dashboard" for admin
+     *                    Return all alert types.
      * @return Hashmap of alert types.
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static HashMap<Integer, String> getAllAlertTypeByStakeHolder(String stakeHolder) throws APIManagementException {
 
@@ -6422,12 +5917,10 @@ public final class APIUtil {
     }
 
     /**
-     * Gets saved alert types ids by user name and stake holder.
-     *
      * @param userName    user name with tenant domain ex: admin@carbon.super
      * @param stakeHolder value "p" for publisher value "s" for subscriber value "a" for admin
      * @return map of saved values of alert types.
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName, String stakeHolder) throws APIManagementException {
 
@@ -6443,7 +5936,7 @@ public final class APIUtil {
      * @param userName    user name with tenant ID.
      * @param stakeHolder if its publisher values should "p", if it is store value is "s" if admin dashboard value is "a"
      * @return List of eamil list.
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static List<String> retrieveSavedEmailList(String userName, String stakeHolder) throws APIManagementException {
 
@@ -6461,11 +5954,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Add default super tenant advanced throttle policies.
-     *
-     * @throws APIManagementException the api management exception
-     */
     public static void addDefaultSuperTenantAdvancedThrottlePolicies() throws APIManagementException {
 
         int tenantId = MultitenantConstants.SUPER_TENANT_ID;
@@ -6631,13 +6119,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Add default tenant advanced throttle policies.
-     *
-     * @param tenantDomain the tenant domain
-     * @param tenantId     the tenant id
-     * @throws APIManagementException the api management exception
-     */
     public static void addDefaultTenantAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
@@ -6975,14 +6456,6 @@ public final class APIUtil {
         return defaultTier;
     }
 
-    /**
-     * Gets tiers from policies.
-     *
-     * @param policyLevel the policy level
-     * @param tenantId    the tenant id
-     * @return the tiers from policies
-     * @throws APIManagementException the api management exception
-     */
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
         Map<String, Tier> tierMap = new TreeMap<String, Tier>();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
@@ -7061,15 +6534,6 @@ public final class APIUtil {
         return tierMap;
     }
 
-    /**
-     * Gets policy by name.
-     *
-     * @param policyLevel  the policy level
-     * @param policyName   the policy name
-     * @param organization the organization
-     * @return the policy by name
-     * @throws APIManagementException the api management exception
-     */
     public static Tier getPolicyByName(String policyLevel, String policyName, String organization)
             throws APIManagementException {
 
@@ -7143,6 +6607,7 @@ public final class APIUtil {
         return null;
     }
 
+
     /**
      * Extract custom attributes and billing plan from subscription policy and set to tier.
      *
@@ -7179,14 +6644,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Gets available tiers.
-     *
-     * @param definedTiers the defined tiers
-     * @param tiers        the tiers
-     * @param apiName      the api name
-     * @return the available tiers
-     */
     public static Set<Tier> getAvailableTiers(Map<String, Tier> definedTiers, String tiers, String apiName) {
 
         Set<Tier> availableTier = new HashSet<Tier>();
@@ -7204,24 +6661,11 @@ public final class APIUtil {
         return availableTier;
     }
 
-    /**
-     * To byte array byte [ ].
-     *
-     * @param is the is
-     * @return the byte [ ]
-     * @throws IOException the io exception
-     */
     public static byte[] toByteArray(InputStream is) throws IOException {
 
         return IOUtils.toByteArray(is);
     }
 
-    /**
-     * Ip to long long.
-     *
-     * @param ipAddress the ip address
-     * @return the long
-     */
     public static long ipToLong(String ipAddress) {
 
         long result = 0;
@@ -7259,25 +6703,11 @@ public final class APIUtil {
         return BigInteger.ZERO;
     }
 
-    /**
-     * Gets address.
-     *
-     * @param ipAddress the ip address
-     * @return the address
-     * @throws UnknownHostException the unknown host exception
-     */
     public static InetAddress getAddress(String ipAddress) throws UnknownHostException {
 
         return InetAddress.getByName(ipAddress);
     }
 
-    /**
-     * Is ip in network boolean.
-     *
-     * @param ip   the ip
-     * @param cidr the cidr
-     * @return the boolean
-     */
     public static boolean isIpInNetwork(String ip, String cidr) {
 
         if (StringUtils.isEmpty(ip) || StringUtils.isEmpty(cidr)) {
@@ -7323,8 +6753,8 @@ public final class APIUtil {
     /**
      * Composes OR based search criteria from provided array of values
      *
-     * @param values the values
-     * @return or based search criteria
+     * @param values
+     * @return
      */
     public static String getORBasedSearchCriteria(String[] values) {
 
@@ -7347,9 +6777,9 @@ public final class APIUtil {
      * Generates solr compatible search criteria synatax from user entered query criteria.
      * Ex: From version:1.0.0, this returns version=*1.0.0*
      *
-     * @param criteria the criteria
+     * @param criteria
      * @return solar compatible criteria
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static String getSingleSearchCriteria(String criteria) throws APIManagementException {
 
@@ -7423,7 +6853,7 @@ public final class APIUtil {
     /**
      * Returns a secured DocumentBuilderFactory instance
      *
-     * @return DocumentBuilderFactory secured document builder
+     * @return DocumentBuilderFactory
      */
     public static DocumentBuilderFactory getSecuredDocumentBuilder() {
 
@@ -7479,11 +6909,6 @@ public final class APIUtil {
         audit.info(StringEscapeUtils.unescapeJava(jsonObject.toString()));
     }
 
-    /**
-     * Gets port offset.
-     *
-     * @return the port offset
-     */
     public static int getPortOffset() {
 
         ServerConfiguration carbonConfig = CarbonUtils.getServerConfiguration();
@@ -7501,66 +6926,36 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Is query param data publishing enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isQueryParamDataPublishingEnabled() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getThrottleProperties().isEnableQueryParamConditions();
     }
 
-    /**
-     * Is header data publishing enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isHeaderDataPublishingEnabled() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getThrottleProperties().isEnableHeaderConditions();
     }
 
-    /**
-     * Is jwt token publishing enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isJwtTokenPublishingEnabled() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getThrottleProperties().isEnableJwtConditions();
     }
 
-    /**
-     * Gets analytics server url.
-     *
-     * @return the analytics server url
-     */
     public static String getAnalyticsServerURL() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
                 getDasServerUrl();
     }
 
-    /**
-     * Gets analytics server user name.
-     *
-     * @return the analytics server user name
-     */
     public static String getAnalyticsServerUserName() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
                 getDasReceiverServerUser();
     }
 
-    /**
-     * Gets analytics server password.
-     *
-     * @return the analytics server password
-     */
     public static String getAnalyticsServerPassword() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
@@ -7577,7 +6972,7 @@ public final class APIUtil {
      * @return - The cache object
      */
     public synchronized static Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
-                                              final long accessExp) {
+            final long accessExp) {
 
         Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(cacheManagerName).getCaches();
         for (Cache cache : availableCaches) {
@@ -7589,9 +6984,9 @@ public final class APIUtil {
         return Caching.getCacheManager(
                 cacheManagerName).createCacheBuilder(cacheName).
                 setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                        modifiedExp)).
+                modifiedExp)).
                 setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                        accessExp)).setStoreByValue(false).build();
+                accessExp)).setStoreByValue(false).build();
     }
 
     /**
@@ -7849,9 +7244,8 @@ public final class APIUtil {
      * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
      * started with the system property 'migrationMode=true' if a migration related exports are to be done.
      *
-     * @param username           Logged in user name
      * @param targetTenantDomain Tenant domain of which resources are requested
-     * @return the boolean
+     * @param username           Logged in user name
      * @throws APIMgtInternalException When internal error occurred
      */
     public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
@@ -7900,9 +7294,10 @@ public final class APIUtil {
      * config is not available in tenant registry
      *
      * @param organization The organization
-     * @param property     The configuration to get from tenant registry or api-manager.xml
+     * @param property The configuration to get from tenant registry or api-manager.xml
      * @return The configuration read from tenant registry or api-manager.xml
-     * @throws APIManagementException Throws if the registry resource doesn't exist                                or the content cannot be parsed to JSON
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
      */
     public static String getOAuthConfiguration(String organization, String property)
             throws APIManagementException {
@@ -7918,10 +7313,11 @@ public final class APIUtil {
     /**
      * This method is used to get the authorization configurations from the tenant registry
      *
-     * @param organization organization.
-     * @param property     The configuration to get from tenant registry
+     * @param organization  organization.
+     * @param property The configuration to get from tenant registry
      * @return The configuration read from tenant registry or else null
-     * @throws APIManagementException Throws if the registry resource doesn't exist                                or the content cannot be parsed to JSON
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
      */
     public static String getOAuthConfigurationFromTenantRegistry(String organization, String property)
             throws APIManagementException {
@@ -7947,7 +7343,8 @@ public final class APIUtil {
      *
      * @param property The configuration to get from api-manager.xml
      * @return The configuration read from api-manager.xml or else null
-     * @throws APIManagementException Throws if the registry resource doesn't exist                                or the content cannot be parsed to JSON
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
      */
     public static String getOAuthConfigurationFromAPIMConfig(String property)
             throws APIManagementException {
@@ -7964,11 +7361,6 @@ public final class APIUtil {
         return null;
     }
 
-    /**
-     * Is forget password configured boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isForgetPasswordConfigured() {
 
         AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
@@ -8015,7 +7407,7 @@ public final class APIUtil {
      *
      * @param clientId client id
      * @return application object.
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static Application getApplicationByClientId(String clientId) throws APIManagementException {
 
@@ -8023,14 +7415,6 @@ public final class APIUtil {
         return apiMgtDAO.getApplicationByClientId(clientId);
     }
 
-    /**
-     * Gets quota type for application policy.
-     *
-     * @param policyName the policy name
-     * @param tenantId   the tenant id
-     * @return the quota type for application policy
-     * @throws APIManagementException the api management exception
-     */
     public static String getQuotaTypeForApplicationPolicy(String policyName, int tenantId)
             throws APIManagementException {
 
@@ -8042,12 +7426,6 @@ public final class APIUtil {
         return null;
     }
 
-    /**
-     * Gets mediation configuration from apim config.
-     *
-     * @param property the property
-     * @return the mediation configuration from apim config
-     */
     public static String getMediationConfigurationFromAPIMConfig(String property) {
         APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -8059,13 +7437,6 @@ public final class APIUtil {
         return null;
     }
 
-    /**
-     * Extract condition dto list.
-     *
-     * @param base64EncodedString the base 64 encoded string
-     * @return the list
-     * @throws ParseException the parse exception
-     */
     public static List<ConditionDto> extractConditionDto(String base64EncodedString) throws ParseException {
 
         List<ConditionDto> conditionDtoList = new ArrayList<>();
@@ -8152,13 +7523,6 @@ public final class APIUtil {
         return conditionDtoList;
     }
 
-    /**
-     * To key manager configuration key manager configuration.
-     *
-     * @param base64EncodedString the base 64 encoded string
-     * @return the key manager configuration
-     * @throws APIManagementException the api management exception
-     */
     public static KeyManagerConfiguration toKeyManagerConfiguration(String base64EncodedString)
             throws APIManagementException {
 
@@ -8176,7 +7540,8 @@ public final class APIUtil {
      *
      * @param organization The organization name.
      * @return JSONObject The Application Attributes read from tenant registry or else null
-     * @throws APIManagementException Throws if the registry resource doesn't exist                                or the content cannot be parsed to JSON
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
      */
     public static JSONObject getAppAttributeKeysFromRegistry(String organization) throws APIManagementException {
 
@@ -8209,8 +7574,7 @@ public final class APIUtil {
     /**
      * Validate the input file name for invalid path elements
      *
-     * @param fileName the file name
-     * @throws APIManagementException the api management exception
+     * @param fileName
      */
     public static void validateFileName(String fileName) throws APIManagementException {
 
@@ -8222,7 +7586,7 @@ public final class APIUtil {
     /**
      * Convert special characters to encoded value.
      *
-     * @param role the role
+     * @param role
      * @return encorded value
      */
     public static String sanitizeUserRole(String role) {
@@ -8240,7 +7604,7 @@ public final class APIUtil {
      * @param appName SP app name that the query should run against
      * @param query   query
      * @return jsonObj JSONObject of the response
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static JSONObject executeQueryOnStreamProcessor(String appName, String query) throws APIManagementException {
 
@@ -8311,7 +7675,6 @@ public final class APIUtil {
      * @param from : the start timestamp of the query.
      * @param to   : the end timestamp of the query.
      * @return JSON Object.
-     * @throws APIManagementException the api management exception
      */
     public static JSONObject getUsageCountForMonetization(long from, long to)
             throws APIManagementException {
@@ -8355,12 +7718,6 @@ public final class APIUtil {
         return jsonObject;
     }
 
-    /**
-     * Is due to authorization failure boolean.
-     *
-     * @param e the e
-     * @return the boolean
-     */
     public static boolean isDueToAuthorizationFailure(Throwable e) {
 
         Throwable rootCause = getPossibleErrorCause(e);
@@ -8385,10 +7742,10 @@ public final class APIUtil {
      * Notify document artifacts if an api state change occured. This change is required to re-trigger the document
      * indexer so that the documnet indexes will be updated with the new associated api status.
      *
-     * @param apiArtifact the api artifact
-     * @param registry    the registry
-     * @throws RegistryException      the registry exception
-     * @throws APIManagementException the api management exception
+     * @param apiArtifact
+     * @param registry
+     * @throws RegistryException
+     * @throws APIManagementException
      */
     public static void notifyAPIStateChangeToAssociatedDocuments(GenericArtifact apiArtifact, Registry registry)
             throws RegistryException, APIManagementException {
@@ -8457,9 +7814,7 @@ public final class APIUtil {
      * This method is used to set environments values to api object.
      *
      * @param environments environments values in json format
-     * @param organization the organization
      * @return set of environments that need to Publish
-     * @throws APIManagementException the api management exception
      */
     public static Set<String> extractEnvironmentsForAPI(List<String> environments, String organization) throws APIManagementException {
 
@@ -8484,12 +7839,6 @@ public final class APIUtil {
         return environmentStringSet;
     }
 
-    /**
-     * Gets grant types.
-     *
-     * @return the grant types
-     * @throws APIManagementException the api management exception
-     */
     public static List<String> getGrantTypes() throws APIManagementException {
 
         OAuthAdminService oAuthAdminService = new OAuthAdminService();
@@ -8497,12 +7846,6 @@ public final class APIUtil {
         return Arrays.asList(allowedGrantTypes);
     }
 
-    /**
-     * Gets token url.
-     *
-     * @return the token url
-     * @throws APIManagementException the api management exception
-     */
     public static String getTokenUrl() throws APIManagementException {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
@@ -8510,24 +7853,12 @@ public final class APIUtil {
                 replace(REVOKE, TOKEN);
     }
 
-    /**
-     * Gets store url.
-     *
-     * @return the store url
-     * @throws APIManagementException the api management exception
-     */
     public static String getStoreUrl() throws APIManagementException {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_URL);
     }
 
-    /**
-     * Gets environments.
-     *
-     * @return the environments
-     * @throws APIManagementException the api management exception
-     */
     public static Map<String, Environment> getEnvironments() throws APIManagementException {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         // get dynamic gateway environments read from database
@@ -8540,13 +7871,6 @@ public final class APIUtil {
         return allEnvironments;
     }
 
-    /**
-     * Gets environments.
-     *
-     * @param organization the organization
-     * @return the environments
-     * @throws APIManagementException the api management exception
-     */
     // Take organization as a parameter
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
         // get dynamic gateway environments read from database
@@ -8561,7 +7885,6 @@ public final class APIUtil {
 
     /**
      * Get gateway environments defined in the configuration: api-manager.xml
-     *
      * @return map of configured environments against environment name
      */
     public static Map<String, Environment> getReadOnlyEnvironments() {
@@ -8571,10 +7894,8 @@ public final class APIUtil {
 
     /**
      * Get default (first) vhost of the given read only environment
-     *
      * @param environmentName name of the read only environment
      * @return default vhost of environment
-     * @throws APIManagementException the api management exception
      */
     public static VHost getDefaultVhostOfReadOnlyEnvironment(String environmentName) throws APIManagementException {
         Map<String, Environment> readOnlyEnvironments = getReadOnlyEnvironments();
@@ -8630,8 +7951,8 @@ public final class APIUtil {
     /**
      * Return the admin username read from the user-mgt.xml
      *
-     * @return admin username
-     * @throws APIMgtInternalException the api mgt internal exception
+     * @return
+     * @throws APIMgtInternalException
      */
     public static String getAdminUsername() throws APIMgtInternalException {
 
@@ -8659,8 +7980,8 @@ public final class APIUtil {
     /**
      * Return the admin password read from the user-mgt.xml
      *
-     * @return admin password
-     * @throws APIMgtInternalException the api mgt internal exception
+     * @return
+     * @throws APIMgtInternalException
      */
     public static String getAdminPassword() throws APIMgtInternalException {
 
@@ -8689,7 +8010,6 @@ public final class APIUtil {
      * This method returns the base64 encoded for the given username and password
      *
      * @return base64 encoded username and password
-     * @throws APIMgtInternalException the api mgt internal exception
      */
     public static String getBase64EncodedAdminCredentials() throws APIMgtInternalException {
 
@@ -8699,12 +8019,6 @@ public final class APIUtil {
         return new String(encodedCredentials, Charset.forName("UTF-8"));
     }
 
-    /**
-     * Gets product identifier.
-     *
-     * @param productPath the product path
-     * @return the product identifier
-     */
     /* Utility method to get api identifier from api path.
      *
      * @param productPath Path of the API Product in registry
@@ -8753,8 +8067,7 @@ public final class APIUtil {
      *
      * @param username Logged-in username
      * @param roleName role that needs to be checked
-     * @return the boolean
-     * @throws UserStoreException the user store exception
+     * @throws UserStoreException
      */
     public static boolean checkIfUserInRole(String username, String roleName) throws UserStoreException {
 
@@ -8770,11 +8083,6 @@ public final class APIUtil {
         return abstractManager.isUserInRole(tenantAwareUserName, roleName);
     }
 
-    /**
-     * Gets monetization attributes.
-     *
-     * @return the monetization attributes
-     */
     public static JSONArray getMonetizationAttributes() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
@@ -8788,7 +8096,7 @@ public final class APIUtil {
      * @param privateKey         private key which use to sign the JWT assertion
      * @param signatureAlgorithm signature algorithm which use to sign the JWT assertion
      * @return byte array of the JWT signature
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static byte[] signJwt(String assertion, PrivateKey privateKey, String signatureAlgorithm) throws APIManagementException {
 
@@ -8820,8 +8128,7 @@ public final class APIUtil {
      *
      * @param publicCert         - The public certificate which needs to include in the header as thumbprint
      * @param signatureAlgorithm signature algorithm which needs to include in the header
-     * @return the string
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws APIManagementException {
 
@@ -8905,15 +8212,6 @@ public final class APIUtil {
         return buf.toString();
     }
 
-    /**
-     * Gets jwt token info dto.
-     *
-     * @param application  the application
-     * @param userName     the user name
-     * @param tenantDomain the tenant domain
-     * @return the jwt token info dto
-     * @throws APIManagementException the api management exception
-     */
     public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, String userName, String tenantDomain)
             throws APIManagementException {
 
@@ -8964,11 +8262,6 @@ public final class APIUtil {
         return jwtTokenInfoDTO;
     }
 
-    /**
-     * Gets api key alias.
-     *
-     * @return the api key alias
-     */
     public static String getApiKeyAlias() {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -8982,11 +8275,6 @@ public final class APIUtil {
         return alias;
     }
 
-    /**
-     * Gets internal api key alias.
-     *
-     * @return the internal api key alias
-     */
     public static String getInternalApiKeyAlias() {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -9000,11 +8288,6 @@ public final class APIUtil {
         return alias;
     }
 
-    /**
-     * Gets api key generator.
-     *
-     * @return the api key generator
-     */
     public static String getApiKeyGeneratorImpl() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -9017,11 +8300,6 @@ public final class APIUtil {
         return keyGeneratorClassName;
     }
 
-    /**
-     * Gets api key sign key store name.
-     *
-     * @return the api key sign key store name
-     */
     public static String getApiKeySignKeyStoreName() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -9037,10 +8315,10 @@ public final class APIUtil {
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
-     * @param uuid         Api uuid
-     * @param workflowType workflow type
-     * @return WorkflowDTO api workflow status
-     * @throws APIManagementException the api management exception
+     * @param uuid Api uuid
+     * @param workflowType  workflow type
+     * @return WorkflowDTO
+     * @throws APIManagementException
      */
     public static WorkflowDTO getAPIWorkflowStatus(String uuid, String workflowType)
             throws APIManagementException {
@@ -9139,13 +8417,6 @@ public final class APIUtil {
         return maskedTokenBuilder.toString();
     }
 
-    /**
-     * Gets certificate from parent trust store.
-     *
-     * @param certAlias the cert alias
-     * @return the certificate from parent trust store
-     * @throws APIManagementException the api management exception
-     */
     public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
 
         Certificate publicCert = null;
@@ -9170,14 +8441,11 @@ public final class APIUtil {
      * <p>
      * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
      *
-     * @param splitToken         The JWT token which is split into [header, payload, signature]
-     * @param certificate        the certificate
-     * @param signatureAlgorithm the signature algorithm
+     * @param splitToken The JWT token which is split into [header, payload, signature]
      * @return whether the signature is verified or or not
-     * @throws APIManagementException the api management exception
      */
     public static boolean verifyTokenSignature(String[] splitToken, Certificate certificate,
-                                               String signatureAlgorithm) throws APIManagementException {
+            String signatureAlgorithm) throws APIManagementException {
         // Retrieve public key from the certificate
         PublicKey publicKey = certificate.getPublicKey();
         try {
@@ -9241,13 +8509,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Convert o mto string string.
-     *
-     * @param faultSequence the fault sequence
-     * @return the string
-     * @throws XMLStreamException the xml stream exception
-     */
     public static String convertOMtoString(OMElement faultSequence) throws XMLStreamException {
 
         StringWriter stringWriter = new StringWriter();
@@ -9255,13 +8516,6 @@ public final class APIUtil {
         return stringWriter.toString();
     }
 
-    /**
-     * Gets fault sequence name.
-     *
-     * @param api the api
-     * @return the fault sequence name
-     * @throws APIManagementException the api management exception
-     */
     public static String getFaultSequenceName(API api) throws APIManagementException {
 
         if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
@@ -9294,8 +8548,6 @@ public final class APIUtil {
 
     /**
      * return skipRolesByRegex config
-     *
-     * @return the skip roles by regex
      */
     public static String getSkipRolesByRegex() {
 
@@ -9305,13 +8557,6 @@ public final class APIUtil {
         return skipRolesByRegex;
     }
 
-    /**
-     * Gets user properties.
-     *
-     * @param userNameWithoutChange the user name without change
-     * @return the user properties
-     * @throws APIManagementException the api management exception
-     */
     public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
         Map<String, Object> properties = new HashMap<String, Object>();
         if (APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
@@ -9326,8 +8571,8 @@ public final class APIUtil {
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
      * in the super tenant
      *
-     * @param username     the username
-     * @param tenantDomain the tenant domain
+     * @param username
+     * @param tenantDomain
      * @return username is an email
      */
     public static String appendTenantDomainForEmailUsernames(String username, String tenantDomain) {
@@ -9391,10 +8636,9 @@ public final class APIUtil {
     /**
      * Validates the API category names to be attached to an API
      *
-     * @param categories   the categories
-     * @param organization the organization
-     * @return boolean
-     * @throws APIManagementException the api management exception
+     * @param categories
+     * @param organization
+     * @return
      */
     public static boolean validateAPICategories(List<APICategory> categories, String organization)
             throws APIManagementException {
@@ -9408,13 +8652,6 @@ public final class APIUtil {
         return true;
     }
 
-    /**
-     * Gets tenant based dev portal context.
-     *
-     * @param tenantDomain the tenant domain
-     * @return the tenant based dev portal context
-     * @throws APIManagementException the api management exception
-     */
     public static String getTenantBasedDevPortalContext(String tenantDomain) throws APIManagementException {
 
         String context = null;
@@ -9449,13 +8686,6 @@ public final class APIUtil {
         return context;
     }
 
-    /**
-     * Gets tenant based store domain mapping.
-     *
-     * @param tenantDomain the tenant domain
-     * @return the tenant based store domain mapping
-     * @throws APIManagementException the api management exception
-     */
     public static Map getTenantBasedStoreDomainMapping(String tenantDomain) throws APIManagementException {
 
         try {
@@ -9484,13 +8714,6 @@ public final class APIUtil {
         return null;
     }
 
-    /**
-     * Gets tenant based publisher domain mapping.
-     *
-     * @param tenantDomain the tenant domain
-     * @return the tenant based publisher domain mapping
-     * @throws APIManagementException the api management exception
-     */
     public static Map getTenantBasedPublisherDomainMapping(String tenantDomain) throws APIManagementException {
 
         try {
@@ -9516,13 +8739,6 @@ public final class APIUtil {
         return null;
     }
 
-    /**
-     * Gets tenant based publisher context.
-     *
-     * @param tenantDomain the tenant domain
-     * @return the tenant based publisher context
-     * @throws APIManagementException the api management exception
-     */
     public static String getTenantBasedPublisherContext(String tenantDomain) throws APIManagementException {
 
         String context = null;
@@ -9557,14 +8773,6 @@ public final class APIUtil {
         return context;
     }
 
-    /**
-     * Is per tenant service provider enabled boolean.
-     *
-     * @param tenantDomain the tenant domain
-     * @return the boolean
-     * @throws APIManagementException the api management exception
-     * @throws RegistryException      the registry exception
-     */
     public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
             RegistryException {
 
@@ -9575,13 +8783,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Gets tenant admin user name.
-     *
-     * @param tenantDomain the tenant domain
-     * @return the tenant admin user name
-     * @throws APIManagementException the api management exception
-     */
     public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
 
         try {
@@ -9603,12 +8804,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Is default application creation disabled for tenant boolean.
-     *
-     * @param organization the organization
-     * @return the boolean
-     */
     public static boolean isDefaultApplicationCreationDisabledForTenant(String organization) {
 
         boolean state = false;
@@ -9627,9 +8822,9 @@ public final class APIUtil {
     /**
      * Validate Certificate exist in TrustStore
      *
-     * @param certificate the certificate
+     * @param certificate
      * @return true if certificate exist in truststore
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static boolean isCertificateExistsInListenerTrustStore(X509Certificate certificate) throws APIManagementException {
 
@@ -9657,11 +8852,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Is dev portal anonymous boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isDevPortalAnonymous() {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -9673,13 +8863,6 @@ public final class APIUtil {
         return Boolean.parseBoolean(anonymousMode);
     }
 
-    /**
-     * Is tenant devportal anonymous boolean.
-     *
-     * @param tenantDomain the tenant domain
-     * @return the boolean
-     * @throws APIManagementException the api management exception
-     */
     public static boolean isTenantDevportalAnonymous(String tenantDomain) throws APIManagementException {
 
         JSONObject tenantConfig = getTenantConfig(tenantDomain);
@@ -9691,13 +8874,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Sets endpoint security for api product.
-     *
-     * @param api the api
-     * @return the endpoint security for api product
-     * @throws APIManagementException the api management exception
-     */
     public static Map<String, EndpointSecurity> setEndpointSecurityForAPIProduct(API api) throws APIManagementException {
 
         Map<String, EndpointSecurity> endpointSecurityMap = new HashMap<>();
@@ -9770,11 +8946,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Add new event publisher.
-     *
-     * @param type the type
-     */
     public static void addNewEventPublisher(EventPublisherType type) {
         try {
             eventPublishers.putIfAbsent(type, eventPublisherFactory.getEventPublisher(type));
@@ -9783,13 +8954,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Publish event.
-     *
-     * @param type        the type
-     * @param event       the event
-     * @param eventString the event string
-     */
     public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String eventString) {
         try {
             if (eventPublishers.get(type) != null) {
@@ -9802,13 +8966,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Publish event.
-     *
-     * @param eventName         the event name
-     * @param dynamicProperties the dynamic properties
-     * @param event             the event
-     */
     public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
 
         boolean tenantFlowStarted = false;
@@ -9834,7 +8991,7 @@ public final class APIUtil {
      * @param tenantId    tenant id of the user
      * @param dialectURI  claim dialect URI
      * @return claims map
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static SortedMap<String, String> getClaims(String endUserName, int tenantId, String dialectURI)
             throws APIManagementException {
@@ -9858,10 +9015,10 @@ public final class APIUtil {
     /**
      * Returns the display name of the given claim URI.
      *
-     * @param claimURI   the claim uri
-     * @param subscriber the subscriber
+     * @param claimURI
+     * @param subscriber
      * @return display name of the claim
-     * @throws APIManagementException the api management exception
+     * @throws APIManagementException
      */
     public static String getClaimDisplayName(String claimURI, String subscriber) throws APIManagementException {
 
@@ -9896,13 +9053,6 @@ public final class APIUtil {
         return temp;
     }
 
-    /**
-     * Gets and set default key manager configuration.
-     *
-     * @param keyManagerConfigurationDTO the key manager configuration dto
-     * @return the and set default key manager configuration
-     * @throws APIManagementException the api management exception
-     */
     public static KeyManagerConfigurationDTO getAndSetDefaultKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
@@ -10036,14 +9186,6 @@ public final class APIUtil {
         return keyManagerConfigurationDTO;
     }
 
-    /**
-     * Gets token endpoints by type.
-     *
-     * @param type         the type
-     * @param organization the organization
-     * @return the token endpoints by type
-     * @throws APIManagementException the api management exception
-     */
     public static String getTokenEndpointsByType(String type, String organization) throws APIManagementException {
 
         Map<String, Environment> environments = getEnvironments(organization);
@@ -10116,11 +9258,6 @@ public final class APIUtil {
         return "";
     }
 
-    /**
-     * Gets key manager configurations.
-     *
-     * @return the key manager configurations
-     */
     public static Map<String, KeyManagerConnectorConfiguration> getKeyManagerConfigurations() {
 
         return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
@@ -10129,7 +9266,7 @@ public final class APIUtil {
     /**
      * Get scopes attached to the API.
      *
-     * @param id           API uuid
+     * @param id   API uuid
      * @param organization Organization
      * @return Scope key to Scope object mapping
      * @throws APIManagementException if an error occurs while getting scope attached to API
@@ -10166,36 +9303,17 @@ public final class APIUtil {
         return scopeToKeyMap;
     }
 
-    /**
-     * Gets scope by name.
-     *
-     * @param scopeKey     the scope key
-     * @param organization the organization
-     * @return the scope by name
-     * @throws APIManagementException the api management exception
-     */
     public static Scope getScopeByName(String scopeKey, String organization) throws APIManagementException {
 
         int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         return ScopesDAO.getInstance().getScope(scopeKey, tenantId);
     }
 
-    /**
-     * Gets key manager connector configurations by connector type.
-     *
-     * @param type the type
-     * @return the key manager connector configurations by connector type
-     */
     public static KeyManagerConnectorConfiguration getKeyManagerConnectorConfigurationsByConnectorType(String type) {
 
         return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
     }
 
-    /**
-     * Gets default claim mappings.
-     *
-     * @return the default claim mappings
-     */
     public static List<ClaimMappingDto> getDefaultClaimMappings() {
 
         List<ClaimMappingDto> claimMappingDtoList = new ArrayList<>();
@@ -10212,12 +9330,7 @@ public final class APIUtil {
         return claimMappingDtoList;
     }
 
-    /**
-     * Gets x 509 certificate content.
-     *
-     * @param certificate the certificate
-     * @return the x 509 certificate content
-     */
+
     public static String getX509certificateContent(String certificate) {
         String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
                 .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
@@ -10225,13 +9338,6 @@ public final class APIUtil {
         return content.trim();
     }
 
-    /**
-     * Retrieve certificate from content x 509 certificate.
-     *
-     * @param base64EncodedCertificate the base 64 encoded certificate
-     * @return the x 509 certificate
-     * @throws APIManagementException the api management exception
-     */
     public static X509Certificate retrieveCertificateFromContent(String base64EncodedCertificate)
             throws APIManagementException {
 
@@ -10260,7 +9366,6 @@ public final class APIUtil {
      * Replace new RESTAPI Role mappings to tenant-conf.
      *
      * @param newScopeRoleJson New object of role-scope mapping
-     * @param username         the username
      * @throws APIManagementException If failed to replace the new tenant-conf.
      */
     public static void updateTenantConfOfRoleScopeMapping(JSONObject newScopeRoleJson, String username)
@@ -10335,7 +9440,6 @@ public final class APIUtil {
      * Replace new RoleMappings  to tenant-conf.
      *
      * @param newRoleMappingJson New object of role-alias mapping
-     * @param username           the username
      * @throws APIManagementException If failed to replace the new tenant-conf.
      */
     public static void updateTenantConfRoleAliasMapping(JSONObject newRoleMappingJson, String username)
@@ -10381,13 +9485,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Gets open id connect configurations.
-     *
-     * @param url the url
-     * @return the open id connect configurations
-     * @throws APIManagementException the api management exception
-     */
     public static OpenIdConnectConfiguration getOpenIdConnectConfigurations(String url) throws APIManagementException {
 
         OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient = Feign.builder()
@@ -10407,11 +9504,10 @@ public final class APIUtil {
     /**
      * Copy of the getAPI(GovernanceArtifact artifact, Registry registry) method with reduced DB calls for api
      * publisher list view listing.
-     *
-     * @param artifact the artifact
-     * @param registry the registry
-     * @return reduced publisher api for listing
-     * @throws APIManagementException the api management exception
+     * @param artifact
+     * @param registry
+     * @return
+     * @throws APIManagementException
      */
     public static API getReducedPublisherAPIForListing(GovernanceArtifact artifact, Registry registry)
             throws APIManagementException {
@@ -10505,11 +9601,6 @@ public final class APIUtil {
         return api;
     }
 
-    /**
-     * Is cross tenant subscriptions enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isCrossTenantSubscriptionsEnabled() {
 
         APIManagerConfiguration apiManagerConfiguration =
@@ -10522,11 +9613,6 @@ public final class APIUtil {
         return false;
     }
 
-    /**
-     * Retrieve default reserved username string.
-     *
-     * @return the string
-     */
     public static String retrieveDefaultReservedUsername() {
 
         APIManagerConfiguration apiManagerConfiguration =
@@ -10536,11 +9622,6 @@ public final class APIUtil {
         return defaultReservedUsername;
     }
 
-    /**
-     * Is default application creation enabled boolean.
-     *
-     * @return the boolean
-     */
     public static boolean isDefaultApplicationCreationEnabled() {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -10555,10 +9636,10 @@ public final class APIUtil {
     /**
      * Get UUID by the API Identifier.
      *
-     * @param identifier   the identifier
+     * @param identifier
      * @param organization identifier of the organization
      * @return String uuid string
-     * @throws APIManagementException the api management exception
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException{
         return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
@@ -10567,10 +9648,10 @@ public final class APIUtil {
     /**
      * Get UUID by the API Identifier.
      *
-     * @param identifier   the identifier
-     * @param organization the organization
+     * @param identifier
+     * @param organization
      * @return String uuid string
-     * @throws APIManagementException the api management exception
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
             throws APIManagementException {
@@ -10582,7 +9663,7 @@ public final class APIUtil {
      *
      * @param uuid UUID of the API
      * @return API Product Identifier
-     * @throws APIManagementException the api management exception
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
@@ -10593,18 +9674,12 @@ public final class APIUtil {
      *
      * @param uuid UUID of the API
      * @return API Identifier
-     * @throws APIManagementException the api management exception
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
 
-    /**
-     * Gets id.
-     *
-     * @param apiId the api id
-     * @return the id
-     */
     public static String getconvertedId(Identifier apiId) {
         String id = null;
         if (apiId instanceof APIIdentifier) {
@@ -10615,13 +9690,6 @@ public final class APIUtil {
         return id;
     }
 
-    /**
-     * Get filtered user roles string [ ].
-     *
-     * @param username the username
-     * @return the string [ ]
-     * @throws APIManagementException the api management exception
-     */
     public static String[] getFilteredUserRoles(String username) throws APIManagementException {
         String[] userRoles = APIUtil.getListOfRoles(username);
         String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
@@ -10644,12 +9712,6 @@ public final class APIUtil {
         return userRoles;
     }
 
-    /**
-     * Is streaming api boolean.
-     *
-     * @param api the api
-     * @return the boolean
-     */
     public static boolean isStreamingApi(API api) {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(api.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(api.getType()) ||
@@ -10657,12 +9719,6 @@ public final class APIUtil {
                 APIConstants.APITransportType.ASYNC.toString().equalsIgnoreCase(api.getType());
     }
 
-    /**
-     * Is streaming api boolean.
-     *
-     * @param apiProduct the api product
-     * @return the boolean
-     */
     public static boolean isStreamingApi(APIProduct apiProduct) {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(apiProduct.getType()) ||
@@ -10708,7 +9764,6 @@ public final class APIUtil {
 
     /**
      * Check whether the file type is supported.
-     *
      * @param filename name
      * @return true if supported
      */
@@ -10734,13 +9789,6 @@ public final class APIUtil {
         }
         return list.contains(fileType.toLowerCase());
     }
-
-    /**
-     * Validate rest api scopes.
-     *
-     * @param tenantConfig the tenant config
-     * @throws APIManagementException the api management exception
-     */
     public static void validateRestAPIScopes(String tenantConfig) throws APIManagementException {
         JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
         Set<String> fileBaseScopes = getRestAPIScopes(fileBaseTenantConfig);
@@ -10776,21 +9824,10 @@ public final class APIUtil {
         }
         return scopes;
     }
-
-    /**
-     * Retrieve tenant config json schema schema.
-     *
-     * @return the schema
-     */
     public static Schema retrieveTenantConfigJsonSchema(){
         return tenantConfigJsonSchema;
     }
 
-    /**
-     * Retrieve operation policy specification json schema schema.
-     *
-     * @return the schema
-     */
     public static Schema retrieveOperationPolicySpecificationJsonSchema(){
         return operationPolicySpecSchema;
     }
@@ -10808,7 +9845,6 @@ public final class APIUtil {
     /**
      * Get external environments registered with the given name
      *
-     * @param providerName the provider name
      * @return the external environments
      */
     public static ExternalEnvironment getExternalEnvironment(String providerName) {
@@ -10826,8 +9862,6 @@ public final class APIUtil {
 
     /**
      * Check whether there are external environments registered
-     *
-     * @return the boolean
      */
     public static boolean isAnyExternalGateWayProviderExists() {
 
@@ -10839,14 +9873,6 @@ public final class APIUtil {
         }
         return false;
     }
-
-    /**
-     * Find tier tier.
-     *
-     * @param tiers    the tiers
-     * @param tierName the tier name
-     * @return the tier
-     */
     public static Tier findTier(Collection<Tier> tiers, String tierName) {
         for (Tier tier : tiers) {
             if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
@@ -10924,15 +9950,15 @@ public final class APIUtil {
     /**
      * Read the operation policy definition from the provided path and return the definition object
      *
-     * @param extractedFolderPath Location of the policy definition
-     * @param definitionFileName  Name of the policy file
-     * @param fileExtension       Since there can be both synapse and choreo connect definitons, fileExtension is used
-     * @return OperationPolicyDefinition operation policy definition from file
-     * @throws APIManagementException the api management exception
+     * @param extractedFolderPath   Location of the policy definition
+     * @param definitionFileName    Name of the policy file
+     * @param fileExtension         Since there can be both synapse and choreo connect definitons, fileExtension is used
+     *
+     * @return OperationPolicyDefinition
      */
     public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
-                                                                                 String definitionFileName,
-                                                                                 String fileExtension)
+            String definitionFileName,
+            String fileExtension)
             throws APIManagementException {
 
         OperationPolicyDefinition policyDefinition = null;
@@ -10957,7 +9983,7 @@ public final class APIUtil {
     /**
      * Check whether there exists a file for the provided location
      *
-     * @param fileLocation Location of the file
+     * @param fileLocation   Location of the file
      * @return True if file exists
      */
     public static boolean checkFileExistence(String fileLocation) {
@@ -10970,7 +9996,7 @@ public final class APIUtil {
      * Get the validated policy specification object from a provided policy string. Validation is done against the
      * policy schema
      *
-     * @param policySpecAsString Policy specification as a string
+     * @param policySpecAsString  Policy specification as a string
      * @return OperationPolicySpecification object
      * @throws APIManagementException If the policy schema validation fails
      */
@@ -10997,7 +10023,7 @@ public final class APIUtil {
     /**
      * Export the policy attribute object of the specification as a string
      *
-     * @param policySpecification Policy specification
+     * @param policySpecification  Policy specification
      * @return policy attributes string
      * @throws APIManagementException If the policy schema validation fails
      */
@@ -11017,7 +10043,7 @@ public final class APIUtil {
      * Return the md5 hash of the provided policy. To generate the md5 hash, policy Specification and the
      * two definitions are used
      *
-     * @param policyData Operation policy data
+     * @param policyData  Operation policy data
      * @return md5 hash
      */
     public static String getMd5OfOperationPolicy(OperationPolicyData policyData) {
@@ -11043,7 +10069,7 @@ public final class APIUtil {
     /**
      * Return the md5 hash of the policy definition string
      *
-     * @param policyDefinition Operation policy definition
+     * @param policyDefinition  Operation policy definition
      * @return md5 hash of the definition content
      */
     public static String getMd5OfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition) {
@@ -11064,51 +10090,41 @@ public final class APIUtil {
      * @param api             API
      * @param policyDirection Request, response of fault flow
      * @param organization    organization
-     * @return the policy data for mediation flow
      * @throws APIManagementException
      */
     public static OperationPolicyData getPolicyDataForMediationFlow(API api, String policyDirection,
-                                                                    String organization) {
+            String organization) {
 
         OperationPolicyData policyData = null;
         switch (policyDirection) {
-            case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
-                if (isSequenceDefined(api.getInSequence()) && api.getInSequenceMediation() != null) {
-                    Mediation inSequenceMediation = api.getInSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
-                            inSequenceMediation.getName(), inSequenceMediation.getConfig());
-                }
-                break;
-            case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
-                if (isSequenceDefined(api.getOutSequence()) && api.getOutSequenceMediation() != null) {
-                    Mediation outSequenceMediation = api.getOutSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
-                            outSequenceMediation.getName(), outSequenceMediation.getConfig());
-                }
-                break;
-            case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
-                if (isSequenceDefined(api.getFaultSequence()) && api.getFaultSequenceMediation() != null) {
-                    Mediation faultSequenceMediation = api.getFaultSequenceMediation();
-                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
-                            faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
-                }
-                break;
+        case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+            if (isSequenceDefined(api.getInSequence()) && api.getInSequenceMediation() != null) {
+                Mediation inSequenceMediation = api.getInSequenceMediation();
+                policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                        inSequenceMediation.getName(), inSequenceMediation.getConfig());
+            }
+            break;
+        case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+            if (isSequenceDefined(api.getOutSequence()) && api.getOutSequenceMediation() != null) {
+                Mediation outSequenceMediation = api.getOutSequenceMediation();
+                policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                        outSequenceMediation.getName(), outSequenceMediation.getConfig());
+            }
+            break;
+        case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+            if (isSequenceDefined(api.getFaultSequence()) && api.getFaultSequenceMediation() != null) {
+                Mediation faultSequenceMediation = api.getFaultSequenceMediation();
+                policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                        faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
+            }
+            break;
         }
         return policyData;
     }
 
-    /**
-     * Generate operation policy data object operation policy data.
-     *
-     * @param apiUuid                the api uuid
-     * @param organization           the organization
-     * @param policyName             the policy name
-     * @param policyDefinitionString the policy definition string
-     * @return the operation policy data
-     */
     public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String organization,
-                                                                        String policyName,
-                                                                        String policyDefinitionString) {
+            String policyName,
+            String policyDefinitionString) {
 
         OperationPolicySpecification policySpecification = new OperationPolicySpecification();
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
@@ -11148,13 +10164,7 @@ public final class APIUtil {
         return policyData;
     }
 
-    /**
-     * Gets operation policy file name.
-     *
-     * @param policyName    the policy name
-     * @param policyVersion the policy version
-     * @return the operation policy file name
-     */
+
     public static String getOperationPolicyFileName(String policyName, String policyVersion) {
         if (StringUtils.isEmpty(policyVersion)) {
             policyVersion = "v1";
@@ -11162,11 +10172,6 @@ public final class APIUtil {
         return policyName + "_" + policyVersion;
     }
 
-    /**
-     * Initialize velocity context.
-     *
-     * @param velocityEngine the velocity engine
-     */
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
