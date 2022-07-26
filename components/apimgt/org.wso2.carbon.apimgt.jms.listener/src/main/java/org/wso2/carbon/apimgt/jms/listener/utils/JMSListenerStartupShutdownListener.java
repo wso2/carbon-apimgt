@@ -72,7 +72,7 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
                         new CorrelationConfigJMSMessageListener());
             }
         }
-        CorrelationConfigManager.getInstance().initializeCorrelationComponentList();
+
     }
 
     @Override

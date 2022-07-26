@@ -18,18 +18,19 @@
 
 package org.wso2.carbon.apimgt.rest.api.devops;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APILogInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentDTO;
+import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentsListDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.LoggingApiOutputDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.LoggingApiOutputListDTO;
-import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentPropertyDTO;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Devops util functions.

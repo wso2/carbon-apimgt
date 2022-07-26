@@ -19,9 +19,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.devops.impl;
 
-import java.util.Arrays;
-import java.util.List;
-import javax.ws.rs.core.Response;
+
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.devops.impl.correlation.ConfigCorrelationImpl;
@@ -30,7 +28,9 @@ import org.wso2.carbon.apimgt.rest.api.devops.ConfigApiService;
 import org.wso2.carbon.apimgt.rest.api.devops.DevopsAPIUtils;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.CorrelationComponentsListDTO;
 import org.wso2.carbon.apimgt.rest.api.devops.dto.ErrorDTO;
-
+import java.util.Arrays;
+import java.util.List;
+import javax.ws.rs.core.Response;
 /**
  * The type Config api service.
  */
