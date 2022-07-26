@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,10 +19,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.ws.rs.core.Response;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -34,7 +31,10 @@ import org.wso2.carbon.apimgt.internal.service.CorrelationConfigsApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.CorrelationComponentDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.CorrelationComponentPropertyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.CorrelationComponentsListDTO;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.ws.rs.core.Response;
 /**
  * Correlation Configs Internal Service Implementation.
  */

@@ -76,7 +76,7 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
         } else {
             log.info("Running on migration enabled mode: Stopped at JMSListenerStartupShutdownListener completed");
         }
-        CorrelationConfigManager.getInstance().initializeCorrelationComponentList();
+
     }
 
     @Override

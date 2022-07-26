@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,11 +20,10 @@
 
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
-import java.util.List;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
-
+import java.util.List;
 /**
- * An Event Object which holds data related to correlation config update
+ * An Event Object which holds data related to correlation config update.
  */
 public class CorrelationConfigEvent extends Event {
 

@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.devops.impl.correlation;
 
-import java.util.List;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -29,16 +28,18 @@ import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
 import org.wso2.carbon.apimgt.impl.notifier.events.CorrelationConfigEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import java.util.List;
 
 /**
- * DevOps API Correlation Config Implementation
+ * DevOps API Correlation Config Implementation.
  */
 public class ConfigCorrelationImpl {
     private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
+    private static final String LOGGING_PERMISSION_PATH = "/permission/protected/configure/logging";
 
     public boolean updateCorrelationConfigs(List<CorrelationConfigDTO> correlationConfigDTOList) throws
             APIManagementException {
-        if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), APIConstants.Permissions.APIM_ADMIN)) {
+        if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), LOGGING_PERMISSION_PATH)) {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
                     ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
         }

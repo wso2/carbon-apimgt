@@ -18,11 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Set;
-import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
@@ -38,6 +33,12 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.logging.APILogHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This Handler can be used to log all external calls done by the api manager via synapse.

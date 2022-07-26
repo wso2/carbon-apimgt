@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,11 +20,7 @@
 
 package org.wso2.carbon.apimgt.impl.correlation;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,21 +41,24 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.logging.correlation.bean.CorrelationLogConfig;
 import org.wso2.carbon.logging.correlation.utils.CorrelationLogHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * Correlation Config Manager to configure correlation components and
  * invoke the internal API.
  */
 public class CorrelationConfigManager {
     public static final int RETRIEVAL_RETRIES = 15;
-    public static final int RETRIEVAL_TIMEOUT_IN_SECONDS = 15;
     public static final String UTF8 = "UTF-8";
     private static final String DENIED_THREADS = "deniedThreads";
     private static final Log log = LogFactory.getLog(CorrelationConfigManager.class);
     private static final CorrelationConfigManager correlationConfigManager = new CorrelationConfigManager();
     private final EventHubConfigurationDto eventHubConfigurationDto;
 
-    public CorrelationConfigManager() {
+    private CorrelationConfigManager() {
         this.eventHubConfigurationDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getEventHubConfigurationDto();
@@ -71,8 +70,7 @@ public class CorrelationConfigManager {
 
     public void initializeCorrelationComponentList() {
         try {
-            String responseString =
-                    invokeService("/correlation-configs", MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            String responseString = invokeService("/correlation-configs");
             JSONObject responseJson = new JSONObject(responseString);
             List<CorrelationConfigDTO> correlationConfigDTOList = new ArrayList<>();
             JSONArray correlationComponentsArray = responseJson.getJSONArray("components");
@@ -96,7 +94,7 @@ public class CorrelationConfigManager {
                         propertyValueList.add(propertyValue);
                     }
                     correlationConfigPropertyDTO.setValue(
-                            propertyValueList.toArray(new String[propertyValueList.size()]));
+                            propertyValueList.toArray(new String[0]));
                     correlationConfigPropertyDTOList.add(correlationConfigPropertyDTO);
                 }
                 correlationConfigDTO.setProperties(correlationConfigPropertyDTOList);
@@ -125,7 +123,7 @@ public class CorrelationConfigManager {
                 configComponentNames.add(componentName);
             }
             List<CorrelationConfigPropertyDTO> correlationConfigPropertyDTOList = correlationConfigDTO.getProperties();
-            String[] deniedThreads = new String[0];
+            String[] deniedThreads;
             for (CorrelationConfigPropertyDTO correlationConfigPropertyDTO : correlationConfigPropertyDTOList) {
                 if (correlationConfigPropertyDTO.getName().equals(DENIED_THREADS)) {
                     deniedThreads = correlationConfigPropertyDTO.getValue();
@@ -134,7 +132,7 @@ public class CorrelationConfigManager {
             }
 
             CorrelationLogConfig correlationLogConfig = new CorrelationLogConfig(configEnable,
-                    configComponentNames.toArray(new String[configComponentNames.size()]), configDeniedThreads);
+                    configComponentNames.toArray(new String[0]), configDeniedThreads);
             CorrelationLogHolder.getInstance().setCorrelationLogServiceConfigs(correlationLogConfig);
         }
     }
@@ -146,7 +144,7 @@ public class CorrelationConfigManager {
         return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes(StandardCharsets.UTF_8));
     }
 
-    private String invokeService(String path, String tenantDomain) throws IOException, APIManagementException {
+    private String invokeService(String path) throws IOException, APIManagementException {
 
         String serviceURLStr = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + path);
@@ -157,38 +155,48 @@ public class CorrelationConfigManager {
         String serviceProtocol = serviceURL.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                 APIConstants.AUTHORIZATION_BASIC + new String(credentials, StandardCharsets.UTF_8));
-        if (tenantDomain != null) {
-            method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
-        }
+        method.setHeader(APIConstants.HEADER_TENANT, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
 
         HttpResponse httpResponse = null;
         int retryCount = 0;
         boolean retry;
-        do {
-            try {
-                httpResponse = httpClient.execute(method);
-                retry = false;
-            } catch (IOException ex) {
-                retryCount++;
-                if (retryCount < RETRIEVAL_RETRIES) {
-                    retry = true;
-                    log.warn("Failed retrieving " + path + " from remote endpoint: " + ex.getMessage()
-                            + ". Retrying after " + RETRIEVAL_TIMEOUT_IN_SECONDS + " seconds.");
-                    try {
-                        Thread.sleep(RETRIEVAL_TIMEOUT_IN_SECONDS * 1000L);
-                    } catch (InterruptedException e) {
-                        // Ignore
+        try {
+            do {
+                try {
+                    httpResponse = httpClient.execute(method);
+                    if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        return EntityUtils.toString(httpResponse.getEntity(), UTF8);
+                    } else {
+                        retry = true;
                     }
-                } else {
-                    throw new APIManagementException("Error while calling internal service", ex);
+                } catch (IOException ex) {
+                    if (retryCount < RETRIEVAL_RETRIES) {
+                        retry = true;
+                    } else {
+                        throw new APIManagementException("Error while calling internal service", ex);
+                    }
                 }
+                if (retry) {
+                    if (retryCount < RETRIEVAL_RETRIES) {
+                        retryCount++;
+                        long retryTimeout = (long) Math.min(Math.pow(2, retryCount), 300);
+                        log.warn("Failed retrieving correlation configs. Retrying after " + retryTimeout
+                                + " seconds...");
+                        Thread.sleep(retryTimeout * 1000);
+                    } else {
+                        throw new APIManagementException("Could not retrieve Correlation Log Configs " + path);
+                    }
+                }
+            } while (retry);
+            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
+                log.error("Could not retrieve Correlation Log Configs - Internal service API");
+                throw new APIManagementException("Could not retrieve Correlation Log Configs " + path);
             }
-        } while (retry);
-        if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-            log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
-            throw new APIManagementException("Error while retrieving subscription from " + path);
+        } catch (InterruptedException e) {
+            log.error("Error while retrieving correlation configs", e);
+            throw new APIManagementException("Could not retrieve Correlation Log Configs" + path);
         }
-        return EntityUtils.toString(httpResponse.getEntity(), UTF8);
+        return null;
     }
 }

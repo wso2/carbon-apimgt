@@ -20,19 +20,20 @@ package org.wso2.carbon.apimgt.cleanup.service;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.MDC;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.apache.log4j.MDC;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.UUID;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
+import java.util.UUID;
+
 
 /**
- * This class provides AspectJ configurations
+ * This class provides AspectJ configurations.
  */
 @Aspect
 public class MethodTimeLogger {
@@ -70,7 +71,7 @@ public class MethodTimeLogger {
     }
 
     /**
-     * This pointcut looks for the system property to enable/ disable timing logs
+     * This pointcut looks for the system property to enable/ disable timing logs.
      *
      * @return true if the property value is given as true
      */
