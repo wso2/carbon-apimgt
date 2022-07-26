@@ -3103,7 +3103,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
             artifactManager.addGenericArtifact(artifact);
-            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + id.getProviderName();
             //provider ------provides----> APIProduct
@@ -3595,7 +3594,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Map<String, Tag> tagsData = new HashMap<String, Tag>();
 
             Map<String, List<String>> criteriaPublished = new HashMap<String, List<String>>();
-            criteriaPublished.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {
+            criteriaPublished.put(APIConstants.API_OVERVIEW_STATUS_SEARCH_KEY, new ArrayList<String>() {
                 {
                     add(APIConstants.PUBLISHED);
                 }
@@ -3611,7 +3610,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
 
             Map<String, List<String>> criteriaPrototyped = new HashMap<String, List<String>>();
-            criteriaPrototyped.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {
+            criteriaPrototyped.put(APIConstants.API_OVERVIEW_STATUS_SEARCH_KEY, new ArrayList<String>() {
                 {
                     add(APIConstants.PROTOTYPED);
                 }
