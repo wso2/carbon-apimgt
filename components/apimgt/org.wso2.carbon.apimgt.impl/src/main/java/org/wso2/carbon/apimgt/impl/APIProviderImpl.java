@@ -472,7 +472,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateOperationPolicyParameters(api, tenantDomain);
+
+        // This is called none API Endpoint because every api has a none API for purpose of none of mapping
+        // There can be a special case that a user can extremely want a resource without an endpoint
+        // So this endpoint acts as an empty endpoint for an API.
         addNoneAPIEndpoint(api.getUuid());
+
         addURITemplates(apiId, api, tenantId);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
@@ -482,7 +487,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Add None Endpoint to AM_API_ENDPOINTS
+     * Add None Endpoint to AM_API_ENDPOINTS.
      *
      * @param uuid  unique identifier of api (UUID)
      * @throws APIManagementException
@@ -925,7 +930,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Update primary endpoints of an API
+     * Update primary endpoints of an API.
      *
      * @param api API
      * @throws APIManagementException If fails to update local scopes of the API.
@@ -4757,6 +4762,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.hasOperationMapping(endpointUuid);
     }
 
+    /**
+     * It fetches the primary endpoint mappings of an API and populate their UUIDs.
+     *
+     * @param api API model Object
+     * @param uuid unique identifier of an API
+     * @throws APIManagementException
+     */
     private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
         String currentApiUuid;
         String revisionUuid = null;
@@ -4778,6 +4790,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setPrimarySandboxEndpointId(sandboxEndpointId);
     }
 
+    /**
+     * It fetches the operation endpoints mapping' details and binds with each resource.
+     *
+     *  @param api API model Object
+     *  @param uuid unique identifier of an API
+     * @throws APIManagementException
+     */
     private void populateAPIOperationEndpointsMapping(API api, String uuid) throws APIManagementException {
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
         String currentApiUuid;

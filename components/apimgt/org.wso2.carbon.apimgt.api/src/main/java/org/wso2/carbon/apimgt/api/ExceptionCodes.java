@@ -488,8 +488,6 @@ public enum ExceptionCodes implements ErrorHandler {
 
     //Service Catalog related error codes
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
-    INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
-            "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
 
     //Operation Policies related error codes
@@ -506,18 +504,21 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
     OPERATION_POLICY_NOT_FOUND(902010, "Operation Policy Not Found", 404,
             "Requested operation policy with id '%s' not found"),
-    API_ENDPOINT_NOT_FOUND(900921, "API Endpoint Not Found", 404,
-            "Requested API endpoint with id '%s' not found."),
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),
-    ERROR_FETCHING_OPERATION_ENDPOINTS_API(902030, "Cannot find information of endpoints API", 404,
-            "Cannot find information of operation endpoints API."),
-    ERROR_UPDATING_API_ENDPOINT_API(902032, "Cannot update an API endpoint", 500,
+
+    //API Endpoints Error codes
+    API_ENDPOINT_NOT_FOUND(900921, "Cannot find the required API Endpoint details.", 404,
+            "Requested API endpoint with id '%s' not found."),
+    ERROR_UPDATING_API_ENDPOINT_API(902032, "Error has occurred. Cannot update an API endpoint.", 500,
                                                   "Error when updating the API Endpoint."),
-    ERROR_INSERTING_API_ENDPOINT_API(902033, "Fail to add an API endpoint", 400,
-                                                  "Error occurred while inserting an operation endpoint."),
-    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902036, "Missing API endpoint's endpoint config", 404,
-            "Cannot find endpoint config object."),
+    ERROR_INSERTING_API_ENDPOINT_API(902033, "Error has occurred. Fail to add an API endpoint to API.", 500,
+                                                  "Error has occurred while inserting an API endpoint."),
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902036, "Missing mandatory API endpoint's endpoint config", 500,
+            "Required attributes %s for an API endpoint config specification %s are either missing or empty"),
+    INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
+            "Invalid Endpoint Security credentials. %s", false),
+
     INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),
     INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true),
     ENDPOINT_HAS_MAPPING_WITH_RESOURCES(902034, "An operation mapping already exists for the endpoint", 400, "Internal Server Error from API Endpoint deletion.") ,

@@ -1643,7 +1643,7 @@ public interface APIProvider extends APIManager {
      *
      * @param apiUUID Unique identifier of API
      * @param apiEndpoint New Endpoint payload object
-     * @return
+     * @return created endpoint UUID
      * @throws APIManagementException
      */
     String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException;
