@@ -169,8 +169,8 @@ public class APIManagerConfiguration {
         return loginConfiguration;
     }
 
-    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();
-    ;
+    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+            new GatewayArtifactSynchronizerProperties();
 
     /**
      * Returns the configuration of the Identity Provider.
@@ -197,8 +197,10 @@ public class APIManagerConfiguration {
     public RESTAPICacheConfiguration getRESTAPICacheConfig() {
         boolean tokenCacheEnabled = Boolean.parseBoolean(getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_ENABLED));
         int tokenCacheExpiry = Integer.parseInt(getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_EXPIRY));
-        boolean cacheControlHeadersEnabled = Boolean.parseBoolean(getFirstProperty(APIConstants.REST_API_CACHE_CONTROL_HEADERS_ENABLED));
-        int cacheControlHeadersMaxAge = Integer.parseInt(getFirstProperty(APIConstants.REST_API_CACHE_CONTROL_HEADERS_MAX_AGE));
+        boolean cacheControlHeadersEnabled =
+                Boolean.parseBoolean(getFirstProperty(APIConstants.REST_API_CACHE_CONTROL_HEADERS_ENABLED));
+        int cacheControlHeadersMaxAge =
+                Integer.parseInt(getFirstProperty(APIConstants.REST_API_CACHE_CONTROL_HEADERS_MAX_AGE));
         return new RESTAPICacheConfiguration.Builder()
                 .tokenCacheEnabled(tokenCacheEnabled)
                 .tokenCacheExpiry(tokenCacheExpiry)
@@ -376,10 +378,14 @@ public class APIManagerConfiguration {
                 OMElement redisPort = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PORT));
                 OMElement redisUser = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_USER));
                 OMElement redisPassword = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PASSWORD));
-                OMElement redisDatabaseId = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_DATABASE_ID));
-                OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_CONNECTION_TIMEOUT));
-                OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_IS_SSL_ENABLED));
-                OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PROPERTIES));
+                OMElement redisDatabaseId =
+                        element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_DATABASE_ID));
+                OMElement redisConnectionTimeout =
+                        element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_CONNECTION_TIMEOUT));
+                OMElement redisIsSslEnabled =
+                        element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_IS_SSL_ENABLED));
+                OMElement propertiesElement =
+                        element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PROPERTIES));
                 redisConfig.setRedisEnabled(true);
                 redisConfig.setHost(redisHost.getText());
                 redisConfig.setPort(Integer.parseInt(redisPort.getText()));
@@ -408,13 +414,17 @@ public class APIManagerConfiguration {
                                 redisConfig.setTestOnReturn(Boolean.parseBoolean(propertyNode.getText()));
                             } else if (APIConstants.CONFIG_REDIS_TEST_WHILE_IDLE.equals(propertyNode.getLocalName())) {
                                 redisConfig.setTestWhileIdle(Boolean.parseBoolean(propertyNode.getText()));
-                            } else if (APIConstants.CONFIG_REDIS_BLOCK_WHEN_EXHAUSTED.equals(propertyNode.getLocalName())) {
+                            } else if (APIConstants.CONFIG_REDIS_BLOCK_WHEN_EXHAUSTED
+                                    .equals(propertyNode.getLocalName())) {
                                 redisConfig.setBlockWhenExhausted(Boolean.parseBoolean(propertyNode.getText()));
-                            } else if (APIConstants.CONFIG_REDIS_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS.equals(propertyNode.getLocalName())) {
+                            } else if (APIConstants.CONFIG_REDIS_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS
+                                    .equals(propertyNode.getLocalName())) {
                                 redisConfig.setMinEvictableIdleTimeMillis(Long.parseLong(propertyNode.getText()));
-                            } else if (APIConstants.CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS.equals(propertyNode.getLocalName())) {
+                            } else if (APIConstants.CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS
+                                    .equals(propertyNode.getLocalName())) {
                                 redisConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
-                            } else if (APIConstants.CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
+                            } else if (APIConstants.CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS
+                                    .equals(propertyNode.getLocalName())) {
                                 redisConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
                             }
                         }
@@ -487,8 +497,8 @@ public class APIManagerConfiguration {
                                             .getText())); //Set store login username [optional]
                         } else {
                             log.error(
-                                    "The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
-                                            "config of api-manager.xml.");
+                                    "The user-credentials of API Publisher is not defined in the " +
+                                            "<ExternalAPIStore> config of api-manager.xml.");
                         }
                     }
                     externalAPIStores.add(store);
@@ -549,9 +559,11 @@ public class APIManagerConfiguration {
                 setGlobalCacheInvalidationConfiguration(element);
             } else if (APIConstants.KeyManager.EVENT_HUB_CONFIGURATIONS.equals(localName)) {
                 setEventHubConfiguration(element);
-            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG.equals(localName)) {
+            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG
+                    .equals(localName)) {
                 setRuntimeArtifactsSyncPublisherConfig(element);
-            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG.equals(localName)) {
+            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG
+                    .equals(localName)) {
                 setRuntimeArtifactsSyncGatewayConfig(element);
             } else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)) {
                 setSkipListConfigurations(element);
@@ -1546,9 +1558,11 @@ public class APIManagerConfiguration {
                         }
                     }
                     OMElement claimRetrievalElement =
-                            configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
+                            configurationElement.getFirstChildWithName(
+                                    new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
                     if (claimRetrievalElement != null) {
-                        jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
+                        jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(
+                                Boolean.parseBoolean(claimRetrievalElement.getText()));
                     }
                 }
             }
@@ -1879,7 +1893,8 @@ public class APIManagerConfiguration {
         OMElement enableElement = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.ENABLE));
         if (enableElement != null && Boolean.parseBoolean(enableElement.getText())) {
             eventHubConfigurationDto.setEnabled(true);
-            OMElement serviceUrlElement = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.SERVICE_URL));
+            OMElement serviceUrlElement = omElement.getFirstChildWithName(
+                    new QName(APIConstants.KeyManager.SERVICE_URL));
             if (serviceUrlElement != null) {
                 String serviceUrl = APIUtil.replaceSystemProperty(serviceUrlElement.getText());
                 if (StringUtils.isNotEmpty(serviceUrl)) {
