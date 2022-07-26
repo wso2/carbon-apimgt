@@ -1528,7 +1528,7 @@ public final class APIUtil {
      * @throws APIManagementException if failed to get GovernanceArtifact from Documentation
      */
     public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, Identifier id,
-            Documentation documentation) throws APIManagementException {
+                                                           Documentation documentation) throws APIManagementException {
 
         try {
             artifact.setAttribute(APIConstants.DOC_NAME, documentation.getName());
@@ -1539,21 +1539,21 @@ public final class APIUtil {
             Documentation.DocumentSourceType sourceType = documentation.getSourceType();
 
             switch (sourceType) {
-            case INLINE:
-                sourceType = Documentation.DocumentSourceType.INLINE;
+                case INLINE:
+                    sourceType = Documentation.DocumentSourceType.INLINE;
+                    break;
+                case MARKDOWN:
+                    sourceType = Documentation.DocumentSourceType.MARKDOWN;
+                    break;
+                case URL:
+                    sourceType = Documentation.DocumentSourceType.URL;
+                    break;
+                case FILE: {
+                    sourceType = Documentation.DocumentSourceType.FILE;
+                }
                 break;
-            case MARKDOWN:
-                sourceType = Documentation.DocumentSourceType.MARKDOWN;
-                break;
-            case URL:
-                sourceType = Documentation.DocumentSourceType.URL;
-                break;
-            case FILE: {
-                sourceType = Documentation.DocumentSourceType.FILE;
-            }
-            break;
-            default:
-                throw new APIManagementException("Unknown sourceType " + sourceType + " provided for documentation");
+                default:
+                    throw new APIManagementException("Unknown sourceType " + sourceType + " provided for documentation");
             }
             //Documentation Source URL is a required field in the documentation.rxt for migrated setups
             //Therefore setting a default value if it is not set.
@@ -1744,7 +1744,7 @@ public final class APIUtil {
      * @return Gateway URL
      */
     public static String getGatewayEndpoint(String transports, String environmentName, String environmentType,
-            String organization)
+                                            String organization)
             throws APIManagementException {
 
         String gatewayURLs;
@@ -2298,14 +2298,14 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(tenantDomain);
 
-            org.wso2.carbon.user.api.AuthorizationManager manager =
-                    ServiceReferenceHolder.getInstance()
-                            .getRealmService()
-                            .getTenantUserRealm(tenantId)
-                            .getAuthorizationManager();
-            authorized =
-                    manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
-                            CarbonConstants.UI_PERMISSION_ACTION);
+                org.wso2.carbon.user.api.AuthorizationManager manager =
+                        ServiceReferenceHolder.getInstance()
+                                .getRealmService()
+                                .getTenantUserRealm(tenantId)
+                                .getAuthorizationManager();
+                authorized =
+                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
+                                CarbonConstants.UI_PERMISSION_ACTION);
             if (APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
                 addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange,
                         authorized ? 1 : 2);
@@ -3442,7 +3442,7 @@ public final class APIUtil {
             isContextCacheInitialized = true;
             return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_CONTEXT_CACHE_MANAGER).
                     setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
-                    APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
+                            APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
         } else {
             return Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).getCache(
                     APIConstants.API_CONTEXT_CACHE);
@@ -3539,7 +3539,7 @@ public final class APIUtil {
         }
         return resourceQuotaLimiter;
     }
-
+    
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
         return getOrganizationResolver().getInternalId(organization);
     }
@@ -3868,7 +3868,7 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static OMElement getCustomSequence(String sequenceName, int tenantId, String direction,
-            APIIdentifier identifier) throws APIManagementException {
+                                              APIIdentifier identifier) throws APIManagementException {
 
         org.wso2.carbon.registry.api.Collection seqCollection = null;
 
@@ -3940,7 +3940,7 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static boolean isPerAPISequence(String sequenceName, int tenantId, APIIdentifier identifier,
-            String sequenceType) throws APIManagementException {
+                                           String sequenceType) throws APIManagementException {
 
         org.wso2.carbon.registry.api.Collection seqCollection = null;
         try {
@@ -4217,7 +4217,7 @@ public final class APIUtil {
      * @return - The cache key
      */
     public static String getResourceInfoDTOCacheKey(String apiContext, String apiVersion,
-            String resourceUri, String httpMethod) {
+                                                    String resourceUri, String httpMethod) {
 
         return apiContext + "/" + apiVersion + resourceUri + ":" + httpMethod;
     }
@@ -4303,7 +4303,7 @@ public final class APIUtil {
      * @return - The Key which will be used to cache the access token
      */
     public static String getAccessTokenCacheKey(String accessToken, String apiContext, String apiVersion,
-            String resourceUri, String httpVerb, String authLevel) {
+                                                String resourceUri, String httpVerb, String authLevel) {
 
         return accessToken + ':' + apiContext + '/' + apiVersion + resourceUri + ':' + httpVerb + ':' + authLevel;
     }
@@ -4413,7 +4413,7 @@ public final class APIUtil {
     public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
 
         try (BufferedReader in =
-                new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
+                     new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
             while ((inputLine = in.readLine()) != null && maxLines > 0) {
@@ -4860,7 +4860,7 @@ public final class APIUtil {
      * @throws APIManagementException if failed to get applications for given subscriber
      */
     public static boolean isApplicationExist(String subscriber, String applicationName, String groupId,
-            String organization) throws APIManagementException {
+                                             String organization) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId, organization);
     }
@@ -5251,7 +5251,7 @@ public final class APIUtil {
             return (JSONObject) tenantConfigCache.get(cacheName);
         } else {
             String tenantConfig =
-                    ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+             ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
             if (StringUtils.isNotEmpty(tenantConfig)){
                 try {
                     JSONObject jsonObject = (JSONObject) new JSONParser().parse(tenantConfig);
@@ -5554,7 +5554,7 @@ public final class APIUtil {
 
     public static String getWebsubSubscriptionConfigurationJsonFromDto(
             WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
-        return new Gson().toJson(websubSubscriptionConfiguration);
+            return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
     public static String getWsUriMappingJsonFromDto(Map<String, String> mappings) {
@@ -6663,7 +6663,7 @@ public final class APIUtil {
      * @return - The cache object
      */
     public synchronized static Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
-            final long accessExp) {
+                                              final long accessExp) {
 
         Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(cacheManagerName).getCaches();
         for (Cache cache : availableCaches) {
@@ -6675,9 +6675,9 @@ public final class APIUtil {
         return Caching.getCacheManager(
                 cacheManagerName).createCacheBuilder(cacheName).
                 setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                modifiedExp)).
+                        modifiedExp)).
                 setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                accessExp)).setStoreByValue(false).build();
+                        accessExp)).setStoreByValue(false).build();
     }
 
     /**
@@ -8087,7 +8087,7 @@ public final class APIUtil {
      * @return whether the signature is verified or or not
      */
     public static boolean verifyTokenSignature(String[] splitToken, Certificate certificate,
-            String signatureAlgorithm) throws APIManagementException {
+                                               String signatureAlgorithm) throws APIManagementException {
         // Retrieve public key from the certificate
         PublicKey publicKey = certificate.getPublicKey();
         try {
@@ -8198,7 +8198,7 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
-
+    
     public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
         Map<String, Object> properties = new HashMap<String, Object>();
         if (APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
@@ -9341,7 +9341,7 @@ public final class APIUtil {
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
-
+    
     public static String getconvertedId(Identifier apiId) {
         String id = null;
         if (apiId instanceof APIIdentifier) {
@@ -9619,8 +9619,8 @@ public final class APIUtil {
      * @return OperationPolicyDefinition
      */
     public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
-            String definitionFileName,
-            String fileExtension)
+                                                                                 String definitionFileName,
+                                                                                 String fileExtension)
             throws APIManagementException {
 
         OperationPolicyDefinition policyDefinition = null;
@@ -9755,38 +9755,38 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static OperationPolicyData getPolicyDataForMediationFlow(API api, String policyDirection,
-            String organization) {
+                                                                    String organization) {
 
         OperationPolicyData policyData = null;
         switch (policyDirection) {
-        case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
-            if (isSequenceDefined(api.getInSequence()) && api.getInSequenceMediation() != null) {
-                Mediation inSequenceMediation = api.getInSequenceMediation();
-                policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
-                        inSequenceMediation.getName(), inSequenceMediation.getConfig());
-            }
-            break;
-        case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
-            if (isSequenceDefined(api.getOutSequence()) && api.getOutSequenceMediation() != null) {
-                Mediation outSequenceMediation = api.getOutSequenceMediation();
-                policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
-                        outSequenceMediation.getName(), outSequenceMediation.getConfig());
-            }
-            break;
-        case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
-            if (isSequenceDefined(api.getFaultSequence()) && api.getFaultSequenceMediation() != null) {
-                Mediation faultSequenceMediation = api.getFaultSequenceMediation();
-                policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
-                        faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
-            }
-            break;
+            case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+                if (isSequenceDefined(api.getInSequence()) && api.getInSequenceMediation() != null) {
+                    Mediation inSequenceMediation = api.getInSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            inSequenceMediation.getName(), inSequenceMediation.getConfig());
+                }
+                break;
+            case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+                if (isSequenceDefined(api.getOutSequence()) && api.getOutSequenceMediation() != null) {
+                    Mediation outSequenceMediation = api.getOutSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            outSequenceMediation.getName(), outSequenceMediation.getConfig());
+                }
+                break;
+            case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+                if (isSequenceDefined(api.getFaultSequence()) && api.getFaultSequenceMediation() != null) {
+                    Mediation faultSequenceMediation = api.getFaultSequenceMediation();
+                    policyData = generateOperationPolicyDataObject(api.getUuid(), organization,
+                            faultSequenceMediation.getName(), faultSequenceMediation.getConfig());
+                }
+                break;
         }
         return policyData;
     }
 
     public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String organization,
-            String policyName,
-            String policyDefinitionString) {
+                                                                        String policyName,
+                                                                        String policyDefinitionString) {
 
         OperationPolicySpecification policySpecification = new OperationPolicySpecification();
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
