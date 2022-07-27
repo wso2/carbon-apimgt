@@ -114,6 +114,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 message.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, tokenInfo.getScopes());
                 //If scope validation successful then set tenant name and user name to current context
                 String tenantDomain = MultitenantUtils.getTenantDomain(tokenInfo.getEndUserName());
+                String organization = RestApiUtil.resolveOrganization(message);
                 int tenantId;
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
@@ -137,7 +138,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     carbonContext.setTenantId(tenantId);
                     carbonContext.setUsername(username);
                     message.put(RestApiConstants.AUTH_TOKEN_INFO, tokenInfo);
-                    message.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
+                    message.put(RestApiConstants.SUB_ORGANIZATION, organization);
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                     }
