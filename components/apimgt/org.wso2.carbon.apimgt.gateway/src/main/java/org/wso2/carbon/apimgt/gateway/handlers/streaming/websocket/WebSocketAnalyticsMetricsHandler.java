@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
@@ -60,7 +61,8 @@ public class WebSocketAnalyticsMetricsHandler {
     }
 
     private void collectData(ChannelHandlerContext ctx) {
-        AnalyticsDataProvider provider = new WebSocketAnalyticsDataProvider(ctx);
+        AnalyticsDataProvider provider = new WebSocketAnalyticsDataProvider(ctx,
+                ServiceReferenceHolder.getInstance().getAnalyticsCustomDataProvider());
         GenericRequestDataCollector collector = new GenericRequestDataCollector(provider);
         try {
             collector.collectData();
