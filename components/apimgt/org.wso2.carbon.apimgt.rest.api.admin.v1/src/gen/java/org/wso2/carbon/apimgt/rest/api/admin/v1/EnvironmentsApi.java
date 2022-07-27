@@ -92,7 +92,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add an Environment", notes = "Add a new geteway environment ", response = EnvironmentDTO.class, authorizations = {
+    @ApiOperation(value = "Add an Environment", notes = "Add a new gateway environment ", response = EnvironmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")

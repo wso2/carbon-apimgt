@@ -777,7 +777,7 @@ public class ImportUtils {
      *
      * @param uploadedInputStream Input stream from the REST request
      * @return Path to the extracted directory
-     * @throws APIImportExportException If an error occurs while creating the directory, transferring files or
+     * @throws APIManagementException If an error occurs while creating the directory, transferring files or
      *                                  extracting the content
      */
     public static String getArchivePathOfPolicyExtractedDirectory(InputStream uploadedInputStream)
@@ -834,8 +834,10 @@ public class ImportUtils {
             OperationPolicyDefinition synapseDefinition = null;
 
             String[] fileLocations = pathToArchive.split("/");
+
+            // File names of all types should be the same
             String fileName = File.separator + fileLocations[fileLocations.length - 1];
-            String policyDefinitionJsonContent = getPolicyFileContentAsJson(pathToArchive + fileName, "policy");
+            String policyDefinitionJsonContent = getPolicyFileContentAsJson(pathToArchive + fileName);
             if (policyDefinitionJsonContent == null) {
                 throw new APIManagementException(
                         "Cannot find Operation Policy definition. policyDefinition.yaml should present",
@@ -849,8 +851,9 @@ public class ImportUtils {
             operationPolicyData.setOrganization(organization);
             operationPolicyData.setSpecification(policySpecification);
 
-            String synapsePolicyDefinitionJsonContent = getPolicyFileContentAsJson(pathToArchive +
-                    fileName, "synapse");
+            String pathToJ2File = pathToArchive + fileName + ImportExportConstants.SYNAPSE_EXTENSION;
+
+            String synapsePolicyDefinitionJsonContent = readDefinitionFiles(pathToJ2File);
 
             if (synapsePolicyDefinitionJsonContent != null) {
                 synapseDefinition = new OperationPolicyDefinition();
@@ -860,8 +863,9 @@ public class ImportUtils {
                 operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
             }
 
-            String choreoConnectPolicyDefinitionJsonContent = getPolicyFileContentAsJson(pathToArchive +
-                    fileName, "choreo");
+            String pathToChoreoFile = pathToArchive + fileName + ImportExportConstants.CHOREO_CONNECT_EXTENSION;
+
+            String choreoConnectPolicyDefinitionJsonContent = readDefinitionFiles(pathToChoreoFile);
 
             if (choreoConnectPolicyDefinitionJsonContent != null) {
                 ccPolicyDefinition = new OperationPolicyDefinition();
@@ -1171,21 +1175,19 @@ public class ImportUtils {
     }
 
     /**
-     * Retrieve Policy Definition as JSON.
+     * Retrieve Policy Definition as JSON content.
      *
      * @param pathToArchive Path to Policy archive
      * @throws IOException If an error occurs while reading the file
      */
-    public static String getPolicyFileContentAsJson(String pathToArchive, String type) throws IOException {
+    public static String getPolicyFileContentAsJson(String pathToArchive) throws IOException {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_EXTENSION;
         String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_EXTENSION;
-        String pathToJ2File = pathToArchive + ImportExportConstants.SYNAPSE_EXTENSION;
-        String pathToGoTmplFile = pathToArchive + ImportExportConstants.CHOREO_CONNECT_EXTENSION;
 
         // Load yaml representation first if it is present
-        if (CommonUtil.checkFileExistence(pathToYamlFile) && type.equals("policy")) {
+        if (CommonUtil.checkFileExistence(pathToYamlFile)) {
             if (log.isDebugEnabled()) {
                 log.debug("Found policy definition file " + pathToYamlFile);
             }
@@ -1202,7 +1204,7 @@ public class ImportUtils {
 
             jsonContent = object.toString();
 
-        } else if (CommonUtil.checkFileExistence(pathToJsonFile) && type.equals("policy")) {
+        } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
             // load as a json fallback
             if (log.isDebugEnabled()) {
                 log.debug("Found policy definition file " + pathToJsonFile);
@@ -1217,19 +1219,20 @@ public class ImportUtils {
             }
 
             jsonContent = object.toString();
-        } else if (CommonUtil.checkFileExistence(pathToJ2File) && type.equals("synapse")) {
-            // load as a j2 fallback
-            if (log.isDebugEnabled()) {
-                log.debug("Found synapse definition file " + pathToJ2File);
-            }
-            jsonContent = FileUtils.readFileToString(new File(pathToJ2File));
-        } else if (CommonUtil.checkFileExistence(pathToGoTmplFile) && type.equals("choreo")) {
-            // load as a gotmpl fallback
-            if (log.isDebugEnabled()) {
-                log.debug("Found choreo definition file " + pathToGoTmplFile);
-            }
-            jsonContent = FileUtils.readFileToString(new File(pathToGoTmplFile));
         }
+
+        return jsonContent;
+    }
+
+    /**
+     * Retrieving the File content as JSON content.
+     *
+     * @param path File path.
+     * @return
+     * @throws IOException
+     */
+    public static String readDefinitionFiles(String path) throws IOException {
+        String  jsonContent = FileUtils.readFileToString(new File(path));
         return jsonContent;
     }
 

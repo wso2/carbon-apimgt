@@ -217,9 +217,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      * @param messageContext message context
      * @return A list of operation policies available for the API
      */
-    @Override
-    public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query, String name, String version,
-                                                  MessageContext messageContext) throws APIManagementException {
+    @Override public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query, String name,
+            String version, MessageContext messageContext) throws APIManagementException {
 
         String apiManagementExceptionErrorMessage = "";
         String exceptionErrorMessage = "";
@@ -232,32 +231,36 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             if (name != null && version != null) {
                 apiManagementExceptionErrorMessage = "Error while retrieving the policy by name & version.";
                 exceptionErrorMessage = "An error has occurred while getting the operation policies by name & version";
-                OperationPolicyData policyData =
-                        apiProvider.getCommonOperationPolicyByPolicyName(name, version, organization, false);
+                OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version,
+                        organization, false);
 
-                        // if not found, throw not found error
+                // if not found, throw not found error
                 if (policyData != null) {
-                    List<OperationPolicyData> commonOperationPolicyLIst =  new ArrayList<>();
+                    List<OperationPolicyData> commonOperationPolicyLIst = new ArrayList<>();
                     commonOperationPolicyLIst.add(policyData);
-                    policyListDTO = OperationPolicyMappingUtil
-                            .fromOperationPolicyDataListToDTO(commonOperationPolicyLIst, 0, 1);
+                    policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(
+                            commonOperationPolicyLIst, 0, 1);
                 } else {
-                    throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing common policy with Name: "
-                            + name + " and Version: " + version, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
-                            name, version));
+                    throw new APIMgtResourceNotFoundException(
+                            "Couldn't retrieve an existing common policy with Name: " + name + " and Version: "
+                                    + version,
+                            ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, name, version));
                 }
             } else {
-                limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+                // limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
                 offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
                 apiManagementExceptionErrorMessage = "Error while retrieving the list of all common operation policies.";
                 exceptionErrorMessage = "An error has occurred while getting the list of all common operation policies";
 
                 // Since policy definition is bit bulky, we don't query the definition unnecessarily.
-                List<OperationPolicyData> commonOperationPolicyLIst =
-                        apiProvider.getAllCommonOperationPolicies(organization);
-                policyListDTO = OperationPolicyMappingUtil
-                        .fromOperationPolicyDataListToDTO(commonOperationPolicyLIst, offset, limit);
+                List<OperationPolicyData> commonOperationPolicyLIst = apiProvider.getAllCommonOperationPolicies(
+                        organization);
+
+                // Set limit to the query param value or the count of all policies
+                limit = limit != null ? limit : commonOperationPolicyLIst.size();
+                policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(commonOperationPolicyLIst,
+                        offset, limit);
             }
 
             return Response.ok().entity(policyListDTO).build();
@@ -265,8 +268,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 String policy = name + "_" + version;
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
-                        policy, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES, policy, e,
+                        log);
             } else {
                 apiManagementExceptionErrorMessage += e.getMessage();
                 RestApiUtil.handleInternalServerError(apiManagementExceptionErrorMessage, e, log);
@@ -361,30 +364,46 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
         return null;
     }
 
-    public Response exportOperationPolicy(String name, String version, MessageContext messageContext) throws APIManagementException {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+    /**
+     * Export Operation Policy as an archived file.
+     *
+     * @param name           Name of the operation policy
+     * @param version        Version of the operation policy
+     * @param messageContext message context
+     * @throws APIManagementException If an error occurs while creating the directory, transferring files or
+     *                                extracting the content
+     * @returnA zip file containing both (if exists) operation policy specification and policy definition
+     */
+    public Response exportOperationPolicy(String name, String version, MessageContext messageContext)
+            throws APIManagementException {
 
-            OperationPolicyData policyData =
-                    apiProvider.getCommonOperationPolicyByPolicyName(name, version, organization, true);
-            if (policyData != null) {
-                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
-                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + file.getName() + "\"").build();
-            } else {
-                // if not found, throw not found error
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing common policy with Name: "
-                        + name + " and Version: " + version, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
-                        name, version));
-            }
-        } catch (APIManagementException e) {
-            // if errors occur during the archive processing
-            throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES, e);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version, organization,
+                true);
+        if (policyData != null) {
+            File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
+            return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + file.getName() + "\"").build();
+        } else {
+            // if not found, throw not found error
+            throw new APIManagementException(
+                    "Couldn't retrieve an existing common policy with Name: " + name + " and Version: " + version,
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, name, version));
         }
     }
 
-    public Response importOperationPolicy(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException {
+    /**
+     * @param fileInputStream Archived file
+     * @param fileDetail      file details
+     * @param messageContext  message context
+     * @return return a response with the corresponding status code
+     * @throws APIManagementException If an error occurs while creating the directory, transferring files or
+     *                                extracting the content
+     */
+    public Response importOperationPolicy(InputStream fileInputStream, Attachment fileDetail,
+            MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);

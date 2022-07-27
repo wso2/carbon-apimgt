@@ -7835,7 +7835,7 @@ paths:
       summary: |
         Export common operation policies by their names and versions
       description: |
-        This operation provides you to export preferred common operation policies
+        This operation provides you to export preferred common API policies
       operationId: exportOperationPolicy
       parameters:
         - name: name
@@ -7863,19 +7863,19 @@ paths:
               schema:
                 type: string
                 format: binary
+        403:
+          $ref: '#/components/responses/Forbidden'
         500:
           $ref: '#/components/responses/InternalServerError'
         404:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:common_operation_policy_view
-            - apim:common_operation_policy_manage
             - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v2/operation-policies/export?name=addHeader&version=v1"
+            "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies/export?name=addHeader&version=v1"
             > addHeader_v1.zip'
 
   /operation-policies/import:
@@ -7884,7 +7884,7 @@ paths:
         - Import Export
       summary: Import a Policy
       description: |
-        This operation can be used to import an Policy.
+        This operation can be used to import a common API Policy.
       requestBody:
         content:
           multipart/form-data:
@@ -7903,15 +7903,12 @@ paths:
             Policy Imported Successfully.
         403:
           $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
         409:
           $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:admin
             - apim:policies_import_export
       x-code-samples:
         - lang: Curl
@@ -12083,7 +12080,7 @@ components:
         Maximum size of resource array to return.
       schema:
         type: integer
-        default: 25
+#        default: 25
     Accept:
       name: Accept
       in: header
