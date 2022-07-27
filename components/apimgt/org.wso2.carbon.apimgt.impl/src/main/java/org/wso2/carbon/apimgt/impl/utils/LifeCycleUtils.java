@@ -63,6 +63,7 @@ public class LifeCycleUtils {
         String uuid = apiTypeWrapper.getUuid();
         String currentStatus = apiTypeWrapper.getStatus();
         targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
+        apiPersistence.changeAPILifeCycle(new Organization(orgId), apiTypeWrapper.getUuid(), targetStatus);
         if (!apiTypeWrapper.isAPIProduct()) {
             API api = apiTypeWrapper.getApi();
             api.setOrganization(orgId);
