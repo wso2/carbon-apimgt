@@ -108,15 +108,15 @@ public class APIMgtGatewayConstants {
     /**
      * Constants for Open Tracing
      */
-    public static final String SERVICE_NAME = "API:Latency";
+    public static final String SERVICE_NAME = "API:Gateway";
     public static final String RESPONSE_LATENCY = "API:Response_Latency";
     public static final String BACKEND_LATENCY_SPAN = "API:Backend_Latency";
     public static final String KEY_VALIDATION = "API:Key_Validation_Latency";
     public static final String REQUEST_MEDIATION = "API:Request_Mediation_Latency";
     public static final String RESPONSE_MEDIATION = "API:Response_Mediation_Latency";
-    public static final String CORS_REQUEST_HANDLER = "API:CORS_Request_Handler";
+    public static final String CORS_REQUEST_HANDLER = "API:CORS_Request_Latency";
     public static final String THROTTLE_LATENCY = "API:Throttle_Latency";
-    public static final String GOOGLE_ANALYTICS_HANDLER = "API:Google_Analytics_Handler";
+    public static final String GOOGLE_ANALYTICS_HANDLER = "API:Google_Analytics_Latency";
     public static final String SPAN_KIND = "span.kind";
     public static final String SPAN_REQUEST_PATH = "span.request.path";
     public static final String SPAN_REQUEST_METHOD = "span.request.method";

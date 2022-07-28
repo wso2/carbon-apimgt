@@ -995,7 +995,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response exportThrottlingPolicy(String policyId, String policyName, String type, String format,
-            MessageContext messageContext) throws APIManagementException {
+            MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -1077,11 +1077,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             }
             if (StringUtils.EMPTY.equals(type) || PolicyConstants.POLICY_LEVEL_GLOBAL.equals(type)) {
                 try {
-                    //only super tenant is allowed to access global policies/custom rules
-                    checkTenantDomainForCustomRules();
-                    //This will give PolicyNotFoundException if there's no policy exists with UUID
                     GlobalPolicy globalPolicy = apiProvider.getGlobalPolicy(policyName);
                     if (globalPolicy != null) {
+                        //only super tenant is allowed to access global policies/custom rules
+                        checkTenantDomainForCustomRules();
                         CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(
                                 globalPolicy);
                         exportPolicy.data(policyDTO);
@@ -1223,12 +1222,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     String uuid = policyIfExists.getUUID();
                     Response resp = throttlingPoliciesApplicationPolicyIdPut(uuid, RestApiConstants.APPLICATION_JSON,
                             applicationPolicy, messageContext);
-                    String message = "Successfully updated Subscription Throttling Policy : "
+                    String message = "Successfully updated Application Throttling Policy : "
                             + applicationPolicy.getPolicyName();
                     return Response.fromResponse(resp).entity(message).build();
                 } else {
                     RestApiUtil.handleResourceAlreadyExistsError(
-                            "Subscription Policy with name " + applicationPolicy.getPolicyName() + " already exists",
+                            "Application Policy with name " + applicationPolicy.getPolicyName() + " already exists",
                             log);
                 }
             } else {

@@ -20,10 +20,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
@@ -178,10 +181,19 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             }
 
             String workflowType = workflowDTO.getWorkflowType();
+
+            if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType) &&
+                    WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                int applicationId = Integer.parseInt(workflowDTO.getWorkflowReference());
+                apiConsumer.cleanupPendingTasksForApplicationDeletion(applicationId);
+            }
+
             WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
             workflowExecutor.complete(workflowDTO);
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
+
             }
             return Response.ok().entity(body).build();
 

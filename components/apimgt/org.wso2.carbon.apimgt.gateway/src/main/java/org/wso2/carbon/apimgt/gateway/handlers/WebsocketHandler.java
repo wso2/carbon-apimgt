@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,6 +84,8 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
             InboundProcessorResponseDTO responseDTO = inboundHandler().getWebSocketProcessor().handleResponse(
                     (WebSocketFrame) msg, inboundMessageContext);
             if (responseDTO.isError()) {
+                // Release WebsocketFrame
+                ReferenceCountUtil.release(msg);
                 if (responseDTO.isCloseConnection()) {
                     InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
                     if (log.isDebugEnabled()) {
