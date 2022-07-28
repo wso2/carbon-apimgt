@@ -1992,8 +1992,9 @@ public class PublisherCommonUtils {
         }
 
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
-        if (apiEndpoint.getEndpointUuid() == null)
+        if (apiEndpoint.getEndpointUuid() == null) {
             apiEndpoint.setEndpointUuid(endpointId);
+        }
         APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiEndpoint);
         if (apiEndpointUpdated == null) {
             throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
