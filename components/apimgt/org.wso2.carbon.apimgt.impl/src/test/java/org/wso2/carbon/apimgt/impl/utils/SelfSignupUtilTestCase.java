@@ -31,22 +31,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 public class SelfSignupUtilTestCase {
 
     @Test
-    public void testGetDomainSpecificRoleName() {
-        UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        userRegistrationConfigDTO.setSignUpDomain("foo.com");
-        String domainSpecificRoleName = SelfSignUpUtil.getDomainSpecificUserName("john", userRegistrationConfigDTO);
-        Assert.assertEquals("FOO.COM/john", domainSpecificRoleName);
-    }
-
-    @Test
-    public void testGetDomainSpecificRoleNameWithWrongDomain() {
-        UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        userRegistrationConfigDTO.setSignUpDomain("foo.com");
-        String domainSpecificRoleName = SelfSignUpUtil.getDomainSpecificUserName("bar.com/john", userRegistrationConfigDTO);
-        Assert.assertEquals("FOO.COM/john", domainSpecificRoleName);
-    }
-
-    @Test
     public void testGetSignupConfiguration() throws Exception {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);

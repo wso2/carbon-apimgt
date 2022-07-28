@@ -3539,27 +3539,6 @@ public final class APIUtil {
     }
 
     /**
-     * Check whether the user has the given role
-     *
-     * @throws UserStoreException
-     * @throws APIManagementException
-     */
-    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
-        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
-        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
-        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
-        return abstractManager.isUserInRole(tenantAwareUserName, role);
-    }
-
-    /**
      * check whether given role is exist
      *
      * @param userName logged user

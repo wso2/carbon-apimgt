@@ -21,10 +21,6 @@ package org.wso2.carbon.apimgt.impl.utils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.user.core.UserCoreConstants;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * This class contains the utility methods used for self signup
@@ -48,33 +44,5 @@ public final class SelfSignUpUtil {
 			return selfSighupConfig;
 		}
 		return new UserRegistrationConfigDTO();
-	}
-
-	/**
-	 * modify username with user storage information.
-	 *
-	 * @param username     - The username
-	 * @param signupConfig - The sign-up configuration
-	 * @return - The modified username
-	 */
-	public static String getDomainSpecificUserName(String username, UserRegistrationConfigDTO signupConfig) {
-		String modifiedUsername = null;
-		// set tenant specific sign up user storage
-		if (signupConfig != null && signupConfig.getSignUpDomain() != null && !signupConfig.getSignUpDomain().equals("")) {
-			int index = username.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
-			/*
-			 * if there is a different domain provided by the user other than one
-			 * given in the configuration, add the correct signup domain. Here signup
-			 * domain refers to the user storage
-			 */
-			if (index > 0) {
-				modifiedUsername = signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
-								username.substring(index + 1);
-			} else {
-				modifiedUsername = signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
-						username;
-			}
-		}
-		return modifiedUsername;
 	}
 }
