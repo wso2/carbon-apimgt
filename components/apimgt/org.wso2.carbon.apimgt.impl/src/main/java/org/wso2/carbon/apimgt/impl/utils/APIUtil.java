@@ -7167,56 +7167,6 @@ public final class APIUtil {
     }
 
     /**
-     * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
-     * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
-     * started with the system property 'migrationMode=true' if a migration related exports are to be done.
-     *
-     * @param targetTenantDomain Tenant domain of which resources are requested
-     * @param username           Logged in user name
-     * @throws APIMgtInternalException When internal error occurred
-     */
-    public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
-            throws APIMgtInternalException {
-
-        String superAdminRole = null;
-
-        //Accessing the same tenant as the user's tenant
-        if (targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username))) {
-            return true;
-        }
-
-        try {
-            superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
-        } catch (UserStoreException e) {
-            handleInternalException("Error in getting super admin role name", e);
-        }
-
-        //check whether logged in user is a super tenant user
-        String superTenantDomain = null;
-        try {
-            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getSuperTenantDomain();
-        } catch (UserStoreException e) {
-            handleInternalException("Error in getting the super tenant domain", e);
-        }
-        boolean isSuperTenantUser = MultitenantUtils.getTenantDomain(username).equals(superTenantDomain);
-        if (!isSuperTenantUser) {
-            return false;
-        }
-
-        //check whether the user has super tenant admin role
-        boolean isSuperAdminRoleNameExistInUser = false;
-        try {
-            isSuperAdminRoleNameExistInUser = isUserInRole(username, superAdminRole);
-        } catch (UserStoreException | APIManagementException e) {
-            handleInternalException("Error in checking whether the user has admin role", e);
-        }
-
-        return isSuperAdminRoleNameExistInUser;
-    }
-
-    /**
      * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if
      * config is not available in tenant registry
      *
