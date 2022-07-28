@@ -398,8 +398,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             JsonObject tenantConfig = (JsonObject) new JsonParser().parse(getTenantConfig(organization));
             if (tenantConfig.has(APIConstants.SELF_SIGN_UP_NAME)) {
-                return getSignupUserRegistrationConfigDTO(
-                        (JsonObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
+                return getSignupUserRegistrationConfigDTO((JsonObject) tenantConfig.get(APIConstants.SELF_SIGN_UP_NAME));
             } else {
                 return null;
             }

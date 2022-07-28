@@ -2823,9 +2823,7 @@ public final class APIUtil {
      * If any REST API scopes are added to the local tenant-conf.json, they will be updated.
      *
      * @param organization organization.
-     * @throws APIManagementException when error occurred while loading the tenant-conf to registry or when error
-     * occurred while reading Self signup configuration file from /signupconfigurations/
-     * self-sign-up-config.json
+     * @throws APIManagementException when error occurred while loading the tenant-conf
      */
     public static void loadAndSyncTenantConf(String organization) throws APIManagementException {
 
@@ -2835,24 +2833,12 @@ public final class APIUtil {
             if (currentConfig == null) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
-                if (APIConstants.SUPER_TENANT_DOMAIN.equals(organization)) { // Add default config for the carbon.super user
-                    try (InputStream inputStream = APIManagerComponent.class.getResourceAsStream(
-                            APIConstants.SELF_SIGN_UP_DEFAULT_CONFIG_FILE_PATH_OF_THE_CARBON_SUPER_USER)) {
-                        String selfSignUpJsonString = IOUtils.toString(inputStream);
-                        JsonObject selfSignUpJsonObject = (JsonObject) new JsonParser().parse(selfSignUpJsonString);
-                        fileBaseTenantConfig.add(APIConstants.SELF_SIGN_UP_NAME, selfSignUpJsonObject);
-                    }
-                }
                 ServiceReferenceHolder.getInstance().getApimConfigService()
                         .addTenantConfig(organization, gson.toJson(fileBaseTenantConfig));
             }
         } catch (APIManagementException e) {
             throw new APIManagementException(
                     "Error while saving tenant conf to the Advanced configuration of the " + "tenant " + organization, e);
-        } catch (IOException e) {
-            throw new APIManagementException(
-                    "Error while reading Self signup configuration file content from /signupconfigurations/"
-                            + "self-sign-up-config.json", e);
         }
     }
 

@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class, APIUtil.class})
+@PrepareForTest({ServiceReferenceHolder.class})
 public class SelfSignupUtilTestCase {
 
     @Test

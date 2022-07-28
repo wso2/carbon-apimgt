@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 import java.util.ArrayList;
 
 /**
- * Object to store tenant signup information taken from the registry
+ * Object to store tenant signup information taken from the Advance Configuration
  */
 public class UserRegistrationConfigDTO {
 
