@@ -72,7 +72,7 @@ public class UserSignUpWSWorkflowExecutorTest {
     private String externalWFReference = UUIDGenerator.generateUUID();
     private String username = "admin";
     private String password = "admin";
-    private String signUpRole = "subscriber";
+    private String signUpRole = "Internal/subscriber";
     private int tenantID = -1234;
     private String testUsername = "PRIMARY/testuser";
 
@@ -179,12 +179,11 @@ public class UserSignUpWSWorkflowExecutorTest {
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
-        PowerMockito.when(SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO)).thenCallRealMethod();
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
         Mockito.when(userStoreManager.isExistingUser(testUsername)).thenReturn(true);
-        Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(true);
+        Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
         PowerMockito.doNothing().when(userStoreManager).updateRoleListOfUser(testUsername, null, new String[]{
-                "Internal/" + signUpRole});
+                signUpRole});
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         try {
@@ -201,10 +200,9 @@ public class UserSignUpWSWorkflowExecutorTest {
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
-        PowerMockito.when(SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO)).thenCallRealMethod();
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
         Mockito.when(userStoreManager.isExistingUser(testUsername)).thenReturn(true);
-        Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(true);
+        Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
 
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
@@ -221,7 +219,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         }
 
         //Test failure to complete workflow execution, when sign up roles are not existing in user realm
-        Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(false);
+        Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(false);
         try {
             userSignUpWSWorkflowExecutor.complete(workflowDTO);
             Assert.fail("Expected WorkflowException has not been thrown when signup role is not existing");

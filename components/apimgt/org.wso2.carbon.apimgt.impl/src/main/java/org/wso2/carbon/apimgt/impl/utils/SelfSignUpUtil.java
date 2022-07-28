@@ -47,33 +47,7 @@ public final class SelfSignUpUtil {
 			UserRegistrationConfigDTO selfSighupConfig = (UserRegistrationConfigDTO) selfSighupConfigObject;
 			return selfSighupConfig;
 		}
-		return null;
-	}
-
-	/**
-	 * get the full role name list (ex: internal/subscriber)
-	 *
-	 * @param config - A UserRegistrationConfigDTO instance
-	 * @return - A list object containing role names
-	 */
-	public static List<String> getRoleNames(UserRegistrationConfigDTO config) {
-
-		ArrayList<String> roleNamesArr = new ArrayList<String>();
-		if (config != null) {
-			Iterator<String> roles = config.getRoles().iterator();
-			while (roles.hasNext()) {
-				String roleName;
-				if (config.getSignUpDomain() != null) {
-					// external role
-					roleName = config.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR + roles.next();
-				} else {
-					// internal role
-					roleName = UserCoreConstants.INTERNAL_DOMAIN + UserCoreConstants.DOMAIN_SEPARATOR + roles.next();
-				}
-				roleNamesArr.add(roleName);
-			}
-		}
-		return roleNamesArr;
+		return new UserRegistrationConfigDTO();
 	}
 
 	/**

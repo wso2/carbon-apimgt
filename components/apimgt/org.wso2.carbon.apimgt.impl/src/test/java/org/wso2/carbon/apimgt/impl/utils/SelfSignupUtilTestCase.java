@@ -25,24 +25,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import java.util.ArrayList;
-import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class})
 public class SelfSignupUtilTestCase {
-
-    @Test
-    public void testGetRoleNames() {
-        UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        ArrayList<String> roles = new ArrayList<String>();
-        roles.add("subscriber");
-        roles.add("creator");
-        userRegistrationConfigDTO.setRoles(roles);
-        userRegistrationConfigDTO.setSignUpDomain("foo.com");
-        List<String> roleList = SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO);
-        Assert.assertEquals(2, roleList.size());
-    }
 
     @Test
     public void testGetDomainSpecificRoleName() {
@@ -83,6 +69,8 @@ public class SelfSignupUtilTestCase {
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
         Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn("Test String");
         UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
-        Assert.assertNull(userRegistrationConfigDTO);
+        Assert.assertTrue(userRegistrationConfigDTO instanceof UserRegistrationConfigDTO);
+        Assert.assertNull(userRegistrationConfigDTO.getSignUpDomain());
+        Assert.assertEquals(userRegistrationConfigDTO.getRoles().size(), 0);
     }
 }

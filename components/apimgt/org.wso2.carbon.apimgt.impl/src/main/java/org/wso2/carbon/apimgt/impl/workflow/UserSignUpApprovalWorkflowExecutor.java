@@ -82,8 +82,7 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
             String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 try {
-                    updateRolesOfUser(tenantAwareUserName,
-                            SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
+                    updateRolesOfUser(tenantAwareUserName, signupConfig.getRoles(), tenantDomain);
                 } catch (Exception e) {
                     // updateRolesOfUser throws generic Exception. Therefore generic Exception is caught
                     throw new WorkflowException("Error while assigning role to user", e);

@@ -39,7 +39,7 @@ public class APIMConfigServiceImplTestCase {
         UserRegistrationConfigDTO userRegistrationConfigDTO = configServiceImpl.getSelfSighupConfig("carbon.super");
         Assert.assertNull(userRegistrationConfigDTO.getSignUpDomain());
         Assert.assertEquals(1, userRegistrationConfigDTO.getRoles().size());
-        Assert.assertEquals("subscriber", userRegistrationConfigDTO.getRoles().get(0));
+        Assert.assertEquals("Internal/subscriber", userRegistrationConfigDTO.getRoles().get(0));
     }
 
     @Test

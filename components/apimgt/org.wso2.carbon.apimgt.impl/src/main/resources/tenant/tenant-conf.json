@@ -382,7 +382,7 @@
   },
   "SelfSignUp": {
     "SignUpRoles": [
-      "subscriber"
+      "Internal/subscriber"
     ]
   }
 }

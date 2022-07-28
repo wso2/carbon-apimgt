@@ -879,32 +879,20 @@
             "type": "string",
             "default": "",
             "examples": [
-              "subscriber"
+              "Internal/subscriber"
             ]
           },
           "examples": [
             [
-              "subscriber"
-            ]
-          ]
-        },
-        "SignUpDomain": {
-          "type": "string",
-          "default": "",
-          "title": "(OPTIONAL) Enter the Signup domain.",
-          "examples": [
-            "PRIMARY"
+              "Internal/subscriber"]
           ]
         }
       },
-      "examples": [
-        {
-          "SignUpRoles": [
-            "subscriber"
-          ],
-          "SignUpDomain": "PRIMARY"
-        }
-      ]
+      "examples": [{
+        "SignUpRoles": [
+          "Internal/subscriber"
+        ]
+      }]
     }
   },
   "additionalProperties": true
