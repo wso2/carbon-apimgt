@@ -66,6 +66,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         OAuthTokenInfo tokenInfo = null;
 
         RESTAPICacheConfiguration cacheConfiguration = APIUtil.getRESTAPICacheConfig();
+        String organization = RestApiUtil.resolveOrganization(message);
         //validate the token from cache if it is enabled
         if (cacheConfiguration.isTokenCacheEnabled()) {
             tokenInfo = (OAuthTokenInfo)getRESTAPITokenCache().get(accessToken);
@@ -114,7 +115,6 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 message.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, tokenInfo.getScopes());
                 //If scope validation successful then set tenant name and user name to current context
                 String tenantDomain = MultitenantUtils.getTenantDomain(tokenInfo.getEndUserName());
-                String organization = RestApiUtil.resolveOrganization(message);
                 int tenantId;
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
