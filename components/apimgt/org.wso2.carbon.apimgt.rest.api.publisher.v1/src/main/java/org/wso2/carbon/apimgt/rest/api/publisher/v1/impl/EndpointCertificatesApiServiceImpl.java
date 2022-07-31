@@ -50,7 +50,6 @@ import java.util.List;
 public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesApiService {
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
-    private static final String URL_PROTOCOL_SEPARATOR = "://";
     private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
     public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -229,28 +228,26 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
     @Override
     public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
-
         APIMetadataListDTO apiMetadataListDTO;
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        limit = (limit != null) ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = (offset != null) ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         CertificateMetadataDTO certificateMetadataDTO;
         String fqdn;
         String query;
         APISearchResult searchResult;
 
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-
         if (StringUtils.isEmpty(alias)) {
             RestApiUtil.handleBadRequest("The alias should not be empty", log);
         }
 
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         certificateMetadataDTO = apiProvider.getCertificate(alias);
 
         if(certificateMetadataDTO != null) {
             String endpoint = certificateMetadataDTO.getEndpoint();
+            URI uri;
 
-            URI uri = null;
             try {
                 uri = new URI(endpoint);
                 fqdn = uri.getHost();
@@ -269,7 +266,6 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         APIMappingUtil.setPaginationParamsForAPIMetadataListDTO(apiMetadataListDTO, query, offset, limit, searchResult.getApiCount());
 
         return Response.status(Response.Status.OK).entity(apiMetadataListDTO).build();
-
     }
 
     public Response getEndpointCertificates(Integer limit, Integer offset, String alias, String endpoint,

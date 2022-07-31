@@ -576,7 +576,7 @@ public class APIMappingUtil {
      * @param apiList List of APIs
      * @return APIListDTO object containing APIDTOs
      */
-    public static APIMetadataListDTO fromAPIListToAPIMetadataListDTO(List<API> apiList) throws APIManagementException {
+    public static APIMetadataListDTO fromAPIListToAPIMetadataListDTO(List<API> apiList) {
 
         APIMetadataListDTO apiMetadataListDTO = new APIMetadataListDTO();
         List<APIMetadataDTO> apiInfoDTOs = apiMetadataListDTO.getList();
@@ -584,6 +584,7 @@ public class APIMappingUtil {
             apiInfoDTOs.add(fromAPIToAPIMetadataDTO(api));
         }
         apiMetadataListDTO.setCount(apiInfoDTOs.size());
+
         return apiMetadataListDTO;
     }
 
@@ -696,18 +697,20 @@ public class APIMappingUtil {
      */
     public static APIMetadataDTO fromAPIToAPIMetadataDTO(API api) {
 
-        APIMetadataDTO apiMetadataDTO = new APIMetadataDTO();
         String context = api.getContextTemplate();
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
+
+        APIMetadataDTO apiMetadataDTO = new APIMetadataDTO();
         apiMetadataDTO.setContext(context);
-        apiMetadataDTO.setId(api.getUUID());
+        apiMetadataDTO.setId(api.getUuid());
         APIIdentifier apiId = api.getId();
         apiMetadataDTO.setName(apiId.getApiName());
         apiMetadataDTO.setVersion(apiId.getVersion());
         String providerName = api.getId().getProviderName();
         apiMetadataDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+
         return apiMetadataDTO;
     }
 

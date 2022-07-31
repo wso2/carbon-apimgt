@@ -4740,18 +4740,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public APISearchResult searchPaginatedAPIsAsAdmin(String searchQuery, String tenantDomain, int offset, int limit) throws APIManagementException {
-
         Organization org = new Organization(organization);
-
         String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
         String[] roles = APIUtil.getFilteredUserRoles(adminUser);
         Map<String, Object> properties = APIUtil.getUserProperties(adminUser);
         UserContext userCtx = new UserContext(adminUser, org, properties, roles);
-
         APISearchResult result = new APISearchResult();
 
         try {
-
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
                     offset, limit, userCtx, "createdTime", "desc");
 
@@ -4771,7 +4767,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.setApis(apiList);
                 result.setApiCount(searchAPIs.getTotalAPIsCount());
             }
-
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching for APIs with Solr query: " + searchQuery , e);
         }
