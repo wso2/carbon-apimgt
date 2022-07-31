@@ -76,6 +76,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
@@ -83,8 +85,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIQuickInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIQuickInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
@@ -571,30 +571,20 @@ public class APIMappingUtil {
     }
 
     /**
-     * Converts a List object of APIs into a minimal DTO.
-     *
-     * @param apiList List of APIs
-     * @return APIQuickInfoListDTO object containing APIQuickInfoDTOs
-     */
-    public static Object fromAPIListToAPIQuickInfoListDTO(List<API> apiList) throws APIManagementException {
-        return fromAPIListToQuickInfoListDTO(apiList);
-    }
-
-    /**
      * Converts a List object of APIs into quick info DTO List.
      *
      * @param apiList List of APIs
      * @return APIListDTO object containing APIDTOs
      */
-    public static APIQuickInfoListDTO fromAPIListToQuickInfoListDTO(List<API> apiList) throws APIManagementException {
+    public static APIMetadataListDTO fromAPIListToAPIMetadataListDTO(List<API> apiList) throws APIManagementException {
 
-        APIQuickInfoListDTO apiQuickInfoListDTO = new APIQuickInfoListDTO();
-        List<APIQuickInfoDTO> apiInfoDTOs = apiQuickInfoListDTO.getList();
+        APIMetadataListDTO apiMetadataListDTO = new APIMetadataListDTO();
+        List<APIMetadataDTO> apiInfoDTOs = apiMetadataListDTO.getList();
         for (API api : apiList) {
-            apiInfoDTOs.add(fromAPIToAPIQuickInfoDTO(api));
+            apiInfoDTOs.add(fromAPIToAPIMetadataDTO(api));
         }
-        apiQuickInfoListDTO.setCount(apiInfoDTOs.size());
-        return apiQuickInfoListDTO;
+        apiMetadataListDTO.setCount(apiInfoDTOs.size());
+        return apiMetadataListDTO;
     }
 
     /**
@@ -704,21 +694,21 @@ public class APIMappingUtil {
      * @param api API object
      * @return a very minimal representation DTO
      */
-    public static APIQuickInfoDTO fromAPIToAPIQuickInfoDTO(API api) {
+    public static APIMetadataDTO fromAPIToAPIMetadataDTO(API api) {
 
-        APIQuickInfoDTO apiQuickInfoDTO = new APIQuickInfoDTO();
+        APIMetadataDTO apiMetadataDTO = new APIMetadataDTO();
         String context = api.getContextTemplate();
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
-        apiQuickInfoDTO.setContext(context);
-        apiQuickInfoDTO.setId(api.getUUID());
+        apiMetadataDTO.setContext(context);
+        apiMetadataDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
-        apiQuickInfoDTO.setName(apiId.getApiName());
-        apiQuickInfoDTO.setVersion(apiId.getVersion());
+        apiMetadataDTO.setName(apiId.getApiName());
+        apiMetadataDTO.setVersion(apiId.getVersion());
         String providerName = api.getId().getProviderName();
-        apiQuickInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        return apiQuickInfoDTO;
+        apiMetadataDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        return apiMetadataDTO;
     }
 
     /**
@@ -825,16 +815,16 @@ public class APIMappingUtil {
     }
 
     /**
-     * Sets pagination urls for a APIQuickInfoListDTO object given pagination parameters and url parameters.
+     * Sets pagination urls for a APIMetadataListDTO object given pagination parameters and url parameters.
      *
-     * @param apiQuickInfoListDTO a APIQuickInfoListDTO object
+     * @param apiMetadataListDTO a APIMetadataListDTO object
      * @param query      search condition
      * @param limit      max number of objects returned
      * @param offset     starting index
      * @param size       max offset
      */
-    public static void setPaginationParamsForAPIQuickInfoListDTO(
-            Object apiQuickInfoListDTO, String query, int offset, int limit, int size
+    public static void setPaginationParamsForAPIMetadataListDTO(
+            Object apiMetadataListDTO, String query, int offset, int limit, int size
     ) {
 
         //acquiring pagination parameters and setting pagination urls
@@ -856,7 +846,7 @@ public class APIMappingUtil {
 
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
-        ((APIQuickInfoListDTO) apiQuickInfoListDTO).setPagination(paginationDTO);
+        ((APIMetadataListDTO) apiMetadataListDTO).setPagination(paginationDTO);
     }
 
     private static String checkAndSetVersionParam(String context) {

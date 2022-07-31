@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIQuickInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import javax.validation.constraints.*;
 
@@ -22,16 +22,16 @@ import javax.validation.Valid;
 
 
 
-public class APIQuickInfoListDTO   {
+public class APIMetadataListDTO   {
   
     private Integer count = null;
-    private List<APIQuickInfoDTO> list = new ArrayList<APIQuickInfoDTO>();
+    private List<APIMetadataDTO> list = new ArrayList<APIMetadataDTO>();
     private PaginationDTO pagination = null;
 
   /**
    * Number of APIs returned. 
    **/
-  public APIQuickInfoListDTO count(Integer count) {
+  public APIMetadataListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -48,7 +48,7 @@ public class APIQuickInfoListDTO   {
 
   /**
    **/
-  public APIQuickInfoListDTO list(List<APIQuickInfoDTO> list) {
+  public APIMetadataListDTO list(List<APIMetadataDTO> list) {
     this.list = list;
     return this;
   }
@@ -57,16 +57,16 @@ public class APIQuickInfoListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<APIQuickInfoDTO> getList() {
+  public List<APIMetadataDTO> getList() {
     return list;
   }
-  public void setList(List<APIQuickInfoDTO> list) {
+  public void setList(List<APIMetadataDTO> list) {
     this.list = list;
   }
 
   /**
    **/
-  public APIQuickInfoListDTO pagination(PaginationDTO pagination) {
+  public APIMetadataListDTO pagination(PaginationDTO pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -91,10 +91,10 @@ public class APIQuickInfoListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIQuickInfoListDTO apIQuickInfoList = (APIQuickInfoListDTO) o;
-    return Objects.equals(count, apIQuickInfoList.count) &&
-        Objects.equals(list, apIQuickInfoList.list) &&
-        Objects.equals(pagination, apIQuickInfoList.pagination);
+    APIMetadataListDTO apIMetadataList = (APIMetadataListDTO) o;
+    return Objects.equals(count, apIMetadataList.count) &&
+        Objects.equals(list, apIMetadataList.list) &&
+        Objects.equals(pagination, apIMetadataList.pagination);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class APIQuickInfoListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIQuickInfoListDTO {\n");
+    sb.append("class APIMetadataListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

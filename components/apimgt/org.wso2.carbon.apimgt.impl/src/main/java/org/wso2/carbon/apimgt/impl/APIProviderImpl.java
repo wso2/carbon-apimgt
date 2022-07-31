@@ -131,8 +131,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private RecommendationEnvironment recommendationEnvironment;
     private GlobalMediationPolicyImpl globalMediationPolicyImpl;
 
-    private static final String ADMIN_USER = "admin";
-
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
@@ -4741,47 +4739,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIsByFQDN(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
-
-        Map<String, Object> result = new HashMap<String, Object>();
+    public APISearchResult searchPaginatedAPIsAsAdmin(String searchQuery, String tenantDomain, int offset, int limit) throws APIManagementException {
 
         Organization org = new Organization(organization);
-        String[] roles = APIUtil.getFilteredUserRoles(ADMIN_USER);
-        Map<String, Object> properties = APIUtil.getUserProperties(ADMIN_USER);
-        UserContext userCtx = new UserContext(ADMIN_USER, org, properties, roles);
+
+        String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(adminUser);
+        Map<String, Object> properties = APIUtil.getUserProperties(adminUser);
+        UserContext userCtx = new UserContext(adminUser, org, properties, roles);
+
+        APISearchResult result = new APISearchResult();
 
         try {
 
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
-                    start, end, userCtx, "createdTime", "desc");
+                    offset, limit, userCtx, "createdTime", "desc");
 
             if (log.isDebugEnabled()) {
-                log.debug("Running query : " + searchQuery + " to retrieve :-> " + searchAPIs.toString());
+                log.debug("Running Solr query : " + searchQuery + " to retrieve :-> " + searchAPIs.toString());
             }
 
-            // Creating function response and adding metadata ( length, isMore )
-            Set<Object> apiSet = new LinkedHashSet<>();
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
-                List<Object> apiList = new ArrayList<>();
+                List<API> apiList = new ArrayList<>();
                 for (PublisherAPIInfo publisherAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
                     apiList.add(mappedAPI);
                 }
-                apiSet.addAll(apiList);
-                result.put("apis", apiSet);
-                result.put("length", searchAPIs.getTotalAPIsCount());
-                result.put("isMore", true);
-            } else {
-                result.put("apis", apiSet);
-                result.put("length", 0);
-                result.put("isMore", false);
+                result.setApis(apiList);
+                result.setApiCount(searchAPIs.getTotalAPIsCount());
             }
 
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching the api ", e);
+            throw new APIManagementException("Error while searching for APIs with Solr query: " + searchQuery , e);
         }
 
         return result ;

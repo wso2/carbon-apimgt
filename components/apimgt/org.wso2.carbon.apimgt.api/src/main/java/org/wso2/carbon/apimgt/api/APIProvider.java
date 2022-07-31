@@ -1665,7 +1665,7 @@ public interface APIProvider extends APIManager {
      * @return APIProduct result
      * @throws APIManagementException if search is failed
      */
-    Map<String,Object> searchPaginatedAPIsByFQDN(String searchQuery, String tenantDomain,int start,int end) throws
+    APISearchResult searchPaginatedAPIsAsAdmin(String searchQuery, String tenantDomain, int start, int end) throws
             APIManagementException;
 
 }

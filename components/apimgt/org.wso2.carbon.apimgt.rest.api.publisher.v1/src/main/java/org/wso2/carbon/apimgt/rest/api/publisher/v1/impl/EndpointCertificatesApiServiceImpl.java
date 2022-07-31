@@ -24,12 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
-import org.apache.xpath.objects.XObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
-import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -46,18 +45,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesApiService {
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
-
-    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
-
     private static final String URL_PROTOCOL_SEPARATOR = "://";
+    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
     public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -236,48 +230,46 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     @Override
     public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
 
-        List<API> allMatchedApis = new ArrayList<>();
-        APIQuickInfoListDTO apiQuickInfoListDTO;
+        APIMetadataListDTO apiMetadataListDTO;
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         CertificateMetadataDTO certificateMetadataDTO;
+        String fqdn;
+        String query;
+        APISearchResult searchResult;
 
-        try {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            if (StringUtils.isEmpty(alias)) {
-                RestApiUtil.handleBadRequest("The alias should not be empty", log);
-            }
+        if (StringUtils.isEmpty(alias)) {
+            RestApiUtil.handleBadRequest("The alias should not be empty", log);
+        }
 
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            certificateMetadataDTO = apiProvider.getCertificate(alias);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        certificateMetadataDTO = apiProvider.getCertificate(alias);
+
+        if(certificateMetadataDTO != null) {
             String endpoint = certificateMetadataDTO.getEndpoint();
 
-            if(endpoint.contains(URL_PROTOCOL_SEPARATOR)){
-                String[] parts = endpoint.split(URL_PROTOCOL_SEPARATOR);
-                endpoint = parts[parts.length-1];
+            URI uri = null;
+            try {
+                uri = new URI(endpoint);
+                fqdn = uri.getHost();
+            } catch (URISyntaxException e) {
+                fqdn =  endpoint;
             }
 
-            String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + endpoint;
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            Map<String, Object> searchResult = apiProvider.searchPaginatedAPIsByFQDN(query, organization, offset, limit);
-            Set<API> apis = (Set<API>) searchResult.get("apis");
-            allMatchedApis.addAll(apis);
-            apiQuickInfoListDTO = (APIQuickInfoListDTO) APIMappingUtil.fromAPIListToAPIQuickInfoListDTO(allMatchedApis);
-
-            //Add pagination section in the response
-            Object totalLength = searchResult.get("length");
-            Integer length = 0;
-            if (totalLength != null) {
-                length = (Integer) totalLength;
-            }
-
-            APIMappingUtil.setPaginationParamsForAPIQuickInfoListDTO(apiQuickInfoListDTO, query, offset, limit, length);
-            return Response.status(Response.Status.OK).entity(apiQuickInfoListDTO).build();
-
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving the certificates.", e, log);
+            query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + fqdn;
+            searchResult = apiProvider.searchPaginatedAPIsAsAdmin(query, organization, offset, limit);
+        }else{
+            query = "";
+            searchResult = new APISearchResult();
         }
-        return null;
+
+        apiMetadataListDTO = APIMappingUtil.fromAPIListToAPIMetadataListDTO(searchResult.getApis());
+        APIMappingUtil.setPaginationParamsForAPIMetadataListDTO(apiMetadataListDTO, query, offset, limit, searchResult.getApiCount());
+
+        return Response.status(Response.Status.OK).entity(apiMetadataListDTO).build();
+
     }
 
     public Response getEndpointCertificates(Integer limit, Integer offset, String alias, String endpoint,

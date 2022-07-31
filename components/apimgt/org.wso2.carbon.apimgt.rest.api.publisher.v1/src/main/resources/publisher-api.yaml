@@ -5158,7 +5158,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIQuickInfoList'
+                $ref: '#/components/schemas/APIMetadataList'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -8353,8 +8353,8 @@ components:
             $ref: '#/components/schemas/APIInfo'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    APIQuickInfoList:
-      title: API quick info List
+    APIMetadataList:
+      title: API metadata List
       type: object
       properties:
         count:
@@ -8365,7 +8365,7 @@ components:
         list:
           type: array
           items:
-            $ref: '#/components/schemas/APIQuickInfo'
+            $ref: '#/components/schemas/APIMetadata'
         pagination:
           $ref: '#/components/schemas/Pagination'
     APIInfo:
@@ -8451,7 +8451,7 @@ components:
         advertiseOnly:
           type: boolean
           example: true
-    APIQuickInfo:
+    APIMetadata:
       title: API Info object with basic minimal API details.
       type: object
       properties:

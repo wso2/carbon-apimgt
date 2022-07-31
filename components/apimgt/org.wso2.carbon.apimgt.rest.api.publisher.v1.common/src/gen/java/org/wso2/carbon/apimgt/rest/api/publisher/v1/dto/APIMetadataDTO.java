@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class APIQuickInfoDTO   {
+public class APIMetadataDTO   {
   
     private String id = null;
     private String name = null;
@@ -28,7 +28,7 @@ public class APIQuickInfoDTO   {
 
   /**
    **/
-  public APIQuickInfoDTO id(String id) {
+  public APIMetadataDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -45,7 +45,7 @@ public class APIQuickInfoDTO   {
 
   /**
    **/
-  public APIQuickInfoDTO name(String name) {
+  public APIMetadataDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -62,7 +62,7 @@ public class APIQuickInfoDTO   {
 
   /**
    **/
-  public APIQuickInfoDTO context(String context) {
+  public APIMetadataDTO context(String context) {
     this.context = context;
     return this;
   }
@@ -79,7 +79,7 @@ public class APIQuickInfoDTO   {
 
   /**
    **/
-  public APIQuickInfoDTO version(String version) {
+  public APIMetadataDTO version(String version) {
     this.version = version;
     return this;
   }
@@ -97,7 +97,7 @@ public class APIQuickInfoDTO   {
   /**
    * If the provider value is not given, the user invoking the API will be used as the provider. 
    **/
-  public APIQuickInfoDTO provider(String provider) {
+  public APIMetadataDTO provider(String provider) {
     this.provider = provider;
     return this;
   }
@@ -121,12 +121,12 @@ public class APIQuickInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIQuickInfoDTO apIQuickInfo = (APIQuickInfoDTO) o;
-    return Objects.equals(id, apIQuickInfo.id) &&
-        Objects.equals(name, apIQuickInfo.name) &&
-        Objects.equals(context, apIQuickInfo.context) &&
-        Objects.equals(version, apIQuickInfo.version) &&
-        Objects.equals(provider, apIQuickInfo.provider);
+    APIMetadataDTO apIMetadata = (APIMetadataDTO) o;
+    return Objects.equals(id, apIMetadata.id) &&
+        Objects.equals(name, apIMetadata.name) &&
+        Objects.equals(context, apIMetadata.context) &&
+        Objects.equals(version, apIMetadata.version) &&
+        Objects.equals(provider, apIMetadata.provider);
   }
 
   @Override
@@ -137,7 +137,7 @@ public class APIQuickInfoDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIQuickInfoDTO {\n");
+    sb.append("class APIMetadataDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
