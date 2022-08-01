@@ -38,10 +38,10 @@ public class SelfSignupUtilTestCase {
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
         UserRegistrationConfigDTO config = new UserRegistrationConfigDTO();
-        config.getRoles().add("subscriber");
+        config.getRoles().add("Internal/subscriber");
         Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn(config);
         UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
-        Assert.assertNotNull(userRegistrationConfigDTO);
+        Assert.assertEquals(userRegistrationConfigDTO, config);
     }
 
     @Test
@@ -54,7 +54,6 @@ public class SelfSignupUtilTestCase {
         Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn("Test String");
         UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
         Assert.assertTrue(userRegistrationConfigDTO instanceof UserRegistrationConfigDTO);
-        Assert.assertNull(userRegistrationConfigDTO.getSignUpDomain());
         Assert.assertEquals(userRegistrationConfigDTO.getRoles().size(), 0);
     }
 }

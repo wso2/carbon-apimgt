@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.impl.config;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
@@ -37,9 +38,32 @@ public class APIMConfigServiceImplTestCase {
 
         APIMConfigServiceImpl configServiceImpl = new APIMConfigServiceImpl();
         UserRegistrationConfigDTO userRegistrationConfigDTO = configServiceImpl.getSelfSighupConfig("carbon.super");
-        Assert.assertNull(userRegistrationConfigDTO.getSignUpDomain());
         Assert.assertEquals(1, userRegistrationConfigDTO.getRoles().size());
         Assert.assertEquals("Internal/subscriber", userRegistrationConfigDTO.getRoles().get(0));
+    }
+
+    @Test
+    public void testGetSelfSighupConfigWhenManySelfSignUpRolesIsPresent() throws APIManagementException, IOException {
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        PowerMockito.mockStatic(SystemConfigurationsDAO.class);
+        SystemConfigurationsDAO systemConfigurationsDAO = Mockito.mock(SystemConfigurationsDAO.class);
+        PowerMockito.when(SystemConfigurationsDAO.getInstance()).thenReturn(systemConfigurationsDAO);
+
+        File siteConfFile = new File(
+                Thread.currentThread().getContextClassLoader().getResource("tenant-conf.json").getFile());
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+        JsonObject tenantConfig = (JsonObject) new JsonParser().parse(tenantConfValue);
+        JsonObject SelfSignUpJsonObject = (JsonObject) tenantConfig.get("SelfSignUp");
+        JsonArray SignUpRolesJsonArray = (JsonArray) SelfSignUpJsonObject.get("SignUpRoles");
+        SignUpRolesJsonArray.add("testRole");
+        Mockito.when(systemConfigurationsDAO.getSystemConfig(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(String.valueOf(tenantConfig));
+
+        APIMConfigServiceImpl configServiceImpl = new APIMConfigServiceImpl();
+        UserRegistrationConfigDTO userRegistrationConfigDTO = configServiceImpl.getSelfSighupConfig("coltrain.com");
+        Assert.assertEquals(2, userRegistrationConfigDTO.getRoles().size());
+        Assert.assertEquals("Internal/subscriber", userRegistrationConfigDTO.getRoles().get(0));
+        Assert.assertEquals("testRole", userRegistrationConfigDTO.getRoles().get(1));
     }
 
     @Test

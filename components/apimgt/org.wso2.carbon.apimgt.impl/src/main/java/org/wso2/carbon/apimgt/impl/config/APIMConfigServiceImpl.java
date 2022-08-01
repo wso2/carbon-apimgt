@@ -415,9 +415,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         while (rolesIterator.hasNext()) {
             config.getRoles().add(rolesIterator.next().getAsString());
         }
-        config.setSignUpDomain(selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM) != null ?
-                selfSighupConfig.get(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).getAsString() :
-                null);
         return config;
     }
 

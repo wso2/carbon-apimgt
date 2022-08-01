@@ -25,16 +25,7 @@ import java.util.ArrayList;
  */
 public class UserRegistrationConfigDTO {
 
-	private String signUpDomain; //user store name
 	private ArrayList<String> roles = new ArrayList<String>();
-
-	public String getSignUpDomain() {
-		return signUpDomain;
-	}
-
-	public void setSignUpDomain(String signUpDomain) {
-		this.signUpDomain = signUpDomain;
-	}
 
 	public ArrayList<String> getRoles() {
 		return roles;
