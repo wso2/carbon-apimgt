@@ -96,8 +96,8 @@ public class InternalAPIKeyAuthenticatorTest {
         Cache invalidCache = Mockito.mock(Cache.class);
         PowerMockito.when(CacheProvider.getInvalidGatewayInternalKeyCache()).thenReturn(invalidCache);
         Mockito.when(invalidCache.get("28f8d7b0-9e62-4341-bf17-094453d5ffa4")).thenReturn(null);
-        String cacheKey = GatewayUtils.getAccessTokenCacheKey("28f8d7b0-9e62-4341-bf17-094453d5ffa4", "/api1/1.0.0",
-                "1.0.0", "/resource", "GET");
+        Mockito.when(GatewayUtils.getAccessTokenCacheKey("28f8d7b0-9e62-4341-bf17-094453d5ffa4", "/api1/1.0.0",
+                "1.0.0", "/resource", "GET")).thenCallRealMethod();
         JSONObject subscribedAPI = Mockito.mock(JSONObject.class);
         PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(SignedJWT.class), Mockito.anyString())).thenReturn(true);
         PowerMockito.when(GatewayUtils.isJwtTokenExpired(signedJWT.getJWTClaimsSet())).thenReturn(false);
@@ -153,6 +153,8 @@ public class InternalAPIKeyAuthenticatorTest {
         Cache invalidCache = Mockito.mock(Cache.class);
         PowerMockito.when(CacheProvider.getInvalidGatewayInternalKeyCache()).thenReturn(invalidCache);
         Mockito.when(invalidCache.get("28f8d7b0-9e62-4341-bf17-094453d5ffa4")).thenReturn(null);
+        Mockito.when(GatewayUtils.getAccessTokenCacheKey("28f8d7b0-9e62-4341-bf17-094453d5ffa4", "/api1/1.0.0",
+                "1.0.0", "/resource", "GET")).thenCallRealMethod();
         JSONObject subscribedAPI = Mockito.mock(JSONObject.class);
         PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(SignedJWT.class), Mockito.anyString())).thenReturn(true);
         PowerMockito.when(GatewayUtils.isJwtTokenExpired(signedJWT.getJWTClaimsSet())).thenReturn(false);
