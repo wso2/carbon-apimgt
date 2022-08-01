@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.cache.invalidation;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.cache.invalidation.internal.DataHolder;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
@@ -30,6 +32,8 @@ import org.wso2.carbon.core.ServerStartupObserver;
  */
 public class APIMgtServerStartupListener implements ServerStartupObserver, ServerShutdownHandler,
         JMSListenerShutDownService {
+
+    private Log log = LogFactory.getLog(APIMgtServerStartupListener.class);
 
     private JMSTransportHandler jmsTransportHandlerForEventHub;
 
@@ -67,6 +71,7 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
         if (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
                 DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled() &&
                 jmsTransportHandlerForEventHub != null) {
+            log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
             DataHolder.getInstance().setStarted(false);
         }
@@ -78,6 +83,7 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
         if (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
                 DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled() &&
                 jmsTransportHandlerForEventHub != null) {
+            log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
             DataHolder.getInstance().setStarted(false);
         }
