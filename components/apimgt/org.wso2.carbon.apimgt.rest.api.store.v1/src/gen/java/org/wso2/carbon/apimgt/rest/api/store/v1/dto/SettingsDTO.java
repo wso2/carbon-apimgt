@@ -47,7 +47,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"refresh_token\",\"urn:ietf:params:oauth:grant-type:saml2-bearer\",\"password\",\"client_credentials\",\"iwa:ntlm\",\"authorization_code\",\"urn:ietf:params:oauth:grant-type:jwt-bearer\"]", value = "")
   @JsonProperty("grantTypes")
   public List<String> getGrantTypes() {
     return grantTypes;
@@ -64,7 +64,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"apim:api_key\",\"apim:app_import_export\",\"apim:app_manage\",\"apim:store_settings\",\"apim:sub_alert_manage\",\"apim:sub_manage\",\"apim:subscribe\",\"openid\"]", value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
@@ -236,7 +236,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
+  @ApiModelProperty(example = "^[\\S]{5,30}$", value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
   @JsonProperty("userStorePasswordPattern")
   public String getUserStorePasswordPattern() {
     return userStorePasswordPattern;
@@ -254,7 +254,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
+  @ApiModelProperty(example = "^[\\S]{5,30}$", value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
   @JsonProperty("passwordPolicyPattern")
   public String getPasswordPolicyPattern() {
     return passwordPolicyPattern;

@@ -81,10 +81,12 @@ public final class ImportExportConstants {
     public static final String ENDPOINT_CERTIFICATES_DIRECTORY = "Endpoint-certificates";
 
     public static final String CLIENT_CERTIFICATES_DIRECTORY = "Client-certificates";
+    public static final String APPLICATION_CLIENT_CERTIFICATES_DIRECTORY = "Application-client-certificates";
 
     public static final String ENDPOINTS_CERTIFICATE_FILE = File.separator + "endpoint_certificates";
 
     public static final String CLIENT_CERTIFICATE_FILE = File.separator + "client_certificates";
+    public static final String APPLICATION_CLIENT_CERTIFICATE_FILE = File.separator + "application_client_certificates";
 
     public static final String APIS_DIRECTORY = "APIs";
 
@@ -192,6 +194,7 @@ public final class ImportExportConstants {
     public static final String TYPE_ENDPOINT_CERTIFICATES = "endpoint_certificates";
 
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
+    public static final String TYPE_APPLICATION_CLIENT_CERTIFICATES = "application_client_certificates";
 
     public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
 
@@ -219,6 +222,7 @@ public final class ImportExportConstants {
     public static final String GATEWAY_ENVIRONMENTS_FIELD = "gatewayEnvironments";
     public static final String MUTUAL_SSL_CERTIFICATES_FIELD = "mutualSslCerts";
     public static final String ENDPOINT_CERTIFICATES_FIELD = "certs";
+    public static final String APPLICATION_CLIENT_CERTIFICATES_FIELD = "applicationcerts";
     public static final String ENDPOINT_SECURITY_FIELD = "security";
     public static final String POLICIES_FIELD = "policies";
     public static final String ROUTING_POLICY_FIELD = "endpointRoutingPolicy";
@@ -280,10 +284,13 @@ public final class ImportExportConstants {
     public static final String CERTIFICATE_DIRECTORY = File.separator + "certificates";
     public static final String ENDPOINT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Endpoint-certificates";
     public static final String CLIENT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Client-certificates";
+    public static final String APPLICATION_CLIENT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Application-client-certificates";
     public static final String ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH =
             ENDPOINT_CERTIFICATES_DIRECTORY_PATH + File.separator + "endpoint_certificates";
     public static final String CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
             CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + "client_certificates";
+    public static final String APPLICATION_CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
+            APPLICATION_CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + "application_client_certificates";
 
     //Deployment directory related constants
     public static final String DEPLOYMENT_DIRECTORY_NAME= "Deployment";

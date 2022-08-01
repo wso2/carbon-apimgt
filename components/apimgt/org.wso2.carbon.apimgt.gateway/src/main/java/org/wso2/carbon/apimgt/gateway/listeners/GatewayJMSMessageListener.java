@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.ApplicationCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
@@ -51,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationCertificateEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
@@ -279,6 +281,31 @@ public class GatewayJMSMessageListener implements MessageListener {
                             .setTenantDomain(certificateEvent.getTenantDomain(), true);
                     tenantFlowStarted = true;
                     CertificateManagerImpl.getInstance().deleteCertificateFromGateway(certificateEvent.getAlias());
+                } finally {
+                    if (tenantFlowStarted) {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+                }
+            }
+        } else if (EventType.APPLICATION_CERTIFICATE_ADD.toString().equals(eventType) ||
+                EventType.APPLICATION_CERTIFICATE_REMOVE.toString().equals(eventType)) {
+            ApplicationCertificateEvent applicationCertificateEvent = new Gson().fromJson(eventJson,
+                    ApplicationCertificateEvent.class);
+            if (EventType.APPLICATION_CERTIFICATE_ADD.toString().equals(eventType)) {
+                try {
+                    new ApplicationCertificateDeployer(applicationCertificateEvent.getTenantDomain())
+                            .deployCertificate(applicationCertificateEvent.getUUID());
+                } catch (APIManagementException e) {
+                    log.error(e);
+                }
+            } else if (EventType.APPLICATION_CERTIFICATE_REMOVE.toString().equals(eventType)) {
+                boolean tenantFlowStarted = false;
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                            .setTenantDomain(applicationCertificateEvent.getTenantDomain(), true);
+                    tenantFlowStarted = true;
+                    CertificateManagerImpl.getInstance().deleteApplicationClientCertificateFromGateway(applicationCertificateEvent.getUUID());
                 } finally {
                     if (tenantFlowStarted) {
                         PrivilegedCarbonContext.endTenantFlow();

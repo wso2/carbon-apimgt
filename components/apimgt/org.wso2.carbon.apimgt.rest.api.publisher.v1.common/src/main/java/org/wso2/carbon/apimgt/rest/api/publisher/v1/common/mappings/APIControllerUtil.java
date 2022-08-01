@@ -209,8 +209,8 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error while generating client certificate information
      */
     private static void handleMutualSslCertificates(JsonObject envParams, APIDTO importedApiDto,
-                                                    APIProductDTO importedApiProductDto, Identifier identifier,
-                                                    String pathToArchive)
+            APIProductDTO importedApiProductDto, Identifier identifier,
+            String pathToArchive)
             throws APIManagementException {
 
         JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
@@ -254,7 +254,7 @@ public class APIControllerUtil {
      * @return APIProductDTO Updated API Product DTO Object
      */
     public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams,
-                                                            String pathToArchive)
+            String pathToArchive)
             throws APIManagementException {
 
         if (envParams == null || envParams.isJsonNull()) {
@@ -443,7 +443,7 @@ public class APIControllerUtil {
      * @param policies              policies with the values
      */
     private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto,
-                                                   APIProductDTO importedApiProductDto) {
+            APIProductDTO importedApiProductDto) {
 
         JsonArray definedPolicies = policies.getAsJsonArray();
         List<String> policiesListToAdd = new ArrayList<>();
@@ -543,7 +543,7 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleDynamicAndAwsEndpoints(JsonObject envParams, JsonObject defaultProductionEndpoint,
-                                                           JsonObject defaultSandboxEndpoint, String endpointType)
+            JsonObject defaultSandboxEndpoint, String endpointType)
             throws APIManagementException {
 
         JsonObject endpointsObject = null;
@@ -621,8 +621,8 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleRestEndpoints(String routingPolicy, JsonObject envParams,
-                                                  JsonObject defaultProductionEndpoint,
-                                                  JsonObject defaultSandboxEndpoint) throws APIManagementException {
+            JsonObject defaultProductionEndpoint,
+            JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         // if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual
         // scenario
@@ -744,8 +744,8 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleSoapEndpoints(String routingPolicy, JsonObject envParams,
-                                                  JsonObject defaultProductionEndpoint,
-                                                  JsonObject defaultSandboxEndpoint) throws APIManagementException {
+            JsonObject defaultProductionEndpoint,
+            JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         JsonObject updatedSOAPEndpointParams = new JsonObject();
         JsonObject endpoints = null;
@@ -876,7 +876,7 @@ public class APIControllerUtil {
      * @param defaultSandboxEndpoint    Default sandbox endpoint json object
      */
     private static void handleEndpointValues(JsonObject endpointConfigs, JsonObject updatedEndpointParams,
-                                             JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint)
+            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint)
             throws APIManagementException {
 
         //check api params file to get provided endpoints
@@ -960,7 +960,7 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error while generating new directory
      */
     private static void handleClientCertificates(JsonArray certificates, Identifier identifier,
-                                                 String pathToArchive) throws IOException, APIManagementException {
+            String pathToArchive) throws IOException, APIManagementException {
 
         APIIdentifier apiIdentifier = new APIIdentifier(identifier.getProviderName(), identifier.getName(),
                 identifier.getVersion());

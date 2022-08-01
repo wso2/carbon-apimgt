@@ -724,6 +724,48 @@
         }
       }
     },
+    "/client-certificates" : {
+      "get" : {
+        "summary" : "Get all the client certificates for given parameters.",
+        "description" : "This will provide access to\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "uuid",
+          "in" : "query",
+          "description" : "**Search condition**.\n  UUID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "serialNumber",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Serial Number\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "applicationId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Application Id\n",
+          "required" : false,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of client certificates"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/apis/deployed-revisions" : {
       "patch" : {
         "tags" : [ "API Revisions" ],
