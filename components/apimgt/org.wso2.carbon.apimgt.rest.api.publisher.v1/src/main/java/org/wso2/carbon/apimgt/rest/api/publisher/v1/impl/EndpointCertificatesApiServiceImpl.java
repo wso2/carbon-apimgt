@@ -60,6 +60,10 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         String certFileName = alias + ".crt";
 
+        if (!StringUtils.isNotEmpty(alias)) {
+            RestApiUtil.handleBadRequest("The alias cannot be empty", log);
+        }
+
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
@@ -236,10 +240,6 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         String query;
         APISearchResult searchResult;
 
-        if (StringUtils.isEmpty(alias)) {
-            RestApiUtil.handleBadRequest("The alias should not be empty", log);
-        }
-
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         certificateMetadataDTO = apiProvider.getCertificate(alias);
@@ -258,12 +258,11 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + fqdn;
             searchResult = apiProvider.searchPaginatedAPIsAsAdmin(query, organization, offset, limit);
         }else{
-            query = "";
             searchResult = new APISearchResult();
         }
 
         apiMetadataListDTO = APIMappingUtil.fromAPIListToAPIMetadataListDTO(searchResult.getApis());
-        APIMappingUtil.setPaginationParamsForAPIMetadataListDTO(apiMetadataListDTO, query, offset, limit, searchResult.getApiCount());
+        APIMappingUtil.setPaginationParamsForAPIMetadataListDTO(apiMetadataListDTO, alias, offset, limit, searchResult.getApiCount());
 
         return Response.status(Response.Status.OK).entity(apiMetadataListDTO).build();
     }
