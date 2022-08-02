@@ -255,7 +255,7 @@ public class GatewayArtifactsMgtDAO {
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, envName);
-            preparedStatement.setString(1, revisionUUId);
+            preparedStatement.setString(2, revisionUUId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     deployedTime = resultSet.getString("DEPLOYED_TIME");
