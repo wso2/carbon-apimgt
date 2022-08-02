@@ -20,7 +20,7 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -144,7 +144,7 @@ public class SelfSignupUtilTestCase {
         PowerMockito.mockStatic(APIUtil.class);
         Mockito.when(apimConfigService.getSelfSighupConfig("foo.com")).thenReturn("wsdl");
         OMElement omElement = Mockito.mock(OMElement.class);
-        Mockito.when(omElement.getFirstChildWithName(Matchers.any(QName.class))).thenReturn(omElement);
+        Mockito.when(omElement.getFirstChildWithName(ArgumentMatchers.any(QName.class))).thenReturn(omElement);
         PowerMockito.mockStatic(AXIOMUtil.class);
         Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM)).thenReturn(Mockito.mock(Iterator.class));
         PowerMockito.when(AXIOMUtil.stringToOM("wsdl")).thenReturn(omElement);
@@ -168,7 +168,7 @@ public class SelfSignupUtilTestCase {
         PowerMockito.mockStatic(APIUtil.class);
         Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn("wsdl");
         OMElement omElement = Mockito.mock(OMElement.class);
-        Mockito.when(omElement.getFirstChildWithName(Matchers.any(QName.class))).thenReturn(omElement);
+        Mockito.when(omElement.getFirstChildWithName(ArgumentMatchers.any(QName.class))).thenReturn(omElement);
         PowerMockito.mockStatic(AXIOMUtil.class);
         Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM)).thenReturn(Mockito.mock(Iterator.class));
         PowerMockito.when(AXIOMUtil.stringToOM("wsdl")).thenReturn(omElement);

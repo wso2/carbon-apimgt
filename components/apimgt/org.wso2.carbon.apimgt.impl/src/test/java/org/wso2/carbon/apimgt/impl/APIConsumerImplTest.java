@@ -53,14 +53,13 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
@@ -70,20 +69,10 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.common.TermData;
-import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.ResourceImpl;
-import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.dataobjects.ResourceDO;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
@@ -97,27 +86,20 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.UUID;
-import javax.cache.Cache;
-import javax.cache.CacheManager;
 import javax.cache.Caching;
-import javax.xml.namespace.QName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
@@ -289,9 +271,8 @@ public class APIConsumerImplTest {
 
     @Test
     public void testRenewConsumerSecret() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
         String clientId = UUID.randomUUID().toString();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
         KeyManagerConfigurationDTO keyManagerConfiguration = new KeyManagerConfigurationDTO();
         keyManagerConfiguration.setEnabled(true);
         Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(), Mockito.anyString()))
@@ -498,10 +479,11 @@ public class APIConsumerImplTest {
         String consumerKey = "aNTf-EFga";
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
+        oAuthApplicationInfo.setClientId(UUID.randomUUID().toString());
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         BDDMockito.when(ApplicationUtils
-                .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                .createOauthAppRequest(Mockito.isNull(), Mockito.isNull(), Mockito.anyString(),
+                        Mockito.isNull(), Mockito.isNull(), Mockito.isNull(), Mockito.anyString(),
                         Mockito.anyString()))
                 .thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO
@@ -513,7 +495,9 @@ public class APIConsumerImplTest {
         Mockito.when(keyManager.updateApplication((OAuthAppRequest) Mockito.any())).thenReturn(updatedAppInfo);
         KeyManagerConfigurationDTO keyManagerConfiguration = new KeyManagerConfigurationDTO();
         keyManagerConfiguration.setEnabled(true);
-        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(),Mockito.anyString())).thenReturn(keyManagerConfiguration);
+        keyManagerConfiguration.setOrganization(SAMPLE_TENANT_DOMAIN_1);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(keyManagerConfiguration);
         System.setProperty(CARBON_HOME, "");
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.
@@ -532,8 +516,7 @@ public class APIConsumerImplTest {
         Mockito.when(application.getSubscriber()).thenReturn(subscriber);
         Mockito.when(subscriber.getName()).thenReturn("1");
 
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
         Assert.assertEquals(apiConsumer
                 .updateAuthClient("1", application, "access", "www.host.com", new String[0], null, null, null, null,
                         "default")
@@ -589,8 +572,7 @@ public class APIConsumerImplTest {
         app.setGroupId("2");
         app.setUUID(UUID.randomUUID().toString());
 
-        Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
-                thenReturn(new String[] { "role1", "role2" });
+//        Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class);
 
         Application application = Mockito.mock(Application.class);
         Subscriber subscriber = Mockito.mock(Subscriber.class);
@@ -608,6 +590,7 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Invalid Token Type"));
         }
+        Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenReturn(new String[] { "role1", "role2" });
         scope1.setRoles("role1");
         scope2.setRoles("role2");
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
@@ -615,8 +598,8 @@ public class APIConsumerImplTest {
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         application = new Application("app1", new Subscriber("1"));
         BDDMockito.when(ApplicationUtils
-                .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                .createOauthAppRequest(Mockito.anyString(), Mockito.isNull(), Mockito.anyString(),
+                        Mockito.anyString(), Mockito.isNull(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         BDDMockito.when(ApplicationUtils
                 .retrieveApplication(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
@@ -627,6 +610,10 @@ public class APIConsumerImplTest {
         Assert.assertEquals(result.size(),10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
+        BDDMockito.when(ApplicationUtils
+                .createOauthAppRequest(Mockito.anyString(), Mockito.isNull(), Mockito.isNull(),
+                        Mockito.anyString(), Mockito.isNull(), Mockito.anyString(),
+                        Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", app, APIConstants.API_KEY_TYPE_SANDBOX, "", null,
                         "3600", "api_view", null, "default", null, false);
@@ -850,13 +837,15 @@ public class APIConsumerImplTest {
         api.setAvailableTiers(tiers);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiTypeWrapper.setTier("tier1");
-        Mockito.when(apiMgtDAO.addSubscription(Mockito.eq(apiTypeWrapper), Mockito.eq(application), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(1);
+        String tenantAwareUsername = "user1@"+SAMPLE_TENANT_DOMAIN_1;
+        Mockito.when(MultitenantUtils.getTenantAwareUsername(Mockito.eq("user1"))).thenReturn(tenantAwareUsername);
+        Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,
+                tenantAwareUsername)).thenReturn(1);
         SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, SAMPLE_TENANT_DOMAIN_1);
-        Assert.assertEquals(apiConsumer.addSubscription(apiTypeWrapper, "user1",application).getSubscriptionUUID(),
-                subscribedAPI.getUUID());
+        SubscriptionResponse subscriptionResponse = apiConsumer.addSubscription(apiTypeWrapper, "user1",application);
+        Assert.assertEquals(subscriptionResponse.getSubscriptionUUID(), subscribedAPI.getUUID());
         try {
             api.setStatus(APIConstants.CREATED);
             apiConsumer.addSubscription(apiTypeWrapper, "sub1", application);
@@ -897,10 +886,11 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.tenantDomain = "carbon.super";
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        oAuthApplicationInfo.setClientId(UUID.randomUUID().toString());
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         BDDMockito.when(ApplicationUtils
-                .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.isNull(),
                         Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(Mockito.anyInt(), Mockito.anyString(),
@@ -972,26 +962,29 @@ public class APIConsumerImplTest {
         apiKey1.setConsumerKey(UUID.randomUUID().toString());
         apiKey1.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
         apiKey1.setState(UUID.randomUUID().toString());
+        apiKey1.setKeyManager(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
         APIKey apiKey2 = new APIKey();
         apiKey2.setConsumerKey(UUID.randomUUID().toString());
         apiKey2.setType(APIConstants.API_KEY_TYPE_SANDBOX);
         apiKey2.setState(UUID.randomUUID().toString());
+        apiKey2.setKeyManager(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Map<String,String> consumerKeyMap = new HashMap<>();
-        consumerKeyMap.put("default",apiKey1.getConsumerKey());
+        Map<String, String> consumerKeyMap = new HashMap<>();
+        consumerKeyMap.put("default", apiKey1.getConsumerKey());
         Set<APIKey> apiKeys = new HashSet<>();
         apiKeys.add(apiKey1);
         apiKeys.add(apiKey2);
         Mockito.when(apiMgtDAO.getKeyMappingsFromApplicationId(Mockito.anyInt())).thenReturn(apiKeys);
         Mockito.when(apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(Mockito.anyInt(), Mockito.anyString()))
-                .thenReturn(consumerKeyMap,consumerKeyMap);
+                .thenReturn(consumerKeyMap);
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
         Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
-
         Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
-        assertNotNull(apiConsumer.getApplicationKeys(1));
-        assertEquals(apiConsumer.getApplicationKeys(1).size(),2);
-        assertNotNull(apiConsumer.getApplicationKeys(1).iterator().next().getAccessToken());
+
+        Set<APIKey> apiKeySet = apiConsumer.getApplicationKeys(1);
+        assertNotNull(apiKeySet);
+        assertEquals(apiKeySet.size(), 2);
+        assertNotNull(apiKeySet.iterator().next().getAccessToken());
     }
 }
