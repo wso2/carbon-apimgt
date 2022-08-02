@@ -33,7 +33,7 @@ import org.wso2.carbon.core.ServerStartupObserver;
 public class APIMgtServerStartupListener implements ServerStartupObserver, ServerShutdownHandler,
         JMSListenerShutDownService {
 
-    private Log log = LogFactory.getLog(APIMgtServerStartupListener.class);
+    private static final Log log = LogFactory.getLog(APIMgtServerStartupListener.class);
 
     private JMSTransportHandler jmsTransportHandlerForEventHub;
 
