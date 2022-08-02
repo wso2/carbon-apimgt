@@ -219,12 +219,12 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      * @param messageContext message context
      * @return A list of operation policies available for the API
      */
-    @Override public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query, String name,
-            String version, MessageContext messageContext) throws APIManagementException {
+    @Override public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query,MessageContext messageContext) throws APIManagementException {
 
         String apiManagementExceptionErrorMessage = "";
         String exceptionErrorMessage = "";
         OperationPolicyDataListDTO policyListDTO = null;
+        String name = null, version = null;
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -239,11 +239,14 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                     queryParamMap.put(keyVal[0], keyVal[1]);
                 }
 
+                name =  queryParamMap.get(ImportExportConstants.POLICY_NAME);
+                version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
+
                 apiManagementExceptionErrorMessage = "Error while retrieving the policy by name & version.";
                 exceptionErrorMessage = "An error has occurred while getting the operation policies by name & version";
                 OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(
-                        queryParamMap.get(ImportExportConstants.POLICY_NAME),
-                        queryParamMap.get(ImportExportConstants.VERSION_ELEMENT), organization, false);
+                       name,
+                        version, organization, false);
 
                 // if not found, throw not found error
                 if (policyData != null) {

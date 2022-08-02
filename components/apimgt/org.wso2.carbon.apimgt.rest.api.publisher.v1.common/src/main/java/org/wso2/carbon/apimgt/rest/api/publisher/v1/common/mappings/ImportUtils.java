@@ -819,9 +819,9 @@ public class ImportUtils {
     /**
      * Import Operation Policy as a zip.
      *
-     * @param pathToArchive            Path to the extracted folder
-     * @param organization             Organization
-     * @param apiProvider              API Provider
+     * @param pathToArchive Path to the extracted folder
+     * @param organization  Organization
+     * @param apiProvider   API Provider
      * @throws APIManagementException If an error occurs while processing the policy files
      */
     public static OperationPolicyDataDTO importPolicy(String pathToArchive, String organization,
@@ -855,7 +855,8 @@ public class ImportUtils {
             String synapsePolicyDefinitionJsonContent = readDefinitionFiles(pathToJ2File);
 
             if (synapsePolicyDefinitionJsonContent != null) {
-                gatewayDefinition = setPropertiesToGatewayDefinition(synapsePolicyDefinitionJsonContent, OperationPolicyDefinition.GatewayType.Synapse);
+                gatewayDefinition = setPropertiesToGatewayDefinition(synapsePolicyDefinitionJsonContent,
+                        OperationPolicyDefinition.GatewayType.Synapse);
                 operationPolicyData.setSynapsePolicyDefinition(gatewayDefinition);
             }
 
@@ -864,15 +865,15 @@ public class ImportUtils {
             String choreoConnectPolicyDefinitionJsonContent = readDefinitionFiles(pathToChoreoFile);
 
             if (choreoConnectPolicyDefinitionJsonContent != null) {
-                gatewayDefinition = setPropertiesToGatewayDefinition(choreoConnectPolicyDefinitionJsonContent, OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                gatewayDefinition = setPropertiesToGatewayDefinition(choreoConnectPolicyDefinitionJsonContent,
+                        OperationPolicyDefinition.GatewayType.ChoreoConnect);
                 operationPolicyData.setCcPolicyDefinition(gatewayDefinition);
             }
 
             operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
 
             OperationPolicyData existingPolicy = apiProvider.getCommonOperationPolicyByPolicyName(
-                    policySpecification.getName(), policySpecification.getVersion(), organization,
-                    false);
+                    policySpecification.getName(), policySpecification.getVersion(), organization, false);
             String policyID = null;
             if (existingPolicy == null) {
                 policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
@@ -889,13 +890,14 @@ public class ImportUtils {
             return createdPolicy;
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding a common operation policy." + e.getMessage();
-            throw new APIManagementException(errorMessage, ExceptionCodes.from(
-                    ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS,
-                    policySpecification.getName(), policySpecification.getVersion()));
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS, policySpecification.getName(),
+                            policySpecification.getVersion()));
         } catch (IOException e) {
             String errorMessage = "An Error has occurred while adding common operation policy. " + e.getMessage();
-            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR,
-                    policySpecification.getName(), policySpecification.getVersion()));
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, policySpecification.getName(),
+                            policySpecification.getVersion()));
         }
     }
 
@@ -903,10 +905,11 @@ public class ImportUtils {
      * Set Properties to Gateway Definition.
      *
      * @param gatewayDefinitionJsonContent Gateway Definition Content.
-     * @param type Gateway Type.
+     * @param type                         Gateway Type.
      * @return
      */
-    private static OperationPolicyDefinition setPropertiesToGatewayDefinition(String gatewayDefinitionJsonContent, OperationPolicyDefinition.GatewayType type) {
+    private static OperationPolicyDefinition setPropertiesToGatewayDefinition(String gatewayDefinitionJsonContent,
+            OperationPolicyDefinition.GatewayType type) {
         OperationPolicyDefinition gatewayDefinition = new OperationPolicyDefinition();
         gatewayDefinition.setContent(gatewayDefinitionJsonContent);
         gatewayDefinition.setGatewayType(type);

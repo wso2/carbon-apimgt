@@ -79,7 +79,7 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @Path("/export")
     
     @Produces({ "application/zip", "application/json" })
-    @ApiOperation(value = "Export common operation policies by their names and versions ", notes = "This operation provides you to export preferred common API policies ", response = File.class, authorizations = {
+    @ApiOperation(value = "Export an API Policy by its name and version ", notes = "This operation provides you to export a preferred common API policy ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
@@ -108,8 +108,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. List of qualifying policies is returned. ", response = OperationPolicyDataListDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getAllCommonOperationPolicies( @ApiParam(value = "Maximum size of resource array to return. ")  @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "-Not supported yet-")  @QueryParam("query") String query,  @ApiParam(value = "Policy Name to fetch ID")  @QueryParam("name") String name,  @ApiParam(value = "Policy Version to fetch ID")  @QueryParam("version") String version) throws APIManagementException{
-        return delegate.getAllCommonOperationPolicies(limit, offset, query, name, version, securityContext);
+    public Response getAllCommonOperationPolicies( @ApiParam(value = "Maximum size of policy array to return. ")  @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"name:addHeader\" will match an API Policy if the provider of the API Policy contains \"addHeader\". \"version:\"v1\"\" will match an API Policy if the provider of the API Policy contains \"v1\".  Also you can use combined modifiers Eg. name:addHeader&version:v1 will match an API Policy if the name of the API Policy is addHeader and version is v1.  Supported attribute modifiers are [**version, name**]  If query attributes are provided, this returns all API policies available under the given limit.  Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl) ")  @QueryParam("query") String query) throws APIManagementException{
+        return delegate.getAllCommonOperationPolicies(limit, offset, query, securityContext);
     }
 
     @GET
@@ -154,7 +154,7 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
     @Path("/import")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Import a Policy", notes = "This operation can be used to import a common API Policy. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Import an API Policy", notes = "This operation can be used to import an API Policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
