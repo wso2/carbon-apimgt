@@ -3555,6 +3555,8 @@ public class SQLConstants {
                 "WHERE AD.REVISION_UUID " +
                 "IN " +
                 "(SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ?)";
+        public static final String GET_API_REVISION_DEPLOYED_TIME =
+                " SELECT DEPLOYED_TIME FROM AM_DEPLOYED_REVISION WHERE NAME = ? AND REVISION_UUID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_API_UUID
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING ADRM LEFT JOIN AM_REVISION AR ON " +
                 "ADRM.REVISION_UUID = AR.REVISION_UUID WHERE AR.API_UUID = ?";

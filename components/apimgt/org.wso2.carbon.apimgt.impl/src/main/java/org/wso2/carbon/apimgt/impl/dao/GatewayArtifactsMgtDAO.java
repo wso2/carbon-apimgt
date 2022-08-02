@@ -241,6 +241,33 @@ public class GatewayArtifactsMgtDAO {
         return organization;
     }
 
+    /**
+     * This method retrieves the deployed time of an API revision.
+     *
+     * @param envName Environment name
+     * @param revisionUUId API revision UUID
+     * @return Deployed Time
+     * @throws APIManagementException If failed to retrieve deployed time
+     */
+    public String retrieveAPIRevisionDeployedTime(String envName, String revisionUUId) throws APIManagementException {
+        String query = SQLConstants.APIRevisionSqlConstants.GET_API_REVISION_DEPLOYED_TIME;
+        String deployedTime = null;
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, envName);
+            preparedStatement.setString(1, revisionUUId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    deployedTime = resultSet.getString("DEPLOYED_TIME");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve deployed time of API revision", e);
+        }
+
+        return deployedTime;
+    }
+
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,
                                                    Map<String, String> gatewayVhosts,
                                                    Set<APIRevisionDeployment> gatewayLabelsToRemove)

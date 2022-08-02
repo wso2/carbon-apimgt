@@ -84,6 +84,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                     EnvironmentDto environment = new EnvironmentDto();
                     environment.setName(apiRuntimeArtifactDto.getLabel());
                     environment.setVhost(apiRuntimeArtifactDto.getVhost());
+                    environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
                     apiProjectDto.getEnvironments().add(environment); // ignored if the name of the environment is same
                 }
             }

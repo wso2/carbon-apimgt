@@ -66,6 +66,12 @@ public class APIArtifactGeneratorUtil {
                     if (organizationId != null) {
                         apiRuntimeArtifactDto.setOrganization(organizationId);
                     }
+                    String deployedTime =
+                            gatewayArtifactsMgtDAO.retrieveAPIRevisionDeployedTime(
+                                    apiRuntimeArtifactDto.getLabel(), apiRuntimeArtifactDto.getRevision());
+                    if (deployedTime != null) {
+                        apiRuntimeArtifactDto.setDeployedTimeStamp(deployedTime);
+                    }
                 }
             }
             if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
@@ -110,6 +116,12 @@ public class APIArtifactGeneratorUtil {
                     String organizationId = gatewayArtifactsMgtDAO.retrieveOrganization(apiRuntimeArtifactDto.getApiId());
                     if (organizationId != null) {
                         apiRuntimeArtifactDto.setOrganization(organizationId);
+                    }
+                    String deployedTime =
+                            gatewayArtifactsMgtDAO.retrieveAPIRevisionDeployedTime(
+                                    apiRuntimeArtifactDto.getLabel(), apiRuntimeArtifactDto.getRevision());
+                    if (deployedTime != null) {
+                        apiRuntimeArtifactDto.setDeployedTimeStamp(deployedTime);
                     }
                 }
             }

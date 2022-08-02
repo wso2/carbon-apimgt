@@ -113,6 +113,7 @@ public class RuntimeArtifactGeneratorUtil {
                         EnvironmentDto environment = new EnvironmentDto();
                         environment.setName(apiRuntimeArtifactDto.getLabel());
                         environment.setVhost(apiRuntimeArtifactDto.getVhost());
+                        environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
                         apiProjectDto.getEnvironments().add(environment);
                     }
                 }
@@ -165,6 +166,7 @@ public class RuntimeArtifactGeneratorUtil {
                         EnvironmentDto environment = new EnvironmentDto();
                         environment.setName(apiRuntimeArtifactDto.getLabel());
                         environment.setVhost(apiRuntimeArtifactDto.getVhost());
+                        environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
                         apiProjectDto.getEnvironments().add(environment);
                     }
                 }
@@ -211,6 +213,12 @@ public class RuntimeArtifactGeneratorUtil {
                 if (organizationId != null) {
                     apiRuntimeArtifactDto.setOrganization(organizationId);
                 }
+                String deployedTime =
+                        gatewayArtifactsMgtDAO.retrieveAPIRevisionDeployedTime(
+                                apiRuntimeArtifactDto.getLabel(), apiRuntimeArtifactDto.getRevision());
+                if (deployedTime != null) {
+                    apiRuntimeArtifactDto.setDeployedTimeStamp(deployedTime);
+                }
             }
         }
         if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
@@ -243,6 +251,12 @@ public class RuntimeArtifactGeneratorUtil {
                 String organizationId = gatewayArtifactsMgtDAO.retrieveOrganization(apiRuntimeArtifactDto.getApiId());
                 if (organizationId != null) {
                     apiRuntimeArtifactDto.setOrganization(organizationId);
+                }
+                String deployedTime =
+                        gatewayArtifactsMgtDAO.retrieveAPIRevisionDeployedTime(
+                                apiRuntimeArtifactDto.getLabel(), apiRuntimeArtifactDto.getRevision());
+                if (deployedTime != null) {
+                    apiRuntimeArtifactDto.setDeployedTimeStamp(deployedTime);
                 }
             }
         }
