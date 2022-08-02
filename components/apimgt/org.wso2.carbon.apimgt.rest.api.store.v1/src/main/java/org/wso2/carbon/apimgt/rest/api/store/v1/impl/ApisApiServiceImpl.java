@@ -50,7 +50,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
-
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -78,9 +77,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
-    @Override
-    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
-            MessageContext messageContext) {
+    @Override public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
+            String ifNoneMatch, MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
@@ -92,13 +90,11 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
-                query = query
-                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
+                query = query.replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":",
+                        APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
-                    limit, null, null);
-            
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset, limit, null, null);
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
@@ -111,8 +107,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 totalAvailableAPis = (Integer) totalLength;
             }
 
-            APIMappingUtil
-                    .setPaginationParams(apiListDTO, query, offset, limit, totalAvailableAPis);
+            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, totalAvailableAPis);
 
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
@@ -126,17 +121,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving APIs";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } 
+        }
         return null;
     }
 
-    @Override
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext)
-            throws APIManagementException {
+    @Override public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
+            MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         return Response.ok().entity(getAPIByAPIId(apiId, organization)).build();
     }
-
 
     /**
      * Get complexity details of a given API
@@ -145,16 +138,15 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param messageContext message context
      * @return Response with complexity details of the GraphQL API
      */
-    @Override
-    public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, MessageContext messageContext) {
+    @Override public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, MessageContext messageContext) {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiId);
-                GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
-                        GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
+                GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO = GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(
+                        graphqlComplexityInfo);
                 return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
             } else {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
@@ -175,18 +167,18 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext) throws APIManagementException {
+    @Override public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext)
+            throws APIManagementException {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String schemaContent = apiConsumer.getGraphqlSchemaDefinition(apiId,organization);
+                String schemaContent = apiConsumer.getGraphqlSchemaDefinition(apiId, organization);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
-                GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
-                        GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
+                GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO = GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(
+                        typeList);
                 return Response.ok().entity(graphQLSchemaTypeListDTO).build();
             } else {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
@@ -207,9 +199,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-
-    @Override
-    public Response apisApiIdGraphqlSchemaGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+    @Override public Response apisApiIdGraphqlSchemaGet(String apiId, String labelName, String ifNoneMatch,
+            String clusterName, String xWSO2Tenant, MessageContext messageContext) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -230,9 +221,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo,
-                                    MessageContext messageContext) throws APIManagementException {
+    @Override public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo,
+            MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
@@ -249,8 +239,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + createdCommentId;
+            String uriString =
+                    RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.RESOURCE_PATH_COMMENTS + "/"
+                            + createdCommentId;
             URI uri = new URI(uriString);
             return Response.created(uri).entity(commentDTO).build();
         } catch (APIManagementException e) {
@@ -265,10 +256,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
-                                        Boolean includeCommenterInfo, MessageContext messageContext)
-            throws APIManagementException {
+    @Override public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
+            Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -277,8 +266,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                    RestApiConstants.RESOURCE_PATH_COMMENTS;
+            String uriString =
+                    RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok(uri).entity(commentDTO).build();
 
@@ -295,10 +284,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                    Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset,
-                                    MessageContext messageContext) throws APIManagementException {
+    @Override public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
+            Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext)
+            throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -308,19 +296,20 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 CommentDTO commentDTO;
                 if (includeCommenterInfo) {
-                    Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil
-                            .retrieveUserClaims(comment.getUser(), new HashMap<>());
+                    Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil.retrieveUserClaims(
+                            comment.getUser(), new HashMap<>());
                     commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
                 } else {
                     commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
                 }
-                String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                        RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                String uriString =
+                        RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.RESOURCE_PATH_COMMENTS
+                                + "/" + commentId;
                 URI uri = new URI(uriString);
                 return Response.ok(uri).entity(commentDTO).build();
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
-                        String.valueOf(commentId), log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId),
+                        log);
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -328,7 +317,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                String errorMessage = "Error while retrieving comment for API : " + apiId + "with comment ID " + commentId;
+                String errorMessage =
+                        "Error while retrieving comment for API : " + apiId + "with comment ID " + commentId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
@@ -338,10 +328,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit,
-                                        Integer offset, String ifNoneMatch, Boolean includeCommenterInfo,
-                                        MessageContext messageContext) throws APIManagementException {
+    @Override public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit,
+            Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext)
+            throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -349,8 +338,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                    RestApiConstants.RESOURCE_PATH_COMMENTS;
+            String uriString =
+                    RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok(uri).entity(commentDTO).build();
 
@@ -367,9 +356,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
-                                     MessageContext messageContext) throws APIManagementException {
+    @Override public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
+            MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
@@ -379,13 +367,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 if (comment.getUser().equals(username)) {
                     boolean commentEdited = false;
-                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment
-                            .getCategory()))) {
+                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory()
+                            .equals(comment.getCategory()))) {
                         comment.setCategory(patchRequestBodyDTO.getCategory());
                         commentEdited = true;
                     }
-                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment
-                            .getText()))) {
+                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent()
+                            .equals(comment.getText()))) {
                         comment.setText(patchRequestBodyDTO.getContent());
                         commentEdited = true;
                     }
@@ -394,8 +382,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                             Comment editedComment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
                             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
 
-                            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
+                                    + RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
                             URI uri = new URI(uriString);
                             return Response.ok(uri).entity(commentDTO).build();
                         }
@@ -403,12 +391,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                         return Response.ok().build();
                     }
                 } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId)
-                            , log);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_COMMENTS,
+                            String.valueOf(commentId), log);
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
-                        String.valueOf(commentId), log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId),
+                        log);
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comment content location for API " + apiId;
@@ -417,9 +405,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext)
-            throws APIManagementException {
+    @Override public Response deleteComment(String commentId, String apiId, String ifMatch,
+            MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -437,15 +424,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                         obj.put("message", "The comment has been deleted");
                         return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
                     } else {
-                        return Response.status(405, "Method Not Allowed").type(MediaType
-                                .APPLICATION_JSON).build();
+                        return Response.status(405, "Method Not Allowed").type(MediaType.APPLICATION_JSON).build();
                     }
                 } else {
                     return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
-                        String.valueOf(commentId), log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId),
+                        log);
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -460,9 +446,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
-            String ifNoneMatch, MessageContext messageContext) {
+    @Override public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
+            String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -506,8 +491,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant,
+    @Override public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant,
             String ifModifiedSince, MessageContext messageContext) {
         Documentation documentation;
         try {
@@ -536,8 +520,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
+    @Override public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
             String ifNoneMatch, MessageContext messageContext) {
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -553,12 +536,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
             List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, organization);
-            DocumentListDTO documentListDTO = DocumentationMappingUtil
-                    .fromDocumentationListToDTO(documentationList, offset, limit);
+            DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(documentationList,
+                    offset, limit);
 
             //todo : set total count properly
-            DocumentationMappingUtil
-                    .setPaginationParams(documentListDTO, apiId, offset, limit, documentationList.size());
+            DocumentationMappingUtil.setPaginationParams(documentListDTO, apiId, offset, limit,
+                    documentationList.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -575,8 +558,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdRatingsGet(String id, Integer limit, Integer offset, String xWSO2Tenant,
+    @Override public Response apisApiIdRatingsGet(String id, Integer limit, Integer offset, String xWSO2Tenant,
             MessageContext messageContext) {
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -624,8 +606,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param messageContext : messageContext
      * @return : The sdk as a zip archive.
      */
-    @Override
-    public Response apisApiIdSdksLanguageGet(String apiId, String language, String xWSO2Tenant,
+    @Override public Response apisApiIdSdksLanguageGet(String apiId, String language, String xWSO2Tenant,
             MessageContext messageContext) throws APIManagementException {
 
         if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
@@ -644,7 +625,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
-                        "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"" ).build();
+                        "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"").build();
             } catch (APIClientGenerationException e) {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
                 RestApiUtil.handleInternalServerError(message, e, log);
@@ -655,19 +636,19 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    /**
-     * Retrieves the swagger document of an API
-     *
-     * @param apiId API identifier
-     * @param environmentName name of the gateway environment
-     * @param ifNoneMatch If-None-Match header value
-     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
-     * @param messageContext CXF message context
-     * @return Swagger document of the API for the given cluster or gateway environment
-     */
-    @Override
-    public Response apisApiIdSwaggerGet(String apiId, String environmentName,
-            String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+    //
+    //  /**
+    //   * Retrieves the swagger document of an API
+    //   *
+    //   * @param apiId API identifier
+    //   * @param environmentName name of the gateway environment
+    //   * @param ifNoneMatch If-None-Match header value
+    //   * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+    //   * @param messageContext CXF message context
+    //   * @return Swagger document of the API for the given cluster or gateway environment
+    //   */
+    @Override public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName,
+            String clusterName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -726,8 +707,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiSwagger = api.getSwaggerDefinition();
             }
 
-            return Response.ok().entity(apiSwagger).header("Content-Disposition",
-                    "attachment; filename=\"" + "swagger.json" + "\"" ).build();
+            return Response.ok().entity(apiSwagger)
+                    .header("Content-Disposition", "attachment; filename=\"" + "swagger.json" + "\"").build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -741,8 +722,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+    @Override public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
+            MessageContext messageContext) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -752,9 +733,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, organization);
 
             if (thumbnailResource != null) {
-                return Response
-                        .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
-                        .build();
+                return Response.ok(thumbnailResource.getContent(),
+                        MediaType.valueOf(thumbnailResource.getContentType())).build();
             } else {
                 return Response.noContent().build();
             }
@@ -767,12 +747,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } 
+        }
         return null;
     }
 
-    @Override
-    public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+    @Override public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext)
+            throws APIManagementException {
         if (org.apache.commons.lang.StringUtils.isNotEmpty(apiId)) {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -801,8 +781,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdUserRatingPut(String id, RatingDTO body, String xWSO2Tenant,
+    @Override public Response apisApiIdUserRatingPut(String id, RatingDTO body, String xWSO2Tenant,
             MessageContext messageContext) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -816,34 +795,34 @@ public class ApisApiServiceImpl implements ApisApiService {
                 rating = body.getRating();
             }
             switch (rating) {
-                //Below case 0[Rate 0] - is to remove ratings from a user
-                case 0: {
-                    apiConsumer.rateAPI(id, APIRating.RATING_ZERO, username);
-                    break;
-                }
-                case 1: {
-                    apiConsumer.rateAPI(id, APIRating.RATING_ONE, username);
-                    break;
-                }
-                case 2: {
-                    apiConsumer.rateAPI(id, APIRating.RATING_TWO, username);
-                    break;
-                }
-                case 3: {
-                    apiConsumer.rateAPI(id, APIRating.RATING_THREE, username);
-                    break;
-                }
-                case 4: {
-                    apiConsumer.rateAPI(id, APIRating.RATING_FOUR, username);
-                    break;
-                }
-                case 5: {
-                    apiConsumer.rateAPI(id, APIRating.RATING_FIVE, username);
-                    break;
-                }
-                default: {
-                    RestApiUtil.handleBadRequest("Provided API Rating is not in the range from 1 to 5", log);
-                }
+            //Below case 0[Rate 0] - is to remove ratings from a user
+            case 0: {
+                apiConsumer.rateAPI(id, APIRating.RATING_ZERO, username);
+                break;
+            }
+            case 1: {
+                apiConsumer.rateAPI(id, APIRating.RATING_ONE, username);
+                break;
+            }
+            case 2: {
+                apiConsumer.rateAPI(id, APIRating.RATING_TWO, username);
+                break;
+            }
+            case 3: {
+                apiConsumer.rateAPI(id, APIRating.RATING_THREE, username);
+                break;
+            }
+            case 4: {
+                apiConsumer.rateAPI(id, APIRating.RATING_FOUR, username);
+                break;
+            }
+            case 5: {
+                apiConsumer.rateAPI(id, APIRating.RATING_FIVE, username);
+                break;
+            }
+            default: {
+                RestApiUtil.handleBadRequest("Provided API Rating is not in the range from 1 to 5", log);
+            }
             }
             JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
@@ -860,15 +839,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(
                         RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, id, e, log);
             } else {
-                RestApiUtil
-                        .handleInternalServerError("Error while adding/updating user rating for API " + id, e, log);
+                RestApiUtil.handleInternalServerError("Error while adding/updating user rating for API " + id, e, log);
             }
         }
         return null;
     }
 
-    @Override
-    public Response apisApiIdUserRatingGet(String id, String xWSO2Tenant, String ifNoneMatch,
+    @Override public Response apisApiIdUserRatingGet(String id, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -897,8 +874,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdUserRatingDelete(String apiId, String xWSO2Tenant, String ifMatch,
+    @Override public Response apisApiIdUserRatingDelete(String apiId, String xWSO2Tenant, String ifMatch,
             MessageContext messageContext) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -922,9 +898,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch,
-                                 String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+    @Override public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch,
+            String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
@@ -937,41 +912,40 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             Environment selectedEnvironment = null;
-            for (Environment environment: environments) {
-               if (environment.getName().equals(environmentName)) {
-                   selectedEnvironment = environment;
-                   break;
-               }
+            for (Environment environment : environments) {
+                if (environment.getName().equals(environmentName)) {
+                    selectedEnvironment = environment;
+                    break;
+                }
             }
 
             if (selectedEnvironment == null) {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT,
-                        environmentName));
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT, environmentName));
             }
             ResourceFile wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(),
                     organization);
 
             return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
         } else {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.NO_GATEWAY_ENVIRONMENTS_ADDED,
-                    apiIdentifier.toString()));
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.NO_GATEWAY_ENVIRONMENTS_ADDED, apiIdentifier.toString()));
         }
     }
 
-    @Override
-    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                                     MessageContext messageContext) throws APIManagementException {
+    @Override public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
+            MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByAPIId(apiId, organization);
-        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), organization);
+        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl().getThrottlingPolicyList(
+                ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), organization);
 
-        if (apiInfo != null ) {
+        if (apiInfo != null) {
             List<APITiersDTO> apiTiers = apiInfo.getTiers();
             if (apiTiers != null && !apiTiers.isEmpty()) {
                 List<Tier> apiThrottlingPolicies = new ArrayList<>();
                 for (Tier policy : availableThrottlingPolicyList) {
-                    for (APITiersDTO apiTier :apiTiers) {
+                    for (APITiersDTO apiTier : apiTiers) {
                         if (apiTier.getTierName().equalsIgnoreCase(policy.getName())) {
                             apiThrottlingPolicies.add(policy);
                         }
@@ -994,7 +968,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiConsumer.publishClickedAPI(api, userName);
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
-                            || APIConstants.DEPRECATED.equals(status)) {
+                    || APIConstants.DEPRECATED.equals(status)) {
 
                 return APIMappingUtil.fromAPItoDTO(api, organization);
             } else {

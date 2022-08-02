@@ -91,8 +91,7 @@ public interface CertificateManager {
      * @param tenantId : The Id of the tenant that endpoint belongs to.
      * @return CertificateMetadataDTO object which contains the certificate meta data.
      */
-    @Deprecated
-    List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId);
+    @Deprecated List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId);
 
     /**
      * This method is used to retrieve all the certificates which belong to the given tenant.
@@ -111,7 +110,8 @@ public interface CertificateManager {
      * @return : If any matching certificates is found, it will be returned as an array list. Otherwise and empty
      * array list will be returned.
      */
-    List<CertificateMetadataDTO> getCertificates(int tenantId, String alias, String endpoint) throws APIManagementException;
+    List<CertificateMetadataDTO> getCertificates(int tenantId, String alias, String endpoint)
+            throws APIManagementException;
 
     /**
      * Check whether a certificate for the given alias is present in the database.
@@ -169,7 +169,7 @@ public interface CertificateManager {
      * certificate is expired.
      */
     ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias, String tierName,
-                                      int tenantId, String organization);
+            int tenantId, String organization);
 
     /**
      * Method to delete the client certificate from publisher node.
@@ -234,4 +234,67 @@ public interface CertificateManager {
      * @throws APIManagementException API Management Exception.
      */
     int getClientCertificateCount(int tenantId) throws APIManagementException;
+
+    /**
+     * Method to add client certificate (i.e. Client certificate that can be used to connect the client with gateway)
+     * to developerPortal node.
+     *
+     * @param applicationId : Identifier of the relevant Application, which the client certificate is added against.
+     * @param certificate   : Base64 encoded certificate string.
+     * @param name         : Display name of the certificate.
+     * @param serialNumber      : Serial Number of the certifiacte
+     * @param keyType      : Serial Number of the certifiacte
+     * @return SUCCESS : If Operation succeeded, INTERNAL_SERVER_ERROR : If any internal error occurred,
+     * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,CERTIFICATE_EXPIRED : If the
+     * certificate is expired.
+     */
+    ResponseCode addClientCertificateToStore(int applicationId, String certificate, String uuid, String name,
+            String serialNumber, String keyType, int tenantId);
+
+    /**
+     * This method is used to search client certificates based on different parameters.
+     * @param uuid         : uuid of the certificate.
+     * @param serialNumber  : Serial Number of the certificate.
+     * @param applicationId: Identifier of the Application.
+     * @return List of certificates that match the criteria.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> searchClientCertificatesOfApplication(String uuid, String serialNumber,
+            int applicationId) throws APIManagementException;
+
+    /**
+     * This method is used to get all client certificates for a tenant.
+     * @param organization         : Alias of the certificate.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> getAllClientCertificatesOfApplication(String organization) throws APIManagementException;
+
+    /**
+     * Method to delete the client certificate from store.
+     *
+     * @param applicationId : Identifier of the Application which particular client certificate is added against.
+     * @param uuid         : uuid of the certificate which needs to be removed.
+     * @return : SUCCESS: If operation success
+     * INTERNAL_SERVER_ERROR: If any internal error occurred
+     * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
+     */
+    ResponseCode deleteApplicationClientCertificate(int applicationId, String uuid);
+
+    /**
+     * Method to add client certificate to gateway nodes.
+     *
+     * @param certificate : The Base64 encoded certificate string.
+     * @param uuid       : Certificate uuid.
+     * @return : True if the certificate is added to gateway node successfully. False otherwise.
+     */
+    boolean addApplicationClientCertificateToGateway(String certificate, String uuid);
+
+    /**
+     * This method is to remove the client certificate from client-truststore.jks of gateway nodes.
+     *
+     * @param uuid : The uuid of the certificate to be removed.
+     * @return : True if the certificate is removed successfully, false otherwise.
+     */
+    boolean deleteApplicationClientCertificateFromGateway(String uuid);
+
 }

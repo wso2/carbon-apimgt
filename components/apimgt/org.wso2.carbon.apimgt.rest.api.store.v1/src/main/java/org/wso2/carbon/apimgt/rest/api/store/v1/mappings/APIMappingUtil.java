@@ -334,33 +334,33 @@ public class APIMappingUtil {
         dto.setMonetization(monetizationInfoDTO);
 
         for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
-                APITiersDTO apiTiersDTO = new APITiersDTO();
-                apiTiersDTO.setTierName(currentTier.getName());
-                apiTiersDTO.setTierPlan(currentTier.getTierPlan());
-                //monetization attributes are applicable only for commercial tiers
-                if (APIConstants.COMMERCIAL_TIER_PLAN.equalsIgnoreCase(currentTier.getTierPlan())) {
-                    APIMonetizationAttributesDTO monetizationAttributesDTO = new APIMonetizationAttributesDTO();
-                    if (MapUtils.isNotEmpty(currentTier.getMonetizationAttributes())) {
-                        Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
-                        //check the billing plan (fixed or price per request)
-                        if (!StringUtils.isBlank(monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE))) {
-                            monetizationAttributesDTO.setFixedPrice(monetizationAttributes.get
-                                    (APIConstants.Monetization.FIXED_PRICE));
-                        } else if (!StringUtils.isBlank(monetizationAttributes.get(
-                                APIConstants.Monetization.PRICE_PER_REQUEST))) {
-                            monetizationAttributesDTO.setPricePerRequest(monetizationAttributes.get
-                                    (APIConstants.Monetization.PRICE_PER_REQUEST));
-                        }
-                        monetizationAttributesDTO.setCurrencyType(monetizationAttributes.get
-                                (APIConstants.Monetization.CURRENCY) != null ? monetizationAttributes.get
-                                (APIConstants.Monetization.CURRENCY) : StringUtils.EMPTY);
-                        monetizationAttributesDTO.setBillingCycle(monetizationAttributes.get
-                                (APIConstants.Monetization.BILLING_CYCLE) != null ? monetizationAttributes.get
-                                (APIConstants.Monetization.BILLING_CYCLE) : StringUtils.EMPTY);
+            APITiersDTO apiTiersDTO = new APITiersDTO();
+            apiTiersDTO.setTierName(currentTier.getName());
+            apiTiersDTO.setTierPlan(currentTier.getTierPlan());
+            //monetization attributes are applicable only for commercial tiers
+            if (APIConstants.COMMERCIAL_TIER_PLAN.equalsIgnoreCase(currentTier.getTierPlan())) {
+                APIMonetizationAttributesDTO monetizationAttributesDTO = new APIMonetizationAttributesDTO();
+                if (MapUtils.isNotEmpty(currentTier.getMonetizationAttributes())) {
+                    Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
+                    //check the billing plan (fixed or price per request)
+                    if (!StringUtils.isBlank(monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE))) {
+                        monetizationAttributesDTO.setFixedPrice(monetizationAttributes.get
+                                (APIConstants.Monetization.FIXED_PRICE));
+                    } else if (!StringUtils.isBlank(monetizationAttributes.get(
+                            APIConstants.Monetization.PRICE_PER_REQUEST))) {
+                        monetizationAttributesDTO.setPricePerRequest(monetizationAttributes.get
+                                (APIConstants.Monetization.PRICE_PER_REQUEST));
                     }
-                    apiTiersDTO.setMonetizationAttributes(monetizationAttributesDTO);
+                    monetizationAttributesDTO.setCurrencyType(monetizationAttributes.get
+                            (APIConstants.Monetization.CURRENCY) != null ? monetizationAttributes.get
+                            (APIConstants.Monetization.CURRENCY) : StringUtils.EMPTY);
+                    monetizationAttributesDTO.setBillingCycle(monetizationAttributes.get
+                            (APIConstants.Monetization.BILLING_CYCLE) != null ? monetizationAttributes.get
+                            (APIConstants.Monetization.BILLING_CYCLE) : StringUtils.EMPTY);
                 }
-                tiersToReturn.add(apiTiersDTO);
+                apiTiersDTO.setMonetizationAttributes(monetizationAttributesDTO);
+            }
+            tiersToReturn.add(apiTiersDTO);
         }
         dto.setTiers(tiersToReturn);
 
@@ -526,8 +526,8 @@ public class APIMappingUtil {
     }
 
     private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto, Environment environment,
-                                                                 String host, String customGatewayUrl,
-                                                                 String tenantDomain) throws APIManagementException {
+            String host, String customGatewayUrl,
+            String tenantDomain) throws APIManagementException {
         // Deployed VHost
         VHost vHost;
         String context = apidto.getContext();
@@ -543,7 +543,6 @@ public class APIMappingUtil {
 
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
         apiEndpointURLsDTO.setEnvironmentName(environment.getName());
-        apiEndpointURLsDTO.setEnvironmentDisplayName(environment.getDisplayName());
         apiEndpointURLsDTO.setEnvironmentType(environment.getType());
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
@@ -711,7 +710,7 @@ public class APIMappingUtil {
      * @param size          max offset
      */
     public static void setRatingPaginationParams(RatingListDTO ratingListDTO, String apiId, int offset, int limit,
-                                                 int size) {
+            int size) {
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
         String paginatedPrevious = "";
@@ -739,7 +738,7 @@ public class APIMappingUtil {
      *
      * @param apiList List of APIs
      * @return APIListDTO object containing APIDTOs
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
     public static APIListDTO fromAPIListToDTO(List<Object> apiList,String organization) throws APIManagementException {
         APIListDTO apiListDTO = new APIListDTO();
@@ -837,7 +836,7 @@ public class APIMappingUtil {
      *
      * @param apiProduct API Product object
      * @return a minimal representation DTO
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
     static APIInfoDTO fromAPIToInfoDTO(APIProduct apiProduct,String organization) throws APIManagementException {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
@@ -932,7 +931,7 @@ public class APIMappingUtil {
      * @return subscriptionAllowed
      */
     private static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
-                                                   String subscriptionAllowedTenants) {
+            String subscriptionAllowedTenants) {
 
         String userTenant = RestApiCommonUtil.getLoggedInUserTenantDomain();
         boolean subscriptionAllowed = false;
@@ -960,7 +959,7 @@ public class APIMappingUtil {
     }
 
     public static void setThrottlePoliciesAndMonetization(API api, APIInfoDTO apiInfoDTO, Set<String> deniedTiers,
-                                                          Map<String, Tier> tierMap) throws APIManagementException {
+            Map<String, Tier> tierMap) throws APIManagementException {
         Set<Tier> throttlingPolicies = new HashSet<Tier>();
         List<String> throttlingPolicyNames = new ArrayList<>();
         String tiers = null;

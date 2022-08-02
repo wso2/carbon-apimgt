@@ -500,7 +500,7 @@ public class APIMappingUtil {
      * @throws APIManagementException if failed to construct the DTO
      */
     public static APIMonetizationInfoDTO getMonetizedTiersDTO(String uuid, String organization,
-                                                              Map<String, String> monetizedPoliciesToPlanMapping)
+            Map<String, String> monetizedPoliciesToPlanMapping)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -792,16 +792,16 @@ public class APIMappingUtil {
     private static String mapVisibilityFromDTOtoAPI(APIDTO.VisibilityEnum visibility) {
 
         switch (visibility) {
-            case PUBLIC:
-                return APIConstants.API_GLOBAL_VISIBILITY;
-            case PRIVATE:
-                return APIConstants.API_PRIVATE_VISIBILITY;
-            case RESTRICTED:
-                return APIConstants.API_RESTRICTED_VISIBILITY;
-//            case CONTROLLED: todo add to swagger
-//                return APIConstants.API_CONTROLLED_VISIBILITY;
-            default:
-                return null; // how to handle this?
+        case PUBLIC:
+            return APIConstants.API_GLOBAL_VISIBILITY;
+        case PRIVATE:
+            return APIConstants.API_PRIVATE_VISIBILITY;
+        case RESTRICTED:
+            return APIConstants.API_RESTRICTED_VISIBILITY;
+        //            case CONTROLLED: todo add to swagger
+        //                return APIConstants.API_CONTROLLED_VISIBILITY;
+        default:
+            return null; // how to handle this?
         }
     }
 
@@ -809,14 +809,14 @@ public class APIMappingUtil {
             APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
 
         switch (subscriptionAvailability) {
-            case CURRENT_TENANT:
-                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
-            case ALL_TENANTS:
-                return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
-            case SPECIFIC_TENANTS:
-                return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
-            default:
-                return null; // how to handle this? 500 or 400
+        case CURRENT_TENANT:
+            return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
+        case ALL_TENANTS:
+            return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
+        case SPECIFIC_TENANTS:
+            return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
+        default:
+            return null; // how to handle this? 500 or 400
         }
 
     }
@@ -859,7 +859,7 @@ public class APIMappingUtil {
     }
 
     public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials,
-                                      APIProvider apiProviderParam)
+            APIProvider apiProviderParam)
             throws APIManagementException {
 
         APIProvider apiProvider;
@@ -1253,7 +1253,7 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
-        
+
         if (model.getAudience() != null) {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
@@ -1339,16 +1339,16 @@ public class APIMappingUtil {
     private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
 
         switch (visibility) { //public, private,controlled, restricted
-            case APIConstants.API_GLOBAL_VISIBILITY:
-                return APIDTO.VisibilityEnum.PUBLIC;
-            case APIConstants.API_PRIVATE_VISIBILITY:
-                return APIDTO.VisibilityEnum.PRIVATE;
-            case APIConstants.API_RESTRICTED_VISIBILITY:
-                return APIDTO.VisibilityEnum.RESTRICTED;
-//            case APIConstants.API_CONTROLLED_VISIBILITY : todo add this to swagger
-//                return APIDTO.VisibilityEnum.CONTROLLED;
-            default:
-                return null; // how to handle this?
+        case APIConstants.API_GLOBAL_VISIBILITY:
+            return APIDTO.VisibilityEnum.PUBLIC;
+        case APIConstants.API_PRIVATE_VISIBILITY:
+            return APIDTO.VisibilityEnum.PRIVATE;
+        case APIConstants.API_RESTRICTED_VISIBILITY:
+            return APIDTO.VisibilityEnum.RESTRICTED;
+        //            case APIConstants.API_CONTROLLED_VISIBILITY : todo add this to swagger
+        //                return APIDTO.VisibilityEnum.CONTROLLED;
+        default:
+            return null; // how to handle this?
         }
     }
 
@@ -1356,14 +1356,14 @@ public class APIMappingUtil {
             String subscriptionAvailability) {
 
         switch (subscriptionAvailability) {
-            case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT:
-                return APIDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
-            case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS:
-                return APIDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
-            case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS:
-                return APIDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
-            default:
-                return null; // how to handle this?
+        case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT:
+            return APIDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
+        case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS:
+            return APIDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
+        case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS:
+            return APIDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
+        default:
+            return null; // how to handle this?
         }
 
     }
@@ -1446,7 +1446,7 @@ public class APIMappingUtil {
      * @return REST API DTO representation of API Lifecycle state information
      */
     public static LifecycleStateDTO fromLifecycleModelToDTO(Map<String, Object> apiLCData,
-                                                            boolean apiOlderVersionExist) {
+            boolean apiOlderVersionExist) {
 
         LifecycleStateDTO lifecycleStateDTO = new LifecycleStateDTO();
 
@@ -1631,8 +1631,8 @@ public class APIMappingUtil {
      * @return operations
      */
     public static List<APIOperationsDTO> getOperationListWithOldData(Set<URITemplate> uriTemplates,
-                                                                     List<APIOperationsDTO>
-                                                                             operations) {
+            List<APIOperationsDTO>
+                    operations) {
 
         for (APIOperationsDTO operation : operations) {
             for (URITemplate uriTemplate : uriTemplates) {
@@ -1692,108 +1692,7 @@ public class APIMappingUtil {
         }
         return scopeSet;
     }
-//
-//    /**
-//     * This method returns endpoints according to the given endpoint config
-//     *
-//     * @param endpoints endpoints given
-//     * @return String endpoint config
-//     */
-//    public static String getEndpointConfigString(List<APIEndpointDTO> endpoints) {
-//        //todo improve this logic to support multiple endpoints such as failorver and load balance
-//        StringBuilder sb = new StringBuilder();
-//        if (endpoints != null && endpoints.size() > 0) {
-//            sb.append("{");
-//            for (APIEndpointDTO endpoint : endpoints) {
-//                sb.append("\"")
-//                        .append(endpoint.getType())
-//                        .append("\": {\"url\":\"")
-//                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
-//                        .append("\",\"timeout\":\"")
-//                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
-//                        .append("\"},");
-//            }
-//            sb.append("\"endpoint_type\" : \"")
-//                    .append(endpoints.get(0).getInline().getType())//assuming all the endpoints are same type
-//                    .append("\"}\n");
-//        }
-//        return sb.toString();
-//    }
-
-//    private static EndpointEndpointConfigDTO getEndpointEndpointConfigDTO(EndpointEndpointConfig
-//    endpointEndpointConfig) {
-//
-//        //map to EndpointEndpointConfig model to EndpointEndpointConfigDTO
-//        EndpointEndpointConfigDTO endpointEndpointConfigDTO = new EndpointEndpointConfigDTO();
-//        switch (endpointEndpointConfig.getEndpointType()) {
-//            case SINGLE:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.SINGLE);
-//            case LOAD_BALANCED:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.LOAD_BALANCED);
-//            case FAIL_OVER:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.FAIL_OVER);
-//        }
-//        List<EndpointConfigDTO> endpointConfigDTOList = new ArrayList<>();
-//        for (EndpointConfig endpointConfig : endpointEndpointConfig.getList()) {
-//            EndpointConfigDTO endpointConfigDTO = new EndpointConfigDTO();
-//            endpointConfigDTO.setUrl(endpointConfig.getUrl());
-//            endpointConfigDTO.setTimeout(endpointConfig.getTimeout());
-//
-//            //map EndpointConfigAttributes model to EndpointConfigAttributesDTO
-//            List<EndpointConfigAttributesDTO> endpointConfigAttributesList = new ArrayList<>();
-//            for (EndpointConfigAttributes endpointConfigAttributes : endpointConfig.getAttributes()) {
-//                EndpointConfigAttributesDTO endpointConfigAttributeDTO = new EndpointConfigAttributesDTO();
-//                endpointConfigAttributeDTO.setName(endpointConfigAttributes.getName());
-//                endpointConfigAttributeDTO.setValue(endpointConfigAttributes.getValue());
-//                endpointConfigAttributesList.add(endpointConfigAttributeDTO);
-//            }
-//            endpointConfigDTO.setAttributes(endpointConfigAttributesList);
-//            endpointConfigDTOList.add(endpointConfigDTO);
-//        }
-//        endpointEndpointConfigDTO.setList(endpointConfigDTOList);
-//        return endpointEndpointConfigDTO;
-//    }
-//
-//    /**
-//     * This method converts Endpoint:EndpontConfig DTO to corresponding model
-//     *
-//     * @param apiEndpointDTO1 egiven endpoint config
-//     * @param type            given endpoint type  SINGLE,  LOAD_BALANCED,  FAIL_OVER
-//     * @return EndpointConfig model
-//     */
-//    private EndpointEndpointConfig getEndpointEndpointConfigModel(EndpointEndpointConfigDTO apiEndpointDTO1,
-//                                                                  EndpointEndpointConfig.EndpointTypeEnum type) {
-//
-//        //mapping properties in EndpointConfigDTO to EndpointConfig model
-//        List<EndpointConfig> configList = new ArrayList<>();
-//        for (EndpointConfigDTO endpointConfigDTO : apiEndpointDTO1.getList()) {
-//            EndpointConfig endpointConfig1 = new EndpointConfig();
-//            endpointConfig1.setUrl(endpointConfigDTO.getUrl());
-//            endpointConfig1.setTimeout(endpointConfigDTO.getTimeout());
-//
-//            //mapping attributes in EndpointConfigAttributesDTO to EndpointConfigAttributes model
-//            List<EndpointConfigAttributes> endpointConfigAttributesList = new ArrayList<>();
-//            for (EndpointConfigAttributesDTO endpointConfigAttributesDTO : endpointConfigDTO.getAttributes()) {
-//                EndpointConfigAttributes endpointConfigAttribute = new EndpointConfigAttributes();
-//                endpointConfigAttribute.setName(endpointConfigAttributesDTO.getName());
-//                endpointConfigAttribute.setValue(endpointConfigAttributesDTO.getValue());
-//
-//                endpointConfigAttributesList.add(endpointConfigAttribute);
-//            }
-//
-//            endpointConfig1.setAttributes(endpointConfigAttributesList);
-//            configList.add(endpointConfig1);
-//        }
-//
-//        //mapping properties in EndpointEndpointConfigDTO to EndpointEndpointConfig model
-//        EndpointEndpointConfig endpointConfig = new EndpointEndpointConfig();
-//        endpointConfig.setEndpointType(type);
-//        endpointConfig.setList(configList);
-//
-//        return endpointConfig;
-//
-//    }
-
+ 
     /**
      * This method returns api security scheme as a comma seperated string.
      *
@@ -1951,7 +1850,7 @@ public class APIMappingUtil {
      * @return workflow state DTO
      */
     public static WorkflowResponseDTO toWorkflowResponseDTO(LifecycleStateDTO lifecycleStateDTO,
-                                                            APIStateChangeResponse stateChangeResponse) {
+            APIStateChangeResponse stateChangeResponse) {
 
         WorkflowResponseDTO workflowResponseDTO = new WorkflowResponseDTO();
 
@@ -2009,7 +1908,7 @@ public class APIMappingUtil {
      */
 
     private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
-         throws APIManagementException {
+            throws APIManagementException {
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerDefinition);
         Set<URITemplate> uriTemplates;
         if (APIConstants.GRAPHQL_API.equals(api.getType())) {
@@ -2359,14 +2258,14 @@ public class APIMappingUtil {
             String subscriptionAvailability) {
 
         switch (subscriptionAvailability) {
-            case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT:
-                return APIProductDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
-            case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS:
-                return APIProductDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
-            case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS:
-                return APIProductDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
-            default:
-                return null; // how to handle this?
+        case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT:
+            return APIProductDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
+        case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS:
+            return APIProductDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
+        case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS:
+            return APIProductDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
+        default:
+            return null; // how to handle this?
         }
 
     }
@@ -2374,14 +2273,14 @@ public class APIMappingUtil {
     private static APIProductDTO.VisibilityEnum mapVisibilityFromAPIProducttoDTO(String visibility) {
 
         switch (visibility) { //public, private,controlled, restricted
-            case APIConstants.API_GLOBAL_VISIBILITY:
-                return APIProductDTO.VisibilityEnum.PUBLIC;
-            case APIConstants.API_PRIVATE_VISIBILITY:
-                return APIProductDTO.VisibilityEnum.PRIVATE;
-            case APIConstants.API_RESTRICTED_VISIBILITY:
-                return APIProductDTO.VisibilityEnum.RESTRICTED;
-            default:
-                return null; // how to handle this?
+        case APIConstants.API_GLOBAL_VISIBILITY:
+            return APIProductDTO.VisibilityEnum.PUBLIC;
+        case APIConstants.API_PRIVATE_VISIBILITY:
+            return APIProductDTO.VisibilityEnum.PRIVATE;
+        case APIConstants.API_RESTRICTED_VISIBILITY:
+            return APIProductDTO.VisibilityEnum.RESTRICTED;
+        default:
+            return null; // how to handle this?
         }
     }
 
@@ -2556,14 +2455,14 @@ public class APIMappingUtil {
     private static String mapVisibilityFromDTOtoAPIProduct(APIProductDTO.VisibilityEnum visibility) {
 
         switch (visibility) {
-            case PUBLIC:
-                return APIConstants.API_GLOBAL_VISIBILITY;
-            case PRIVATE:
-                return APIConstants.API_PRIVATE_VISIBILITY;
-            case RESTRICTED:
-                return APIConstants.API_RESTRICTED_VISIBILITY;
-            default:
-                return null; // how to handle this?
+        case PUBLIC:
+            return APIConstants.API_GLOBAL_VISIBILITY;
+        case PRIVATE:
+            return APIConstants.API_PRIVATE_VISIBILITY;
+        case RESTRICTED:
+            return APIConstants.API_RESTRICTED_VISIBILITY;
+        default:
+            return null; // how to handle this?
         }
     }
 
@@ -2571,14 +2470,14 @@ public class APIMappingUtil {
             APIProductDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
 
         switch (subscriptionAvailability) {
-            case CURRENT_TENANT:
-                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
-            case ALL_TENANTS:
-                return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
-            case SPECIFIC_TENANTS:
-                return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
-            default:
-                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT; // default to current tenant
+        case CURRENT_TENANT:
+            return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
+        case ALL_TENANTS:
+            return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
+        case SPECIFIC_TENANTS:
+            return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
+        default:
+            return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT; // default to current tenant
         }
 
     }
@@ -2592,7 +2491,7 @@ public class APIMappingUtil {
      * @return ResourcePathListDTO object containing ResourcePathDTOs
      */
     public static ResourcePathListDTO fromResourcePathListToDTO(List<ResourcePath> resourcePathList, int limit,
-                                                                int offset) {
+            int offset) {
 
         ResourcePathListDTO resourcePathListDTO = new ResourcePathListDTO();
         List<ResourcePathDTO> resourcePathDTOs = new ArrayList<ResourcePathDTO>();
@@ -2625,7 +2524,7 @@ public class APIMappingUtil {
      * @param size                max offset
      */
     public static void setPaginationParamsForAPIResourcePathList(ResourcePathListDTO resourcePathListDTO, int offset,
-                                                                 int limit, int size) {
+            int limit, int size) {
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
         String paginatedPrevious = "";
@@ -2658,7 +2557,7 @@ public class APIMappingUtil {
      * @param size              max offset
      */
     public static void setPaginationParams(APIProductListDTO apiProductListDTO, String query, int offset, int limit,
-                                           int size) {
+            int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);

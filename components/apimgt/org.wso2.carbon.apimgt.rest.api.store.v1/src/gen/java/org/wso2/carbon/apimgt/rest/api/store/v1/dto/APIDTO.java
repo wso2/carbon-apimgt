@@ -9,10 +9,12 @@ import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIIngressURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
@@ -50,8 +52,10 @@ public class APIDTO   {
     private Boolean hasThumbnail = false;
     private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
     private APIMonetizationInfoDTO monetization = null;
+    private List<APIIngressURLsDTO> ingressURLs = new ArrayList<APIIngressURLsDTO>();
     private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
     private APIBusinessInformationDTO businessInformation = null;
+    private List<LabelDTO> labels = new ArrayList<LabelDTO>();
     private List<String> environmentList = new ArrayList<String>();
     private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
     private String avgRating = null;
@@ -257,7 +261,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(example = "WS", value = "This describes the transport type of the API")
+  @ApiModelProperty(example = "HTTP", value = "This describes the transport type of the API")
   @JsonProperty("type")
   public String getType() {
     return type;
@@ -430,6 +434,24 @@ public class APIDTO   {
 
   /**
    **/
+  public APIDTO ingressURLs(List<APIIngressURLsDTO> ingressURLs) {
+    this.ingressURLs = ingressURLs;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("ingressURLs")
+  public List<APIIngressURLsDTO> getIngressURLs() {
+    return ingressURLs;
+  }
+  public void setIngressURLs(List<APIIngressURLsDTO> ingressURLs) {
+    this.ingressURLs = ingressURLs;
+  }
+
+  /**
+   **/
   public APIDTO endpointURLs(List<APIEndpointURLsDTO> endpointURLs) {
     this.endpointURLs = endpointURLs;
     return this;
@@ -462,6 +484,25 @@ public class APIDTO   {
   }
   public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
+  }
+
+  /**
+   * Labels of micro-gateway environments attached to the API. 
+   **/
+  public APIDTO labels(List<LabelDTO> labels) {
+    this.labels = labels;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API. ")
+      @Valid
+  @JsonProperty("labels")
+  public List<LabelDTO> getLabels() {
+    return labels;
+  }
+  public void setLabels(List<LabelDTO> labels) {
+    this.labels = labels;
   }
 
   /**
@@ -580,7 +621,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "API Key Managers ")
+  @ApiModelProperty(example = "[\"all\"]", value = "API Key Managers ")
       @Valid
   @JsonProperty("keyManagers")
   public Object getKeyManagers() {
@@ -689,8 +730,10 @@ public class APIDTO   {
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
         Objects.equals(monetization, API.monetization) &&
+        Objects.equals(ingressURLs, API.ingressURLs) &&
         Objects.equals(endpointURLs, API.endpointURLs) &&
         Objects.equals(businessInformation, API.businessInformation) &&
+        Objects.equals(labels, API.labels) &&
         Objects.equals(environmentList, API.environmentList) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(avgRating, API.avgRating) &&
@@ -706,7 +749,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols);
   }
 
   @Override
@@ -734,8 +777,10 @@ public class APIDTO   {
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
+    sb.append("    ingressURLs: ").append(toIndentedString(ingressURLs)).append("\n");
     sb.append("    endpointURLs: ").append(toIndentedString(endpointURLs)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
+    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    environmentList: ").append(toIndentedString(environmentList)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");

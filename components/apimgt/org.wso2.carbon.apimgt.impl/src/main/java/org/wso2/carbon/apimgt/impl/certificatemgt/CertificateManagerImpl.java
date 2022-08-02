@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
@@ -35,6 +37,12 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,31 +85,31 @@ public class CertificateManagerImpl implements CertificateManager {
         senderProfilePath = CertificateMgtUtils.getSSLSenderProfilePath();
     }
 
-    @Override
-    public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId) {
+    @Override public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint,
+            int tenantId) {
 
         try {
             if (certificateMgtDAO.addCertificate(certificate, alias, endpoint, tenantId)) {
                 ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
-                if (responseCode.getResponseCode() ==
-                        ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode()) {
+                if (responseCode.getResponseCode() == ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode()) {
                     log.error("Error adding the certificate to Publisher Trust Store. Rolling back...");
                     certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
-                } else if (responseCode.getResponseCode() == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE
-                        .getResponseCode()) {
+                } else if (responseCode.getResponseCode()
+                        == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode()) {
                     log.error("Could not add Certificate to Trust Store. Certificate Exists. Rolling back...");
                     certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
                 } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_EXPIRED.getResponseCode()) {
                     log.error("Could not add Certificate. Certificate has already expired.");
                     certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
                 } else {
-                    log.info("Certificate is successfully added to the Publisher client Trust Store with Alias '"
-                            + alias + "'");
+                    log.info(
+                            "Certificate is successfully added to the Publisher client Trust Store with Alias '" + alias
+                                    + "'");
                 }
                 return responseCode;
             } else {
-                log.error("Error persisting the certificate meta data in db. Certificate could not be added to " +
-                        "publisher Trust Store.");
+                log.error("Error persisting the certificate meta data in db. Certificate could not be added to "
+                        + "publisher Trust Store.");
                 return ResponseCode.INTERNAL_SERVER_ERROR;
             }
         } catch (CertificateManagementException e) {
@@ -112,9 +120,8 @@ public class CertificateManagerImpl implements CertificateManager {
         }
     }
 
-    @Override
-    public ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias,
-                                             String tierName, int tenantId, String organization) {
+    @Override public ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias,
+            String tierName, int tenantId, String organization) {
 
         ResponseCode responseCode;
         try {
@@ -123,8 +130,8 @@ public class CertificateManagerImpl implements CertificateManager {
                 if (certificateMgtDAO.checkWhetherAliasExist(alias, tenantId)) {
                     responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
                 } else {
-                    certificateMgtDAO
-                            .addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId, organization);
+                    certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId,
+                            organization);
                 }
             }
         } catch (CertificateManagementException e) {
@@ -135,12 +142,11 @@ public class CertificateManagerImpl implements CertificateManager {
         return responseCode;
     }
 
-    @Override
-    public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId) {
+    @Override public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId) {
 
         try {
-            List<CertificateMetadataDTO> certificateMetadataDTOList =
-                    certificateMgtDAO.getCertificates(alias, null, tenantId);
+            List<CertificateMetadataDTO> certificateMetadataDTOList = certificateMgtDAO.getCertificates(alias, null,
+                    tenantId);
             if (certificateMetadataDTOList != null && certificateMetadataDTOList.size() == 1) {
                 CertificateMetadataDTO certificate = certificateMetadataDTOList.get(0);
                 boolean removeFromDB = certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
@@ -150,17 +156,16 @@ public class CertificateManagerImpl implements CertificateManager {
                         certificateMgtDAO.addCertificate(certificate.getCertificate(), alias, endpoint, tenantId);
                         log.error("Error removing the Certificate from Trust Store. Rolling back...");
                     } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode()) {
-                        log.warn("The Certificate for Alias '" + alias + "' has been previously removed from " +
-                                "Trust Store. Hence DB entry is removed.");
+                        log.warn("The Certificate for Alias '" + alias + "' has been previously removed from "
+                                + "Trust Store. Hence DB entry is removed.");
                     } else {
                         log.info("Certificate is successfully removed from the Publisher Trust Store with Alias '"
                                 + alias + "'");
                     }
                     return responseCode;
                 } else {
-                    log.error(
-                            "Failed to remove certificate from the data base. No certificate changes will be affected" +
-                                    ".");
+                    log.error("Failed to remove certificate from the data base. No certificate changes will be affected"
+                            + ".");
                     return ResponseCode.INTERNAL_SERVER_ERROR;
                 }
             }
@@ -173,8 +178,8 @@ public class CertificateManagerImpl implements CertificateManager {
         return ResponseCode.CERTIFICATE_NOT_FOUND;
     }
 
-    @Override
-    public ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, int tenantId) {
+    @Override public ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias,
+            int tenantId) {
 
         try {
             boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, tenantId);
@@ -193,8 +198,7 @@ public class CertificateManagerImpl implements CertificateManager {
         }
     }
 
-    @Override
-    public boolean addCertificateToGateway(String certificate, String alias) {
+    @Override public boolean addCertificateToGateway(String certificate, String alias) {
         // Check whether the api is invoked via the APIGatewayAdmin service.
         int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
@@ -203,16 +207,15 @@ public class CertificateManagerImpl implements CertificateManager {
         return addCertificateToListenerOrSenderProfile(certificate, alias, false);
     }
 
-    @Override
-    public boolean addClientCertificateToGateway(String certificate, String alias) {
+    @Override public boolean addClientCertificateToGateway(String certificate, String alias) {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         /*
         Tenant ID is appended with alias to make sure, only the admins from the same tenant, can delete the
         certificates later.
          */
-        if (alias.endsWith("_" + tenantId) ||
-                tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
+        if (alias.endsWith("_" + tenantId)
+                || tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
             return addCertificateToListenerOrSenderProfile(certificate, alias, true);
         } else {
             log.warn("Attempt to add an alias " + alias + " by tenant " + tenantId + " has been rejected. Please "
@@ -263,8 +266,7 @@ public class CertificateManagerImpl implements CertificateManager {
         return result;
     }
 
-    @Override
-    public boolean deleteCertificateFromGateway(String alias) {
+    @Override public boolean deleteCertificateFromGateway(String alias) {
         // Check whether the api is invoked via the APIGatewayAdmin service.
         int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
@@ -273,16 +275,15 @@ public class CertificateManagerImpl implements CertificateManager {
         return deleteCertificateFromListenerAndSenderProfiles(alias, false);
     }
 
-    @Override
-    public boolean deleteClientCertificateFromGateway(String alias) {
+    @Override public boolean deleteClientCertificateFromGateway(String alias) {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         /*
             Tenant ID is checked to make sure that tenant admins cannot delete the alias that do not belong their
             tenant. Super tenant is special cased, as it is required to delete the certificates from different tenants.
          */
-        if (alias.endsWith("_" + tenantId) ||
-                tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
+        if (alias.endsWith("_" + tenantId)
+                || tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
             return deleteCertificateFromListenerAndSenderProfiles(alias, true);
         } else {
             log.warn("Attempt to delete the alias " + alias + " by tenant " + tenantId + " has been rejected. Only "
@@ -327,14 +328,12 @@ public class CertificateManagerImpl implements CertificateManager {
         }
     }
 
-    @Override
-    public boolean isConfigured() {
+    @Override public boolean isConfigured() {
 
         return true;
     }
 
-    @Override
-    public List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId) {
+    @Override public List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId) {
 
         List<CertificateMetadataDTO> certificateMetadataList = null;
         try {
@@ -345,8 +344,7 @@ public class CertificateManagerImpl implements CertificateManager {
         return certificateMetadataList;
     }
 
-    @Override
-    public List<CertificateMetadataDTO> getCertificates(int tenantId) {
+    @Override public List<CertificateMetadataDTO> getCertificates(int tenantId) {
 
         List<CertificateMetadataDTO> certificates = null;
 
@@ -361,8 +359,7 @@ public class CertificateManagerImpl implements CertificateManager {
         return certificates;
     }
 
-    @Override
-    public List<CertificateMetadataDTO> getCertificates(int tenantId, String alias, String endpoint)
+    @Override public List<CertificateMetadataDTO> getCertificates(int tenantId, String alias, String endpoint)
             throws APIManagementException {
 
         List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
@@ -374,16 +371,15 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, endpoint, tenantId);
         } catch (CertificateManagementException e) {
-            throw new APIManagementException("Error retrieving certificate information for tenantId '" + tenantId +
-                    "' and alias '" + alias + "'");
+            throw new APIManagementException(
+                    "Error retrieving certificate information for tenantId '" + tenantId + "' and alias '" + alias
+                            + "'");
         }
         return certificateMetadataList;
     }
 
-    @Override
-    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
-                                                               Identifier apiIdentifier, String organization)
-            throws APIManagementException {
+    @Override public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+            Identifier apiIdentifier, String organization) throws APIManagementException {
 
         try {
             return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier, organization);
@@ -393,8 +389,7 @@ public class CertificateManagerImpl implements CertificateManager {
         }
     }
 
-    @Override
-    public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
+    @Override public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
 
         List<CertificateMetadataDTO> certificateMetadataList;
         if (log.isDebugEnabled()) {
@@ -403,14 +398,14 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, null, tenantId);
         } catch (CertificateManagementException e) {
-            throw new APIManagementException("Error retrieving certificate information for tenantId '" + tenantId +
-                    "' and alias '" + alias + "'");
+            throw new APIManagementException(
+                    "Error retrieving certificate information for tenantId '" + tenantId + "' and alias '" + alias
+                            + "'");
         }
         return certificateMetadataList.size() == 1; // The list would not be null so we check the size.
     }
 
-    @Override
-    public CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException {
+    @Override public CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug(String.format("Get Certificate information for alias %s", alias));
@@ -422,8 +417,7 @@ public class CertificateManagerImpl implements CertificateManager {
         }
     }
 
-    @Override
-    public ResponseCode updateCertificate(String certificate, String alias) throws APIManagementException {
+    @Override public ResponseCode updateCertificate(String certificate, String alias) throws APIManagementException {
 
         try {
             return certificateMgtUtils.updateCertificate(certificate, alias);
@@ -432,8 +426,7 @@ public class CertificateManagerImpl implements CertificateManager {
         }
     }
 
-    @Override
-    public ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId,
+    @Override public ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId,
             String organization) throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.SUCCESS;
@@ -442,8 +435,8 @@ public class CertificateManagerImpl implements CertificateManager {
         }
         try {
             if (responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
-                boolean isSuccess = certificateMgtDAO
-                        .updateClientCertificate(certificate, alias, tier, tenantId, organization);
+                boolean isSuccess = certificateMgtDAO.updateClientCertificate(certificate, alias, tier, tenantId,
+                        organization);
                 if (isSuccess) {
                     responseCode = ResponseCode.SUCCESS;
                 } else {
@@ -458,8 +451,7 @@ public class CertificateManagerImpl implements CertificateManager {
         return responseCode;
     }
 
-    @Override
-    public int getCertificateCount(int tenantId) throws APIManagementException {
+    @Override public int getCertificateCount(int tenantId) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug(String.format("Get the number of certificates tenant %d has.", tenantId));
@@ -471,8 +463,7 @@ public class CertificateManagerImpl implements CertificateManager {
         }
     }
 
-    @Override
-    public int getClientCertificateCount(int tenantId) throws APIManagementException {
+    @Override public int getClientCertificateCount(int tenantId) throws APIManagementException {
 
         try {
             return certificateMgtDAO.getClientCertificateCount(tenantId);
@@ -483,8 +474,7 @@ public class CertificateManagerImpl implements CertificateManager {
         }
     }
 
-    @Override
-    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+    @Override public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug(String.format("Get the contents of the certificate for alias %s", alias));
@@ -552,4 +542,109 @@ public class CertificateManagerImpl implements CertificateManager {
         }
         return success;
     }
+
+    public ResponseCode addClientCertificateToStore(int applicationId, String certificate, String UUID, String name,
+            String serialNumber, String keyType, int tenantId) {
+
+        ResponseCode responseCode;
+        try {
+            responseCode = certificateMgtUtils.validateCertificate(name, tenantId, certificate);
+            if (responseCode == ResponseCode.SUCCESS) {
+                if (certificateMgtDAO.isClientCertificateExist(name, applicationId, serialNumber)) {
+                    responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+                } else {
+                    certificateMgtDAO.addClientCertificateToApplication(certificate, applicationId, UUID, name,
+                            serialNumber, keyType);
+                }
+            }
+        } catch (CertificateManagementException e) {
+            log.error("Error when adding client certificate with alias " + name + " to database for the Application "
+                    + applicationId, e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        }
+        return responseCode;
+    }
+
+    public List<ClientCertificateDTO> searchClientCertificatesOfApplication(String uuid, String serialNumber,
+            int applicationId) throws APIManagementException {
+
+        List<ClientCertificateDTO> certificateMetadataList = new ArrayList<>();
+
+        try {
+            certificateMetadataList = certificateMgtDAO.getApplicationClientCertificates(uuid, serialNumber,
+                    applicationId);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException("Error retrieving certificate information");
+        }
+        return certificateMetadataList;
+
+    }
+
+    public List<ClientCertificateDTO> getAllClientCertificatesOfApplication(String organization)
+            throws APIManagementException {
+
+        List<ClientCertificateDTO> certificateMetadataList = new ArrayList<>();
+
+        try {
+            certificateMetadataList = certificateMgtDAO.getAllApplicationClientCertificates(organization);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException("Error retrieving certificate information");
+        }
+        return certificateMetadataList;
+
+    }
+
+    public ResponseCode deleteApplicationClientCertificate(int applicationId, String uuid) {
+        try {
+            boolean removeFromDB = certificateMgtDAO.deleteApplicationClientCertificate(applicationId, uuid);
+            if (removeFromDB) {
+                return ResponseCode.SUCCESS;
+
+            } else {
+                log.error("Failed to remove certificate with UUID " + uuid + " from the database for the Application "
+                        + applicationId + "  No certificate changes will be affected.");
+                return ResponseCode.INTERNAL_SERVER_ERROR;
+            }
+        } catch (CertificateManagementException e) {
+            log.error("Error while deleting certificate metadata of the UUID " + uuid + " of the Application "
+                    + applicationId, e);
+            return ResponseCode.INTERNAL_SERVER_ERROR;
+        }
+    }
+
+    public boolean addApplicationClientCertificateToGateway(String certificate, String uuid) {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        /*
+        Tenant ID is appended with alias to make sure, only the admins from the same tenant, can delete the
+        certificates later.
+         */
+        if (uuid.endsWith("_" + tenantId)
+                || tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
+            return addCertificateToListenerOrSenderProfile(certificate, uuid, true);
+        } else {
+            log.warn("Attempt to add an alias " + uuid + " by tenant " + tenantId + " has been rejected. Please "
+                    + "make sure to provide a alias name that ends with '_" + tenantId + "' .");
+            return false;
+        }
+    }
+
+    public boolean deleteApplicationClientCertificateFromGateway(String uuid) {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        /*
+            Tenant ID is checked to make sure that tenant admins cannot delete the alias that do not belong their
+            tenant. Super tenant is special cased, as it is required to delete the certificates from different tenants.
+         */
+        if (uuid.endsWith("_" + tenantId)
+                || tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
+            return deleteCertificateFromListenerAndSenderProfiles(uuid, true);
+        } else {
+            log.warn("Attempt to delete the alias " + uuid + " by tenant " + tenantId + " has been rejected. Only "
+                    + "the client certificates that belongs to " + tenantId + " can be deleted. All the client "
+                    + "certificates belongs to " + tenantId + " have '_" + tenantId + "' suffix in alias");
+            return false;
+        }
+    }
+
 }

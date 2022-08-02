@@ -23,7 +23,6 @@ import javax.validation.Valid;
 public class APIEndpointURLsDTO   {
   
     private String environmentName = null;
-    private String environmentDisplayName = null;
     private String environmentType = null;
     private APIURLsDTO urLs = null;
     private APIDefaultVersionURLsDTO defaultVersionURLs = null;
@@ -36,30 +35,13 @@ public class APIEndpointURLsDTO   {
   }
 
   
-  @ApiModelProperty(example = "Default", value = "")
+  @ApiModelProperty(example = "Production and Sandbox", value = "")
   @JsonProperty("environmentName")
   public String getEnvironmentName() {
     return environmentName;
   }
   public void setEnvironmentName(String environmentName) {
     this.environmentName = environmentName;
-  }
-
-  /**
-   **/
-  public APIEndpointURLsDTO environmentDisplayName(String environmentDisplayName) {
-    this.environmentDisplayName = environmentDisplayName;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "Default", value = "")
-  @JsonProperty("environmentDisplayName")
-  public String getEnvironmentDisplayName() {
-    return environmentDisplayName;
-  }
-  public void setEnvironmentDisplayName(String environmentDisplayName) {
-    this.environmentDisplayName = environmentDisplayName;
   }
 
   /**
@@ -126,7 +108,6 @@ public class APIEndpointURLsDTO   {
     }
     APIEndpointURLsDTO apIEndpointURLs = (APIEndpointURLsDTO) o;
     return Objects.equals(environmentName, apIEndpointURLs.environmentName) &&
-        Objects.equals(environmentDisplayName, apIEndpointURLs.environmentDisplayName) &&
         Objects.equals(environmentType, apIEndpointURLs.environmentType) &&
         Objects.equals(urLs, apIEndpointURLs.urLs) &&
         Objects.equals(defaultVersionURLs, apIEndpointURLs.defaultVersionURLs);
@@ -134,7 +115,7 @@ public class APIEndpointURLsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, environmentDisplayName, environmentType, urLs, defaultVersionURLs);
+    return Objects.hash(environmentName, environmentType, urLs, defaultVersionURLs);
   }
 
   @Override
@@ -143,7 +124,6 @@ public class APIEndpointURLsDTO   {
     sb.append("class APIEndpointURLsDTO {\n");
     
     sb.append("    environmentName: ").append(toIndentedString(environmentName)).append("\n");
-    sb.append("    environmentDisplayName: ").append(toIndentedString(environmentDisplayName)).append("\n");
     sb.append("    environmentType: ").append(toIndentedString(environmentType)).append("\n");
     sb.append("    urLs: ").append(toIndentedString(urLs)).append("\n");
     sb.append("    defaultVersionURLs: ").append(toIndentedString(defaultVersionURLs)).append("\n");

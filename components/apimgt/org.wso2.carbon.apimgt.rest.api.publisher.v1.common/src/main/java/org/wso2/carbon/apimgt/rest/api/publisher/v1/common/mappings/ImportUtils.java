@@ -116,7 +116,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This class usesd to utility for Import API.
+ * This class used to utility for Import API.
  */
 public class ImportUtils {
 
