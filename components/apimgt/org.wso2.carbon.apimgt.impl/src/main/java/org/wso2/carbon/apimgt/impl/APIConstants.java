@@ -266,8 +266,7 @@ public final class APIConstants {
     public static final String ASSESSMENT_REPORT = "/assessmentreport?";
 
     //registry resource containing the self signup user config
-    public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
-    public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE = "signup-config";
+    public static final String SELF_SIGN_UP_NAME = "SelfSignUp";
 
     public static final String DOCUMENTATION_SEARCH_PATH_FIELD = "path";
 
@@ -868,15 +867,10 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";
 
-    //elements in the configuration file in the registry related to self signup
-    public static final String SELF_SIGN_UP_REG_DOMAIN_ELEM = "SignUpDomain";
+    //elements in the configuration file in the advance tenant configuration related to self signup
     public static final String SELF_SIGN_UP_REG_ROLES_ELEM = "SignUpRoles";
-    public static final String SELF_SIGN_UP_REG_ROLE_ELEM = "SignUpRole";
-    public static final String SELF_SIGN_UP_REG_USERNAME = "AdminUserName";
-    public static final String SELF_SIGN_UP_REG_PASSWORD = "AdminPassword";
-    public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
-    public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
-    public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
+    public static final String SELF_SIGN_UP_DEFAULT_CONFIG_FILE_PATH_OF_THE_CARBON_SUPER_USER = "/signupconfigurations/" +
+            "self-sign-up-config.json";
 
     public static final String ORG_RESOLVER = "OrganizationResolver";
 
@@ -1118,6 +1112,7 @@ public final class APIConstants {
     public static final String EVERYONE_ROLE = "internal/everyone";
     public static final String ANONYMOUS_ROLE = "system/wso2.anonymous.role";
     public static final String SUBSCRIBER_ROLE = "Internal/subscriber";
+    public static final String NULL_SUBSCRIBER_ROLE = "null";
 
     // Anonymous end user, to be used with ACCESS_TOKEN_USER_TYPE_APPLICATION
     public static final String END_USER_ANONYMOUS = "anonymous";

@@ -862,6 +862,37 @@
         }
       },
       "additionalProperties": true
+    },
+    "SelfSignUp": {
+      "type": "object",
+      "default": {},
+      "title": "Add this configuration to enable self-signup.",
+      "required": [
+        "SignUpRoles"
+      ],
+      "properties": {
+        "SignUpRoles": {
+          "type": "array",
+          "default": [],
+          "title": "Enter the Signup roles.",
+          "items": {
+            "type": "string",
+            "default": "",
+            "examples": [
+              "Internal/subscriber"
+            ]
+          },
+          "examples": [
+            [
+              "Internal/subscriber"]
+          ]
+        }
+      },
+      "examples": [{
+        "SignUpRoles": [
+          "Internal/subscriber"
+        ]
+      }]
     }
   },
   "additionalProperties": true
