@@ -54,7 +54,7 @@ import java.util.List;
 public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesApiService {
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
-    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
+
     public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -232,31 +232,21 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
     @Override
     public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
-        APIMetadataListDTO apiMetadataListDTO;
+
         limit = (limit != null) ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = (offset != null) ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        APIMetadataListDTO apiMetadataListDTO;
         CertificateMetadataDTO certificateMetadataDTO;
         String fqdn;
-        String query;
         APISearchResult searchResult;
-
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         certificateMetadataDTO = apiProvider.getCertificate(alias);
 
         if(certificateMetadataDTO != null) {
             String endpoint = certificateMetadataDTO.getEndpoint();
-            URI uri;
-
-            try {
-                uri = new URI(endpoint);
-                fqdn = uri.getHost();
-            } catch (URISyntaxException e) {
-                fqdn =  endpoint;
-            }
-
-            query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + fqdn;
-            searchResult = apiProvider.searchPaginatedAPIsAsAdmin(query, organization, offset, limit);
+            searchResult = apiProvider.searchPaginatedAPIsByFQDN(endpoint, organization, offset, limit);
         }else{
             searchResult = new APISearchResult();
         }

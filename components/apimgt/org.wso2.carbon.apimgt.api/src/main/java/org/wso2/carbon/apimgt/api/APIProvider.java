@@ -1656,16 +1656,17 @@ public interface APIProvider extends APIManager {
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
     /**
-     * Returns APIProduct Search result based on the provided query.
+     * Returns API Search result based on fqdn of the provided endpoint.
+     * Returns empty API Search result if endpoint is invalid.
      *
-     * @param searchQuery     query Ex: endpointConfig:api.wso2.com
+     * @param endpoint        endpoint Ex: https://api.wso2.com
      * @param tenantDomain    tenant domain
      * @param start           starting number
      * @param end             ending number
      * @return APIProduct result
      * @throws APIManagementException if search is failed
      */
-    APISearchResult searchPaginatedAPIsAsAdmin(String searchQuery, String tenantDomain, int start, int end) throws
+    APISearchResult searchPaginatedAPIsByFQDN(String endpoint, String tenantDomain, int start, int end) throws
             APIManagementException;
 
 }

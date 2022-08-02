@@ -101,6 +101,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -130,6 +132,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private RecommendationEnvironment recommendationEnvironment;
     private GlobalMediationPolicyImpl globalMediationPolicyImpl;
+    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -4739,23 +4742,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APISearchResult searchPaginatedAPIsAsAdmin(String searchQuery, String tenantDomain,
-                                                      int offset, int limit) throws APIManagementException {
+    public APISearchResult searchPaginatedAPIsByFQDN(String endpoint, String tenantDomain,
+                                                     int offset, int limit) throws APIManagementException {
+        String fqdn;
+        APISearchResult result = new APISearchResult();
+
+        try {
+            URI uri = new URI(endpoint);
+            fqdn = uri.getHost();
+        } catch (URISyntaxException e) {
+            return result;
+        }
+
+        String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + fqdn;
         Organization org = new Organization(organization);
         String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
         String[] roles = APIUtil.getFilteredUserRoles(adminUser);
         Map<String, Object> properties = APIUtil.getUserProperties(adminUser);
         UserContext userCtx = new UserContext(adminUser, org, properties, roles);
-        APISearchResult result = new APISearchResult();
 
         try {
-            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
                     offset, limit, userCtx, "createdTime", "desc");
-
             if (log.isDebugEnabled()) {
-                log.debug("Running Solr query : " + searchQuery + " to retrieve :-> " + searchAPIs.toString());
+                log.debug("Running Solr query : " + query + " to retrieve :-> " + searchAPIs.toString());
             }
-
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
                 List<API> apiList = new ArrayList<>();
@@ -4769,7 +4780,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.setApiCount(searchAPIs.getTotalAPIsCount());
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching for APIs with Solr query: " + searchQuery , e);
+            throw new APIManagementException("Error while searching for APIs with Solr query: " + query , e);
         }
 
         return result ;
