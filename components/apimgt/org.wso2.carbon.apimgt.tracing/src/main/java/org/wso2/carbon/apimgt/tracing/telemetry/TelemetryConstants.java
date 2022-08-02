@@ -58,4 +58,10 @@ public class TelemetryConstants {
      */
     static final String LOG = "log";
     static final String LOG_ENABLED = "OpenTelemetry.LogTelemetry.Enabled";
+
+    /**
+     * Otlp Constants.
+     */
+    static final String OTLP_CONFIG_URL = "OpenTelemetry.RemoteTracer.Url";
+    static final String OPENTELEMETRY_PROPERTIES_PREFIX = "OpenTelemetry.RemoteTracer.Properties.";
 }
