@@ -830,8 +830,7 @@ public class ImportUtils {
         OperationPolicySpecification policySpecification = null;
 
         try {
-            OperationPolicyDefinition ccPolicyDefinition = null;
-            OperationPolicyDefinition synapseDefinition = null;
+            OperationPolicyDefinition gatewayDefinition = null;
 
             String[] fileLocations = pathToArchive.split("/");
 
@@ -856,11 +855,8 @@ public class ImportUtils {
             String synapsePolicyDefinitionJsonContent = readDefinitionFiles(pathToJ2File);
 
             if (synapsePolicyDefinitionJsonContent != null) {
-                synapseDefinition = new OperationPolicyDefinition();
-                synapseDefinition.setContent(synapsePolicyDefinitionJsonContent);
-                synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-                synapseDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(synapseDefinition));
-                operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                gatewayDefinition = setPropertiesToGatewayDefinition(synapsePolicyDefinitionJsonContent, OperationPolicyDefinition.GatewayType.Synapse);
+                operationPolicyData.setSynapsePolicyDefinition(gatewayDefinition);
             }
 
             String pathToChoreoFile = pathToArchive + fileName + ImportExportConstants.CHOREO_CONNECT_EXTENSION;
@@ -868,11 +864,8 @@ public class ImportUtils {
             String choreoConnectPolicyDefinitionJsonContent = readDefinitionFiles(pathToChoreoFile);
 
             if (choreoConnectPolicyDefinitionJsonContent != null) {
-                ccPolicyDefinition = new OperationPolicyDefinition();
-                ccPolicyDefinition.setContent(choreoConnectPolicyDefinitionJsonContent);
-                ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                ccPolicyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(ccPolicyDefinition));
-                operationPolicyData.setCcPolicyDefinition(ccPolicyDefinition);
+                gatewayDefinition = setPropertiesToGatewayDefinition(choreoConnectPolicyDefinitionJsonContent, OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                operationPolicyData.setCcPolicyDefinition(gatewayDefinition);
             }
 
             operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
@@ -899,11 +892,26 @@ public class ImportUtils {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(
                     ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS,
                     policySpecification.getName(), policySpecification.getVersion()));
-        } catch (Exception e) {
+        } catch (IOException e) {
             String errorMessage = "An Error has occurred while adding common operation policy. " + e.getMessage();
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR,
                     policySpecification.getName(), policySpecification.getVersion()));
         }
+    }
+
+    /**
+     * Set Properties to Gateway Definition.
+     *
+     * @param gatewayDefinitionJsonContent Gateway Definition Content.
+     * @param type Gateway Type.
+     * @return
+     */
+    private static OperationPolicyDefinition setPropertiesToGatewayDefinition(String gatewayDefinitionJsonContent, OperationPolicyDefinition.GatewayType type) {
+        OperationPolicyDefinition gatewayDefinition = new OperationPolicyDefinition();
+        gatewayDefinition.setContent(gatewayDefinitionJsonContent);
+        gatewayDefinition.setGatewayType(type);
+        gatewayDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(gatewayDefinition));
+        return gatewayDefinition;
     }
 
     @NotNull
@@ -1194,15 +1202,8 @@ public class ImportUtils {
             String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
 
             jsonContent = CommonUtil.yamlToJson(yamlContent);
-            JsonObject object = new JsonParser().parse(jsonContent).getAsJsonObject();
-            JsonElement data = object.get("data");
-            object.remove("data");
 
-            for (String key : data.getAsJsonObject().keySet()) {
-                object.add(key, data.getAsJsonObject().get(key));
-            }
-
-            jsonContent = object.toString();
+            jsonContent = getJsonContentWithData(jsonContent);
 
         } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
             // load as a json fallback
@@ -1210,15 +1211,8 @@ public class ImportUtils {
                 log.debug("Found policy definition file " + pathToJsonFile);
             }
             jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
-            JsonObject object = new JsonParser().parse(jsonContent).getAsJsonObject();
-            JsonElement data = object.get("data");
-            object.remove("data");
 
-            for (String key : data.getAsJsonObject().keySet()) {
-                object.add(key, data.getAsJsonObject().get(key));
-            }
-
-            jsonContent = object.toString();
+            jsonContent = getJsonContentWithData(jsonContent);
         }
 
         return jsonContent;
@@ -1232,8 +1226,31 @@ public class ImportUtils {
      * @throws IOException
      */
     public static String readDefinitionFiles(String path) throws IOException {
-        String  jsonContent = FileUtils.readFileToString(new File(path));
+        String jsonContent = null;
+        if (CommonUtil.checkFileExistence(path)) {
+            jsonContent = FileUtils.readFileToString(new File(path));
+        }
+
         return jsonContent;
+    }
+
+    /**
+     * Break the data object into fields and append to the main object.
+     *
+     * @param jsonContent Json content of the file.
+     * @return String object which with data elements.
+     * @throws IOException if exists.
+     */
+    private static String getJsonContentWithData(String jsonContent) throws IOException {
+        JsonObject object = new JsonParser().parse(jsonContent).getAsJsonObject();
+        JsonElement data = object.get("data");
+        object.remove("data");
+
+        for (String key : data.getAsJsonObject().keySet()) {
+            object.add(key, data.getAsJsonObject().get(key));
+        }
+
+        return object.toString();
     }
 
     /**

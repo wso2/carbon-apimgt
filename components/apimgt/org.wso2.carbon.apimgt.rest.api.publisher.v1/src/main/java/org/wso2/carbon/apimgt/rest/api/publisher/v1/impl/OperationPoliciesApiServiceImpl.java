@@ -58,7 +58,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
@@ -228,11 +230,20 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             // If name & version are given, it returns the policy data
-            if (name != null && version != null) {
+            if (query != null) {
+                Map<String, String> queryParamMap = new HashMap();
+
+                String[] queryParams = query.split("&");
+                for (String param : queryParams) {
+                    String[] keyVal = param.split(":");
+                    queryParamMap.put(keyVal[0], keyVal[1]);
+                }
+
                 apiManagementExceptionErrorMessage = "Error while retrieving the policy by name & version.";
                 exceptionErrorMessage = "An error has occurred while getting the operation policies by name & version";
-                OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version,
-                        organization, false);
+                OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(
+                        queryParamMap.get(ImportExportConstants.POLICY_NAME),
+                        queryParamMap.get(ImportExportConstants.VERSION_ELEMENT), organization, false);
 
                 // if not found, throw not found error
                 if (policyData != null) {
@@ -247,7 +258,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                             ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, name, version));
                 }
             } else {
-                // limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
                 offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
                 apiManagementExceptionErrorMessage = "Error while retrieving the list of all common operation policies.";

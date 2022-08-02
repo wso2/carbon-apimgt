@@ -308,4 +308,6 @@ public final class ImportExportConstants {
 
     public static final String EXPORT_POLICY_TYPE_YAML = "YAML";
     public static final String EXPORT_POLICY_TYPE_JSON = "JSON";
+
+    public static final String POLICY_NAME = "name";
 }
