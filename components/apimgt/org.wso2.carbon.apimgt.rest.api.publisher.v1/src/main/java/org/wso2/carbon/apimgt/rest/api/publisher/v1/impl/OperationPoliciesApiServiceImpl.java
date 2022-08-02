@@ -191,7 +191,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 }
                 return Response.ok().build();
             } else {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing common policy with ID: "
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing API policy with ID: "
                         + operationPolicyId, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
                         operationPolicyId));
             }
@@ -222,7 +222,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
     @Override public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query,MessageContext messageContext) throws APIManagementException {
 
         String apiManagementExceptionErrorMessage = "";
-        String exceptionErrorMessage = "";
         OperationPolicyDataListDTO policyListDTO = null;
         String name = null, version = null;
         try {
@@ -233,7 +232,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             if (query != null) {
                 Map<String, String> queryParamMap = new HashMap();
 
-                String[] queryParams = query.split("&");
+                String[] queryParams = query.split(" ");
                 for (String param : queryParams) {
                     String[] keyVal = param.split(":");
                     queryParamMap.put(keyVal[0], keyVal[1]);
@@ -243,7 +242,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
 
                 apiManagementExceptionErrorMessage = "Error while retrieving the policy by name & version.";
-                exceptionErrorMessage = "An error has occurred while getting the operation policies by name & version";
                 OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(
                        name,
                         version, organization, false);
@@ -258,13 +256,12 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                     throw new APIMgtResourceNotFoundException(
                             "Couldn't retrieve an existing common policy with Name: " + name + " and Version: "
                                     + version,
-                            ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, name, version));
+                            ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_WITH_NAME_NOT_FOUND, name, version));
                 }
             } else {
                 offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
                 apiManagementExceptionErrorMessage = "Error while retrieving the list of all common operation policies.";
-                exceptionErrorMessage = "An error has occurred while getting the list of all common operation policies";
 
                 // Since policy definition is bit bulky, we don't query the definition unnecessarily.
                 List<OperationPolicyData> commonOperationPolicyLIst = apiProvider.getAllCommonOperationPolicies(
@@ -280,15 +277,14 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
 
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                String policy = name + "_" + version;
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES, policy, e,
-                        log);
+                throw new APIManagementException(
+                        "Couldn't retrieve an existing API policy with Name: " + name + " and Version: "
+                                + version,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_WITH_NAME_NOT_FOUND, name, version));
             } else {
                 apiManagementExceptionErrorMessage += e.getMessage();
                 RestApiUtil.handleInternalServerError(apiManagementExceptionErrorMessage, e, log);
             }
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError(exceptionErrorMessage, e, log);
         }
         return null;
     }
