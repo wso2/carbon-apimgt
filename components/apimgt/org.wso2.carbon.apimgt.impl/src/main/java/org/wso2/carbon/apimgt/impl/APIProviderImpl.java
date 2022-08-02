@@ -4739,7 +4739,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APISearchResult searchPaginatedAPIsAsAdmin(String searchQuery, String tenantDomain, int offset, int limit) throws APIManagementException {
+    public APISearchResult searchPaginatedAPIsAsAdmin(String searchQuery, String tenantDomain,
+                                                      int offset, int limit) throws APIManagementException {
         Organization org = new Organization(organization);
         String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
         String[] roles = APIUtil.getFilteredUserRoles(adminUser);

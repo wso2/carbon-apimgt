@@ -34,9 +34,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
@@ -55,10 +59,6 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         String certFileName = alias + ".crt";
-
-        if (!StringUtils.isNotEmpty(alias)) {
-            RestApiUtil.handleBadRequest("The alias cannot be empty", log);
-        }
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();

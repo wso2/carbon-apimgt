@@ -826,9 +826,7 @@ public class APIMappingUtil {
      * @param offset     starting index
      * @param size       max offset
      */
-    public static void setPaginationParamsForAPIMetadataListDTO(
-            Object apiMetadataListDTO, String query, int offset, int limit, int size
-    ) {
+    public static void setPaginationParamsForAPIMetadataListDTO(Object apiMetadataListDTO, String query, int offset, int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
