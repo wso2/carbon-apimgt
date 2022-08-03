@@ -2934,10 +2934,11 @@ public final class APIUtil {
             JSONObject subscriberRoleConfig = (JSONObject) defaultRoles.get(
                     APIConstants.API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE);
             if (isRoleCreationEnabled(subscriberRoleConfig)) {
-                String subscriberRoleName = String.valueOf(
-                        subscriberRoleConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
-                if (subscriberRoleName.equals(APIConstants.NULL_SUBSCRIBER_ROLE) || StringUtils.isBlank(
-                        subscriberRoleName) || subscriberRoleName == null) {
+                String subscriberRoleName;
+                if (subscriberRoleConfig.containsKey(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME)) {
+                    subscriberRoleName = String.valueOf(
+                            subscriberRoleConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                } else {
                     subscriberRoleName = APIConstants.SUBSCRIBER_ROLE;
                 }
                 createSubscriberRole(subscriberRoleName, tenantId);
