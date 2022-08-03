@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class ConfigCorrelationImpl {
     private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
-    private static final String LOGGING_PERMISSION_PATH = "/permission/protected/configure/logging";
+    private static final String LOGGING_PERMISSION_PATH = "/permission/protected";
 
     public boolean updateCorrelationConfigs(List<CorrelationConfigDTO> correlationConfigDTOList) throws
             APIManagementException {

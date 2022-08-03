@@ -485,7 +485,7 @@ public enum ExceptionCodes implements ErrorHandler {
     LOGGING_API_NOT_FOUND(901400, "Requested Resource Not Found", 404, "Request API Not Found for context: %s"),
     LOGGING_API_INCORRECT_LOG_LEVEL(901401, "Bad Request", 400, "Log level should be either OFF, BASIC, STANDARD or FULL"),
     LOGGING_API_MISSING_DATA(901402, "Missing data", 400, "API context or log level is missing"),
-    CORRELATION_CONFIG_PROPERTY_NOT_SUPPORTED(901403, "Bad Request", 400, "Requested component does not have a corresponding property"),
+    CORRELATION_CONFIG_BAD_REQUEST(901403, "Bad Request", 400, "Request body can not have empty elements"),
     //Service Catalog related error codes
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,

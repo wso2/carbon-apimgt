@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataH
 import java.util.Map;
 import java.util.UUID;
 
-
 /**
  * This class provides AspectJ configurations
  */

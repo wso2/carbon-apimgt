@@ -179,5 +179,6 @@
   "apim.sync_runtime_artifacts.gateway.deployment_retry_duration": "15000",
   "apim.sync_runtime_artifacts.gateway.data_retrieval_mode": "async",
   "apim.sync_runtime_artifacts.gateway.event_waiting_time": "5000",
-  "apim.sync_runtime_artifacts.gateway.enable": true
+  "apim.sync_runtime_artifacts.gateway.enable": true,
+  "apim.correlation_logs.components": "http,jdbc,ldap,synapse,method-calls"
 }
