@@ -70,9 +70,8 @@ public class DevopsAPIUtils {
      * @param correlationComponentsListDTO the correlation components list dto
      * @return the string with invalid component name
      */
-    public static String validateCorrelationComponentList(CorrelationComponentsListDTO correlationComponentsListDTO)
+    public static boolean validateCorrelationComponentList(CorrelationComponentsListDTO correlationComponentsListDTO)
             throws APIManagementException {
-        String[] components = CORRELATION_DEFAULT_COMPONENTS;
         for (CorrelationComponentDTO component : correlationComponentsListDTO.getComponents()) {
             String componentName = component.getName();
             String enabled = component.getEnabled();
@@ -87,12 +86,8 @@ public class DevopsAPIUtils {
                             ExceptionCodes.from(ExceptionCodes.CORRELATION_CONFIG_BAD_REQUEST));
                 }
             }
-            if (Arrays.stream(components).anyMatch(s -> s.equals(componentName))) {
-                continue;
-            }
-            return componentName;
         }
-        return null;
+        return true;
     }
 
 
@@ -138,7 +133,9 @@ public class DevopsAPIUtils {
             for (CorrelationComponentPropertyDTO propertyDTO: correlationComponentDTO.getProperties()) {
                 CorrelationConfigPropertyDTO correlationConfigPropertyDTO = new CorrelationConfigPropertyDTO();
                 correlationConfigPropertyDTO.setName(propertyDTO.getName());
-                correlationConfigPropertyDTO.setValue(propertyDTO.getValue().toArray(new String[0]));
+                List<String> propertyValue = propertyDTO.getValue();
+                propertyValue.replaceAll(String::trim);
+                correlationConfigPropertyDTO.setValue(propertyValue.toArray(new String[0]));
                 properties.add(correlationConfigPropertyDTO);
             }
             correlationConfigDTO.setProperties(properties);

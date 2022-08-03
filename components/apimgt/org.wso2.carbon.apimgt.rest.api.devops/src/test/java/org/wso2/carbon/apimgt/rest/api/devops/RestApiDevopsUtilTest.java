@@ -72,12 +72,8 @@ public class RestApiDevopsUtilTest {
         }
         CorrelationComponentsListDTO correlationComponentsListDTO = new CorrelationComponentsListDTO();
         correlationComponentsListDTO.setComponents(correlationComponentDTOList);
-        String invalidComponentName = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
-        Assert.assertNull(invalidComponentName);
+        Boolean valid = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
+        Assert.assertTrue(valid);
 
-        String invalidComponent = "publisher";
-        correlationComponentsListDTO.getComponents().get(0).setName(invalidComponent);
-        invalidComponentName = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
-        Assert.assertEquals(invalidComponent, invalidComponentName);
     }
 }

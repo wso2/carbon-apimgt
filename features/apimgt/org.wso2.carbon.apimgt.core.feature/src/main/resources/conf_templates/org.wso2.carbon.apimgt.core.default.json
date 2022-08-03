@@ -181,5 +181,5 @@
   "apim.sync_runtime_artifacts.gateway.event_waiting_time": "5000",
   "apim.sync_runtime_artifacts.gateway.enable": true,
   "apim.sync_runtime_artifacts.gateway.enable_on_demand_loading": false,
-  "apim.correlation_logs.components": "http,jdbc,ldap,synapse,method-calls"
+  "apim.correlation_logs.components": ["http","jdbc","ldap","synapse","method-calls"]
 }
