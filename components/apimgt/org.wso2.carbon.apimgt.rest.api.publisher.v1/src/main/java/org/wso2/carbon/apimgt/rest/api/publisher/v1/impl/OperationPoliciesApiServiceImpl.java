@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
@@ -348,7 +349,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             OperationPolicyData policyData =
                     apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, true);
             if (policyData != null) {
-                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
+                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, ExportFormat.YAML.name());
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             } else {
@@ -383,7 +384,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      *                                extracting the content
      * @returnA zip file containing both (if exists) operation policy specification and policy definition
      */
-    public Response exportOperationPolicy(String name, String version, MessageContext messageContext)
+    public Response exportOperationPolicy(String name, String version, String format, MessageContext messageContext)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -392,7 +393,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
         OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version, organization,
                 true);
         if (policyData != null) {
-            File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
+            File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, format);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } else {

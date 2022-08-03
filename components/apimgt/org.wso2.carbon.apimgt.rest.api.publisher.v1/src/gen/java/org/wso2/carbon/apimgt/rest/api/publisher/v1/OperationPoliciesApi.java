@@ -89,8 +89,8 @@ OperationPoliciesApiService delegate = new OperationPoliciesApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response exportOperationPolicy( @ApiParam(value = "Policy name")  @QueryParam("name") String name,  @ApiParam(value = "Version of the policy")  @QueryParam("version") String version) throws APIManagementException{
-        return delegate.exportOperationPolicy(name, version, securityContext);
+    public Response exportOperationPolicy( @ApiParam(value = "Policy name")  @QueryParam("name") String name,  @ApiParam(value = "Version of the policy")  @QueryParam("version") String version,  @ApiParam(value = "Format of the policy definition file")  @QueryParam("format") String format) throws APIManagementException{
+        return delegate.exportOperationPolicy(name, version, format, securityContext);
     }
 
     @GET

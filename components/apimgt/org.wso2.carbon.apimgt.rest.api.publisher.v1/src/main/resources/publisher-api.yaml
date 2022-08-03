@@ -7855,6 +7855,11 @@ paths:
           description: Version of the policy
           schema:
             type: string
+        - name: format
+          in: query
+          description: Format of the policy definition file
+          schema:
+            type: string
       responses:
         200:
           description: |
