@@ -61,7 +61,7 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
         String headerValue = configuration.getFirstProperty(headerProperty) != null ?
                 configuration.getFirstProperty(headerProperty) : null;
 
-        if (StringUtils.isNotEmpty(endPointURL) && !StringUtils.isNotEmpty(headerValue)) {
+        if (StringUtils.isNotEmpty(endPointURL) && StringUtils.isNotEmpty(headerValue)) {
             OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
                     .setEndpoint(endPointURL)
                     .setCompression("gzip")
@@ -87,7 +87,7 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
                 log.debug("OpenTelemetry instance: " + openTelemetry + " is configured.");
             }
         } else {
-            log.error("Either endpoint url or the header key value in null");
+            log.error("Either endpoint url or the header key value is null or empty");
         }
     }
 
