@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.OrgAndRevisionDeployedTimeInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -216,56 +217,39 @@ public class GatewayArtifactsMgtDAO {
     }
 
     /**
-     * This method retrieves the Organization given the API UUID
+     * This method retrieves the organization and the deployed time of an API revision.
      *
-     * @param uuid API UUID
-     * @return Organization
-     * @throws APIManagementException If failed to retrieve organization
+     * @param apiUUID API UUID
+     * @param envName Environment name
+     * @param revisionUUId API revision UUID
+     * @return Organization and Deployed Time
+     * @throws APIManagementException If failed to retrieve organization and deployed time
      */
-    public String retrieveOrganization(String uuid) throws APIManagementException {
+    public OrgAndRevisionDeployedTimeInfoDTO retrieveOrgAndAPIRevisionDeployedTime(
+            String apiUUID, String envName, String revisionUUId) throws APIManagementException {
 
-        String query = SQLConstants.RETRIEVE_ORGANIZATION;
+        String query = SQLConstants.RETRIEVE_ORGANIZATION_AND_API_REVISION_DEPLOYED_TIME;
         String organization = null;
+        String deployedTime = null;
+        OrgAndRevisionDeployedTimeInfoDTO infoDTO = new OrgAndRevisionDeployedTimeInfoDTO();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, uuid);
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, envName);
+            preparedStatement.setString(3, revisionUUId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     organization = resultSet.getString("ORGANIZATION");
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve organization", e);
-        }
-
-        return organization;
-    }
-
-    /**
-     * This method retrieves the deployed time of an API revision.
-     *
-     * @param envName Environment name
-     * @param revisionUUId API revision UUID
-     * @return Deployed Time
-     * @throws APIManagementException If failed to retrieve deployed time
-     */
-    public String retrieveAPIRevisionDeployedTime(String envName, String revisionUUId) throws APIManagementException {
-        String query = SQLConstants.APIRevisionSqlConstants.GET_API_REVISION_DEPLOYED_TIME;
-        String deployedTime = null;
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, envName);
-            preparedStatement.setString(2, revisionUUId);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
                     deployedTime = resultSet.getString("DEPLOYED_TIME");
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve deployed time of API revision", e);
+            handleException("Failed to retrieve organization and API revision deployed time", e);
         }
 
-        return deployedTime;
+        infoDTO.setOrganization(organization);
+        infoDTO.setDeployedTime(deployedTime);
+        return infoDTO;
     }
 
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.OrgAndRevisionDeployedTimeInfoDTO;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,10 +29,16 @@ public class Util {
 
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
-    public static void setDeployedTime(APIRuntimeArtifactDto apiRuntimeArtifactDto) throws APIManagementException {
-        String deployedTime =
-                gatewayArtifactsMgtDAO.retrieveAPIRevisionDeployedTime(
+    public static void setOrgAndAPIRevisionDeployedTime(APIRuntimeArtifactDto apiRuntimeArtifactDto)
+            throws APIManagementException {
+        OrgAndRevisionDeployedTimeInfoDTO orgAndDeployedTime =
+                gatewayArtifactsMgtDAO.retrieveOrgAndAPIRevisionDeployedTime(apiRuntimeArtifactDto.getApiId(),
                         apiRuntimeArtifactDto.getLabel(), apiRuntimeArtifactDto.getRevision());
+        String organization = orgAndDeployedTime.getOrganization();
+        String deployedTime = orgAndDeployedTime.getDeployedTime();
+        if (organization != null) {
+            apiRuntimeArtifactDto.setOrganization(orgAndDeployedTime.getOrganization());
+        }
         if (deployedTime != null) {
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
