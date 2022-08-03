@@ -1462,5 +1462,9 @@
       {% endif %}
 
       <!-- Default Correlation Log Components -->
-      <CorrelationLogComponents>{{apim.correlation_logs.components}}</CorrelationLogComponents>
+      <CorrelationLogComponents>
+      {%for component in apim.correlation_logs.components%}
+          <CorrelationLogComponent>{{component}}</CorrelationLogComponent>
+      {% endfor %}
+      </CorrelationLogComponents>
 </APIManager>

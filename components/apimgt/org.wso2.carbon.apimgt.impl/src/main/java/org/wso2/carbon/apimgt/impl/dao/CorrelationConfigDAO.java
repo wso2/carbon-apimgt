@@ -23,9 +23,12 @@ package org.wso2.carbon.apimgt.impl.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigPropertyDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -46,13 +49,15 @@ public class CorrelationConfigDAO {
     private static final String PROPERTY_NAME = "PROPERTY_NAME";
     private static final String PROPERTY_VALUE = "PROPERTY_VALUE";
     private static final String DENIED_THREADS = "deniedThreads";
-    private static final String[] DEFAULT_CORRELATION_COMPONENTS = {
-            "http", "ldap", "synapse", "jdbc", "method-calls"};
+    private List<String> correlationComponents;
     private static final String DEFAULT_DENIED_THREADS = "MessageDeliveryTaskThreadPool,HumanTaskServer," +
             "BPELServer,CarbonDeploymentSchedulerThread";
 
     private CorrelationConfigDAO() {
-
+        correlationComponents = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getProperty(APIConstants.CORRELATION_LOG_COMPONENTS);
+        correlationComponents.replaceAll(String::trim);
+        log.info("Correlation Components " + correlationComponents.toString());
     }
 
     public static CorrelationConfigDAO getInstance() {
@@ -69,7 +74,12 @@ public class CorrelationConfigDAO {
             log.debug("Updating Correlation Configs");
             try (PreparedStatement preparedStatementConfigs = connection.prepareStatement(queryConfigs)) {
                 for (CorrelationConfigDTO correlationConfigDTO : correlationConfigDTOList) {
-                    String componentName = correlationConfigDTO.getName();
+                    String componentName = correlationConfigDTO.getName().trim();
+                    if (!correlationComponents.contains(componentName)) {
+                        connection.rollback();
+                        throw new APIManagementException("Invalid Component Name : " + componentName,
+                                ExceptionCodes.from(ExceptionCodes.CORRELATION_CONFIG_BAD_REQUEST_INVALID_NAME));
+                    }
                     String enabled = correlationConfigDTO.getEnabled();
 
                     preparedStatementConfigs.setString(1, enabled);
@@ -157,11 +167,26 @@ public class CorrelationConfigDAO {
     }
 
     public boolean isConfigExist() throws APIManagementException {
-        String queryConfigs = SQLConstants.RETRIEVE_CORRELATION_COMPONENT_NAMES;
+        String queryComponentNames = SQLConstants.RETRIEVE_CORRELATION_COMPONENT_NAMES;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatementConfigs = connection.prepareStatement(queryConfigs);
-                ResultSet resultSetConfigs = preparedStatementConfigs.executeQuery()) {
-            return resultSetConfigs != null && resultSetConfigs.next();
+                PreparedStatement preparedStatementComponentNames = connection.prepareStatement(queryComponentNames);
+                ResultSet resultSetComponentNames = preparedStatementComponentNames.executeQuery()) {
+            List<String> persistedCorrelationComponents = new ArrayList<>();
+            if (resultSetComponentNames != null) {
+                while (resultSetComponentNames.next()) {
+                    persistedCorrelationComponents.add(resultSetComponentNames.getString(COMPONENT_NAME));
+                }
+            }
+            // Checking whether any changes needed to the persisted component list
+            if (correlationComponents.size() != persistedCorrelationComponents.size()) {
+                return false;
+            }
+            for (String component: correlationComponents) {
+                if (!persistedCorrelationComponents.contains(component)) {
+                    return false;
+                }
+            }
+            return true;
         } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving correlation configs" , e);
         }
@@ -170,14 +195,42 @@ public class CorrelationConfigDAO {
     public void addDefaultCorrelationConfigs() throws APIManagementException {
         String queryConfigs = SQLConstants.INSERT_CORRELATION_CONFIGS;
         String queryProps = SQLConstants.INSERT_CORRELATION_CONFIG_PROPERTIES;
+        String queryComponentNames = SQLConstants.RETRIEVE_CORRELATION_COMPONENT_NAMES;
+        String queryDelete = SQLConstants.DELETE_CORRELATION_CONFIGS;
+
+        List<String> correlationComponentsInsertList = new ArrayList<>();
+        List<String> correlationComponentsDeleteList = new ArrayList<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
+
+            try (PreparedStatement preparedStatementComponentNames = connection.prepareStatement(queryComponentNames);
+                    ResultSet resultSetComponentNames = preparedStatementComponentNames.executeQuery()) {
+                List<String> persistedCorrelationComponents = new ArrayList<>();
+                if (resultSetComponentNames != null) {
+                    while (resultSetComponentNames.next()) {
+                        persistedCorrelationComponents.add(resultSetComponentNames.getString(COMPONENT_NAME));
+                    }
+                }
+                //Checking for the components to be deleted from the DB
+                for (String persistedComponent: persistedCorrelationComponents) {
+                    if (!correlationComponents.contains(persistedComponent)) {
+                        correlationComponentsDeleteList.add(persistedComponent);
+                    }
+                }
+                //Checking for the components to be added to the DB
+                for (String component: correlationComponents) {
+                    if (!persistedCorrelationComponents.contains(component)) {
+                        correlationComponentsInsertList.add(component);
+                    }
+                }
+            }
+
             try (PreparedStatement preparedStatementConfigs = connection.prepareStatement(queryConfigs);
                     PreparedStatement preparedStatementProps = connection.prepareStatement(queryProps)) {
 
                 connection.setAutoCommit(false);
                 log.debug("Inserting into Correlation Configs");
-                for (String componentName : DEFAULT_CORRELATION_COMPONENTS) {
+                for (String componentName : correlationComponentsInsertList) {
                     String enabled = "false";
 
                     preparedStatementConfigs.setString(1, componentName);
@@ -186,12 +239,12 @@ public class CorrelationConfigDAO {
                 }
                 preparedStatementConfigs.executeBatch();
 
-                preparedStatementProps.setString(1, DENIED_THREADS);
-                preparedStatementProps.setString(2, "jdbc");
-                preparedStatementProps.setString(3, DEFAULT_DENIED_THREADS);
-                preparedStatementProps.executeUpdate();
-                connection.commit();
-
+                if (correlationComponentsInsertList.contains("jdbc")) {
+                    preparedStatementProps.setString(1, DENIED_THREADS);
+                    preparedStatementProps.setString(2, "jdbc");
+                    preparedStatementProps.setString(3, DEFAULT_DENIED_THREADS);
+                    preparedStatementProps.executeUpdate();
+                }
             } catch (SQLException e) {
                 connection.rollback();
                 boolean isExist = false;
@@ -206,6 +259,17 @@ public class CorrelationConfigDAO {
                     throw new APIManagementException("Error while updating the correlation configs", e);
                 }
             }
+
+
+            try (PreparedStatement preparedStatementDelete = connection.prepareStatement(queryDelete)) {
+                for (String componentName : correlationComponentsDeleteList) {
+                    preparedStatementDelete.setString(1, componentName);
+                    preparedStatementDelete.addBatch();
+                }
+                preparedStatementDelete.executeBatch();
+            }
+
+            connection.commit();
         } catch (SQLException e) {
             throw new APIManagementException("Error while updating the correlation configs", e);
         }

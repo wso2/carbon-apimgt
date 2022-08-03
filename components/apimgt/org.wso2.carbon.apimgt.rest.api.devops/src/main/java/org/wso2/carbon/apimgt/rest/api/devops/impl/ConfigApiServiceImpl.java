@@ -48,8 +48,8 @@ public class ConfigApiServiceImpl implements ConfigApiService {
 
     public Response configCorrelationPut(CorrelationComponentsListDTO correlationComponentsListDTO,
             MessageContext messageContext) throws APIManagementException {
-        String invalidComponentName = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
-        if (invalidComponentName == null) {
+        Boolean valid = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
+        if (valid) {
             ConfigCorrelationImpl configCorrelationImpl = new ConfigCorrelationImpl();
 
             List<CorrelationConfigDTO> correlationConfigDTOList =
@@ -74,9 +74,7 @@ public class ConfigApiServiceImpl implements ConfigApiService {
             Response.Status status = Response.Status.BAD_REQUEST;
             errorObject.setCode((long) status.getStatusCode());
             errorObject.setMessage(status.toString());
-            errorObject.setDescription("Invalid Component Name: " + invalidComponentName + ". ");
-            errorObject.setMoreInfo(
-                    "The valid component names : " + Arrays.toString(DevopsAPIUtils.CORRELATION_DEFAULT_COMPONENTS));
+            errorObject.setDescription("Invalid Request");
             return Response.status(status).entity(errorObject).build();
         }
 
