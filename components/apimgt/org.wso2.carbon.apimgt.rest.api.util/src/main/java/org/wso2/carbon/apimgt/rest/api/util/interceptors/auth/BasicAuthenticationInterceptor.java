@@ -26,6 +26,7 @@ import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -94,8 +95,14 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                         "username cannot be null/empty." : "password cannot be null/empty.";
                 log.error("Basic Authentication failed: " + errorMessage);
                 throw new AuthenticationException("Unauthenticated request");
-            } else if (!authenticate(inMessage, username, password)) {
-                throw new AuthenticationException("Unauthenticated request");
+            } else {
+                try {
+                    if (!authenticate(inMessage, username, password)) {
+                        throw new AuthenticationException("Unauthenticated request");
+                    }
+                } catch (APIManagementException e) {
+                    throw new RuntimeException(e);
+                }
             }
             log.debug("User logged into web app using Basic Authentication");
         }
@@ -110,12 +117,13 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @param password  password in basic auth header
      * @return true if user is successfully authenticated and authorized. false otherwise.
      */
-    private boolean authenticate(Message inMessage, String username, String password) {
+    private boolean authenticate(Message inMessage, String username, String password) throws APIManagementException {
 
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         UserRealm userRealm;
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String organization = RestApiUtil.resolveOrganization(inMessage);
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
@@ -137,7 +145,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(domainAwareUserName);
-                inMessage.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
+                inMessage.put(RestApiConstants.SUB_ORGANIZATION, organization);
                 if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                 }
