@@ -67,7 +67,6 @@ public class CorrelationConfigJMSMessageListener implements MessageListener {
                                 log.debug("Event received from the topic of " + jmsDestination.getTopicName());
                             }
                             handleNotificationMessage(payloadData.get(APIConstants.EVENT_TYPE).asText(),
-                                    payloadData.get(APIConstants.EVENT_TIMESTAMP).asLong(),
                                     payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
                         }
                     }
@@ -84,7 +83,7 @@ public class CorrelationConfigJMSMessageListener implements MessageListener {
         }
     }
 
-    private void handleNotificationMessage(String eventType, long timestamp, String encodedEvent) {
+    private void handleNotificationMessage(String eventType, String encodedEvent) {
         byte[] eventDecoded = Base64.decodeBase64(encodedEvent);
         String eventJson = new String(eventDecoded);
 

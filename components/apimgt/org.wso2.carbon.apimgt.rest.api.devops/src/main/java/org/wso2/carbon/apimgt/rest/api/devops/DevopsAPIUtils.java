@@ -18,7 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.devops;
 
-
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APILogInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.CorrelationConfigDTO;
@@ -69,10 +70,23 @@ public class DevopsAPIUtils {
      * @param correlationComponentsListDTO the correlation components list dto
      * @return the string with invalid component name
      */
-    public static String validateCorrelationComponentList(CorrelationComponentsListDTO correlationComponentsListDTO) {
+    public static String validateCorrelationComponentList(CorrelationComponentsListDTO correlationComponentsListDTO)
+            throws APIManagementException {
         String[] components = CORRELATION_DEFAULT_COMPONENTS;
         for (CorrelationComponentDTO component : correlationComponentsListDTO.getComponents()) {
             String componentName = component.getName();
+            String enabled = component.getEnabled();
+            List<CorrelationComponentPropertyDTO> properties = component.getProperties();
+            if (componentName == null || enabled == null) {
+                throw new APIManagementException("Invalid Request",
+                        ExceptionCodes.from(ExceptionCodes.CORRELATION_CONFIG_BAD_REQUEST));
+            }
+            for (CorrelationComponentPropertyDTO property: properties) {
+                if (property.getName() == null || property.getValue() == null) {
+                    throw new APIManagementException("Invalid Request",
+                            ExceptionCodes.from(ExceptionCodes.CORRELATION_CONFIG_BAD_REQUEST));
+                }
+            }
             if (Arrays.stream(components).anyMatch(s -> s.equals(componentName))) {
                 continue;
             }
@@ -109,7 +123,6 @@ public class DevopsAPIUtils {
 
         correlationComponentsListDTO.setComponents(correlationComponentDTOList);
         return correlationComponentsListDTO;
-
     }
 
     public static List<CorrelationConfigDTO> getCorrelationConfigDTOList(
