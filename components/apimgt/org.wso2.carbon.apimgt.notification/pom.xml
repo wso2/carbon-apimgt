@@ -19,7 +19,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.22.29-SNAPSHOT</version>
+        <version>9.22.30-SNAPSHOT</version>
     </parent>
     <artifactId>org.wso2.carbon.apimgt.notification</artifactId>
     <modelVersion>4.0.0</modelVersion>
@@ -103,12 +103,12 @@
     </dependency>
     <dependency>
         <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
+        <artifactId>mockito-core</artifactId>
         <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>org.powermock</groupId>
-        <artifactId>powermock-api-mockito</artifactId>
+        <artifactId>powermock-api-mockito2</artifactId>
         <scope>test</scope>
     </dependency>
     <dependency>

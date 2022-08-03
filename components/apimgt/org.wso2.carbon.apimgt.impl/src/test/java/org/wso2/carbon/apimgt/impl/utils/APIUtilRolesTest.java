@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
-import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfiguration;
@@ -45,7 +44,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PrivilegedCarbonContext.class, ServiceReferenceHolder.class, APIManagerComponent.class})
@@ -102,11 +101,11 @@ public class APIUtilRolesTest {
 
             String[] adminName = {"admin"};
             Mockito.verify(userStoreManager, Mockito.atLeastOnce()).addRole(eq("Internal/publisher"),
-                    eq(adminName), new Permission[]{Mockito.any(Permission.class)});
+                    eq(adminName), Mockito.any());
             Mockito.verify(userStoreManager, Mockito.atLeastOnce()).addRole(eq("Internal/subscriber"),
-                    eq(adminName), new Permission[]{Mockito.any(Permission.class)});
+                    eq(adminName), Mockito.any());
             Mockito.verify(userStoreManager, Mockito.atLeastOnce()).addRole(eq("Internal/creator"),
-                    eq(adminName), new Permission[]{Mockito.any(Permission.class)});
+                    eq(adminName), Mockito.any());
 
         }finally {
             PrivilegedCarbonContext.endTenantFlow();

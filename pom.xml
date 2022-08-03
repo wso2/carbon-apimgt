@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>9.22.29-SNAPSHOT</version>
+    <version>9.22.30-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -1269,8 +1269,8 @@
 
             <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.all.version}</version>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -1283,7 +1283,7 @@
 
             <dependency>
                 <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
+                <artifactId>powermock-api-mockito2</artifactId>
                 <version>${powermock.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -1926,7 +1926,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>9.22.29-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>9.22.30-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
         <carbon.analytics.common.version>5.2.41</carbon.analytics.common.version>
@@ -2064,7 +2064,7 @@
         <spring-web.version>5.1.13.RELEASE</spring-web.version>
         <hibernate-validator.version>5.4.3.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>
         <openapi.generator.version>4.3.1.wso2v4</openapi.generator.version>
         <caffeine.version>2.8.1</caffeine.version>
@@ -2085,7 +2085,7 @@
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 
         <!-- apache cxf version -->
-        <cxf.version>3.3.6</cxf.version>
+        <cxf.version>3.5.3</cxf.version>
 
 
         <carbon.metrics.version>1.3.11</carbon.metrics.version>
@@ -2118,13 +2118,12 @@
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>1.7.29</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
-        <jacoco.version>0.8.0</jacoco.version>
+        <jacoco.version>0.8.4</jacoco.version>
         <xml-apis.version>1.4.01</xml-apis.version>
-        <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
         <wiremock.version>2.5.0</wiremock.version>
-        <mockito.version>2.10.0</mockito.version>
-        <powermock.version>1.7.4</powermock.version>
-        <mockito.all.version>1.10.19</mockito.all.version>
+        <mockito.version>2.23.4</mockito.version>
+        <powermock.version>2.0.2</powermock.version>
         <reflection.version>0.9.11</reflection.version>
         <woodstox-core.version>6.2.1</woodstox-core.version>
         <apache.commons.version>2.8.0</apache.commons.version>
@@ -2175,7 +2174,7 @@
         <okio.wso2.version>2.8.0.wso2v1</okio.wso2.version>
 
         <openfeign.version>11.0</openfeign.version>
-        <maven.spotbugsplugin.version>3.1.10</maven.spotbugsplugin.version>
+        <maven.spotbugsplugin.version>4.1.4</maven.spotbugsplugin.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>

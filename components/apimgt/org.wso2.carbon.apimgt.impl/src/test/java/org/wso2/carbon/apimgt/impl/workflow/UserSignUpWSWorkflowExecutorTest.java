@@ -209,8 +209,8 @@ public class UserSignUpWSWorkflowExecutorTest {
         workflowDTO.setTenantDomain(tenantDomain);
 
         //Test failure to complete workflow execution, when error has been occurred while updating user with signup roles
-        Mockito.doThrow(UserStoreException.class).when(userStoreManager).updateRoleListOfUser(Mockito.anyString(),
-                Mockito.any(), new String[]{Mockito.anyString()});
+        Mockito.doThrow(UserStoreException.class).when(userStoreManager)
+                .updateRoleListOfUser(Mockito.anyString(), Mockito.isNull(), Mockito.any());
         try {
             userSignUpWSWorkflowExecutor.complete(workflowDTO);
             Assert.fail("Expected WorkflowException has not been thrown when signup user role update failed");

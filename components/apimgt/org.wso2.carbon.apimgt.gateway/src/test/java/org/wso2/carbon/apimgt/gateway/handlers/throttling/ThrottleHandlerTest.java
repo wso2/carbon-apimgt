@@ -436,39 +436,6 @@ public class ThrottleHandlerTest {
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
     }
 
-
-    @Test
-    public void testMsgThrottleOutWhenHardThrottlingFailedWithThrottleException() {
-        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-
-        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
-                accessInformation);
-        throttleHandler.setProductionMaxCount("100");
-        SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
-        throttleHandler.init(synapseEnvironment);
-        MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
-        messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
-        ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
-                .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
-                (API_AUTH_CONTEXT);
-        authenticationContext.setApiTier(throttlingTier);
-        authenticationContext.setKeyType("SANDBOX");
-        authenticationContext.setSpikeArrestLimit(0);
-        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
-
-        verbInfo.setConditionGroups(conditionGroupDTOs);
-        ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
-        matchingConditions.add(conditionGroupDTO);
-
-
-        //Throw ThrottleException while retrieving access information
-        Mockito.doThrow(ThrottleException.class).when(accessInformation).isAccessAllowed();
-        //Should discontinue message flow, when an exception is thrown during hard limit throttling information
-        //process time
-        Assert.assertFalse(throttleHandler.handleRequest(messageContext));
-    }
-
     @Test
     public void testMsgThrottleOutWhenCustomThrottlingLimitExceeded() {
         ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();

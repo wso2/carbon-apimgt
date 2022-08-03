@@ -1279,7 +1279,7 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public String getTenantConfigSchema(String organization) throws APIManagementException {
+    public String getTenantConfigSchema(String organization) {
         return APIUtil.retrieveTenantConfigJsonSchema().toString();
     }
 
