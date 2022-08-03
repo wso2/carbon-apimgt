@@ -4750,12 +4750,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             URI uri = new URI(endpoint);
             fqdn = uri.getHost();
+            if(fqdn == null) {
+                return result;
+            }
         } catch (URISyntaxException e) {
             return result;
         }
 
         String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + fqdn;
-        Organization org = new Organization(organization);
+        Organization org = new Organization(tenantDomain);
         String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
         String[] roles = APIUtil.getFilteredUserRoles(adminUser);
         Map<String, Object> properties = APIUtil.getUserProperties(adminUser);
@@ -4765,7 +4768,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
                     offset, limit, userCtx, "createdTime", "desc");
             if (log.isDebugEnabled()) {
-                log.debug("Running Solr query : " + query + " to retrieve :-> " + searchAPIs.toString());
+                log.debug("Running Solr query : " + query);
             }
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();

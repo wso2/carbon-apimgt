@@ -821,12 +821,13 @@ public class APIMappingUtil {
      * Sets pagination urls for a APIMetadataListDTO object given pagination parameters and url parameters.
      *
      * @param apiMetadataListDTO a APIMetadataListDTO object
-     * @param query      search condition
+     * @param alias      alias of the certificate
      * @param limit      max number of objects returned
      * @param offset     starting index
      * @param size       max offset
      */
-    public static void setPaginationParamsForAPIMetadataListDTO(Object apiMetadataListDTO, String alias, int offset, int limit, int size) {
+    public static void setPaginationParamsForAPIMetadataListDTO(
+            Object apiMetadataListDTO, String alias, int offset, int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
@@ -835,13 +836,15 @@ public class APIMappingUtil {
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiCommonUtil
-                    .getCertificateUsagePaginatedURL(alias, paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    .getCertificateUsagePaginatedURL(alias,
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiCommonUtil
-                    .getCertificateUsagePaginatedURL(alias, paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    .getCertificateUsagePaginatedURL(alias,
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }
 
