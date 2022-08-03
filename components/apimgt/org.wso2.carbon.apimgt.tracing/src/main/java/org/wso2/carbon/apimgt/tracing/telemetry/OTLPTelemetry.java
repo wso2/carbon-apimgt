@@ -32,6 +32,7 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hsqldb.lib.StringUtil;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
@@ -60,7 +61,7 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
         String headerValue = configuration.getFirstProperty(headerProperty) != null ?
                 configuration.getFirstProperty(headerProperty) : null;
 
-        if (endPointURL != null && headerValue != null) {
+        if (!StringUtil.isEmpty(endPointURL) && !StringUtil.isEmpty(headerValue)) {
             OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
                     .setEndpoint(endPointURL)
                     .setCompression("gzip")
