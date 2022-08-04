@@ -20,39 +20,11 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
  * AuthenticationResponse object contains the authentication status of the request when it passed
  * through an authenticator.
  */
-public class AuthenticationResponse {
-    private boolean authenticated;
-    private boolean mandatoryAuthentication;
-    private boolean continueToNextAuthenticator;
-    private int errorCode;
-    private String errorMessage;
+public class AuthenticationResponse extends org.wso2.carbon.apimgt.common.gateway.dto.AuthenticationResponse {
 
     public AuthenticationResponse(boolean authenticated, boolean mandatoryAuthentication, boolean continueToNextAuthenticator,
                                   int errorCode, String errorMessage) {
-        this.authenticated = authenticated;
-        this.mandatoryAuthentication = mandatoryAuthentication;
-        this.continueToNextAuthenticator = continueToNextAuthenticator;
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
+        super(authenticated, mandatoryAuthentication, continueToNextAuthenticator, errorCode, errorMessage);
     }
 
-    public boolean isAuthenticated() {
-        return authenticated;
-    }
-
-    public int getErrorCode() {
-        return errorCode;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public boolean isMandatoryAuthentication() {
-        return mandatoryAuthentication;
-    }
-
-    public boolean isContinueToNextAuthenticator() {
-        return continueToNextAuthenticator;
-    }
 }
