@@ -28,6 +28,8 @@ public class APIRequestInfoDTO {
     String consumerKey;
     String apiId;
 
+    String apiType;
+
     public String getApiId() {
 
         return apiId;
@@ -76,6 +78,14 @@ public class APIRequestInfoDTO {
     public void setConsumerKey(String consumerKey) {
 
         this.consumerKey = consumerKey;
+    }
+
+    public void setApiType(String apiType) {
+        this.apiType = apiType;
+    }
+
+    public String getApiType() {
+        return apiType;
     }
 }
 

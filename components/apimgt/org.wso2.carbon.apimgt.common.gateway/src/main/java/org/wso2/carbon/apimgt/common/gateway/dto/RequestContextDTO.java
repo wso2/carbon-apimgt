@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.dto;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ContextHandler;
 
 import java.util.Map;
 
@@ -36,6 +37,38 @@ public class RequestContextDTO {
     javax.security.cert.X509Certificate[] clientCerts;
     // custom property map used to populate customProperty key template value
     Map<String, Object> customProperty;
+
+    String remoteIPAddress;
+
+    String domainAddress;
+
+    ContextHandler contextHandler;
+
+
+    public ContextHandler getContextHandler() {
+        return contextHandler;
+    }
+
+    public void setContextHandler(ContextHandler contextHandler) {
+        this.contextHandler = contextHandler;
+    }
+
+    public String getDomainAddress() {
+        return domainAddress;
+    }
+
+    public void setDomainAddress(String domainAddress) {
+        this.domainAddress = domainAddress;
+    }
+
+    public String getRemoteIPAddress() {
+        return remoteIPAddress;
+    }
+
+    public void setRemoteIPAddress(String remoteIP) {
+        this.remoteIPAddress = remoteIP;
+    }
+
 
     public MsgInfoDTO getMsgInfo() {
 
@@ -77,4 +110,3 @@ public class RequestContextDTO {
         this.customProperty = customProperty;
     }
 }
-
