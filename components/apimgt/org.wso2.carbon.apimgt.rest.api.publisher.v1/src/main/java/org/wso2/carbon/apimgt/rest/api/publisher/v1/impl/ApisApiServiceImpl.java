@@ -3337,22 +3337,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             // Validation failure
             RestApiUtil.handleBadRequest(validationResponse.getError(), log);
         }
-
-        if (fileInputStream != null) {
-            if (fileInputStream.markSupported()) {
-                // For uploading the WSDL below will require re-reading from the input stream hence resetting
-                try {
-                    fileInputStream.reset();
-                } catch (IOException e) {
-                    throw new APIManagementException("Error occurred while trying to reset the content stream of the " +
-                            "WSDL", e);
-                }
-            } else {
-                log.warn("Marking is not supported in 'fileInputStream' InputStream type: "
-                        + fileInputStream.getClass() + ". Skipping validating WSDL to avoid re-reading from the " +
-                        "input stream.");
-            }
-        }
         return validationResponse;
     }
 
