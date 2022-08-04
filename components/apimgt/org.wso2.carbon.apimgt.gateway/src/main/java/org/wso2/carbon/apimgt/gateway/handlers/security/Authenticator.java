@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 
 /**
  * Interface through which API consumers are authenticated. An implementation of this interface
@@ -40,6 +42,7 @@ public interface Authenticator {
      */
     void destroy();
 
+    // This method is deprecated from API Manager 4.2 onwards
     /**
      * Authenticates the given request to see if an API consumer is allowed to access
      * a particular API or not. If the request can be properly authenticated, this method
@@ -53,7 +56,24 @@ public interface Authenticator {
      * @param synCtx The message to be authenticated
      * @return an AuthenticationResponse object which contains the authentication status
      */
-    AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException;
+    @Deprecated AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException;
+
+    /**
+     * Authenticates the given request to see if an API consumer is allowed to access
+     * a particular API or not. If the request can be properly authenticated, this method
+     * should return true authenticationResponse. However implementations of this method must never return
+     * false. For all authentication errors and other unexpected error conditions, this
+     * method must throw an APISecurityException. Implementations of this method should
+     * also try to add some AuthenticationContext information into the successfully
+     * authenticated requests, so that other components processing the same requests
+     * can access user information easily.
+     *
+     * @param requestContext The message to be authenticated
+     * @return an AuthenticationResponse object which contains the authentication status
+     */
+    default AuthenticationResponse authenticate(RequestContextDTO requestContext) throws APIManagementException {
+        return null;
+    }
 
     /**
      * Returns a string representation of the authentication challenge imposed by this
