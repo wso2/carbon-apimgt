@@ -28,28 +28,24 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.Base64;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
-import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An API consumer authenticator which authenticates user requests using
@@ -66,7 +62,7 @@ public class BasicAuthAuthenticator implements Authenticator {
     private BasicAuthCredentialValidator basicAuthCredentialValidator;
     private OpenAPI openAPI = null;
     private String apiLevelPolicy;
-    private boolean isMandatory;
+    private boolean isMandatory = true;
 
     /**
      * Initialize the authenticator with the required parameters.
@@ -107,6 +103,183 @@ public class BasicAuthAuthenticator implements Authenticator {
      * Authenticates the given request to see if an API consumer is allowed to access
      * a particular API or not.
      *
+     * @param requestContext The message to be authenticated
+     * @return an AuthenticationResponse object which contains the authentication status
+     */
+    @Override
+    public AuthenticationResponse authenticate(RequestContextDTO requestContext) {
+        if (log.isDebugEnabled()) {
+            log.info("Basic Authentication initialized");
+        }
+
+        // Extract basic authorization header while removing it from the authorization header
+        String basicAuthHeader = extractBasicAuthHeader(requestContext.getMsgInfo().getHeaders());
+
+        String apiContext = requestContext.getApiRequestInfo().getContext();
+        String apiVersion = requestContext.getApiRequestInfo().getVersion();
+        String httpMethod =  requestContext.getMsgInfo().getHttpMethod();
+        String matchingResource = requestContext.getMsgInfo().getElectedResource();
+
+
+        String tenantDomain = requestContext.getDomainAddress();
+
+        URLMapping apiResource = APISecurityUtils.GetInMemoryAPIResource(requestContext);
+
+        // Check for resource level authentication
+        String authenticationScheme;
+
+        List<VerbInfoDTO> verbInfoList;
+
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        API api = tenantSubscriptionStore.getApiByContextAndVersion(apiContext, apiVersion);
+
+        if (APIConstants.GRAPHQL_API.equals(requestContext.getApiRequestInfo().getApiType())) {
+            String[] operationList = matchingResource.split(",");
+            verbInfoList = new ArrayList<>(1);
+            authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
+
+            for (String operation: operationList) {
+                boolean operationAuthSchemeEnabled = true;
+                VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+                List<URLMapping> resources = api.getResources();
+                URLMapping urlMapping = null;
+
+                for (URLMapping mapping : resources) {
+                    if (Objects.equals(mapping.getHttpMethod(), httpMethod) || "WS".equalsIgnoreCase(api.getApiType())) {
+                        if (isResourcePathMatching(operation, mapping)) {
+                            urlMapping = mapping;
+                            break;
+                        }
+                    }
+                }
+
+                if (urlMapping != null) {
+                    if (urlMapping.getAuthScheme() != null) {
+                        verbInfoDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                        authenticationScheme = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                    } else {
+                        verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
+                    }
+
+                    verbInfoDTO.setThrottling(urlMapping.getThrottlingPolicy());
+                    verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + operation + ":" + httpMethod);
+                    verbInfoList.add(verbInfoDTO);
+                }
+            }
+        }  else {
+            authenticationScheme = apiResource.getAuthScheme();
+            verbInfoList = new ArrayList<>(1);
+            VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+            verbInfoDTO.setAuthType(authenticationScheme);
+            verbInfoDTO.setThrottling(apiResource.getThrottlingPolicy());
+            verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + matchingResource + ":" + httpMethod);
+            verbInfoList.add(verbInfoDTO);
+        }
+
+        String[] credentials;
+        try {
+            credentials = extractBasicAuthCredentials(basicAuthHeader);
+        } catch (APISecurityException ex) {
+            return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+        }
+        String username = getEndUserName(credentials[0]);
+        String password = credentials[1];
+
+        // If end user tenant domain does not match the API publisher's tenant domain, return error
+        if (!MultitenantUtils.getTenantDomain(username).equals(tenantDomain)) {
+            log.error("Basic Authentication failure: tenant domain mismatch for user :" + username);
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        }
+
+        BasicAuthValidationInfoDTO basicAuthValidationInfoObj;
+        try {
+            if (basicAuthCredentialValidator == null) {
+                basicAuthCredentialValidator = new BasicAuthCredentialValidator();
+            }
+            basicAuthValidationInfoObj = basicAuthCredentialValidator.validate(username, password);
+        } catch (APISecurityException ex) {
+            return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+        }
+        if (!basicAuthValidationInfoObj.isAuthenticated()) {
+            log.error("Basic Authentication failure: Username and Password mismatch");
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        } else { // username password matches
+            if (log.isDebugEnabled()) {
+                log.debug("Basic Authentication: Username and Password authenticated");
+            }
+            //scope validation
+            boolean scopesValid = true;
+            try {
+                scopesValid = basicAuthCredentialValidator
+                        .validateScopes(username, requestContext, basicAuthValidationInfoObj);
+            } catch (APISecurityException ex) {
+                return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+            }
+            String domainQualifiedUserName = basicAuthValidationInfoObj.getDomainQualifiedUsername();
+
+            if (scopesValid) {
+
+                if (APISecurityUtils.getAuthenticationContext(requestContext) == null) {
+                        //Create a dummy AuthenticationContext object with hard coded values for
+                        // Tier and KeyType. This is because we cannot determine the Tier nor Key
+                        // Type without subscription information..
+                        AuthenticationContext authContext = new AuthenticationContext();
+                        authContext.setAuthenticated(true);
+                        authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
+                        authContext.setStopOnQuotaReach(
+                                true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
+
+                        requestContext.getContextHandler().setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
+
+                        //In basic authentication scenario, we will use the username for throttling.
+                        authContext.setApiKey(domainQualifiedUserName);
+                        authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                        authContext.setUsername(domainQualifiedUserName);
+                        authContext.setCallerToken(null);
+                        authContext.setApplicationName(APIConstants.BASIC_AUTH_APPLICATION_NAME);
+                        authContext.setApplicationId(domainQualifiedUserName); //Set username as application ID in basic auth scenario
+                        authContext.setApplicationUUID(domainQualifiedUserName); //Set username as application ID in basic auth scenario
+                        authContext.setSubscriber(APIConstants.BASIC_AUTH_APPLICATION_OWNER); //Set application owner in basic auth scenario
+                        authContext.setConsumerKey(null);
+                        authContext.setApiTier(api.getApiTier());
+
+                        APISecurityUtils.setAuthenticationContext(requestContext, authContext, null);
+                    }
+                log.debug("Basic Authentication: Scope validation passed");
+                return new AuthenticationResponse(true, isMandatory, false, 0, null);
+            }
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+        }
+    }
+
+    private boolean isResourcePathMatching(String resourceString, URLMapping urlMapping) {
+
+        String resource = resourceString.trim();
+        String urlPattern = urlMapping.getUrlPattern().trim();
+
+        if (resource.equalsIgnoreCase(urlPattern)) {
+            return true;
+        }
+
+        // If the urlPattern is only one character longer than the resource and the urlPattern ends with a '/'
+        if (resource.length() + 1 == urlPattern.length() && urlPattern.endsWith("/")) {
+            // Check if resource is equal to urlPattern if the trailing '/' of the urlPattern is ignored
+            String urlPatternWithoutSlash = urlPattern.substring(0, urlPattern.length() - 1);
+            return resource.equalsIgnoreCase(urlPatternWithoutSlash);
+        }
+
+        return false;
+    }
+
+    /**
+     * Authenticates the given request to see if an API consumer is allowed to access
+     * a particular API or not.
+     *
      * @param synCtx The message to be authenticated
      * @return an AuthenticationResponse object which contains the authentication status
      */
@@ -124,7 +297,9 @@ public class BasicAuthAuthenticator implements Authenticator {
         }
 
         // Extract basic authorization header while removing it from the authorization header
-        String basicAuthHeader = extractBasicAuthHeader(synCtx);
+        Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String basicAuthHeader = extractBasicAuthHeader(headers);
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
@@ -289,13 +464,11 @@ public class BasicAuthAuthenticator implements Authenticator {
     /**
      * Extract the Basic Auth header segment from the Auth header.
      *
-     * @param synCtx The message to be authenticated
+     * @param headers Transport headers of the request
      * @return the basic auth header segment.
      */
-    private String extractBasicAuthHeader(MessageContext synCtx) {
+    private String extractBasicAuthHeader(Map headers) {
         final String authHeaderSplitter = ",";
-        Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
-                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         boolean removeBasicAuthHeadersFromOutMessage =
                 Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE));

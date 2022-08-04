@@ -27,10 +27,13 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -39,6 +42,9 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
@@ -48,8 +54,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,7 +189,7 @@ public class BasicAuthCredentialValidator {
      * @param username     given username
      * @param openAPI      OpenAPI of the API
      * @param synCtx       The message to be authenticated
-     * @param userRoleList The list of roles of the user
+     * @param basicAuthValidationInfoDTO The list of roles of the user
      * @return true if the validation passed
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
@@ -290,6 +294,81 @@ public class BasicAuthCredentialValidator {
             if (log.isDebugEnabled()) {
                 log.debug("Basic Authentication: No OpenAPI found in the gateway for the API: ".concat(apiContext)
                         .concat(":").concat(apiVersion));
+            }
+            return true;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Basic Authentication: Scope validation failed for the API resource: ".concat(apiElectedResource));
+        }
+        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+    }
+
+    public boolean validateScopes(String username, RequestContextDTO requestContext,
+                                  BasicAuthValidationInfoDTO basicAuthValidationInfoDTO) throws APISecurityException {
+
+        String[] userRoleList = basicAuthValidationInfoDTO.getUserRoleList();
+        String apiContext = requestContext.getApiRequestInfo().getContext();
+        String apiVersion = requestContext.getApiRequestInfo().getVersion();
+        String apiElectedResource = requestContext.getMsgInfo().getElectedResource();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+        String httpMethod = requestContext.getMsgInfo().getHttpMethod();
+        String resourceKey = apiContext + ":" + apiVersion + ":" + apiElectedResource + ":" + httpMethod;
+        Map<String, Scope> scopeMap = apiKeyValidator.retrieveScopes(tenantDomain);
+        String resourceCacheKey = resourceKey + ":" + username;
+
+        if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null &&
+                basicAuthValidationInfoDTO.isCached()) {
+            return true;
+        }
+
+        // retrieve the user roles related to the scope of the API resource
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        API api = tenantSubscriptionStore.getApiByContextAndVersion(apiContext,
+                apiVersion);
+
+        URLMapping apiResource = APISecurityUtils.GetInMemoryAPIResource(requestContext);
+        List<String> resourceScopes = apiResource.getScopes();
+
+        // List<String> resourceScopes = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
+        if (resourceScopes != null && resourceScopes.size() > 0) {
+            for (String resourceScope : resourceScopes) {
+                Scope scope = scopeMap.get(resourceScope);
+                if (scope != null) {
+                    if (scope.getRoles().isEmpty()) {
+                        log.debug("Scope " + resourceScope + " didn't have roles");
+                        if (gatewayKeyCacheEnabled) {
+                            getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                        }
+                        return true;
+                    } else {
+                        //check if the roles related to the API resource contains internal role which matches
+                        // any of the role of the user
+                        //check if the roles related to the API resource contains internal role which matches
+                        // any of the role of the user
+                        if (validateInternalUserRoles(scope.getRoles(), userRoleList)) {
+                            if (gatewayKeyCacheEnabled) {
+                                getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                            }
+                            return true;
+                        }
+                        // check if the roles related to the API resource contains any of the role of the user
+                        for (String role : userRoleList) {
+                            if (scope.getRoles().contains(role)) {
+                                if (gatewayKeyCacheEnabled) {
+                                    getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Basic Authentication: No scopes for the API resource: ".concat(resourceKey));
             }
             return true;
         }
