@@ -163,7 +163,9 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             if (pathItem != null) {
                 List<Operation> operations = pathItem.readOperations();
                 for (Operation operation : operations) {
-                    operation.setParameters(getLowercaseHeaderParameters(operation.getParameters()));
+                    if (operation.getParameters() != null) {
+                        operation.setParameters(getLowercaseHeaderParameters(operation.getParameters()));
+                    }
                 }
             }
         }
