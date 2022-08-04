@@ -869,8 +869,6 @@ public final class APIConstants {
 
     //elements in the configuration file in the advance tenant configuration related to self signup
     public static final String SELF_SIGN_UP_REG_ROLES_ELEM = "SignUpRoles";
-    public static final String SELF_SIGN_UP_DEFAULT_CONFIG_FILE_PATH_OF_THE_CARBON_SUPER_USER = "/signupconfigurations/" +
-            "self-sign-up-config.json";
 
     public static final String ORG_RESOLVER = "OrganizationResolver";
 
