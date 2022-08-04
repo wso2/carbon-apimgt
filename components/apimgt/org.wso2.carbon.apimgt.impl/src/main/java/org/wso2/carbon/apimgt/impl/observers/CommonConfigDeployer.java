@@ -101,13 +101,6 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            //load self signup configurations to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantDomain);
-        } catch (Exception e) {
-            log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry", e);
-        }
-
-        try {
             APIUtil.loadAndSyncTenantConf(tenantDomain);
         } catch (APIManagementException e) {
             log.error("Failed to load " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);

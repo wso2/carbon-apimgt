@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -30,6 +29,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -43,8 +43,6 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -64,11 +62,13 @@ public class APIUtilRolesTest {
             final int tenantId = MultitenantConstants.SUPER_TENANT_ID;
             final String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
-            File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
-                    getResource("tenant-conf.json").getFile());
+            File siteConfFile = new File(
+                    Thread.currentThread().getContextClassLoader().getResource("tenant-conf.json").getFile());
             String tenantConfValue = FileUtils.readFileToString(siteConfFile);
-            InputStream signUpConfStream = new FileInputStream(Thread.currentThread().getContextClassLoader().
-                    getResource("default-sign-up-config.xml").getFile());
+
+            UserRegistrationConfigDTO config = new UserRegistrationConfigDTO();
+            config.getRoles().add("Internal/subscriber");
+
             ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
             RealmService realmService = Mockito.mock(RealmService.class);
             RegistryService registryService = Mockito.mock(RegistryService.class);
@@ -96,7 +96,7 @@ public class APIUtilRolesTest {
             Mockito.when(tenantManager.getDomain(tenantId)).thenReturn(tenantDomain);
             Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
             Mockito.when(apimConfigService.getTenantConfig(tenantDomain)).thenReturn(tenantConfValue);
-            Mockito.when(apimConfigService.getSelfSighupConfig(tenantDomain)).thenReturn(IOUtils.toString(signUpConfStream));
+            Mockito.when(apimConfigService.getSelfSighupConfig(tenantDomain)).thenReturn(config);
             APIUtil.createDefaultRoles(tenantId);
 
             String[] adminName = {"admin"};
