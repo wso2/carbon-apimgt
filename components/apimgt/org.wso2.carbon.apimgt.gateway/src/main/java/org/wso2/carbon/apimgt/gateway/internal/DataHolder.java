@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.GraphQLSchemaDTO;
 
 import java.util.Collections;
 import java.util.HashMap;

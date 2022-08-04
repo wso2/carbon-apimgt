@@ -36,10 +36,10 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
+import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -135,7 +135,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             messageContext.setProperty(HTTP_VERB, httpVerb);
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
                                     operation.getOperation().toString());
-                            String operationList = GraphQLProcessorUtil.getOperationList(operation,
+                            String operationList = GraphQLProcessorUtil.getOperationListAsString(operation,
                                     graphQLSchemaDTO.getTypeDefinitionRegistry());
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
                             if (log.isDebugEnabled()) {

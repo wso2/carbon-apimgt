@@ -29,4 +29,7 @@ public class GraphQLConstants {
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final List<String> QUERY_COMPLEXITY_SLICING_ARGS = Collections.unmodifiableList(
             Arrays.asList("first", "last", "limit"));
+    public static final String GRAPHQL_QUERY = "Query";
+    public static final String GRAPHQL_MUTATION = "Mutation";
+    public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
 }

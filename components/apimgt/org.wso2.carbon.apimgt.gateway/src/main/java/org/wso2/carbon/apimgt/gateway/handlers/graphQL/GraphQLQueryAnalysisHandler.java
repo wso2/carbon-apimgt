@@ -25,8 +25,10 @@ import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.AbstractHandler;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
+import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer.QueryMutationAnalyzer;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -37,7 +39,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 public class GraphQLQueryAnalysisHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(GraphQLQueryAnalysisHandler.class);
-    private QueryMutationAnalyzer queryMutationAnalyzer;
+    private QueryAnalyzer queryAnalyzer;
 
     public boolean handleRequest(MessageContext messageContext) {
         if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
@@ -47,14 +49,12 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             return true;
         }
         GraphQLSchema schema = (GraphQLSchema) messageContext.getProperty(APIConstants.GRAPHQL_SCHEMA);
-        if (queryMutationAnalyzer == null) {
-            queryMutationAnalyzer = new QueryMutationAnalyzer(schema);
+        if (queryAnalyzer == null) {
+            queryAnalyzer = new QueryAnalyzer(schema);
         }
         String payload = messageContext.getProperty(APIConstants.GRAPHQL_PAYLOAD).toString();
-        if (!analyseQuery(messageContext, payload)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Query was blocked by the static query analyser");
-            }
+        if (!isDepthAndComplexityValid(messageContext, payload)) {
+            log.debug("Query was blocked by the static query analyser");
             return false;
         }
         return true;
@@ -67,17 +67,53 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @param payload        payload of the request
      * @return true, if the query is not blocked or false, if the query is blocked
      */
-    private boolean analyseQuery(MessageContext messageContext, String payload) {
-
+    private boolean isDepthAndComplexityValid(MessageContext messageContext, String payload) {
         try {
-            return queryMutationAnalyzer.analyseQueryMutationDepth(messageContext, payload) &&
-                    queryMutationAnalyzer.analyseQueryMutationComplexity(messageContext, payload);
+            return isDepthValid(messageContext, payload) && isComplexityValid(messageContext, payload);
         } catch (Exception e) {
             String errorMessage = "Policy definition parsing failed. ";
             log.error(errorMessage, e);
             handleFailure(messageContext);
             return false;
         }
+    }
+
+    private boolean isDepthValid(MessageContext messageContext, String payload) {
+        int maxQueryDepth = -1;
+        if (messageContext.getPropertyKeySet().contains(APIConstants.MAXIMUM_QUERY_DEPTH)) {
+            maxQueryDepth = (int) messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH);
+        }
+        QueryAnalyzerResponseDTO responseDTO = queryAnalyzer.analyseQueryDepth(maxQueryDepth, payload);
+        if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
+            handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
+                    GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, responseDTO.getErrorList().toString());
+            log.error(responseDTO.getErrorList().toString());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isComplexityValid(MessageContext messageContext, String payload) {
+        int queryComplexity = -1;
+        if (messageContext.getPropertyKeySet().contains(APIConstants.MAXIMUM_QUERY_COMPLEXITY)) {
+            queryComplexity = (int) messageContext.getProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
+        }
+        String complexityInfoJson = (String) messageContext
+                .getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
+        QueryAnalyzerResponseDTO responseDTO = null;
+        try {
+            responseDTO = queryAnalyzer.analyseQueryMutationComplexity(payload, queryComplexity, complexityInfoJson);
+        } catch (ParseException e) {
+            String errorMessage = "Policy definition parsing failed. ";
+            handleFailure(GraphQLConstants.GRAPHQL_INVALID_QUERY, messageContext, errorMessage, errorMessage);
+        }
+        if (responseDTO != null && !responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
+            handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
+                    GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, responseDTO.getErrorList().toString());
+            log.error(responseDTO.getErrorList().toString());
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -95,6 +131,28 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             return;
         }
         Utils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    }
+
+
+    /**
+     * This method handle the query mutation analysis failures.
+     *
+     * @param errorCodeValue   error code of the failure
+     * @param messageContext   message context of the request
+     * @param errorMessage     error message of the failure
+     * @param errorDescription error description of the failure
+     */
+    private void handleFailure(int errorCodeValue, MessageContext messageContext, String errorMessage,
+                               String errorDescription) {
+
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCodeValue);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
+        Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            return;
+        }
+        Utils.sendFault(messageContext, HttpStatus.SC_BAD_REQUEST);
     }
 
     @Override
