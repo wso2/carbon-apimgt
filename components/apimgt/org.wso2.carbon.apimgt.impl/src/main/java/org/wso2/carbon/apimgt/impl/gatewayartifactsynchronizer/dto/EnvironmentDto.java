@@ -23,10 +23,13 @@ import org.apache.commons.lang3.StringUtils;
  * EnvironmentDto represents a gateway environment.
  * name: Name of the environment.
  * vhost: Deployed Vhost.
+ * deployedTimeStamp: API deployed time.
  */
 public class EnvironmentDto {
     private String name;
     private String vhost;
+
+    private String deployedTimeStamp;
 
     public String getName() {
         return name;
@@ -44,6 +47,14 @@ public class EnvironmentDto {
         this.vhost = vhost;
     }
 
+    public String getDeployedTimeStamp() {
+        return deployedTimeStamp;
+    }
+
+    public void setDeployedTimeStamp(String deployedTimeStamp) {
+        this.deployedTimeStamp = deployedTimeStamp;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -55,7 +66,7 @@ public class EnvironmentDto {
         }
 
         EnvironmentDto environmentDto = (EnvironmentDto) obj;
-        // check only name (environment name or label name), no need to consider vhost
+        // check only name (environment name or label name), no need to consider vhost and deployedTimeStamp
         return StringUtils.equals(this.name, environmentDto.name);
     }
 
