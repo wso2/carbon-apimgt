@@ -113,6 +113,7 @@ public class RuntimeArtifactGeneratorUtil {
                         EnvironmentDto environment = new EnvironmentDto();
                         environment.setName(apiRuntimeArtifactDto.getLabel());
                         environment.setVhost(apiRuntimeArtifactDto.getVhost());
+                        environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
                         apiProjectDto.getEnvironments().add(environment);
                     }
                 }
@@ -165,6 +166,7 @@ public class RuntimeArtifactGeneratorUtil {
                         EnvironmentDto environment = new EnvironmentDto();
                         environment.setName(apiRuntimeArtifactDto.getLabel());
                         environment.setVhost(apiRuntimeArtifactDto.getVhost());
+                        environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
                         apiProjectDto.getEnvironments().add(environment);
                     }
                 }
@@ -207,10 +209,7 @@ public class RuntimeArtifactGeneratorUtil {
                 throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
             for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
-                String organizationId = gatewayArtifactsMgtDAO.retrieveOrganization(apiRuntimeArtifactDto.getApiId());
-                if (organizationId != null) {
-                    apiRuntimeArtifactDto.setOrganization(organizationId);
-                }
+                Util.setOrgAndAPIRevisionDeployedTime(apiRuntimeArtifactDto);
             }
         }
         if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
@@ -240,10 +239,7 @@ public class RuntimeArtifactGeneratorUtil {
                 throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
             for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
-                String organizationId = gatewayArtifactsMgtDAO.retrieveOrganization(apiRuntimeArtifactDto.getApiId());
-                if (organizationId != null) {
-                    apiRuntimeArtifactDto.setOrganization(organizationId);
-                }
+                Util.setOrgAndAPIRevisionDeployedTime(apiRuntimeArtifactDto);
             }
         }
         if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
