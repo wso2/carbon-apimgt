@@ -18,10 +18,15 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
-public class OrgAndRevisionDeployedTimeInfoDTO {
+import java.sql.Timestamp;
+
+/**
+ * This class represents the property values of an API Artifact.
+ */
+public class APIArtifactPropertyValues {
 
     private String organization;
-    private String deployedTime;
+    private Timestamp deployedTime;
 
     public String getOrganization() {
         return organization;
@@ -31,11 +36,11 @@ public class OrgAndRevisionDeployedTimeInfoDTO {
         this.organization = organization;
     }
 
-    public String getDeployedTime() {
+    public Timestamp getDeployedTime() {
         return deployedTime;
     }
 
-    public void setDeployedTime(String deployedTime) {
+    public void setDeployedTime(Timestamp deployedTime) {
         this.deployedTime = deployedTime;
     }
 }

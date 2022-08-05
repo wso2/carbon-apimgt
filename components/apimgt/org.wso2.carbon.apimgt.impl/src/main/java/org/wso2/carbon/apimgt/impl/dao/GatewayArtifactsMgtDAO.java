@@ -4,11 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
-import org.wso2.carbon.apimgt.impl.dto.OrgAndRevisionDeployedTimeInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIArtifactPropertyValues;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 public class GatewayArtifactsMgtDAO {
 
@@ -223,13 +221,13 @@ public class GatewayArtifactsMgtDAO {
      * @return Organization and Deployed Time
      * @throws APIManagementException If failed to retrieve organization and deployed time
      */
-    public OrgAndRevisionDeployedTimeInfoDTO retrieveOrgAndAPIRevisionDeployedTime(
+    public APIArtifactPropertyValues retrieveAPIArtifactPropertyValues(
             String apiUUID, String envName, String revisionUUId) throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ORGANIZATION_AND_API_REVISION_DEPLOYED_TIME;
         String organization = null;
-        String deployedTime = null;
-        OrgAndRevisionDeployedTimeInfoDTO infoDTO = new OrgAndRevisionDeployedTimeInfoDTO();
+        Timestamp deployedTime = null;
+        APIArtifactPropertyValues propertyValues = new APIArtifactPropertyValues();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, apiUUID);
@@ -238,16 +236,16 @@ public class GatewayArtifactsMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     organization = resultSet.getString("ORGANIZATION");
-                    deployedTime = resultSet.getString("DEPLOYED_TIME");
+                    deployedTime = resultSet.getTimestamp("DEPLOYED_TIME");
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve organization and API revision deployed time", e);
         }
 
-        infoDTO.setOrganization(organization);
-        infoDTO.setDeployedTime(deployedTime);
-        return infoDTO;
+        propertyValues.setOrganization(organization);
+        propertyValues.setDeployedTime(deployedTime);
+        return propertyValues;
     }
 
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,

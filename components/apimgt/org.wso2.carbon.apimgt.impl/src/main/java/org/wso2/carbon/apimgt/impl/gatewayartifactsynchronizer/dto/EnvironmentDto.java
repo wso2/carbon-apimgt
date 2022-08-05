@@ -29,7 +29,7 @@ public class EnvironmentDto {
     private String name;
     private String vhost;
 
-    private String deployedTimeStamp;
+    private long deployedTimeStamp;
 
     public String getName() {
         return name;
@@ -47,11 +47,11 @@ public class EnvironmentDto {
         this.vhost = vhost;
     }
 
-    public String getDeployedTimeStamp() {
+    public long getDeployedTimeStamp() {
         return deployedTimeStamp;
     }
 
-    public void setDeployedTimeStamp(String deployedTimeStamp) {
+    public void setDeployedTimeStamp(long deployedTimeStamp) {
         this.deployedTimeStamp = deployedTimeStamp;
     }
 
