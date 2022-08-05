@@ -2092,8 +2092,8 @@
         <!-- apache pdfbox version -->
         <pdfbox.version>2.0.25</pdfbox.version>
 
-        <event.processor.stub.version>2.3.1</event.processor.stub.version>
-        <event.processor.core.version>2.3.1</event.processor.core.version>
+        <event.processor.stub.version>2.3.2</event.processor.stub.version>
+        <event.processor.core.version>2.3.2</event.processor.core.version>
 	    <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v2</swagger.inflector.oas3.version>
@@ -2111,8 +2111,8 @@
         <fasterxml.jackson.databind.version>2.13.1</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.13.1</fasterxml.jackson.core.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
-        <carbon.broker.version>3.3.24</carbon.broker.version>
-        <andes.version>3.3.22</andes.version>
+        <carbon.broker.version>3.3.26</carbon.broker.version>
+        <andes.version>3.3.24</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
         <version.snake.yaml>1.28</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
