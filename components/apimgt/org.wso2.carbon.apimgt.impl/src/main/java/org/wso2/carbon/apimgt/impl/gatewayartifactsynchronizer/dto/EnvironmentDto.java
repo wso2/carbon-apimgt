@@ -66,7 +66,7 @@ public class EnvironmentDto {
         }
 
         EnvironmentDto environmentDto = (EnvironmentDto) obj;
-        // check only name (environment name or label name), no need to consider vhost and deployedTimeStamp
+        // check only name (environment name or label name)
         return StringUtils.equals(this.name, environmentDto.name);
     }
 
