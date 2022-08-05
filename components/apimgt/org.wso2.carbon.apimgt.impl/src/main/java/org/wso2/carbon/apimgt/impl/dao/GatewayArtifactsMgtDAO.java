@@ -224,7 +224,7 @@ public class GatewayArtifactsMgtDAO {
     public APIArtifactPropertyValues retrieveAPIArtifactPropertyValues(
             String apiUUID, String envName, String revisionUUId) throws APIManagementException {
 
-        String query = SQLConstants.RETRIEVE_ORGANIZATION_AND_API_REVISION_DEPLOYED_TIME;
+        String query = SQLConstants.RETRIEVE_API_ARTIFACT_PROPERTY_VALUES;
         String organization = null;
         Timestamp deployedTime = null;
         APIArtifactPropertyValues propertyValues = new APIArtifactPropertyValues();

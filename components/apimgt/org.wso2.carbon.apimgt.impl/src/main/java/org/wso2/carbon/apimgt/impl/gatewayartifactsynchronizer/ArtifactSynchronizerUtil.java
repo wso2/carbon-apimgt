@@ -30,13 +30,13 @@ public class ArtifactSynchronizerUtil {
 
     public static void setArtifactProperties(APIRuntimeArtifactDto apiRuntimeArtifactDto)
             throws APIManagementException {
-        APIArtifactPropertyValues orgAndDeployedTime =
+        APIArtifactPropertyValues apiArtifactPropertyValues =
                 gatewayArtifactsMgtDAO.retrieveAPIArtifactPropertyValues(apiRuntimeArtifactDto.getApiId(),
                         apiRuntimeArtifactDto.getLabel(), apiRuntimeArtifactDto.getRevision());
-        String organization = orgAndDeployedTime.getOrganization();
-        Timestamp deployedTime = orgAndDeployedTime.getDeployedTime();
+        String organization = apiArtifactPropertyValues.getOrganization();
+        Timestamp deployedTime = apiArtifactPropertyValues.getDeployedTime();
         if (organization != null) {
-            apiRuntimeArtifactDto.setOrganization(orgAndDeployedTime.getOrganization());
+            apiRuntimeArtifactDto.setOrganization(apiArtifactPropertyValues.getOrganization());
         }
         if (deployedTime != null) {
             apiRuntimeArtifactDto.setDeployedTimeStamp(deployedTime.getTime());
