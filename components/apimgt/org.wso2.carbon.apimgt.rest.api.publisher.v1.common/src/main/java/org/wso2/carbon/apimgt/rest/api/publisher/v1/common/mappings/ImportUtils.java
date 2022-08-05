@@ -72,7 +72,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
-import org.wso2.carbon.apimgt.impl.lifecycle.RegistryLCManager;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManager;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -1902,7 +1902,7 @@ public class ImportUtils {
             return null;
         }
         try {
-            RegistryLCManager lcManager = LCManagerFactory.getInstance().getLCManager();
+            LCManager lcManager = LCManagerFactory.getInstance().getLCManager();
             return lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase());
         } catch (PersistenceException e) {
             throw new APIManagementException("Error while retrieving lifecycle configuration", e);

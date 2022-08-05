@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RegistryLCManager {
+public class LCManager {
 
-    private static Log log = LogFactory.getLog(RegistryLCManager.class);
+    private static Log log = LogFactory.getLog(LCManager.class);
     private static final int ENTITY_EXPANSION_LIMIT = 0;
     private static final String STATE_ID_PROTOTYPED = "Prototyped";
     private static final String STATE_ID_PUBLISHED = "Published";
@@ -42,13 +42,13 @@ public class RegistryLCManager {
     private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
     private static String tenantDomain;
     public static void setTenantDomain(String tenantDomain) {
-        RegistryLCManager.tenantDomain = tenantDomain;
+        LCManager.tenantDomain = tenantDomain;
     }
     public static String getTenantDomain() {
         return tenantDomain;
     }
 
-    public RegistryLCManager(String tenantDomain) throws APIManagementException
+    public LCManager(String tenantDomain) throws APIManagementException
     {
         setTenantDomain(tenantDomain);
     }

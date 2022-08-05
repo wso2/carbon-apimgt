@@ -18,16 +18,16 @@ import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(APIUtil.class)
-public class RegistryLCManagerTestCase extends TestCase {
+public class LCManagerTestCase extends TestCase {
     String LCConfigObj = "{\"States\":[{\"State\":\"Created\",\"CheckItems\":[\"Deprecate old versions after publishing the API\",\"Requires re-subscription when publishing the API\"],\"Transitions\":[{\"Event\":\"Publish\",\"Target\":\"Published\"},{\"Event\":\"Deploy as a Prototype\",\"Target\":\"Prototyped\"}]},{\"State\":\"Prototyped\",\"CheckItems\":[\"Deprecate old versions after publishing the API\",\"Requires re-subscription when publishing the API\"],\"Transitions\":[{\"Event\":\"Publish\",\"Target\":\"Published\"},{\"Event\":\"Demote to Created\",\"Target\":\"Created\"},{\"Event\":\"Deploy as a Prototype\",\"Target\":\"Prototyped\"}]},{\"State\":\"Published\",\"Transitions\":[{\"Event\":\"Block\",\"Target\":\"Blocked\"},{\"Event\":\"Deploy as a Prototype\",\"Target\":\"Prototyped\"},{\"Event\":\"Demote to Created\",\"Target\":\"Created\"},{\"Event\":\"Deprecate\",\"Target\":\"Deprecated\"},{\"Event\":\"Publish\",\"Target\":\"Published\"}]},{\"State\":\"Blocked\",\"Transitions\":[{\"Event\":\"Deprecate\",\"Target\":\"Deprecated\"},{\"Event\":\"Re-Publish\",\"Target\":\"Published\"}]},{\"State\":\"Deprecated\",\"Transitions\":[{\"Event\":\"Retire\",\"Target\":\"Retired\"}]},{\"State\":\"Retired\"}]}";
 
     @Test
     public void testGetDefaultLCConfigJSON() throws  ParseException, APIManagementException {
-        RegistryLCManager registryLCManager = new RegistryLCManager("carbon.super");
+        LCManager LCManager = new LCManager("carbon.super");
         JSONParser jsonParser = new JSONParser();
         String LCConfig = String.valueOf(this.LCConfigObj);
         JSONObject jsonObject = (JSONObject) jsonParser.parse(LCConfig);
-        Assert.assertEquals(jsonObject, registryLCManager.getDefaultLCConfigJSON());
+        Assert.assertEquals(jsonObject, LCManager.getDefaultLCConfigJSON());
     }
 
     public void prepareGetTenantConfig() throws Exception {
@@ -40,7 +40,7 @@ public class RegistryLCManagerTestCase extends TestCase {
     @Test
     public void testGetAllowedActionsForState() throws Exception {
         prepareGetTenantConfig();
-        RegistryLCManager registryLCManager = new RegistryLCManager("carbon.super");
+        LCManager LCManager = new LCManager("carbon.super");
         Map<String, String[]> states = new HashMap<>();
         states.put("Created", new String[]{"Publish", "Deploy as a Prototype"});
         states.put("Prototyped", new String[]{"Publish", "Demote to Created"});
@@ -50,19 +50,19 @@ public class RegistryLCManagerTestCase extends TestCase {
 
         for (String state : states.keySet()) {
             Object[] actions = states.get(state);
-            Object[] expectedActions = registryLCManager.getAllowedActionsForState(state.toUpperCase()).toArray();
+            Object[] expectedActions = LCManager.getAllowedActionsForState(state.toUpperCase()).toArray();
             Assert.assertArrayEquals(expectedActions, actions);
         }
 
         //Check for returning null line
         String state = "notAState";
-        Assert.assertNull(registryLCManager.getAllowedActionsForState(state.toUpperCase()));
+        Assert.assertNull(LCManager.getAllowedActionsForState(state.toUpperCase()));
     }
 
     @Test
     public void testGetTransitionAction() throws Exception {
         prepareGetTenantConfig();
-        RegistryLCManager registryLCManager = new RegistryLCManager("carbon.super");
+        LCManager LCManager = new LCManager("carbon.super");
         Map<String[], String> actionMap = new HashMap<>();
 
         //CreatedState  actions
@@ -89,33 +89,33 @@ public class RegistryLCManagerTestCase extends TestCase {
 
         for (String[] state : actionMap.keySet()){
             String action = actionMap.get(state);
-            String expectedAction = registryLCManager.getTransitionAction(state[0].toUpperCase(),state[1].toUpperCase());
+            String expectedAction = LCManager.getTransitionAction(state[0].toUpperCase(),state[1].toUpperCase());
             Assert.assertArrayEquals(new String[]{expectedAction},new String[]{action});
         }
 
         //Check for returning null line
         String state = "notAState";
-        Assert.assertNull(registryLCManager.getTransitionAction(String.valueOf(new String[]{state,state}),"Block"));
+        Assert.assertNull(LCManager.getTransitionAction(String.valueOf(new String[]{state,state}),"Block"));
 
     }
 
     @Test
     public void testGetCheckListItemsForState() throws Exception {
         prepareGetTenantConfig();
-        RegistryLCManager registryLCManager = new RegistryLCManager("carbon.super");
+        LCManager LCManager = new LCManager("carbon.super");
         Map<String, String[]> checkListItemMap = new HashMap<>();
         checkListItemMap.put("Created", new String[]{"Deprecate old versions after publishing the API","Requires re-subscription when publishing the API"});
         checkListItemMap.put("Prototyped", new String[]{"Deprecate old versions after publishing the API","Requires re-subscription when publishing the API"});
 
         for (String state : checkListItemMap.keySet()){
             Object[] checkLists = checkListItemMap.get(state);
-            Object[] expectedCheckLists = registryLCManager.getCheckListItemsForState(state.toUpperCase()).toArray();
+            Object[] expectedCheckLists = LCManager.getCheckListItemsForState(state.toUpperCase()).toArray();
             Assert.assertArrayEquals(expectedCheckLists,checkLists);
         }
 
         //Check for returning null line
         String state = "notAState";
-        Assert.assertNull(registryLCManager.getCheckListItemsForState(state.toUpperCase()));
+        Assert.assertNull(LCManager.getCheckListItemsForState(state.toUpperCase()));
     }
 
 
