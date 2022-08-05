@@ -13,7 +13,7 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     private String organization;
     private String context;
 
-    private String deployedTimeStamp;
+    private long deployedTimeStamp;
 
     public String getType() {
 
@@ -124,11 +124,11 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
         this.context = context;
     }
 
-    public String getDeployedTimeStamp() {
+    public long getDeployedTimeStamp() {
         return deployedTimeStamp;
     }
 
-    public void setDeployedTimeStamp(String deployedTimeStamp) {
+    public void setDeployedTimeStamp(long deployedTimeStamp) {
         this.deployedTimeStamp = deployedTimeStamp;
     }
 }
