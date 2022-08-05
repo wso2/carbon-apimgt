@@ -20,33 +20,26 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
-import org.wso2.carbon.apimgt.impl.dto.OrgAndRevisionDeployedTimeInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIArtifactPropertyValues;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.Timestamp;
 
-public class Util {
+public class ArtifactSynchronizerUtil {
 
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
-    public static void setOrgAndAPIRevisionDeployedTime(APIRuntimeArtifactDto apiRuntimeArtifactDto)
+    public static void setArtifactProperties(APIRuntimeArtifactDto apiRuntimeArtifactDto)
             throws APIManagementException {
-        OrgAndRevisionDeployedTimeInfoDTO orgAndDeployedTime =
-                gatewayArtifactsMgtDAO.retrieveOrgAndAPIRevisionDeployedTime(apiRuntimeArtifactDto.getApiId(),
+        APIArtifactPropertyValues orgAndDeployedTime =
+                gatewayArtifactsMgtDAO.retrieveAPIArtifactPropertyValues(apiRuntimeArtifactDto.getApiId(),
                         apiRuntimeArtifactDto.getLabel(), apiRuntimeArtifactDto.getRevision());
         String organization = orgAndDeployedTime.getOrganization();
-        String deployedTime = orgAndDeployedTime.getDeployedTime();
+        Timestamp deployedTime = orgAndDeployedTime.getDeployedTime();
         if (organization != null) {
             apiRuntimeArtifactDto.setOrganization(orgAndDeployedTime.getOrganization());
         }
         if (deployedTime != null) {
-            try {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date date = dateFormat.parse(deployedTime);
-                apiRuntimeArtifactDto.setDeployedTimeStamp(String.valueOf(date.getTime()));
-            } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the deployed time:" + deployedTime, e);
-            }
+            apiRuntimeArtifactDto.setDeployedTimeStamp(deployedTime.getTime());
         }
     }
 }
