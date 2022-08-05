@@ -15,26 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.persistence.utils;
+package org.wso2.carbon.apimgt.impl.lifecycle;
 
-import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.xerces.util.SecurityManager;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.xml.sax.SAXException;
 
 public class RegistryLCManager {
 
@@ -47,14 +40,33 @@ public class RegistryLCManager {
     private Map<String, String> stateTransitionMap = new HashMap<String, String>();
     private Map<String, StateInfo> stateInfoMap = new HashMap<String, StateInfo>();
     private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
+    private static String tenantDomain;
+    public static void setTenantDomain(String tenantDomain) {
+        RegistryLCManager.tenantDomain = tenantDomain;
+    }
+    public static String getTenantDomain() {
+        return tenantDomain;
+    }
 
-    public RegistryLCManager(int tenantId)
-            throws RegistryException, XMLStreamException, ParserConfigurationException, SAXException, IOException {
+    public RegistryLCManager(String tenantDomain) throws APIManagementException
+    {
+        setTenantDomain(tenantDomain);
+    }
 
-        UserRegistry registry;
+    public void processLifeCycle() throws APIManagementException {
 
-        JSONObject jsonObject = getDefaultLCConfigJSON();
-        JSONArray states = (JSONArray) jsonObject.get("States");
+        JSONObject tenantConfig = APIUtil.getTenantConfig(getTenantDomain());
+
+        JSONArray states;
+
+        //Checking whether the lifecycle exists in the tenantConfig
+        if(tenantConfig.containsKey("LifeCycle")){
+            JSONObject LCObj = (JSONObject) tenantConfig.get("LifeCycle");
+            states = (JSONArray) LCObj.get("States");
+        }else{
+            JSONObject jsonObject = getDefaultLCConfigJSON();
+            states = (JSONArray) jsonObject.get("States");
+        }
 
         for (Object state : states) {
             JSONObject stateObj = (JSONObject) state;
@@ -103,7 +115,6 @@ public class RegistryLCManager {
             stateInfo.setTransitions(actions);
             stateInfoMap.put(stateId.toUpperCase(), stateInfo);
         }
-
     }
 
     public JSONObject getDefaultLCConfigJSON() {
@@ -197,7 +208,8 @@ public class RegistryLCManager {
         return checkItemsArray;
     }
 
-    public String getTransitionAction(String currentState, String targetState) {
+    public String getTransitionAction(String currentState, String targetState) throws APIManagementException {
+        processLifeCycle();
         if (stateHashMap.containsKey(currentState)) {
             LifeCycleTransition transition = stateHashMap.get(currentState);
             return transition.getAction(targetState);
@@ -205,7 +217,8 @@ public class RegistryLCManager {
         return null;
     }
 
-    public String getStateForTransition(String action) {
+    public String getStateForTransition(String action) throws APIManagementException {
+        processLifeCycle();
         return stateTransitionMap.get(action);
     }
 
@@ -273,14 +286,16 @@ public class RegistryLCManager {
         }
     }
     
-    public List<String> getCheckListItemsForState(String state) {
+    public List<String> getCheckListItemsForState(String state) throws APIManagementException {
+        processLifeCycle();
         if (stateInfoMap.containsKey(state)) {
             return stateInfoMap.get(state).getCheckListItems();
         }
         return null;
     }
 
-    public List<String> getAllowedActionsForState(String state) {
+    public List<String> getAllowedActionsForState(String state) throws APIManagementException {
+        processLifeCycle();
         if (stateInfoMap.containsKey(state)) {
             return stateInfoMap.get(state).getTransitions();
         }

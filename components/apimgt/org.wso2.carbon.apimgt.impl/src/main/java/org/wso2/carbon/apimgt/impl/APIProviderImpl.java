@@ -80,7 +80,7 @@ import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
