@@ -4,10 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.APIArtifactPropertyValues;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -216,29 +216,39 @@ public class GatewayArtifactsMgtDAO {
     }
 
     /**
-     * This method retrieves the Organization given the API UUID
+     * This method retrieves the organization and the deployed time of an API revision.
      *
-     * @param uuid API UUID
-     * @return Organization
-     * @throws APIManagementException If failed to retrieve organization
+     * @param apiUUID API UUID
+     * @param envName Environment name
+     * @param revisionUUId API revision UUID
+     * @return Organization and Deployed Time
+     * @throws APIManagementException If failed to retrieve organization and deployed time
      */
-    public String retrieveOrganization(String uuid) throws APIManagementException {
+    public APIArtifactPropertyValues retrieveAPIArtifactPropertyValues(
+            String apiUUID, String envName, String revisionUUId) throws APIManagementException {
 
-        String query = SQLConstants.RETRIEVE_ORGANIZATION;
+        String query = SQLConstants.RETRIEVE_API_ARTIFACT_PROPERTY_VALUES;
         String organization = null;
+        Timestamp deployedTime = null;
+        APIArtifactPropertyValues propertyValues = new APIArtifactPropertyValues();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, uuid);
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, envName);
+            preparedStatement.setString(3, revisionUUId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     organization = resultSet.getString("ORGANIZATION");
+                    deployedTime = resultSet.getTimestamp("DEPLOYED_TIME");
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve organization", e);
+            handleException("Failed to retrieve organization and API revision deployed time", e);
         }
 
-        return organization;
+        propertyValues.setOrganization(organization);
+        propertyValues.setDeployedTime(deployedTime);
+        return propertyValues;
     }
 
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,
