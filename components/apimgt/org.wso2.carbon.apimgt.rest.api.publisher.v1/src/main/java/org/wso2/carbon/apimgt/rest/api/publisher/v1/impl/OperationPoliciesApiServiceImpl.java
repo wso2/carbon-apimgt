@@ -400,7 +400,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             // if not found, throw not found error
             throw new APIManagementException(
                     "Couldn't retrieve an existing common policy with Name: " + name + " and Version: " + version,
-                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, name, version));
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name, version));
         }
     }
 

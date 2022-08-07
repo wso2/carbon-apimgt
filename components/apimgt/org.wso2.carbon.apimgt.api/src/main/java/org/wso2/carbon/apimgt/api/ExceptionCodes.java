@@ -512,6 +512,12 @@ public enum ExceptionCodes implements ErrorHandler {
     OPERATION_POLICY_WITH_NAME_NOT_FOUND(903002, "Operation Policy Not Found", 404,
             "Requested operation policy with name '%s' and version '%s' not found"),
 
+    THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
+            "Requested throttling policy with name '%s' and type '%s' not found"),
+
+    OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "Operation Policy Not Found", 404,
+            "Requested operation policy with name '%s' and version '%s not found"),
+
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),
     INVALID_KEY_MANAGER_REQUEST(902003, "Invalid Request sent to Key Manager.", 400, "Invalid Request sent to Key Manager.Error from Backend : %s", false),
