@@ -142,7 +142,6 @@ public class APIManagerComponentTest {
 
         Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
         Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true);
-        Mockito.when(configuration.getFirstProperty(Mockito.anyString())).thenThrow(FileNotFoundException.class);
 
         APIManagerComponent apiManagerComponent = new APIManagerComponentWrapper(registry);
         try {
