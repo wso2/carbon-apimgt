@@ -1049,6 +1049,24 @@
     </APIRecommendations>
     {% endif %}
 
+    <OpenTelemetry>
+        <RemoteTracer>
+            <Enabled>{{apim.open_telemetry.remote_tracer.enable}}</Enabled>
+            <Name>{{apim.open_telemetry.remote_tracer.name}}</Name>
+            <Url>{{apim.open_telemetry.remote_tracer.url}}</Url>
+            <HostName>{{apim.open_telemetry.remote_tracer.hostname}}</HostName>
+            <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
+            <Properties>
+                {% for property in apim.open_telemetry.remote_tracer.properties %}
+                <{{property.name}}>{{property.value}}</{{property.name}}>
+                {% endfor %}
+            </Properties>
+        </RemoteTracer>
+        <LogTracer>
+            <Enabled>{{apim.open_telemetry.log_tracer.enable}}</Enabled>
+        </LogTracer>
+    </OpenTelemetry>
+
     <OpenTracer>
         <RemoteTracer>
             <Enabled>{{apim.open_tracer.remote_tracer.enable}}</Enabled>
@@ -1061,7 +1079,6 @@
         <LogTracer>
             <Enabled>{{apim.open_tracer.log_tracer.enable}}</Enabled>
         </LogTracer>
-        <Legacy>{{apim.open_tracer.legacy}}</Legacy>
     </OpenTracer>
 
     {% if security_audit is defined %}

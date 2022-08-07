@@ -137,8 +137,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (StringUtils.isEmpty(tenantDomain)) {
                     tenantDomain = MultitenantUtils.getTenantDomain(user);
                 }
-                RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain,
-                        RestApiCommonUtil.getLoggedInUsername());
                 APIAdmin apiAdmin = new APIAdminImpl();
                 allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(tenantDomain);
             }

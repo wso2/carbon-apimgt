@@ -263,8 +263,7 @@ public final class APIConstants {
     public static final String ASSESSMENT_REPORT = "/assessmentreport?";
 
     //registry resource containing the self signup user config
-    public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
-    public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE = "signup-config";
+    public static final String SELF_SIGN_UP_NAME = "SelfSignUp";
 
     public static final String DOCUMENTATION_SEARCH_PATH_FIELD = "path";
 
@@ -629,6 +628,7 @@ public final class APIConstants {
         public static final String ON_HOLD = "ON_HOLD";
         public static final String TIER_UPDATE_PENDING = "TIER_UPDATE_PENDING";
         public static final String REJECTED = "REJECTED";
+        public static final String DELETE_PENDING = "DELETE_PENDING";
 
         private SubscriptionStatus() {
 
@@ -864,15 +864,8 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";
 
-    //elements in the configuration file in the registry related to self signup
-    public static final String SELF_SIGN_UP_REG_DOMAIN_ELEM = "SignUpDomain";
+    //elements in the configuration file in the advance tenant configuration related to self signup
     public static final String SELF_SIGN_UP_REG_ROLES_ELEM = "SignUpRoles";
-    public static final String SELF_SIGN_UP_REG_ROLE_ELEM = "SignUpRole";
-    public static final String SELF_SIGN_UP_REG_USERNAME = "AdminUserName";
-    public static final String SELF_SIGN_UP_REG_PASSWORD = "AdminPassword";
-    public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
-    public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
-    public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
 
     public static final String ORG_RESOLVER = "OrganizationResolver";
 
@@ -1222,6 +1215,7 @@ public final class APIConstants {
         public static final String APPLICATION_APPROVED = "APPROVED";
         public static final String APPLICATION_REJECTED = "REJECTED";
         public static final String APPLICATION_ONHOLD = "ON_HOLD";
+        public static final String DELETE_PENDING = "DELETE_PENDING";
     }
 
     public static class AppRegistrationStatus {
@@ -1882,7 +1876,8 @@ public final class APIConstants {
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
-            "SSE", "ASYNC"};
+            "SSE", "ASYN" +
+            "C"};
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2353,8 +2348,10 @@ public final class APIConstants {
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
     public static final String AMZN_REGION = "amznRegion";
+    public static final String AMZN_ROLE_ARN = "amznRoleArn";
+    public static final String AMZN_ROLE_SESSION_NAME = "amznRoleSessionName";
+    public static final String AMZN_ROLE_REGION = "amznRoleRegion";
     public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";
-
     public static final String JWT_AUTHENTICATION_CONFIG = "JWTAuthentication";
     public static final String JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION =
             JWT_AUTHENTICATION_CONFIG + ".EnableSubscriptionValidationViaKeyManager";
@@ -2722,6 +2719,7 @@ public final class APIConstants {
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
+        public static final String ORG_ID = "org_id";
         public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
     }
 

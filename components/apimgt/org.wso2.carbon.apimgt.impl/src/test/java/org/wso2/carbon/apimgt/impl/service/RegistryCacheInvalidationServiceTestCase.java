@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -91,7 +91,7 @@ public class RegistryCacheInvalidationServiceTestCase {
 
         RegistryCacheInvalidationService registryCacheInvalidationService = new RegistryCacheInvalidationService();
         registryCacheInvalidationService.invalidateCache(path,tenantDomain);
-        Mockito.verify(cache, Mockito.times(0)).remove(Matchers.any());
+        Mockito.verify(cache, Mockito.times(0)).remove(ArgumentMatchers.any());
     }
 
 
@@ -111,7 +111,7 @@ public class RegistryCacheInvalidationServiceTestCase {
 
         RegistryCacheInvalidationService registryCacheInvalidationService = new RegistryCacheInvalidationService();
         registryCacheInvalidationService.invalidateCache(path,tenantDomain);
-        Mockito.verify(cache, Mockito.times(1)).remove(Matchers.any());
+        Mockito.verify(cache, Mockito.times(1)).remove(ArgumentMatchers.any());
     }
 
     @Test
@@ -140,6 +140,6 @@ public class RegistryCacheInvalidationServiceTestCase {
 
         RegistryCacheInvalidationService registryCacheInvalidationService = new RegistryCacheInvalidationService();
         registryCacheInvalidationService.invalidateCache(path,tenantDomain);
-        Mockito.verify(cache, Mockito.times(1)).remove(Matchers.any());
+        Mockito.verify(cache, Mockito.times(1)).remove(ArgumentMatchers.any());
     }
 }

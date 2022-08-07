@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -156,4 +158,30 @@ public class GatewayUtils {
         return apiId.concat("--").concat(type);
     }
 
+    public static long getTtl() {
+        long ttl;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String gwTokenCacheConfig = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+        boolean isGWTokenCacheEnabled = Boolean.parseBoolean(gwTokenCacheConfig);
+
+        if (isGWTokenCacheEnabled) {
+            String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+
+            if (apimKeyCacheExpiry != null) {
+                ttl = Long.parseLong(apimKeyCacheExpiry);
+            } else {
+                ttl = Long.valueOf(900);
+            }
+        } else {
+            String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
+            if (ttlValue != null) {
+                ttl = Long.parseLong(ttlValue);
+            } else {
+                // 15 * 60 (convert 15 minutes to seconds)
+                ttl = Long.valueOf(900);
+            }
+        }
+        return ttl;
+    }
 }

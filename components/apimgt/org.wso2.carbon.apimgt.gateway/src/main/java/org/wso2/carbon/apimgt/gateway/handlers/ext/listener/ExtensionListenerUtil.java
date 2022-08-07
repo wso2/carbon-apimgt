@@ -292,7 +292,7 @@ public class ExtensionListenerUtil {
             try {
                 String payload = IOUtils.toString(extensionResponseDTO.getPayload());
                 // based on Content-Type header reset the payload
-                if (StringUtils.equals(contentType, APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
+                if (StringUtils.startsWith(contentType, APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
                     JsonUtil.removeJsonPayload(axis2MC);
                     JsonUtil.getNewJsonPayload(axis2MC, payload, true, true);
                     axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);

@@ -92,7 +92,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -245,8 +244,6 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.xml.sax.SAXException;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -316,9 +313,7 @@ import javax.cache.Caching;
 import javax.net.ssl.SSLContext;
 import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
@@ -2790,52 +2785,26 @@ public final class APIUtil {
     }
 
     /**
-     * @param organization
-     * @throws APIManagementException
-     */
-    public static void loadTenantSelfSignUpConfigurations(String organization)
-            throws APIManagementException {
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Adding Self signup configuration to the tenant's registry");
-            }
-            InputStream inputStream;
-            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                inputStream =
-                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/default-sign-up-config" +
-                                ".xml");
-            } else {
-                inputStream =
-                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/tenant-sign-up-config" +
-                                ".xml");
-            }
-
-            ServiceReferenceHolder.getInstance().getApimConfigService().addSelfSighupConfig(organization, IOUtils.toString(inputStream));
-        } catch (IOException  e) {
-            throw new APIManagementException("Error while reading Self signup configuration file content", e);
-        }
-    }
-
-    /**
-     * Loads tenant-conf.json (tenant config) to registry from the tenant-conf.json available in the file system.
-     * If any REST API scopes are added to the local tenant-conf.json, they will be updated in the registry.
+     * Loads tenant-conf.json (tenant config) from the tenant-conf.json available in the file system.
+     * If any REST API scopes are added to the local tenant-conf.json, they will be updated.
      *
      * @param organization organization.
-     * @throws APIManagementException when error occurred while loading the tenant-conf to registry
+     * @throws APIManagementException when error occurred while loading the tenant-conf
      */
     public static void loadAndSyncTenantConf(String organization) throws APIManagementException {
 
         try {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonElement jsonElement = getFileBaseTenantConfig();
-            String currentConfig = ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+            String currentConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
+                    .getTenantConfig(organization);
             if (currentConfig == null) {
-                ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
-                        gson.toJson(jsonElement));
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
+                ServiceReferenceHolder.getInstance().getApimConfigService()
+                        .addTenantConfig(organization, gson.toJson(fileBaseTenantConfig));
             }
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
+            throw new APIManagementException(
+                    "Error while saving tenant conf to the Advanced configuration of the " + "tenant " + organization, e);
         }
     }
 
@@ -2872,58 +2841,6 @@ public final class APIUtil {
             data = IOUtils.toByteArray(inputStream);
         }
         return data;
-    }
-
-
-
-    /**
-     * @param tenantId
-     * @throws APIManagementException
-     */
-    public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
-
-        try {
-            String selfSighupConfig =
-                    ServiceReferenceHolder.getInstance().getApimConfigService()
-                            .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
-            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-                factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                DocumentBuilder parser = factory.newDocumentBuilder();
-                InputStream inputStream = new ByteArrayInputStream(selfSighupConfig.getBytes());
-                Document dc = parser.parse(inputStream);
-                boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
-                String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0)
-                        .getFirstChild().getNodeValue();
-
-                if (enableSubscriberRoleCreation) {
-                    int roleLength = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
-                            .getLength();
-
-                    for (int i = 0; i < roleLength; i++) {
-                        String roleName = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
-                                .item(i).getFirstChild().getNodeValue();
-                        boolean isExternalRole = Boolean.parseBoolean(dc
-                                .getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL).item(i)
-                                .getFirstChild().getNodeValue());
-                        if (roleName != null) {
-                            // If isExternalRole==false ;create the subscriber role as an internal role
-                            if (isExternalRole && signUpDomain != null) {
-                                roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
-                            } else {
-                                roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR
-                                        + roleName;
-                            }
-                            createSubscriberRole(roleName, tenantId);
-                        }
-                    }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Adding Self signup configuration to the tenant's registry");
-            }
-
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new APIManagementException("Error while getting Self signup role information from the registry", e);
-        }
     }
 
     /**
@@ -2969,14 +2886,28 @@ public final class APIUtil {
             }
 
             // create creator role if it's creation is enabled in tenant-conf.json
-            JSONObject creatorRoleConfig = (JSONObject) defaultRoles
-                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE);
+            JSONObject creatorRoleConfig = (JSONObject) defaultRoles.get(
+                    APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE);
             if (isRoleCreationEnabled(creatorRoleConfig)) {
-                String creatorRoleName = String.valueOf(creatorRoleConfig
-                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                String creatorRoleName = String.valueOf(
+                        creatorRoleConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
                 if (!StringUtils.isBlank(creatorRoleName)) {
                     createCreatorRole(creatorRoleName, tenantId);
                 }
+            }
+
+            // create subscriber role if it's creation is enabled in tenant-conf.json
+            JSONObject subscriberRoleConfig = (JSONObject) defaultRoles.get(
+                    APIConstants.API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE);
+            if (isRoleCreationEnabled(subscriberRoleConfig)) {
+                String subscriberRoleName;
+                if (subscriberRoleConfig.containsKey(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME)) {
+                    subscriberRoleName = String.valueOf(
+                            subscriberRoleConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                } else {
+                    subscriberRoleName = APIConstants.SUBSCRIBER_ROLE;
+                }
+                createSubscriberRole(subscriberRoleName, tenantId);
             }
 
             // create devOps role if it's creation is enabled in tenant-conf.json
@@ -3013,7 +2944,6 @@ public final class APIUtil {
             }
 
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
-            createSelfSignUpRoles(tenantId);
         }
     }
 
@@ -3573,27 +3503,6 @@ public final class APIUtil {
 
     public static boolean isInternalOrganization(String organization) throws UserStoreException {
         return isTenantAvailable(organization);
-    }
-
-    /**
-     * Check whether the user has the given role
-     *
-     * @throws UserStoreException
-     * @throws APIManagementException
-     */
-    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
-        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
-        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
-        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
-        return abstractManager.isUserInRole(tenantAwareUserName, role);
     }
 
     /**
@@ -7201,56 +7110,6 @@ public final class APIUtil {
         }
 
         return apiSwagger;
-    }
-
-    /**
-     * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
-     * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
-     * started with the system property 'migrationMode=true' if a migration related exports are to be done.
-     *
-     * @param targetTenantDomain Tenant domain of which resources are requested
-     * @param username           Logged in user name
-     * @throws APIMgtInternalException When internal error occurred
-     */
-    public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
-            throws APIMgtInternalException {
-
-        String superAdminRole = null;
-
-        //Accessing the same tenant as the user's tenant
-        if (targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username))) {
-            return true;
-        }
-
-        try {
-            superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
-        } catch (UserStoreException e) {
-            handleInternalException("Error in getting super admin role name", e);
-        }
-
-        //check whether logged in user is a super tenant user
-        String superTenantDomain = null;
-        try {
-            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getSuperTenantDomain();
-        } catch (UserStoreException e) {
-            handleInternalException("Error in getting the super tenant domain", e);
-        }
-        boolean isSuperTenantUser = MultitenantUtils.getTenantDomain(username).equals(superTenantDomain);
-        if (!isSuperTenantUser) {
-            return false;
-        }
-
-        //check whether the user has super tenant admin role
-        boolean isSuperAdminRoleNameExistInUser = false;
-        try {
-            isSuperAdminRoleNameExistInUser = isUserInRole(username, superAdminRole);
-        } catch (UserStoreException | APIManagementException e) {
-            handleInternalException("Error in checking whether the user has admin role", e);
-        }
-
-        return isSuperAdminRoleNameExistInUser;
     }
 
     /**

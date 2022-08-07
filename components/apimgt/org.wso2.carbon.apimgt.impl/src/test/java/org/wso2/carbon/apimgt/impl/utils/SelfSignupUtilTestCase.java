@@ -15,167 +15,45 @@
 */
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.PasswordResolver;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.tenant.TenantManager;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import javax.xml.namespace.QName;
-
-import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIUtil.class, ServiceReferenceHolder.class, PrivilegedCarbonContext.class, AXIOMUtil.class,
-                    PasswordResolverFactory.class})
+@PrepareForTest({ServiceReferenceHolder.class})
 public class SelfSignupUtilTestCase {
 
-    private  Registry registry = Mockito.mock(Registry.class);
-
-
-
     @Test
-    public void testGetRoleNames() {
-        UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        Map<String, Boolean> roles = new HashMap();
-        roles.put("subscriber", true);
-        roles.put("creator", false);
-        userRegistrationConfigDTO.setRoles(roles);
-        userRegistrationConfigDTO.setSignUpDomain("foo.com");
-        List<String> roleList = SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO);
-        Assert.assertEquals(2, roleList.size());
-    }
-
-    @Test
-    public void testGetDomainSpecificRoleName() {
-        UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        userRegistrationConfigDTO.setSignUpDomain("foo.com");
-        String domainSpecificRoleName = SelfSignUpUtil.getDomainSpecificUserName("john", userRegistrationConfigDTO);
-        Assert.assertEquals("FOO.COM/john", domainSpecificRoleName);
-    }
-
-    @Test
-    public void testGetDomainSpecificRoleNameWithWrongDomain() {
-        UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        userRegistrationConfigDTO.setSignUpDomain("foo.com");
-        String domainSpecificRoleName = SelfSignUpUtil.getDomainSpecificUserName("bar.com/john", userRegistrationConfigDTO);
-        Assert.assertEquals("FOO.COM/john", domainSpecificRoleName);
-    }
-
-    @Test
-    public void testIsUserNameWithAllowedDomainNameFalse() throws Exception {
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        RealmConfiguration realmConfiguration = new RealmConfiguration();
-        realmConfiguration.addRestrictedDomainForSelfSignUp("bar.com");
-        Mockito.when(userRealm.getRealmConfiguration()).thenReturn(realmConfiguration);
-        boolean result = SelfSignUpUtil.isUserNameWithAllowedDomainName("bar.com/john", userRealm);
-        Assert.assertFalse(result);
-    }
-
-    @Test
-    public void testIsUserNameWithAllowedDomainNameTrue() throws Exception {
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        RealmConfiguration realmConfiguration = new RealmConfiguration();
-        realmConfiguration.addRestrictedDomainForSelfSignUp("foo.com");
-        Mockito.when(userRealm.getRealmConfiguration()).thenReturn(realmConfiguration);
-        boolean result = SelfSignUpUtil.isUserNameWithAllowedDomainName("bar.com/john", userRealm);
-        Assert.assertTrue(result);
-    }
-
-    @Test
-    public void testIsUserNameWithAllowedDomainNameWhenDomainNotGiven() throws Exception {
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        RealmConfiguration realmConfiguration = new RealmConfiguration();
-        realmConfiguration.addRestrictedDomainForSelfSignUp("foo.com");
-        Mockito.when(userRealm.getRealmConfiguration()).thenReturn(realmConfiguration);
-        boolean result = SelfSignUpUtil.isUserNameWithAllowedDomainName("john", userRealm);
-        Assert.assertTrue(result);
-    }
-
-    @Test(expected = APIManagementException.class)
-    public void testIsUserNameWithAllowedDomainNameException() throws Exception {
-        UserRealm userRealm = Mockito.mock(UserRealm.class);
-        RealmConfiguration realmConfiguration = new RealmConfiguration();
-        realmConfiguration.addRestrictedDomainForSelfSignUp("bar.com");
-        Mockito.when(userRealm.getRealmConfiguration()).thenThrow(new UserStoreException());
-        SelfSignUpUtil.isUserNameWithAllowedDomainName("bar.com/john", userRealm);
-    }
-
-    @Test
-    public void testGetSelfSignupConfigFromRegistry() throws Exception {
-
-        System.setProperty(CARBON_HOME, "");
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
-        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("foo.com");
-        Mockito.when(privilegedCarbonContext.getRegistry(RegistryType.SYSTEM_GOVERNANCE)).thenReturn(registry);
-
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        APIMConfigService apimConfigService  = Mockito.mock(APIMConfigService.class);
-        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(apimConfigService.getSelfSighupConfig("foo.com")).thenReturn("wsdl");
-        OMElement omElement = Mockito.mock(OMElement.class);
-        Mockito.when(omElement.getFirstChildWithName(Matchers.any(QName.class))).thenReturn(omElement);
-        PowerMockito.mockStatic(AXIOMUtil.class);
-        Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM)).thenReturn(Mockito.mock(Iterator.class));
-        PowerMockito.when(AXIOMUtil.stringToOM("wsdl")).thenReturn(omElement);
-        PowerMockito.mockStatic(PasswordResolverFactory.class);
-        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
-        PowerMockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
-        UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("foo.com");
-
-        Assert.assertNotNull(userRegistrationConfigDTO);
-    }
-
-
-
-    @Test
-    public void testGetSelfSignupConfigFromRegistryTenant() throws Exception {
+    public void testGetSignupConfiguration() throws Exception {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn("wsdl");
-        OMElement omElement = Mockito.mock(OMElement.class);
-        Mockito.when(omElement.getFirstChildWithName(Matchers.any(QName.class))).thenReturn(omElement);
-        PowerMockito.mockStatic(AXIOMUtil.class);
-        Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM)).thenReturn(Mockito.mock(Iterator.class));
-        PowerMockito.when(AXIOMUtil.stringToOM("wsdl")).thenReturn(omElement);
-        PowerMockito.mockStatic(PasswordResolverFactory.class);
-        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
-        PowerMockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
+        UserRegistrationConfigDTO config = new UserRegistrationConfigDTO();
+        config.getRoles().add("Internal/subscriber");
+        Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn(config);
         UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
-        Assert.assertNotNull(userRegistrationConfigDTO);
+        Assert.assertEquals(userRegistrationConfigDTO, config);
+    }
+
+    @Test
+    public void testGetSignupConfigurationDifferentObjectType() throws Exception {
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        Mockito.when(apimConfigService.getSelfSighupConfig("bar.com")).thenReturn("Test String");
+        UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
+        Assert.assertTrue(userRegistrationConfigDTO instanceof UserRegistrationConfigDTO);
+        Assert.assertEquals(userRegistrationConfigDTO.getRoles().size(), 0);
     }
 }

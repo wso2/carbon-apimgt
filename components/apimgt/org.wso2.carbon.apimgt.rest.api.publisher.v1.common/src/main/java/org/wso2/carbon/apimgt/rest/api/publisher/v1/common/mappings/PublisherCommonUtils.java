@@ -1839,7 +1839,7 @@ public class PublisherCommonUtils {
         API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto, apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         if (isServiceAPI) {
-            apiToAdd.setServiceInfo("key", service.getKey());
+            apiToAdd.setServiceInfo("key", service.getServiceKey());
             apiToAdd.setServiceInfo("md5", service.getMd5());
             if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
                 apiToAdd.setEndpointConfig(
