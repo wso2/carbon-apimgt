@@ -97,7 +97,6 @@ public class APIManagerComponentTest {
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authManager);
         Mockito.when(configuration.getThrottleProperties()).thenReturn(throttleProperties);
         PowerMockito.doNothing().when(APIMgtDBUtil.class, "initialize");
-        PowerMockito.doNothing().when(APIUtil.class, "loadTenantExternalStoreConfig", Mockito.anyString());
         PowerMockito.doNothing().when(AuthorizationUtils.class ,"addAuthorizeRoleListener",
                 Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
         PowerMockito.doNothing().when(SQLConstantManagerFactory.class, "initializeSQLConstantManager");
@@ -143,7 +142,7 @@ public class APIManagerComponentTest {
 
         Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
         Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true);
-        PowerMockito.doNothing().when(APIUtil.class, "loadTenantExternalStoreConfig", Mockito.anyString());
+        Mockito.when(configuration.getFirstProperty(Mockito.anyString())).thenThrow(FileNotFoundException.class);
 
         APIManagerComponent apiManagerComponent = new APIManagerComponentWrapper(registry);
         try {
