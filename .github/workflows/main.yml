@@ -5,6 +5,7 @@ on:
     branches:
       - master
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - master
   workflow_dispatch:
@@ -37,8 +38,19 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2
           restore-keys: ${{ runner.os }}-m2
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
       - name: Build carbon-apimgt with Tests, skipping AspectJ
-        run: mvn clean install --file pom.xml -Dskip.aspectj=true
+        run: mvn clean install sonar:sonar --file pom.xml -Dskip.aspectj=true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
       - name: Upload unit test coverage to Codecov
         uses: codecov/codecov-action@v1.2.1
         with:

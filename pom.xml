@@ -276,7 +276,8 @@
                             <phase>compile</phase>
                             <configuration>
                                 <configLocation>${project.parent.parent.basedir}/checkstyle.xml</configLocation>
-                                <suppressionsLocation>${project.parent.parent.basedir}/suppressions.xml</suppressionsLocation>
+                                <suppressionsLocation>${project.parent.parent.basedir}/suppressions.xml
+                                </suppressionsLocation>
                                 <encoding>UTF-8</encoding>
                                 <consoleOutput>true</consoleOutput>
                                 <failsOnError>true</failsOnError>
@@ -311,7 +312,20 @@
                         </execution>
                     </executions>
                 </plugin>
-
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.7.0.1746</version>
+                    <executions>
+                        <execution>
+                            <id>analyze-compile</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>sonar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <extensions>
@@ -1920,7 +1934,12 @@
 
     <properties>
         <project.scm.id>scm-server</project.scm.id>
-
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.organization>wso2</sonar.organization>
+        <sonar.projectKey>wso2_carbon-apimgt</sonar.projectKey>
+        <sonar.moduleKey>
+            ${project.groupId}:${project.artifactId}
+        </sonar.moduleKey>
         <!-- File encoding of build -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
