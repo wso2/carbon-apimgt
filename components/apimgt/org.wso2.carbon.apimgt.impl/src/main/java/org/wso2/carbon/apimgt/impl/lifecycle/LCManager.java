@@ -99,7 +99,7 @@ public class LCManager {
             throw new APIManagementException(e);
         }
     }
-
+    
     /**
      * Process the lifecycle object into the states
      *
