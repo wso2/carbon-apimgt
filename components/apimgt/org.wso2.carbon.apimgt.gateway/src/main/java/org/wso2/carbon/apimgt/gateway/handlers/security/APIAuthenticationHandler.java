@@ -29,6 +29,7 @@ import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
@@ -36,12 +37,13 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.*;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.contexthandler.SynapseContextHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler.SynapsePayloadHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.InternalAPIKeyAuthenticator;
@@ -92,6 +94,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     protected ArrayList<Authenticator> authenticators = new ArrayList<>();
     protected boolean isAuthenticatorsInitialized = false;
     private SynapseEnvironment synapseEnvironment;
+
+    static final String PUBLISHER_TENANT_DOMAIN = "tenant.info.domain";
 
     private String authorizationHeader;
     private String apiSecurity;
@@ -414,7 +418,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     return ExtensionListenerUtil.postProcessRequest(messageContext, type);
                 }
                 try {
-                    if (isAuthenticate(messageContext)) {
+                    // Generate the new contest from message for the authentication
+                    RequestContextDTO requestContext = generateRequestContext(messageContext);
+
+                    if (isAuthenticate(requestContext)) {
                         setAPIParametersToMessageContext(messageContext);
                         return ExtensionListenerUtil.postProcessRequest(messageContext, type);
                     }
@@ -543,6 +550,38 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         for (Authenticator authenticator : authenticators) {
             authenticationResponse = authenticator.authenticate(messageContext);
+            if (authenticationResponse.isMandatoryAuthentication()) {
+                // Update authentication status only if the authentication is a mandatory one
+                authenticated = authenticationResponse.isAuthenticated();
+            }
+            if (!authenticationResponse.isAuthenticated()) {
+                authResponses.add(authenticationResponse);
+            }
+            if (!authenticationResponse.isContinueToNextAuthenticator()) {
+                break;
+            }
+        }
+        if (!authenticated) {
+            Pair<Integer, String> error = getError(authResponses);
+            throw new APISecurityException(error.getKey(), error.getValue());
+        }
+        return true;
+    }
+
+    /**
+     * Authenticates the given request using the authenticators which have been initialized.
+     *
+     * @param  requestContext The message to be authenticated
+     * @return true if the authentication is successful (never returns false)
+     * @throws APISecurityException If an authentication failure or some other error occurs
+     */
+    protected boolean isAuthenticate(RequestContextDTO requestContext) throws APISecurityException, APIManagementException {
+        boolean authenticated = false;
+        AuthenticationResponse authenticationResponse;
+        List<AuthenticationResponse> authResponses = new ArrayList<>();
+
+        for (Authenticator authenticator : authenticators) {
+            authenticationResponse = authenticator.authenticate(requestContext);
             if (authenticationResponse.isMandatoryAuthentication()) {
                 // Update authentication status only if the authentication is a mandatory one
                 authenticated = authenticationResponse.isAuthenticated();
@@ -796,5 +835,71 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public void setKeyManagers(String keyManagers) {
         this.keyManagers = keyManagers;
+    }
+
+    /**
+     * Generates RequestContextDTO object using InboundMessageContext.
+     *
+     * @param messageContext message context
+     * @return RequestContextDTO
+     */
+    private RequestContextDTO generateRequestContext (MessageContext  messageContext) {
+        RequestContextDTO requestContextDTO = new RequestContextDTO();
+        MsgInfoDTO msgInfoDTO = generateMessageInfo(messageContext);
+        APIRequestInfoDTO apiRequestInfoDTO = generateAPIInfoDTO(messageContext);
+        requestContextDTO.setApiRequestInfo(apiRequestInfoDTO);
+        requestContextDTO.setMsgInfo(msgInfoDTO);
+        requestContextDTO.setDomainAddress((String) messageContext.getProperty(PUBLISHER_TENANT_DOMAIN));
+
+        SynapseContextHandler synapseContextHandler = new SynapseContextHandler(messageContext);
+        requestContextDTO.setContextHandler(synapseContextHandler);
+        return requestContextDTO;
+    }
+
+
+    /**
+     * Populate common MsgInfoDTO properties for both Request and Response from MessageContext.
+     *
+     * @param messageContext message context
+     */
+    private static MsgInfoDTO generateMessageInfo(MessageContext messageContext) {
+
+        MsgInfoDTO msgInfoDTO = new MsgInfoDTO();
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+        msgInfoDTO.setHeaders(headers);
+        msgInfoDTO.setResource(GatewayUtils.extractResource(messageContext));
+        msgInfoDTO.setElectedResource((String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE));
+        //Add a payload handler instance for the current message context to consume the payload later
+        msgInfoDTO.setPayloadHandler(new SynapsePayloadHandler(messageContext));
+        Object correlationId = axis2MC.getProperty(CorrelationConstants.CORRELATION_ID);
+        if (correlationId instanceof String){
+            msgInfoDTO.setMessageId((String) correlationId);
+        }
+        msgInfoDTO.setHttpMethod((String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
+        return msgInfoDTO;
+    }
+
+    /**
+     * Generates APIRequestInfoDTO object using MessageContext.
+     *
+     * @param messageContext message Context
+     * @return APIRequestInfoDTO
+     */
+    private static APIRequestInfoDTO generateAPIInfoDTO(MessageContext messageContext) {
+
+        APIRequestInfoDTO apiRequestInfoDTO = new APIRequestInfoDTO();
+        apiRequestInfoDTO.setContext((String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT));
+        apiRequestInfoDTO.setVersion((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION));
+        apiRequestInfoDTO.setApiId((String) messageContext.getProperty(APIMgtGatewayConstants.API_UUID_PROPERTY));
+        AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
+        if (authenticationContext != null) {
+            apiRequestInfoDTO.setUsername(authenticationContext.getUsername());
+            apiRequestInfoDTO.setConsumerKey(authenticationContext.getConsumerKey());
+        }
+        return apiRequestInfoDTO;
     }
 }
