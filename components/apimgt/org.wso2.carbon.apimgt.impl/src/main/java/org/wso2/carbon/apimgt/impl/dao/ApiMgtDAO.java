@@ -8306,8 +8306,6 @@ public class ApiMgtDAO {
             handleException("Error occurred while retrieving an " +
                     "Application Registration Entry for Workflow : " + workflowDTO
                     .getExternalWorkflowReference(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
     }
 
