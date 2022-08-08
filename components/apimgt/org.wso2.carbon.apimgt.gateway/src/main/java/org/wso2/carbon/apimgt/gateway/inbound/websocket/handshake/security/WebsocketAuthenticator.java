@@ -225,7 +225,7 @@ public class WebsocketAuthenticator {
         MsgInfoDTO msgInfoDTO = new MsgInfoDTO();
         msgInfoDTO.setHeaders(inboundMessageContext.getRequestHeaders());
         msgInfoDTO.setResource(inboundMessageContext.getMatchingResource());
-        msgInfoDTO.setElectedResource(inboundMessageContext.getElectedRoute());
+        msgInfoDTO.setElectedResource(inboundMessageContext.getMatchingResource());
         msgInfoDTO.setHttpMethod(WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME);
         msgInfoDTO.setHttpMethod((String)(inboundMessageContext.getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD)));
@@ -233,7 +233,7 @@ public class WebsocketAuthenticator {
     }
 
     /**
-     * Generates APIRequestInfoDTO object using InboundMessageContext).
+     * Generates APIRequestInfoDTO object using InboundMessageContext.
      *
      * @param inboundMessageContext) InboundMessageContext)
      * @return APIRequestInfoDTO
