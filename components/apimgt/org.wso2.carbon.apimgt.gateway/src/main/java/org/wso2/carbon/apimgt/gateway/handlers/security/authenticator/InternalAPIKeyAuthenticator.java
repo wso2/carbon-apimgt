@@ -31,6 +31,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -45,6 +47,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -79,7 +83,198 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     }
 
     @Override
-    public AuthenticationResponse authenticate(MessageContext synCtx) {
+    public AuthenticationResponse authenticate(RequestContextDTO requestContext) {
+        if (log.isDebugEnabled()) {
+            log.info("Internal Key Authentication initialized");
+        }
+
+        try {
+            //check headers to get InternalKey
+            Map headers = requestContext.getMsgInfo().getHeaders();
+
+            // Extract internal from the request while removing it from the msg context.
+            String internalKey = extractInternalKey(headers);
+            if (StringUtils.isEmpty(internalKey)) {
+                return new AuthenticationResponse(false, false,
+                        true, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            }
+
+            JWTTokenPayloadInfo payloadInfo = null;
+
+            String[] splitToken = internalKey.split("\\.");
+            JWTClaimsSet payload;
+            SignedJWT signedJWT;
+            String tokenIdentifier;
+            JWSHeader jwsHeader;
+            String alias;
+            if (splitToken.length != 3) {
+                log.error("Internal Key does not have the format {header}.{payload}.{signature} ");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            }
+            signedJWT = SignedJWT.parse(internalKey);
+            payload = signedJWT.getJWTClaimsSet();
+            tokenIdentifier = payload.getJWTID();
+            jwsHeader = signedJWT.getHeader();
+            if (jwsHeader != null && StringUtils.isNotEmpty(jwsHeader.getKeyID())) {
+                alias = jwsHeader.getKeyID();
+            } else {
+                alias = APIUtil.getInternalApiKeyAlias();
+            }
+            // Check if the decoded header contains type as 'InternalKey'.
+            if (!GatewayUtils.isInternalKey(payload)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Invalid Internal Key token type. Internal Key: " + GatewayUtils.getMaskedToken(splitToken[0]));
+                }
+                log.error("Invalid Internal Key token type.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            }
+
+            String apiContext = requestContext.getApiRequestInfo().getContext();
+            String apiVersion = requestContext.getApiRequestInfo().getVersion();
+            String httpMethod = requestContext.getMsgInfo().getHttpMethod();
+            String matchingResource = requestContext.getMsgInfo().getElectedResource();
+
+            String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                    matchingResource, httpMethod);
+            VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+            verbInfoDTO.setHttpVerb(httpMethod);
+            //Not doing resource level authentication
+            verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
+            verbInfoDTO.setRequestKey(resourceCacheKey);
+
+            URLMapping apiResource = APISecurityUtils.GetInMemoryAPIResource(requestContext);
+            verbInfoDTO.setThrottling(apiResource.getThrottlingPolicy());
+
+            List<VerbInfoDTO> verbInfoList = new ArrayList<>();
+            verbInfoList.add(verbInfoDTO);
+
+            requestContext.getContextHandler().setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
+
+            String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
+                    matchingResource, httpMethod);
+            String tenantDomain = GatewayUtils.getTenantDomain();
+            boolean isVerified = false;
+
+            String cacheToken = (String) getGatewayInternalKeyCache().get(tokenIdentifier);
+            if (cacheToken != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Internal Key retrieved from the Internal Key cache.");
+                }
+                if (getGatewayInternalKeyDataCache().get(cacheKey) != null) {
+                    // Token is found in the key cache
+                    payloadInfo = (JWTTokenPayloadInfo) getGatewayInternalKeyDataCache().get(cacheKey);
+                    String accessToken = payloadInfo.getAccessToken();
+                    isVerified = accessToken.equals(internalKey);
+                }
+            } else if (getInvalidGatewayInternalKeyCache().get(tokenIdentifier) != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Internal Key retrieved from the invalid Internal Key cache. Internal Key: " +
+                            GatewayUtils.getMaskedToken(splitToken[0]));
+                }
+                log.error("Invalid Internal Key." + GatewayUtils.getMaskedToken(splitToken[0]));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            }
+
+            // Not found in cache or caching disabled
+            if (!isVerified) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Internal Key not found in the cache.");
+                }
+                isVerified =
+                        GatewayUtils.verifyTokenSignature(signedJWT, alias) && !GatewayUtils.isJwtTokenExpired(payload);
+                // Add token to tenant token cache
+                if (isVerified) {
+                    getGatewayInternalKeyCache().put(tokenIdentifier, tenantDomain);
+                } else {
+                    getInvalidGatewayInternalKeyCache().put(tokenIdentifier, tenantDomain);
+                }
+
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    try {
+                        // Start super tenant flow
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        // Add token to super tenant token cache
+                        if (isVerified) {
+                            getGatewayInternalKeyCache().put(tokenIdentifier, tenantDomain);
+                        }
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+
+                }
+            }
+
+            // If Internal Key signature is verified
+            if (isVerified) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Internal Key signature is verified.");
+                }
+                if (payloadInfo != null) {
+                    // Internal Key is found in the key cache
+                    payload = payloadInfo.getPayload();
+                    if (GatewayUtils.isJwtTokenExpired(payload)) {
+                        getGatewayInternalKeyCache().remove(tokenIdentifier);
+                        getInvalidGatewayInternalKeyCache().put(tokenIdentifier, tenantDomain);
+                        log.error("Internal Key is expired");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                    }
+                } else {
+                    // Retrieve payload from InternalKey
+                    if (log.isDebugEnabled()) {
+                        log.debug("InternalKey payload not found in the cache.");
+                    }
+                    JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
+                    jwtTokenPayloadInfo.setPayload(payload);
+                    jwtTokenPayloadInfo.setAccessToken(internalKey);
+                    getGatewayInternalKeyDataCache().put(cacheKey, jwtTokenPayloadInfo);
+                }
+                JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion,
+                        payload, splitToken, false);
+                if (log.isDebugEnabled()) {
+                    log.debug("Internal Key authentication successful.");
+                }
+
+                SubscriptionDataStore tenantSubscriptionStore =
+                        SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+                API apiObj = tenantSubscriptionStore.getApiByContextAndVersion(apiContext, apiVersion);
+
+                AuthenticationContext authenticationContext = GatewayUtils
+                        .generateAuthenticationContext(tokenIdentifier, payload, api, apiObj.getApiTier());
+
+                APISecurityUtils.setAuthenticationContext(requestContext, authenticationContext);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("User is authorized to access the resource using Internal Key.");
+                }
+                return new AuthenticationResponse(true, true, false, 0, null);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Internal Key signature verification failure. Internal Key: " +
+                        GatewayUtils.getMaskedToken(splitToken[0]));
+            }
+            log.error("Invalid Internal Key. Signature verification failed.");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+
+        } catch (APISecurityException e) {
+            return new AuthenticationResponse(false, true, false, e.getErrorCode(), e.getMessage());
+        } catch (ParseException e) {
+            log.error("Error while parsing Internal Key", e);
+            return new AuthenticationResponse(false, true, false, APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        }
+    }
+
+    @Override
+    @Deprecated public AuthenticationResponse authenticate(MessageContext synCtx) {
         API retrievedApi = GatewayUtils.getAPI(synCtx);
         if (retrievedApi != null) {
             if (log.isDebugEnabled()) {
@@ -87,8 +282,12 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
             }
 
             try {
+                //check headers to get InternalKey
+                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+                Map headers = (Map) (axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+
                 // Extract internal from the request while removing it from the msg context.
-                String internalKey = extractInternalKey(synCtx);
+                String internalKey = extractInternalKey(headers);
                 if (StringUtils.isEmpty(internalKey)) {
                     return new AuthenticationResponse(false, false,
                             true, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -270,13 +469,10 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
-    private String extractInternalKey(MessageContext mCtx) {
+    private String extractInternalKey(Map headers) {
 
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mCtx).getAxis2MessageContext();
         String internalKey;
 
-        //check headers to get InternalKey
-        Map headers = (Map) (axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
         if (headers != null) {
             internalKey = (String) headers.get(securityParam);
             if (internalKey != null) {
