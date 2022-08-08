@@ -24,6 +24,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,29 +42,28 @@ public class LCManager {
     private Map<String, StateInfo> stateInfoMap = new HashMap<String, StateInfo>();
     private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
     private static String tenantDomain;
+
     public static void setTenantDomain(String tenantDomain) {
         LCManager.tenantDomain = tenantDomain;
     }
+
     public static String getTenantDomain() {
         return tenantDomain;
     }
 
-    public LCManager(String tenantDomain) throws APIManagementException
-    {
+    public LCManager(String tenantDomain) throws APIManagementException {
         setTenantDomain(tenantDomain);
     }
 
     public void processLifeCycle() throws APIManagementException {
-
         JSONObject tenantConfig = APIUtil.getTenantConfig(getTenantDomain());
-
         JSONArray states;
 
         //Checking whether the lifecycle exists in the tenantConfig
-        if(tenantConfig.containsKey("LifeCycle")){
+        if (tenantConfig.containsKey("LifeCycle")) {
             JSONObject LCObj = (JSONObject) tenantConfig.get("LifeCycle");
             states = (JSONArray) LCObj.get("States");
-        }else{
+        } else {
             JSONObject jsonObject = getDefaultLCConfigJSON();
             states = (JSONArray) jsonObject.get("States");
         }
@@ -80,7 +80,6 @@ public class LCManager {
                     JSONObject transitionObj = (JSONObject) transition;
                     String action = (String) transitionObj.get("Event");
                     String target = (String) transitionObj.get("Target");
-
                     if (stateId.equals(STATE_ID_PROTOTYPED)
                             && (target.equals(TRANSITION_TARGET_PROTOTYPED)
                     )) {
@@ -102,11 +101,9 @@ public class LCManager {
 
             if (stateObj.containsKey("CheckItems")) {
                 JSONArray checkItems = (JSONArray) stateObj.get("CheckItems");
-
                 for (Object checkItem : checkItems) {
                     checklistItems.add(checkItem.toString());
                 }
-
             }
 
             stateHashMap.put(stateId.toUpperCase(), lifeCycleTransition);
@@ -120,7 +117,6 @@ public class LCManager {
     public JSONObject getDefaultLCConfigJSON() {
 
         JSONObject LCConfigObj = new JSONObject();
-
         JSONArray statesArray = new JSONArray();
 
         //Created State
@@ -187,12 +183,10 @@ public class LCManager {
         statesArray.add(retiredState);
 
         LCConfigObj.put("States", statesArray);
-
         return LCConfigObj;
     }
 
     public JSONObject getTransitionObj(String event, String target) {
-
         JSONObject transitionObj = new JSONObject();
         transitionObj.put("Event", event);
         transitionObj.put("Target", target);
@@ -200,7 +194,6 @@ public class LCManager {
     }
 
     public JSONArray getCheckItemsArray(String[] checkItems) {
-
         JSONArray checkItemsArray = new JSONArray();
         for (String checkItem : checkItems) {
             checkItemsArray.add(checkItem);
@@ -255,7 +248,7 @@ public class LCManager {
             transitions.put(targetStatus, action);
         }
     }
-    
+
     class StateInfo {
         private String state;
         private List<String> transitions = new ArrayList<String>();
@@ -285,7 +278,7 @@ public class LCManager {
             this.state = state;
         }
     }
-    
+
     public List<String> getCheckListItemsForState(String state) throws APIManagementException {
         processLifeCycle();
         if (stateInfoMap.containsKey(state)) {
