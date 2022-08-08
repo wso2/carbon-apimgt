@@ -45,30 +45,28 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         TelemetryTracer telemetryTracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
 
         if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy()) {
-                org.apache.axis2.context.MessageContext axis2MessageContext =
-                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-                Map headersMap =
-                        (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                TracingSpan spanContext = Util.extract(tracer, headersMap);
-                TracingSpan responseLatencySpan =
-                        Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
-                Util.setTag(responseLatencySpan, APIMgtGatewayConstants.SPAN_KIND, APIMgtGatewayConstants.SERVER);
-                GatewayUtils.setRequestRelatedTags(responseLatencySpan, messageContext);
-                messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
-            } else {
-                org.apache.axis2.context.MessageContext axis2MessageContext =
-                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-                Map headersMap =
-                        (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            Map headersMap =
+                    (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-                Context spanContext = TelemetryUtil.extract(headersMap);
+            Context spanContext = TelemetryUtil.extract(headersMap);
 
-                TelemetrySpan responseLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY,
-                        spanContext, telemetryTracer);
-                GatewayUtils.setRequestRelatedTags(responseLatencySpan, messageContext);
-                messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
-            }
+            TelemetrySpan responseLatencySpan = TelemetryUtil.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY,
+                    spanContext, telemetryTracer);
+            GatewayUtils.setRequestRelatedTags(responseLatencySpan, messageContext);
+            messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
+        } else if (Util.tracingEnabled()) {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            Map headersMap =
+                    (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            TracingSpan spanContext = Util.extract(tracer, headersMap);
+            TracingSpan responseLatencySpan =
+                    Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
+            Util.setTag(responseLatencySpan, APIMgtGatewayConstants.SPAN_KIND, APIMgtGatewayConstants.SERVER);
+            GatewayUtils.setRequestRelatedTags(responseLatencySpan, messageContext);
+            messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
         }
         return true;
     }
@@ -79,8 +77,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         TracingTracer tracer = ServiceReferenceHolder.getInstance().getTracer();
         TelemetryTracer telemetryTracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
-        if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy()) {
+        if (TelemetryUtil.telemetryEnabled() || Util.tracingEnabled()) {
+            if (Util.tracingEnabled()) {
                 TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
                 TracingSpan backendLatencySpan =
                         Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
@@ -107,18 +105,16 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
-        if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy() && messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN) != null) {
-                TracingSpan backendLatencySpan =
-                        (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
-                GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
-                Util.finishSpan(backendLatencySpan);
-            } else if (messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN) != null) {
-                TelemetrySpan backendLatencySpan =
-                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
-                GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
-                TelemetryUtil.finishSpan(backendLatencySpan);
-            }
+        if (TelemetryUtil.telemetryEnabled() && messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN) != null) {
+            TelemetrySpan backendLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
+            GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
+            TelemetryUtil.finishSpan(backendLatencySpan);
+        } else if (Util.tracingEnabled() && messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN) != null) {
+            TracingSpan backendLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
+            GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
+            Util.finishSpan(backendLatencySpan);
         }
         return true;
     }
@@ -126,38 +122,36 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
         if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy()) {
-                Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-                if (resourceSpanObject != null) {
-                    GatewayUtils.setAPIResource((TracingSpan) resourceSpanObject, messageContext);
-                    Util.finishSpan((TracingSpan) resourceSpanObject);
-                }
-                TracingSpan responseLatencySpan =
-                        (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-                GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
-                API api = GatewayUtils.getAPI(messageContext);
-                if (api != null) {
-                    Util.updateOperation(responseLatencySpan, api.getApiName().concat("--").concat(api
-                                    .getApiVersion()).concat("--").concat(GatewayUtils.getTenantDomain()));
-                }
-                Util.finishSpan(responseLatencySpan);
-            } else {
-                Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
-                if (resourceSpanObject != null) {
-                    GatewayUtils.setAPIResource((TelemetrySpan) resourceSpanObject, messageContext);
-                    TelemetryUtil.finishSpan((TelemetrySpan) resourceSpanObject);
-                }
-                TelemetrySpan responseLatencySpan =
-                        (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-                GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
-                API api = GatewayUtils.getAPI(messageContext);
-                if (api != null) {
-                    TelemetryUtil.updateOperation(responseLatencySpan,
-                            api.getApiName().concat("--").concat(api.getApiVersion()).concat("--")
-                                    .concat(GatewayUtils.getTenantDomain()));
-                }
-                TelemetryUtil.finishSpan(responseLatencySpan);
+            Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            if (resourceSpanObject != null) {
+                GatewayUtils.setAPIResource((TelemetrySpan) resourceSpanObject, messageContext);
+                TelemetryUtil.finishSpan((TelemetrySpan) resourceSpanObject);
             }
+            TelemetrySpan responseLatencySpan =
+                    (TelemetrySpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
+            API api = GatewayUtils.getAPI(messageContext);
+            if (api != null) {
+                TelemetryUtil.updateOperation(responseLatencySpan,
+                        api.getApiName().concat("--").concat(api.getApiVersion()).concat("--")
+                                .concat(GatewayUtils.getTenantDomain()));
+            }
+            TelemetryUtil.finishSpan(responseLatencySpan);
+        } else if (Util.tracingEnabled()) {
+            Object resourceSpanObject = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
+            if (resourceSpanObject != null) {
+                GatewayUtils.setAPIResource((TracingSpan) resourceSpanObject, messageContext);
+                Util.finishSpan((TracingSpan) resourceSpanObject);
+            }
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
+            API api = GatewayUtils.getAPI(messageContext);
+            if (api != null) {
+                Util.updateOperation(responseLatencySpan, api.getApiName().concat("--").concat(api
+                        .getApiVersion()).concat("--").concat(GatewayUtils.getTenantDomain()));
+            }
+            Util.finishSpan(responseLatencySpan);
         }
         return true;
     }

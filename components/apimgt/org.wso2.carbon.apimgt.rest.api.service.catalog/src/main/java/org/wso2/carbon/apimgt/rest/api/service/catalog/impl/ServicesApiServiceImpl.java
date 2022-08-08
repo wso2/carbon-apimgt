@@ -115,6 +115,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
+            // Check whether a service already exists for the given service ID
+            serviceCatalog.getServiceByUUID(serviceId, tenantId);
+
             List<API> usedAPIs = serviceCatalog.getServiceUsage(serviceId, tenantId);
             if (usedAPIs != null && usedAPIs.size() > 0 ) {
                 String message = "Cannot remove the Service as it is used by one or more APIs";
@@ -123,8 +126,12 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             serviceCatalog.deleteService(serviceId, tenantId);
             return Response.noContent().build();
         } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
+            }
             String errorMessage = "Error while deleting the service with key " + serviceId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+
         }
         return null;
     }
@@ -161,7 +168,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedFileName + "\"");
                 return responseBuilder.build();
             } else {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                String errorMsg = "Requested resource with name " + name + " and version " + version +" not found";
+                return Response.status(Response.Status.NOT_FOUND).entity(getErrorDTO(RestApiConstants
+                        .STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L, errorMsg, StringUtils.EMPTY)).type(MediaType.APPLICATION_JSON_TYPE).build();
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while exporting Services: " + archiveName, e, log);
@@ -269,7 +278,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 }
                 if (overwrite) {
                     if (StringUtils.isNotEmpty(verifier) && validationResults
-                            .containsKey(service.getKey()) && !validationResults.get(service.getKey())) {
+                            .containsKey(service.getServiceKey()) && !validationResults.get(service.getServiceKey())) {
                         serviceListToIgnore.add(service);
                     } else {
                         serviceListToImport.add(service);
@@ -315,7 +324,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                         "existing service", log);
             }
             for (ServiceEntry service : importedServiceList) {
-                retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
+                retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getServiceKey(), tenantId));
             }
             serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(retrievedServiceList);
             return Response.ok().entity(ServiceEntryMappingUtil
@@ -399,7 +408,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
                         .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, StringUtils.EMPTY)).build();
             }
-            if (!existingService.getKey().equals(service.getKey()) || !existingService.getName().equals(service
+            if (!existingService.getServiceKey().equals(service.getServiceKey()) || !existingService.getName().equals(service
                 .getName()) || !existingService.getDefinitionType().equals(service.getDefinitionType()) ||
                     !existingService.getVersion().equals(service.getVersion())) {
                 RestApiUtil.handleBadRequest("Cannot update the name or version or key or definition type of an " +
@@ -428,9 +437,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             ServiceEntry service = serviceCatalog.getServiceByKey(verifierJson.get("key").toString(), tenantId);
             if (service != null) {
                 if (service.getMd5().equals(verifierJson.get("md5").toString())) {
-                    validationResults.put(service.getKey(), true);
+                    validationResults.put(service.getServiceKey(), true);
                 } else {
-                    validationResults.put(service.getKey(), false);
+                    validationResults.put(service.getServiceKey(), false);
                 }
             }
         }

@@ -21,12 +21,18 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
+import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
+import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
+import com.amazonaws.services.securitytoken.model.Credentials;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +45,8 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.ByteArrayInputStream;
@@ -55,6 +63,9 @@ public class AWSLambdaMediator extends AbstractMediator {
     private String secretKey = "";
     private String region = "";
     private String resourceName = "";
+    private String roleArn = "";
+    private String roleSessionName = "";
+    private String roleRegion = "";
     private int resourceTimeout = APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT;
     private static final String PATH_PARAMETERS = "pathParameters";
     private static final String QUERY_STRING_PARAMETERS = "queryStringParameters";
@@ -154,31 +165,64 @@ public class AWSLambdaMediator extends AbstractMediator {
      */
     private InvokeResult invokeLambda(String payload) {
         try {
-            // set credential provider
-            AWSCredentialsProvider credentialsProvider;
-            AWSLambda awsLambda;
+            AWSLambda awsLambdaClient;
             if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Using temporary credentials supplied by the IAM role attached to the EC2 instance");
+                    log.debug("Using temporary credentials supplied by the IAM role attached to AWS instance");
                 }
-                credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
-                awsLambda = AWSLambdaClientBuilder.standard().withCredentials(credentialsProvider).build();
-            } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)
-                    && !StringUtils.isEmpty(region)) {
+                if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
+                        && StringUtils.isEmpty(roleRegion)) {
+                    awsLambdaClient = AWSLambdaClientBuilder.standard()
+                            .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                            .build();
+                } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                        && StringUtils.isNotEmpty(roleRegion)) {
+                    Credentials sessionCredentials = getSessionCredentials(
+                            DefaultAWSCredentialsProviderChain.getInstance(), roleArn, roleSessionName, "");
+                    BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
+                            sessionCredentials.getAccessKeyId(),
+                            sessionCredentials.getSecretAccessKey(),
+                            sessionCredentials.getSessionToken());
+                    awsLambdaClient = AWSLambdaClientBuilder.standard()
+                            .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
+                            .withRegion(roleRegion)
+                            .build();
+                } else {
+                    log.error("Missing AWS STS configurations");
+                    return null;
+                }
+            } else if (StringUtils.isNotEmpty(accessKey) && StringUtils.isNotEmpty(secretKey)
+                    && StringUtils.isNotEmpty(region)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Using user given stored credentials");
                 }
                 BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-                credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
-                awsLambda = AWSLambdaClientBuilder.standard()
-                        .withCredentials(credentialsProvider)
-                        .withRegion(region)
-                        .build();
+                if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
+                        && StringUtils.isEmpty(roleRegion)) {
+                    awsLambdaClient = AWSLambdaClientBuilder.standard()
+                            .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                            .withRegion(region)
+                            .build();
+                } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                        && StringUtils.isNotEmpty(roleRegion)) {
+                    Credentials sessionCredentials = getSessionCredentials(
+                            new AWSStaticCredentialsProvider(awsCredentials), roleArn, roleSessionName, region);
+                    BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
+                            sessionCredentials.getAccessKeyId(),
+                            sessionCredentials.getSecretAccessKey(),
+                            sessionCredentials.getSessionToken());
+                    awsLambdaClient = AWSLambdaClientBuilder.standard()
+                            .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
+                            .withRegion(roleRegion)
+                            .build();
+                } else {
+                    log.error("Missing AWS STS configurations");
+                    return null;
+                }
             } else {
                 log.error("Missing AWS Credentials");
                 return null;
             }
-            // set invoke request
             if (resourceTimeout < 1000 || resourceTimeout > 900000) {
                 setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
             }
@@ -187,11 +231,56 @@ public class AWSLambdaMediator extends AbstractMediator {
                     .withPayload(payload)
                     .withInvocationType(InvocationType.RequestResponse)
                     .withSdkClientExecutionTimeout(resourceTimeout);
-            return awsLambda.invoke(invokeRequest);
+            return awsLambdaClient.invoke(invokeRequest);
         } catch (SdkClientException e) {
             log.error("Error while invoking the lambda function", e);
         }
         return null;
+    }
+
+    private Credentials getSessionCredentials(AWSCredentialsProvider credentialsProvider, String roleArn,
+                                              String roleSessionName, String region) {
+        Credentials sessionCredentials = null;
+        if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
+            Object previousCredentialsObject = new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
+                    .getObject(roleSessionName, Credentials.class);
+            if (previousCredentialsObject != null) {
+                sessionCredentials = (Credentials) previousCredentialsObject;
+            }
+        } else {
+            sessionCredentials = CredentialsCache.getInstance().getCredentialsMap().get(roleSessionName);
+        }
+        if (sessionCredentials != null) {
+            long expirationTime = sessionCredentials.getExpiration().getTime();
+            long currentTime = System.currentTimeMillis();
+            long timeDifference = expirationTime - currentTime;
+            if (timeDifference > 1000) {
+                return sessionCredentials;
+            }
+        }
+        AWSSecurityTokenService awsSTSClient;
+        if (StringUtils.isEmpty(region)) {
+            awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
+                    .withCredentials(credentialsProvider)
+                    .build();
+        } else {
+            awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
+                    .withCredentials(credentialsProvider)
+                    .withRegion(region)
+                    .build();
+        }
+        AssumeRoleRequest roleRequest = new AssumeRoleRequest()
+                .withRoleArn(roleArn)
+                .withRoleSessionName(roleSessionName);
+        AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
+        sessionCredentials = assumeRoleResult.getCredentials();
+        if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
+            new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
+                    .addObject(roleSessionName, sessionCredentials);
+        } else {
+            CredentialsCache.getInstance().getCredentialsMap().put(roleSessionName, sessionCredentials);
+        }
+        return sessionCredentials;
     }
 
     public String getType() {
@@ -218,6 +307,18 @@ public class AWSLambdaMediator extends AbstractMediator {
         return region;
     }
 
+    public String getRoleArn() {
+        return roleArn;
+    }
+
+    public String getRoleSessionName() {
+        return roleSessionName;
+    }
+
+    public String getRoleRegion() {
+        return roleRegion;
+    }
+
     public String getResourceName() {
         return resourceName;
     }
@@ -236,6 +337,18 @@ public class AWSLambdaMediator extends AbstractMediator {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public void setRoleArn(String roleArn) {
+        this.roleArn = roleArn;
+    }
+
+    public void setRoleSessionName(String roleSessionName) {
+        this.roleSessionName = roleSessionName;
+    }
+
+    public void setRoleRegion(String roleRegion) {
+        this.roleRegion = roleRegion;
     }
 
     public void setResourceName(String resourceName) {

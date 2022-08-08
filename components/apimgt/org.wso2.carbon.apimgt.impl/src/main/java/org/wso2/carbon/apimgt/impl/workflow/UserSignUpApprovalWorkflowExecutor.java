@@ -21,15 +21,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
 import java.util.List;
 
 /**
@@ -86,8 +82,7 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
             String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 try {
-                    updateRolesOfUser(tenantAwareUserName,
-                            SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
+                    updateRolesOfUser(tenantAwareUserName, signupConfig.getRoles(), tenantDomain);
                 } catch (Exception e) {
                     // updateRolesOfUser throws generic Exception. Therefore generic Exception is caught
                     throw new WorkflowException("Error while assigning role to user", e);

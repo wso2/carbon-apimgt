@@ -113,8 +113,7 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
 
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 try {
-                    updateRolesOfUser(tenantAwareUserName,
-                            SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
+                    updateRolesOfUser(tenantAwareUserName, signupConfig.getRoles(), tenantDomain);
                 } catch (Exception e) {
 
                     // updateRolesOfUser throws generic Exception. Therefore generic Exception is caught

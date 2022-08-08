@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.FaultCodeClassifier;
@@ -50,6 +52,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.HttpURLConnection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,9 +60,15 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     private static final Log log = LogFactory.getLog(WebSocketAnalyticsDataProvider.class);
 
     private ChannelHandlerContext ctx;
+    private AnalyticsCustomDataProvider analyticsCustomDataProvider;
 
     public WebSocketAnalyticsDataProvider(ChannelHandlerContext ctx) {
         this.ctx = ctx;
+    }
+
+    public WebSocketAnalyticsDataProvider(ChannelHandlerContext ctx, AnalyticsCustomDataProvider analyticsCustomDataProvider) {
+        this.ctx = ctx;
+        this.analyticsCustomDataProvider = analyticsCustomDataProvider;
     }
 
     private AuthenticationContext getAuthenticationContext()  {
@@ -283,6 +292,38 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         Object userIp = WebSocketUtils.getPropertyFromChannel(Constants.USER_IP_PROPERTY, ctx);
         if (userIp != null) {
             return (String) userIp;
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        Map<String, Object> customProperties;
+
+        if (analyticsCustomDataProvider != null) {
+            customProperties = analyticsCustomDataProvider.getCustomProperties(ctx);
+        } else {
+            customProperties = new HashMap<>();
+        }
+        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
+        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        return customProperties;
+    }
+
+    private String getUserName() {
+
+        Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
+        if (authContext != null && authContext instanceof AuthenticationContext) {
+            return ((AuthenticationContext)authContext).getUsername();
+        }
+        return null;
+    }
+
+    private String getApiContext() {
+
+        Object apiContext = WebSocketUtils.getPropertyFromChannel(JWTConstants.REST_API_CONTEXT, ctx);
+        if (apiContext != null) {
+            return (String) apiContext;
         }
         return null;
     }

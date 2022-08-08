@@ -2074,6 +2074,14 @@ public class SQLConstants {
             "   APPLICATION_ID=? " +
             "   AND SUB_STATUS=?";
 
+    public static final String GET_SUBSCRIPTION_ID_STATUS_BY_APPLICATION_SQL =
+            "SELECT" +
+                    "   SUBSCRIPTION_ID, SUB_STATUS" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION " +
+                    " WHERE " +
+                    "   APPLICATION_ID=? ";
+
     public static final String GET_SUBSCRIPTIONS_BY_API_SQL =
             "SELECT" +
                     "   SUBSCRIPTION_ID" +
