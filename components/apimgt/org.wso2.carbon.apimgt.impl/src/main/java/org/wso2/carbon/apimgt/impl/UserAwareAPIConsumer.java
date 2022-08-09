@@ -40,7 +40,8 @@ import java.util.List;
  * available operations. However if the user attempts to execute a privileged operation
  * when the object had been created in the anonymous mode, an exception will be thrown.
  */
-@MethodStats public class UserAwareAPIConsumer extends APIConsumerImpl {
+@MethodStats 
+public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     private String username;
 
@@ -62,46 +63,52 @@ import java.util.List;
     }
 
     private void readAccessControlConfig() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        isAccessControlRestrictionEnabled = Boolean.parseBoolean(
-                config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        isAccessControlRestrictionEnabled = Boolean
+                .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
     }
 
-    @Override public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId,
-            Application application) throws APIManagementException {
+    @Override 
+    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, 
+                                                          String userId, Application application) throws APIManagementException {
         return super.addSubscription(apiTypeWrapper, userId, application);
     }
 
-    @Override public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+    @Override 
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
         return super.getSubscriptionByUUID(uuid);
     }
 
-    @Override public void removeSubscription(Identifier identifier, String userId, int applicationId,
-            String organization) throws APIManagementException {
+    @Override 
+    public void removeSubscription(Identifier identifier, String userId, int applicationId,
+                                   String organization) throws APIManagementException {
         super.removeSubscription(identifier, userId, applicationId, organization);
     }
 
-    @Override public void removeSubscription(SubscribedAPI subscription, String organization)
-            throws APIManagementException {
+    @Override 
+    public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
         super.removeSubscription(subscription, organization);
     }
 
-    @Override public int addApplication(Application application, String userId, String organization)
-            throws APIManagementException {
+    @Override 
+    public int addApplication(Application application, String userId, String organization) throws APIManagementException {
         return super.addApplication(application, userId, organization);
     }
 
-    @Override public void updateApplication(Application application) throws APIManagementException {
+    @Override 
+    public void updateApplication(Application application) throws APIManagementException {
         super.updateApplication(application);
     }
 
-    @Override public void removeApplication(Application application, String username) throws APIManagementException {
+    @Override 
+    public void removeApplication(Application application, String username) throws APIManagementException {
         super.removeApplication(application, username);
     }
 
-    @Override public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
-            String organization) throws APIManagementException {
+    @Override 
+    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
+                                   String organization) throws APIManagementException {
         super.removeSubscription(identifier, userId, applicationId, groupId, organization);
     }
 
@@ -110,47 +117,54 @@ import java.util.List;
      * This method needs to be removed once the Jaggery web apps are removed.
      *
      */
-    @Override public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
+    @Override 
+    public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
         super.addComment(identifier, s, user);
     }
 
-    @Override public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
+    @Override 
+    public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
         return super.addComment(uuid, comment, user);
     }
 
-    @Override public void deleteComment(String uuid, String commentId) throws APIManagementException {
+    @Override 
+    public void deleteComment(String uuid, String commentId) throws APIManagementException {
         super.deleteComment(uuid, commentId);
     }
 
-    @Override public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization)
-            throws APIManagementException {
+    @Override 
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organization);
         return apiTypeWrapper;
     }
 
-    @Override public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
+    @Override 
+    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
         API api = super.getLightweightAPI(identifier, orgId);
-        checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
+        checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), 
+                api.getVisibleRoles());
         return api;
     }
 
-    @Override public int addClientCertificate(String userName, String UUID, int applicationId, String certificate,
-            String name, String serialNumber, String keyType) throws APIManagementException {
+    @Override 
+    public int addClientCertificate(String userName, String UUID, int applicationId, String certificate,
+                                    String name, String serialNumber, String keyType) throws APIManagementException {
         return super.addClientCertificate(userName, UUID, applicationId, certificate, name, serialNumber, keyType);
     }
 
-    @Override public int deleteClientCertificate(String userName, Application application, String UUID)
-            throws APIManagementException {
+    @Override 
+    public int deleteClientCertificate(String userName, Application application, String UUID) throws APIManagementException {
         return super.deleteClientCertificate(userName, application, UUID);
     }
 
-    @Override public ClientCertificateDTO getClientCertificate(String uuid, String serialNumber, int applicationId)
-            throws APIManagementException {
+    @Override 
+    public ClientCertificateDTO getClientCertificate(String uuid, String serialNumber, int applicationId) throws APIManagementException {
         return super.getClientCertificate(uuid, serialNumber, applicationId);
     }
 
-    @Override public List<ClientCertificateDTO> searchClientCertificates(String uuid, String serialNumber,
-            int applicationId) throws APIManagementException {
+    @Override 
+    public List<ClientCertificateDTO> searchClientCertificates(String uuid, String serialNumber,
+                                                               int applicationId) throws APIManagementException {
         return super.searchClientCertificates(uuid, serialNumber, applicationId);
     }
 
