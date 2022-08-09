@@ -5637,8 +5637,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
-                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
-                    apiList.add(mappedAPI);
+                    try {
+                        mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
+                        apiList.add(mappedAPI);
+                    } catch (APIManagementException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Getting Average rating failed for API: " + mappedAPI.getUuid());
+                        }
+                    }
                 }
                 apiSet.addAll(apiList);
                 result.put("apis", apiSet);
