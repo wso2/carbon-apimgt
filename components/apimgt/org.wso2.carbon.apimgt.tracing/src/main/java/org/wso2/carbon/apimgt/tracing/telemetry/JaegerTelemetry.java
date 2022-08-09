@@ -60,7 +60,7 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
                 : TelemetryConstants.JAEGER_DEFAULT_PORT;
 
         JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
-                .setEndpoint("http://" + hostname + ":" + port)
+                .setEndpoint(String.format("http://%s:%s", hostname, port))
                 .setTimeout(30, TimeUnit.SECONDS)
                 .build();
 

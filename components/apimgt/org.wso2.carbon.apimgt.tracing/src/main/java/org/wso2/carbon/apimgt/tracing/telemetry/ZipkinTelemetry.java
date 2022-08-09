@@ -58,7 +58,7 @@ public class ZipkinTelemetry implements APIMOpenTelemetry {
                 : TelemetryConstants.ZIPKIN_DEFAULT_PORT;
 
         ZipkinSpanExporter zipkinExporter = ZipkinSpanExporter.builder()
-                .setEndpoint("http://" + hostname + ":" + port + TelemetryConstants.ZIPKIN_API_CONTEXT)
+                .setEndpoint(String.format("http://%s:%s%s", hostname, port, TelemetryConstants.ZIPKIN_API_CONTEXT))
                 .build();
 
         if (log.isDebugEnabled()) {
