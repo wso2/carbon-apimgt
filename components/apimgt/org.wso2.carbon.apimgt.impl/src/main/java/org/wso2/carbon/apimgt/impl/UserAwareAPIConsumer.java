@@ -40,7 +40,7 @@ import java.util.List;
  * available operations. However if the user attempts to execute a privileged operation
  * when the object had been created in the anonymous mode, an exception will be thrown.
  */
-@MethodStats 
+@MethodStats
 public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     private String username;
@@ -69,34 +69,34 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
                 .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
     }
 
-    @Override 
+    @Override
     public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, 
-                                                          String userId, Application application) throws APIManagementException {
+                                                String userId, Application application) throws APIManagementException {
         return super.addSubscription(apiTypeWrapper, userId, application);
     }
 
-    @Override 
+    @Override
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
         return super.getSubscriptionByUUID(uuid);
     }
 
-    @Override 
+    @Override
     public void removeSubscription(Identifier identifier, String userId, int applicationId,
                                    String organization) throws APIManagementException {
         super.removeSubscription(identifier, userId, applicationId, organization);
     }
 
-    @Override 
+    @Override
     public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
         super.removeSubscription(subscription, organization);
     }
 
-    @Override 
+    @Override
     public int addApplication(Application application, String userId, String organization) throws APIManagementException {
         return super.addApplication(application, userId, organization);
     }
 
-    @Override 
+    @Override
     public void updateApplication(Application application) throws APIManagementException {
         super.updateApplication(application);
     }
@@ -106,7 +106,7 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super.removeApplication(application, username);
     }
 
-    @Override 
+    @Override
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
                                    String organization) throws APIManagementException {
         super.removeSubscription(identifier, userId, applicationId, groupId, organization);
@@ -117,36 +117,36 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
      * This method needs to be removed once the Jaggery web apps are removed.
      *
      */
-    @Override 
+    @Override
     public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
         super.addComment(identifier, s, user);
     }
 
-    @Override 
+    @Override
     public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
         return super.addComment(uuid, comment, user);
     }
 
-    @Override 
+    @Override
     public void deleteComment(String uuid, String commentId) throws APIManagementException {
         super.deleteComment(uuid, commentId);
     }
 
-    @Override 
+    @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organization);
         return apiTypeWrapper;
     }
 
-    @Override 
+    @Override
     public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
         API api = super.getLightweightAPI(identifier, orgId);
-        checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), 
+        checkVisibilityPermission(userNameWithoutChange, api.getVisibility(),
                 api.getVisibleRoles());
         return api;
     }
 
-    @Override 
+    @Override
     public int addClientCertificate(String userName, String UUID, int applicationId, String certificate,
                                     String name, String serialNumber, String keyType) throws APIManagementException {
         return super.addClientCertificate(userName, UUID, applicationId, certificate, name, serialNumber, keyType);
