@@ -1050,17 +1050,21 @@
     {% endif %}
 
     <OpenTelemetry>
-        <RemoteTelemetry>
-            <Enabled>{{apim.open_telemetry.remote_telemetry.enable}}</Enabled>
-            <Name>{{apim.open_telemetry.remote_telemetry.name}}</Name>
+        <RemoteTracer>
+            <Enabled>{{apim.open_telemetry.remote_tracer.enable}}</Enabled>
+            <Name>{{apim.open_telemetry.remote_tracer.name}}</Name>
+            <Url>{{apim.open_telemetry.remote_tracer.url}}</Url>
+            <HostName>{{apim.open_telemetry.remote_tracer.hostname}}</HostName>
+            <Port>{{apim.open_telemetry.remote_tracer.port}}</Port>
             <Properties>
-                <HostName>{{apim.open_telemetry.remote_telemetry.properties.hostname}}</HostName>
-                <Port>{{apim.open_telemetry.remote_telemetry.properties.port}}</Port>
+                {% for property in apim.open_telemetry.remote_tracer.properties %}
+                <{{property.name}}>{{property.value}}</{{property.name}}>
+                {% endfor %}
             </Properties>
-        </RemoteTelemetry>
-        <LogTelemetry>
-            <Enabled>{{apim.open_telemetry.log_telemetry.enable}}</Enabled>
-        </LogTelemetry>
+        </RemoteTracer>
+        <LogTracer>
+            <Enabled>{{apim.open_telemetry.log_tracer.enable}}</Enabled>
+        </LogTracer>
     </OpenTelemetry>
 
     <OpenTracer>

@@ -37,8 +37,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2
           restore-keys: ${{ runner.os }}-m2
+
       - name: Build carbon-apimgt with Tests, skipping AspectJ
         run: mvn clean install --file pom.xml -Dskip.aspectj=true
+
       - name: Upload unit test coverage to Codecov
         uses: codecov/codecov-action@v1.2.1
         with:
