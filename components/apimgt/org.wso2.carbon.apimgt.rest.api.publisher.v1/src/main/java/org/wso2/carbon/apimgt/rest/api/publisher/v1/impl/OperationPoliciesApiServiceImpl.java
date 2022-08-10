@@ -220,7 +220,9 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      * @param messageContext message context
      * @return A list of operation policies available for the API
      */
-    @Override public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query,MessageContext messageContext) throws APIManagementException {
+    @Override
+    public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query,
+            MessageContext messageContext) throws APIManagementException {
 
         String apiManagementExceptionErrorMessage = "";
         OperationPolicyDataListDTO policyListDTO = null;
@@ -239,13 +241,12 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                     queryParamMap.put(keyVal[0], keyVal[1]);
                 }
 
-                name =  queryParamMap.get(ImportExportConstants.POLICY_NAME);
+                name = queryParamMap.get(ImportExportConstants.POLICY_NAME);
                 version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
 
                 apiManagementExceptionErrorMessage = "Error while retrieving the policy by name & version.";
-                OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(
-                       name,
-                        version, organization, false);
+                OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version,
+                        organization, false);
 
                 // if not found, throw not found error
                 if (policyData != null) {
@@ -279,8 +280,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 throw new APIManagementException(
-                        "Couldn't retrieve an existing API policy with Name: " + name + " and Version: "
-                                + version,
+                        "Couldn't retrieve an existing API policy with Name: " + name + " and Version: " + version,
                         ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_WITH_NAME_NOT_FOUND, name, version));
             } else {
                 apiManagementExceptionErrorMessage += e.getMessage();
@@ -384,6 +384,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      *                                extracting the content
      * @returnA zip file containing both (if exists) operation policy specification and policy definition
      */
+    @Override
     public Response exportOperationPolicy(String name, String version, String format, MessageContext messageContext)
             throws APIManagementException {
 
@@ -412,6 +413,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      * @throws APIManagementException If an error occurs while creating the directory, transferring files or
      *                                extracting the content
      */
+    @Override
     public Response importOperationPolicy(InputStream fileInputStream, Attachment fileDetail,
             MessageContext messageContext) throws APIManagementException {
 

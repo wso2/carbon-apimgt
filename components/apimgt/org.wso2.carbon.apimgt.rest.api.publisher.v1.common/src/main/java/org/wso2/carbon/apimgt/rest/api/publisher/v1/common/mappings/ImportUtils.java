@@ -794,7 +794,6 @@ public class ImportUtils {
         } catch (APIImportExportException e) {
             throw new APIManagementException(e.getMessage(), ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR));
         }
-
     }
 
     /**
@@ -881,18 +880,24 @@ public class ImportUtils {
                     log.debug("A common operation policy has been added with name " + policySpecification.getName());
                 }
             } else {
-                throw new APIManagementException("Existing common operation policy found for the same name.");
+                throw new APIMgtResourceNotFoundException("Existing common operation policy found for the same name.",
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS,
+                                policySpecification.getName(), policySpecification.getVersion()));
             }
             operationPolicyData.setPolicyId(policyID);
             OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(
                     operationPolicyData);
 
             return createdPolicy;
-        } catch (APIManagementException e) {
+        } catch (APIMgtResourceNotFoundException e) {
             String errorMessage = "Error while adding a common operation policy." + e.getMessage();
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS, policySpecification.getName(),
                             policySpecification.getVersion()));
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding a common operation policy." + e.getMessage();
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, e.getMessage()));
         } catch (IOException e) {
             String errorMessage = "An Error has occurred while adding common operation policy. " + e.getMessage();
             throw new APIManagementException(errorMessage,
@@ -1191,7 +1196,7 @@ public class ImportUtils {
      * @param pathToArchive Path to Policy archive
      * @throws IOException If an error occurs while reading the file
      */
-    public static String getPolicyFileContentAsJson(String pathToArchive) throws IOException {
+    private static String getPolicyFileContentAsJson(String pathToArchive) throws IOException {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_EXTENSION;
@@ -1203,21 +1208,16 @@ public class ImportUtils {
                 log.debug("Found policy definition file " + pathToYamlFile);
             }
             String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
-
             jsonContent = CommonUtil.yamlToJson(yamlContent);
-
             jsonContent = getJsonContentWithData(jsonContent);
-
         } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
             // load as a json fallback
             if (log.isDebugEnabled()) {
                 log.debug("Found policy definition file " + pathToJsonFile);
             }
             jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
-
             jsonContent = getJsonContentWithData(jsonContent);
         }
-
         return jsonContent;
     }
 
