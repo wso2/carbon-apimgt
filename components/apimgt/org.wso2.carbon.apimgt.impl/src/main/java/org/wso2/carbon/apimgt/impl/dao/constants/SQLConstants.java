@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -2835,7 +2834,12 @@ public class SQLConstants {
             "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ?";
     public static final String DELETE_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
             "API_ID = ?";
-    public static final String RETRIEVE_ORGANIZATION = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID =?";
+    public static final String RETRIEVE_API_ARTIFACT_PROPERTY_VALUES =
+            "SELECT AM_API.ORGANIZATION AS ORGANIZATION, " +
+                    "AM_DEPLOYMENT_REVISION_MAPPING.DEPLOYED_TIME AS DEPLOYED_TIME " +
+                    "FROM AM_API, AM_DEPLOYMENT_REVISION_MAPPING " +
+                    "WHERE AM_API.API_UUID = ? AND AM_DEPLOYMENT_REVISION_MAPPING.NAME = ? " +
+                    "AND AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID = ?";
     public static final String RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL =
             "SELECT AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID,AM_GW_PUBLISHED_API_DETAILS" +
                     ".TENANT_DOMAIN AS TENANT_DOMAIN," +
