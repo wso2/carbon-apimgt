@@ -841,8 +841,7 @@ public class ImportUtils {
                         "Cannot find Operation Policy definition. policyDefinition.yaml should present",
                         ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
             }
-
-            policyDefinitionJsonContent = CommonUtil.yamlToJson(policyDefinitionJsonContent);
+            
             policySpecification = APIUtil.getValidatedOperationPolicySpecification(policyDefinitionJsonContent);
 
             OperationPolicyData operationPolicyData = new OperationPolicyData();
