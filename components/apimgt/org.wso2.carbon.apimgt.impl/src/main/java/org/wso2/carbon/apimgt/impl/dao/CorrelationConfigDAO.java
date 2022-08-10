@@ -66,6 +66,14 @@ public class CorrelationConfigDAO {
 
     public boolean updateCorrelationConfigs(List<CorrelationConfigDTO> correlationConfigDTOList)
             throws APIManagementException {
+
+        for (CorrelationConfigDTO correlationConfigDTO : correlationConfigDTOList) {
+            String componentName = correlationConfigDTO.getName().trim();
+            if (!correlationComponents.contains(componentName)) {
+                throw new APIManagementException("Invalid Component Name : " + componentName,
+                        ExceptionCodes.from(ExceptionCodes.CORRELATION_CONFIG_BAD_REQUEST_INVALID_NAME));
+            }
+        }
         String queryConfigs = SQLConstants.UPDATE_CORRELATION_CONFIGS;
         String queryProps = SQLConstants.UPDATE_CORRELATION_CONFIG_PROPERTIES;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -75,11 +83,6 @@ public class CorrelationConfigDAO {
             try (PreparedStatement preparedStatementConfigs = connection.prepareStatement(queryConfigs)) {
                 for (CorrelationConfigDTO correlationConfigDTO : correlationConfigDTOList) {
                     String componentName = correlationConfigDTO.getName().trim();
-                    if (!correlationComponents.contains(componentName)) {
-                        connection.rollback();
-                        throw new APIManagementException("Invalid Component Name : " + componentName,
-                                ExceptionCodes.from(ExceptionCodes.CORRELATION_CONFIG_BAD_REQUEST_INVALID_NAME));
-                    }
                     String enabled = correlationConfigDTO.getEnabled();
 
                     preparedStatementConfigs.setString(1, enabled);
