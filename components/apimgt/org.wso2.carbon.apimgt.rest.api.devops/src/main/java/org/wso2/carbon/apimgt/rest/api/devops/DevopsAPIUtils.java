@@ -128,7 +128,8 @@ public class DevopsAPIUtils {
         for (CorrelationComponentDTO correlationComponentDTO: correlationComponentDTOList) {
             CorrelationConfigDTO correlationConfigDTO = new CorrelationConfigDTO();
             correlationConfigDTO.setName(correlationComponentDTO.getName());
-            correlationConfigDTO.setEnabled(correlationComponentDTO.getEnabled());
+            correlationConfigDTO.setEnabled(Boolean.toString(
+                    Boolean.parseBoolean(correlationComponentDTO.getEnabled())));
             List<CorrelationConfigPropertyDTO> properties = new ArrayList<>();
             for (CorrelationComponentPropertyDTO propertyDTO: correlationComponentDTO.getProperties()) {
                 CorrelationConfigPropertyDTO correlationConfigPropertyDTO = new CorrelationConfigPropertyDTO();

@@ -68,12 +68,25 @@ public class RestApiDevopsUtilTest {
         for (int i = 0; i < DevopsAPIUtils.CORRELATION_DEFAULT_COMPONENTS.length; i++) {
             CorrelationComponentDTO correlationComponentDTO = new CorrelationComponentDTO();
             correlationComponentDTO.setName(DevopsAPIUtils.CORRELATION_DEFAULT_COMPONENTS[i]);
+            correlationComponentDTO.setEnabled("true");
             correlationComponentDTOList.add(correlationComponentDTO);
         }
         CorrelationComponentsListDTO correlationComponentsListDTO = new CorrelationComponentsListDTO();
         correlationComponentsListDTO.setComponents(correlationComponentDTOList);
         Boolean valid = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
         Assert.assertTrue(valid);
+
+        CorrelationComponentDTO correlationComponentDTO = new CorrelationComponentDTO();
+        correlationComponentDTO.setName("abc");
+        correlationComponentDTOList.add(correlationComponentDTO);
+        correlationComponentsListDTO.setComponents(correlationComponentDTOList);
+        try {
+            valid = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
+        } catch (APIManagementException e) {
+            return;
+        }
+        Assert.assertTrue("validateCorrelationComponentList did not throw an exception", false);
+
 
     }
 }

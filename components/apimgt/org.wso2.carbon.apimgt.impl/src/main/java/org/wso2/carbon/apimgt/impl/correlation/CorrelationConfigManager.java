@@ -51,12 +51,13 @@ import java.util.List;
  * invoke the internal API.
  */
 public class CorrelationConfigManager {
-    public static final int RETRIEVAL_RETRIES = 15;
-    public static final String UTF8 = "UTF-8";
+    private static final int RETRIEVAL_RETRIES = 15;
+    private static final String UTF8 = "UTF-8";
     private static final String DENIED_THREADS = "deniedThreads";
     private static final Log log = LogFactory.getLog(CorrelationConfigManager.class);
     private static final CorrelationConfigManager correlationConfigManager = new CorrelationConfigManager();
     private final EventHubConfigurationDto eventHubConfigurationDto;
+    private String[] deniedThreads = new String[0];
 
     private CorrelationConfigManager() {
         this.eventHubConfigurationDto =
@@ -95,6 +96,9 @@ public class CorrelationConfigManager {
                     }
                     correlationConfigPropertyDTO.setValue(
                             propertyValueList.toArray(new String[0]));
+                    if (correlationConfigPropertyDTO.getName() == DENIED_THREADS) {
+                        deniedThreads = correlationConfigPropertyDTO.getValue();
+                    }
                     correlationConfigPropertyDTOList.add(correlationConfigPropertyDTO);
                 }
                 correlationConfigDTO.setProperties(correlationConfigPropertyDTOList);
@@ -115,7 +119,7 @@ public class CorrelationConfigManager {
 
         boolean configEnable = true;
         List<String> configComponentNames = new ArrayList<>();
-        String[] configDeniedThreads = new String[0];
+        String[] configDeniedThreads = deniedThreads;
         for (CorrelationConfigDTO correlationConfigDTO : correlationConfigDTOList) {
             String componentName = correlationConfigDTO.getName();
             String enabled = correlationConfigDTO.getEnabled();
