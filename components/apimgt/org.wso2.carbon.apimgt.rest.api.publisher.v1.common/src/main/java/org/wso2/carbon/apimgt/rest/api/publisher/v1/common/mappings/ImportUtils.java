@@ -841,7 +841,7 @@ public class ImportUtils {
                         "Cannot find Operation Policy definition. policyDefinition.yaml should present",
                         ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
             }
-            
+
             policySpecification = APIUtil.getValidatedOperationPolicySpecification(policyDefinitionJsonContent);
 
             OperationPolicyData operationPolicyData = new OperationPolicyData();
@@ -1227,13 +1227,13 @@ public class ImportUtils {
      * @return
      * @throws IOException
      */
-    public static String readDefinitionFiles(String path) throws IOException {
-        String jsonContent = null;
+    private static String readDefinitionFiles(String path) throws IOException {
+        String content = null;
         if (CommonUtil.checkFileExistence(path)) {
-            jsonContent = FileUtils.readFileToString(new File(path));
+            content = FileUtils.readFileToString(new File(path));
         }
 
-        return jsonContent;
+        return content;
     }
 
     /**
