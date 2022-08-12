@@ -19,12 +19,11 @@
 package org.wso2.carbon.apimgt.common.gateway.graphql;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLSchemaDefinitionUtil;
 
 public class GraphQLSchemaDefinitionTest {
     @Test

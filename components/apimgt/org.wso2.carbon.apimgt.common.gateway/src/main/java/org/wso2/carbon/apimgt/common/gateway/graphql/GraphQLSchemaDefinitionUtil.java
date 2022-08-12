@@ -1,5 +1,5 @@
 /*
- *   Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -26,12 +26,17 @@ import graphql.language.SchemaDefinition;
 import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * Contains utils for processing GraphQLSchemaDefinition
+ */
 public class GraphQLSchemaDefinitionUtil {
 
     /**
@@ -51,17 +56,17 @@ public class GraphQLSchemaDefinitionUtil {
                 for (OperationTypeDefinition operationTypeDefinition : operationTypeList) {
                     boolean canAddOperation = entry.getValue().getName()
                             .equalsIgnoreCase(operationTypeDefinition.getTypeName().getName()) &&
-                            (type == null || type.equals(operationTypeDefinition.getName().toUpperCase()));
+                            (type == null || type.equals(operationTypeDefinition.getName().toUpperCase(Locale.ROOT)));
                     if (canAddOperation) {
                         addOperations(entry, operationArray);
                         break;
                     }
                 }
             } else {
-                boolean canAddOperation = (entry.getValue().getName().equalsIgnoreCase(GraphQLConstants.GRAPHQL_QUERY) ||
-                        entry.getValue().getName().equalsIgnoreCase(GraphQLConstants.GRAPHQL_MUTATION)
+                boolean canAddOperation = (entry.getValue().getName().equalsIgnoreCase(GraphQLConstants.GRAPHQL_QUERY)
+                        || entry.getValue().getName().equalsIgnoreCase(GraphQLConstants.GRAPHQL_MUTATION)
                         || entry.getValue().getName().equalsIgnoreCase(GraphQLConstants.GRAPHQL_SUBSCRIPTION)) &&
-                        (type == null || type.equals(entry.getValue().getName().toUpperCase()));
+                        (type == null || type.equals(entry.getValue().getName().toUpperCase(Locale.ROOT)));
                 if (canAddOperation) {
                     addOperations(entry, operationArray);
                 }
@@ -93,7 +98,8 @@ public class GraphQLSchemaDefinitionUtil {
     /**
      * @param entry Entry
      */
-    private static ArrayList<String> addOperations(Map.Entry<String, TypeDefinition> entry, ArrayList<String> operationsArray) {
+    private static ArrayList<String> addOperations(Map.Entry<String, TypeDefinition> entry,
+                                                   ArrayList<String> operationsArray) {
         for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
             operationsArray.add(fieldDef.getName());
         }
