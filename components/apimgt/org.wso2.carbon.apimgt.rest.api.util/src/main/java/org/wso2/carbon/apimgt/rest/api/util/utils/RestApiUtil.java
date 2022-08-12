@@ -1311,7 +1311,11 @@ public class RestApiUtil {
                         portalScopeList.put(entry.getName(), list);
                     }
                 } else {
-                    portalScopeList.put(entry.getName(), list);
+                    if (portalScopeList.containsKey(entry.getName())) {
+                        portalScopeList.get(entry.getName()).set(1, "common");
+                    } else {
+                        portalScopeList.put(entry.getName(), list);
+                    }
                 }
             }
         }
