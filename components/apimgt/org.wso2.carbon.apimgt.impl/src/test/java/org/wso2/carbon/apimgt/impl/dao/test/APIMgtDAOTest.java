@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -90,14 +91,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -1281,6 +1275,218 @@ public class APIMgtDAOTest {
 
     }
 
+    @Test
+    public void testAddAPIEndpoint() throws APIManagementException {
+        //Adding an API with an endpoint should automatically convert it to Unlimited
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/testAddAndGetApi");
+        api.setContextTemplate("/testAddAndGetApi/{version}");
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        api.setUUID(UUID.randomUUID().toString());
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointName("TESTING_ENDPOINT");
+        apiEndpoint.setEndpointUuid(UUID.randomUUID().toString());
+        apiEndpoint.setOrganization("-1234");
+        apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        String createdEndpointUUID = apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+        Assert.assertNotNull(createdEndpointUUID);
+    }
+
+    @Test
+    public void testGetAllAPIEndpoints() throws APIManagementException {
+        //Adding an API with an endpoint should automatically convert it to Unlimited
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/testAddAndGetApi");
+        api.setContextTemplate("/testAddAndGetApi/{version}");
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        // Create First API Endpoint
+        APIEndpointInfo apiEndpointOne = new APIEndpointInfo();
+        apiEndpointOne.setEndpointName("TESTING_ENDPOINT");
+        apiEndpointOne.setEndpointUuid(UUID.randomUUID().toString());
+        apiEndpointOne.setOrganization("-1234");
+        apiEndpointOne.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        String createdEndpointUUIDOne = apiMgtDAO.addAPIEndpoint(apiId, apiEndpointOne);
+        Assert.assertNotNull(createdEndpointUUIDOne);
+
+        // Create Secound API Endpoint
+        APIEndpointInfo apiEndpointTwo = new APIEndpointInfo();
+        apiEndpointTwo.setEndpointName("TESTING_ENDPOINT");
+        apiEndpointTwo.setEndpointUuid(UUID.randomUUID().toString());
+        apiEndpointTwo.setOrganization("-1234");
+        apiEndpointTwo.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        String createdEndpointUUIDTwo = apiMgtDAO.addAPIEndpoint(apiId, apiEndpointOne);
+        Assert.assertNotNull(createdEndpointUUIDTwo);
+
+        List<APIEndpointInfo> apiEndpointInfoList = apiMgtDAO.getAPIEndpoints(apiUUID);
+        Assert.assertNotNull(apiEndpointInfoList);
+        Assert.assertNotEquals(apiEndpointInfoList.size(), 0);
+    }
+
+    @Test
+    public void testGetAPIEndpoint() throws APIManagementException {
+        //Adding an API with an endpoint should automatically convert it to Unlimited
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/testAddAndGetApi");
+        api.setContextTemplate("/testAddAndGetApi/{version}");
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointName("TESTING_ENDPOINT");
+        apiEndpoint.setEndpointUuid(UUID.randomUUID().toString());
+        apiEndpoint.setOrganization("-1234");
+        apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        String createdEndpointUUID = apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+        Assert.assertNotNull(createdEndpointUUID);
+
+        APIEndpointInfo apiEndpointInfo = apiMgtDAO.getAPIEndpoint(apiUUID, createdEndpointUUID);
+        Assert.assertNotNull(apiEndpointInfo);
+    }
+
+    @Test
+    public void testUpdateAPIEndpoint() throws APIManagementException {
+        //Adding an API with an endpoint should automatically convert it to Unlimited
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/testAddAndGetApi");
+        api.setContextTemplate("/testAddAndGetApi/{version}");
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointName("TESTING_ENDPOINT");
+        apiEndpoint.setEndpointUuid(UUID.randomUUID().toString());
+        apiEndpoint.setOrganization("-1234");
+        apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        String createdEndpointUUID = apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+        Assert.assertNotNull(createdEndpointUUID);
+
+        APIEndpointInfo updateAPIEndpoint = apiEndpoint;
+        //SetEndpointConfig
+        Map<String,Object> endpointConfig = new HashMap<>();
+        endpointConfig.put("url", "https://google.lk");
+        endpointConfig.put("timeout", 1000);
+
+        Map<String,Object> endpointSecurity = new HashMap<>();
+        endpointSecurity.put("enabled", true);
+        endpointSecurity.put("username", "test_user");
+        endpointSecurity.put("password", "password123");
+
+        endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+        updateAPIEndpoint.setEndpointConfig(endpointConfig);
+
+        APIEndpointInfo updatedEndpointInfo = apiMgtDAO.updateAPIEndpoint(updateAPIEndpoint);
+        Assert.assertNotNull(updatedEndpointInfo);
+        Assert.assertNotNull(updatedEndpointInfo.getEndpointConfig());
+    }
+
+    @Test
+    public void testDeleteAPIEndpoint() throws APIManagementException {
+        //Adding an API with an endpoint should automatically convert it to Unlimited
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/testAddAndGetApi");
+        api.setContextTemplate("/testAddAndGetApi/{version}");
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointName("TESTING_ENDPOINT");
+        apiEndpoint.setEndpointUuid(UUID.randomUUID().toString());
+        apiEndpoint.setOrganization("-1234");
+        apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        String createdEndpointUUID = apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+        Assert.assertNotNull(createdEndpointUUID);
+
+        try {
+            apiMgtDAO.deleteAPIEndpointByEndpointId(createdEndpointUUID);
+        } catch (APIManagementException e) {
+            Assert.assertNotNull(e.getMessage());
+        }
+    }
+
+    public void testUpdateAPIPrimaryEndpointsMapping() throws APIManagementException {
+        //Adding an API with an endpoint should automatically convert it to Unlimited
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/testAddAndGetApi");
+        api.setContextTemplate("/testAddAndGetApi/{version}");
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointName("TESTING_ENDPOINT");
+        apiEndpoint.setEndpointUuid(UUID.randomUUID().toString());
+        apiEndpoint.setOrganization("-1234");
+        apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        String createdEndpointUUID = apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+        Assert.assertNotNull(createdEndpointUUID);
+
+        api.setPrimarySandboxEndpointId(createdEndpointUUID);
+        //initial primary mapping
+        try {
+            apiMgtDAO.updateAPIPrimaryEndpointsMapping(api);
+        } catch (APIManagementException e) {
+            Assert.assertNotNull(e.getMessage());
+        }
+        //check deletion of primary mapping and getPrimaryEndpoint by Environment
+        try {
+            api.setPrimaryProductionEndpointId(createdEndpointUUID);
+            apiMgtDAO.updateAPIPrimaryEndpointsMapping(api);
+            apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, APIConstants.APIEndpoint.PRODUCTION, null);
+        } catch (APIManagementException e) {
+            Assert.assertNotNull(e.getMessage());
+        }
+
+   }
+
+    @Test
+    public void testHasOperationMapping() throws APIManagementException {
+        //Adding an API with an endpoint should automatically convert it to Unlimited
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/testAddAndGetApi");
+        api.setContextTemplate("/testAddAndGetApi/{version}");
+        api.setStatus(APIConstants.PUBLISHED);
+        api.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        api.setAsDefaultVersion(true);
+        String apiUUID = UUID.randomUUID().toString();
+        api.setUUID(apiUUID);
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointName("TESTING_ENDPOINT");
+        apiEndpoint.setEndpointUuid(UUID.randomUUID().toString());
+        apiEndpoint.setOrganization("-1234");
+        apiEndpoint.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        String createdEndpointUUID = apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+        Assert.assertNotNull(createdEndpointUUID);
+
+        Assert.assertEquals(false, apiMgtDAO.hasOperationMapping(createdEndpointUUID));
+    }
+
     private void deleteSubscriber(int subscriberId) throws APIManagementException {
         Connection conn = null;
         ResultSet rs = null;
@@ -1475,6 +1681,8 @@ public class APIMgtDAOTest {
         GraphqlComplexityInfo graphqlComplexityInfo = apiMgtDAO.getComplexityDetails(uuid);
         assertEquals(2,graphqlComplexityInfo.getList().size());
     }
+
+
 
     private GraphqlComplexityInfo getGraphqlComplexityInfoDetails() {
         GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();

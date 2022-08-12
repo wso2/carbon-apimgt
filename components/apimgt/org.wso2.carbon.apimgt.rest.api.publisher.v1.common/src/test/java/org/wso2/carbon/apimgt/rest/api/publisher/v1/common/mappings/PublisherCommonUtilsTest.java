@@ -34,16 +34,15 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.Mockito.when;
 
@@ -94,6 +93,101 @@ public class PublisherCommonUtilsTest {
             Assert.assertTrue(e.getMessage().contains("Action 'Retire' is not allowed"));
         }
     }
+
+    @Test
+    public void testEncryptEndpointSecurityOAuthCredentialsOnlyUserPass() throws Exception {
+        APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
+        apiEndpointDTO.setName("TESTING_ENDPOINT");
+        apiEndpointDTO.setId("213213-123-21-ee41234");
+        apiEndpointDTO.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        String oldAPISecret = "";
+
+        //User and Pass
+        Map<String,Object> endpointConfigUserPass = new HashMap<>();
+        endpointConfigUserPass.put("url", "https://google.lk");
+        endpointConfigUserPass.put("timeout", 1000);
+
+        Map<String,Object> endpointSecurityUserPass = new HashMap<>();
+        endpointSecurityUserPass.put("enabled", true);
+        endpointSecurityUserPass.put("username", "test_user");
+        endpointSecurityUserPass.put("password", "password123");
+
+        endpointConfigUserPass.put(APIConstants.ENDPOINT_SECURITY, endpointSecurityUserPass);
+        apiEndpointDTO.setEndpointConfig(endpointConfigUserPass);
+        try {
+            //username password check
+            PublisherCommonUtils.encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, oldAPISecret,
+                    endpointConfigUserPass);
+        } catch (APIManagementException | CryptoException e) {
+            Assert.assertNotNull(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testEncryptEndpointSecurityOAuthCredentialsOnlyOAuth() throws Exception {
+        APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
+        apiEndpointDTO.setName("TESTING_ENDPOINT");
+        apiEndpointDTO.setId("213213-123-21-ee41234");
+        apiEndpointDTO.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        String oldAPISecret = "";
+
+        //Oauth 2
+        Map<String,Object> endpointConfigOauth = new HashMap<>();
+        endpointConfigOauth.put("url", "https://google.lk");
+
+        Map<String, String> customParameters= new LinkedHashMap<>();
+        customParameters.put("testingCustomParam", "{}");
+
+        Map<String,Object> endpointSecurityOauth = new HashMap<>();
+        endpointSecurityOauth.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
+        endpointSecurityOauth.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE, APIConstants.OAuthConstants.OAUTH);
+        endpointSecurityOauth.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, "2dawda233wd");
+
+        endpointConfigOauth.put("endpoint_security", endpointSecurityOauth);
+        apiEndpointDTO.setEndpointConfig(endpointConfigOauth);
+        try {
+            // Oauth2 checking
+            PublisherCommonUtils.encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil,
+                    oldAPISecret, endpointConfigOauth);
+        } catch (APIManagementException | CryptoException e) {
+            Assert.assertNotNull(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testEncryptEndpointSecurityOAuthCredentialsOnlyOAuthUpdate() throws Exception {
+        APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
+        apiEndpointDTO.setName("TESTING_ENDPOINT");
+        apiEndpointDTO.setId("213213-123-21-ee41234");
+        apiEndpointDTO.setEndpointType(APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        String oldAPISecret = "sample-secret";
+
+        //Oauth 2 while Update
+        Map<String,Object> endpointConfigOauthUp = new HashMap<>();
+        endpointConfigOauthUp.put("url", "https://google.lk");
+        endpointConfigOauthUp.put("timeout", 1000);
+
+        Map<String,Object> endpointSecurityOauthUp = new HashMap<>();
+        endpointSecurityOauthUp.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, "{}");
+        endpointSecurityOauthUp.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE, APIConstants.OAuthConstants.OAUTH);
+
+        endpointConfigOauthUp.put("endpoint_security", endpointSecurityOauthUp);
+        try {
+            // Oauth2 checking
+            PublisherCommonUtils.encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil,
+                    oldAPISecret, endpointConfigOauthUp);
+        } catch (APIManagementException | CryptoException e) {
+            Assert.assertNotNull(e.getMessage());
+        }
+    }
+
+
 
     private ApiTypeWrapper createMockAPIProduct() {
 
