@@ -546,10 +546,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         } else if (query.toLowerCase().indexOf("type:") < 0) {
             String errorMessage = "Invalid query format";
             RestApiUtil.handleInternalServerError(errorMessage, log);
-        } else if (query.toLowerCase().indexOf("name:") < 0) {
-            String errorMessage = "Invalid query format";
-            RestApiUtil.handleInternalServerError(errorMessage, log);
         }
+
         log.debug("Extracting query info...");
 
         try{

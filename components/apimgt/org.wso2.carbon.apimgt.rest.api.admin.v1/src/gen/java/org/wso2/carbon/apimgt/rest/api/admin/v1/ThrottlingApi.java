@@ -546,7 +546,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     }, tags={ "Unified Search" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying Throttling Policies is returned. ", response = ThrottlePolicyDetailsListDTO.class) })
-    public Response throttlingPolicySearch( @ApiParam(value = "**Search**. You can search by providing a keyword. Allowed to search by type only. ")  @QueryParam("query") String query) throws APIManagementException{
+    public Response throttlingPolicySearch( @ApiParam(value = "**Search**. You can search by providing a keyword. Allowed to search by type and name only. ")  @QueryParam("query") String query) throws APIManagementException{
         return delegate.throttlingPolicySearch(query, securityContext);
     }
 }
