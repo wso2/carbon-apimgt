@@ -98,6 +98,8 @@ public class InMemoryAPIDeployer {
                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
                 addDeployedGraphqlQLToAPI(gatewayAPIDTO);
+                addDeployedAuthorizationHeaderToAPI(gatewayAPIDTO);
+                addDeployedAPISecurityToAPI(gatewayAPIDTO);
                 DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
                 if (debugEnabled) {
                     log.debug("API with " + apiId + " is deployed in gateway with the labels " + String.join(",",
@@ -182,6 +184,8 @@ public class InMemoryAPIDeployer {
                                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
                                 addDeployedGraphqlQLToAPI(gatewayAPIDTO);
+                                addDeployedAuthorizationHeaderToAPI(gatewayAPIDTO);
+                                addDeployedAPISecurityToAPI(gatewayAPIDTO);
                                 DataHolder.getInstance().addKeyManagerToAPIMapping(gatewayAPIDTO.getApiId(),
                                         gatewayAPIDTO.getKeyManagers());
                             }
@@ -264,6 +268,8 @@ public class InMemoryAPIDeployer {
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
                 DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
                 DataHolder.getInstance().removeKeyManagerToAPIMapping(gatewayAPIDTO.getApiId());
+                DataHolder.getInstance().removeAuthorizationHeaderMapping(gatewayAPIDTO.getApiId());
+                DataHolder.getInstance().removeApiToApiSecurityMapping(gatewayAPIDTO.getApiId());
             }
     }
 
@@ -346,6 +352,32 @@ public class InMemoryAPIDeployer {
             GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
             GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
             DataHolder.getInstance().addApiToGraphQLSchemaDTO(apiId, schemaDTO);
+        }
+    }
+
+    /**
+     * Add Authorization header of deployed API to Gateway internal data holder.
+     *
+     * @param gatewayAPIDTO GatewayAPIDTO
+     */
+    private void addDeployedAuthorizationHeaderToAPI(GatewayAPIDTO gatewayAPIDTO) {
+
+        if (gatewayAPIDTO != null && gatewayAPIDTO.getAuthorizationHeader() != null) {
+            String apiId = gatewayAPIDTO.getApiId();
+            DataHolder.getInstance().addApiToAuthorizationHeaderMapping(apiId, gatewayAPIDTO.getAuthorizationHeader());
+        }
+    }
+
+    /**
+     * Add API Security of deployed API to Gateway internal data holder.
+     *
+     * @param gatewayAPIDTO GatewayAPIDTO
+     */
+    private void addDeployedAPISecurityToAPI(GatewayAPIDTO gatewayAPIDTO) {
+
+        if (gatewayAPIDTO != null && gatewayAPIDTO.getApiSecurity() != null) {
+            String apiId = gatewayAPIDTO.getApiId();
+            DataHolder.getInstance().addApiToApiSecurityMapping(apiId, gatewayAPIDTO.getApiSecurity());
         }
     }
 

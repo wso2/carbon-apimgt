@@ -49,6 +49,11 @@ public class GatewayAPIDTO implements Serializable {
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
     private List<String> keyManagers = new ArrayList<>();
+
+    private String authorizationHeader;
+
+    private String apiSecurity;
+
     public String getName() {
 
         return name;
@@ -225,5 +230,21 @@ public class GatewayAPIDTO implements Serializable {
     public void setKeyManagers(List<String> keyManagers) {
 
         this.keyManagers = keyManagers;
+    }
+
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
+    }
+
+    public String getApiSecurity() {
+        return apiSecurity;
+    }
+
+    public void setApiSecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
     }
 }

@@ -32,6 +32,10 @@ public class DataHolder {
     private Map<String, String> googleAnalyticsConfigMap = new HashMap<>();
     private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
+
+    private Map<String, String> apiToAuthorizationHeaderMap = new HashMap<>();
+
+    private Map<String, String> apiToApiSecurityMap = new HashMap<>();
     private boolean isAllApisDeployed = false;
 
     private DataHolder() {
@@ -114,5 +118,31 @@ public class DataHolder {
     public List<String> getKeyManagersFromUUID(String apiUUID) {
 
         return apiToKeyManagersMap.get(apiUUID);
+    }
+
+    public void addApiToAuthorizationHeaderMapping(String uuid, String authorizationHeader) {
+
+        apiToAuthorizationHeaderMap.put(uuid, authorizationHeader);
+    }
+    public void removeAuthorizationHeaderMapping(String uuid) {
+
+        apiToAuthorizationHeaderMap.remove(uuid);
+    }
+    public String getAuthorizationHeaderFromUUID(String apiUUID) {
+
+        return apiToAuthorizationHeaderMap.get(apiUUID);
+    }
+
+    public void addApiToApiSecurityMapping(String uuid, String authorizationHeader) {
+
+        apiToApiSecurityMap.put(uuid, authorizationHeader);
+    }
+    public void removeApiToApiSecurityMapping(String uuid) {
+
+        apiToApiSecurityMap.remove(uuid);
+    }
+    public String getApiSecurityFromUUID(String apiUUID) {
+
+        return apiToApiSecurityMap.get(apiUUID);
     }
 }
