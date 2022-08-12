@@ -28,7 +28,7 @@ public interface TelemetryService {
 
     /**
      * Create and return the initialized tracer for an exporter.
-     * @param serviceName API:Latency.
+     * @param serviceName API:Gateway.
      * @return OpenTelemetry tracer.
      */
     TelemetryTracer buildTelemetryTracer(String serviceName);

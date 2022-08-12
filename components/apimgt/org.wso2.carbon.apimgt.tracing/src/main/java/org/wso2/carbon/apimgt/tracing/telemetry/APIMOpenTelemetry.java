@@ -30,7 +30,7 @@ public interface APIMOpenTelemetry {
     /**
      * Initialize the exporter and configure an openTelemetry instance from it.
      *
-     * @param serviceName API:Latency
+     * @param serviceName API:Gateway
      */
     void init(String serviceName);
 
