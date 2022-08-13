@@ -1680,6 +1680,7 @@ public class APIUtilTest {
         Assert.assertEquals("Test%26123", APIUtil.sanitizeUserRole("Test&123"));
         Assert.assertEquals("Test%26123%26test", APIUtil.sanitizeUserRole("Test&123&test"));
         Assert.assertEquals("Test123", APIUtil.sanitizeUserRole("Test123"));
+        Assert.assertEquals("Role%20A", APIUtil.sanitizeUserRole("Role A"));
     }
 
     @Test

@@ -7450,6 +7450,8 @@ public final class APIUtil {
 
         if (role.contains("&")) {
             return role.replaceAll("&", "%26");
+        } else if (role.contains(" ")) {
+            return role.replaceAll(" ", "%20");
         } else {
             return role;
         }

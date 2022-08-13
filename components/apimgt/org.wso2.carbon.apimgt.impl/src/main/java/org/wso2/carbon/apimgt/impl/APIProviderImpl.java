@@ -5094,7 +5094,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
-            String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+            String[] accessControlRoleList = publisherAccessControlRoles.split(",");
             if (log.isDebugEnabled()) {
                 log.debug("API has restricted access to creators and publishers with the roles : "
                         + Arrays.toString(accessControlRoleList));
