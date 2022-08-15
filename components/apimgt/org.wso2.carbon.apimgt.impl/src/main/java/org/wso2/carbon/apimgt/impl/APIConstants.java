@@ -2928,4 +2928,11 @@ public final class APIConstants {
 
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
+
+    public static class APIEndpoint {
+        public static final String PRODUCTION = "PRODUCTION";
+        public static final String SANDBOX = "SANDBOX";
+        public static final String ENDPOINT_NONE = "none";
+        public static final String ENDPOINT_NONE_NAME = "NoneEndpoint";
+    }
 }

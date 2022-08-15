@@ -212,6 +212,30 @@ public class API implements Serializable {
     private int revisionId;
     
     private String audience;
+    /**
+     * Primary Endpoint of environment Sandbox
+     */
+    private String primarySandboxEndpointId;
+    /**
+     * Primary Endpoint of environment Production
+     */
+    private String primaryProductionEndpointId;
+
+    public String getPrimarySandboxEndpointId() {
+        return primarySandboxEndpointId;
+    }
+
+    public void setPrimarySandboxEndpointId(String primarySandboxEndpointId) {
+        this.primarySandboxEndpointId = primarySandboxEndpointId;
+    }
+
+    public String getPrimaryProductionEndpointId() {
+        return primaryProductionEndpointId;
+    }
+
+    public void setPrimaryProductionEndpointId(String primaryProductionEndpointId) {
+        this.primaryProductionEndpointId = primaryProductionEndpointId;
+    }
 
     public String getAudience() {
         return audience;

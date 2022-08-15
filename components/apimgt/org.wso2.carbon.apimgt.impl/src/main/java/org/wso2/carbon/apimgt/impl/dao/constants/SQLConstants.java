@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -2098,7 +2098,7 @@ public class SQLConstants {
 
     public static final String GET_SUBSCRIPTION_STATUS_SQL =
             "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
-    
+
     public static final String GET_SUBSCRIPTION_ID_SQL =
             "SELECT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
 
@@ -3557,8 +3557,9 @@ public class SQLConstants {
         public static final String ADD_API_REVISION =
                 " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY, CREATED_TIME)" +
                         " VALUES (?,?,?,?,?,?)";
+        //TODO edited
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
-                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID " +
+                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID, AUM.URL_MAPPING_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
@@ -3665,7 +3666,7 @@ public class SQLConstants {
         public static final String REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING =
                 "DELETE FROM AM_API_URL_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_REVISION_UUID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
-                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID " +
+                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID, AUM.URL_MAPPING_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID = ?";
@@ -3811,6 +3812,8 @@ public class SQLConstants {
                 "   UUID = ? AND TENANT_ID = ?";
 
     }
+
+
 
     /**
      * Static class to hold database queries related to AM_API_OPERATION_POLICY_MAPPING table
@@ -4030,4 +4033,168 @@ public class SQLConstants {
                 + "SET CONFIGURATION = ? WHERE ORGANIZATION = ? AND CONFIG_TYPE = ?";
     }
 
+    /**
+     * Static class to hold database query related to AM_API_ENDPOINTS
+     */
+    public static class APIEndpointsSQLConstants {
+        public static final String GET_ALL_API_ENDPOINTS_BY_API_UUID =
+                " SELECT " +
+                        "   AMAE.ENDPOINT_UUID," +
+                        "   AMAE.REVISION_UUID," +
+                        "   AMAE.ENDPOINT_NAME," +
+                        "   AMAE.ENDPOINT_TYPE," +
+                        "   AMAE.ENDPOINT_CONFIG," +
+                        "   AMAE.ORGANIZATION" +
+                        " FROM " +
+                        "   AM_API_ENDPOINTS  AMAE" +
+                        " WHERE " +
+                        "   AMAE.API_ID = ? AND AMAE.ENDPOINT_NAME != ? AND REVISION_UUID IS NULL";
+
+        public static final String GET_ALL_API_ENDPOINTS_BY_API_UUID_REVISION_SQL =
+                " SELECT " +
+                        "   AMAE.ENDPOINT_UUID," +
+                        "   AMAE.REVISION_UUID," +
+                        "   AMAE.ENDPOINT_NAME," +
+                        "   AMAE.ENDPOINT_TYPE," +
+                        "   AMAE.ENDPOINT_CONFIG," +
+                        "   AMAE.ORGANIZATION" +
+                        " FROM " +
+                        "   AM_API_ENDPOINTS  AMAE" +
+                        " WHERE " +
+                        "   AMAE.API_ID = ? AND AMAE.ENDPOINT_NAME != ? AND AMAE.REVISION_UUID = ?";
+
+
+        public static final String GET_API_ENDPOINT_BY_API_UUID_AND_ENDPOINT_UUID =
+                " SELECT " +
+                        "   AMAE.ENDPOINT_UUID," +
+                        "   AMAE.REVISION_UUID," +
+                        "   AMAE.ENDPOINT_NAME," +
+                        "   AMAE.ENDPOINT_TYPE," +
+                        "   AMAE.ENDPOINT_CONFIG," +
+                        "   AMAE.ORGANIZATION" +
+                        " FROM " +
+                        "   AM_API_ENDPOINTS  AMAE" +
+                        " WHERE " +
+                        "   AMAE.API_ID = ? AND" +
+                        "   AMAE.ENDPOINT_UUID = ? AND REVISION_UUID IS NULL";
+
+        public static final String DELETE_API_ENDPOINT_BY_ID =
+                "DELETE FROM AM_API_ENDPOINTS WHERE ENDPOINT_UUID = ? AND REVISION_UUID IS NULL";
+
+        public static final String DELETE_CURRENT_API_ENDPOINTS =
+                "DELETE FROM AM_API_ENDPOINTS WHERE API_ID = ? AND ENDPOINT_NAME != ? AND REVISION_UUID IS NULL";
+
+        public static final String GET_ENDPOINT_ID_SQL_BY_ENDPOINT_UUID =
+                "SELECT " +
+                        "AMAE.ENDPOINT_ID " +
+                        "FROM AM_API_ENDPOINTS AMAE " +
+                        "WHERE AMAE.ENDPOINT_UUID = ? AND AMAE.REVISION_UUID IS NULL";
+
+        public static final String GET_ENDPOINT_ID_SQL_BY_ENDPOINT_UUID_REVISION_SQL =
+                "SELECT " +
+                        "AMAE.ENDPOINT_ID " +
+                        "FROM AM_API_ENDPOINTS AMAE " +
+                        "WHERE AMAE.ENDPOINT_UUID = ? AND AMAE.REVISION_UUID = ?";
+
+        public static final String GET_NONE_ENDPOINT_ID_SQL_BY_API_ID =
+                "SELECT " +
+                        "AMAE.ENDPOINT_ID " +
+                        "FROM AM_API_ENDPOINTS AMAE " +
+                        "WHERE AMAE.API_ID = ? AND AMAE.ENDPOINT_NAME = ?";
+
+        public static final String UPDATE_API_ENDPOINT_BY_UUID = "UPDATE " +
+                " AM_API_ENDPOINTS " +
+                " SET " +
+                " ENDPOINT_NAME = ?, ENDPOINT_CONFIG = ?, ORGANIZATION = ? " +
+                " WHERE " +
+                " ENDPOINT_UUID = ? AND REVISION_UUID IS NULL";
+
+        public static final String ADD_NEW_API_ENDPOINT = " INSERT INTO " +
+                "AM_API_ENDPOINTS " +
+                "(API_ID, " +
+                "ENDPOINT_UUID, " +
+                "REVISION_UUID, " +
+                "ENDPOINT_NAME, " +
+                "ENDPOINT_TYPE, " +
+                "ENDPOINT_CONFIG, ORGANIZATION) " +
+                "VALUES(?,?,?,?,?,?,?)";
+
+        public static final String ADD_NEW_OPERATION_ENDPOINT_MAPPING = " INSERT INTO " +
+                "AM_API_OPERATION_ENDPOINT_MAPPING " +
+                "(URL_MAPPING_ID, " +
+                "ENDPOINT_ID, " +
+                "ENVIRONMENT) " +
+                "VALUES(?,?,?)";
+
+        public static final String GET_API_ENDPOINT_ID_BY_URL_MAPPING_ID_AND_ENV = "SELECT ENDPOINT_ID " +
+                "FROM AM_API_OPERATION_ENDPOINT_MAPPING AMOEM " +
+                "WHERE " +
+                "AMOEM.URL_MAPPING_ID = ? AND " +
+                "AMOEM.ENVIRONMENT = ? ";
+
+        public static final String GET_API_ENDPOINT_UUID_SQL_BY_ENDPOINT_ID =
+                "SELECT " +
+                        "AMAE.ENDPOINT_UUID, " +
+                        "AMAE.ENDPOINT_NAME " +
+                        "FROM AM_API_ENDPOINTS AMAE " +
+                        "WHERE AMAE.ENDPOINT_ID = ?";
+
+        public static final String GET_OPERATION_ENDPOINTS_OF_API_SQL = "SELECT  " +
+                "AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, AUM.REVISION_UUID, AMAE.ENDPOINT_UUID, " +
+                "AOEM.ENDPOINT_ID, AOEM.ENVIRONMENT, AMAE.ENDPOINT_NAME FROM  AM_API_URL_MAPPING AUM  " +
+                "INNER JOIN AM_API_OPERATION_ENDPOINT_MAPPING AOEM ON AUM.URL_MAPPING_ID = AOEM.URL_MAPPING_ID " +
+                "LEFT JOIN AM_API_ENDPOINTS AMAE ON AMAE.ENDPOINT_ID = AOEM.ENDPOINT_ID  " +
+                "WHERE AUM.API_ID = ? " +
+                "AND  AUM.REVISION_UUID IS NULL ORDER BY AUM.URL_MAPPING_ID ASC";
+
+        public static final String GET_OPERATION_ENDPOINTS_OF_API_REVISION_SQL = "SELECT  " +
+                "AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD, AUM.REVISION_UUID, AMAE.ENDPOINT_UUID, " +
+                "AOEM.ENDPOINT_ID, AOEM.ENVIRONMENT, AMAE.ENDPOINT_NAME FROM  AM_API_URL_MAPPING AUM  " +
+                "INNER JOIN AM_API_OPERATION_ENDPOINT_MAPPING AOEM ON AUM.URL_MAPPING_ID = AOEM.URL_MAPPING_ID " +
+                "LEFT JOIN AM_API_ENDPOINTS AMAE ON AMAE.ENDPOINT_ID = AOEM.ENDPOINT_ID  " +
+                "WHERE AUM.API_ID = ? " +
+                "AND  AUM.REVISION_UUID = ? ORDER BY AUM.URL_MAPPING_ID ASC";
+
+        public static final String GET_MAPPED_API_ENDPOINTS_IDS = "SELECT " +
+                "AMAE.ENDPOINT_ID " +
+                "FROM AM_API_ENDPOINTS AMAE INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM " +
+                "ON AMPM.ENDPOINT_ID = AMAE.ENDPOINT_ID " +
+                "WHERE AMAE.API_ID = ? AND AMAE.REVISION_UUID IS NULL";
+
+        public static final String DELETE_PRIMARY_ENDPOINT_MAPPING =
+                "DELETE FROM AM_API_PRIMARY_ENDPOINT_MAPPING WHERE ENDPOINT_ID = ?";
+
+        public static final String ADD_PRIMARY_ENDPOINT_MAPPING = " INSERT INTO " +
+                "AM_API_PRIMARY_ENDPOINT_MAPPING " +
+                "(API_ID, " +
+                "ENDPOINT_ID, " +
+                "ENVIRONMENT) " +
+                "VALUES(?,?,?)";
+
+        public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_ID_AND_ENV = "SELECT AME.ENDPOINT_UUID " +
+                "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM " +
+                "ON AMPM.ENDPOINT_ID = AME.ENDPOINT_ID " +
+                "WHERE " +
+                "AME.API_ID = ? " +
+                "AND AME.REVISION_UUID IS NULL " +
+                "AND AMPM.ENVIRONMENT = ?";
+
+
+        public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_ID_AND_ENV_REVISION =
+                "SELECT AME.ENDPOINT_UUID " +
+                        "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM " +
+                        "ON AMPM.ENDPOINT_ID = AME.ENDPOINT_ID " +
+                        "WHERE " +
+                        "AME.API_ID = ? " +
+                        "AND AME.REVISION_UUID = ? " +
+                        "AND AMPM.ENVIRONMENT = ?";
+
+        public static final String CHECK_AN_ENDPOINT_HAS_OPERATION_MAPPING = "SELECT AMAE.ENDPOINT_ID " +
+                "FROM AM_API_ENDPOINTS AMAE INNER JOIN " +
+                "AM_API_OPERATION_ENDPOINT_MAPPING AOEM ON AMAE.ENDPOINT_ID = AOEM.ENDPOINT_ID " +
+                "WHERE AMAE.ENDPOINT_UUID = ? AND AMAE.REVISION_UUID IS NULL";
+
+        public static final String DELETE_API_ENDPOINTS_BY_API_ID_AND_REVISION_UUID =
+                "DELETE FROM AM_API_ENDPOINTS WHERE API_ID = ? AND REVISION_UUID = ? ";
+    }
 }

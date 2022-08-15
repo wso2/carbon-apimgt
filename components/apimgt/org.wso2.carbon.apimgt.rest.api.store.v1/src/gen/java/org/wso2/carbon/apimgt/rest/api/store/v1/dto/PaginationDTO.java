@@ -51,7 +51,7 @@ public class PaginationDTO   {
   }
 
   
-  @ApiModelProperty(example = "1", value = "")
+  @ApiModelProperty(example = "10", value = "")
   @JsonProperty("limit")
   public Integer getLimit() {
     return limit;
@@ -68,7 +68,7 @@ public class PaginationDTO   {
   }
 
   
-  @ApiModelProperty(example = "10", value = "")
+  @ApiModelProperty(example = "1", value = "")
   @JsonProperty("total")
   public Integer getTotal() {
     return total;
@@ -78,7 +78,7 @@ public class PaginationDTO   {
   }
 
   /**
-   * Link to the next subset of resources qualified. Empty if no more resources are to be returned. example: \&quot;\&quot; 
+   * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
    **/
   public PaginationDTO next(String next) {
     this.next = next;
@@ -86,7 +86,7 @@ public class PaginationDTO   {
   }
 
   
-  @ApiModelProperty(value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. example: \"\" ")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -96,7 +96,7 @@ public class PaginationDTO   {
   }
 
   /**
-   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. example: \&quot;\&quot; 
+   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
    **/
   public PaginationDTO previous(String previous) {
     this.previous = previous;
@@ -104,7 +104,7 @@ public class PaginationDTO   {
   }
 
   
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. example: \"\" ")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;

@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
@@ -28,6 +27,7 @@ import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
 import com.amazonaws.services.lambda.model.ListFunctionsResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -97,7 +98,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -253,6 +253,38 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (URISyntaxException e) {
             throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
+        }
+        return null;
+    }
+
+    @Override
+    public Response addApiEndpoint(String apiId, APIEndpointDTO apiEndpointDTO, MessageContext messageContext)
+            throws APIManagementException {
+        //validate if api exists
+        validateAPIExistence(apiId);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String createdAPIEndpointId = PublisherCommonUtils.addAPIEndpoint
+                    (apiId, apiEndpointDTO, organization, apiProvider);
+            APIEndpointInfo createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId);
+            APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint);
+            removeAPIEndpointSecrets(createdAPIEndpointDTO);
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
+                    + RestApiConstants.RESOURCE_PATH_API_ENDPOINT + "/" + createdAPIEndpointId;
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(createdAPIEndpointDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add endpoint to the API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("Error while retrieving endpoint location for API " + apiId);
+        } catch (CryptoException e) {
+            String errorMessage = "Error while encrypting the secret key of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -451,6 +483,51 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Delete API Endpoint by UUID.
+     *
+     * @param apiId         api identification UUID
+     * @param endpointUuid    endpointUUID
+     * @return Status of API Endpoint Deletion
+     */
+    @Override
+    public Response deleteApiEndpoint(String apiId, String endpointUuid, MessageContext messageContext)
+            throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            //validate if api exists
+            validateAPIExistence(apiId);
+            //validate API Endpoint
+            APIEndpointInfo existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid);
+            if (existingApiEndpoint != null) {
+                if (!(apiProvider.hasOperationMapping(endpointUuid))) {
+                    apiProvider.deleteAPIEndpointById(endpointUuid);
+                    if (log.isDebugEnabled()) {
+                        log.debug("The API endpoint " + endpointUuid + " has been deleted from the the API " + apiId);
+                    }
+                } else {
+                    throw new APIManagementException("Could not delete endpoint : " + endpointUuid + " for API " +
+                            apiId, ExceptionCodes.ENDPOINT_HAS_MAPPING_WITH_RESOURCES);
+                }
+                return Response.ok().build();
+            } else {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing API Endpoint with ID: "
+                        + endpointUuid + " for API with UUID " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.API_ENDPOINT_NOT_FOUND, endpointUuid));
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_API_ENDPOINTS,
+                        endpointUuid, e, log);
+            } else {
+                String errorMessage = "Error while deleting the API specific API endpoint with ID :" +
+                        endpointUuid + " for API " + apiId + " " + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Get complexity details of a given API
      *
      * @param apiId          apiId
@@ -545,6 +622,43 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while updating complexity details of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Response updateApiEndpoint(String apiId, String endpointId, APIEndpointDTO apIEndpointDTO,
+                                      MessageContext messageContext) throws APIManagementException {
+        try {
+            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                throw new APIManagementException("Cannot Update API Endpoint in Revision View : " + endpointId,
+                        ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
+            }
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            //validate if api exists
+            validateAPIExistence(apiId);
+            PublisherCommonUtils.updateAPIEndpoint(apiId, endpointId, apIEndpointDTO, organization, apiProvider);
+            APIEndpointInfo updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId);
+            APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint);
+            removeAPIEndpointSecrets(updatedAPIEndpointDTO);
+            return Response.ok().entity(updatedAPIEndpointDTO).build();
+        } catch (APIManagementException | JsonProcessingException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving schema of API: "
+                        + apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating Endpoint of the API: " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (CryptoException e) {
+            String errorMessage = "Error while encrypting the secret key of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -807,6 +921,58 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 String msg = "Error while retrieving types and fields of the schema of API " + apiId;
                 RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response getApiEndpoint(String apiId, String endpointId, MessageContext messageContext)
+            throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            //validate if api exists
+            validateAPIExistence(apiId);
+            //get API endpoint by UUID
+            APIEndpointDTO apiEndpointDTO = PublisherCommonUtils.getAPIEndpoint(apiId, endpointId, apiProvider);
+            removeAPIEndpointSecrets(apiEndpointDTO);
+            return Response.ok().entity(apiEndpointDTO).build();
+        } catch (APIManagementException | JsonProcessingException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving resource paths of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving endpoint of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response getApiEndpoints(String apiId, Integer limit, Integer offset, MessageContext messageContext)
+            throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            //validate if api exists
+            validateAPIExistence(apiId);
+            //get API endpoints
+            APIEndpointListDTO apiEndpointListDTO = PublisherCommonUtils.getApiEndpoints(apiId, apiProvider);
+            for (APIEndpointDTO apiEndpointDTO : apiEndpointListDTO.getList()) {
+                removeAPIEndpointSecrets(apiEndpointDTO);
+            }
+            return Response.ok().entity(apiEndpointListDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving resource paths of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API endpoints of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
         return null;
@@ -4879,6 +5045,39 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // if apiProvider.getEnvironment(organization, envId) return null, it will throw an exception
         apiProvider.getEnvironment(organization, envId);
+    }
+
+    private void removeAPIEndpointSecrets(APIEndpointDTO apiEndpointDTO) throws APIManagementException {
+        Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
+        if (endpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY)) {
+            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+            Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+
+            try {
+                //decrypt if oath 2.0 endpoint security
+                if (endpointSecurity.containsKey(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)) {
+                    endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, cryptoUtil.
+                            base64DecodeAndDecrypt((String) endpointSecurity.
+                                    get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)));
+                }
+
+                //remove password from endpoint security
+                if (endpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD)) {
+                    endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD, "");
+                }
+            } catch (CryptoException e) {
+                String errorMessage =
+                        "Error while decrypting the secret key of API Endpoint ID : " + apiEndpointDTO.getId();
+                throw new APIManagementException(errorMessage, e);
+            }
+            endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+            apiEndpointDTO.setEndpointConfig(endpointConfig);
+        }
+
+        //remove AMZN secret key
+        if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
+        }
     }
 
 }

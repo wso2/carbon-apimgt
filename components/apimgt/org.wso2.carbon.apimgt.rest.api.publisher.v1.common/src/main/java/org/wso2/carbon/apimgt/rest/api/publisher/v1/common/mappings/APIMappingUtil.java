@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
@@ -71,6 +72,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO.AudienceEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
@@ -424,6 +427,10 @@ public class APIMappingUtil {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
         }
+
+        //Set primary endpoint mapping
+        model.setPrimaryProductionEndpointId(dto.getPrimaryProductionEndpointId());
+        model.setPrimarySandboxEndpointId(dto.getPrimarySandboxEndpointId());
 
         return model;
     }
@@ -1086,6 +1093,9 @@ public class APIMappingUtil {
             //have to set them back from the original API model.
             setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
 
+            //set each operation endpoint to each operation
+            setOperationEndpointsToOperationsDTO(model, apiOperationsDTO);
+
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1270,6 +1280,9 @@ public class APIMappingUtil {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
 
+        //set primary endpoints
+        dto.setPrimaryProductionEndpointId(model.getPrimaryProductionEndpointId());
+        dto.setPrimarySandboxEndpointId(model.getPrimarySandboxEndpointId());
         return dto;
     }
 
@@ -1583,6 +1596,10 @@ public class APIMappingUtil {
                     template.setOperationPolicies(OperationPolicyMappingUtil
                             .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies()));
                 }
+                //Add operation mapping endpoint UUIDs to template
+                template.setSandboxEndpoint(operation.getSandBoxEndpointId());
+                template.setProductionEndpoint(operation.getProductionEndpointId());
+
                 uriTemplates.add(template);
             } else {
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
@@ -1692,107 +1709,6 @@ public class APIMappingUtil {
         }
         return scopeSet;
     }
-//
-//    /**
-//     * This method returns endpoints according to the given endpoint config
-//     *
-//     * @param endpoints endpoints given
-//     * @return String endpoint config
-//     */
-//    public static String getEndpointConfigString(List<APIEndpointDTO> endpoints) {
-//        //todo improve this logic to support multiple endpoints such as failorver and load balance
-//        StringBuilder sb = new StringBuilder();
-//        if (endpoints != null && endpoints.size() > 0) {
-//            sb.append("{");
-//            for (APIEndpointDTO endpoint : endpoints) {
-//                sb.append("\"")
-//                        .append(endpoint.getType())
-//                        .append("\": {\"url\":\"")
-//                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
-//                        .append("\",\"timeout\":\"")
-//                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
-//                        .append("\"},");
-//            }
-//            sb.append("\"endpoint_type\" : \"")
-//                    .append(endpoints.get(0).getInline().getType())//assuming all the endpoints are same type
-//                    .append("\"}\n");
-//        }
-//        return sb.toString();
-//    }
-
-//    private static EndpointEndpointConfigDTO getEndpointEndpointConfigDTO(EndpointEndpointConfig
-//    endpointEndpointConfig) {
-//
-//        //map to EndpointEndpointConfig model to EndpointEndpointConfigDTO
-//        EndpointEndpointConfigDTO endpointEndpointConfigDTO = new EndpointEndpointConfigDTO();
-//        switch (endpointEndpointConfig.getEndpointType()) {
-//            case SINGLE:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.SINGLE);
-//            case LOAD_BALANCED:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.LOAD_BALANCED);
-//            case FAIL_OVER:
-//                endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.FAIL_OVER);
-//        }
-//        List<EndpointConfigDTO> endpointConfigDTOList = new ArrayList<>();
-//        for (EndpointConfig endpointConfig : endpointEndpointConfig.getList()) {
-//            EndpointConfigDTO endpointConfigDTO = new EndpointConfigDTO();
-//            endpointConfigDTO.setUrl(endpointConfig.getUrl());
-//            endpointConfigDTO.setTimeout(endpointConfig.getTimeout());
-//
-//            //map EndpointConfigAttributes model to EndpointConfigAttributesDTO
-//            List<EndpointConfigAttributesDTO> endpointConfigAttributesList = new ArrayList<>();
-//            for (EndpointConfigAttributes endpointConfigAttributes : endpointConfig.getAttributes()) {
-//                EndpointConfigAttributesDTO endpointConfigAttributeDTO = new EndpointConfigAttributesDTO();
-//                endpointConfigAttributeDTO.setName(endpointConfigAttributes.getName());
-//                endpointConfigAttributeDTO.setValue(endpointConfigAttributes.getValue());
-//                endpointConfigAttributesList.add(endpointConfigAttributeDTO);
-//            }
-//            endpointConfigDTO.setAttributes(endpointConfigAttributesList);
-//            endpointConfigDTOList.add(endpointConfigDTO);
-//        }
-//        endpointEndpointConfigDTO.setList(endpointConfigDTOList);
-//        return endpointEndpointConfigDTO;
-//    }
-//
-//    /**
-//     * This method converts Endpoint:EndpontConfig DTO to corresponding model
-//     *
-//     * @param apiEndpointDTO1 egiven endpoint config
-//     * @param type            given endpoint type  SINGLE,  LOAD_BALANCED,  FAIL_OVER
-//     * @return EndpointConfig model
-//     */
-//    private EndpointEndpointConfig getEndpointEndpointConfigModel(EndpointEndpointConfigDTO apiEndpointDTO1,
-//                                                                  EndpointEndpointConfig.EndpointTypeEnum type) {
-//
-//        //mapping properties in EndpointConfigDTO to EndpointConfig model
-//        List<EndpointConfig> configList = new ArrayList<>();
-//        for (EndpointConfigDTO endpointConfigDTO : apiEndpointDTO1.getList()) {
-//            EndpointConfig endpointConfig1 = new EndpointConfig();
-//            endpointConfig1.setUrl(endpointConfigDTO.getUrl());
-//            endpointConfig1.setTimeout(endpointConfigDTO.getTimeout());
-//
-//            //mapping attributes in EndpointConfigAttributesDTO to EndpointConfigAttributes model
-//            List<EndpointConfigAttributes> endpointConfigAttributesList = new ArrayList<>();
-//            for (EndpointConfigAttributesDTO endpointConfigAttributesDTO : endpointConfigDTO.getAttributes()) {
-//                EndpointConfigAttributes endpointConfigAttribute = new EndpointConfigAttributes();
-//                endpointConfigAttribute.setName(endpointConfigAttributesDTO.getName());
-//                endpointConfigAttribute.setValue(endpointConfigAttributesDTO.getValue());
-//
-//                endpointConfigAttributesList.add(endpointConfigAttribute);
-//            }
-//
-//            endpointConfig1.setAttributes(endpointConfigAttributesList);
-//            configList.add(endpointConfig1);
-//        }
-//
-//        //mapping properties in EndpointEndpointConfigDTO to EndpointEndpointConfig model
-//        EndpointEndpointConfig endpointConfig = new EndpointEndpointConfig();
-//        endpointConfig.setEndpointType(type);
-//        endpointConfig.setList(configList);
-//
-//        return endpointConfig;
-//
-//    }
 
     /**
      * This method returns api security scheme as a comma seperated string.
@@ -2054,6 +1970,30 @@ public class APIMappingUtil {
     }
 
     /**
+     * Reads operation-endpoints from the API object passed in, and sets them back to the API Operations DTO.
+     *
+     * @param api
+     * @param apiOperationsDTO
+     */
+    private static void setOperationEndpointsToOperationsDTO(API api, List<APIOperationsDTO> apiOperationsDTO) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+        Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb();
+            uriTemplateMap.put(key, uriTemplate);
+        }
+
+        for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
+            String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
+            String sandboxEndpoint = uriTemplateMap.get(key).getSandboxEndpoint();
+            String productionEndpoint = uriTemplateMap.get(key).getProductionEndpoint();
+            operationsDTO.setSandBoxEndpointId(sandboxEndpoint);
+            operationsDTO.setProductionEndpointId(productionEndpoint);
+        }
+    }
+
+    /**
      * Converts a URI template object to a REST API DTO.
      *
      * @param uriTemplate URI Template object
@@ -2081,6 +2021,8 @@ public class APIMappingUtil {
         operationsDTO.setOperationPolicies(
                 OperationPolicyMappingUtil.fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
+        operationsDTO.setProductionEndpointId(uriTemplate.getProductionEndpoint());
+        operationsDTO.setSandBoxEndpointId(uriTemplate.getSandboxEndpoint());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
 
@@ -2518,7 +2460,8 @@ public class APIMappingUtil {
                 template.setUriTemplate(resourceItem.getTarget());
                 template.setOperationPolicies(OperationPolicyMappingUtil
                         .fromDTOToAPIOperationPoliciesList(resourceItem.getOperationPolicies()));
-
+                template.setProductionEndpoint(resourceItem.getProductionEndpointId());
+                template.setSandboxEndpoint(resourceItem.getSandBoxEndpointId());
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());
                 resource.setUriTemplate(template);
@@ -3051,4 +2994,43 @@ public class APIMappingUtil {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.parse(time);
     }
+
+    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<APIEndpointInfo> apiEndpoints)
+            throws APIManagementException {
+        APIEndpointListDTO apiEndpointListDTO = new APIEndpointListDTO();
+        List<APIEndpointDTO> apiEndpointDTOs = new ArrayList<>();
+        for (APIEndpointInfo apiEndpoint : apiEndpoints) {
+            apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint));
+        }
+        apiEndpointListDTO.setCount(apiEndpointDTOs.size());
+        apiEndpointListDTO.setList(apiEndpointDTOs);
+        return apiEndpointListDTO;
+    }
+
+    public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint) throws APIManagementException {
+        APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
+        apiEndpointDTO.setId(apiEndpoint.getEndpointUuid());
+        apiEndpointDTO.setName(apiEndpoint.getEndpointName());
+        apiEndpointDTO.setEndpointType(apiEndpoint.getEndpointType());
+        apiEndpointDTO.setEndpointConfig(apiEndpoint.getEndpointConfig());
+        return apiEndpointDTO;
+    }
+
+    public static APIEndpointInfo fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)
+            throws APIManagementException {
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointUuid(apiEndpointDTO.getId());
+        apiEndpoint.setEndpointName(apiEndpointDTO.getName());
+        apiEndpoint.setEndpointType(apiEndpointDTO.getEndpointType());
+        try {
+            HashMap endpointConfigHashMap = (HashMap) apiEndpointDTO.getEndpointConfig();
+            apiEndpoint.setEndpointConfig(endpointConfigHashMap);
+        } catch (ClassCastException e) {
+            throw new APIManagementException("Endpoint Config is missing of API Endpoint.",
+                    ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
+        }
+        apiEndpoint.setOrganization(organization);
+        return apiEndpoint;
+    }
+
 }

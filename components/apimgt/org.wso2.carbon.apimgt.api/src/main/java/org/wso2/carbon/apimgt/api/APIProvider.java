@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
@@ -1438,6 +1439,28 @@ public interface APIProvider extends APIManager {
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
 
     /**
+     * Get Endpoint details by providing API UUID if it is revision UUID of an API it returns the revision
+     * endpoint details.
+     *
+     * @param uuid      Unique Identifier of API
+     * @return List<APIEndpointInfo> Object
+     * @throws APIManagementException if an error occurs while retrieving endpoints details
+     */
+    List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get Endpoint details by providing API UUID and Endpoint UUID.
+     * We could not fetch endpoint details by only using endpoint UUID because endpoints also have revision
+     * endpoint UUID is similar to an endpoint which can have different revisions.
+     *
+     * @param apiUUID      Unique Identifier of API
+     * @param endpointUUID      Unique Identifier of Endpoint
+     * @return APIEndpointInfo Object
+     * @throws APIManagementException if an error occurs while retrieving endpoint details
+     */
+    APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException;
+
+    /**
      * Set existing operation policy mapping to the URI Templates
      *
      * @param apiId        API UUID
@@ -1598,6 +1621,34 @@ public interface APIProvider extends APIManager {
     void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
 
     /**
+     * Insert new endpoint for an API.
+     *
+     * @param apiUUID Unique identifier of API
+     * @param apiEndpoint New Endpoint payload object
+     * @return created endpoint UUID String Object
+     * @throws APIManagementException if an error occurs while inserting endpoint detail.
+     */
+    String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException;
+
+    /**
+     * Delete an API endpoint by providing the endpoint ID.
+     *
+     * @param endpointUUID     API Endpoint UUID
+     * @throws APIManagementException
+     */
+    void deleteAPIEndpointById(String endpointUUID) throws APIManagementException;
+
+    /**
+     *  Update an endpoint by providing the endpoint ID.
+     *
+     * @param apiEndpoint  Endpoint with updated details
+     * @return
+     * @throws APIManagementException
+     */
+    APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint) throws APIManagementException;
+
+    /**
+     *
      * Load the mediation policies if exists to the API. If a mediation policy is defined in the object under keys
      * inSequence, outSequence or faultSequence, this method will search in the registry for a such sequence and
      * populate the inSequenceMediation, outSequenceMediation or faultSequenceMediation attributes with a mediation
@@ -1616,6 +1667,15 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
+
+    /**
+     * Set Operation endpoints to URI Templates.
+     *
+     * @param apiId  Unique Identifier of  an API
+     * @param uriTemplates Set of URI Templates
+     * @throws APIManagementException
+     */
+    void setOperationEndpointsToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
 
     /**
      * Returns details of an APIProduct
@@ -1647,4 +1707,12 @@ public interface APIProvider extends APIManager {
      */
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
+    /**
+     * Check whether the endpoint has an operation mapping.
+     *
+     * @param endpointUuid
+     * @return true if it has at least one mapping
+     * @throws APIManagementException
+     */
+    boolean hasOperationMapping(String endpointUuid) throws APIManagementException;
 }

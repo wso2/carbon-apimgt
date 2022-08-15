@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -6,7 +6,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,22 +22,22 @@ import javax.validation.Valid;
 
 
 
-public class SearchResultListDTO   {
+public class APIEndpointListDTO   {
   
     private Integer count = null;
-    private List<Object> list = new ArrayList<Object>();
+    private List<APIEndpointDTO> list = new ArrayList<APIEndpointDTO>();
     private PaginationDTO pagination = null;
 
   /**
-   * Number of results returned. 
+   * Number of Resource Endpoints returned. 
    **/
-  public SearchResultListDTO count(Integer count) {
+  public APIEndpointListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "Number of results returned. ")
+  @ApiModelProperty(example = "1", value = "Number of Resource Endpoints returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -47,24 +48,25 @@ public class SearchResultListDTO   {
 
   /**
    **/
-  public SearchResultListDTO list(List<Object> list) {
+  public APIEndpointListDTO list(List<APIEndpointDTO> list) {
     this.list = list;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[{\"id\":\"abcff4cf-24c5-4298-a7b4-39a1fbd34693\",\"name\":\"PizzaShackAPI\",\"type\":\"API\",\"transportType\":null,\"description\":null,\"context\":\"/pizzashack\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"status\":\"PUBLISHED\",\"thumbnailUri\":null,\"businessInformation\":{\"businessOwner\":\"Jane Roe\",\"businessOwnerEmail\":\"businessowner@wso2.com\",\"technicalOwner\":\"John Doe\",\"technicalOwnerEmail\":\"technicalowner@wso2.com\"},\"avgRating\":\"4.0\"}]", value = "")
+  @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
-  public List<Object> getList() {
+  public List<APIEndpointDTO> getList() {
     return list;
   }
-  public void setList(List<Object> list) {
+  public void setList(List<APIEndpointDTO> list) {
     this.list = list;
   }
 
   /**
    **/
-  public SearchResultListDTO pagination(PaginationDTO pagination) {
+  public APIEndpointListDTO pagination(PaginationDTO pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -89,10 +91,10 @@ public class SearchResultListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SearchResultListDTO searchResultList = (SearchResultListDTO) o;
-    return Objects.equals(count, searchResultList.count) &&
-        Objects.equals(list, searchResultList.list) &&
-        Objects.equals(pagination, searchResultList.pagination);
+    APIEndpointListDTO apIEndpointList = (APIEndpointListDTO) o;
+    return Objects.equals(count, apIEndpointList.count) &&
+        Objects.equals(list, apIEndpointList.list) &&
+        Objects.equals(pagination, apIEndpointList.pagination);
   }
 
   @Override
@@ -103,7 +105,7 @@ public class SearchResultListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SearchResultListDTO {\n");
+    sb.append("class APIEndpointListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

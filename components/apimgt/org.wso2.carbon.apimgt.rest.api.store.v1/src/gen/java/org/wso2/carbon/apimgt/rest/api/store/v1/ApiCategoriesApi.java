@@ -43,7 +43,7 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "API Category (Collection)" })
+    }, tags={ "API Categories" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Categories returned ", response = APICategoryListDTO.class) })
     public Response apiCategoriesGet( @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{

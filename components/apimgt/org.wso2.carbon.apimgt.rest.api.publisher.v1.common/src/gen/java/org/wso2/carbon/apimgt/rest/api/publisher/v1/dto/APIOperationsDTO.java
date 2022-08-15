@@ -33,6 +33,8 @@ public class APIOperationsDTO   {
     private String amznResourceName = null;
     private Integer amznResourceTimeout = null;
     private String payloadSchema = null;
+    private String sandBoxEndpointId = null;
+    private String productionEndpointId = null;
     private String uriMapping = null;
     private APIOperationPoliciesDTO operationPolicies = null;
 
@@ -208,6 +210,40 @@ public class APIOperationsDTO   {
 
   /**
    **/
+  public APIOperationsDTO sandBoxEndpointId(String sandBoxEndpointId) {
+    this.sandBoxEndpointId = sandBoxEndpointId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("sandBoxEndpointId")
+  public String getSandBoxEndpointId() {
+    return sandBoxEndpointId;
+  }
+  public void setSandBoxEndpointId(String sandBoxEndpointId) {
+    this.sandBoxEndpointId = sandBoxEndpointId;
+  }
+
+  /**
+   **/
+  public APIOperationsDTO productionEndpointId(String productionEndpointId) {
+    this.productionEndpointId = productionEndpointId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("productionEndpointId")
+  public String getProductionEndpointId() {
+    return productionEndpointId;
+  }
+  public void setProductionEndpointId(String productionEndpointId) {
+    this.productionEndpointId = productionEndpointId;
+  }
+
+  /**
+   **/
   public APIOperationsDTO uriMapping(String uriMapping) {
     this.uriMapping = uriMapping;
     return this;
@@ -261,13 +297,15 @@ public class APIOperationsDTO   {
         Objects.equals(amznResourceName, apIOperations.amznResourceName) &&
         Objects.equals(amznResourceTimeout, apIOperations.amznResourceTimeout) &&
         Objects.equals(payloadSchema, apIOperations.payloadSchema) &&
+        Objects.equals(sandBoxEndpointId, apIOperations.sandBoxEndpointId) &&
+        Objects.equals(productionEndpointId, apIOperations.productionEndpointId) &&
         Objects.equals(uriMapping, apIOperations.uriMapping) &&
         Objects.equals(operationPolicies, apIOperations.operationPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, payloadSchema, uriMapping, operationPolicies);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, payloadSchema, sandBoxEndpointId, productionEndpointId, uriMapping, operationPolicies);
   }
 
   @Override
@@ -285,6 +323,8 @@ public class APIOperationsDTO   {
     sb.append("    amznResourceName: ").append(toIndentedString(amznResourceName)).append("\n");
     sb.append("    amznResourceTimeout: ").append(toIndentedString(amznResourceTimeout)).append("\n");
     sb.append("    payloadSchema: ").append(toIndentedString(payloadSchema)).append("\n");
+    sb.append("    sandBoxEndpointId: ").append(toIndentedString(sandBoxEndpointId)).append("\n");
+    sb.append("    productionEndpointId: ").append(toIndentedString(productionEndpointId)).append("\n");
     sb.append("    uriMapping: ").append(toIndentedString(uriMapping)).append("\n");
     sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
     sb.append("}");

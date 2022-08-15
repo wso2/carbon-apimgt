@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.endpoints.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
@@ -471,12 +472,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateOperationPolicyParameters(api, tenantDomain);
+
+        // This is called none API Endpoint because every api has a none API for purpose of none of mapping
+        // There can be a special case that a user can extremely want a resource without an endpoint
+        // So this endpoint acts as an empty endpoint for an API.
+        addNoneAPIEndpoint(api.getUuid());
+
         addURITemplates(apiId, api, tenantId);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+    }
+
+    /**
+     * Add None Endpoint to AM_API_ENDPOINTS.
+     *
+     * @param uuid  unique identifier of api (UUID)
+     * @throws APIManagementException
+     */
+    private void addNoneAPIEndpoint(String uuid) throws APIManagementException {
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointName(APIConstants.APIEndpoint.ENDPOINT_NONE_NAME);
+        addAPIEndpoint(uuid, apiEndpoint);
     }
 
     /**
@@ -907,6 +926,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
         updateAPIResources(api, tenantId);
+        updateAPIPrimaryEndpointsMapping(api);
+    }
+
+    /**
+     * Update primary endpoints of an API.
+     *
+     * @param api API
+     * @throws APIManagementException If fails to update local scopes of the API.
+     */
+    private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
+        apiMgtDAO.updateAPIPrimaryEndpointsMapping(api);
     }
 
     /**
@@ -4709,6 +4739,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
+                populateAPIOperationEndpointsMapping(api, uuid);
+                populateAPIPrimaryEndpointsMapping(api, uuid);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -4722,6 +4754,66 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while parsing the OAS definition", e);
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
+        }
+    }
+
+    @Override
+    public boolean hasOperationMapping(String endpointUuid) throws APIManagementException {
+        return apiMgtDAO.hasOperationMapping(endpointUuid);
+    }
+
+    /**
+     * It fetches the primary endpoint mappings of an API and populate their UUIDs.
+     *
+     * @param api API model Object
+     * @param uuid unique identifier of an API
+     * @throws APIManagementException
+     */
+    private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
+        String currentApiUuid;
+        String revisionUuid = null;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+            revisionUuid = apiRevision.getRevisionUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        int apiId = apiMgtDAO.getAPIID(currentApiUuid);
+        // Get primary production Endpoint mapping
+        String productionEndpointId =
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, APIConstants.APIEndpoint.PRODUCTION, revisionUuid);
+        api.setPrimaryProductionEndpointId(productionEndpointId);
+        // Get primary sandbox endpoint endpoint
+        String sandboxEndpointId =
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, APIConstants.APIEndpoint.SANDBOX, revisionUuid);
+        api.setPrimarySandboxEndpointId(sandboxEndpointId);
+    }
+
+    /**
+     * It fetches the operation endpoints mapping' details and binds with each resource.
+     *
+     *  @param api API model Object
+     *  @param uuid unique identifier of an API
+     * @throws APIManagementException
+     */
+    private void populateAPIOperationEndpointsMapping(API api, String uuid) throws APIManagementException {
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        String currentApiUuid;
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            // Get production Endpoint mapping
+            String productionEndpointId = apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(
+                    uriTemplate.getId(), APIConstants.APIEndpoint.PRODUCTION);
+            uriTemplate.setProductionEndpoint(productionEndpointId);
+            // Get sandbox endpoint endpoint
+            String sandboxEndpointId = apiMgtDAO.getEndpointUUIDByURIMappingIdAndEnv(
+                    uriTemplate.getId(), APIConstants.APIEndpoint.SANDBOX);
+            uriTemplate.setSandboxEndpoint(sandboxEndpointId);
         }
     }
 
@@ -5933,15 +6025,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoints(uuid);
+    }
+
+    @Override
+    public APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID);
+    }
+
+
     public void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates)
             throws APIManagementException {
-
         Set<URITemplate> uriTemplatesWithPolicies = apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
 
         if (!uriTemplatesWithPolicies.isEmpty()) {
             //This is a temporary map to keep operation policies list of URI Templates against the URI mapping ID
             Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
-
             for (URITemplate uriTemplate : uriTemplatesWithPolicies) {
                 String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
@@ -5954,6 +6054,37 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 if (operationPoliciesMap.containsKey(key)) {
                     uriTemplate.setOperationPolicies(operationPoliciesMap.get(key));
+                }
+            }
+        }
+    }
+
+    public void setOperationEndpointsToURITemplates(String apiId, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
+
+        Set<URITemplate> uriTemplatesWithOperationEndpoints = apiMgtDAO.getURITemplatesWithOperationEndpoints(apiId);
+
+        if (!uriTemplatesWithOperationEndpoints.isEmpty()) {
+            //This is a temporary map to keep operation policies list of URI Templates against the URI mapping ID
+            Map<String, String> operationEndpointPerURITemplate = new HashMap<>();
+
+            for (URITemplate uriTemplate : uriTemplatesWithOperationEndpoints) {
+                String key = uriTemplate.getHTTPVerb() + APIConstants.DELEM_COLON + uriTemplate.getUriTemplate();
+                operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                        uriTemplate.getProductionEndpoint());
+                operationEndpointPerURITemplate.put(key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                        uriTemplate.getSandboxEndpoint());
+            }
+
+            for (URITemplate uriTemplate : uriTemplates) {
+                String key = uriTemplate.getHTTPVerb() + APIConstants.DELEM_COLON + uriTemplate.getUriTemplate();
+                String sandboxKey = key + APIConstants.ENDPOINT_SANDBOX_ENDPOINTS;
+                String productionKey = key + APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS;
+                if (operationEndpointPerURITemplate.containsKey(sandboxKey)) {
+                    uriTemplate.setSandboxEndpoint(operationEndpointPerURITemplate.get(sandboxKey));
+                }
+                if (operationEndpointPerURITemplate.containsKey(productionKey)) {
+                    uriTemplate.setProductionEndpoint(operationEndpointPerURITemplate.get(productionKey));
                 }
             }
         }
@@ -6108,7 +6239,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void deleteOperationPolicyById(String policyId, String tenantDomain) throws APIManagementException {
-
         apiMgtDAO.deleteOperationPolicyByPolicyId(policyId);
     }
 
@@ -6126,6 +6256,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return operationPoliciesMap;
     }
 
+    @Override
+    public void deleteAPIEndpointById(String endpointUUID) throws APIManagementException {
+        apiMgtDAO.deleteAPIEndpointByEndpointId(endpointUUID);
+    }
+
+    @Override
+    public APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint)
+            throws APIManagementException {
+        return apiMgtDAO.updateAPIEndpoint(apiEndpoint);
+    }
+
+    @Override
+    public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException {
+        int apiId = apiMgtDAO.getAPIID(apiUUID);
+        String endpointUUID = UUID.randomUUID().toString();
+        apiEndpoint.setEndpointUuid(endpointUUID);
+        return apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+    }
+
+    @Override
     public  APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
         return apiMgtDAO.checkAPIUUIDIsARevisionUUID(apiUUID);
     }
