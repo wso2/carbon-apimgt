@@ -308,7 +308,7 @@ public class APIConsumerImplTest {
         when(apiMgtDAO.getSubscribedAPIs("testorg", subscriber, "testID" )).thenReturn(originalSubscribedAPIs);
         when(subscribedAPI.getTier()).thenReturn(tier);
         when(tier.getName()).thenReturn("tier");
-        when(subscribedAPI.getApiId()).thenReturn(apiId1);
+        when(subscribedAPI.getAPIIdentifier()).thenReturn(apiId1);
         Application app = Mockito.mock(Application.class);
         when(app.getId()).thenReturn(1);
         when(subscribedAPI.getApplication()).thenReturn(app);

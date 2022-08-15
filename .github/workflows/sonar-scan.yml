@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - master
+  pull_request:
+      types: [opened, synchronize, reopened]
   workflow_dispatch:
-
 jobs:
   build-carbon:
     runs-on: ubuntu-latest

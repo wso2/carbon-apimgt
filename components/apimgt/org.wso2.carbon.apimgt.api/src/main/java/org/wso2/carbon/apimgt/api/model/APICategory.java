@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Objects;
+
 /**
  * This class represents API Categories
  */
@@ -83,8 +85,17 @@ public class APICategory {
      * @param obj
      * @return
      */
-    public boolean equals(Object obj) {
-        return this.organization == ((APICategory) obj).getOrganization() && this.getName()
-                .equals(((APICategory) obj).getName());
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        if (!super.equals(object)) return false;
+        APICategory that = (APICategory) object;
+        return numberOfAPIs == that.numberOfAPIs && tenantID == that.tenantID && id.equals(that.id)
+                && name.equals(that.name) && java.util.Objects.equals(description, that.description)
+                && organization.equals(that.organization);
+    }
+
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), id, name, description, numberOfAPIs, tenantID, organization);
     }
 }
