@@ -270,8 +270,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIEndpointInfo createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId);
             APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint);
             removeAPIEndpointSecrets(createdAPIEndpointDTO);
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                    RestApiConstants.RESOURCE_PATH_API_ENDPOINT + "/" + createdAPIEndpointId;
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
+                    + RestApiConstants.RESOURCE_PATH_API_ENDPOINT + "/" + createdAPIEndpointId;
             URI uri = new URI(uriString);
             return Response.created(uri).entity(createdAPIEndpointDTO).build();
         } catch (APIManagementException e) {
@@ -300,8 +300,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             CommentList comments = apiProvider.getComments(apiTypeWrapper, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
-                    + RestApiConstants.RESOURCE_PATH_COMMENTS;
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok(uri).entity(commentDTO).build();
 
