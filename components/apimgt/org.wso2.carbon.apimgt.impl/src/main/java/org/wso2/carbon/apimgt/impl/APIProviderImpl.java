@@ -132,7 +132,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private RecommendationEnvironment recommendationEnvironment;
     private GlobalMediationPolicyImpl globalMediationPolicyImpl;
-    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
+    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -4754,10 +4754,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 return result;
             }
         } catch (URISyntaxException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while extracting fully qualified domain name from given endpoint: " + endpoint);
+            }
             return result;
         }
 
-        String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + ":" + fqdn;
+        String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + fqdn;
         Organization org = new Organization(tenantDomain);
         String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
         String[] roles = APIUtil.getFilteredUserRoles(adminUser);
