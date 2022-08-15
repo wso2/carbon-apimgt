@@ -20,7 +20,8 @@ package org.wso2.carbon.apimgt.api.model;
 
 public class BlockConditionsDTO {
     private boolean enabled;
-    private String conditionType,conditionValue;
+    private String conditionType;
+    private String conditionValue;
     private int conditionId;
     private String tenantDomain;
     private String uuid;

@@ -454,7 +454,7 @@ public final class APIUtil {
             for (APIProductIdentifier usedByProduct : usedByProducts) {
                 //TODO : removed registry call until find a proper fix
                 String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                usedByProduct.setUUID(apiProductPath);
+                usedByProduct.setUuid(apiProductPath);
             }
         }
     }

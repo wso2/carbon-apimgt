@@ -95,7 +95,7 @@ public class WorkflowUtils {
                     .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent;
             String orgId = sub.getOrganization();
-            if (sub.getApiId() != null) {
+            if (sub.getAPIIdentifier() != null) {
                 subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
                         subWFDto.getTenantId(), orgId,
@@ -117,7 +117,7 @@ public class WorkflowUtils {
                     .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
             String orgId = sub.getOrganization();
             SubscriptionEvent subscriptionEvent;
-            if (sub.getApiId() != null) {
+            if (sub.getAPIIdentifier() != null) {
                 subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
                         subWFDto.getTenantId(), orgId,

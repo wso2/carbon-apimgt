@@ -94,7 +94,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         AdditionalSubscriptionInfoDTO additionalSubscriptionInfoDTO = new AdditionalSubscriptionInfoDTO();
         additionalSubscriptionInfoDTO.setSubscriptionId(subscription.getUUID());
-        APIIdentifier apiId = subscription.getApiId();
+        APIIdentifier apiId = subscription.getAPIIdentifier();
         API api = null;
 
         if (apiId != null) {
