@@ -917,7 +917,7 @@ public class ApiMgtDAO {
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_ID"));
-                    apiProductIdentifier.setUUID(resultSet.getString("API_UUID"));
+                    apiProductIdentifier.setUuid(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 } else {
                     APIIdentifier apiIdentifier = new APIIdentifier(
@@ -1558,7 +1558,7 @@ public class ApiMgtDAO {
                     APIProductIdentifier identifier =
                             new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-                    identifier.setUUID(result.getString("API_UUID"));
+                    identifier.setUuid(result.getString("API_UUID"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
                     initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
@@ -18143,7 +18143,7 @@ public class ApiMgtDAO {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-                            identifier.setUUID(result.getString("API_UUID"));
+                            identifier.setUuid(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
                             initSubscribedAPI(subscribedAPI, result);

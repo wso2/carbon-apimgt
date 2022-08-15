@@ -1375,7 +1375,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
             Application application = subscription.getApplication();
-            Identifier identifier = subscription.getApiId() != null ? subscription.getApiId()
+            Identifier identifier = subscription.getAPIIdentifier() != null ? subscription.getAPIIdentifier()
                     : subscription.getProductId();
             String userId = application.getSubscriber().getName();
             removeSubscription(identifier, userId, application.getId(), organization);
@@ -2504,7 +2504,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (identifier instanceof APIIdentifier && identifier.equals(api.getApiId())) {
+            if (identifier instanceof APIIdentifier && identifier.equals(api.getAPIIdentifier())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);
@@ -3082,7 +3082,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<SubscribedAPI>();
         Set<SubscribedAPI> subscribedAPIs = getLightWeightSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (api.getApiId().equals(apiIdentifier)) {
+            if (api.getAPIIdentifier().equals(apiIdentifier)) {
                 subscribedAPISet.add(api);
             }
         }
