@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Objects;
+
 /**
  * This class represents API Categories
  */
