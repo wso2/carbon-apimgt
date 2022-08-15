@@ -838,8 +838,8 @@ public class ImportUtils {
             String policyDefinitionJsonContent = getPolicyFileContentAsJson(pathToArchive + fileName);
             if (policyDefinitionJsonContent == null) {
                 throw new APIManagementException(
-                        "Cannot find Operation Policy definition. policyDefinition.yaml should present",
-                        ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
+                        "Cannot find Operation Policy definition. policyDefinition.yaml or policyDefinition.json "
+                                + "should present", ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
             }
 
             policySpecification = APIUtil.getValidatedOperationPolicySpecification(policyDefinitionJsonContent);
