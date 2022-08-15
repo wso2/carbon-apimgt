@@ -245,8 +245,8 @@ public class ExportUtils {
     public static void addOperationEndpointsToArchive(String archivePath, String apiID, ExportFormat exportFormat,
                                                       APIProvider apiProvider) throws APIManagementException {
         try {
-            CommonUtil.createDirectory(archivePath + File.separator +
-                    ImportExportConstants.API_ENDPOINTS_DIRECTORY);
+            CommonUtil.createDirectory(archivePath + File.separator
+                    + ImportExportConstants.API_ENDPOINTS_DIRECTORY);
             List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID);
 
             if (apiEndpointList.size() > 0) {

@@ -300,8 +300,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             CommentList comments = apiProvider.getComments(apiTypeWrapper, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                    RestApiConstants.RESOURCE_PATH_COMMENTS;
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
+                    + RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok(uri).entity(commentDTO).build();
 
