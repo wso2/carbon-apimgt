@@ -21,11 +21,11 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -33,8 +33,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
@@ -64,12 +62,7 @@ public class ImportUtilsTest {
         PowerMockito.mockStatic(CommonUtil.class);
         PowerMockito.mockStatic(FileUtils.class);
         apiProvider = Mockito.mock(APIProvider.class);
-        // PowerMockito.mockStatic(APIUtil.class);
-
-//        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getMd5OfOperationPolicyDefinition"));
-//        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getMd5OfOperationPolicy"));
-
-        // PowerMockito.mockStatic(RandomStringUtils.class);
+        policyData = Mockito.mock(OperationPolicyData.class);
     }
 
     @Test public void testImportAPIPolicy() throws Exception {
@@ -86,8 +79,7 @@ public class ImportUtilsTest {
                         + "\"description\":\"Usingthispolicy,youcanaddacustomlogmessage\",\"applicableFlows\":"
                         + "[\"request\","
                         + "\"response\",\"fault\"],\"supportedGateways\":[\"Synapse\"],\"supportedApiTypes\":"
-                        + "[\"HTTP\"],"
-                        + "\"policyAttributes\":[]}";
+                        + "[\"HTTP\"]," + "\"policyAttributes\":[]}";
 
         Mockito.when(CommonUtil.checkFileExistence(yamlFile)).thenReturn(false);
         Mockito.when(CommonUtil.checkFileExistence(jsonFile)).thenReturn(true);
@@ -96,38 +88,11 @@ public class ImportUtilsTest {
         Mockito.when(FileUtils.readFileToString(new File(synapsePath))).thenReturn(synapseDefFileString);
 
         String policyId = RandomStringUtils.randomAlphanumeric(10);
-        String synapseMd5 = RandomStringUtils.randomAlphanumeric(30);
-        String policyMD5 = RandomStringUtils.randomAlphanumeric(30);
-        policyData = Mockito.mock(OperationPolicyData.class);
-
-        OperationPolicySpecification operationPolicySpecification = APIUtil.getValidatedOperationPolicySpecification(
-                policyDefContentModified);
-
-        OperationPolicyData operationPolicyData = new OperationPolicyData();
-        operationPolicyData.setOrganization(ORGANIZATION);
-        operationPolicyData.setSpecification(operationPolicySpecification);
-
-        OperationPolicyDefinition gatewayDefinition = new OperationPolicyDefinition();
-        gatewayDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-        gatewayDefinition.setContent(synapseDefFileString);
-
-        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getMd5OfOperationPolicyDefinition",
-                OperationPolicyDefinition.class)).toReturn(synapseMd5);
-
-        // Mockito.when(APIUtil.getMd5OfOperationPolicyDefinition(gatewayDefinition)).thenReturn(synapseMd5);
-
-        gatewayDefinition.setMd5Hash(synapseMd5);
-        operationPolicyData.setSynapsePolicyDefinition(gatewayDefinition);
-
-        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getMd5OfOperationPolicy", OperationPolicyData.class))
-                .toReturn(policyMD5);
-
-        // Mockito.when(APIUtil.getMd5OfOperationPolicy(operationPolicyData)).thenReturn(policyMD5);
-        operationPolicyData.setMd5Hash(policyMD5);
 
         Mockito.when(apiProvider.getCommonOperationPolicyByPolicyName(POLICYNAME, POLICYVERSION, ORGANIZATION, false))
                 .thenReturn(null);
-        Mockito.when(apiProvider.addCommonOperationPolicy(policyData, ORGANIZATION)).thenReturn(policyId);
+        Mockito.when(apiProvider.addCommonOperationPolicy(ArgumentMatchers.any(OperationPolicyData.class),
+                ArgumentMatchers.eq(ORGANIZATION))).thenReturn(policyId);
 
         try {
             OperationPolicyDataDTO operationPolicyDataDTO = ImportUtils.importPolicy(pathToArchive, ORGANIZATION,
@@ -140,11 +105,8 @@ public class ImportUtilsTest {
         Mockito.when(apiProvider.getCommonOperationPolicyByPolicyName(POLICYNAME, POLICYVERSION, ORGANIZATION, false))
                 .thenReturn(policyData);
 
-        String unauthenticatedResponse = "{\"code\":401,\"message\":\"\",\"description\":\"Unauthenticated request\","
-                + "\"moreInfo\":\"\",\"error\":[]}";
-        String errorMsg =
-                "Import API service call received unsuccessful response: " + unauthenticatedResponse + " status: "
-                        + HttpStatus.SC_UNAUTHORIZED;
+        String errorMsg = "Error while adding a common operation policy.Existing common operation policy found "
+                + "for the same name.";
 
         try {
             ImportUtils.importPolicy(pathToArchive, ORGANIZATION, apiProvider);
