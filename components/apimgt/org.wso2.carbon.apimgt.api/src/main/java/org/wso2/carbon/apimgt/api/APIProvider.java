@@ -1635,8 +1635,7 @@ public interface APIProvider extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint)
-            throws APIManagementException;
+    APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint) throws APIManagementException;
 
     /**
      * Insert new endpoint for an API.
