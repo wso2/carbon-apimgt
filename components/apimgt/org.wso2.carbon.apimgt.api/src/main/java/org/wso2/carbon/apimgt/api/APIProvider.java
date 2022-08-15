@@ -1621,6 +1621,16 @@ public interface APIProvider extends APIManager {
     void deleteOperationPolicyById(String policyId, String organization) throws APIManagementException;
 
     /**
+     * Insert new endpoint for an API.
+     *
+     * @param apiUUID Unique identifier of API
+     * @param apiEndpoint New Endpoint payload object
+     * @return created endpoint UUID String Object
+     * @throws APIManagementException if an error occurs while inserting endpoint detail.
+     */
+    String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException;
+
+    /**
      * Delete an API endpoint by providing the endpoint ID.
      *
      * @param endpointUUID     API Endpoint UUID
@@ -1636,9 +1646,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint) throws APIManagementException;
-
-    
-    String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException;
 
     /**
      *
