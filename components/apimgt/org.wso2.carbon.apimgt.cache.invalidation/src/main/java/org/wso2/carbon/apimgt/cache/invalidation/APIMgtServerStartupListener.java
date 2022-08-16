@@ -46,7 +46,7 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
 
     @Override
     public void completingServerStartup() {
-
+       //Not doing anything since transport not start in this method.
     }
 
     @Override

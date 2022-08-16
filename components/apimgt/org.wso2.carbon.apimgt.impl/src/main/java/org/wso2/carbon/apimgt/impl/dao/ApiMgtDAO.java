@@ -16879,14 +16879,15 @@ public class ApiMgtDAO {
             try {
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
-                PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
-                for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
-                    statement.setString(1, apiRevisionDeployment.getDeployment());
-                    statement.setString(2, apiRevisionId);
-                    statement.addBatch();
+                try (PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING)) {
+                    for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+                        statement.setString(1, apiRevisionDeployment.getDeployment());
+                        statement.setString(2, apiRevisionId);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
                 }
-                statement.executeBatch();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
