@@ -19,12 +19,14 @@ package org.wso2.carbon.apimgt.gateway.handlers.ext.contexthandler;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ContextHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-
-import javax.xml.stream.XMLStreamException;
+import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 /**
  * This class is the inbound implementation of ContextHandler interface. This handle websocket specific logic to consume
@@ -42,13 +44,25 @@ public class InboundContextHandler implements ContextHandler {
 
     @Override
     public Object getProperty(String key) {
-        // return this.inboundMessageContext.getProperty(key);
         return inboundMessageContext.getProperty(key);
     }
 
     @Override
     public void setProperty(String key, Object value) {
         if (value != null) {
+            if (key.equals(APISecurityUtils.API_AUTH_CONTEXT)) {
+                this.inboundMessageContext.setAuthContext((AuthenticationContext) value);
+            } else if (key.equals(APIConstants.JwtTokenConstants.SIGNED_JWT_INFO)) {
+                this.inboundMessageContext.setSignedJWTInfo((SignedJWTInfo) value);
+            } else if (key.equals(APIConstants.JwtTokenConstants.KEY_TYPE)) {
+                this.inboundMessageContext.setKeyType((String) value);
+            } else if (key.equals(APIConstants.JwtTokenConstants.KEY_VALIDATION_INFO)) {
+                this.inboundMessageContext.setInfoDTO((APIKeyValidationInfoDTO) value);
+            } else if (key.equals(APIConstants.JwtTokenConstants.TOKEN)) {
+                this.inboundMessageContext.setToken((String) value);
+            } else if (key.equals(WebsocketUtil.authorizationHeader)) {
+                this.inboundMessageContext.getHeadersToRemove().add((String) value);
+            }
             this.inboundMessageContext.setProperty(key, value);
         }
     }
