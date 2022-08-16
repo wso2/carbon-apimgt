@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -76,7 +77,7 @@ public class OpenAPIRequest implements Request {
             SwaggerParseResult swaggerParseResult =
                     openAPIParser.readContents(swagger, new ArrayList<>(), new ParseOptions());
             OpenAPI openAPI = swaggerParseResult.getOpenAPI();
-            validatePath(openAPI);;
+            validatePath(openAPI);
         }
         //extract transport headers
         Map<String, String> transportHeaders = (Map<String, String>)
@@ -91,7 +92,8 @@ public class OpenAPIRequest implements Request {
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
             String headerKey = header.getKey();
             String value =  header.getValue().iterator().next();
-            headerKey = headerKey.equalsIgnoreCase(contentTypeHeader) ? "Content-Type" : headerKey;
+            headerKey = headerKey.equalsIgnoreCase(contentTypeHeader) ?
+                    "Content-Type" : headerKey.toLowerCase(Locale.ROOT);
             headers.put(headerKey, value);
         }
         String apiResource = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString();
