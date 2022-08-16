@@ -860,13 +860,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Scope getScopeByName(String name) throws APIManagementException {
 
-        ScopeDTO scopeDTO = null;
+        ScopeDTO scopeDTO;
         try {
             scopeDTO = scopeClient.getScopeByName(name);
+            return fromDTOToScope(scopeDTO);
         } catch (KeyManagerClientException ex) {
             handleException("Cannot read scope : " + name, ex);
         }
-        return fromDTOToScope(scopeDTO);
+        return null;
     }
 
     /**

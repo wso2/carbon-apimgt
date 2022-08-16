@@ -756,7 +756,7 @@ public class APIMappingUtil {
                     setThrottlePoliciesAndMonetization(api1, apiInfoDTO, deniedTiers, tierMap);
                 } else if (api instanceof APIProduct) {
                     APIProduct api1 = (APIProduct) api;
-                    apiInfoDTO = fromAPIToInfoDTO((API) api);
+                    apiInfoDTO = fromAPIToInfoDTO(api1);
                     setThrottlePoliciesAndMonetization(api1, apiInfoDTO, deniedTiers, tierMap);
                 }
                 apiInfoDTOs.add(apiInfoDTO);
@@ -764,6 +764,62 @@ public class APIMappingUtil {
         }
         apiListDTO.setCount(apiInfoDTOs.size());
         return apiListDTO;
+    }
+
+    private static APIInfoDTO fromAPIToInfoDTO(APIProduct apiProduct) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setDescription(apiProduct.getDescription());
+        String context = apiProduct.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        apiInfoDTO.setContext(context);
+        apiInfoDTO.setId(apiProduct.getUuid());
+        APIProductIdentifier apiId = apiProduct.getId();
+        apiInfoDTO.setName(apiId.getName());
+        apiInfoDTO.setVersion(apiId.getVersion());
+        apiInfoDTO.setProvider(apiId.getProviderName());
+        apiInfoDTO.setLifeCycleStatus(apiProduct.getState());
+        apiInfoDTO.setType(apiProduct.getType());
+        apiInfoDTO.setAvgRating(String.valueOf(apiProduct.getRating()));
+        String providerName = apiId.getProviderName();
+        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+
+        if (apiProduct.getAdditionalProperties() != null) {
+            JSONObject additionalProperties = apiProduct.getAdditionalProperties();
+            List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            for (Object propertyKey : additionalProperties.keySet()) {
+                APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
+                String key = (String) propertyKey;
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                    additionalPropertiesList.add(additionalPropertiesDTO);
+                }
+            }
+            apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
+        }
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(apiProduct.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(apiProduct.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
+        apiInfoDTO.setBusinessInformation(apiBusinessInformationDTO);
+        apiInfoDTO.setCreatedTime(apiProduct.getCreatedTime().toString());
+        if (!StringUtils.isBlank(apiProduct.getThumbnailUrl())) {
+            apiInfoDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
+        }
+        apiInfoDTO.setAdvertiseInfo(new AdvertiseInfoDTO().advertised(false));
+        String apiTenant = apiProduct.getOrganization();
+        String subscriptionAvailability = apiProduct.getSubscriptionAvailability();
+        String subscriptionAllowedTenants = apiProduct.getSubscriptionAvailableTenants();
+        apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
+                subscriptionAllowedTenants));
+        apiInfoDTO.setGatewayVendor(apiProduct.getGatewayVendor());
+
+        return apiInfoDTO;
     }
 
     /**
@@ -910,7 +966,7 @@ public class APIMappingUtil {
      * @param api API object
      * @return AdvertiseInfoDTO
      */
-    public static AdvertiseInfoDTO extractAdvertiseInfo(API api) {
+    private static AdvertiseInfoDTO extractAdvertiseInfo(API api) {
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(api.isAdvertiseOnly());
         advertiseInfoDTO.setOriginalDevPortalUrl(api.getRedirectURL());

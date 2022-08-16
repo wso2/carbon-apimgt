@@ -3389,9 +3389,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (createdBlockConditionsDto != null) {
             publishBlockingEvent(createdBlockConditionsDto, "true");
+            return createdBlockConditionsDto.getUUID();
         }
-
-        return createdBlockConditionsDto.getUUID();
+        return null;
     }
 
     @Override
@@ -5888,7 +5888,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setEndUserName(username);
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
-        jwtTokenInfoDTO.setExpirationTime(60 * 1000);
+        jwtTokenInfoDTO.setExpirationTime(60000l);
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }
