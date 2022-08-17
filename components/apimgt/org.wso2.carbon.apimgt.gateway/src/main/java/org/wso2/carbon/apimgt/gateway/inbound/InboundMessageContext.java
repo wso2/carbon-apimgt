@@ -27,10 +27,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Message context to hold information of an intercepted single inbound connection.
@@ -46,6 +43,8 @@ public class InboundMessageContext {
     private Map<String, String> requestHeaders = new HashMap<>();   //Current request headers
     private List<String> headersToRemove = new ArrayList<>();   //Headers to remove from requestHeaders
     private Map<String, String> headersToAdd = new HashMap<>(); //Headers to add to requestHeaders
+
+    private final Map<String, Object> properties = new HashMap();
     private String token;
     private String apiContext;
     private String apiName;
@@ -63,6 +62,24 @@ public class InboundMessageContext {
     //Graphql Subscription specific connection context information
     private GraphQLSchemaDTO graphQLSchemaDTO;
     private Map<String, GraphQLOperationDTO> graphQLMsgIdToVerbInfo = new HashMap<>();
+
+    public Map<String, Object> getProperties() {
+        return Collections.unmodifiableMap(this.properties);
+    }
+
+    public Object getProperty(String key) {
+        return this.properties.get(key);
+    }
+
+    public void setProperty(String key, Object value) {
+        if (value != null) {
+            this.properties.put(key, value);
+            if ("RESPONSE".equals(key) && this.getAxis2MessageContext().getOperationContext() != null) {
+                this.getAxis2MessageContext().getOperationContext().setProperty("RESPONSE_WRITTEN", "SKIP");
+            }
+
+        }
+    }
 
     public void addVerbInfoForGraphQLMsgId(String msgId, GraphQLOperationDTO graphQLOperationDTO) {
         this.graphQLMsgIdToVerbInfo.put(msgId, graphQLOperationDTO);
