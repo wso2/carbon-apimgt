@@ -20,7 +20,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
-import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 
 /**
  * Interface through which API consumers are authenticated. An implementation of this interface

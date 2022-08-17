@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.MsgInfoDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.contexthandler.InboundContextHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -102,10 +103,11 @@ public class WebsocketAuthenticator {
                     apiLevelPolicy);
             authenticators.add(authenticator);
         }
-//        if (isApiKeyProtected) {
-//            Authenticator authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
-//            authenticators.add(authenticator);
-//        }
+        if (isApiKeyProtected) {
+            Authenticator authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM,
+                    apiLevelPolicy, isOAuthBasicAuthMandatory);
+            authenticators.add(authenticator);
+        }
 
         authenticators.sort(new Comparator<Authenticator>() {
             @Override

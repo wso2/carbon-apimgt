@@ -74,10 +74,6 @@ public class InboundMessageContext {
     public void setProperty(String key, Object value) {
         if (value != null) {
             this.properties.put(key, value);
-            if ("RESPONSE".equals(key) && this.getAxis2MessageContext().getOperationContext() != null) {
-                this.getAxis2MessageContext().getOperationContext().setProperty("RESPONSE_WRITTEN", "SKIP");
-            }
-
         }
     }
 
