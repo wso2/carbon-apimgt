@@ -306,7 +306,7 @@ public class RestApiAdminUtils {
      */
     public static String getTenantThemeDirectoryPath(String tenantDomain) {
 
-        return "repository" + File.separator + "deployment" + File.separator + "server" + File.separator + "jaggeryapps"
+        return "repository" + File.separator + "deployment" + File.separator + "server" + File.separator + "webapps"
                 + File.separator + "devportal" + File.separator + "site" + File.separator + "public"
                 + File.separator + "tenant_themes" + File.separator + tenantDomain;
     }
