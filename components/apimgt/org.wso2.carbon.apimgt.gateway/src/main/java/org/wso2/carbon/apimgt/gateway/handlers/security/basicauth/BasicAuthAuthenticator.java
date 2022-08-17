@@ -42,7 +42,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.*;
@@ -106,7 +105,7 @@ public class BasicAuthAuthenticator implements Authenticator {
      * @param requestContext The message to be authenticated
      * @return an AuthenticationResponse object which contains the authentication status
      */
-    @Override
+    @MethodStats
     public AuthenticationResponse authenticate(RequestContextDTO requestContext) {
         if (log.isDebugEnabled()) {
             log.info("Basic Authentication initialized");
@@ -284,7 +283,7 @@ public class BasicAuthAuthenticator implements Authenticator {
      * @return an AuthenticationResponse object which contains the authentication status
      */
     @MethodStats
-    public AuthenticationResponse authenticate(MessageContext synCtx) {
+    @Deprecated public AuthenticationResponse authenticate(MessageContext synCtx) {
         if (log.isDebugEnabled()) {
             log.info("Basic Authentication initialized");
         }
