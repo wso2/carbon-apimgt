@@ -29,6 +29,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
@@ -39,6 +40,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -108,7 +110,298 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     @MethodStats
-    public AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException {
+    public AuthenticationResponse authenticate(RequestContextDTO requestContext) throws APIManagementException {
+        boolean isJwtToken = false;
+        String accessToken = null;
+        String remainingAuthHeader = "";
+        boolean defaultVersionInvoked = false;
+        Map headers = requestContext.getMsgInfo().getHeaders();
+        String tenantDomain = requestContext.getDomainAddress();
+        keyManagerList = GatewayUtils.getKeyManagers(requestContext);
+        if (keyValidator == null) {
+            this.keyValidator = new APIKeyValidator();
+        }
+
+        if (jwtValidator == null) {
+            this.jwtValidator = new JWTValidator(this.keyValidator, tenantDomain);
+        }
+
+        config = getApiManagerConfiguration();
+        removeOAuthHeadersFromOutMessage = isRemoveOAuthHeadersFromOutMessage();
+        securityContextHeader = getSecurityContextHeader();
+
+        if (headers != null) {
+            requestOrigin = (String) headers.get("Origin");
+
+            // Extract the access token from auth header
+
+            // From 1.0.7 version of this component onwards remove the OAuth authorization header from
+            // the message is configurable. So we dont need to remove headers at this point.
+            String authHeader = (String) headers.get(getSecurityHeader());
+            if (authHeader == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("OAuth2 Authentication: Expected authorization header with the name '"
+                            .concat(getSecurityHeader()).concat("' was not found."));
+                }
+            } else {
+                ArrayList<String> remainingAuthHeaders = new ArrayList<>();
+                boolean consumerkeyFound = false;
+                String[] splitHeaders = authHeader.split(oauthHeaderSplitter);
+                if (splitHeaders != null) {
+                    for (int i = 0; i < splitHeaders.length; i++) {
+                        String[] elements = splitHeaders[i].split(consumerKeySegmentDelimiter);
+                        if (elements != null && elements.length > 1) {
+                            int j = 0;
+                            boolean isConsumerKeyHeaderAvailable = false;
+                            for (String element : elements) {
+                                if (!"".equals(element.trim())) {
+                                    if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
+                                        isConsumerKeyHeaderAvailable = true;
+                                    } else if (isConsumerKeyHeaderAvailable) {
+                                        accessToken = removeLeadingAndTrailing(elements[j].trim());
+                                        consumerkeyFound = true;
+                                    }
+                                }
+                                j++;
+                            }
+                        }
+                        if (!consumerkeyFound) {
+                            remainingAuthHeaders.add(splitHeaders[i]);
+                        } else {
+                            consumerkeyFound = false;
+                        }
+                    }
+                }
+                remainingAuthHeader = String.join(oauthHeaderSplitter, remainingAuthHeaders);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug(accessToken != null ? "Received Token ".concat(accessToken) :
+                        "No valid Authorization header found");
+            }
+            //Check if client invoked the default version API (accessing API without version).
+            defaultVersionInvoked = headers.containsKey(defaultAPIHeader);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Default Version API invoked");
+        }
+
+        if (removeOAuthHeadersFromOutMessage) {
+            //Remove authorization headers sent for authentication at the gateway and pass others to the backend
+            if (StringUtils.isNotBlank(remainingAuthHeader)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Removing OAuth key from Authorization header");
+                }
+                headers.put(getSecurityHeader(), remainingAuthHeader);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Removing Authorization header from headers");
+                }
+                headers.remove(getSecurityHeader());
+            }
+
+        }
+        if (removeDefaultAPIHeaderFromOutMessage) {
+            headers.remove(defaultAPIHeader);
+        }
+
+        String apiContext = requestContext.getApiRequestInfo().getContext();
+        String apiVersion = requestContext.getApiRequestInfo().getVersion();
+        String httpMethod = requestContext.getMsgInfo().getHttpMethod();
+        String matchingResource = requestContext.getMsgInfo().getElectedResource();
+        SignedJWTInfo signedJWTInfo = null;
+
+        //If the matching resource does not require authentication
+        Timer timer = getTimer(MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
+        Timer.Context context = timer.start();
+        org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) requestContext.
+                getContextHandler()).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
+
+        String authenticationScheme;
+        try {
+            //Initial guess of a JWT token using the presence of a DOT.
+            if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
+                try {
+                    if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
+                        log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                "Invalid JWT token");
+                    }
+
+                    signedJWTInfo = getSignedJwt(accessToken);
+                    if (GatewayUtils.isInternalKey(signedJWTInfo.getJwtClaimsSet())
+                            || GatewayUtils.isAPIKey(signedJWTInfo.getJwtClaimsSet())) {
+                        log.debug("Invalid Token Provided");
+                        return new AuthenticationResponse(false, isMandatory, true,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                    }
+                    String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                            .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
+                    if (StringUtils.isNotEmpty(keyManager)) {
+                        if (log.isDebugEnabled()){
+                            log.debug("KeyManager " + keyManager + "found for authenticate token " +
+                                    GatewayUtils.getMaskedToken(accessToken));
+                        }
+                        if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                                keyManagerList.contains(keyManager)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + "found in API level list " +
+                                        String.join(",", keyManagerList));
+                            }
+                            isJwtToken = true;
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Elected KeyManager " + keyManager + " not found in API level list " +
+                                        String.join(",", keyManagerList));
+                            }
+                            return new AuthenticationResponse(false, isMandatory, true,
+                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                        }
+                    }else{
+                        if (log.isDebugEnabled()) {
+                            log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
+                        }
+                    }
+                } catch ( ParseException | IllegalArgumentException e) {
+                    log.debug("Not a JWT token. Failed to decode the token header.", e);
+                } catch (APIManagementException e) {
+                    log.error("error while check validation of JWt", e);
+                    return new AuthenticationResponse(false, isMandatory, true,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                }
+            }
+
+            authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(requestContext);
+        } catch (APISecurityException ex) {
+            return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+        }
+        context.stop();
+        APIKeyValidationInfoDTO info;
+        if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
+            info = new APIKeyValidationInfoDTO();
+            info.setAuthorized(false);
+            info.setValidationStatus(900906);
+        } else if (accessToken == null || apiContext == null || apiVersion == null) {
+            if (log.isDebugEnabled()) {
+                if (accessToken == null) {
+                    log.debug("OAuth headers not found");
+                } else if (apiContext == null) {
+                    log.debug("Couldn't find API Context");
+                } else {
+                    log.debug("Could not find api version");
+                }
+            }
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
+        } else {
+            //Start JWT token validation
+            if (isJwtToken) {
+                try {
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(signedJWTInfo,
+                            requestContext);
+                    APISecurityUtils.setAuthenticationContext(requestContext,
+                            authenticationContext, securityContextHeader);
+                    log.debug("User is authorized using JWT token to access the resource.");
+                    requestContext.getContextHandler().setProperty(APIMgtGatewayConstants.END_USER_NAME,
+                            authenticationContext.getUsername());
+                    return new AuthenticationResponse(true, isMandatory, false, 0, null);
+
+                } catch (APISecurityException ex) {
+                    return new AuthenticationResponse(false, isMandatory, true,
+                            ex.getErrorCode(), ex.getMessage());
+                }
+            }
+
+            if(log.isDebugEnabled()){
+                log.debug("Matching resource is: ".concat(matchingResource));
+            }
+
+            timer = getTimer(MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
+            context = timer.start();
+
+            try {
+                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion, authenticationScheme,
+                        matchingResource, httpMethod, defaultVersionInvoked,keyManagerList);
+            } catch (APISecurityException ex) {
+                return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+            }
+            context.stop();
+            requestContext.getContextHandler().setProperty(APIMgtGatewayConstants.APPLICATION_NAME,
+                    info.getApplicationName());
+            requestContext.getContextHandler().setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
+            requestContext.getContextHandler().setProperty(
+                    APIMgtGatewayConstants.SCOPES, info.getScopes() == null ? null : info.getScopes().toString());
+
+        }
+
+        if (info.isAuthorized()) {
+            AuthenticationContext authContext = new AuthenticationContext();
+            authContext.setAuthenticated(true);
+            authContext.setTier(info.getTier());
+            authContext.setApiKey(accessToken);
+            authContext.setKeyType(info.getType());
+            if (info.getEndUserName() != null) {
+                authContext.setUsername(info.getEndUserName());
+            } else {
+                authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
+            }
+            authContext.setCallerToken(info.getEndUserToken());
+            authContext.setApplicationId(info.getApplicationId());
+            authContext.setApplicationUUID(info.getApplicationUUID());
+            authContext.setApplicationGroupIds(info.getApplicationGroupIds());
+            authContext.setApplicationName(info.getApplicationName());
+            authContext.setApplicationTier(info.getApplicationTier());
+            authContext.setSubscriber(info.getSubscriber());
+            authContext.setConsumerKey(info.getConsumerKey());
+            authContext.setApiTier(info.getApiTier());
+            authContext.setThrottlingDataList(info.getThrottlingDataList());
+            authContext.setSubscriberTenantDomain(info.getSubscriberTenantDomain());
+            authContext.setSpikeArrestLimit(info.getSpikeArrestLimit());
+            authContext.setSpikeArrestUnit(info.getSpikeArrestUnit());
+            authContext.setStopOnQuotaReach(info.isStopOnQuotaReach());
+            authContext.setIsContentAware(info.isContentAware());
+            APISecurityUtils.setAuthenticationContext(requestContext, authContext, securityContextHeader);
+            if (info.getProductName() != null && info.getProductProvider() != null) {
+                authContext.setProductName(info.getProductName());
+                authContext.setProductProvider(info.getProductProvider());
+            }
+
+            /* Synapse properties required for BAM Mediator*/
+            //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
+            requestContext.getContextHandler().setProperty("api.ut.apiPublisher", info.getApiPublisher());
+            requestContext.getContextHandler().setProperty("API_NAME", info.getApiName());
+
+            /* GraphQL Query Analysis Information */
+            if (APIConstants.GRAPHQL_API.equals(requestContext.getApiRequestInfo().getApiType())) {
+                requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_DEPTH,
+                        info.getGraphQLMaxDepth());
+                requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY,
+                        info.getGraphQLMaxComplexity());
+            }
+            if(log.isDebugEnabled()){
+                log.debug("User is authorized to access the Resource");
+            }
+            return new AuthenticationResponse(true, isMandatory, false, 0, null);
+        } else {
+            if(log.isDebugEnabled()){
+                log.debug("User is NOT authorized to access the Resource");
+            }
+            return new AuthenticationResponse(false, isMandatory, true, info.getValidationStatus(),
+                    "Access failure for API: " + apiContext +
+                            ", version: "+ apiVersion + " status: (" + info.getValidationStatus() +
+                            ") - " + APISecurityConstants.getAuthenticationFailureMessage(info.getValidationStatus()));
+        }
+    }
+
+    @MethodStats
+    @Deprecated public AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException {
         boolean isJwtToken = false;
         String accessToken = null;
         String remainingAuthHeader = "";

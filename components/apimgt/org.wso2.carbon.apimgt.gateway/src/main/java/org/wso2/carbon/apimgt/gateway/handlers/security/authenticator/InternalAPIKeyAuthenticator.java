@@ -248,7 +248,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 AuthenticationContext authenticationContext = GatewayUtils
                         .generateAuthenticationContext(tokenIdentifier, payload, api, apiObj.getApiTier());
 
-                APISecurityUtils.setAuthenticationContext(requestContext, authenticationContext);
+                APISecurityUtils.setAuthenticationContext(requestContext, authenticationContext, null);
 
                 if (log.isDebugEnabled()) {
                     log.debug("User is authorized to access the resource using Internal Key.");
@@ -442,7 +442,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
                     AuthenticationContext authenticationContext = GatewayUtils
                             .generateAuthenticationContext(tokenIdentifier, payload, api, retrievedApi.getApiTier());
-                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext);
+                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, null);
                     if (log.isDebugEnabled()) {
                         log.debug("User is authorized to access the resource using Internal Key.");
                     }

@@ -850,6 +850,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         requestContextDTO.setApiRequestInfo(apiRequestInfoDTO);
         requestContextDTO.setMsgInfo(msgInfoDTO);
         requestContextDTO.setDomainAddress((String) messageContext.getProperty(PUBLISHER_TENANT_DOMAIN));
+        requestContextDTO.setRemoteIPAddress((String) messageContext.getProperty(
+                org.apache.axis2.context.MessageContext.REMOTE_ADDR));
 
         SynapseContextHandler synapseContextHandler = new SynapseContextHandler(messageContext);
         requestContextDTO.setContextHandler(synapseContextHandler);

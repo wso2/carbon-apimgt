@@ -31,6 +31,7 @@ import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -47,6 +48,8 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -282,6 +285,37 @@ public class APIKeyValidator {
     }
 
     @MethodStats
+    public String getResourceAuthenticationScheme(RequestContextDTO requestContext) throws APISecurityException {
+        String authType = "";
+        List<VerbInfoDTO> verbInfoList;
+        try {
+            verbInfoList = findMatchingVerb(requestContext);
+            if (verbInfoList != null && verbInfoList.toArray().length > 0) {
+                for (VerbInfoDTO verb : verbInfoList) {
+                    authType = verb.getAuthType();
+                    if (authType == null || !StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase())
+                            .equals(authType)) {
+                        authType = StringUtils.capitalize(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN
+                                .toLowerCase());
+                        break;
+                    }
+                }
+                requestContext.getContextHandler().setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
+            }
+        } catch (ResourceNotFoundException e) {
+            log.error("Could not find matching resource for request", e);
+            return APIConstants.NO_MATCHING_AUTH_SCHEME;
+        }
+
+        if (!authType.isEmpty()) {
+            return authType;
+        } else {
+            //No matching resource found. return the highest level of security
+            return APIConstants.NO_MATCHING_AUTH_SCHEME;
+        }
+    }
+
+    @MethodStats
     public String getResourceAuthenticationScheme(MessageContext synCtx) throws APISecurityException {
         String authType = "";
         List<VerbInfoDTO> verbInfoList;
@@ -310,6 +344,190 @@ public class APIKeyValidator {
             //No matching resource found. return the highest level of security
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
         }
+    }
+
+    public List<VerbInfoDTO> findMatchingVerb(RequestContextDTO requestContext) throws ResourceNotFoundException, APISecurityException {
+
+        List<VerbInfoDTO>  verbInfoList =  new ArrayList<>();
+        String resourceCacheKey;
+        String httpMethod = requestContext.getMsgInfo().getHttpMethod();
+        String apiContext = requestContext.getApiRequestInfo().getContext();
+        String apiVersion = requestContext.getApiRequestInfo().getVersion();
+        String fullRequestPath = (String) requestContext.getContextHandler().getProperty(
+                RESTConstants.REST_FULL_REQUEST_PATH);
+
+        String electedResource = (requestContext.getMsgInfo().getElectedResource());
+        ArrayList<String> resourceArray = null;
+
+        if (electedResource != null) {
+            if (APIConstants.GRAPHQL_API.equalsIgnoreCase(requestContext.getApiRequestInfo().getApiType())) {
+                resourceArray = new ArrayList<>(Arrays.asList(electedResource.split(",")));
+            } else {
+                resourceArray = new ArrayList<>(Arrays.asList(electedResource));
+            }
+        }
+
+        String requestPath = getRequestPath(requestContext, apiContext, apiVersion, fullRequestPath);
+        if ("".equals(requestPath)) {
+            requestPath = "/";
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Setting REST_SUB_REQUEST_PATH in msg context: " + requestPath);
+        }
+        requestContext.getContextHandler().setProperty(RESTConstants.REST_SUB_REQUEST_PATH, requestPath);
+
+
+        //This function is used by more than one handler. If on one execution of this function, it has found and placed
+        //the matching verb in the cache, the same can be re-used from all handlers since all handlers share the same
+        //MessageContext. The API_RESOURCE_CACHE_KEY property will be set in the MessageContext to indicate that the
+        //verb has been put into the cache.
+        if (resourceArray != null) {
+            for (String resourceString : resourceArray) {
+                VerbInfoDTO verbInfo;
+                if (isGatewayAPIResourceValidationEnabled) {
+                    String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
+                    if (!getResourceCache().containsKey(apiCacheKey)) {
+                        break;
+                    }
+                    resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                            resourceString, httpMethod);
+                    verbInfo = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
+                    //Cache hit
+                    if (verbInfo != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Found resource in Cache for key: " + resourceCacheKey);
+                        }
+                        verbInfoList.add(verbInfo);
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Resource not found in cache for key: " + resourceCacheKey);
+                        }
+                    }
+                }
+            }
+            if (resourceArray.size() == verbInfoList.size()) {
+                return verbInfoList;
+            }
+        } else {
+            API selectedApi = Utils.getSelectedAPI((Axis2MessageContext) requestContext.getContextHandler());
+            Resource selectedResource = null;
+            String resourceString;
+
+
+            if (selectedApi != null) {
+                Resource[] selectedAPIResources = selectedApi.getResources();
+
+                Set<Resource> acceptableResources = new LinkedHashSet<Resource>();
+
+                for (Resource resource : selectedAPIResources) {
+                    //If the requesting method is OPTIONS or if the Resource contains the requesting method
+                    if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
+                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+                        acceptableResources.add(resource);
+                    }
+                }
+
+                if (acceptableResources.size() > 0) {
+                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                        Resource resource = dispatcher.findResource((Axis2MessageContext)
+                                requestContext.getContextHandler(), acceptableResources);
+                        if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                            selectedResource = resource;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (selectedResource == null) {
+                //No matching resource found.
+                String msg = "Could not find matching resource for " + requestPath;
+                log.error(msg);
+                throw new ResourceNotFoundException(msg);
+            }
+
+            resourceString = selectedResource.getDispatcherHelper().getString();
+            resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Selected Resource: " + resourceString);
+            }
+            //Set the elected resource
+            requestContext.getContextHandler().setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
+            if (isGatewayAPIResourceValidationEnabled) {
+                VerbInfoDTO verbInfo;
+                verbInfo = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
+                //Cache hit
+                if (verbInfo != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Got Resource from cache for key: " + resourceCacheKey);
+                    }
+                    verbInfoList.add(verbInfo);
+                    return verbInfoList;
+                } else if (log.isDebugEnabled()) {
+                    log.debug("Cache miss for Resource for key: " + resourceCacheKey);
+                }
+            }
+        }
+
+        String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
+        APIInfoDTO apiInfoDTO = null;
+
+        if (isGatewayAPIResourceValidationEnabled) {
+            apiInfoDTO = (APIInfoDTO) getResourceCache().get(apiCacheKey);
+        }
+
+        //Cache miss
+        if (apiInfoDTO == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Could not find API object in cache for key: " + apiCacheKey);
+            }
+
+            String apiType = requestContext.getApiRequestInfo().getApiType();
+
+            if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType)) {
+                apiInfoDTO = doGetAPIProductInfo((Axis2MessageContext) requestContext.getContextHandler(),
+                        apiContext, apiVersion);
+            } else {
+                apiInfoDTO = doGetAPIInfo((Axis2MessageContext) requestContext.getContextHandler(),
+                        apiContext, apiVersion);
+            }
+
+            if (isGatewayAPIResourceValidationEnabled) {
+                getResourceCache().put(apiCacheKey, apiInfoDTO);
+            }
+        }
+        if (apiInfoDTO.getResources() != null) {
+            for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
+                Set<VerbInfoDTO> verbDTOList = resourceInfoDTO.getHttpVerbs();
+                for (VerbInfoDTO verb : verbDTOList) {
+                    if (verb.getHttpVerb().equals(httpMethod)) {
+                        for (String resourceString : resourceArray) {
+                            if (isResourcePathMatching(resourceString, resourceInfoDTO)) {
+                                resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                                        resourceString, httpMethod);
+                                verb.setRequestKey(resourceCacheKey);
+                                verbInfoList.add(verb);
+                                if (isGatewayAPIResourceValidationEnabled) {
+                                    //Store verb in cache
+                                    //Set cache key in the message c\ontext so that it can be used by the subsequent handlers.
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Putting resource object in cache with key: " + resourceCacheKey);
+                                    }
+                                    getResourceCache().put(resourceCacheKey, verb);
+                                    requestContext.getContextHandler().setProperty(
+                                            APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (verbInfoList.size() == 0) {
+            verbInfoList = null;
+        }
+        return verbInfoList;
     }
 
     public List<VerbInfoDTO> findMatchingVerb(MessageContext synCtx) throws ResourceNotFoundException, APISecurityException {
@@ -489,6 +707,21 @@ public class APIKeyValidator {
             verbInfoList = null;
         }
         return verbInfoList;
+    }
+
+    private String getRequestPath(RequestContextDTO requestContext, String apiContext, String apiVersion, String fullRequestPath) {
+        String requestPath;
+        String versionStrategy = (String) requestContext.getContextHandler().getProperty(
+                RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY);
+
+        if (VersionStrategyFactory.TYPE_URL.equals(versionStrategy)) {
+            // most used strategy. server:port/context/version/resource
+            requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
+        } else {
+            // default version. assume there is no version is used
+            requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
+        }
+        return requestPath;
     }
 
     private String getRequestPath(MessageContext synCtx, String apiContext, String apiVersion, String fullRequestPath) {

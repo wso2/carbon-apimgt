@@ -49,6 +49,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -421,6 +422,44 @@ public class Utils {
         return APIMgtGatewayConstants.BASE64_ENCODED_CLIENT_CERTIFICATE_HEADER;
     }
 
+    public static X509Certificate getClientCertificate(RequestContextDTO requestContext)
+            throws APIManagementException {
+        Object validatedCert = requestContext.getContextHandler().getProperty(
+                APIMgtGatewayConstants.VALIDATED_X509_CERT);
+
+        if (validatedCert != null) {
+            return (X509Certificate) validatedCert;
+        } else {
+            Map headers = requestContext.getMsgInfo().getHeaders();
+            Object sslCertObject = requestContext.getContextHandler().
+                    getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+            X509Certificate certificateFromMessageContext = null;
+            if (sslCertObject != null) {
+                X509Certificate[] certs = (X509Certificate[]) sslCertObject;
+                certificateFromMessageContext = certs[0];
+                requestContext.getContextHandler().setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT,
+                        certificateFromMessageContext);
+            }
+            if (headers.containsKey(Utils.getClientCertificateHeader())) {
+                try {
+                    if (!isClientCertificateValidationEnabled() || APIUtil
+                            .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
+                        X509Certificate x509Certificate = getClientCertificateFromHeader(headers);
+                        requestContext.getContextHandler().setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT,
+                                x509Certificate);
+                        return x509Certificate;
+                    }
+                } catch (APIManagementException e) {
+                    String msg = "Error while validating into Certificate Existence";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, e);
+                }
+            }
+
+            return certificateFromMessageContext;
+        }
+    }
+
     public static X509Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
         Object validatedCert = axis2MessageContext.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
@@ -441,7 +480,7 @@ public class Utils {
                 try {
                     if (!isClientCertificateValidationEnabled() || APIUtil
                             .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
-                        X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
+                        X509Certificate x509Certificate = getClientCertificateFromHeader(headers);
                         axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
                         return x509Certificate;
                     }
@@ -456,10 +495,8 @@ public class Utils {
         }
     }
 
-    private static X509Certificate getClientCertificateFromHeader(org.apache.axis2.context.MessageContext axis2MessageContext)
+    private static X509Certificate getClientCertificateFromHeader(Map headers)
             throws APIManagementException {
-        Map headers =
-                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         String certificate = (String) headers.get(Utils.getClientCertificateHeader());
         byte[] bytes;

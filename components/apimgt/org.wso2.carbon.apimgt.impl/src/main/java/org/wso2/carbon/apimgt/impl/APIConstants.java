@@ -1264,6 +1264,7 @@ public final class APIConstants {
     public static final String API_TYPE = "API_TYPE";
     public static final String HTTP_VERB = "HTTP_VERB";
     public static final String GRAPHQL_API = "GRAPHQL";
+    public static final String WEBSOCKET_API = "WS";
     public static final String GRAPHQL_SUBSCRIPTION_REQUEST = "isGraphqlSubscriptionRequest";
     public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
     public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
@@ -2064,6 +2065,9 @@ public final class APIConstants {
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
         public static final String TOKEN_TYPE = "token_type";
         public static final String API_KEY_TOKEN_TYPE = "apiKey";
+        public static final String TOKEN= "token";
+        public static final String SIGNED_JWT_INFO = "signedJWTInfo";
+        public static final String KEY_VALIDATION_INFO = "keyValidationInfo";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

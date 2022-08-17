@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -232,6 +233,110 @@ public class JWTValidator {
         }
     }
 
+    /**
+     * Authenticates the given request with a JWT token to see if an API consumer is allowed to access
+     * a particular API or not.
+     *
+     * @param signedJWTInfo The JWT token sent with the API request
+     * @param requestContext   The message to be authenticated
+     * @return an AuthenticationContext object which contains the authentication information
+     * @throws APISecurityException in case of authentication failure
+     */
+    @MethodStats
+    public AuthenticationContext authenticate(SignedJWTInfo signedJWTInfo, RequestContextDTO requestContext)
+            throws APISecurityException {
+
+        String apiContext = requestContext.getApiRequestInfo().getContext();
+        String apiVersion = requestContext.getApiRequestInfo().getVersion();
+
+        String httpMethod = requestContext.getMsgInfo().getHttpMethod();
+        String matchingResource = requestContext.getMsgInfo().getElectedResource();
+        String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
+        String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
+
+        try {
+            X509Certificate clientCertificate = Utils.getClientCertificate(requestContext);
+            signedJWTInfo.setX509ClientCertificate(clientCertificate);
+        } catch (APIManagementException e) {
+            log.error("Error while obtaining client certificate. " + GatewayUtils.getMaskedToken(jwtHeader));
+        }
+        if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
+            if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                            getMaskedToken(jwtHeader));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+        }
+
+        JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
+
+        if (jwtValidationInfo != null) {
+            if (jwtValidationInfo.isValid()) {
+
+                // Validate subscriptions
+                APIKeyValidationInfoDTO apiKeyValidationInfoDTO;
+
+                log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
+                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, jwtValidationInfo);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Subscription validation via Key Manager. Status: "
+                            + apiKeyValidationInfoDTO.isAuthorized());
+                }
+                if (!apiKeyValidationInfoDTO.isAuthorized()) {
+                    log.debug(
+                            "User is NOT authorized to access the Resource. API Subscription validation failed.");
+                    throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
+                            "User is NOT authorized to access the Resource. API Subscription validation failed.");
+
+                }
+                // Validate scopes
+                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo);
+                requestContext.getContextHandler().setProperty(APIMgtGatewayConstants.SCOPES,
+                        jwtValidationInfo.getScopes().toString());
+                if (apiKeyValidationInfoDTO.isAuthorized()) {
+                    /*
+                     * Set api.ut.apiPublisher of the subscribed api to the message context.
+                     * This is necessary for the functionality of Publisher alerts.
+                     * Set API_NAME of the subscribed api to the message context.
+                     * */
+                    requestContext.getContextHandler().setProperty(APIMgtGatewayConstants.API_PUBLISHER,
+                            apiKeyValidationInfoDTO.getApiPublisher());
+                    requestContext.getContextHandler().setProperty("API_NAME", apiKeyValidationInfoDTO.getApiName());
+                    /* GraphQL Query Analysis Information */
+                    if (APIConstants.GRAPHQL_API.equals(requestContext.getApiRequestInfo().getApiType())) {
+                        requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_DEPTH,
+                                apiKeyValidationInfoDTO.getGraphQLMaxDepth());
+                        requestContext.getContextHandler().setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY,
+                                apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
+                    }
+                    log.debug("JWT authentication successful.");
+                }
+                log.debug("JWT authentication successful.");
+                String endUserToken = null;
+                if (jwtGenerationEnabled) {
+                    JWTInfoDto jwtInfoDto = GatewayUtils
+                            .generateJWTInfoDto(null, jwtValidationInfo, apiKeyValidationInfoDTO,
+                                    requestContext);
+                    endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
+                }
+                return GatewayUtils.generateAuthenticationContext(jwtTokenIdentifier, jwtValidationInfo,
+                        apiKeyValidationInfoDTO,
+                        endUserToken, true);
+            } else {
+                throw new APISecurityException(jwtValidationInfo.getValidationCode(),
+                        APISecurityConstants.getAuthenticationFailureMessage(jwtValidationInfo.getValidationCode()));
+            }
+        } else {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        }
+    }
+
     private long getTtl() {
         if (ttl != -1) {
             return ttl;
@@ -324,6 +429,15 @@ public class JWTValidator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        return validateSubscriptionUsingKeyManager(apiContext, apiVersion, jwtValidationInfo);
+    }
+
+    private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(RequestContextDTO requestContext,
+                                                                        JWTValidationInfo jwtValidationInfo)
+            throws APISecurityException {
+
+        String apiContext = requestContext.getApiRequestInfo().getContext();
+        String apiVersion = requestContext.getApiRequestInfo().getVersion();
         return validateSubscriptionUsingKeyManager(apiContext, apiVersion, jwtValidationInfo);
     }
 

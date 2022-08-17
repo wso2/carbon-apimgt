@@ -18,8 +18,15 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.util.List;
 import java.util.Map;
 
 public class APISecurityUtils {
@@ -59,6 +66,30 @@ public class APISecurityUtils {
      * this should only be used with newly validated requests. It shouldn't be used to modify
      * already validated requests.
      *
+     * @param requestContext        A newly authenticated request
+     * @param authContext   AuthenticationContext information to be added
+     */
+    public static void setAuthenticationContext(RequestContextDTO requestContext,
+                                                AuthenticationContext authContext,
+                                                String contextHeader) {
+
+        requestContext.getContextHandler().setProperty(API_AUTH_CONTEXT, authContext);
+        requestContext.getContextHandler().setProperty(APIConstants.API_KEY_TYPE, authContext.getKeyType());
+        if (authContext.getIssuer() != null) {
+            requestContext.getContextHandler().setProperty(APIConstants.KeyManager.ISSUER, authContext.getIssuer());
+        }
+        if (contextHeader != null && authContext.getCallerToken() != null) {
+            Map transportHeaders = requestContext.getMsgInfo().getHeaders();
+            transportHeaders.put(contextHeader, authContext.getCallerToken());
+        }
+    }
+
+    /**
+     * Add AuthenticationContext information into a validated request. This method does not
+     * allow overriding existing AuthenticationContext information on the request. Therefore
+     * this should only be used with newly validated requests. It shouldn't be used to modify
+     * already validated requests.
+     *
      * @param synCtx        A newly authenticated request
      * @param authContext   AuthenticationContext information to be added
      */
@@ -78,6 +109,56 @@ public class APISecurityUtils {
      */
     public static AuthenticationContext getAuthenticationContext(MessageContext synCtx) {
         return (AuthenticationContext) synCtx.getProperty(API_AUTH_CONTEXT);
+    }
+
+    /**
+     * Retrieve the AuthenticationContext information from the request. If the request hasn't
+     * been validated yet, this method will return null.
+     *
+     * @param requestContext Current message
+     * @return An AuthenticationContext instance or null
+     */
+    public static AuthenticationContext getAuthenticationContext(RequestContextDTO requestContext) {
+        return (AuthenticationContext) requestContext.getContextHandler().getProperty(API_AUTH_CONTEXT);
+    }
+
+    /**
+     * Retrieve the matching API Resource from the in Memory
+     *
+     * @param requestContext Current requestContext
+     * @return An URLMapping instance
+     */
+    public static URLMapping GetInMemoryAPIResource (RequestContextDTO requestContext) {
+
+        URLMapping apiResource = null;
+        String apiContext = requestContext.getApiRequestInfo().getContext();
+        String apiVersion = requestContext.getApiRequestInfo().getVersion();
+        String httpMethod =  requestContext.getMsgInfo().getHttpMethod();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        API api = tenantSubscriptionStore.getApiByContextAndVersion(apiContext,
+                apiVersion);
+
+        List<URLMapping> resources = api.getResources();
+
+        // Get the resources of elected resource
+        for(URLMapping resource: resources) {
+            if (APIConstants.WEBSOCKET_API.equals(requestContext.getApiRequestInfo().getApiType())) {
+                if (resource.getUrlPattern().equals(requestContext.getMsgInfo().getElectedResource())) {
+                    apiResource = resource;
+                    break;
+                }
+            } else {
+                if (resource.getUrlPattern().equals(requestContext.getMsgInfo().getElectedResource()) &&
+                        resource.getHttpMethod().equals(httpMethod)) {
+                    apiResource = resource;
+                    break;
+                }
+            }
+        }
+        return apiResource;
     }
 
 }
