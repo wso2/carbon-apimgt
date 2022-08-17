@@ -99,9 +99,8 @@ public class TracingReporter implements Reporter {
      * @return structured log message format String
      * */
     private String toStructuredMessage(Instant timeStamp, SpanData span) {
-        try {
-            StringWriter writer = new StringWriter();
-            JsonGenerator generator = this.jsonFactory.createGenerator(writer);
+        try (StringWriter writer = new StringWriter();
+             JsonGenerator generator = this.jsonFactory.createGenerator(writer)) {
             generator.writeStartObject();
             generator.writeNumberField(TracingConstants.LATENCY, Duration.between(span.startAt, timeStamp).toMillis());
             generator.writeStringField(TracingConstants.OPERATION_NAME, span.operationName);
