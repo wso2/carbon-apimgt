@@ -17,69 +17,92 @@
  */
 package org.wso2.carbon.apimgt.impl.lifecycle;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Manages the LifeCycle
+ */
 public class LCManager {
 
-    private static Log log = LogFactory.getLog(LCManager.class);
-    private static final int ENTITY_EXPANSION_LIMIT = 0;
     private static final String STATE_ID_PROTOTYPED = "Prototyped";
     private static final String STATE_ID_PUBLISHED = "Published";
     private static final String TRANSITION_TARGET_PROTOTYPED = "Prototyped";
     private static final String TRANSITION_TARGET_PUBLISHED = "Published";
+    private static final String LIFECYCLE_KEY = "LifeCycle";
+    private static final String STATES_KEY = "States";
+    private static final String STATE_KEY = "State";
+    private static final String TRANSITIONS_KEY = "Transitions";
+    private static final String CHECK_ITEMS_KEY = "CheckItems";
+    private static final String API_LIFECYCLE_PATH = "lifecycle/APILifeCycle.json";
+    private static final String UTF_8 = "UTF-8";
+    private static final String EVENT_KEY = "Event";
+    private static final String TARGET_KEY = "Target";
+
     private Map<String, String> stateTransitionMap = new HashMap<String, String>();
     private Map<String, StateInfo> stateInfoMap = new HashMap<String, StateInfo>();
     private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
-    private static String tenantDomain;
+    private String tenantDomain;
+    private JSONObject defaultLCObj;
 
-    public static void setTenantDomain(String tenantDomain) {
-        LCManager.tenantDomain = tenantDomain;
+    /**
+     * Initialize Class
+     *
+     * @param tenantDomain
+     * @throws IOException
+     * @throws ParseException
+     */
+    public LCManager(String tenantDomain) throws IOException, ParseException {
+
+        this.tenantDomain = tenantDomain;
+        defaultLCObj = getDefaultLCConfigJSON();
     }
 
-    public static String getTenantDomain() {
-        return tenantDomain;
-    }
-
-    public LCManager(String tenantDomain) throws APIManagementException {
-        setTenantDomain(tenantDomain);
-    }
-
+    /**
+     * Process the lifecycle object into the states
+     *
+     * @throws APIManagementException
+     */
     private void processLifeCycle() throws APIManagementException {
-        JSONObject tenantConfig = APIUtil.getTenantConfig(getTenantDomain());
+
+        JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
         JSONArray states;
 
         //Checking whether the lifecycle exists in the tenantConfig
-        if (tenantConfig.containsKey("LifeCycle")) {
-            JSONObject LCObj = (JSONObject) tenantConfig.get("LifeCycle");
-            states = (JSONArray) LCObj.get("States");
+        if (tenantConfig.containsKey(LIFECYCLE_KEY)) {
+            JSONObject LCObj = (JSONObject) tenantConfig.get(LIFECYCLE_KEY);
+            states = (JSONArray) LCObj.get(STATES_KEY);
         } else {
-            JSONObject jsonObject = getDefaultLCConfigJSON();
-            states = (JSONArray) jsonObject.get("States");
+            JSONObject jsonObject = defaultLCObj;
+            states = (JSONArray) jsonObject.get(STATES_KEY);
         }
 
         for (Object state : states) {
             JSONObject stateObj = (JSONObject) state;
-            String stateId = (String) stateObj.get("State");
+            String stateId = (String) stateObj.get(STATE_KEY);
             LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
             List<String> actions = new ArrayList<String>();
             List<String> checklistItems = new ArrayList<String>();
-            if (stateObj.containsKey("Transitions")) {
-                JSONArray transitions = (JSONArray) stateObj.get("Transitions");
+            if (stateObj.containsKey(TRANSITIONS_KEY)) {
+                JSONArray transitions = (JSONArray) stateObj.get(TRANSITIONS_KEY);
                 for (Object transition : transitions) {
                     JSONObject transitionObj = (JSONObject) transition;
-                    String action = (String) transitionObj.get("Event");
-                    String target = (String) transitionObj.get("Target");
+                    String action = (String) transitionObj.get(EVENT_KEY);
+                    String target = (String) transitionObj.get(TARGET_KEY);
                     if (stateId.equals(STATE_ID_PROTOTYPED)
                             && (target.equals(TRANSITION_TARGET_PROTOTYPED)
                     )) {
@@ -99,8 +122,8 @@ public class LCManager {
                 }
             }
 
-            if (stateObj.containsKey("CheckItems")) {
-                JSONArray checkItems = (JSONArray) stateObj.get("CheckItems");
+            if (stateObj.containsKey(CHECK_ITEMS_KEY)) {
+                JSONArray checkItems = (JSONArray) stateObj.get(CHECK_ITEMS_KEY);
                 for (Object checkItem : checkItems) {
                     checklistItems.add(checkItem.toString());
                 }
@@ -114,94 +137,36 @@ public class LCManager {
         }
     }
 
-    public JSONObject getDefaultLCConfigJSON() {
+    /**
+     * Reading the default API Lifecycle
+     *
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     * @throws URISyntaxException
+     * @throws APIManagementException
+     */
+    public JSONObject getDefaultLCConfigJSON() throws IOException, ParseException {
 
-        JSONObject LCConfigObj = new JSONObject();
-        JSONArray statesArray = new JSONArray();
+        InputStream lcStream = getClass().getClassLoader().getResourceAsStream(API_LIFECYCLE_PATH);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(
+                new InputStreamReader(lcStream, UTF_8));
 
-        //Created State
-        JSONObject createdState = new JSONObject();
-        createdState.put("State", "Created");
-        JSONArray transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Publish", "Published"));
-        transitionArray.add(getTransitionObj("Deploy as a Prototype", "Prototyped"));
-        createdState.put("Transitions", transitionArray);
-        createdState.put("CheckItems", getCheckItemsArray(
-                new String[]{
-                        "Deprecate old versions after publishing the API",
-                        "Requires re-subscription when publishing the API"}));
-
-        //Prototyped State
-        JSONObject prototypedState = new JSONObject();
-        prototypedState.put("State", "Prototyped");
-        transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Publish", "Published"));
-        transitionArray.add(getTransitionObj("Demote to Created", "Created"));
-        transitionArray.add(getTransitionObj("Deploy as a Prototype", "Prototyped"));
-        prototypedState.put("Transitions", transitionArray);
-        prototypedState.put("CheckItems", getCheckItemsArray(
-                new String[]{
-                        "Deprecate old versions after publishing the API",
-                        "Requires re-subscription when publishing the API"}));
-
-        //Published State
-        JSONObject publishedState = new JSONObject();
-        publishedState.put("State", "Published");
-        transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Block", "Blocked"));
-        transitionArray.add(getTransitionObj("Deploy as a Prototype", "Prototyped"));
-        transitionArray.add(getTransitionObj("Demote to Created", "Created"));
-        transitionArray.add(getTransitionObj("Deprecate", "Deprecated"));
-        transitionArray.add(getTransitionObj("Publish", "Published"));
-        publishedState.put("Transitions", transitionArray);
-
-        //Blocked State
-        JSONObject blockedState = new JSONObject();
-        blockedState.put("State", "Blocked");
-        transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Deprecate", "Deprecated"));
-        transitionArray.add(getTransitionObj("Re-Publish", "Published"));
-        blockedState.put("Transitions", transitionArray);
-
-        //Deprecated State
-        JSONObject deprecatedState = new JSONObject();
-        deprecatedState.put("State", "Deprecated");
-        transitionArray = new JSONArray();
-        transitionArray.add(getTransitionObj("Retire", "Retired"));
-        deprecatedState.put("Transitions", transitionArray);
-
-        //Retired State
-        JSONObject retiredState = new JSONObject();
-        retiredState.put("State", "Retired");
-
-        //Adding the all State info objects to statesArray
-        statesArray.add(createdState);
-        statesArray.add(prototypedState);
-        statesArray.add(publishedState);
-        statesArray.add(blockedState);
-        statesArray.add(deprecatedState);
-        statesArray.add(retiredState);
-
-        LCConfigObj.put("States", statesArray);
-        return LCConfigObj;
+        return jsonObject;
     }
 
-    public JSONObject getTransitionObj(String event, String target) {
-        JSONObject transitionObj = new JSONObject();
-        transitionObj.put("Event", event);
-        transitionObj.put("Target", target);
-        return transitionObj;
-    }
-
-    public JSONArray getCheckItemsArray(String[] checkItems) {
-        JSONArray checkItemsArray = new JSONArray();
-        for (String checkItem : checkItems) {
-            checkItemsArray.add(checkItem);
-        }
-        return checkItemsArray;
-    }
-
-    public String getTransitionAction(String currentState, String targetState) throws APIManagementException {
+    /**
+     * Returning the Action for the current and the target state
+     *
+     * @param currentState
+     * @param targetState
+     * @return
+     * @throws APIManagementException
+     * @throws IOException
+     * @throws ParseException
+     */
+    public String getTransitionAction(String currentState, String targetState) throws APIManagementException, IOException, ParseException {
         processLifeCycle();
         if (stateHashMap.containsKey(currentState)) {
             LifeCycleTransition transition = stateHashMap.get(currentState);
@@ -210,7 +175,14 @@ public class LCManager {
         return null;
     }
 
-    public String getStateForTransition(String action) throws APIManagementException {
+    /**
+     * Get State Transition for the action
+     *
+     * @param action
+     * @return
+     * @throws APIManagementException
+     */
+    public String getStateForTransition(String action) throws APIManagementException{
         processLifeCycle();
         return stateTransitionMap.get(action);
     }
@@ -257,7 +229,6 @@ public class LCManager {
         public List<String> getCheckListItems() {
             return checkListItems;
         }
-
         public void setCheckListItems(List<String> checkListItems) {
             this.checkListItems = checkListItems;
         }
@@ -279,7 +250,16 @@ public class LCManager {
         }
     }
 
-    public List<String> getCheckListItemsForState(String state) throws APIManagementException {
+    /**
+     * Get check list items for the state
+     *
+     * @param state
+     * @return
+     * @throws APIManagementException
+     * @throws IOException
+     * @throws ParseException
+     */
+    public List<String> getCheckListItemsForState(String state) throws APIManagementException, IOException, ParseException {
         processLifeCycle();
         if (stateInfoMap.containsKey(state)) {
             return stateInfoMap.get(state).getCheckListItems();
@@ -287,7 +267,16 @@ public class LCManager {
         return null;
     }
 
-    public List<String> getAllowedActionsForState(String state) throws APIManagementException {
+    /**
+     * Get allowed actions for the state
+     *
+     * @param state
+     * @return
+     * @throws APIManagementException
+     * @throws IOException
+     * @throws ParseException
+     */
+    public List<String> getAllowedActionsForState(String state) throws APIManagementException, IOException, ParseException {
         processLifeCycle();
         if (stateInfoMap.containsKey(state)) {
             return stateInfoMap.get(state).getTransitions();

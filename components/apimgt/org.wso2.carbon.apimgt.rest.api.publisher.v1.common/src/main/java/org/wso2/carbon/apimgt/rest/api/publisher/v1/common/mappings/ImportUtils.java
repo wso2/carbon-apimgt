@@ -1904,7 +1904,7 @@ public class ImportUtils {
         try {
             LCManager lcManager = LCManagerFactory.getInstance().getLCManager();
             return lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase());
-        } catch (PersistenceException e) {
+        } catch (PersistenceException | ParseException | IOException e) {
             throw new APIManagementException("Error while retrieving lifecycle configuration", e);
         }
     }

@@ -16,32 +16,37 @@
 
 package org.wso2.carbon.apimgt.impl.lifecycle;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.io.IOException;
+
+/**
+ * Factory class to get the LCManager
+ */
 public class LCManagerFactory {
 
-    private static final Log log = LogFactory.getLog(LCManagerFactory.class);
-    private static LCManagerFactory instance;
+    private static LCManagerFactory instance = new LCManagerFactory();
 
-    private LCManagerFactory() {
+    private LCManagerFactory() {}
 
-    }
+    /**
+     * Returning the LCManager Factory instance
+     * @return
+     */
+    public static LCManagerFactory getInstance() {return instance;}
 
-    public static LCManagerFactory getInstance() {
-        if (instance == null) {
-            instance = new LCManagerFactory();
-        }
-        return instance;
-    }
-
-    public LCManager getLCManager() throws PersistenceException, APIManagementException {
+    /**
+     * Return new LCManager Instance
+     * @return
+     * @throws PersistenceException
+     * @throws IOException
+     * @throws ParseException
+     */
+    public LCManager getLCManager() throws PersistenceException,  IOException, ParseException {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        LCManager lcManager ;
-        lcManager = new LCManager(tenantDomain);
+        LCManager lcManager = new LCManager(tenantDomain);
         return lcManager;
     }
 }

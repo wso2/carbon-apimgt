@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -46,6 +47,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -319,7 +321,7 @@ public class WorkflowUtils {
         } catch (APIManagementException e) {
             String errorMsg = "Could not complete api state change workflow";
             log.error(errorMsg, e);
-        } catch (APIPersistenceException | PersistenceException e) {
+        } catch (APIPersistenceException | PersistenceException | IOException | ParseException e) {
             log.error("Error while accessing lifecycle information ", e);
         }
     }
