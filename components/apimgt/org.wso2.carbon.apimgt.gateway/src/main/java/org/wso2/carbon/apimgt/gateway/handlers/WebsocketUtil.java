@@ -50,6 +50,7 @@ public class WebsocketUtil {
 	private static boolean gatewayTokenCacheEnabled = false;
 	public static Set<String> allowedOriginsConfigured = new HashSet<>();
 	public static String authorizationHeader = null;
+	public static String apikeyHeader = null;
 
 	static {
 		initParams();
@@ -74,6 +75,17 @@ public class WebsocketUtil {
 		if (authorizationHeader == null) {
 			try {
 				authorizationHeader = APIUtil
+						.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+				if (authorizationHeader == null) {
+					authorizationHeader = HttpHeaders.AUTHORIZATION;
+				}
+			} catch (APIManagementException e) {
+				log.error("Error while reading authorization header from APIM configurations", e);
+			}
+		}
+		if (apikeyHeader == null) {
+			try {
+				apikeyHeader = APIUtil
 						.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
 				if (authorizationHeader == null) {
 					authorizationHeader = HttpHeaders.AUTHORIZATION;

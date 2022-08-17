@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.APIRequestInfoDTO;
-import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.common.gateway.dto.MsgInfoDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.contexthandler.InboundContextHandler;
@@ -33,6 +32,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.handshake.security.oauth.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
@@ -49,14 +50,6 @@ public class WebsocketAuthenticator {
     private String authorizationHeader;
     private String apiSecurity;
     private String apiLevelPolicy;
-    private String certificateInformation;
-    private String apiUUID;
-    private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
-    private String keyManagers;
-    private final String type = ExtensionType.AUTHENTICATION.toString();
-    private String securityContextHeader;
-    protected APIKeyValidator keyValidator;
-    protected boolean isOauthParamsInitialized = false;
 
     public WebsocketAuthenticator(InboundMessageContext inboundMessageContext) {
         this.inboundMessageContext = inboundMessageContext;
@@ -66,14 +59,12 @@ public class WebsocketAuthenticator {
         boolean isBasicAuthProtected = true;
         boolean isApiKeyProtected = true;
         boolean isOAuthBasicAuthMandatory = true;
-        authorizationHeader = "Authorization";
-//        authorizationHeader = DataHolder.getInstance().getAuthorizationHeader(inboundMessageContext.
-//                getElectedAPI().getUuid());
+
+        authorizationHeader = DataHolder.getInstance().getAuthorizationHeaderFromUUID(inboundMessageContext.
+                getElectedAPI().getUuid());
         apiLevelPolicy = null;
-//        apiLevelPolicy = DataHolder.getInstance().getApiLevelPolicy(inboundMessageContext.
-//                getElectedAPI().getUuid());
-//        apiSecurity = DataHolder.getInstance().getApiSecurity(inboundMessageContext.
-//                getElectedAPI().getUuid());
+        apiSecurity = DataHolder.getInstance().getApiSecurityFromUUID(inboundMessageContext.
+                getElectedAPI().getUuid());
 
         // Set security conditions
         if (apiSecurity == null) {
@@ -102,10 +93,10 @@ public class WebsocketAuthenticator {
 //            authenticator.init(synapseEnvironment);
 //            authenticators.add(authenticator);
 //        }
-//        if (isOAuthProtected) {
-//            Authenticator authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
-//            authenticators.add(authenticator);
-//        }
+        if (isOAuthProtected) {
+            Authenticator authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
+            authenticators.add(authenticator);
+        }
         if (isBasicAuthProtected) {
             Authenticator authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
                     apiLevelPolicy);
@@ -207,6 +198,7 @@ public class WebsocketAuthenticator {
         requestContextDTO.setApiRequestInfo(apiRequestInfoDTO);
         requestContextDTO.setMsgInfo(msgInfoDTO);
         requestContextDTO.setDomainAddress(inboundMessageContext.getTenantDomain());
+        requestContextDTO.setRemoteIPAddress(inboundMessageContext.getUserIP());
 
         InboundContextHandler inboundContextHandler = new InboundContextHandler(inboundMessageContext);
         requestContextDTO.setContextHandler(inboundContextHandler);
@@ -244,6 +236,7 @@ public class WebsocketAuthenticator {
         apiRequestInfoDTO.setContext(inboundMessageContext.getApiContext());
         apiRequestInfoDTO.setVersion(inboundMessageContext.getVersion());
         apiRequestInfoDTO.setApiType(inboundMessageContext.getElectedAPI().getApiType());
+        apiRequestInfoDTO.setApiId(inboundMessageContext.getElectedAPI().getUuid());
         AuthenticationContext authenticationContext = inboundMessageContext.getAuthContext();
         if (authenticationContext != null) {
             apiRequestInfoDTO.setUsername(authenticationContext.getUsername());

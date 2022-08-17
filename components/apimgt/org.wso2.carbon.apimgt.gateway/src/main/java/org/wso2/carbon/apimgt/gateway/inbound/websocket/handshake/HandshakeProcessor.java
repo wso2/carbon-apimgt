@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.handshake.security.WebsocketAuthenticator;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -56,7 +57,9 @@ public class HandshakeProcessor {
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
         boolean isOAuthHeaderValid;
         try {
-            isOAuthHeaderValid = InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
+            // isOAuthHeaderValid = InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
+            WebsocketAuthenticator websocketAuthenticator = new WebsocketAuthenticator(inboundMessageContext);
+            isOAuthHeaderValid = websocketAuthenticator.isAuthenticated(inboundMessageContext);
         } catch (APIManagementException e) {
             log.error(WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
             return InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
