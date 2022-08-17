@@ -61,21 +61,20 @@ public class SchemaValidator extends AbstractHandler {
 
         logger.debug("Validating the API request Body content..");
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-        if (openAPI == null) {
-            return true;
-        }
-        OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
-        OpenAPIRequest request = new OpenAPIRequest(messageContext);
+        if (openAPI != null) {
+            OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
+            OpenAPIRequest request = new OpenAPIRequest(messageContext);
 
-        ValidationReport validationReport = validator.validateRequest(request);
-        if (validationReport.hasErrors()) {
-            StringBuilder finalMessage = new StringBuilder();
-            for (ValidationReport.Message message : validationReport.getMessages()) {
-                finalMessage.append(message.getMessage()).append(", ");
+            ValidationReport validationReport = validator.validateRequest(request);
+            if (validationReport.hasErrors()) {
+                StringBuilder finalMessage = new StringBuilder();
+                for (ValidationReport.Message message : validationReport.getMessages()) {
+                    finalMessage.append(message.getMessage()).append(", ");
+                }
+                String errMessage = "Schema validation failed in the Request: ";
+                logger.error(errMessage);
+                GatewayUtils.handleThreat(messageContext, HTTP_SC_CODE, errMessage + finalMessage);
             }
-            String errMessage = "Schema validation failed in the Request: ";
-            logger.error(errMessage);
-            GatewayUtils.handleThreat(messageContext, HTTP_SC_CODE, errMessage + finalMessage);
         }
         return true;
     }
@@ -84,22 +83,21 @@ public class SchemaValidator extends AbstractHandler {
     public boolean handleResponse(MessageContext messageContext) {
 
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-        if (openAPI == null) {
-            return true;
-        }
-        OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
-        OpenAPIResponse response = new OpenAPIResponse(messageContext);
+        if (openAPI != null) {
+            OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
+            OpenAPIResponse response = new OpenAPIResponse(messageContext);
 
-        ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
-                response);
-        if (validationReport.hasErrors()) {
-            StringBuilder finalMessage = new StringBuilder();
-            for (ValidationReport.Message message : validationReport.getMessages()) {
-                finalMessage.append(message.getMessage()).append(", ");
+            ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
+                    response);
+            if (validationReport.hasErrors()) {
+                StringBuilder finalMessage = new StringBuilder();
+                for (ValidationReport.Message message : validationReport.getMessages()) {
+                    finalMessage.append(message.getMessage()).append(", ");
+                }
+                String errMessage = "Schema validation failed in the Response: ";
+                logger.error(errMessage);
+                GatewayUtils.handleThreat(messageContext, INTERNAL_ERROR_CODE, errMessage + finalMessage);
             }
-            String errMessage = "Schema validation failed in the Response: ";
-            logger.error(errMessage);
-            GatewayUtils.handleThreat(messageContext, INTERNAL_ERROR_CODE, errMessage + finalMessage);
         }
         return true;
     }
