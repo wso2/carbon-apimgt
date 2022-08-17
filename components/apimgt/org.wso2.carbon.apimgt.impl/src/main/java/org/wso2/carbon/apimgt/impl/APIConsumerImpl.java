@@ -1361,8 +1361,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
-        String uuid = subscription.getUUID();
         if (subscription != null) {
+            String uuid = subscription.getUUID();
             String deleteWorkflowExtRef = apiMgtDAO
                     .getExternalWorkflowReferenceForSubscriptionAndWFType(subscription.getSubscriptionId(),
                             WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
