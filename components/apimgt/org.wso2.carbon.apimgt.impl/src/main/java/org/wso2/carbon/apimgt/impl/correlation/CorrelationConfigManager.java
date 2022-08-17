@@ -96,7 +96,7 @@ public class CorrelationConfigManager {
                     }
                     correlationConfigPropertyDTO.setValue(
                             propertyValueList.toArray(new String[0]));
-                    if (correlationConfigPropertyDTO.getName() == DENIED_THREADS) {
+                    if (correlationConfigPropertyDTO.getName().equals(DENIED_THREADS)) {
                         deniedThreads = correlationConfigPropertyDTO.getValue();
                     }
                     correlationConfigPropertyDTOList.add(correlationConfigPropertyDTO);
@@ -134,11 +134,10 @@ public class CorrelationConfigManager {
                     configDeniedThreads = deniedThreads;
                 }
             }
-
-            CorrelationLogConfig correlationLogConfig = new CorrelationLogConfig(configEnable,
-                    configComponentNames.toArray(new String[0]), configDeniedThreads);
-            CorrelationLogHolder.getInstance().setCorrelationLogServiceConfigs(correlationLogConfig);
         }
+        CorrelationLogConfig correlationLogConfig = new CorrelationLogConfig(configEnable,
+                configComponentNames.toArray(new String[0]), configDeniedThreads);
+        CorrelationLogHolder.getInstance().setCorrelationLogServiceConfigs(correlationLogConfig);
     }
 
     private byte[] getServiceCredentials(EventHubConfigurationDto eventHubConfigurationDto) {
