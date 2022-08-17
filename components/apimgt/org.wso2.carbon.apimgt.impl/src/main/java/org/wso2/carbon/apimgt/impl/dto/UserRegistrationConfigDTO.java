@@ -18,69 +18,20 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 /**
- * Object to store tenant signup information taken from the registry
- * 
+ * Object to store tenant signup information taken from the Advance Configuration
  */
-public class UserRegistrationConfigDTO implements Serializable{
+public class UserRegistrationConfigDTO {
 
-    private static final long serialVersionUID = 453085948357718066L;
-    //user store name
-	private String signUpDomain;
-	
-	//tenant admin info
-	private String adminUserName;	
-	private String adminPassword;
-	
-	//whether self signup is enabled
-	private boolean isSignUpEnabled;	
+	private ArrayList<String> roles = new ArrayList<String>();
 
-	private Map roles = new HashMap<String, Boolean>(); // role name - external
-														// (true/false) mapping
-
-	public String getSignUpDomain() {
-		return signUpDomain;
-	}
-
-	public void setSignUpDomain(String signUpDomain) {
-		this.signUpDomain = signUpDomain;
-	}
-
-	public Map<String, Boolean> getRoles() {
+	public ArrayList<String> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(Map roles) {
+	public void setRoles(ArrayList<String> roles) {
 		this.roles = roles;
 	}
-	
-	public String getAdminUserName() {
-		return adminUserName;
-	}
-
-	public void setAdminUserName(String adminUserName) {
-		this.adminUserName = adminUserName;
-	}
-
-	public String getAdminPassword() {
-		return adminPassword;
-	}
-
-	public void setAdminPassword(String adminPassword) {
-		this.adminPassword = adminPassword;
-	}
-	
-	public boolean isSignUpEnabled() {
-		return isSignUpEnabled;
-	}
-
-	public void setSignUpEnabled(boolean isSignUpEnabled) {
-		this.isSignUpEnabled = isSignUpEnabled;
-	}
-
-
 }

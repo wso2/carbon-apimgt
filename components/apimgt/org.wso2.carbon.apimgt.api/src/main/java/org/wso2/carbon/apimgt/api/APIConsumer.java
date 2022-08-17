@@ -153,6 +153,15 @@ public interface APIConsumer extends APIManager {
     void cleanUpApplicationRegistrationByApplicationId(int applicationId, String tokenType) throws APIManagementException;
 
     /**
+     * This method will delete pending subscription tasks
+     * @param applicationId
+     * @throws APIManagementException
+     */
+    default void cleanupPendingTasksForApplicationDeletion(int applicationId) throws APIManagementException {
+        //no default implementation
+    }
+
+    /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier

@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
@@ -507,6 +508,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             apiConsumer.removeSubscription(subscribedAPI, organization);
+            if (subscribedAPI != null &&
+                    APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subscribedAPI.getSubStatus())) {
+                if (subscribedAPI.getSubscriptionId() == -1) {
+                    return Response.status(Response.Status.BAD_REQUEST).build();
+                }
+                return Response.status(Response.Status.CREATED).build();
+            }
             return Response.ok().build();
         } catch (APIManagementException e) {
             RestApiUtil

@@ -331,7 +331,7 @@
       },
       {
         "Name": "apim:common_operation_policy_view",
-        "Roles": "admin,Internal/creator,Internal/publisher"
+        "Roles": "admin,Internal/creator,Internal/publisher,Internal/observer"
       },
       {
         "Name": "apim:common_operation_policy_manage",
@@ -379,5 +379,10 @@
       "CreateOnTenantLoad" : true,
       "RoleName" : "Internal/integration_dev"
     }
+  },
+  "SelfSignUp": {
+    "SignUpRoles": [
+      "Internal/subscriber"
+    ]
   }
 }

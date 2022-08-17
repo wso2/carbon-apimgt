@@ -47,7 +47,7 @@ public class ServiceReferenceHolderMockCreator {
     private RealmServiceMockCreator realmServiceMockCreator;
     private RegistryServiceMockCreator registryServiceMockCreator;
 
-    public ServiceReferenceHolderMockCreator(int tenantId) throws RegistryException, UserStoreException {
+    public ServiceReferenceHolderMockCreator(int tenantId) throws UserStoreException {
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         realmServiceMockCreator = new RealmServiceMockCreator(tenantId);
 

@@ -4352,6 +4352,7 @@ components:
             - ON_HOLD
             - REJECTED
             - TIER_UPDATE_PENDING
+            - DELETE_PENDING
         redirectionParams:
           type: string
           description: A url and other parameters the subscriber can be redirected.

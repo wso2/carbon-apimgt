@@ -124,7 +124,6 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
             APIUtil.loadTenantRegistry(tenantId);
             APIUtil.loadTenantExternalStoreConfig(tenantDomain);
             APIUtil.loadTenantWorkFlowExtensions(tenantDomain);
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantDomain);
             APIUtil.loadAndSyncTenantConf(tenantDomain);
 
         } catch (RegistryException e) {

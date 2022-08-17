@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -137,7 +137,7 @@ public class DefaultClaimsRetrieverTestCase {
         Cache cache = Mockito.mock(Cache.class);
 
         Mockito.when(cacheBuilder.setStoreByValue(false)).thenReturn(cacheBuilder);
-        Mockito.when(cacheBuilder.setExpiry(Matchers.any(CacheConfiguration.ExpiryType.class),Matchers.any(
+        Mockito.when(cacheBuilder.setExpiry(ArgumentMatchers.any(CacheConfiguration.ExpiryType.class),ArgumentMatchers.any(
                 CacheConfiguration.Duration.class))).thenReturn(cacheBuilder);
         Mockito.when(cacheBuilder.build()).thenReturn(cache);
         PowerMockito.mockStatic(APIUtil.class);
@@ -147,7 +147,7 @@ public class DefaultClaimsRetrieverTestCase {
         claimValues.put("claim1", "http://wso2.org/claim1");
         claimValues.put("claim2", "http://wso2.org/claim2");
         UserClaims userClaims = new UserClaims(claimValues);
-        Mockito.when(cache.get(Matchers.any(ClaimCacheKey.class))).thenReturn(userClaims);
+        Mockito.when(cache.get(ArgumentMatchers.any(ClaimCacheKey.class))).thenReturn(userClaims);
         SortedMap<String, String> claims = defaultClaimsRetriever.getClaims(USER_NAME);
 
         Assert.assertNotNull(claims);

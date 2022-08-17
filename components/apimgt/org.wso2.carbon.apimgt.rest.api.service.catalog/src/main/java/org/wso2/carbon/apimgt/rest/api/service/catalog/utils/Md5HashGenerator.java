@@ -83,7 +83,7 @@ public class Md5HashGenerator {
                             // This if only check whether the file start with the name "metadata".
                             try {
                                 ServiceEntry service = fromFileToServiceEntry(yamlFile, null);
-                                key = service.getKey();
+                                key = service.getServiceKey();
                             } catch (IOException e) {
                                 RestApiUtil.handleBadRequest("Failed to fetch metadata information", log);
                             }

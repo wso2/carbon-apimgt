@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.tracing.ZipkinTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.APIMOpenTelemetry;
 import org.wso2.carbon.apimgt.tracing.telemetry.JaegerTelemetry;
 import org.wso2.carbon.apimgt.tracing.telemetry.LogTelemetry;
+import org.wso2.carbon.apimgt.tracing.telemetry.OTLPTelemetry;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryServiceImpl;
 import org.wso2.carbon.apimgt.tracing.telemetry.ZipkinTelemetry;
@@ -67,6 +68,7 @@ public class TracingServiceComponent {
             registration = bundleContext.registerService(APIMOpenTelemetry.class, new JaegerTelemetry(), null);
             registration = bundleContext.registerService(APIMOpenTelemetry.class, new ZipkinTelemetry(), null);
             registration = bundleContext.registerService(APIMOpenTelemetry.class, new LogTelemetry(), null);
+            registration = bundleContext.registerService(APIMOpenTelemetry.class, new OTLPTelemetry(), null);
             registration = bundleContext.registerService(TelemetryService.class, TelemetryServiceImpl.getInstance(),
                     null);
 

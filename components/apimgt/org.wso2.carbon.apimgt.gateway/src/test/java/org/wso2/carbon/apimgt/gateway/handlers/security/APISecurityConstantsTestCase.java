@@ -34,11 +34,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 @PrepareForTest(APISecurityConstants.class)
 public class APISecurityConstantsTestCase {
 
-    @Before
-    public void setup() {
-//        PowerMockito.mockStatic(APISecurityConstants.class);
-    }
-
     @Test
     public void testGetAuthenticationFailureMessage() {
         Assert.assertEquals(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED_MESSAGE, APISecurityConstants
@@ -91,10 +86,5 @@ public class APISecurityConstantsTestCase {
         Assert.assertEquals(invalidCredentialsDesc, APISecurityConstants
                 .getFailureMessageDetailDescription(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE));
-    }
-
-    @Test
-    public void testStaticClass() {
-        PowerMockito.mockStatic(APISecurityConstants.class);
     }
 }

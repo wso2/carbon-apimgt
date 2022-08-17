@@ -71,9 +71,7 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
 
 			String tenantAwareUserName =
 					MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
-			updateRolesOfUser(
-					tenantAwareUserName,
-			                  SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
+			updateRolesOfUser(tenantAwareUserName, signupConfig.getRoles(), tenantDomain);
 		} catch (APIManagementException e) {
 			throw new WorkflowException("Error while accessing signup configuration", e);
 		} catch (Exception e) {

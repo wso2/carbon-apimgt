@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Mapping class for Service Catalog services
@@ -81,8 +80,8 @@ public class ServiceEntryMappingUtil {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             service = mapper.readValue(file, ServiceEntry.class);
-            if (StringUtils.isBlank(service.getKey())) {
-                service.setKey(generateServiceKey(service));
+            if (StringUtils.isBlank(service.getServiceKey())) {
+                service.setServiceKey(generateServiceKey(service));
             }
         } catch (InvalidFormatException e) {
             RestApiUtil.handleBadRequest("One or more parameters contain disallowed values", e, log);
@@ -115,7 +114,7 @@ public class ServiceEntryMappingUtil {
                 try {
                     serviceInfo = fromFileToServiceEntry(metadataFile, serviceInfo);
                     serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(metadataFile)));
-                    key = serviceInfo.getKey();
+                    key = serviceInfo.getServiceKey();
                     serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(definitionFile)));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while reading service resource files. " +
@@ -185,7 +184,7 @@ public class ServiceEntryMappingUtil {
 
         serviceInfoDTO.setId(serviceEntry.getUuid());
         serviceInfoDTO.setName(serviceEntry.getName());
-        serviceInfoDTO.setKey(serviceEntry.getKey());
+        serviceInfoDTO.setKey(serviceEntry.getServiceKey());
         serviceInfoDTO.setVersion(serviceEntry.getVersion());
         serviceInfoDTO.setMd5(serviceEntry.getMd5());
 
@@ -198,7 +197,7 @@ public class ServiceEntryMappingUtil {
         serviceDTO.setName(service.getName());
         serviceDTO.setVersion(service.getVersion());
         serviceDTO.setMd5(service.getMd5());
-        serviceDTO.setServiceKey(service.getKey());
+        serviceDTO.setServiceKey(service.getServiceKey());
         if (!shrink) {
             serviceDTO.setServiceUrl(service.getServiceUrl());
             serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType()
@@ -261,9 +260,9 @@ public class ServiceEntryMappingUtil {
      * @param key Service key
      * @param sortBy Sort By
      * @param sortOrder Sort Order
-     * @param limit
-     * @param offset
-     * @return
+     * @param limit limit
+     * @param offset offset
+     * @return service filter parameters
      */
     public static ServiceFilterParams getServiceFilterParams(String name, String version, String definitionType,
                                                              String key, String sortBy, String sortOrder, Integer limit,
@@ -271,11 +270,11 @@ public class ServiceEntryMappingUtil {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
+        sortOrder = getServiceSortOrderField(sortOrder);
         sortBy = getServiceSortByField(sortBy);
         name = name != null ? name : StringUtils.EMPTY;
         version = version != null ? version : StringUtils.EMPTY;
-        definitionType = definitionType != null ? definitionType : StringUtils.EMPTY;
+        definitionType = getDefinitionType(definitionType);
         key = key != null ? key : StringUtils.EMPTY;
 
         ServiceFilterParams filterParams = new ServiceFilterParams();
@@ -326,8 +325,37 @@ public class ServiceEntryMappingUtil {
             updatedSortBy = APIConstants.ServiceCatalogConstants.SERVICE_NAME;
         } else if ("definitionType".equals(sortBy)) {
             updatedSortBy = APIConstants.ServiceCatalogConstants.DEFINITION_TYPE;
+        } else {
+            RestApiUtil.handleBadRequest("Error while retrieving the Services with invalid sort by value " + sortBy, log);
         }
         return updatedSortBy;
+    }
+
+    private static String getServiceSortOrderField(String sortOrder) {
+        String updatedSortOrder = StringUtils.EMPTY;
+        // Default sortOrder field is ascending
+        if (sortOrder == null || "asc".equals(sortOrder)) {
+            updatedSortOrder = RestApiConstants.DEFAULT_SORT_ORDER;
+        } else if ("desc".equals(sortOrder)) {
+            updatedSortOrder = RestApiConstants.DESCENDING_SORT_ORDER;
+        } else {
+            RestApiUtil.handleBadRequest("Error while retrieving the Services with invalid sort order value " + sortOrder, log);
+        }
+        return updatedSortOrder;
+    }
+
+    private static String getDefinitionType(String definitionType) {
+        if (definitionType == null) {
+            return StringUtils.EMPTY;
+        }
+
+        try {
+            ServiceEntry.DefinitionType.valueOf(definitionType);
+        } catch (IllegalArgumentException e) {
+            RestApiUtil.handleBadRequest("Error while retrieving the Services with invalid definition type " + definitionType, e, log);
+        }
+
+        return definitionType;
     }
 
     private static PaginationDTO getPaginationDTO(int limit, int offset, int total, String next, String previous) {

@@ -41,11 +41,8 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
-
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * UserSignUpSimpleWorkflowExecutor test cases
@@ -62,7 +59,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
     private String tenantDomain = "carbon.super";
     private int tenantID = -1234;
     private String username = "testuser";
-    private String signUpRole = "subscriber";
+    private String signUpRole = "Internal/subscriber";
 
     @Before
     public void init() throws Exception {
@@ -103,20 +100,16 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
     @Test
     public void testExecutingUserSignUpSimpleWorkflow() throws APIManagementException, UserStoreException {
-        Map<String, Boolean> roleMap = new HashMap<String, Boolean>();
-        roleMap.put(signUpRole, false);
+        ArrayList<String> roleMap = new ArrayList<String>();
+        roleMap.add(signUpRole);
 
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
-        userRegistrationConfigDTO.setAdminUserName("admin");
-        userRegistrationConfigDTO.setAdminPassword("admin");
         userRegistrationConfigDTO.setRoles(roleMap);
 
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
-        PowerMockito.when(SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO)).thenCallRealMethod();
         Mockito.when(userStoreManager.isExistingUser(username)).thenReturn(true);
-        Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(true);
-        Mockito.doNothing().when(userStoreManager).updateRoleListOfUser(username, null,
-                new String[]{"Internal/" + signUpRole});
+        Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
+        Mockito.doNothing().when(userStoreManager).updateRoleListOfUser(username, null, new String[] { signUpRole });
 
         try {
             Assert.assertNotNull(userSignUpSimpleWorkflowExecutor.execute(workflowDTO));
@@ -127,20 +120,17 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
     @Test
     public void testFailuresToCompleteUserSignUpSimpleWorkflow() throws Exception {
-        Map<String, Boolean> roleMap = new HashMap<String, Boolean>();
-        roleMap.put(signUpRole, false);
+        ArrayList<String> roleMap = new ArrayList<String>();
+        roleMap.add(signUpRole);
 
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);
         workflowDTO.setTenantDomain(tenantDomain);
         PowerMockito.when(SelfSignUpUtil.class, "getSignupConfiguration", tenantDomain).thenReturn(userRegistrationConfigDTO);
-        PowerMockito.when(SelfSignUpUtil.class, "getRoleNames", userRegistrationConfigDTO).thenReturn(Collections.singletonList(
-                "Internal/" + signUpRole));
-
         Mockito.when(userStoreManager.isExistingUser(username)).thenReturn(true);
 
         //Test failure to complete workflow execution, when sign up roles are not existing in user realm
-        Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(false);
+        Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(false);
         try {
             userSignUpSimpleWorkflowExecutor.execute(workflowDTO);
             Assert.fail("Expected WorkflowException has not been thrown when signup role is not existing");

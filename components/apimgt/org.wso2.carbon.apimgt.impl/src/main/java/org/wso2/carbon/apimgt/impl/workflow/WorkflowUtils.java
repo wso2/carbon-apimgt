@@ -138,26 +138,11 @@ public class WorkflowUtils {
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
-            SubscribedAPI sub = ApiMgtDAO.getInstance()
-                    .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
-            String orgId = sub.getOrganization();
-            SubscriptionEvent subscriptionEvent;
-            if (sub.getApiId() != null) {
-                subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
-                        subWFDto.getTenantId(), orgId,
-                        Integer.parseInt(subWFDto.getWorkflowReference()), sub.getUUID(), sub.getIdentifier().getId(),
-                        sub.getIdentifier().getUUID(), sub.getApplication().getId(), sub.getApplication().getUUID(),
-                        sub.getTier().getName(), sub.getSubCreatedStatus());
-            } else {
-                subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
-                        subWFDto.getTenantId(), orgId,
-                        Integer.parseInt(subWFDto.getWorkflowReference()), sub.getUUID(), sub.getProductId().getId(),
-                        sub.getProductId().getUUID(), sub.getApplication().getId(), sub.getApplication().getUUID(),
-                        sub.getTier().getName(), sub.getSubCreatedStatus());
-            }
-
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
+                    subWFDto.getTenantId(), subWFDto.getTenantDomain(),
+                    Integer.parseInt(subWFDto.getWorkflowReference()), subWFDto.getExternalWorkflowReference(), 0,
+                    "", 0, "", "", "");
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equalsIgnoreCase(wfType) ||
                 WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equalsIgnoreCase(wfType)) {

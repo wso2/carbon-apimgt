@@ -79,6 +79,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         String offsetDateTime = getTimeInISO(requestInTime);
 
         Event event = new Event();
+        event.setProperties(provider.getProperties());
         API api = provider.getApi();
         Target target = new Target();
         target.setTargetResponseCode(Constants.UNKNOWN_INT_VALUE);
