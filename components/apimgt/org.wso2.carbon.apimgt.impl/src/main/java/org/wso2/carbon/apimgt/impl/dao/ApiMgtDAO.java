@@ -13468,40 +13468,6 @@ public class ApiMgtDAO {
         return status;
     }
 
-    public String[] getAPIDetailsByContext(String context) {
-
-        String apiName = "";
-        String apiProvider = "";
-        String sql = SQLConstants.GET_API_FOR_CONTEXT_TEMPLATE_SQL;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, context);
-
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                apiName = rs.getString("API_NAME");
-                apiProvider = rs.getString("API_PROVIDER");
-            }
-        } catch (SQLException e) {
-            log.error("Error occurred while fetching data: " + e.getMessage(), e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(false);
-                }
-            } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e.getMessage(), e);
-            }
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return new String[]{apiName, apiProvider};
-    }
-
     /**
      * Returns a Prepared statement after setting all the dynamic parameters. Dynamic parameters will be added in
      * the place of $params in query string
