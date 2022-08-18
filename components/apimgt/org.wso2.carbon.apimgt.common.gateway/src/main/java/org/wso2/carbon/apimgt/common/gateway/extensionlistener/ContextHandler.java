@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.common.gateway.extensionlistener;
 
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * This Interface is provides specific extension points to consume the payload from the related message context.
  */
@@ -25,5 +27,7 @@ public interface ContextHandler {
 
     Object getProperty(String key);
 
-    void setProperty(String key, Object varue);
+    void setProperty(String key, Object value);
+
+    String getAPIKeyAsQueryParam();
 }

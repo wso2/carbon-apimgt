@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.ext.contexthandler;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.util.xpath.SynapseXPath;
+import org.jaxen.JaxenException;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ContextHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -27,6 +29,13 @@ import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * This class is the inbound implementation of ContextHandler interface. This handle websocket specific logic to consume
@@ -65,5 +74,29 @@ public class InboundContextHandler implements ContextHandler {
             }
             this.inboundMessageContext.setProperty(key, value);
         }
+    }
+
+    @Override
+    public String getAPIKeyAsQueryParam() {
+        String apiKey = null;
+
+        try {
+            String fullUrl = "http://" + inboundMessageContext.getFullRequestPath();
+            URL url=new URL(fullUrl);
+            Map<String, String> query_pairs = new LinkedHashMap<>();
+            String query = url.getQuery();
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                int idx = pair.indexOf("=");
+                query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
+                        URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+            }
+            return query_pairs.get("apiKey");
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error occurred while reading a apiKey query param", e);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        return apiKey;
     }
 }

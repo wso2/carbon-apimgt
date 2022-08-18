@@ -942,8 +942,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         }
         //check query params to get apikey
         try {
-            // apiKey = new SynapseXPath("$url:apikey").stringValueOf(mCtx);
-            apiKey = (String) headers.get(securityParam);
+            apiKey = requestContext.getContextHandler().getAPIKeyAsQueryParam();
             if (StringUtils.isNotBlank(apiKey)) {
                 String rest_url_postfix = (String) requestContext.getContextHandler().getProperty(
                         NhttpConstants.REST_URL_POSTFIX);

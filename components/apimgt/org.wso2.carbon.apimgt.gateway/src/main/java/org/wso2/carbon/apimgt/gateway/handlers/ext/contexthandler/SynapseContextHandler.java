@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.ext.contexthandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.util.xpath.SynapseXPath;
+import org.jaxen.JaxenException;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ContextHandler;
 
 public class SynapseContextHandler implements ContextHandler {
@@ -43,5 +45,16 @@ public class SynapseContextHandler implements ContextHandler {
         if (value != null) {
             this.messageContext.setProperty(key, value);
         }
+    }
+
+    @Override
+    public String getAPIKeyAsQueryParam()  {
+        String apiKey = null;
+        try {
+            apiKey = new SynapseXPath("$url:apikey").stringValueOf(messageContext);
+        } catch (JaxenException er) {
+            log.error("Error occurred while reading a apiKey query param", er);
+        }
+        return apiKey;
     }
 }
