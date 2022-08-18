@@ -180,7 +180,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
     private List<Parameter> getLowercaseHeaderParameters(List<Parameter> parameters) {
 
         List<Parameter> headerParameters = parameters.stream()
-                .filter(param -> param instanceof HeaderParameter)
+                .filter(HeaderParameter.class::isInstance)
                 .filter(param -> !param.getName().equalsIgnoreCase(Headers.CONTENT_TYPE)) // Ignore content-type header
                 .collect(Collectors.toList());
         List<Parameter> modifiedHeaderParameters = headerParameters.stream()
