@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.tracing.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
@@ -32,11 +30,10 @@ import java.util.Map;
  * This class holds the osgi references for opentracing.
  */
 public class ServiceReferenceHolder {
-    private static final Log log = LogFactory.getLog(TracingServiceComponent.class);
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private APIManagerConfiguration configuration;
-    private static Map<String, OpenTracer> openTracerMap = new HashMap();
-    private static Map<String, APIMOpenTelemetry> openTelemetryTracerMap = new HashMap();
+    private static Map<String, OpenTracer> openTracerMap = new HashMap<>();
+    private static Map<String, APIMOpenTelemetry> openTelemetryTracerMap = new HashMap<>();
     private ServiceReferenceHolder() {
     }
 

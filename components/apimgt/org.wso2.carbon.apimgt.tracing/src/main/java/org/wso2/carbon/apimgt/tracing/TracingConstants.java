@@ -76,4 +76,7 @@ class TracingConstants {
      * */
     static final String LOG_ENABLED = "OpenTracer.LogTracer.Enabled";
     static final String LOG = "log";
+
+    private TracingConstants() {
+    }
 }
