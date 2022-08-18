@@ -371,8 +371,8 @@ public class JWTValidator {
                     apiVersion);
             if (apiKeyValidationInfoDTO.isAuthorized()) {
                 validateScopes(apiContext, apiVersion, matchingResource,
-                               WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME, jwtValidationInfo,
-                               signedJWTInfo);
+                        WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME, jwtValidationInfo,
+                        signedJWTInfo);
                 log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
                 String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
                         apiVersion, tokenSignature);
@@ -684,6 +684,7 @@ public class JWTValidator {
                     if (!isValidCertificateBoundAccessToken(signedJWTInfo)) {
                         tempJWTValidationInfo.setValid(false);
                     }
+                    jwtValidationInfo = tempJWTValidationInfo;
                 }
             } else if (SignedJWTInfo.ValidationStatus.INVALID.equals(signedJWTInfo.getValidationStatus())
                     && getInvalidTokenCache().get(jti) != null) {
