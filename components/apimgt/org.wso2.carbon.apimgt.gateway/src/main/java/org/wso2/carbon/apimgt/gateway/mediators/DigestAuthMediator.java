@@ -94,8 +94,12 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         }
 
         //remove front and end double quotes.serverNonce and realm will not be null.
-        serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
-        realm = realm.substring(1, realm.length() - 1);
+        if (serverNonce != null) {
+            serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
+        }
+        if (realm != null) {
+            realm = realm.substring(1, realm.length() - 1);
+        }
 
         //qop can be null
         if (qop != null) {

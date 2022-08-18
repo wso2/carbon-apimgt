@@ -13491,7 +13491,9 @@ public class ApiMgtDAO {
             log.error("Error occurred while fetching data: " + e.getMessage(), e);
         } finally {
             try {
-                conn.setAutoCommit(false);
+                if (conn != null) {
+                    conn.setAutoCommit(false);
+                }
             } catch (SQLException e) {
                 log.error("Error occurred while fetching data: " + e.getMessage(), e);
             }

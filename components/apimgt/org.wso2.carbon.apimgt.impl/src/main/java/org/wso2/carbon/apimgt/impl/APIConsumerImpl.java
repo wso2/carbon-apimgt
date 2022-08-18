@@ -387,7 +387,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
         ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
-        return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        if (apiKeyGenerator != null) {
+            return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        } else {
+            throw new APIManagementException("Failed to generate the API key");
+        }
     }
 
     private ApiKeyGenerator loadApiKeyGenerator() {
@@ -1417,8 +1421,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
-            throw new APIManagementException(String.format("Subscription for UUID:%s does not exist.",
-                    subscription.getUUID()));
+            String message;
+            if (subscription != null) {
+                String subscriptionID = subscription.getUUID();
+                message = String.format("Subscription for UUID:%s does not exist.", subscriptionID);
+            } else {
+                message = "Subscription does not exists.";
+            }
+            throw new APIManagementException(message);
         }
     }
 
