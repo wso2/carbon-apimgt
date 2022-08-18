@@ -651,6 +651,15 @@ public class JWTValidator {
         return payload;
     }
 
+    private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) { //Holder of Key token
+        if (signedJWTInfo.getX509ClientCertificate() == null ||
+                StringUtils.isEmpty(signedJWTInfo.getX509ClientCertificateHash()) ||
+                signedJWTInfo.getCertificateThumbprint() == null) {
+            return true; // If cnf is not available - 200 success
+        }
+        return signedJWTInfo.getX509ClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint());
+    }
+
     protected long getTimeStampSkewInSeconds() {
 
         return OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
@@ -670,7 +679,11 @@ public class JWTValidator {
                 if (getGatewayKeyCache().get(jti) != null) {
                     JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getGatewayKeyCache().get(jti);
                     checkTokenExpiration(jti, tempJWTValidationInfo, tenantDomain);
-                    jwtValidationInfo = tempJWTValidationInfo;
+                    /* Only when cnf validation fails the validation info is updated when it passes the other
+                     validations are performed */
+                    if (!isValidCertificateBoundAccessToken(signedJWTInfo)) {
+                        tempJWTValidationInfo.setValid(false);
+                    }
                 }
             } else if (SignedJWTInfo.ValidationStatus.INVALID.equals(signedJWTInfo.getValidationStatus())
                     && getInvalidTokenCache().get(jti) != null) {
