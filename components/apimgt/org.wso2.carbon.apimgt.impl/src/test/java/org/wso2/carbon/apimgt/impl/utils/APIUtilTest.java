@@ -21,13 +21,10 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.catalina.Realm;
-import org.apache.commons.collections.SetUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.juddi.v3.error.RegistryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -35,7 +32,6 @@ import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -76,6 +72,7 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Tag;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserRealm;
@@ -104,9 +101,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFromAPIMConfig;
@@ -883,34 +879,6 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testCreateAPIArtifactContent() throws Exception {
-
-        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
-                    .SUPER_TENANT_DOMAIN_NAME);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-            GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
-            API api = getUniqueAPI();
-            Mockito.when(genericArtifact.getAttributeKeys()).thenReturn(new String[]{"URITemplate"}).thenThrow
-                    (GovernanceException.class);
-            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-            PowerMockito.mockStatic(ApiMgtDAO.class);
-            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-            APIUtil.createAPIArtifactContent(genericArtifact, api);
-            Assert.assertTrue(true);
-            APIUtil.createAPIArtifactContent(genericArtifact, api);
-            Assert.fail();
-        } catch (APIManagementException ex) {
-            Assert.assertTrue(ex.getMessage().contains("Failed to create API for :"));
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-
-    }
-
-    @Test
     public void testGetDocumentation() throws GovernanceException, APIManagementException {
 
         PowerMockito.mockStatic(CarbonUtils.class);
@@ -1084,7 +1052,7 @@ public class APIUtilTest {
             Assert.fail();
         } catch (APIManagementException ex) {
             Assert.assertTrue(ex.getMessage().contains("Failed to initialize GenericArtifactManager"));
-        } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
+        } catch (RegistryException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1774,10 +1742,10 @@ public class APIUtilTest {
                 .mock(org.wso2.carbon.user.api.AuthorizationManager.class);
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
 
-        Mockito
-                .when(authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        Mockito.when(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange)).thenReturn(userNameWithoutChange);
+        Mockito.when(
+                        authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-
 
         Log logMock = Mockito.mock(Log.class);
         PowerMockito.mockStatic(LogFactory.class);

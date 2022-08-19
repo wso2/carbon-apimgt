@@ -19,10 +19,13 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
@@ -33,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.webhooks.SubscriptionsDataService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -49,6 +53,8 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import redis.clients.jedis.JedisPool;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.HashMap;
@@ -88,6 +94,7 @@ public class ServiceReferenceHolder {
     private JWTValidationService jwtValidationService;
     private KeyManagerDataService keyManagerDataService;
     private SubscriptionsDataService subscriptionsDataService;
+    private AnalyticsCustomDataProvider analyticsCustomDataProvider;
 
     private Set<String> activeTenants = new ConcurrentSkipListSet<>();
     private JedisPool redisPool;
@@ -129,8 +136,13 @@ public class ServiceReferenceHolder {
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigService) {
         this.amConfigService = amConfigService;
-        if (amConfigService != null && amConfigService.getAPIManagerConfiguration() != null){
-            setThrottleProperties(amConfigService.getAPIManagerConfiguration().getThrottleProperties());
+        if (amConfigService != null) {
+            if (amConfigService.getAPIManagerConfiguration() != null) {
+                setThrottleProperties(amConfigService.getAPIManagerConfiguration().getThrottleProperties());
+            }
+            if (amConfigService.getAPIAnalyticsConfiguration() != null) {
+                setAnalyticsCustomDataProvider(amConfigService.getAPIAnalyticsConfiguration());
+            }
         }
     }
 
@@ -402,5 +414,28 @@ public class ServiceReferenceHolder {
     public void setRedisPool(JedisPool redisPool) {
 
         this.redisPool = redisPool;
+    }
+
+    public AnalyticsCustomDataProvider getAnalyticsCustomDataProvider() {
+        return analyticsCustomDataProvider;
+    }
+
+    private void setAnalyticsCustomDataProvider(APIManagerAnalyticsConfiguration apiManagerAnalyticsConfiguration) {
+        String customPublisherClass = null;
+        if (apiManagerAnalyticsConfiguration.getReporterProperties() != null && apiManagerAnalyticsConfiguration
+                .getReporterProperties().containsKey(Constants.API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS)) {
+            customPublisherClass = apiManagerAnalyticsConfiguration.getReporterProperties()
+                    .get(Constants.API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS);
+        }
+        if (customPublisherClass != null) {
+            try {
+                Class<?> c = APIUtil.getClassForName(customPublisherClass);
+                Constructor<?> cons = c.getConstructors()[0];
+                analyticsCustomDataProvider = (AnalyticsCustomDataProvider) cons.newInstance();
+            } catch (IllegalAccessException | InstantiationException | InvocationTargetException
+                    | ClassNotFoundException e) {
+                log.error("Error in obtaining custom publisher class", e);
+            }
+        }
     }
 }

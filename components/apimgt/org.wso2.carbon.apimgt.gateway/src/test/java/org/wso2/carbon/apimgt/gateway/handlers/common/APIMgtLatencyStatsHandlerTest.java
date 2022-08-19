@@ -19,7 +19,9 @@ package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.config.Entry;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
@@ -33,6 +35,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+import java.io.File;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest( {APIUtil.class})
@@ -103,4 +107,30 @@ public class APIMgtLatencyStatsHandlerTest {
         apiMgtLatencyStatsHandler.handleResponse(synCtx);
     }
 
+    @Test
+    public void handleRequestWithSwagger() throws Exception {
+
+        String apiUUID = "414f0c50-1429-11ed-861d-0242ac120002";
+        File swaggerJsonFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("swaggerEntry/openapi.json").getFile());
+        String swaggerValue = FileUtils.readFileToString(swaggerJsonFile);
+        Entry entry = new Entry();
+        entry.setValue(swaggerValue);
+
+        SynapseConfiguration synCfg = new SynapseConfiguration();
+        synCfg.getLocalRegistry().put(apiUUID, entry);
+        org.apache.axis2.context.MessageContext axisMsgCtx = new org.apache.axis2.context.MessageContext();
+        AxisConfiguration axisConfig = new AxisConfiguration();
+        ConfigurationContext cfgCtx = new ConfigurationContext(axisConfig);
+        MessageContext synCtx = new Axis2MessageContext(axisMsgCtx, synCfg,
+                new Axis2SynapseEnvironment(cfgCtx, synCfg));
+        synCfg.setProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME, "123456789");
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
+        APIMgtLatencyStatsHandler apiMgtLatencyStatsHandler = new APIMgtLatencyStatsHandler();
+        apiMgtLatencyStatsHandler.setApiUUID(apiUUID);
+        apiMgtLatencyStatsHandler.handleRequest(synCtx);
+        long requestTime = Long.parseLong(String.valueOf(synCtx.getProperty("api.ut.requestTime")));
+        Assert.assertTrue(requestTime <= System.currentTimeMillis());
+        Assert.assertEquals(synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_STRING), swaggerValue);
+    }
 }

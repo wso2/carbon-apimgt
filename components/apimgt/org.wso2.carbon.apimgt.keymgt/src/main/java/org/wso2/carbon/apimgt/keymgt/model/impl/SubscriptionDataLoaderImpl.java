@@ -317,8 +317,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                         api = list.getList().get(0);
                     }
                 }
-                return api;
-
+                if (api != null) {
+                    return api;
+                }
             }
         }
         return null;

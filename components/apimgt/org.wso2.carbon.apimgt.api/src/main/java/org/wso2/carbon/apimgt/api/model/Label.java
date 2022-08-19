@@ -87,4 +87,8 @@ public class Label {
         if (!Objects.equals(this.accessUrls, other.accessUrls)) return false;
         return true;
     }
+
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), labelId, name, tenantId, description, accessUrls);
+    }
 }

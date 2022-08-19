@@ -74,45 +74,44 @@ public class ReportGenerator {
 
         String[] columnHeaders = table.getColumnHeaders();
 
-        PDDocument document = new PDDocument();
         PDPage page = new PDPage();
         page.setMediaBox(PDRectangle.A4);
         page.setRotation(0);
-        document.addPage(page);
 
-        PDPageContentStream contentStream = new PDPageContentStream(document, page, false, false);
+        try (PDDocument document = new PDDocument();
+             PDPageContentStream contentStream =
+                     new PDPageContentStream(document, page, false, false)) {
+            document.addPage(page);
 
-        // add logo
-        InputStream in = APIManagerComponent.class.getResourceAsStream("/report/wso2-logo.jpg");
-        PDImageXObject img = JPEGFactory.createFromStream(document, in);
-        contentStream.drawImage(img, 375, 755);
+            InputStream in = APIManagerComponent.class.getResourceAsStream("/report/wso2-logo.jpg");
+            // add logo
+            PDImageXObject img = JPEGFactory.createFromStream(document, in);
+            contentStream.drawImage(img, 375, 755);
 
-        // Add topic
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
-        writeContent(contentStream, CELL_MARGIN, 770, "API Microgateway request summary");
+            // Add topic
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
+            writeContent(contentStream, CELL_MARGIN, 770, "API Microgateway request summary");
 
-        // Add generated time
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, FONT_SIZE);
-        writeContent(contentStream, CELL_MARGIN, 730, "Report generated on: " + new Date().toString());
+            // Add generated time
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, FONT_SIZE);
+            writeContent(contentStream, CELL_MARGIN, 730, "Report generated on: " + new Date().toString());
 
-        contentStream.setFont(TEXT_FONT, FONT_SIZE);
+            contentStream.setFont(TEXT_FONT, FONT_SIZE);
 
-        // add table with data
-        drowTableGrid(contentStream, table.getRows().size());
-        writeRowsContent(contentStream, columnHeaders, table.getRows());
+            // add table with data
+            drowTableGrid(contentStream, table.getRows().size());
+            writeRowsContent(contentStream, columnHeaders, table.getRows());
 
-        // Add meta data
-        // Whenever the summary report structure is updated this should be changed
-        String requestCount = table.getRows().get(0).getEntries().get(2);
-        document.getDocumentInformation().setCustomMetadataValue(MGW_META, getMetaCount(requestCount));
+            // Add meta data
+            // Whenever the summary report structure is updated this should be changed
+            String requestCount = table.getRows().get(0).getEntries().get(2);
+            document.getDocumentInformation().setCustomMetadataValue(MGW_META, getMetaCount(requestCount));
 
-        contentStream.close();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        document.save(out);
-        document.close();
-
-        return new ByteArrayInputStream(out.toByteArray());
-
+            contentStream.close();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            document.save(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        }
     }
 
     private String getMetaCount(String origCount) {

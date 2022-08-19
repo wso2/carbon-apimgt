@@ -32,11 +32,12 @@ import java.io.FileInputStream;
 
 public class URLMappingFilter implements Filter {
 
-    private FilterConfig filterConfig = null;
+    private FilterConfig filterConfig;
     private String appPath = "./repository/deployment/server/jaggeryapps";
     private String replaceValue= "public";
     private String customeValue = "override";
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         this.filterConfig = filterConfig;
     }
@@ -52,15 +53,16 @@ public class URLMappingFilter implements Filter {
             //init array with file length
             byte[] bytesArray = new byte[(int) file.length()];
 
-            FileInputStream fis = new FileInputStream(file);
-            fis.read(bytesArray); //read file into bytes[]
-            fis.close();
+            try (FileInputStream fis = new FileInputStream(file)) {
+                fis.read(bytesArray); //read file into bytes[]
+            }
             response.getOutputStream().write(bytesArray);
         } else {
             chain.doFilter(request, response);
         }
     }
 
+    @Override
     public void destroy() {
         filterConfig = null;
     }

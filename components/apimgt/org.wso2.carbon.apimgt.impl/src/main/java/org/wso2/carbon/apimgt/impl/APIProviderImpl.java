@@ -220,7 +220,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(uuid, organization);
             for (UserApplicationAPIUsage usage : allApiResult) {
                 for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
-                    APIIdentifier subsApiId = apiSubscription.getApiId();
+                    APIIdentifier subsApiId = apiSubscription.getAPIIdentifier();
                     APIIdentifier subsApiIdEmailReplaced = new APIIdentifier(
                             APIUtil.replaceEmailDomain(subsApiId.getProviderName()), subsApiId.getApiName(),
                             subsApiId.getVersion());
@@ -473,8 +473,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateOperationPolicyParameters(api, tenantDomain);
         addURITemplates(apiId, api, tenantId);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_CREATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
+                APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
+                apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
@@ -736,7 +736,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
         API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier, organization);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, apiIdentifier.getApiName(),
+                APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
                 api.getStatus(), APIConstants.EventAction.DEFAULT_VERSION);
@@ -850,7 +850,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
+                APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
@@ -2012,11 +2012,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateSubscription(subscribedAPI);
         subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
         Identifier identifier =
-                subscribedAPI.getApiId() != null ? subscribedAPI.getApiId() : subscribedAPI.getProductId();
+                subscribedAPI.getAPIIdentifier() != null ? subscribedAPI.getAPIIdentifier() : subscribedAPI.getProductId();
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        String orgId = subscribedAPI.getOrganization();
         SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, tenantDomain,
+                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, orgId,
                 subscribedAPI.getSubscriptionId(), subscribedAPI.getUUID(), identifier.getId(), identifier.getUUID(),
                 subscribedAPI.getApplication().getId(), subscribedAPI.getApplication().getUUID(),
                 subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
@@ -2146,7 +2147,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Delete event publishing to gateways
         if (api != null && apiId != -1) {
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                    APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
+                    APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                     APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
                     api.getStatus());
@@ -3388,9 +3389,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (createdBlockConditionsDto != null) {
             publishBlockingEvent(createdBlockConditionsDto, "true");
+            return createdBlockConditionsDto.getUUID();
         }
-
-        return createdBlockConditionsDto.getUUID();
+        return null;
     }
 
     @Override
@@ -4189,7 +4190,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int productId = apiMgtDAO.getAPIProductId(product.getId());
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, product.getId().getName(), productId,
+                APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(), productId,
                 product.getId().getUUID(), product.getId().getVersion(), product.getType(), product.getContext(),
                 product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
@@ -5660,7 +5661,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
                     + apiRevision.getApiUUID(), ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevision.getApiUUID()));
         }
-        apiProductIdentifier.setUUID(apiRevision.getApiUUID());
+        apiProductIdentifier.setUuid(apiRevision.getApiUUID());
         String revisionUUID;
         try {
             revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(tenantDomain),
@@ -5817,7 +5818,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
-        apiProductIdentifier.setUUID(apiProductId);
+        apiProductIdentifier.setUuid(apiProductId);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
                     apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
@@ -5850,7 +5851,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                     EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
         }
-        apiProductIdentifier.setUUID(apiProductId);
+        apiProductIdentifier.setUuid(apiProductId);
         try {
             apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
                     apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
@@ -5887,7 +5888,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setEndUserName(username);
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
-        jwtTokenInfoDTO.setExpirationTime(60 * 1000);
+        jwtTokenInfoDTO.setExpirationTime(60000l);
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }

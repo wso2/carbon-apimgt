@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.api.dto;
 
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 
 /**
  * DTO object to represent client certificate.

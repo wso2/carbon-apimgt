@@ -43,15 +43,16 @@ public class CertificateReLoader implements Runnable {
         TrustStoreDTO trustStoreDTO = CertificateReLoaderUtil.getTrustStore();
         if (trustStoreDTO != null) {
             File trustStoreFile = new File(trustStoreDTO.getLocation());
-            FileInputStream localTrustStoreStream;
             try {
                 long lastUpdatedTimeStamp = CertificateReLoaderUtil.getLastUpdatedTimeStamp();
                 long lastModified = trustStoreFile.lastModified();
                 if (lastUpdatedTimeStamp != lastModified) {
                     CertificateReLoaderUtil.setLastUpdatedTimeStamp(lastModified);
-                    localTrustStoreStream = new FileInputStream(trustStoreFile);
-                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
+                    KeyStore trustStore;
+                    try (FileInputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
+                        trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                        trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
+                    }
                     ServiceReferenceHolder.getInstance().setListenerTrustStore(trustStore);
                 }
             } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {

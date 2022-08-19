@@ -718,13 +718,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             for (CredentialDto certificate : gatewayAPIDTO.getCredentialsToBeAdd()) {
                 try {
                     String encryptedValue = mediationSecurityAdminServiceProxy.doEncryption(certificate.getPassword());
-                    if (mediationSecurityAdminServiceProxy.isAliasExist(certificate.getAlias())) {
-                        setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(),
-                                encryptedValue);
-                    } else {
-                        setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(), encryptedValue);
-                    }
-
+                    setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(), encryptedValue);
                 } catch (APIManagementException e) {
                     log.error("Exception occurred while encrypting password.", e);
                     throw new AxisFault(e.getMessage());

@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.impl.dao.test;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -113,6 +114,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest( {KeyManagerHolder.class})
+@PowerMockIgnore("javax.management.*")
 public class APIMgtDAOTest {
 
     public static ApiMgtDAO apiMgtDAO;
@@ -985,11 +987,11 @@ public class APIMgtDAOTest {
         Mockito.when(keyManager.retrieveApplication(clientIdSandbox)).thenReturn(oAuthApplicationInfo);
         assertTrue(apiMgtDAO.getSubscribedAPIs(organization, subscriber, null).size() > 0);
         assertEquals(subscribedAPI.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-        assertEquals(subscribedAPI.getApiId(), apiId);
+        assertEquals(subscribedAPI.getAPIIdentifier(), apiId);
         assertEquals(subscribedAPI.getApplication().getId(), application.getId());
         SubscribedAPI subscribedAPIFromUuid = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
         assertEquals(subscribedAPIFromUuid.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-        assertEquals(subscribedAPIFromUuid.getApiId(), apiId);
+        assertEquals(subscribedAPIFromUuid.getAPIIdentifier(), apiId);
         assertEquals(subscribedAPIFromUuid.getApplication().getId(), application.getId());
         apiMgtDAO.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
         String status = apiMgtDAO.getApplicationStatus("testCreateApplicationRegistrationEntry",

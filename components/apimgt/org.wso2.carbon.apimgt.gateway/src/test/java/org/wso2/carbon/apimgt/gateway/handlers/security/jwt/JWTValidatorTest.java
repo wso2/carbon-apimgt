@@ -958,6 +958,7 @@ public class JWTValidatorTest {
 
     @Test
     public void testValidateScopesForGraphQLSubscriptions() throws ParseException {
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("carbon.super");
         String apiContext = "/graphql";
         String apiVersion = "1.0.0";
         String matchingResource = "/subresource";

@@ -452,7 +452,7 @@ public interface APIAdmin  {
 
     void updateTenantConfig(String organization, String config) throws APIManagementException;
 
-    String getTenantConfigSchema(String organization) throws APIManagementException;
+    String getTenantConfigSchema(String organization);
 
     /**
      * Get policy list for given level

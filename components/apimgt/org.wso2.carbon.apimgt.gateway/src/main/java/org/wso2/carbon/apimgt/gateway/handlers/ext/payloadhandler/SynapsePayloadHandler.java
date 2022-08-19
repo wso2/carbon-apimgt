@@ -22,6 +22,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -92,12 +93,16 @@ public class SynapsePayloadHandler implements PayloadHandler {
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
         }
-        SOAPEnvelope env = ((Axis2MessageContext) this.messageContext).getAxis2MessageContext().getEnvelope();
-        if (env != null) {
-            SOAPBody body = env.getBody();
-            if (body != null) {
-                env.buildWithAttachments();
-                return body.toString();
+        if (JsonUtil.hasAJsonPayload(((Axis2MessageContext) this.messageContext).getAxis2MessageContext())) {
+            return JsonUtil.jsonPayloadToString(((Axis2MessageContext) this.messageContext).getAxis2MessageContext());
+        } else {
+            SOAPEnvelope env = ((Axis2MessageContext) this.messageContext).getAxis2MessageContext().getEnvelope();
+            if (env != null) {
+                SOAPBody body = env.getBody();
+                if (body != null) {
+                    env.buildWithAttachments();
+                    return body.toString();
+                }
             }
         }
         return null;

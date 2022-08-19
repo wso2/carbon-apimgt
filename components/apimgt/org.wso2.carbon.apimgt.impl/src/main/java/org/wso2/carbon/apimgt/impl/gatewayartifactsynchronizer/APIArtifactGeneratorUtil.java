@@ -62,10 +62,7 @@ public class APIArtifactGeneratorUtil {
                     throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
                 }
                 for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
-                    String organizationId = gatewayArtifactsMgtDAO.retrieveOrganization(apiRuntimeArtifactDto.getApiId());
-                    if (organizationId != null) {
-                        apiRuntimeArtifactDto.setOrganization(organizationId);
-                    }
+                    ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
                 }
             }
             if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
@@ -107,10 +104,7 @@ public class APIArtifactGeneratorUtil {
                     throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
                 }
                 for (APIRuntimeArtifactDto apiRuntimeArtifactDto: gatewayArtifacts) {
-                    String organizationId = gatewayArtifactsMgtDAO.retrieveOrganization(apiRuntimeArtifactDto.getApiId());
-                    if (organizationId != null) {
-                        apiRuntimeArtifactDto.setOrganization(organizationId);
-                    }
+                    ArtifactSynchronizerUtil.setArtifactProperties(apiRuntimeArtifactDto);
                 }
             }
             if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {

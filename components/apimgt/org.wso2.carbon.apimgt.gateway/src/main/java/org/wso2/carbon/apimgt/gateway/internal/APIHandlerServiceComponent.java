@@ -115,13 +115,11 @@ public class APIHandlerServiceComponent {
         RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
         revokedJWTMapCleaner.startJWTRevokedMapCleaner();
         if (TelemetryUtil.telemetryEnabled()) {
-            if (Util.legacy()) {
-                ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
-                        .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
-            } else {
-                ServiceReferenceHolder.getInstance().setTelemetry(ServiceReferenceHolder.getInstance().getTelemetryService
-                        ().buildTelemetryTracer(APIMgtGatewayConstants.SERVICE_NAME));
-            }
+            ServiceReferenceHolder.getInstance().setTelemetry(ServiceReferenceHolder.getInstance().getTelemetryService
+                    ().buildTelemetryTracer(APIMgtGatewayConstants.SERVICE_NAME));
+        } else if (Util.tracingEnabled()) {
+            ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
+                    .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
         }
 
         RedisConfig redisConfig =

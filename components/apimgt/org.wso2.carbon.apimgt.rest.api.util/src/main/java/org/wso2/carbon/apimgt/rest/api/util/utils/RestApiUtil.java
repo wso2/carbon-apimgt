@@ -1245,65 +1245,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
-     * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
-     * started with the system property 'migrationMode=true' if a migration related exports are to be done.
-     *
-     * @param targetTenantDomain Tenant domain of which resources are requested
-     * @param username           Logged in user name
-     * @throws ForbiddenException
-     */
-    public static void handleMigrationSpecificPermissionViolations(String targetTenantDomain, String username) throws
-            ForbiddenException {
-        boolean isCrossTenantAccess = !targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username));
-        if (!isCrossTenantAccess) {
-            return;
-        }
-        String superAdminRole = null;
-        try {
-            superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
-        } catch (UserStoreException e) {
-            RestApiUtil.handleInternalServerError("Error in getting super admin role name", e, log);
-        }
-
-        //check whether logged in user is a super tenant user
-        String superTenantDomain = null;
-        try {
-            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getSuperTenantDomain();
-        } catch (UserStoreException e) {
-            RestApiUtil.handleInternalServerError("Error in getting the super tenant domain", e, log);
-        }
-        boolean isSuperTenantUser = RestApiCommonUtil.getLoggedInUserTenantDomain().equals(superTenantDomain);
-        if (!isSuperTenantUser) {
-            String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
-                    " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a super " +
-                    "tenant user";
-            log.error(errorMsg);
-            ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
-            throw new ForbiddenException(errorDTO);
-        }
-
-        //check whether the user has super tenant admin role
-        boolean isSuperAdminRoleNameExist = false;
-        try {
-            isSuperAdminRoleNameExist = APIUtil.isUserInRole(username, superAdminRole);
-        } catch (UserStoreException | APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error in checking whether the user has admin role", e, log);
-        }
-
-        if (!isSuperAdminRoleNameExist) {
-            String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
-                    " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a " +
-                    "super tenant admin";
-            log.error(errorMsg);
-            ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
-            throw new ForbiddenException(errorDTO);
-        }
-    }
-
-    /**
      * Check if user calls an anonymous REST API.
      *
      * @param inMessage cxf message

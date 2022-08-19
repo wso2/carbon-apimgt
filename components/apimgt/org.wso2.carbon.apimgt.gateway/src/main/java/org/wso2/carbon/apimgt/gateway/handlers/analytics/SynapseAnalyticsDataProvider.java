@@ -24,6 +24,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
@@ -36,6 +37,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -49,16 +51,25 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private static final Log log = LogFactory.getLog(SynapseAnalyticsDataProvider.class);
     private MessageContext messageContext;
+    private AnalyticsCustomDataProvider analyticsCustomDataProvider;
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
         this.messageContext = messageContext;
+    }
+
+    public SynapseAnalyticsDataProvider(MessageContext messageContext,
+            AnalyticsCustomDataProvider analyticsCustomDataProvider) {
+
+        this.messageContext = messageContext;
+        this.analyticsCustomDataProvider = analyticsCustomDataProvider;
     }
 
     public static String sortGraphQLOperations(String apiResourceTemplates) {
@@ -299,6 +310,36 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         if (messageContext.getPropertyKeySet().contains(Constants.USER_IP_PROPERTY)) {
             return (String) messageContext.getProperty(Constants.USER_IP_PROPERTY);
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        Map<String, Object> customProperties;
+
+        if (analyticsCustomDataProvider != null) {
+            customProperties = analyticsCustomDataProvider.getCustomProperties(messageContext);
+        } else {
+            customProperties = new HashMap<>();
+        }
+        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
+        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        return customProperties;
+    }
+
+    private String getUserName() {
+
+        if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.END_USER_NAME)) {
+            return (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
+        }
+        return null;
+    }
+
+    private String getApiContext() {
+
+        if (messageContext.getPropertyKeySet().contains(JWTConstants.REST_API_CONTEXT)) {
+            return (String) messageContext.getProperty(JWTConstants.REST_API_CONTEXT);
         }
         return null;
     }
