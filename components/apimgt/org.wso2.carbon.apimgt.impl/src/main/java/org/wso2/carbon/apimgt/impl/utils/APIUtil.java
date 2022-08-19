@@ -1902,8 +1902,8 @@ public final class APIUtil {
                                 replaceSystemProperty(configDisplayName) :
                                 name;
                         store.setDisplayName(displayName);//Set store display name
-                        store.setEndpoint(replaceSystemProperty(storeElem.getEndpoint()));
                         //Set store endpoint, which is used to publish APIs
+                        store.setEndpoint(replaceSystemProperty(storeElem.getEndpoint()));
                         store.setPublished(false);
                         if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
                             String password = storeElem.getPassword();

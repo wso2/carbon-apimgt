@@ -38,6 +38,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -52,18 +53,20 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
-
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.dto.ExternalAPIStoresConfigDTO;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({EntityUtils.class, CarbonUtils.class, ServiceReferenceHolder.class, URL.class, HttpURLConnection.class,
-        FileUtils.class, WSO2APIPublisher.class, MultipartEntityBuilder.class})
+        FileUtils.class, WSO2APIPublisher.class, MultipartEntityBuilder.class, APIUtil.class})
 public class WSO2APIPublisherTestCase {
 
     private int tenantID = -1234;
@@ -97,22 +100,12 @@ public class WSO2APIPublisherTestCase {
         defaultHttpClient = Mockito.mock(CloseableHttpClient.class);
         wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient, username, Mockito.mock(APIProvider.class));
         CloseableHttpResponse httpResponse = Mockito.mock(CloseableHttpResponse.class);
-        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
-        RealmService realmService = Mockito.mock(RealmService.class);
         tenantManager = Mockito.mock(TenantManager.class);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         HttpEntity entity = Mockito.mock(HttpEntity.class);
         statusLine = Mockito.mock(StatusLine.class);
         Mockito.doReturn(statusLine).when(httpResponse).getStatusLine();
         Mockito.doReturn(entity).when(httpResponse).getEntity();
         PowerMockito.mockStatic(EntityUtils.class);
-        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "."
-                + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(storeRedirectURL);
         HttpGet httpGet = Mockito.mock(HttpGet.class);
         HttpPost httpPost = Mockito.mock(HttpPost.class);
         HttpDelete httpDelete = Mockito.mock(HttpDelete.class);
@@ -149,6 +142,16 @@ public class WSO2APIPublisherTestCase {
     @Test
     public void testPublishAndUpdateToStore() throws Exception {
 
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+        RealmService realmService = Mockito.mock(RealmService.class);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "."
+                + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(storeRedirectURL);
         Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
         Mockito.when(APIImportExportUtil.getImportExportAPI()).thenReturn(importExportAPI);
         Mockito.doReturn(new File(apiArtifactDir)).when(importExportAPI)
@@ -187,6 +190,16 @@ public class WSO2APIPublisherTestCase {
     @Test
     public void testFailureWhileExportingAPI() throws Exception {
 
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+        RealmService realmService = Mockito.mock(RealmService.class);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "."
+                + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(storeRedirectURL);
         //Error path - When exporting API failed
         Mockito.when(APIImportExportUtil.getImportExportAPI()).thenReturn(importExportAPI);
         PowerMockito.doThrow(new APIImportExportException("Error while exporting API")).when(importExportAPI)
@@ -360,5 +373,86 @@ public class WSO2APIPublisherTestCase {
                     + HttpStatus.SC_INTERNAL_SERVER_ERROR + " response: " + apiDeleteResponse;
             Assert.assertEquals(errorMessage, e.getMessage());
         }
+    }
+
+    @Test
+    public void testGetExternalStoreRedirectURLWhenConfigIsNotAvailable() throws Exception {
+
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(
+                APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(
+                APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(null);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        Mockito.when(apimConfigService.getExternalStoreConfig(Mockito.anyString())).thenReturn(null);
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getTenantDomainFromTenantId(Mockito.anyInt())).thenReturn("carbon.super");
+        Assert.assertNull(Whitebox.invokeMethod(wso2APIPublisher, "getExternalStoreRedirectURL", 123));
+    }
+
+    @Test
+    public void testGetExternalStoreRedirectURLWhenConfigIsAvailable() throws Exception {
+
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(
+                APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(
+                APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(null);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        ExternalAPIStoresConfigDTO externalAPIStoresConfigDTO = new ExternalAPIStoresConfigDTO();
+        externalAPIStoresConfigDTO.setStoreURL("http://localhost:9443/devportal");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal1", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher", "DeveloperPortal1",
+                "http://localhost:9444/devportal1", "admin", "admin");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal2", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher", "DeveloperPortal2",
+                "http://localhost:9444/devportal2", "admin", "admin");
+        Mockito.when(apimConfigService.getExternalStoreConfig(Mockito.anyString()))
+                .thenReturn(externalAPIStoresConfigDTO);
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getTenantDomainFromTenantId(Mockito.anyInt())).thenReturn("carbon.super");
+        Assert.assertEquals(Whitebox.invokeMethod(wso2APIPublisher, "getExternalStoreRedirectURL", 123),
+                "http://localhost:9443/devportal");
+    }
+
+    @Test
+    public void testGetExternalStoreRedirectURLWhenConfigIsAvailableAndStoreURLIsNotAvailable() throws Exception {
+
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(
+                APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(
+                APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(null);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        ExternalAPIStoresConfigDTO externalAPIStoresConfigDTO = new ExternalAPIStoresConfigDTO();
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal1", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher", "DeveloperPortal1",
+                "http://localhost:9444/devportal1", "admin", "admin");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal2", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher", "DeveloperPortal2",
+                "http://localhost:9444/devportal2", "admin", "admin");
+        Mockito.when(apimConfigService.getExternalStoreConfig(Mockito.anyString()))
+                .thenReturn(externalAPIStoresConfigDTO);
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getTenantDomainFromTenantId(Mockito.anyInt())).thenReturn("carbon.super");
+        Exception exception = Assert.assertThrows(APIManagementException.class, () -> {
+            Whitebox.invokeMethod(wso2APIPublisher, "getExternalStoreRedirectURL", 123);
+        });
+        Assert.assertEquals(exception.getMessage(), "Store URL element is missing in External APIStores configuration");
     }
 }
