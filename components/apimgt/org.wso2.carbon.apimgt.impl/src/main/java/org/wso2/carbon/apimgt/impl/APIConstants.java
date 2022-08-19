@@ -2455,6 +2455,7 @@ public final class APIConstants {
         public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
         public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
         public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
+        public static final String KEY_MANAGER_OPERATIONS_REVOKE_TOKEN_ENDPOINT = "/keymanager-operations/revoke-one-time-token";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
         public static final String DISPLAY_TOKEN_ENDPOINT = "display_token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
@@ -2473,6 +2474,7 @@ public final class APIConstants {
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
         public static final String USERINFO_ENDPOINT = "userinfo_endpoint";
+        public static final String REVOKE_TOKEN_ENDPOINT = "revoke_token_endpoint";
         public static final String AUTHORIZE_ENDPOINT = "authorize_endpoint";
         public static final String EVENT_HUB_CONFIGURATIONS = "EventHubConfigurations";
         public static final String KEY_MANAGER = "KeyManager";

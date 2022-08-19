@@ -64,7 +64,9 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
@@ -92,6 +94,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -104,6 +107,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.cache.Cache;
 
 public class GatewayUtils {
 
@@ -1518,5 +1522,29 @@ public class GatewayUtils {
             return DataHolder.getInstance().getKeyManagersFromUUID(api.getUuid());
         }
         return Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
+    }
+
+    public static SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
+
+        String signature = accessToken.split("\\.")[2];
+        SignedJWTInfo signedJWTInfo = null;
+        Cache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
+        if (gatewaySignedJWTParseCache != null) {
+            Object cachedEntry = gatewaySignedJWTParseCache.get(signature);
+            if (cachedEntry != null) {
+                signedJWTInfo = (SignedJWTInfo) cachedEntry;
+            }
+            if (signedJWTInfo == null || !signedJWTInfo.getToken().equals(accessToken)) {
+                SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+                signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
+                gatewaySignedJWTParseCache.put(signature, signedJWTInfo);
+            }
+        } else {
+            SignedJWT signedJWT = SignedJWT.parse(accessToken);
+            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+            signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
+        }
+        return signedJWTInfo;
     }
 }
