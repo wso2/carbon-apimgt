@@ -512,10 +512,6 @@ public enum ExceptionCodes implements ErrorHandler {
 
     OPERATION_POLICY_WITH_NAME_NOT_FOUND(903002, "Operation Policy Not Found", 404,
             "Requested operation policy with name '%s' and version '%s' not found"),
-
-    THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
-            "Requested throttling policy with name '%s' and type '%s' not found"),
-
     OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "Operation Policy Not Found", 404,
             "Requested operation policy with name '%s' and version '%s not found"),
 

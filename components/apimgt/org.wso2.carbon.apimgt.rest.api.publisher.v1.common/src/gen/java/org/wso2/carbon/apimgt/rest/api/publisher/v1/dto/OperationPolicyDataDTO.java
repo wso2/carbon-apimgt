@@ -26,7 +26,7 @@ public class OperationPolicyDataDTO   {
     private String category = null;
     private String id = null;
     private String name = null;
-    private String version = null;
+    private String version = "v1";
     private String displayName = null;
     private String description = null;
     private List<String> applicableFlows = new ArrayList<String>();
