@@ -103,7 +103,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
                         if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
-                            API subscribedAPI = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(api.getApiId(),
+                            API subscribedAPI = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(api.getAPIIdentifier(),
                                     event.tenantDomain);
                             subscribedAPI.setGatewayVendor(SolaceConstants.SOLACE_ENVIRONMENT);
                             subscribedAPIs.add(subscribedAPI);

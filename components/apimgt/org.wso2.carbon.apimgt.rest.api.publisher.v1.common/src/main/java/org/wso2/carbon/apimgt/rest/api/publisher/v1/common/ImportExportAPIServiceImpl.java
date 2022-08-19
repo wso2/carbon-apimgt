@@ -175,7 +175,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         }
 
         apiProduct = apiProvider.getAPIProductbyUUID(exportAPIProductUUID, tenantDomain);
-        apiProductIdentifier.setUUID(exportAPIProductUUID);
+        apiProductIdentifier.setUuid(exportAPIProductUUID);
         if (apiProduct != null) {
             apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
             return ExportUtils

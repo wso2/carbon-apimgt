@@ -49,6 +49,8 @@ import java.util.zip.ZipInputStream;
 
 public class RestApiAdminUtils {
 
+    private RestApiAdminUtils() {}
+
     //using a set for file extensions white list since it will be faster to search
     private static final Set<String> EXTENSION_WHITELIST = new HashSet<String>(Arrays.asList(
             "css", "jpg", "png", "gif", "svg", "ttf", "html", "js", "json", "ico"));
@@ -96,22 +98,21 @@ public class RestApiAdminUtils {
             throws APIManagementException {
 
         String propertyName;
+        String error_str = "property value of payload cannot be blank";
         //policyName property is validated only for POST request
-        if (httpMethod.equalsIgnoreCase(APIConstants.HTTP_POST)) {
-            if (StringUtils.isBlank(customRuleDTO.getPolicyName())) {
-                propertyName = "policyName";
-                throw new APIManagementException(propertyName + " property value of payload cannot be blank",
-                        ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
-            }
+        if (httpMethod.equalsIgnoreCase(APIConstants.HTTP_POST) && StringUtils.isBlank(customRuleDTO.getPolicyName())) {
+            propertyName = "policyName";
+            throw new APIManagementException(propertyName + error_str,
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
         if (StringUtils.isBlank(customRuleDTO.getSiddhiQuery())) {
             propertyName = "siddhiQuery";
-            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+            throw new APIManagementException(propertyName + error_str,
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
         if (StringUtils.isBlank(customRuleDTO.getKeyTemplate())) {
             propertyName = "keyTemplate";
-            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+            throw new APIManagementException(propertyName + error_str,
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
     }
@@ -203,7 +204,6 @@ public class RestApiAdminUtils {
     public static void importTenantTheme(InputStream themeContentInputStream, String tenantDomain)
             throws APIManagementException, IOException {
 
-        ZipInputStream zipInputStream = null;
         byte[] buffer = new byte[1024];
         InputStream existingTenantTheme = null;
         InputStream themeContent = null;
@@ -211,7 +211,7 @@ public class RestApiAdminUtils {
         File backupDirectory = null;
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
-        try {
+
             APIAdmin apiAdmin = new APIAdminImpl();
             //add or update the tenant theme in the database
             if (apiAdmin.isTenantThemeExist(tenantId)) {
@@ -239,7 +239,7 @@ public class RestApiAdminUtils {
                 FileUtils.cleanDirectory(tenantThemeDirectory);
             }
             //get the zip file content
-            zipInputStream = new ZipInputStream(themeContent);
+        try (ZipInputStream zipInputStream = new ZipInputStream(themeContent)) {
             //get the zipped file list entry
             ZipEntry zipEntry = zipInputStream.getNextEntry();
 
@@ -267,12 +267,12 @@ public class RestApiAdminUtils {
                         //create all non exists folders
                         //else you will hit FileNotFoundException for compressed folder
                         new File(newFile.getParent()).mkdirs();
-                        FileOutputStream fileOutputStream = new FileOutputStream(newFile);
-                        int len;
-                        while ((len = zipInputStream.read(buffer)) > 0) {
-                            fileOutputStream.write(buffer, 0, len);
+                        try (FileOutputStream fileOutputStream = new FileOutputStream(newFile)) {
+                            int len;
+                            while ((len = zipInputStream.read(buffer)) > 0) {
+                                fileOutputStream.write(buffer, 0, len);
+                            }
                         }
-                        fileOutputStream.close();
                     } else {
                         APIUtil.handleException(
                                 "Unsupported file is uploaded with tenant theme by " + tenantDomain + " : file name : "
@@ -292,7 +292,6 @@ public class RestApiAdminUtils {
             throw new APIManagementException(e.getMessage(), e,
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
         } finally {
-            IOUtils.closeQuietly(zipInputStream);
             IOUtils.closeQuietly(themeContent);
             IOUtils.closeQuietly(themeContentInputStream);
         }

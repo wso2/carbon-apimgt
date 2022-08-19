@@ -987,11 +987,11 @@ public class APIMgtDAOTest {
         Mockito.when(keyManager.retrieveApplication(clientIdSandbox)).thenReturn(oAuthApplicationInfo);
         assertTrue(apiMgtDAO.getSubscribedAPIs(organization, subscriber, null).size() > 0);
         assertEquals(subscribedAPI.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-        assertEquals(subscribedAPI.getApiId(), apiId);
+        assertEquals(subscribedAPI.getAPIIdentifier(), apiId);
         assertEquals(subscribedAPI.getApplication().getId(), application.getId());
         SubscribedAPI subscribedAPIFromUuid = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
         assertEquals(subscribedAPIFromUuid.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-        assertEquals(subscribedAPIFromUuid.getApiId(), apiId);
+        assertEquals(subscribedAPIFromUuid.getAPIIdentifier(), apiId);
         assertEquals(subscribedAPIFromUuid.getApplication().getId(), application.getId());
         apiMgtDAO.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
         String status = apiMgtDAO.getApplicationStatus("testCreateApplicationRegistrationEntry",

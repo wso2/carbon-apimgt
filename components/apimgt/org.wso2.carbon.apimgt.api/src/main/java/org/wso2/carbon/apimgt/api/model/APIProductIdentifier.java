@@ -75,11 +75,6 @@ public class APIProductIdentifier implements Serializable, Identifier {
         this.applicationId = applicationId;
     }
 
-    public void setUUID(String uuid) {
-
-        this.uuid = uuid;
-    }
-
     @Override
     public void setId(int id) {
 
@@ -163,7 +158,7 @@ public class APIProductIdentifier implements Serializable, Identifier {
     @Override
     public void setUuid(String uuid) {
 
-        setUUID(uuid);
+        this.uuid = uuid;
     }
 
     @Override

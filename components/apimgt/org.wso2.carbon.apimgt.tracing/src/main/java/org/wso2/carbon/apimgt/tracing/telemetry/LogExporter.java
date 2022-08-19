@@ -49,9 +49,9 @@ public class LogExporter implements SpanExporter {
 
         Iterator var3 = spans.iterator();
         while (var3.hasNext()) {
-            try {
-                StringWriter writer = new StringWriter();
-                JsonGenerator generator = this.jsonFactory.createGenerator(writer);
+
+            try (StringWriter writer = new StringWriter();
+                 JsonGenerator generator = this.jsonFactory.createGenerator(writer)) {
                 generator.writeStartObject();
                 SpanData span = (SpanData) var3.next();
                 generator.writeStringField(TelemetryConstants.SPAN_ID, span.getSpanId());

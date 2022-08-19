@@ -17,8 +17,14 @@
 */
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
+import com.atlassian.oai.validator.model.Headers;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,9 +32,9 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -36,6 +42,11 @@ import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class APIMgtLatencyStatsHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(APIMgtLatencyStatsHandler.class);
@@ -118,8 +129,12 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
                     if (localEntryObj != null) {
                         swagger = localEntryObj.getValue().toString();
                         OpenAPIParser parser = new OpenAPIParser();
-                        openAPI = parser.readContents(swagger,
-                                null, null).getOpenAPI();
+                        ParseOptions parseOptions = new ParseOptions();
+                        parseOptions.setResolveFully(true);
+                        openAPI = parser.readContents(swagger, null, parseOptions).getOpenAPI();
+                        // HTTP headers should be case insensitive as for HTTP 1.1 RFC
+                        // Thus converting headers to lowercase for schema validation.
+                        convertHeadersToLowercase(openAPI);
                     }
                     long endTime = System.currentTimeMillis();
                     if (log.isDebugEnabled()) {
@@ -132,6 +147,59 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
         messageContext.setProperty(APIMgtGatewayConstants.OPEN_API_OBJECT, openAPI);
         // Add swagger String to message context
         messageContext.setProperty(APIMgtGatewayConstants.OPEN_API_STRING, swagger);
+    }
+
+    /**
+     * This method iterate through openAPI paths and convert header parameter names to lowercase for each operation
+     *
+     * @param openAPI openAPI object
+     */
+    private void convertHeadersToLowercase(OpenAPI openAPI) {
+
+        // Iterate each path
+        for (Map.Entry<String, PathItem> entry : openAPI.getPaths().entrySet()) {
+            // Iterate each operation
+            PathItem pathItem = entry.getValue();
+            if (pathItem != null) {
+                List<Operation> operations = pathItem.readOperations();
+                for (Operation operation : operations) {
+                    if (operation.getParameters() != null) {
+                        operation.setParameters(getLowercaseHeaderParameters(operation.getParameters()));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * This method read the parameter list and convert header parameter's name to lowercase
+     * @param parameters list of params
+     * @return
+     */
+    @NotNull
+    private List<Parameter> getLowercaseHeaderParameters(List<Parameter> parameters) {
+
+        List<Parameter> headerParameters = parameters.stream()
+                .filter(HeaderParameter.class::isInstance)
+                .filter(param -> !param.getName().equalsIgnoreCase(Headers.CONTENT_TYPE)) // Ignore content-type header
+                .collect(Collectors.toList());
+        List<Parameter> modifiedHeaderParameters = headerParameters.stream()
+                .map(APIMgtLatencyStatsHandler::replaceLowerCaseHeaderName).collect(Collectors.toList());
+        List<Parameter> nonHeaderParameters = parameters.stream()
+                .filter(param -> !(param instanceof HeaderParameter)).collect(Collectors.toList());
+        nonHeaderParameters.addAll(modifiedHeaderParameters);
+        return nonHeaderParameters;
+    }
+
+    /**
+     * This method convert parameter name to lowercase.
+     * @param parameter param
+     * @return
+     */
+    private static Parameter replaceLowerCaseHeaderName(Parameter parameter) {
+
+        parameter.setName(parameter.getName().toLowerCase(Locale.ROOT));
+        return parameter;
     }
 
 }

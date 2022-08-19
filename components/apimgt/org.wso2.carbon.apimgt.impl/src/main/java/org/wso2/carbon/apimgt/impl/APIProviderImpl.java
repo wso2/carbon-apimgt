@@ -220,7 +220,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(uuid, organization);
             for (UserApplicationAPIUsage usage : allApiResult) {
                 for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
-                    APIIdentifier subsApiId = apiSubscription.getApiId();
+                    APIIdentifier subsApiId = apiSubscription.getAPIIdentifier();
                     APIIdentifier subsApiIdEmailReplaced = new APIIdentifier(
                             APIUtil.replaceEmailDomain(subsApiId.getProviderName()), subsApiId.getApiName(),
                             subsApiId.getVersion());
@@ -2012,7 +2012,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateSubscription(subscribedAPI);
         subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
         Identifier identifier =
-                subscribedAPI.getApiId() != null ? subscribedAPI.getApiId() : subscribedAPI.getProductId();
+                subscribedAPI.getAPIIdentifier() != null ? subscribedAPI.getAPIIdentifier() : subscribedAPI.getProductId();
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         String orgId = subscribedAPI.getOrganization();
@@ -3389,9 +3389,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (createdBlockConditionsDto != null) {
             publishBlockingEvent(createdBlockConditionsDto, "true");
+            return createdBlockConditionsDto.getUUID();
         }
-
-        return createdBlockConditionsDto.getUUID();
+        return null;
     }
 
     @Override
@@ -5661,7 +5661,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
                     + apiRevision.getApiUUID(), ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevision.getApiUUID()));
         }
-        apiProductIdentifier.setUUID(apiRevision.getApiUUID());
+        apiProductIdentifier.setUuid(apiRevision.getApiUUID());
         String revisionUUID;
         try {
             revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(tenantDomain),
@@ -5818,7 +5818,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
-        apiProductIdentifier.setUUID(apiProductId);
+        apiProductIdentifier.setUuid(apiProductId);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
                     apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
@@ -5851,7 +5851,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                     EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
         }
-        apiProductIdentifier.setUUID(apiProductId);
+        apiProductIdentifier.setUuid(apiProductId);
         try {
             apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
                     apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
@@ -5888,7 +5888,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setEndUserName(username);
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
-        jwtTokenInfoDTO.setExpirationTime(60 * 1000);
+        jwtTokenInfoDTO.setExpirationTime(60000l);
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }
