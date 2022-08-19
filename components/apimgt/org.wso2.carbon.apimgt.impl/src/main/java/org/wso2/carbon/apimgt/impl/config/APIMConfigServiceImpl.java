@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.SystemConfigurationsDAO;
+import org.wso2.carbon.apimgt.impl.dto.ExternalAPIStoresConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -61,104 +62,50 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
-    public void addExternalStoreConfig(String organization, String externalStoreConfig) throws APIManagementException {
+    public void addExternalStoreConfig(String organization, String externalStoreConfig) {
+    }
 
+    @Override
+    public void updateExternalStoreConfig(String organization, String externalStoreConfig) {
+    }
+
+    @Override
+    public ExternalAPIStoresConfigDTO getExternalStoreConfig(String organization) throws APIManagementException {
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
+            JsonObject tenantConfig = (JsonObject) new JsonParser().parse(getTenantConfig(organization));
+            if (tenantConfig.has(APIConstants.EXTERNAL_API_STORES)) {
+                return getExternalAPIStoresConfigDTO(
+                        (JsonObject) tenantConfig.get(APIConstants.EXTERNAL_API_STORES));
             }
-            org.wso2.carbon.user.api.AuthorizationManager authManager =
-                    ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId).
-                            getAuthorizationManager();
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (!registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                Resource resource = registry.newResource();
-                resource.setContent(IOUtils.toByteArray(new StringReader(externalStoreConfig)));
-                registry.put(APIConstants.EXTERNAL_API_STORES_LOCATION, resource);
-                String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                        APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                                + APIConstants.EXTERNAL_API_STORES_LOCATION);
-                authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-
-            }
-
-        } catch (RegistryException | IOException | UserStoreException e) {
-            String msg = "Error while adding External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            return null;
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
-    @Override
-    public void updateExternalStoreConfig(String organization, String externalStoreConfig)
-            throws APIManagementException {
-
-        if (organization == null) {
-            organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    private static ExternalAPIStoresConfigDTO getExternalAPIStoresConfigDTO(JsonObject externalStoreConfig) {
+        ExternalAPIStoresConfigDTO externalAPIStoresConfigDTO = new ExternalAPIStoresConfigDTO();
+        externalAPIStoresConfigDTO.setStoreURL(
+                externalStoreConfig.get(APIConstants.EXTERNAL_API_STORES_STORE_URL).getAsString());
+        JsonArray externalAPIStores = (JsonArray) externalStoreConfig.get(APIConstants.EXTERNAL_API_STORE);
+        Iterator<JsonElement> externalAPIStoresIterator = externalAPIStores.iterator();
+        while (externalAPIStoresIterator.hasNext()) {
+            JsonObject externalAPIStore = (JsonObject) externalAPIStoresIterator.next();
+            externalAPIStoresConfigDTO.addExternalAPIStore(
+                    externalAPIStore.get(APIConstants.EXTERNAL_API_STORE_ID).getAsString(),
+                    externalAPIStore.get(APIConstants.EXTERNAL_API_STORE_TYPE).getAsString(),
+                    externalAPIStore.get(APIConstants.EXTERNAL_API_STORE_CLASS_NAME).getAsString(),
+                    externalAPIStore.get(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME).getAsString(),
+                    externalAPIStore.get(APIConstants.EXTERNAL_API_STORE_ENDPOINT).getAsString(),
+                    externalAPIStore.get(APIConstants.EXTERNAL_API_STORE_USERNAME).getAsString(),
+                    externalAPIStore.get(APIConstants.EXTERNAL_API_STORE_PASSWORD).getAsString());
         }
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
-                resource.setContent(IOUtils.toByteArray(new StringReader(externalStoreConfig)));
-                registry.put(APIConstants.EXTERNAL_API_STORES_LOCATION, resource);
-            }
-
-        } catch (RegistryException | IOException e) {
-            String msg = "Error while updating External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-    }
-
-    @Override
-    public String getExternalStoreConfig(String organization) throws APIManagementException {
-
-        if (organization == null) {
-            organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
-                return new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            } else {
-                return null;
-            }
-
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        return externalAPIStoresConfigDTO;
     }
 
     @Override

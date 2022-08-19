@@ -24,7 +24,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.registry.core.Collection;
@@ -60,8 +59,6 @@ public class APIManagerComponentPermissionsTest {
         Mockito.when(carbonContext.getUsername()).thenReturn(USER_NAME);
         Mockito.when(carbonContext.getUserRealm()).thenReturn(realm);
         PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
-        PowerMockito.when(APIUtil.class, "loadTenantExternalStoreConfig",
-                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).thenThrow(IndexOutOfBoundsException.class);
     }
 
     @Test

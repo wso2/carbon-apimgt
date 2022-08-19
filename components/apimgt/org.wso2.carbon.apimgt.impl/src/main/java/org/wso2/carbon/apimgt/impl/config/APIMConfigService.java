@@ -50,7 +50,7 @@ public interface APIMConfigService {
      * @return external-store configuration.
      * @throws APIManagementException throw if external-store configuration couldn't retrieve from store.
      */
-    public String getExternalStoreConfig(String organization) throws APIManagementException;
+    public Object getExternalStoreConfig(String organization) throws APIManagementException;
 
     /**
      * store tenant-config relevant to organization.

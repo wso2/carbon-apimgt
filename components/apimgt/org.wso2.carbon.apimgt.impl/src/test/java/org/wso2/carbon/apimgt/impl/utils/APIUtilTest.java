@@ -38,6 +38,10 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PasswordResolver;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -54,7 +58,7 @@ import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
-import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ExternalAPIStoresConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -110,10 +114,10 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFro
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(
-        {LogFactory.class, APIUtil.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class,
-                GovernanceUtils.class, MultitenantUtils.class,
-                GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
+@PrepareForTest({ LogFactory.class, APIUtil.class, ServiceReferenceHolder.class,
+        SSLSocketFactory.class, CarbonUtils.class, GovernanceUtils.class, MultitenantUtils.class,
+        GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class,
+        PasswordResolverFactory.class, PasswordResolver.class })
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
@@ -2168,5 +2172,150 @@ public class APIUtilTest {
         // test invalid types
         fileName = "test1.pdf";
         Assert.assertFalse("PDF type should not be allowed", APIUtil.isSupportedFileType(fileName));
+    }
+
+    @Test
+    public void testGetExternalStoresWhenConfigIsNotAvailable() throws Exception {
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.mockStatic(PasswordResolverFactory.class);
+        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
+        Mockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
+        Mockito.when(passwordResolver.getPassword(Mockito.anyString())).thenAnswer(i -> i.getArguments()[0]);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        Mockito.when(apimConfigService.getExternalStoreConfig(Mockito.anyString())).thenReturn(null);
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getGlobalExternalStores");
+        PowerMockito.when(APIUtil.class, "replaceSystemProperty", Mockito.anyString())
+                .thenAnswer(i -> i.getArguments()[0]);
+        Set<APIStore> externalAPIStores = APIUtil.getExternalStores(Mockito.anyInt());
+        Assert.assertEquals(externalAPIStores.size(), 0);
+    }
+
+    @Test
+    public void testGetExternalStoresWhenConfigIsAvailable() throws Exception {
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.mockStatic(PasswordResolverFactory.class);
+        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
+        Mockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
+        Mockito.when(passwordResolver.getPassword(Mockito.anyString())).thenAnswer(i -> i.getArguments()[0]);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        ExternalAPIStoresConfigDTO externalAPIStoresConfigDTO = new ExternalAPIStoresConfigDTO();
+        externalAPIStoresConfigDTO.setStoreURL("http://localhost:9443/devportal");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal1", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher", "DeveloperPortal1",
+                "http://localhost:9444/devportal1", "admin", "admin");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal2", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher", "DeveloperPortal2",
+                "http://localhost:9444/devportal2", "admin", "admin");
+        Mockito.when(apimConfigService.getExternalStoreConfig(Mockito.anyString()))
+                .thenReturn(externalAPIStoresConfigDTO);
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getGlobalExternalStores");
+        PowerMockito.when(APIUtil.class, "replaceSystemProperty", Mockito.anyString())
+                .thenAnswer(i -> i.getArguments()[0]);
+        Set<APIStore> externalAPIStores = APIUtil.getExternalStores(Mockito.anyInt());
+        Assert.assertEquals(externalAPIStores.size(), 2);
+        APIStore store1 = externalAPIStores.iterator().next();
+        Assert.assertTrue(store1.getPublisher() instanceof APIPublisher);
+        Assert.assertEquals(store1.getType(), "wso2");
+        Assert.assertEquals(store1.getName(), "DeveloperPortal1");
+        Assert.assertEquals(store1.getDisplayName(), "DeveloperPortal1");
+        Assert.assertEquals(store1.getEndpoint(), "http://localhost:9444/devportal1");
+        Assert.assertEquals(store1.getEndpoint(), "http://localhost:9444/devportal1");
+        Assert.assertEquals(store1.getPassword(), "admin");
+        Assert.assertEquals(store1.getUsername(), "admin");
+    }
+
+    @Test
+    public void testGetExternalStoresWhenClassNotFoundException() throws Exception {
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.mockStatic(PasswordResolverFactory.class);
+        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
+        Mockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
+        Mockito.when(passwordResolver.getPassword(Mockito.anyString())).thenAnswer(i -> i.getArguments()[0]);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        ExternalAPIStoresConfigDTO externalAPIStoresConfigDTO = new ExternalAPIStoresConfigDTO();
+        externalAPIStoresConfigDTO.setStoreURL("http://localhost:9443/devportal");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal1", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher1", "DeveloperPortal1",
+                "http://localhost:9444/devportal1", "admin", "admin");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal2", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher1", "DeveloperPortal2",
+                "http://localhost:9444/devportal2", "admin", "admin");
+        Mockito.when(apimConfigService.getExternalStoreConfig(Mockito.anyString()))
+                .thenReturn(externalAPIStoresConfigDTO);
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getGlobalExternalStores");
+        PowerMockito.when(APIUtil.class, "replaceSystemProperty", Mockito.anyString())
+                .thenAnswer(i -> i.getArguments()[0]);
+
+        Exception exception = Assert.assertThrows(APIManagementException.class, () -> {
+            APIUtil.getExternalStores(Mockito.anyInt());
+        });
+        Assert.assertEquals(exception.getMessage(),
+                "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found");
+        Assert.assertEquals(exception.getCause().getMessage(),
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher1");
+    }
+
+    @Test
+    public void testIsExternalStoresEnabledWhenConfigIsNotAvailable() throws Exception {
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.mockStatic(PasswordResolverFactory.class);
+        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
+        Mockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
+        Mockito.when(passwordResolver.getPassword(Mockito.anyString())).thenAnswer(i -> i.getArguments()[0]);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        Mockito.when(apimConfigService.getExternalStoreConfig(Mockito.anyString())).thenReturn(null);
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(1234).when(APIUtil.class, "getTenantIdFromTenantDomain", Mockito.anyString());
+        PowerMockito.doReturn(null).when(APIUtil.class, "getGlobalExternalStores");
+        PowerMockito.doReturn(null).when(APIUtil.class, "getGlobalExternalStores");
+        Assert.assertFalse(APIUtil.isExternalStoresEnabled(Mockito.anyString()));
+    }
+
+    @Test
+    public void testIsExternalStoresEnabledWhenConfigIsAvailable() throws Exception {
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.mockStatic(PasswordResolverFactory.class);
+        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
+        Mockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
+        Mockito.when(passwordResolver.getPassword(Mockito.anyString())).thenAnswer(i -> i.getArguments()[0]);
+        APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+        Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+        ExternalAPIStoresConfigDTO externalAPIStoresConfigDTO = new ExternalAPIStoresConfigDTO();
+        externalAPIStoresConfigDTO.setStoreURL("http://localhost:9443/devportal");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal1", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher", "DeveloperPortal1",
+                "http://localhost:9444/devportal1", "admin", "admin");
+        externalAPIStoresConfigDTO.addExternalAPIStore("DeveloperPortal2", "wso2",
+                "org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher", "DeveloperPortal2",
+                "http://localhost:9444/devportal2", "admin", "admin");
+        Mockito.when(apimConfigService.getExternalStoreConfig(Mockito.anyString()))
+                .thenReturn(externalAPIStoresConfigDTO);
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(1234).when(APIUtil.class, "getTenantIdFromTenantDomain", Mockito.anyString());
+        PowerMockito.doReturn(null).when(APIUtil.class, "getGlobalExternalStores");
+        PowerMockito.doReturn(null).when(APIUtil.class, "getGlobalExternalStores");
+        Assert.assertTrue(APIUtil.isExternalStoresEnabled(Mockito.anyString()));
     }
 }
