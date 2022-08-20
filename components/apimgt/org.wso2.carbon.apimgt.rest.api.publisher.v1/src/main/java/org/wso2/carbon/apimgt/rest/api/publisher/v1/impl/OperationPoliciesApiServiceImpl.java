@@ -101,7 +101,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 jsonContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
 
                 String fileName = policySpecFileDetail.getDataHandler().getName();
-
                 String fileContentType = URLConnection.guessContentTypeFromName(fileName);
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();

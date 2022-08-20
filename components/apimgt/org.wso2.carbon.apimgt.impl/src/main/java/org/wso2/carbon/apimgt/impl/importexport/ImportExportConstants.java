@@ -68,10 +68,6 @@ public final class ImportExportConstants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YAML_EXTENSION = ".yaml";
 
-    public static final String SYNAPSE_POLICY_EXTENSION = ".j2";
-
-    public static final String CHOREO_CONNECT_POLICY_EXTENSION = ".gotmpl";
-
     // Image resource
     public static final String IMAGE_RESOURCE = "Image";
 

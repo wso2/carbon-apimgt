@@ -832,40 +832,39 @@ public class ImportUtils {
             String[] fileLocations = pathToArchive.split("/");
 
             // File names of all types should be the same
-            String fileName = File.separator + fileLocations[fileLocations.length - 1];
-            String policySpecificationJsonContent = getPolicyFileContentAsJson(pathToArchive + fileName);
-            if (policySpecificationJsonContent == null) {
+            String fileName = fileLocations[fileLocations.length - 1];
+            policySpecification = getOperationPolicySpecificationFromFile(pathToArchive, fileName);
+            if (policySpecification == null) {
                 throw new APIManagementException(
-                        "Cannot find Operation Policy Specification. policySpecification.yaml or "
-                                + "policySpecification.json "
-                                + "should present", ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
+                        "Policy Specification Cannot be null", ExceptionCodes.POLICY_SPECIFICATION_CONTENT_ERROR);
             }
-            policySpecification = APIUtil.getValidatedOperationPolicySpecification(policySpecificationJsonContent);
             OperationPolicyData operationPolicyData = new OperationPolicyData();
             operationPolicyData.setOrganization(organization);
             operationPolicyData.setSpecification(policySpecification);
 
-            String pathToJ2File = pathToArchive + fileName + ImportExportConstants.SYNAPSE_POLICY_EXTENSION;
-            String synapsePolicyDefinitionJsonContent = readDefinitionFiles(pathToJ2File);
-            if (synapsePolicyDefinitionJsonContent != null) {
-                gatewayDefinition = setPropertiesToGatewayDefinition(synapsePolicyDefinitionJsonContent,
-                        OperationPolicyDefinition.GatewayType.Synapse);
-                operationPolicyData.setSynapsePolicyDefinition(gatewayDefinition);
-            }
-
-            String pathToChoreoFile = pathToArchive + fileName + ImportExportConstants.CHOREO_CONNECT_POLICY_EXTENSION;
-            String choreoConnectPolicyDefinitionJsonContent = readDefinitionFiles(pathToChoreoFile);
-            if (choreoConnectPolicyDefinitionJsonContent != null) {
-                gatewayDefinition = setPropertiesToGatewayDefinition(choreoConnectPolicyDefinitionJsonContent,
-                        OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                operationPolicyData.setCcPolicyDefinition(gatewayDefinition);
-            }
-
-            operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
             OperationPolicyData existingPolicy = apiProvider.getCommonOperationPolicyByPolicyName(
                     policySpecification.getName(), policySpecification.getVersion(), organization, false);
             String policyID = null;
             if (existingPolicy == null) {
+                String pathToJ2File =
+                        pathToArchive + File.separator + fileName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION;
+                String synapsePolicyDefinitionJsonContent = readDefinitionFiles(pathToJ2File);
+                if (synapsePolicyDefinitionJsonContent != null) {
+                    gatewayDefinition = setPropertiesToGatewayDefinition(synapsePolicyDefinitionJsonContent,
+                            OperationPolicyDefinition.GatewayType.Synapse);
+                    operationPolicyData.setSynapsePolicyDefinition(gatewayDefinition);
+                }
+
+                String pathToChoreoFile = pathToArchive + File.separator + fileName
+                        + APIConstants.CC_POLICY_DEFINITION_EXTENSION;
+                String choreoConnectPolicyDefinitionJsonContent = readDefinitionFiles(pathToChoreoFile);
+                if (choreoConnectPolicyDefinitionJsonContent != null) {
+                    gatewayDefinition = setPropertiesToGatewayDefinition(choreoConnectPolicyDefinitionJsonContent,
+                            OperationPolicyDefinition.GatewayType.ChoreoConnect);
+                    operationPolicyData.setCcPolicyDefinition(gatewayDefinition);
+                }
+
+                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
                 policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
                 if (log.isDebugEnabled()) {
                     log.debug("A common operation policy has been added with name " + policySpecification.getName());
@@ -875,6 +874,7 @@ public class ImportUtils {
                         ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS,
                                 policySpecification.getName(), policySpecification.getVersion()));
             }
+
             operationPolicyData.setPolicyId(policyID);
             OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(
                     operationPolicyData);
@@ -900,14 +900,14 @@ public class ImportUtils {
     /**
      * Set Properties to Gateway Definition.
      *
-     * @param gatewayDefinitionJsonContent Gateway Definition Content.
+     * @param gatewayDefinitionContent Gateway Definition Content.
      * @param type                         Gateway Type.
      * @return
      */
-    private static OperationPolicyDefinition setPropertiesToGatewayDefinition(String gatewayDefinitionJsonContent,
+    private static OperationPolicyDefinition setPropertiesToGatewayDefinition(String gatewayDefinitionContent,
             OperationPolicyDefinition.GatewayType type) {
         OperationPolicyDefinition gatewayDefinition = new OperationPolicyDefinition();
-        gatewayDefinition.setContent(gatewayDefinitionJsonContent);
+        gatewayDefinition.setContent(gatewayDefinitionContent);
         gatewayDefinition.setGatewayType(type);
         gatewayDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(gatewayDefinition));
         return gatewayDefinition;
@@ -1182,38 +1182,7 @@ public class ImportUtils {
     }
 
     /**
-     * Retrieve Policy Definition as JSON content.
-     *
-     * @param pathToArchive Path to Policy archive
-     * @throws IOException If an error occurs while reading the file
-     */
-    private static String getPolicyFileContentAsJson(String pathToArchive) throws IOException {
-
-        String jsonContent = null;
-        String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_EXTENSION;
-        String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_EXTENSION;
-
-        // Load yaml representation first if it is present
-        if (CommonUtil.checkFileExistence(pathToYamlFile)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Found policy definition file " + pathToYamlFile);
-            }
-            String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
-            jsonContent = CommonUtil.yamlToJson(yamlContent);
-            jsonContent = getJsonContentWithData(jsonContent);
-        } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-            // load as a json fallback
-            if (log.isDebugEnabled()) {
-                log.debug("Found policy definition file " + pathToJsonFile);
-            }
-            jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
-            jsonContent = getJsonContentWithData(jsonContent);
-        }
-        return jsonContent;
-    }
-
-    /**
-     * Retrieving the File content as JSON content.
+     * Retrieving the File content.
      *
      * @param path File path.
      * @return
@@ -1224,7 +1193,6 @@ public class ImportUtils {
         if (CommonUtil.checkFileExistence(path)) {
             content = FileUtils.readFileToString(new File(path));
         }
-
         return content;
     }
 
