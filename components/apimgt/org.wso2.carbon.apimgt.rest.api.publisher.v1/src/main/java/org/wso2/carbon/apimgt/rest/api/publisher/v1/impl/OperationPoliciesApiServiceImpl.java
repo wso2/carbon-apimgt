@@ -109,7 +109,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
                     jsonContent = CommonUtil.yamlToJson(jsonContent);
                 }
-
                 policySpecification = APIUtil.getValidatedOperationPolicySpecification(jsonContent);
 
                 OperationPolicyData operationPolicyData = new OperationPolicyData();
@@ -234,13 +233,13 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             // If name & version are given, it returns the policy data
             if (query != null) {
                 Map<String, String> queryParamMap = new HashMap();
-
                 String[] queryParams = query.split(" ");
                 for (String param : queryParams) {
                     String[] keyVal = param.split(":");
-                    queryParamMap.put(keyVal[0], keyVal[1]);
+                    if (keyVal.length == 2) {
+                        queryParamMap.put(keyVal[0], keyVal[1]);
+                    }
                 }
-
                 name = queryParamMap.get(ImportExportConstants.POLICY_NAME);
                 version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
 
@@ -262,7 +261,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 }
             } else {
                 offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
                 apiManagementExceptionErrorMessage = "Error while retrieving the list of all common operation policies.";
 
                 // Since policy definition is bit bulky, we don't query the definition unnecessarily.
@@ -274,7 +272,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(commonOperationPolicyLIst,
                         offset, limit);
             }
-
             return Response.ok().entity(policyListDTO).build();
 
         } catch (APIManagementException e) {

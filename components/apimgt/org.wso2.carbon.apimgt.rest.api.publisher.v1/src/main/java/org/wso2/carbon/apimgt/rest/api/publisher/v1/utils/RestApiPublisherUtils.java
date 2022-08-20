@@ -277,7 +277,7 @@ public class RestApiPublisherUtils {
             String policyName = archivePath + File.separator + policyData.getSpecification().getName();
             if (policyData.getSpecification() != null) {
                 if (format == null || format == "") {
-                    throw new APIImportExportException("Policy Definition file format should not be null or empty");
+                    throw new APIImportExportException("Policy Specification file format should not be null or empty");
                 }
                 if (format.equalsIgnoreCase(ExportFormat.YAML.name())) {
                     CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
