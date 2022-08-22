@@ -53,6 +53,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil.getRestApiJWTAuthAudiences;
 
@@ -291,9 +292,16 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     return null;
                 }
             } else {
+                Set<String> keySet;
                 //invalid issuer. invalid token
-                log.error("JWT token issuer validation failed. Reason: Issuer present in the JWT (" + issuer
-                        + ") does not match with the token issuer (" + tokenIssuers.keySet().toString() + ")");
+                if (tokenIssuers != null) {
+                    keySet = tokenIssuers.keySet();
+                    log.error("JWT token issuer validation failed. Reason: Issuer present in the JWT (" + issuer
+                            + ") does not match with the token issuer (" + keySet.toString() + ")");
+                } else {
+                    log.error("JWT token issuer validation failed. Reason: Issuer present in the JWT (" + issuer
+                            + ")");
+                }
                 return null;
             }
         } else {

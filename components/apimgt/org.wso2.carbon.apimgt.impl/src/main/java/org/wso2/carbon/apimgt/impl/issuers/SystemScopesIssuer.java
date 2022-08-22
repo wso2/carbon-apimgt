@@ -516,7 +516,8 @@ public class SystemScopesIssuer implements ScopeValidator {
         try {
             identityProvider = IdentityProviderManager.getInstance().getIdPByName(jwtIssuer, tenantDomain);
             if (identityProvider != null) {
-                if (StringUtils.equalsIgnoreCase(identityProvider.getIdentityProviderName(), "default")) {
+                if (StringUtils.equalsIgnoreCase(identityProvider.getIdentityProviderName(), "default")
+                        && jwtIssuer != null) {
                     identityProvider = this.getResidentIDPForIssuer(tenantDomain, jwtIssuer);
                     if (identityProvider == null) {
                         log.error("No Registered IDP found for the JWT with issuer name : " + jwtIssuer);
@@ -530,9 +531,11 @@ public class SystemScopesIssuer implements ScopeValidator {
         }
 
         try {
-            roles = claimsSet != null ?
-                    claimsSet.getStringArrayClaim(identityProvider.getClaimConfig().getRoleClaimURI()) :
-                    null;
+            if (identityProvider != null) {
+                roles = claimsSet != null ?
+                        claimsSet.getStringArrayClaim(identityProvider.getClaimConfig().getRoleClaimURI()) :
+                        null;
+            }
         } catch (ParseException e) {
             log.error("Couldn't retrieve roles:", e);
         }
@@ -550,12 +553,14 @@ public class SystemScopesIssuer implements ScopeValidator {
         }
         AuthenticatedUser user = tokReqMsgCtx.getAuthorizedUser();
         Map<ClaimMapping, String> userAttributes = user.getUserAttributes();
-        String roleClaim = identityProvider.getClaimConfig().getRoleClaimURI();
-        if (roleClaim != null) {
-            userAttributes
-                    .put(ClaimMapping.build(roleClaim, roleClaim, null, false),
-                            updatedRoles.toString().replace(" ", ""));
-            tokReqMsgCtx.addProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM, roleClaim);
+        if (identityProvider != null) {
+            String roleClaim = identityProvider.getClaimConfig().getRoleClaimURI();
+            if (roleClaim != null) {
+                userAttributes
+                        .put(ClaimMapping.build(roleClaim, roleClaim, null, false),
+                                updatedRoles.toString().replace(" ", ""));
+                tokReqMsgCtx.addProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM, roleClaim);
+            }
         }
         user.setUserAttributes(userAttributes);
         tokReqMsgCtx.setAuthorizedUser(user);

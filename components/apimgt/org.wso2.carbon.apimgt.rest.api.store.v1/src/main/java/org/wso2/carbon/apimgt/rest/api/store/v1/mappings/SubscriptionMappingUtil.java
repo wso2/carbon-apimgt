@@ -121,11 +121,13 @@ public class SubscriptionMappingUtil {
             APIMappingUtil.setThrottlePoliciesAndMonetization(api, apiInfo, deniedTiers, tierMap);
             subscriptionDTO.setApiInfo(apiInfo);
         } else {
-            APIProduct apiProduct = apiTypeWrapper.getApiProduct();
-            subscriptionDTO.setApiId(apiProduct.getUuid());
-            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct, organization);
-            APIMappingUtil.setThrottlePoliciesAndMonetization(apiProduct, apiInfo, deniedTiers, tierMap);
-            subscriptionDTO.setApiInfo(apiInfo);
+            if (apiTypeWrapper != null) {
+                APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+                subscriptionDTO.setApiId(apiProduct.getUuid());
+                APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct, organization);
+                APIMappingUtil.setThrottlePoliciesAndMonetization(apiProduct, apiInfo, deniedTiers, tierMap);
+                subscriptionDTO.setApiInfo(apiInfo);
+            }
         }
         Application application = subscription.getApplication();
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());

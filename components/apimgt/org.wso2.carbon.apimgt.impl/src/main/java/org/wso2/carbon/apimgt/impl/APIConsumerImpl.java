@@ -1312,18 +1312,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
             if (api != null) {
-                //check whether monetization is enabled for API and tier plan is commercial
-                if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
-                } else {
-                    removeSubscriptionWFExecutor.execute(workflowDTO);
+                if (tier != null) {
+                    //check whether monetization is enabled for API and tier plan is commercial
+                    if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
+                    } else {
+                        removeSubscriptionWFExecutor.execute(workflowDTO);
+                    }
                 }
             } else if (product != null) {
-                //check whether monetization is enabled for API product and tier plan is commercial
-                if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, product);
-                } else {
-                    removeSubscriptionWFExecutor.execute(workflowDTO);
+                if (tier != null) {
+                    //check whether monetization is enabled for API product and tier plan is commercial
+                    if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, product);
+                    } else {
+                        removeSubscriptionWFExecutor.execute(workflowDTO);
+                    }
                 }
             }
             JSONObject subsLogObject = new JSONObject();
@@ -2333,7 +2337,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
                 // only send the notification if approved
                 // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
-                if (wfDTO != null) {
+                if (wfDTO != null && applicationInfo != null) {
                     if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -2343,7 +2347,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         APIUtil.sendNotification(applicationRegistrationEvent,
                                 APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     }
-                } else {
+                } else if (applicationInfo != null) {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, orgId,

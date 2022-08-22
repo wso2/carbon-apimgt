@@ -40,6 +40,8 @@ public class DataPublisherUtil {
     public static final String HOST_NAME = "HostName";
     private static final String UNKNOWN_HOST = "UNKNOWN_HOST";
 
+    private DataPublisherUtil(){}
+
     public static String getHostAddress() {
 
         if (hostAddress != null) {
@@ -47,16 +49,15 @@ public class DataPublisherUtil {
         }
         hostAddress = ServerConfiguration.getInstance().getFirstProperty(HOST_NAME);
         if (null == hostAddress) {
-            if (getLocalAddress() != null) {
-                hostAddress = getLocalAddress().getHostName();
+            InetAddress localAddress = getLocalAddress();
+            if (localAddress != null) {
+                hostAddress = localAddress.getHostName();
             }
             if (hostAddress == null) {
                 hostAddress = UNKNOWN_HOST;
             }
-            return hostAddress;
-        } else {
-            return hostAddress;
         }
+        return hostAddress;
     }
 
     private static InetAddress getLocalAddress() {

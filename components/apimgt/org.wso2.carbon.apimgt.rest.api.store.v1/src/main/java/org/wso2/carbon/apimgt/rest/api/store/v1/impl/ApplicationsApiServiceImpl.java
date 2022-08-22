@@ -580,7 +580,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     String restrictedIP = null;
                     String restrictedReferer = null;
 
-                    if (body.getAdditionalProperties() != null) {
+                    if (body != null && body.getAdditionalProperties() != null) {
                         Map additionalProperties = (HashMap) body.getAdditionalProperties();
                         if (additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
                             restrictedIP = (String) additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP);

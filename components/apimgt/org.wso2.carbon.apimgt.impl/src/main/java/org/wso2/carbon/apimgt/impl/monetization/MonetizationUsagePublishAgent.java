@@ -65,7 +65,9 @@ public class MonetizationUsagePublishAgent implements Runnable {
                 //update the state and status of the job incase of any execptions
                 monetizationUsagePublishInfo.setState(APIConstants.Monetization.COMPLETED);
                 monetizationUsagePublishInfo.setStatus(APIConstants.Monetization.FAILED);
-                apiAdmin.updateMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
+                if (apiAdmin != null) {
+                    apiAdmin.updateMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
+                }
             } catch (APIManagementException ex) {
                 String errorMsg = "Failed to update the state of monetization ussge publisher";
                 log.error(errorMsg, ex);

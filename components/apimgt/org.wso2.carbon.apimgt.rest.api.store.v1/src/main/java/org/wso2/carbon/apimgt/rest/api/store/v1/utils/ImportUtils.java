@@ -27,15 +27,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -231,12 +223,25 @@ public class ImportUtils {
             }
         }
         if (!apiTypeWrapper.isAPIProduct()) {
-            log.error("Tier:" + targetTierName + " is not available for API " + api.getId().getApiName() + "-" + api
-                    .getId().getVersion());
+            APIIdentifier apiID;
+            if (api != null) {
+                apiID = api.getId();
+                log.error("Tier:" + targetTierName + " is not available for API " + apiID.getApiName() + "-"
+                        + apiID.getVersion());
+            } else {
+                log.error("Tier:" + targetTierName + " is not available for API ");
+            }
         } else {
-            log.error(
-                    "Tier:" + targetTierName + " is not available for API Product " + apiProduct.getId().getName() + "-"
-                            + apiProduct.getId().getVersion());
+            APIProductIdentifier apiProductId;
+            if (apiProduct != null) {
+                apiProductId = apiProduct.getId();
+                log.error(
+                        "Tier:" + targetTierName + " is not available for API Product " + apiProductId.getName()
+                                + "-" + apiProductId.getVersion());
+            } else {
+                log.error(
+                        "Tier:" + targetTierName + " is not available for API Product.");
+            }
         }
         return false;
     }

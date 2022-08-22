@@ -2213,8 +2213,13 @@ public class ImportUtils {
             throw new APIManagementException(
                     "Error while reading API Product meta information from path: " + extractedFolderPath, e);
         } catch (FaultGatewaysException e) {
-            throw new APIManagementException(
-                    "Error while updating API Product: " + importedApiProduct.getId().getName(), e);
+            if (importedApiProduct != null) {
+                throw new APIManagementException(
+                        "Error while updating API Product: " + importedApiProduct.getId().getName(), e);
+            } else {
+                throw new APIManagementException(
+                        "Error while updating API Product: ", e);
+            }
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API Product: ";
             if (importedApiProduct != null) {
@@ -2278,8 +2283,10 @@ public class ImportUtils {
                             API api = retrieveApiToOverwrite(apiName, apiVersion,
                                     MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(currentUser)),
                                     apiProvider, Boolean.FALSE, organization);
-                            invalidApiOperations = filterInvalidProductResources(invalidApiOperations,
-                                    api.getUriTemplates());
+                            if (api != null) {
+                                invalidApiOperations = filterInvalidProductResources(invalidApiOperations,
+                                        api.getUriTemplates());
+                            }
                         }
 
                         // invalidApiOperations is not empty means, at least one of the resources of the API

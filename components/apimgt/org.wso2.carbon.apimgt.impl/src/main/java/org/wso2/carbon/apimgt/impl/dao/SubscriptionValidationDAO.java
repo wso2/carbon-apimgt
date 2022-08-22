@@ -741,8 +741,10 @@ public class SubscriptionValidationDAO {
                 } catch (APIManagementException e) {
                     log.error("Error while processing api policies for policyId : " + policyId, e);
                 }
-                ConditionDTO[] conditionDTOS = conditionGroupDTO.getConditions();
-                apiPolicyConditionGroup.setConditionDTOS(Arrays.asList(conditionDTOS));
+                if (conditionGroupDTO != null) {
+                    ConditionDTO[] conditionDTOS = conditionGroupDTO.getConditions();
+                    apiPolicyConditionGroup.setConditionDTOS(Arrays.asList(conditionDTOS));
+                }
                 setCommonProperties(apiPolicyConditionGroup, resultSet);
                 apiPolicy.addConditionGroup(apiPolicyConditionGroup);
                 temp.put(policyId, apiPolicy);

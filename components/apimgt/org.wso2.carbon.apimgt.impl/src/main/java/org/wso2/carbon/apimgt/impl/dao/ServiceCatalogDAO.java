@@ -44,6 +44,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -530,9 +531,11 @@ public class ServiceCatalogDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     ServiceEntry service = getServiceParams(rs, false);
-                    int usage = getServiceUsage(serviceId, tenantId, connection) != null ? getServiceUsage(serviceId,
-                            tenantId, connection).size() : 0;
-                    service.setUsage(usage);
+                    int size = Objects.requireNonNull(getServiceUsage(serviceId, tenantId, connection)).size();
+                    int usage = getServiceUsage(serviceId, tenantId, connection) != null ? size : 0;
+                    if (service != null) {
+                        service.setUsage(usage);
+                    }
                     return service;
                 }
             }

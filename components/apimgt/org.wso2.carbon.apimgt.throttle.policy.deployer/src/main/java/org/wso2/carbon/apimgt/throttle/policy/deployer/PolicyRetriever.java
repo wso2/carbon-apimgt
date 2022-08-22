@@ -68,8 +68,10 @@ public class PolicyRetriever {
         String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
                 "?policyName=" + policyName;
         SubscriptionPolicyList subscriptionPolicyList = getPolicies(path, tenantDomain, SubscriptionPolicyList.class);
-        if (subscriptionPolicyList.getList() != null && !subscriptionPolicyList.getList().isEmpty()) {
-            return subscriptionPolicyList.getList().get(0);
+        if (subscriptionPolicyList != null) {
+            if (subscriptionPolicyList.getList() != null && !subscriptionPolicyList.getList().isEmpty()) {
+                return subscriptionPolicyList.getList().get(0);
+            }
         }
         return null;
     }
@@ -101,8 +103,10 @@ public class PolicyRetriever {
         String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES +
                 "?policyName=" + policyName;
         ApplicationPolicyList applicationPolicyList = getPolicies(path, tenantDomain, ApplicationPolicyList.class);
-        if (applicationPolicyList.getList() != null && !applicationPolicyList.getList().isEmpty()) {
-            return applicationPolicyList.getList().get(0);
+        if (applicationPolicyList != null) {
+            if (applicationPolicyList.getList() != null && !applicationPolicyList.getList().isEmpty()) {
+                return applicationPolicyList.getList().get(0);
+            }
         }
         return null;
     }
@@ -132,8 +136,10 @@ public class PolicyRetriever {
         String path = APIConstants.SubscriptionValidationResources.API_POLICIES +
                 "?policyName=" + policyName;
         ApiPolicyList apiPolicyList = getPolicies(path, tenantDomain, ApiPolicyList.class);
-        if (apiPolicyList.getList() != null && !apiPolicyList.getList().isEmpty()) {
-            return apiPolicyList.getList().get(0);
+        if (apiPolicyList != null) {
+            if (apiPolicyList.getList() != null && !apiPolicyList.getList().isEmpty()) {
+                return apiPolicyList.getList().get(0);
+            }
         }
         return null;
     }
@@ -176,8 +182,10 @@ public class PolicyRetriever {
         String path = APIConstants.SubscriptionValidationResources.GLOBAL_POLICIES +
                 "?policyName=" + policyName;
         GlobalPolicyList globalPolicyList = getPolicies(path, tenantDomain, GlobalPolicyList.class);
-        if (globalPolicyList.getList() != null && !globalPolicyList.getList().isEmpty()) {
-            return globalPolicyList.getList().get(0);
+        if (globalPolicyList != null) {
+            if (globalPolicyList.getList() != null && !globalPolicyList.getList().isEmpty()) {
+                return globalPolicyList.getList().get(0);
+            }
         }
         return null;
     }

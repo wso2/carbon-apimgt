@@ -636,15 +636,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO api = getAPIByAPIId(apiId, organization);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
-        String swaggerDefinition = api.getApiDefinition();
         if (api != null) {
+            String swaggerDefinition = api.getApiDefinition();
             try {
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
                         swaggerDefinition);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
-                        "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"" ).build();
+                        "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"").build();
             } catch (APIClientGenerationException e) {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
                 RestApiUtil.handleInternalServerError(message, e, log);

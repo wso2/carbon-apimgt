@@ -2548,10 +2548,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
         if (apiProvider.publishToExternalAPIStores(api, externalStoreIdList)) {
-            Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getUuid());
-            APIExternalStoreListDTO apiExternalStoreListDTO =
-                    ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
-            return Response.ok().entity(apiExternalStoreListDTO).build();
+            if (api != null) {
+                Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getUuid());
+                APIExternalStoreListDTO apiExternalStoreListDTO =
+                        ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
+                return Response.ok().entity(apiExternalStoreListDTO).build();
+            }
         }
         return Response.serverError().build();
     }
@@ -3114,7 +3116,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO = (OpenAPIDefinitionValidationResponseDTO) validationResponseMap
                 .get(RestApiConstants.RETURN_DTO);
-        if (!validationResponseDTO.isIsValid()) {
+        if (validationResponseMap != null && !validationResponseDTO.isIsValid()) {
             List<ErrorListItemDTO> errors = validationResponseDTO.getErrors();
             for (ErrorListItemDTO error : errors) {
                 log.error("Error while parsing OpenAPI definition. Error code: " + error.getCode() + ". Error: "
@@ -3571,7 +3573,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response createNewAPIVersion(String newVersion, String apiId, Boolean defaultVersion,
                 String serviceVersion, MessageContext messageContext) throws APIManagementException {
-        URI newVersionedApiUri;
+        URI newVersionedApiUri = null;
         APIDTO newVersionedApi = new APIDTO();
         ServiceEntry service = new ServiceEntry();
         try {
@@ -3621,8 +3623,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             }
             //This URI used to set the location header of the POST response
-            newVersionedApiUri =
-                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+            if (newVersionedApi != null) {
+                newVersionedApiUri =
+                        new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+            }
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
             if (isAuthorizationFailure(e)) {
@@ -3751,8 +3755,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
     } catch (IOException e) {
-            String errorMessage = "Error while retrieving content from file : " + additionalPropertiesAPI.getProvider()
-                    + "-" + additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion();
+            String errorMessage;
+            if (additionalPropertiesAPI != null) {
+                errorMessage = "Error while retrieving content from file : "
+                        + additionalPropertiesAPI.getProvider() + "-" + additionalPropertiesAPI.getName()
+                        + "-" + additionalPropertiesAPI.getVersion();
+            } else {
+                errorMessage = "Error while retrieving content from file";
+            }
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
     }
         return null;
@@ -4318,8 +4328,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
 
-        AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
-                (AsyncAPISpecificationValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        AsyncAPISpecificationValidationResponseDTO validationResponseDTO = null;
+        if (validationResponseMap != null) {
+            validationResponseDTO =
+                    (AsyncAPISpecificationValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        }
         return Response.ok().entity(validationResponseDTO).build();
     }
 
@@ -4434,8 +4447,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIDTO createdAPIDTO = importAsyncAPISpecification(fileInputStream, url, apiDTOFromProperties, fileDetail,
                     null, organization);
-            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdAPIDTO.getId());
-            return Response.created(createdApiUri).entity(createdAPIDTO).build();
+            if (createdAPIDTO != null) {
+                URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdAPIDTO.getId());
+                return Response.created(createdApiUri).entity(createdAPIDTO).build();
+            }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
@@ -4557,8 +4572,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIDTO createdApiDTO = null;
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
-                    ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
+            if (service != null && (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
+                    ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType()))) {
                 createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, null, apiDto, null, service,
                         organization);
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
@@ -4691,9 +4706,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
-
-        OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
-                (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        OpenAPIDefinitionValidationResponseDTO validationResponseDTO = null;
+        if (validationResponseMap != null) {
+            validationResponseDTO =
+                    (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        }
         APIDefinitionValidationResponse validationResponse =
                 (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
 
@@ -4777,8 +4794,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
 
-        AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
-                (AsyncAPISpecificationValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        AsyncAPISpecificationValidationResponseDTO validationResponseDTO = null;
+        if (validationResponseMap != null) {
+            validationResponseDTO =
+                    (AsyncAPISpecificationValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        }
         APIDefinitionValidationResponse validationResponse =
                 (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
 

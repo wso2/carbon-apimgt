@@ -117,6 +117,20 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 }
                 apiProduct.setOrganization(organization);
             }
+
+            String productState;
+            if (apiProduct != null) {
+                productState = apiProduct.getState();
+                apiProduct.setOrganization(organization);
+            } else {
+                productState = null;
+            }
+            boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatus().equals(productState) ||
+                    APIStatus.DEPRECATED.getStatus().equals(productState);
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
+            if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
+                RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
+            }
             apiProvider.deleteAPIProduct(apiProduct);
             return Response.ok().build();
         } catch (APIManagementException e) {

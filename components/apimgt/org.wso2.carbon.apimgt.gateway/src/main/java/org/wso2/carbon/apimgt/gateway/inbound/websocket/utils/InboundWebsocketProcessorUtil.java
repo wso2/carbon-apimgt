@@ -170,11 +170,16 @@ public class InboundWebsocketProcessorUtil {
     public static boolean authorizeGraphQLSubscriptionEvents(String matchingResource,
                                                              InboundMessageContext inboundMessageContext)
             throws APIManagementException, APISecurityException {
-
-        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), inboundMessageContext.getTenantDomain());
-        jwtValidator.validateScopesForGraphQLSubscriptions(inboundMessageContext.getApiContext(),
-                inboundMessageContext.getVersion(), matchingResource, inboundMessageContext.getSignedJWTInfo(),
-                inboundMessageContext.getAuthContext());
+        try {
+            JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), inboundMessageContext.getTenantDomain());
+            jwtValidator.validateScopesForGraphQLSubscriptions(inboundMessageContext.getApiContext(),
+                    inboundMessageContext.getVersion(), matchingResource, inboundMessageContext.getSignedJWTInfo(),
+                    inboundMessageContext.getAuthContext());
+        } catch (APIManagementException | APISecurityException e) {
+            log.error("Error while validating scopes for and and incoming GraphQL subscription", e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        }
         return true;
     }
 
@@ -255,7 +260,7 @@ public class InboundWebsocketProcessorUtil {
         String apiLevelTier = infoDTO.getApiTier() == null && verbInfoDTO == null ? APIConstants.UNLIMITED_TIER
                 : infoDTO.getApiTier();
         String subscriptionLevelTier = infoDTO.getTier();
-        String resourceLevelTier;
+        String resourceLevelTier = null;
         String authorizedUser;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(infoDTO.getSubscriberTenantDomain())) {
             authorizedUser = infoDTO.getSubscriber() + "@" + infoDTO.getSubscriberTenantDomain();
@@ -269,14 +274,16 @@ public class InboundWebsocketProcessorUtil {
         String appId = infoDTO.getApplicationId();
         String applicationLevelThrottleKey = appId + ":" + authorizedUser;
         String apiLevelThrottleKey = inboundMessageContext.getApiContext() + ":" + apiVersion;
-        String resourceLevelThrottleKey;
+        String resourceLevelThrottleKey = null;
         //If API level throttle policy is present then it will apply and no resource level policy will apply for it
         if (StringUtils.isNotEmpty(apiLevelTier) && verbInfoDTO == null) {
             resourceLevelThrottleKey = apiLevelThrottleKey;
             resourceLevelTier = apiLevelTier;
         } else {
-            resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
-            resourceLevelTier = verbInfoDTO.getThrottling();
+            if (verbInfoDTO != null) {
+                resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
+                resourceLevelTier = verbInfoDTO.getThrottling();
+            }
         }
         String subscriptionLevelThrottleKey = appId + ":" + inboundMessageContext.getApiContext() + ":" + apiVersion;
         String messageId = UIDGenerator.generateURNString();
