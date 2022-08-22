@@ -102,7 +102,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
-            if (log.isDebugEnabled()) {
+            if (log.isDeb
                 log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
             }
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, organization);

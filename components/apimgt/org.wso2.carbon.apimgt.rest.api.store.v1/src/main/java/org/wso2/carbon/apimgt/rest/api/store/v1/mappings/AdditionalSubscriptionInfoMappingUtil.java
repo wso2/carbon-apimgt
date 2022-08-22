@@ -106,14 +106,16 @@ public class AdditionalSubscriptionInfoMappingUtil {
             }
         }
 
-        additionalSubscriptionInfoDTO.setApiId(api.getUuid());
-        // Set Application information
-        Application application = subscription.getApplication();
-        application = apiConsumer.getApplicationByUUID(application.getUUID());
-        additionalSubscriptionInfoDTO.setApplicationId(subscription.getApplication().getUUID());
-        additionalSubscriptionInfoDTO.setApplicationName(application.getName());
-        additionalSubscriptionInfoDTO.setIsSolaceAPI(SolaceNotifierUtils.checkWhetherAPIDeployedToSolaceUsingRevision
-                (api));
+        if (api != null) {
+            additionalSubscriptionInfoDTO.setApiId(api.getUuid());
+            // Set Application information
+            Application application = subscription.getApplication();
+            application = apiConsumer.getApplicationByUUID(application.getUUID());
+            additionalSubscriptionInfoDTO.setApplicationId(subscription.getApplication().getUUID());
+            additionalSubscriptionInfoDTO.setApplicationName(application.getName());
+            additionalSubscriptionInfoDTO.setIsSolaceAPI(SolaceNotifierUtils.checkWhetherAPIDeployedToSolaceUsingRevision
+                    (api));
+        }
 
         if (additionalSubscriptionInfoDTO.isIsSolaceAPI()) {
             //Set Solace organization details if API is a Solace API
