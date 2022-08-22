@@ -262,7 +262,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.endTenantFlow();
             }
             try {
-                if (!transactionCommitted && registry != null) {
+                if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
@@ -327,7 +327,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (tenantFlowStarted) {
                     RegistryPersistenceUtil.endTenantFlow();
                 }
-                if (!transactionCommitted && registry != null) {
+                if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
@@ -398,7 +398,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (tenantFlowStarted) {
                     RegistryPersistenceUtil.endTenantFlow();
                 }
-                if (!transactionCommitted && registry != null) {
+                if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
@@ -443,7 +443,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (tenantFlowStarted) {
                     RegistryPersistenceUtil.endTenantFlow();
                 }
-                if (!transactionCommitted && registry != null) {
+                if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
@@ -625,7 +625,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.endTenantFlow();
             }
             try {
-                if (!transactionCommitted && registry != null) {
+                if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
@@ -851,7 +851,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.endTenantFlow();
             }
             try {
-                if (!transactionCommitted && registry != null) {
+                if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
@@ -1716,7 +1716,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String visibleRolesList = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
 
             Resource wsdlResource = registry.newResource();
-            ;
 
             wsdlResource.setContentStream(wsdlResourceFile.getContent());
             if (wsdlResourceFile.getContentType() != null) {
@@ -3195,7 +3194,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException("Error while creating API Product", e);
         } finally {
             try {
-                if (!transactionCommitted && registry != null) {
+                if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
@@ -3402,7 +3401,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException("Error while performing registry transaction operation", e);
         } finally {
             try {
-                if (!transactionCommitted && registry != null) {
+                if (registry != null && !transactionCommitted) {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
