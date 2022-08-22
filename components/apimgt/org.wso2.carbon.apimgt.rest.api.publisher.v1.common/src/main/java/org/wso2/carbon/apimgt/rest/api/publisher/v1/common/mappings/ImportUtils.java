@@ -1162,40 +1162,6 @@ public class ImportUtils {
     }
 
     /**
-     * Retrieving the File content.
-     *
-     * @param path File path.
-     * @return
-     * @throws IOException
-     */
-    private static String readDefinitionFiles(String path) throws IOException {
-        String content = null;
-        if (CommonUtil.checkFileExistence(path)) {
-            content = FileUtils.readFileToString(new File(path));
-        }
-        return content;
-    }
-
-    /**
-     * Break the data object into fields and append to the main object.
-     *
-     * @param jsonContent Json content of the file.
-     * @return String object which with data elements.
-     * @throws IOException if exists.
-     */
-    private static String getJsonContentWithData(String jsonContent) throws IOException {
-        JsonObject object = new JsonParser().parse(jsonContent).getAsJsonObject();
-        JsonElement data = object.get("data");
-        object.remove("data");
-
-        for (String key : data.getAsJsonObject().keySet()) {
-            object.add(key, data.getAsJsonObject().get(key));
-        }
-
-        return object.toString();
-    }
-
-    /**
      * Validate Aysnc API definition from the archive directory and return it.
      *
      * @param pathToArchive Path to API archive
