@@ -629,7 +629,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
-                log.error("Error occurred while rolling back the transaction. ");
+                log.error("Error occurred while rolling back the transaction.", ex);
             }
         }
     }
@@ -855,7 +855,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
-                log.error("Error occurred while rolling back the transaction. ");
+                log.error("Error occurred while rolling back the transaction.", ex);
             }
         }
     }
@@ -3405,7 +3405,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.rollbackTransaction();
                 }
             } catch (RegistryException ex) {
-                log.error("Error occurred while rolling back the transaction.");
+                log.error("Error occurred while rolling back the transaction.", ex);
             }
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
