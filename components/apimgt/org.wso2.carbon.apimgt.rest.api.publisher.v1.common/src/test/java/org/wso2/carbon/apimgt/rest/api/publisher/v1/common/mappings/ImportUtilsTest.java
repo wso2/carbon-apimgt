@@ -33,34 +33,31 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
+
 import java.io.File;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ APIProvider.class, CommonUtil.class, FileUtils.class, APIUtil.class })
+@RunWith(PowerMockRunner.class) @PrepareForTest({ APIProvider.class, CommonUtil.class, FileUtils.class, APIUtil.class })
 public class ImportUtilsTest {
     private static final String ORGANIZATION = "carbon.super";
-    private APIProvider apiProvider;
-
+    private static final String POLICYNAME = "customCommonLogPolicy";
+    private static final String POLICYVERSION = "v1";
+    private static OperationPolicyData policyData;
     private final String pathToArchive = "/tmp/test/customCommonLogPolicy";
     private final String yamlFile = pathToArchive + "/customCommonLogPolicy.yaml";
     private final String jsonFile = pathToArchive + "/customCommonLogPolicy.json";
-    private final String synapsePath = pathToArchive + "/customCommonLogPolicy.j2";
-    private final String synapseDefFileString = "<log level=\"full\">\n"
-            + "    <property name=\"MESSAGE\" value=\"MESSAGE\"/>\n" + "</log>";
+    private APIProvider apiProvider;
 
-    private static final String POLICYNAME = "customCommonLogPolicy";
-
-    private static final String POLICYVERSION = "v1";
-
-    private static OperationPolicyData policyData;
-
-    @Before
-    public void init() throws Exception {
+    @Before public void init() throws Exception {
         PowerMockito.mockStatic(CommonUtil.class);
         PowerMockito.mockStatic(FileUtils.class);
+        PowerMockito.stub(
+                PowerMockito.method(APIUtil.class, "getOperationPolicyDefinitionFromFile", String.class,
+                        String.class,
+                                String.class));
         apiProvider = Mockito.mock(APIProvider.class);
         policyData = Mockito.mock(OperationPolicyData.class);
     }
@@ -73,24 +70,28 @@ public class ImportUtilsTest {
                 + ",\"applicableFlows\":[\"request\",\"response\",\"fault\"],\"supportedGateways\":[\"Synapse\"]"
                 + ",\"supportedApiTypes\":[\"HTTP\"],\"policyAttributes\":[]}}";
 
-        String policyDefContentModified =
-                "{\"type\":\"operation_policy_specification\",\"version\":\"v1\",\"category\"" + ":"
-                        + "\"Mediation\",\"name\":\"customCommonLogPolicy\",\"displayName\":\"CustomCommonLogPolicy\","
-                        + "\"description\":\"Usingthispolicy,youcanaddacustomlogmessage\",\"applicableFlows\":"
-                        + "[\"request\","
-                        + "\"response\",\"fault\"],\"supportedGateways\":[\"Synapse\"],\"supportedApiTypes\":"
-                        + "[\"HTTP\"]," + "\"policyAttributes\":[]}";
-
         Mockito.when(CommonUtil.checkFileExistence(yamlFile)).thenReturn(false);
         Mockito.when(CommonUtil.checkFileExistence(jsonFile)).thenReturn(true);
         Mockito.when(FileUtils.readFileToString(new File(jsonFile))).thenReturn(policyDefContent);
-        Mockito.when(CommonUtil.checkFileExistence(synapsePath)).thenReturn(true);
-        Mockito.when(FileUtils.readFileToString(new File(synapsePath))).thenReturn(synapseDefFileString);
-
-        String policyId = RandomStringUtils.randomAlphanumeric(10);
 
         Mockito.when(apiProvider.getCommonOperationPolicyByPolicyName(POLICYNAME, POLICYVERSION, ORGANIZATION, false))
                 .thenReturn(null);
+
+        OperationPolicyDefinition gatewayDefinition = Mockito.mock(OperationPolicyDefinition.class);
+
+        PowerMockito.stub(
+                PowerMockito.method(APIUtil.class, "getOperationPolicyDefinitionFromFile", String.class,
+                String.class,
+                        String.class)).toReturn(gatewayDefinition);
+
+        String md5Hash = RandomStringUtils.randomAlphanumeric(30);
+
+        PowerMockito.stub(
+                PowerMockito.method(APIUtil.class, "getMd5OfOperationPolicy", OperationPolicyData.class)).
+                toReturn(md5Hash);
+
+        String policyId = RandomStringUtils.randomAlphanumeric(10);
+
         Mockito.when(apiProvider.addCommonOperationPolicy(ArgumentMatchers.any(OperationPolicyData.class),
                 ArgumentMatchers.eq(ORGANIZATION))).thenReturn(policyId);
 
@@ -102,6 +103,7 @@ public class ImportUtilsTest {
             Assert.fail("Import Policy failed due to an exception!");
         }
 
+        // error path
         Mockito.when(apiProvider.getCommonOperationPolicyByPolicyName(POLICYNAME, POLICYVERSION, ORGANIZATION, false))
                 .thenReturn(policyData);
 

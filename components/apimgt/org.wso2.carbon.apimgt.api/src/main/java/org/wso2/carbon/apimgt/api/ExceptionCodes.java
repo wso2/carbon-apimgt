@@ -310,7 +310,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
-    POLICY_SPECIFICATION_CONTENT_ERROR(903007, "Policy Specification file cannot be empty", 500, "Server Error Occurred"),
+
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
     INVALID_APPLICATION_ADDITIONAL_PROPERTIES(900970, "Invalid application additional properties", 400,
@@ -515,6 +515,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Requested operation policy with name '%s' and version '%s' not found"),
     OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "Operation Policy Not Found", 404,
             "Requested operation policy with name '%s' and version '%s not found"),
+
+    OPERATION_POLICY_GATEWAY_ERROR(903008,
+            "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
+            "Operation Policy cannot be imported due to the missing Gateway files."),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),

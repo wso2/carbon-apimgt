@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.github.jknack.handlebars.internal.lang3.StringUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -390,7 +391,10 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
         OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version, organization,
                 true);
         if (policyData != null) {
-            File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, format);
+            ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
+                    ExportFormat.valueOf(format.toUpperCase()) :
+                    ExportFormat.YAML;
+            File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, exportFormat.name());
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } else {

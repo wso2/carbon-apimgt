@@ -828,15 +828,16 @@ public class ImportUtils {
 
         OperationPolicySpecification policySpecification = null;
         try {
-            OperationPolicyDefinition gatewayDefinition = null;
+            OperationPolicyDefinition synapseGatewayDefinition = null;
+            OperationPolicyDefinition ccGatewayDefinition = null;
             String[] fileLocations = pathToArchive.split("/");
 
             // File names of all types should be the same
             String fileName = fileLocations[fileLocations.length - 1];
             policySpecification = getOperationPolicySpecificationFromFile(pathToArchive, fileName);
             if (policySpecification == null) {
-                throw new APIManagementException(
-                        "Policy Specification Cannot be null", ExceptionCodes.POLICY_SPECIFICATION_CONTENT_ERROR);
+                throw new APIManagementException("Policy Specification Cannot be null",
+                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
             }
             OperationPolicyData operationPolicyData = new OperationPolicyData();
             operationPolicyData.setOrganization(organization);
@@ -846,22 +847,22 @@ public class ImportUtils {
                     policySpecification.getName(), policySpecification.getVersion(), organization, false);
             String policyID = null;
             if (existingPolicy == null) {
-                String pathToJ2File =
-                        pathToArchive + File.separator + fileName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION;
-                String synapsePolicyDefinitionJsonContent = readDefinitionFiles(pathToJ2File);
-                if (synapsePolicyDefinitionJsonContent != null) {
-                    gatewayDefinition = setPropertiesToGatewayDefinition(synapsePolicyDefinitionJsonContent,
-                            OperationPolicyDefinition.GatewayType.Synapse);
-                    operationPolicyData.setSynapsePolicyDefinition(gatewayDefinition);
+                synapseGatewayDefinition = APIUtil.getOperationPolicyDefinitionFromFile(pathToArchive, fileName,
+                        APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                ccGatewayDefinition = APIUtil.getOperationPolicyDefinitionFromFile(pathToArchive, fileName,
+                        APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+
+                if (ccGatewayDefinition == null && synapseGatewayDefinition == null) {
+                    throw new APIManagementException("Either one of the Gateway Definition files should be present",
+                            ExceptionCodes.OPERATION_POLICY_GATEWAY_ERROR);
                 }
 
-                String pathToChoreoFile = pathToArchive + File.separator + fileName
-                        + APIConstants.CC_POLICY_DEFINITION_EXTENSION;
-                String choreoConnectPolicyDefinitionJsonContent = readDefinitionFiles(pathToChoreoFile);
-                if (choreoConnectPolicyDefinitionJsonContent != null) {
-                    gatewayDefinition = setPropertiesToGatewayDefinition(choreoConnectPolicyDefinitionJsonContent,
-                            OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                    operationPolicyData.setCcPolicyDefinition(gatewayDefinition);
+                if (ccGatewayDefinition != null) {
+                    operationPolicyData.setCcPolicyDefinition(ccGatewayDefinition);
+                }
+
+                if (synapseGatewayDefinition != null) {
+                    operationPolicyData.setSynapsePolicyDefinition(synapseGatewayDefinition);
                 }
 
                 operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
@@ -889,28 +890,7 @@ public class ImportUtils {
             String errorMessage = "Error while adding a common operation policy." + e.getMessage();
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, e.getMessage()));
-        } catch (IOException e) {
-            String errorMessage = "An Error has occurred while adding common operation policy. " + e.getMessage();
-            throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, policySpecification.getName(),
-                            policySpecification.getVersion()));
         }
-    }
-
-    /**
-     * Set Properties to Gateway Definition.
-     *
-     * @param gatewayDefinitionContent Gateway Definition Content.
-     * @param type                         Gateway Type.
-     * @return
-     */
-    private static OperationPolicyDefinition setPropertiesToGatewayDefinition(String gatewayDefinitionContent,
-            OperationPolicyDefinition.GatewayType type) {
-        OperationPolicyDefinition gatewayDefinition = new OperationPolicyDefinition();
-        gatewayDefinition.setContent(gatewayDefinitionContent);
-        gatewayDefinition.setGatewayType(type);
-        gatewayDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(gatewayDefinition));
-        return gatewayDefinition;
     }
 
     @NotNull
