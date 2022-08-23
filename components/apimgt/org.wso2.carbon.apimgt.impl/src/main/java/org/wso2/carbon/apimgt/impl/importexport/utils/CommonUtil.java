@@ -317,8 +317,14 @@ public class CommonUtil {
 
                 //This index variable is used to get the extracted folder name; that is root directory
                 if (index == 0) {
-                    archiveName = currentEntry
-                            .substring(0, currentEntry.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR));
+                    if (currentEntry.contains("/")) {
+                        archiveName = currentEntry
+                                .substring(0, currentEntry.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR));
+                    } else if (currentEntry.contains("\\")) {
+                        archiveName = currentEntry
+                                .substring(0, currentEntry.indexOf(ImportExportConstants.WIN_ZIP_FILE_SEPARATOR));
+
+                    }
                     --index;
                 }
 
