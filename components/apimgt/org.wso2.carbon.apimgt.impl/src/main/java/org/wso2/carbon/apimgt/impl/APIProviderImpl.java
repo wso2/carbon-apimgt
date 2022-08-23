@@ -2762,6 +2762,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiOrApiProductId = apiMgtDAO.getAPIID(uuid);
                 workflowType = WorkflowConstants.WF_TYPE_AM_API_STATE;
             }
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, apiName);
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, apiContext);
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, apiVersion);
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, providerName);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.LIFECYCLE_CHANGED, this.username);
+
             String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
 
             WorkflowStatus apiWFState = null;
