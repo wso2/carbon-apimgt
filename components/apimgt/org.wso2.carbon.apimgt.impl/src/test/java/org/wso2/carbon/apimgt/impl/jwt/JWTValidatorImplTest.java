@@ -58,13 +58,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.security.cert.CertificateException;
-import javax.security.cert.X509Certificate;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -219,18 +218,18 @@ public class JWTValidatorImplTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt =
                 Mockito.mock(org.apache.axis2.context.MessageContext.class);
 
-        X509Certificate x509Certificate = Mockito.mock(X509Certificate.class);
+        Certificate x509Certificate = Mockito.mock(Certificate.class);
         java.security.cert.X509Certificate x509CertificateJava = Mockito.mock(java.security.cert.X509Certificate.class);
         PowerMockito.when(CertificateMgtUtils.convert(x509Certificate)).thenReturn(Optional.of(x509CertificateJava));
 
-        X509Certificate[] sslCertObject = new X509Certificate[]{x509Certificate};
+        Certificate[] sslCertObject = new java.security.cert.Certificate[]{x509Certificate};
         Mockito.when(axis2MsgCntxt.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509)).thenReturn(sslCertObject);
 
         Map<String, String> headers = new HashMap<>();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        X509Certificate x509CertificateUnMatched = Mockito.mock(X509Certificate.class);
+        Certificate x509CertificateUnMatched = Mockito.mock(Certificate.class);
         java.security.cert.X509Certificate x509CertificateUnMatchedJava =
                 Mockito.mock(java.security.cert.X509Certificate.class);
         PowerMockito.when(CertificateMgtUtils.convert(x509CertificateUnMatched))
@@ -240,7 +239,7 @@ public class JWTValidatorImplTest {
         PowerMockito.when(X509CertUtils.computeSHA256Thumbprint(x509CertificateJava)).thenReturn(new Base64URL(CERT_HASH));
         PowerMockito.when(X509CertUtils.computeSHA256Thumbprint(x509CertificateUnMatchedJava))
                 .thenReturn(new Base64URL(encodedCertificateUnmatched.toString()));
-        signedJWTInfo.setX509ClientCertificate(x509CertificateUnMatched);
+        signedJWTInfo.setClientCertificate(x509CertificateUnMatched);
 
         // Mock the properties read from the deployment.toml
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN))
@@ -254,7 +253,7 @@ public class JWTValidatorImplTest {
             Assert.fail();
         }
         //validate with correct certificate thumbprint
-        signedJWTInfo.setX509ClientCertificate(x509Certificate);
+        signedJWTInfo.setClientCertificate(x509Certificate);
         try {
             JWTValidationInfo validatedInfo = jwtValidator.validateToken(signedJWTInfo);
             assertTrue(validatedInfo.isValid(),
@@ -264,20 +263,20 @@ public class JWTValidatorImplTest {
         }
         // Test when certificate bound access token validation is enabled and cnf thumbprint validation is successful
         // when client certificate is added in the trust store
-        signedJWTInfo.setX509ClientCertificate(null);
+        signedJWTInfo.setClientCertificate(null);
         headers.put(BASE64_ENCODED_CLIENT_CERTIFICATE_HEADER, BASE64_ENCODED_CERT);
 
     }
 
-    public X509Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
+    public Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
 
         Map headers =
                 (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
-        X509Certificate certificateFromMessageContext = null;
+        Certificate certificateFromMessageContext = null;
         if (sslCertObject != null) {
-            X509Certificate[] certs = (X509Certificate[]) sslCertObject;
+            Certificate[] certs = (Certificate[]) sslCertObject;
             certificateFromMessageContext = certs[0];
         }
         if (headers.containsKey(getClientCertificateHeader())) {
@@ -285,7 +284,7 @@ public class JWTValidatorImplTest {
                 if (!isClientCertificateValidationEnabled() || APIUtil
                         .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
                     String certificate = (String) headers.get(getClientCertificateHeader());
-                    X509Certificate x509Certificate = getCertificateFromBase64EncodedString(certificate);
+                    Certificate x509Certificate = getCertificateFromBase64EncodedString(certificate);
                     if (APIUtil.isCertificateExistsInListenerTrustStore(x509Certificate)) {
                         return x509Certificate;
                     } else {
@@ -317,7 +316,7 @@ public class JWTValidatorImplTest {
         return false;
     }
 
-    private X509Certificate getCertificateFromBase64EncodedString(String certificate) throws APIManagementException {
+    private Certificate getCertificateFromBase64EncodedString(String certificate) throws APIManagementException {
 
         byte[] bytes;
         if (certificate != null) {
@@ -336,8 +335,9 @@ public class JWTValidatorImplTest {
                 bytes = Base64.decodeBase64(certificate);
             }
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                return X509Certificate.getInstance(inputStream);
-            } catch (IOException | CertificateException e) {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                return cf.generateCertificate(inputStream);
+            } catch (IOException | java.security.cert.CertificateException e) {
                 String msg = "Error while converting into X509Certificate";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);

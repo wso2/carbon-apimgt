@@ -71,10 +71,12 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import javax.cache.Caching;
-import javax.security.cert.CertificateException;
-import javax.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 
 public class Utils {
@@ -421,19 +423,19 @@ public class Utils {
         return APIMgtGatewayConstants.BASE64_ENCODED_CLIENT_CERTIFICATE_HEADER;
     }
 
-    public static X509Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
+    public static Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
         Object validatedCert = axis2MessageContext.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
 
         if (validatedCert != null) {
-            return (X509Certificate) validatedCert;
+            return (Certificate) validatedCert;
         } else {
             Map headers =
                     (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
-            X509Certificate certificateFromMessageContext = null;
+            Certificate certificateFromMessageContext = null;
             if (sslCertObject != null) {
-                X509Certificate[] certs = (X509Certificate[]) sslCertObject;
+                Certificate[] certs = (Certificate[]) sslCertObject;
                 certificateFromMessageContext = certs[0];
                 axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificateFromMessageContext);
             }
@@ -441,9 +443,9 @@ public class Utils {
                 try {
                     if (!isClientCertificateValidationEnabled() || APIUtil
                             .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
-                        X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
-                        axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
-                        return x509Certificate;
+                        Certificate certificate = getClientCertificateFromHeader(axis2MessageContext);
+                        axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificate);
+                        return certificate;
                     }
                 } catch (APIManagementException e) {
                     String msg = "Error while validating into Certificate Existence";
@@ -456,7 +458,7 @@ public class Utils {
         }
     }
 
-    private static X509Certificate getClientCertificateFromHeader(org.apache.axis2.context.MessageContext axis2MessageContext)
+    private static Certificate getClientCertificateFromHeader(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
         Map headers =
                 (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
@@ -480,7 +482,8 @@ public class Utils {
             }
 
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                return X509Certificate.getInstance(inputStream);
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                return cf.generateCertificate(inputStream);
             } catch (IOException | CertificateException e) {
                 String msg = "Error while converting into X509Certificate";
                 throw new APIManagementException(msg, e);
@@ -646,5 +649,20 @@ public class Utils {
         return (APIConstants.WS_PROTOCOL.equals(axis2MC.getIncomingTransportName()) ||
                 APIConstants.WSS_PROTOCOL.equals(axis2MC.getIncomingTransportName())
                         && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST));
+    }
+
+    /**
+     * @param certificate SSL Certificate
+     * @return X509Certificate
+     */
+    public static X509Certificate convertCertificateToX509Certificate(Certificate certificate) {
+        try {
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(certificate.getEncoded());
+            return (X509Certificate) certificateFactory.generateCertificate(inputStream);
+        } catch (CertificateException e) {
+            log.error("Error while converting client certificate", e);
+        }
+        return null;
     }
 }

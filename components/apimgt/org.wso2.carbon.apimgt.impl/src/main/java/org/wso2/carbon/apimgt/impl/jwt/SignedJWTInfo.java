@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 
 import java.io.Serializable;
-import javax.security.cert.X509Certificate;
+import java.security.cert.Certificate;
 
 /**
  * JWT internal Representation
@@ -39,8 +39,8 @@ public class SignedJWTInfo implements Serializable {
     private JWTClaimsSet jwtClaimsSet;
     private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
     private String certificateThumbprint; //holder of key certificate bound access token
-    private X509Certificate x509ClientCertificate; //holder of key certificate cnf
-    private String x509ClientCertificateHash; //holder of key certificate cnf
+    private Certificate clientCertificate; //holder of key certificate cnf
+    private String clientCertificateHash; //holder of key certificate cnf
     private static final Log log = LogFactory.getLog(JWTValidator.class);
 
     public enum ValidationStatus {
@@ -96,12 +96,12 @@ public class SignedJWTInfo implements Serializable {
         this.validationStatus = validationStatus;
     }
 
-    public void setX509ClientCertificate(X509Certificate x509ClientCertificate) {
+    public void setClientCertificate(Certificate clientCertificate) {
 
-        this.x509ClientCertificate = x509ClientCertificate;
-        if (x509ClientCertificate != null) {
-            CertificateMgtUtils.convert(x509ClientCertificate).ifPresent(x509Certificate ->
-                    x509ClientCertificateHash = X509CertUtils.computeSHA256Thumbprint(x509Certificate).toString());
+        this.clientCertificate = clientCertificate;
+        if (clientCertificate != null) {
+            CertificateMgtUtils.convert(clientCertificate).ifPresent(x509Certificate ->
+                    clientCertificateHash = X509CertUtils.computeSHA256Thumbprint(x509Certificate).toString());
         }
     }
 
@@ -116,13 +116,13 @@ public class SignedJWTInfo implements Serializable {
         return null;
     }
 
-    public String getX509ClientCertificateHash() {
+    public String getClientCertificateHash() {
 
-        return x509ClientCertificateHash;
+        return clientCertificateHash;
     }
 
-    public X509Certificate getX509ClientCertificate() {
+    public Certificate getClientCertificate() {
 
-        return x509ClientCertificate;
+        return clientCertificate;
     }
 }

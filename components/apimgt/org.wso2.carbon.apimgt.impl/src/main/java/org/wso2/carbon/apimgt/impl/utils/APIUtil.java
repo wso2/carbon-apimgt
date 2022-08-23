@@ -310,7 +310,6 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.net.ssl.SSLContext;
-import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -8369,7 +8368,7 @@ public final class APIUtil {
      * @return true if certificate exist in truststore
      * @throws APIManagementException
      */
-    public static boolean isCertificateExistsInListenerTrustStore(X509Certificate certificate) throws APIManagementException {
+    public static boolean isCertificateExistsInListenerTrustStore(Certificate certificate) throws APIManagementException {
 
         if (certificate != null) {
             try {
@@ -8386,7 +8385,7 @@ public final class APIUtil {
                         }
                     }
                 }
-            } catch (KeyStoreException | CertificateException | CertificateEncodingException | IOException e) {
+            } catch (KeyStoreException | CertificateException | IOException e) {
                 String msg = "Error in validating certificate existence";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
