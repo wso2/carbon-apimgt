@@ -279,6 +279,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         String requestOrigin = req.headers().get(HttpHeaderNames.ORIGIN);
+        // Don't validate the 'origin' header if it's not present in the request
+        if (requestOrigin == null) {
+            return;
+        }
         String allowedOrigin = assessAndGetAllowedOrigin(requestOrigin);
         if (allowedOrigin == null) {
             FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
