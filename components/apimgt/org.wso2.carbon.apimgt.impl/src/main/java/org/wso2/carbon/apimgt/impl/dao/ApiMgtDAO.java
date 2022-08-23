@@ -6999,7 +6999,7 @@ public class ApiMgtDAO {
                 if (id == -1) {
                     String msg = "Unable to find the API with UUID : " + uuid + " in the database";
                     log.error(msg);
-                    throw new APIManagementException(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_IS_NOT_FOUND_IN_DATABASE, uuid));
                 }
             }
         }

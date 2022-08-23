@@ -112,6 +112,10 @@ public enum ExceptionCodes implements ErrorHandler {
     ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
     INVALID_ENV_API_PROP_CONFIG(900358, "Invalid environment specific api property config", 400,
             "Environment specific api property config is not valid. %s", false),
+    API_IS_NOT_FOUND_IN_DATABASE(900359, "API is not consistently stored", 500,
+            "API is not consistently stored"),
+    API_IS_NOT_FOUND_IN_REGISTRY(900360, "API is not consistently stored", 404,
+            "API is not consistently stored"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
