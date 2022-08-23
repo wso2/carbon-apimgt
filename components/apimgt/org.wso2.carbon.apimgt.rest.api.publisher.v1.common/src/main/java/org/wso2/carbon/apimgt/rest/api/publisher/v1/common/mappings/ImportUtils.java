@@ -87,6 +87,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
@@ -95,7 +96,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -137,7 +137,7 @@ public class ImportUtils {
      * @param dependentAPIParamsConfigObject Params configuration of an API (this will not be null if a dependent API
      *                                       of an
      *                                       API product wants to override the parameters)
-     * @param organization  Identifier of an Organization
+     * @param organization                   Identifier of an Organization
      * @throws APIImportExportException If there is an error in importing an API
      * @@return Imported API
      */
@@ -543,7 +543,7 @@ public class ImportUtils {
         }
         return importedApiDTO.getAdvertiseInfo() != null && importedApiDTO.getAdvertiseInfo().isAdvertised();
     }
-    
+
     /**
      * Process the properties specific to advertise only APIs
      *
@@ -671,7 +671,7 @@ public class ImportUtils {
                             + APIConstants.API_DATA_VERSION + ": " + apiVersion + " not found", ExceptionCodes
                     .from(ExceptionCodes.API_NOT_FOUND, apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion()));
         }
-        
+
         String uuid = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
         return apiProvider.getAPIbyUUID(uuid, currentTenantDomain);
     }
@@ -773,6 +773,30 @@ public class ImportUtils {
     }
 
     /**
+     * Extract the imported archive to a temporary folder and return the folder path of it.
+     *
+     * @param uploadedInputStream Input stream from the REST request
+     * @return Path to the extracted directory
+     * @throws APIManagementException If an error occurs while creating the directory, transferring files or
+     *                                  extracting the content
+     */
+    public static String getArchivePathOfPolicyExtractedDirectory(InputStream uploadedInputStream)
+            throws APIManagementException {
+        try {
+            // Temporary directory is used to create the required folders
+            File importFolder = CommonUtil.createTempDirectory(null);
+            String uploadFileName = ImportExportConstants.UPLOAD_POLICY_FILE_NAME;
+            String absolutePath = importFolder.getAbsolutePath() + File.separator;
+            CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
+            String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName),
+                    absolutePath);
+            return absolutePath + extractedFolderName;
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR));
+        }
+    }
+
+    /**
      * Validate API/API Product configuration (api/api_product.yaml or api/api_product.json) and return it.
      *
      * @param pathToArchive            Path to the extracted folder
@@ -789,6 +813,84 @@ public class ImportUtils {
                 retrievedAPIProductDtoJson(pathToArchive);
         configObject = validatePreserveProvider(configObject, isDefaultProviderAllowed, currentUser);
         return configObject;
+    }
+
+    /**
+     * Import Operation Policy as a zip.
+     *
+     * @param pathToArchive Path to the extracted folder
+     * @param organization  Organization
+     * @param apiProvider   API Provider
+     * @throws APIManagementException If an error occurs while processing the policy files
+     */
+    public static OperationPolicyDataDTO importPolicy(String pathToArchive, String organization,
+            APIProvider apiProvider) throws APIManagementException {
+
+        OperationPolicySpecification policySpecification = null;
+        try {
+            OperationPolicyDefinition synapseGatewayDefinition = null;
+            OperationPolicyDefinition ccGatewayDefinition = null;
+            String[] fileLocations = pathToArchive.split("/");
+
+            // File names of all types should be the same
+            String fileName = fileLocations[fileLocations.length - 1];
+            policySpecification = getOperationPolicySpecificationFromFile(pathToArchive, fileName);
+            if (policySpecification == null) {
+                throw new APIManagementException("Policy Specification Cannot be null",
+                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
+            }
+            OperationPolicyData operationPolicyData = new OperationPolicyData();
+            operationPolicyData.setOrganization(organization);
+            operationPolicyData.setSpecification(policySpecification);
+
+            OperationPolicyData existingPolicy = apiProvider.getCommonOperationPolicyByPolicyName(
+                    policySpecification.getName(), policySpecification.getVersion(), organization, false);
+            String policyID = null;
+            if (existingPolicy == null) {
+                synapseGatewayDefinition = APIUtil.getOperationPolicyDefinitionFromFile(pathToArchive, fileName,
+                        APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                ccGatewayDefinition = APIUtil.getOperationPolicyDefinitionFromFile(pathToArchive, fileName,
+                        APIConstants.CC_POLICY_DEFINITION_EXTENSION);
+
+                if (ccGatewayDefinition == null && synapseGatewayDefinition == null) {
+                    throw new APIManagementException("Either one of the Gateway Definition files should be present",
+                            ExceptionCodes.OPERATION_POLICY_GATEWAY_ERROR);
+                }
+
+                if (ccGatewayDefinition != null) {
+                    operationPolicyData.setCcPolicyDefinition(ccGatewayDefinition);
+                }
+
+                if (synapseGatewayDefinition != null) {
+                    operationPolicyData.setSynapsePolicyDefinition(synapseGatewayDefinition);
+                }
+
+                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
+                if (log.isDebugEnabled()) {
+                    log.debug("A common operation policy has been added with name " + policySpecification.getName());
+                }
+            } else {
+                throw new APIMgtResourceNotFoundException("Existing common operation policy found for the same name.",
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS,
+                                policySpecification.getName(), policySpecification.getVersion()));
+            }
+
+            operationPolicyData.setPolicyId(policyID);
+            OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(
+                    operationPolicyData);
+
+            return createdPolicy;
+        } catch (APIMgtResourceNotFoundException e) {
+            String errorMessage = "Error while adding a common operation policy." + e.getMessage();
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS, policySpecification.getName(),
+                            policySpecification.getVersion()));
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding a common operation policy." + e.getMessage();
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, e.getMessage()));
+        }
     }
 
     @NotNull
@@ -941,7 +1043,7 @@ public class ImportUtils {
         return configObject;
     }
 
-     /**
+    /**
      * This function will preprocess and get the updated Endpoint Config object from the API/API Product configuration
      *
      * @param endpointConfigObject Endpoint Config object from the API/API Product configuration

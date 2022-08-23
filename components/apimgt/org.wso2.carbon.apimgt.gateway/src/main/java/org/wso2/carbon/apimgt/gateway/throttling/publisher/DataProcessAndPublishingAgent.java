@@ -167,7 +167,10 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         if (authenticationContext.isContentAwareTierPresent() || isVerbInfoContentAware) {
-            Object contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
+            Object contentLength = null;
+            if (transportHeaderMap != null) {
+                contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
+            }
             if (contentLength != null) {
                 log.debug("Content lenght found in the request. Using it as the message size..");
                 messageSizeInBytes  = Long.parseLong(contentLength.toString());

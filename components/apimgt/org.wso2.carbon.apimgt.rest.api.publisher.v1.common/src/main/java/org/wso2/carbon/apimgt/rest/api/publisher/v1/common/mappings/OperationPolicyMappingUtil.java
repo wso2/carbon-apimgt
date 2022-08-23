@@ -171,6 +171,7 @@ public class OperationPolicyMappingUtil {
         policyDataDTO.setMd5(policyData.getMd5Hash());
         policyDataDTO.setIsAPISpecific(policyData.isApiSpecificPolicy());
         policyDataDTO.setName(policySpecification.getName());
+        policyDataDTO.setVersion(policySpecification.getVersion());
         policyDataDTO.setDisplayName(policySpecification.getDisplayName());
         policyDataDTO.setDescription(policySpecification.getDescription());
         policyDataDTO.setSupportedGateways(policySpecification.getSupportedGateways());

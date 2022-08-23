@@ -387,11 +387,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
         ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
-        return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        if (apiKeyGenerator != null) {
+            return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        } else {
+            throw new APIManagementException("Failed to generate the API key");
+        }
     }
 
-    private ApiKeyGenerator loadApiKeyGenerator() {
-        ApiKeyGenerator apiKeyGenerator = null;
+    private ApiKeyGenerator loadApiKeyGenerator() throws APIManagementException {
+        ApiKeyGenerator apiKeyGenerator;
         String keyGeneratorClassName = APIUtil.getApiKeyGeneratorImpl();
 
         try {
@@ -400,7 +404,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiKeyGenerator = (ApiKeyGenerator) constructor.newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
                 InvocationTargetException e) {
-            log.error("Error while loading the api key generator class: " + keyGeneratorClassName, e);
+            throw new APIManagementException("Error while loading the api key generator class: "
+                    + keyGeneratorClassName, e);
         }
         return apiKeyGenerator;
     }
@@ -1417,8 +1422,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
-            throw new APIManagementException(String.format("Subscription for UUID:%s does not exist.",
-                    subscription.getUUID()));
+            throw new APIManagementException("Subscription does not exists.");
         }
     }
 
