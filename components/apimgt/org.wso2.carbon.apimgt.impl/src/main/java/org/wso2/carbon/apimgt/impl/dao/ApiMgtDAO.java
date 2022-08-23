@@ -19239,9 +19239,7 @@ public class ApiMgtDAO {
         statement.close();
 
         if (isWithPolicyDefinition && policyData != null) {
-            if (isWithPolicyDefinition && policyData != null) {
-                populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
-            }
+            populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
         }
         return policyData;
     }

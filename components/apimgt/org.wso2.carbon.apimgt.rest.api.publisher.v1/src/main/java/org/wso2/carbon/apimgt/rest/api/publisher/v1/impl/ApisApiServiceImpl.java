@@ -2429,7 +2429,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             OperationPolicyData policyData =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, true);
             if (policyData != null) {
-                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
+                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, ExportFormat.YAML.name());
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             } else {
