@@ -1957,6 +1957,7 @@ public final class APIConstants {
         public static final String CREATED = "created";
         public static final String UPDATED = "updated";
         public static final String DELETED = "deleted";
+        public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
 
         public static final String API = "API";
         public static final String ORGANIZATION = "Organization";

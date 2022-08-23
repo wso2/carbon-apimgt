@@ -4755,6 +4755,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String currentStatus = apiArtifact.getLifecycleState();
                 String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, organization);
+
+                JSONObject apiLogObject = new JSONObject();
+                apiLogObject.put(APIConstants.AuditLogConstants.NAME, apiName);
+                apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, apiContext);
+                apiLogObject.put(APIConstants.AuditLogConstants.VERSION, apiVersion);
+                apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, providerName);
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                        APIConstants.AuditLogConstants.LIFECYCLE_CHANGED, this.username);
+
                 int apiId = apiMgtDAO.getAPIID(uuid);
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
@@ -4886,6 +4895,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiType = api.getType();//check
                 String apiVersion = api.getId().getVersion();
                 String currentStatus = api.getStatus();
+
+                JSONObject apiLogObject = new JSONObject();
+                apiLogObject.put(APIConstants.AuditLogConstants.NAME, apiName);
+                apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, apiContext);
+                apiLogObject.put(APIConstants.AuditLogConstants.VERSION, apiVersion);
+                apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, providerName);
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                        APIConstants.AuditLogConstants.LIFECYCLE_CHANGED, this.username);
 
                 int apiId = apiMgtDAO.getAPIID(api.getUuid());
 
