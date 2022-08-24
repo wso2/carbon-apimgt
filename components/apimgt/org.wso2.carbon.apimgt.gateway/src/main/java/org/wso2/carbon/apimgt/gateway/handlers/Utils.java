@@ -432,7 +432,7 @@ public class Utils {
         } else {
             Map headers =
                     (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+            Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT);
             Certificate certificateFromMessageContext = null;
             if (sslCertObject != null) {
                 Certificate[] certs = (Certificate[]) sslCertObject;

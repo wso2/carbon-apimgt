@@ -177,7 +177,7 @@ public class ExtensionListenerUtil {
         } catch (APIManagementException e) {
             log.error("Error when getting client certificate", e);
         }
-        requestDTO.setClientCerts(clientCerts);
+        requestDTO.setClientCertsLatest(clientCerts);
         return requestDTO;
     }
 

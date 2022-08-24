@@ -223,7 +223,7 @@ public class JWTValidatorImplTest {
         PowerMockito.when(CertificateMgtUtils.convert(x509Certificate)).thenReturn(Optional.of(x509CertificateJava));
 
         Certificate[] sslCertObject = new java.security.cert.Certificate[]{x509Certificate};
-        Mockito.when(axis2MsgCntxt.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509)).thenReturn(sslCertObject);
+        Mockito.when(axis2MsgCntxt.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT)).thenReturn(sslCertObject);
 
         Map<String, String> headers = new HashMap<>();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
@@ -273,7 +273,7 @@ public class JWTValidatorImplTest {
 
         Map headers =
                 (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+        Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT);
         Certificate certificateFromMessageContext = null;
         if (sslCertObject != null) {
             Certificate[] certs = (Certificate[]) sslCertObject;

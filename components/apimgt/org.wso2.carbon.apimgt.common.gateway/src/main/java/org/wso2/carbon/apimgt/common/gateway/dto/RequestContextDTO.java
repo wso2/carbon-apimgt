@@ -42,9 +42,6 @@ public class RequestContextDTO {
     private APIRequestInfoDTO apiRequestInfo;
     // client certificate from transport level
     private Certificate[] clientCerts;
-    @Deprecated
-    // X509Certificate client certificate from transport level
-    private X509Certificate[] x509clientCerts;
     // custom property map used to populate customProperty key template value
     private Map<String, Object> customProperty;
 
@@ -68,17 +65,8 @@ public class RequestContextDTO {
         this.apiRequestInfo = apiRequestInfo;
     }
 
-    public Certificate[] getClientCerts() {
-
-        return (Certificate[]) SerializationUtils.clone(clientCerts);
-    }
-
-    public void setClientCerts(Certificate[] clientCerts) {
-
-        this.clientCerts = (Certificate[]) SerializationUtils.clone(clientCerts);
-    }
-
-    public X509Certificate[] getX509ClientCerts() {
+    @Deprecated
+    public X509Certificate[] getClientCerts() {
         X509Certificate[] x509Certificates = new X509Certificate[clientCerts.length];
         for (int i = 0; i < clientCerts.length; i++) {
             try {
@@ -87,11 +75,11 @@ public class RequestContextDTO {
                 log.error("Error while converting client certificate", e);
             }
         }
-        return x509Certificates;
+        return (X509Certificate[]) SerializationUtils.clone(x509Certificates);
     }
 
-    public void setX509ClientCerts(X509Certificate[] x509ClientCerts) {
-
+    @Deprecated
+    public void setClientCerts(X509Certificate[] x509ClientCerts) {
         Certificate[] certificates = new Certificate[x509ClientCerts.length];
         for (int i = 0; i < x509ClientCerts.length; i++) {
             try {
@@ -102,7 +90,15 @@ public class RequestContextDTO {
                 log.error("Error while converting client certificate", e);
             }
         }
-        this.x509clientCerts = (X509Certificate[]) SerializationUtils.clone(certificates);
+        this.clientCerts = (Certificate[]) SerializationUtils.clone(certificates);
+    }
+
+    public Certificate[] getClientCertsLatest() {
+        return (Certificate[]) SerializationUtils.clone(clientCerts);
+    }
+
+    public void setClientCertsLatest(Certificate[] clientCerts) {
+        this.clientCerts = (Certificate[]) SerializationUtils.clone(clientCerts);
     }
 
     public Map<String, Object> getCustomProperty() {
