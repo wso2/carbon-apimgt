@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.lifecycle;
 
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
@@ -27,7 +28,7 @@ import java.io.IOException;
  */
 public class LCManagerFactory {
 
-    private static LCManagerFactory instance = new LCManagerFactory();
+    private static LCManagerFactory instance;
 
     private LCManagerFactory() {}
 
@@ -35,7 +36,12 @@ public class LCManagerFactory {
      * Returning the LCManager Factory instance
      * @return
      */
-    public static LCManagerFactory getInstance() {return instance;}
+    public static LCManagerFactory getInstance() {
+        if (instance == null) {
+            instance = new LCManagerFactory();
+        }
+        return instance;
+    }
 
     /**
      * Return new LCManager Instance
@@ -44,7 +50,7 @@ public class LCManagerFactory {
      * @throws IOException
      * @throws ParseException
      */
-    public LCManager getLCManager() throws PersistenceException,  IOException, ParseException {
+    public LCManager getLCManager() throws PersistenceException, IOException, ParseException, APIManagementException {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         LCManager lcManager = new LCManager(tenantDomain);
         return lcManager;

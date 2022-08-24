@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.impl.lifecycle;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -39,6 +41,7 @@ import java.util.Map;
  */
 public class LCManager {
 
+    private static final Log log = LogFactory.getLog(LCManager.class);
     private static final String STATE_ID_PROTOTYPED = "Prototyped";
     private static final String STATE_ID_PUBLISHED = "Published";
     private static final String TRANSITION_TARGET_PROTOTYPED = "Prototyped";
@@ -52,24 +55,33 @@ public class LCManager {
     private static final String UTF_8 = "UTF-8";
     private static final String EVENT_KEY = "Event";
     private static final String TARGET_KEY = "Target";
-
     private Map<String, String> stateTransitionMap = new HashMap<String, String>();
     private Map<String, StateInfo> stateInfoMap = new HashMap<String, StateInfo>();
     private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
     private String tenantDomain;
-    private JSONObject defaultLCObj;
+    private static JSONObject defaultLCObj;
+    private LCManager instance;
+
+    static {
+        if (defaultLCObj == null) {
+
+            try {
+                defaultLCObj = getDefaultLCConfigJSON();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+    }
 
     /**
-     * Initialize Class
-     *
+     * Initialize LCManager Class
      * @param tenantDomain
-     * @throws IOException
-     * @throws ParseException
      */
-    public LCManager(String tenantDomain) throws IOException, ParseException {
-
+    public LCManager(String tenantDomain) {
         this.tenantDomain = tenantDomain;
-        defaultLCObj = getDefaultLCConfigJSON();
     }
 
     /**
@@ -146,9 +158,9 @@ public class LCManager {
      * @throws URISyntaxException
      * @throws APIManagementException
      */
-    public JSONObject getDefaultLCConfigJSON() throws IOException, ParseException {
+    public static JSONObject getDefaultLCConfigJSON() throws IOException, ParseException {
 
-        InputStream lcStream = getClass().getClassLoader().getResourceAsStream(API_LIFECYCLE_PATH);
+        InputStream lcStream = LCManager.class.getClassLoader().getResourceAsStream(API_LIFECYCLE_PATH);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(
                 new InputStreamReader(lcStream, UTF_8));
@@ -187,7 +199,7 @@ public class LCManager {
         return stateTransitionMap.get(action);
     }
 
-    class LifeCycleTransition {
+    static class LifeCycleTransition {
         private HashMap<String, String> transitions;
 
         /**
@@ -221,7 +233,7 @@ public class LCManager {
         }
     }
 
-    class StateInfo {
+    static class StateInfo {
         private String state;
         private List<String> transitions = new ArrayList<String>();
         private List<String> checkListItems = new ArrayList<String>();
