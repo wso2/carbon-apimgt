@@ -29,7 +29,8 @@
           "response",
           "fault"
         ]
-      }
+      },
+      "minItems": 1
     },
     "supportedGateways": {
       "type": "array",
@@ -39,7 +40,8 @@
           "Synapse",
           "ChoreoConnect"
         ]
-      }
+      },
+      "minItems": 1
     },
     "supportedApiTypes": {
       "type": "array",
@@ -48,7 +50,8 @@
         "enum": [
           "HTTP"
         ]
-      }
+      },
+      "minItems": 1
     },
     "policyAttributes": {
       "type": "array",

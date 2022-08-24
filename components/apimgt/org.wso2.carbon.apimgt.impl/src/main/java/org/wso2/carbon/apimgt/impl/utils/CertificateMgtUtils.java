@@ -845,7 +845,11 @@ public class CertificateMgtUtils {
     private static void deletePreviousBackupJKSFile(File file) {
 
         if (file.isFile()) {
-            file.delete();
+            if (!file.delete()){
+                if (log.isDebugEnabled()) {
+                    log.debug("Backup JKS file " + file.getAbsolutePath() + "not deleted successfully");
+                }
+            }
         }
     }
 

@@ -7722,11 +7722,28 @@ paths:
         This operation provides you a list of all common operation policies that can be used by any API
       operationId: getAllCommonOperationPolicies
       parameters:
-        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/policyLimit'
         - $ref: '#/components/parameters/offset'
         - name: query
           in: query
-          description: -Not supported yet-
+          description: |
+            **Search condition**.
+
+            You can search in attributes by using an **"<attribute>:"** modifier.
+
+            Eg.
+            "name:addHeader" will match an API Policy if the provider of the API Policy contains "addHeader".
+            "version:"v1"" will match an API Policy if the provider of the API Policy contains "v1".
+
+            Also you can use combined modifiers
+            Eg.
+            name:addHeader&version:v1 will match an API Policy if the name of the API Policy is addHeader and version is v1.
+
+            Supported attribute modifiers are [**version, name**]
+            
+            If query attributes are provided, this returns all API policies available under the given limit.
+
+            Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
           schema:
             type: string
       responses:
@@ -7751,11 +7768,11 @@ paths:
         - OAuth2Security:
             - apim:common_operation_policy_view
             - apim:common_operation_policy_manage
+            - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies"'
-
     post:
       tags:
         - Operation Policies
@@ -7818,6 +7835,99 @@ paths:
             -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
             "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies"'
 
+  /operation-policies/export:
+    get:
+      tags:
+        - Import Export
+      summary: |
+        Export an API Policy by its name and version
+      description: |
+        This operation provides you to export a preferred common API policy
+      operationId: exportOperationPolicy
+      parameters:
+        - name: name
+          in: query
+          description: Policy name
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: Version of the policy
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format of the policy definition file
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:policies_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies/export?name=addHeader&version=v1"
+            > addHeader_v1.zip'
+
+  /operation-policies/import:
+    post:
+      tags:
+        - Import Export
+      summary: Import an API Policy
+      description: |
+        This operation can be used to import an API Policy.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: Zip archive consisting on exported policy configuration
+                  format: binary
+      responses:
+        200:
+          description: |
+            Created.
+            Policy Imported Successfully.
+        403:
+          $ref: '#/components/responses/Forbidden'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:policies_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -F file=add_header_v1.zip "https://127.0.0.1:9443/api/am/publisher/v3/operation-policies/import"'
+      operationId: importOperationPolicy
+
   /operation-policies/{operationPolicyId}:
     get:
       tags:
@@ -7853,6 +7963,7 @@ paths:
         - OAuth2Security:
             - apim:common_operation_policy_view
             - apim:common_operation_policy_manage
+            - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7882,6 +7993,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:common_operation_policy_manage
+            - apim:policies_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11543,6 +11655,10 @@ components:
         name:
           type: string
           example: removeHeaderPolicy
+        version:
+          type: string
+          example: v1
+          default: v1
         displayName:
           type: string
           example: Remove Header Policy
@@ -11978,6 +12094,13 @@ components:
       schema:
         type: integer
         default: 25
+    policyLimit:
+      name: limit
+      in: query
+      description: |
+        Maximum size of policy array to return.
+      schema:
+        type: integer
     Accept:
       name: Accept
       in: header
@@ -12149,6 +12272,7 @@ components:
           scopes:
             openid: Authorize access to user details
             apim:api_view: View API
+            apim:policies_import_export: Export and import policies related operations
             apim:api_create: Create API
             apim:api_delete: Delete API
             apim:api_publish: Publish API

@@ -917,7 +917,7 @@ public class ApiMgtDAO {
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_ID"));
-                    apiProductIdentifier.setUUID(resultSet.getString("API_UUID"));
+                    apiProductIdentifier.setUuid(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 } else {
                     APIIdentifier apiIdentifier = new APIIdentifier(
@@ -1558,7 +1558,7 @@ public class ApiMgtDAO {
                     APIProductIdentifier identifier =
                             new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-                    identifier.setUUID(result.getString("API_UUID"));
+                    identifier.setUuid(result.getString("API_UUID"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
                     initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
@@ -4149,6 +4149,10 @@ public class ApiMgtDAO {
                 //setting subscription count
                 int subscriptionCount = getSubscriptionCountByApplicationId(connection,application, organization);
                 application.setSubscriptionCount(subscriptionCount);
+
+                // Get custom attributes of application
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
 
                 applicationsList.add(application);
             }
@@ -13468,38 +13472,6 @@ public class ApiMgtDAO {
         return status;
     }
 
-    public String[] getAPIDetailsByContext(String context) {
-
-        String apiName = "";
-        String apiProvider = "";
-        String sql = SQLConstants.GET_API_FOR_CONTEXT_TEMPLATE_SQL;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, context);
-
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                apiName = rs.getString("API_NAME");
-                apiProvider = rs.getString("API_PROVIDER");
-            }
-        } catch (SQLException e) {
-            log.error("Error occurred while fetching data: " + e.getMessage(), e);
-        } finally {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e.getMessage(), e);
-            }
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return new String[]{apiName, apiProvider};
-    }
-
     /**
      * Returns a Prepared statement after setting all the dynamic parameters. Dynamic parameters will be added in
      * the place of $params in query string
@@ -16879,14 +16851,15 @@ public class ApiMgtDAO {
             try {
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
-                PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
-                for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
-                    statement.setString(1, apiRevisionDeployment.getDeployment());
-                    statement.setString(2, apiRevisionId);
-                    statement.addBatch();
+                try (PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING)) {
+                    for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+                        statement.setString(1, apiRevisionDeployment.getDeployment());
+                        statement.setString(2, apiRevisionId);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
                 }
-                statement.executeBatch();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18143,7 +18116,7 @@ public class ApiMgtDAO {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
-                            identifier.setUUID(result.getString("API_UUID"));
+                            identifier.setUuid(result.getString("API_UUID"));
                             SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                             subscribedAPI.setApplication(application);
                             initSubscribedAPI(subscribedAPI, result);
@@ -19270,9 +19243,7 @@ public class ApiMgtDAO {
         statement.close();
 
         if (isWithPolicyDefinition && policyData != null) {
-            if (isWithPolicyDefinition && policyData != null) {
-                populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
-            }
+            populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
         }
         return policyData;
     }

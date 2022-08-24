@@ -108,12 +108,12 @@ public class TracingServiceComponent {
             unbind = "unsetTracerService")
     protected void setTracerService(OpenTracer tracer) {
 
-        ServiceReferenceHolder.getInstance().getOpenTracerMap().put(tracer.getName(), tracer);
+        ServiceReferenceHolder.getOpenTracerMap().put(tracer.getName(), tracer);
     }
 
     protected void unsetTracerService(OpenTracer tracer) {
 
-        ServiceReferenceHolder.getInstance().getOpenTracerMap().remove(tracer.getName());
+        ServiceReferenceHolder.getOpenTracerMap().remove(tracer.getName());
     }
 
     @Reference(
@@ -124,13 +124,13 @@ public class TracingServiceComponent {
             unbind = "unsetTelemetryService")
     protected void setTelemetryService(APIMOpenTelemetry tracer) {
 
-        ServiceReferenceHolder.getInstance().getOpenTelemetryTracerMap().put(tracer.getName(), tracer);
+        ServiceReferenceHolder.getOpenTelemetryTracerMap().put(tracer.getName(), tracer);
     }
 
     protected void unsetTelemetryService(APIMOpenTelemetry tracer) {
 
         tracer.close();
-        ServiceReferenceHolder.getInstance().getOpenTelemetryTracerMap().remove(tracer.getName());
+        ServiceReferenceHolder.getOpenTelemetryTracerMap().remove(tracer.getName());
     }
 }
 

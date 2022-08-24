@@ -65,7 +65,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -757,8 +756,7 @@ public class TemplateBuilderUtil {
         Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
         for (APIOperationsDTO operation : apidto.getOperations()) {
             String key = operation.getTarget();
-            String mapping = operation.getUriMapping() == null ? "" :
-                    Paths.get("/", operation.getUriMapping()).toString();
+            String mapping = operation.getUriMapping() == null ? "" : operation.getUriMapping();
             Map<String, String> endpoints = new HashMap<>();
             if (sandboxEndpointUrl != null) {
                 endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEndpointUrl + mapping);

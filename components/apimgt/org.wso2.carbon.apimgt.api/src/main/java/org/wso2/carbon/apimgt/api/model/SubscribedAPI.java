@@ -99,7 +99,7 @@ public class SubscribedAPI {
         return subscriber;
     }
 
-    public APIIdentifier getApiId() {
+    public APIIdentifier getAPIIdentifier() {
         return apiId;
     }
 
@@ -234,7 +234,7 @@ public class SubscribedAPI {
         }
     }
 
-    public int getapiId() {
+    public int getApiId() {
         if (apiId != null) {
             return apiId.getId();
         } else {

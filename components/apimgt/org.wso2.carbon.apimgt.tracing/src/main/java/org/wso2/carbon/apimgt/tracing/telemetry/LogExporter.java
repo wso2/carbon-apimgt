@@ -47,13 +47,13 @@ public class LogExporter implements SpanExporter {
     @Override
     public CompletableResultCode export(Collection<SpanData> spans) {
 
-        Iterator var3 = spans.iterator();
+        Iterator<SpanData> var3 = spans.iterator();
         while (var3.hasNext()) {
-            try {
-                StringWriter writer = new StringWriter();
-                JsonGenerator generator = this.jsonFactory.createGenerator(writer);
+
+            try (StringWriter writer = new StringWriter();
+                 JsonGenerator generator = this.jsonFactory.createGenerator(writer)) {
                 generator.writeStartObject();
-                SpanData span = (SpanData) var3.next();
+                SpanData span = var3.next();
                 generator.writeStringField(TelemetryConstants.SPAN_ID, span.getSpanId());
                 generator.writeStringField(TelemetryConstants.TRACER_ID, span.getTraceId());
                 generator.writeStringField(TelemetryConstants.OPERATION_NAME, span.getName());
@@ -61,8 +61,6 @@ public class LogExporter implements SpanExporter {
                         ((int) (span.getEndEpochNanos() - span.getStartEpochNanos()) / 1000000) + "ms");
                 generator.writeStringField(TelemetryConstants.ATTRIBUTES, String.valueOf(span.getAttributes()));
                 generator.writeEndObject();
-                generator.close();
-                writer.close();
                 log.trace(writer.toString());
             } catch (IOException e) {
                 log.error("Error in structured message when exporting", e);

@@ -866,7 +866,7 @@ public class RegistryPersistenceUtil {
             Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
             for (APIProductIdentifier usedByProduct : usedByProducts) {
                 String apiProductPath = RegistryPersistenceUtil.getAPIProductPath(usedByProduct);
-                usedByProduct.setUUID(apiProductPath);
+                usedByProduct.setUuid(apiProductPath);
             }
         }
     }

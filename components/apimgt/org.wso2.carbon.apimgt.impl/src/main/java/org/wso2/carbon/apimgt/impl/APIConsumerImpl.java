@@ -387,11 +387,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
         ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
-        return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        if (apiKeyGenerator != null) {
+            return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        } else {
+            throw new APIManagementException("Failed to generate the API key");
+        }
     }
 
-    private ApiKeyGenerator loadApiKeyGenerator() {
-        ApiKeyGenerator apiKeyGenerator = null;
+    private ApiKeyGenerator loadApiKeyGenerator() throws APIManagementException {
+        ApiKeyGenerator apiKeyGenerator;
         String keyGeneratorClassName = APIUtil.getApiKeyGeneratorImpl();
 
         try {
@@ -400,7 +404,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiKeyGenerator = (ApiKeyGenerator) constructor.newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
                 InvocationTargetException e) {
-            log.error("Error while loading the api key generator class: " + keyGeneratorClassName, e);
+            throw new APIManagementException("Error while loading the api key generator class: "
+                    + keyGeneratorClassName, e);
         }
         return apiKeyGenerator;
     }
@@ -1361,8 +1366,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
-        String uuid = subscription.getUUID();
         if (subscription != null) {
+            String uuid = subscription.getUUID();
             String deleteWorkflowExtRef = apiMgtDAO
                     .getExternalWorkflowReferenceForSubscriptionAndWFType(subscription.getSubscriptionId(),
                             WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
@@ -1375,7 +1380,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
             Application application = subscription.getApplication();
-            Identifier identifier = subscription.getApiId() != null ? subscription.getApiId()
+            Identifier identifier = subscription.getAPIIdentifier() != null ? subscription.getAPIIdentifier()
                     : subscription.getProductId();
             String userId = application.getSubscriber().getName();
             removeSubscription(identifier, userId, application.getId(), organization);
@@ -1417,8 +1422,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
-            throw new APIManagementException(String.format("Subscription for UUID:%s does not exist.",
-                    subscription.getUUID()));
+            throw new APIManagementException("Subscription does not exists.");
         }
     }
 
@@ -1625,7 +1629,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId,
-                    requestedTenant);
+                    organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -2504,7 +2508,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (identifier instanceof APIIdentifier && identifier.equals(api.getApiId())) {
+            if (identifier instanceof APIIdentifier && identifier.equals(api.getAPIIdentifier())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);
@@ -3082,7 +3086,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<SubscribedAPI>();
         Set<SubscribedAPI> subscribedAPIs = getLightWeightSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (api.getApiId().equals(apiIdentifier)) {
+            if (api.getAPIIdentifier().equals(apiIdentifier)) {
                 subscribedAPISet.add(api);
             }
         }
@@ -3410,17 +3414,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return basePath;
     }
 
-    public void publishSearchQuery(String query, String username) {
+    public void publishSearchQuery(String query, String username, String organization) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, requestedTenant);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
     }
 
-    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username) {
+    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username, String organization) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, requestedTenant);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, organization);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
