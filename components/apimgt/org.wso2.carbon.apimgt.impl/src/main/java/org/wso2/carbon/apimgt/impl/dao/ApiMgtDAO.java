@@ -4150,6 +4150,10 @@ public class ApiMgtDAO {
                 int subscriptionCount = getSubscriptionCountByApplicationId(connection,application, organization);
                 application.setSubscriptionCount(subscriptionCount);
 
+                // Get custom attributes of application
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
+
                 applicationsList.add(application);
             }
 
@@ -19239,9 +19243,7 @@ public class ApiMgtDAO {
         statement.close();
 
         if (isWithPolicyDefinition && policyData != null) {
-            if (isWithPolicyDefinition && policyData != null) {
-                populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
-            }
+            populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
         }
         return policyData;
     }

@@ -29,6 +29,7 @@ public final class ImportExportConstants {
 
     // System independent file separator for zip files
     public static final char ZIP_FILE_SEPARATOR = '/';
+    public static final char WIN_ZIP_FILE_SEPARATOR = '\\';
 
     //length of the name of the temporary directory
     public static final int TEMP_FILENAME_LENGTH = 5;
@@ -93,6 +94,8 @@ public final class ImportExportConstants {
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
     public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
+
+    public static final String UPLOAD_POLICY_FILE_NAME = "PolicyArchive.zip";
 
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
@@ -302,4 +305,6 @@ public final class ImportExportConstants {
 
     public static final String EXPORT_POLICY_TYPE_YAML = "YAML";
     public static final String EXPORT_POLICY_TYPE_JSON = "JSON";
+
+    public static final String POLICY_NAME = "name";
 }

@@ -133,7 +133,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     public abstract Map<String, String> populateCustomClaims(TokenValidationContext validationContext) throws APIManagementException;
 
     public String encode(byte[] stringToBeEncoded) throws APIManagementException {
-        return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(stringToBeEncoded);
     }
 
     public String generateToken(TokenValidationContext validationContext) throws APIManagementException{

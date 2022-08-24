@@ -858,7 +858,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher
-                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
+                    extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.ADD_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -2171,7 +2171,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Extracting API details for the recommendation system
         if (api != null && recommendationEnvironment != null) {
             RecommenderEventPublisher
-                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
+                    extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.DELETE_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }

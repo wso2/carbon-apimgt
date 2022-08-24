@@ -98,7 +98,9 @@ public class LifeCycleUtils {
                     + ", version " + apiTypeWrapper.getId().getVersion() + ", New Status : " + targetStatus;
             log.debug(logMessage);
         }
-        extractRecommendationDetails(apiTypeWrapper);
+        if (!apiTypeWrapper.isAPIProduct()) {
+            extractRecommendationDetails(apiTypeWrapper.getApi(), orgId);
+        }
     }
 
     /**
@@ -319,14 +321,14 @@ public class LifeCycleUtils {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    private static void extractRecommendationDetails(ApiTypeWrapper apiTypeWrapper) {
+    private static void extractRecommendationDetails(API api, String organization) {
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiRecommendationEnvironment();
 
         // Extracting API or API Product details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher
-                    extractor = new RecommenderDetailsExtractor(apiTypeWrapper, apiTypeWrapper.getOrganization(), APIConstants.ADD_API);
+                    extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.ADD_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
