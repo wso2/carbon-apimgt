@@ -3665,10 +3665,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            return certificateManager.getCertificates(tenantId);
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
         }
-        return certificateManager.getCertificates(tenantId);
+        return null;
     }
 
     @Override
@@ -4754,10 +4755,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 return result;
             }
         } catch (URISyntaxException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Error while extracting fully qualified domain name from given endpoint: " + endpoint);
-            }
-            return result;
+            throw new APIManagementException("Error while extracting fully qualified domain name from the given url: " + endpoint, e);
         }
 
         String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + fqdn;
