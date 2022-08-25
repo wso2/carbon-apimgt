@@ -21,6 +21,11 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is used to return API search results of solr queries. It just simply wraps list of APIs returned and
+ * provides the total num of APIs that matches the query. Here, length of API list may not be equal to the apiCount
+ * in case of paginated searches.
+ */
 public class APISearchResult {
     private List<API> apis;
     private int apiCount;
