@@ -1523,28 +1523,4 @@ public class GatewayUtils {
         }
         return Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
     }
-
-    public static SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
-
-        String signature = accessToken.split("\\.")[2];
-        SignedJWTInfo signedJWTInfo = null;
-        Cache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
-        if (gatewaySignedJWTParseCache != null) {
-            Object cachedEntry = gatewaySignedJWTParseCache.get(signature);
-            if (cachedEntry != null) {
-                signedJWTInfo = (SignedJWTInfo) cachedEntry;
-            }
-            if (signedJWTInfo == null || !signedJWTInfo.getToken().equals(accessToken)) {
-                SignedJWT signedJWT = SignedJWT.parse(accessToken);
-                JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-                signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
-                gatewaySignedJWTParseCache.put(signature, signedJWTInfo);
-            }
-        } else {
-            SignedJWT signedJWT = SignedJWT.parse(accessToken);
-            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-            signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
-        }
-        return signedJWTInfo;
-    }
 }
