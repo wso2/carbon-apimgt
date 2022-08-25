@@ -77,6 +77,12 @@ public class OneTimeTokenRevocationMediator extends AbstractMediator {
     }
 
     @Override
+    public boolean isContentAware() {
+
+        return false;
+    }
+
+    @Override
     public String getType() {
 
         return null;
