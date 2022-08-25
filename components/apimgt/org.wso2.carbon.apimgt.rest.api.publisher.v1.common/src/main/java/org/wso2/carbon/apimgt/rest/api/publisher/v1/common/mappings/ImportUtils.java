@@ -882,10 +882,8 @@ public class ImportUtils {
             }
 
             operationPolicyData.setPolicyId(policyID);
-            OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(
-                    operationPolicyData);
+            return OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(operationPolicyData);
 
-            return createdPolicy;
         } catch (APIMgtResourceNotFoundException e) {
             String errorMessage = "Error while adding a common operation policy." + e.getMessage();
             throw new APIManagementException(errorMessage,
