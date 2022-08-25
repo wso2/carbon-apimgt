@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
-import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -48,10 +47,6 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.model.entity.API;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -60,7 +55,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import javax.cache.Cache;
 
 /**
