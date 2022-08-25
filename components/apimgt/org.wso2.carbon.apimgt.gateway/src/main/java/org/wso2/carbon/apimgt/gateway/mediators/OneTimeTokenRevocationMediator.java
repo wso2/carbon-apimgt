@@ -84,18 +84,6 @@ public class OneTimeTokenRevocationMediator extends AbstractMediator {
         return null;
     }
 
-    @Override
-    public void setTraceState(int traceState) {
-
-        this.traceState = 0;
-    }
-
-    @Override
-    public int getTraceState() {
-
-        return 0;
-    }
-
     public void setScope(String scope) {
 
         this.scope = scope;
