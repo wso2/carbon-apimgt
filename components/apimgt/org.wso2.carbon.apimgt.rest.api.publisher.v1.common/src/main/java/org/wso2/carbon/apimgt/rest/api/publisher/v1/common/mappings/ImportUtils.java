@@ -71,14 +71,14 @@ import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManager;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
-import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -2007,9 +2007,9 @@ public class ImportUtils {
             return null;
         }
         try {
-            RegistryLCManager lcManager = LCManagerFactory.getInstance().getLCManager();
+            LCManager lcManager = LCManagerFactory.getInstance().getLCManager();
             return lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase());
-        } catch (PersistenceException e) {
+        } catch (PersistenceException | ParseException | IOException e) {
             throw new APIManagementException("Error while retrieving lifecycle configuration", e);
         }
     }

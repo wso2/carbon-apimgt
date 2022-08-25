@@ -80,7 +80,7 @@ import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
@@ -98,6 +98,7 @@ import javax.cache.Cache;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -2793,7 +2794,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (APIPersistenceException e) {
             handleException("Error while accessing persistence layer", e);
-        } catch (PersistenceException e) {
+        } catch (PersistenceException | IOException | ParseException e) {
             handleException("Error while accessing lifecycle information ", e);
         }  finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -2928,7 +2929,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             lcData.put("items", checkListItems);
-        } catch (PersistenceException e) {
+        } catch (PersistenceException | IOException | ParseException e) {
             throw new APIManagementException("Error while parsing the lifecycle ", e);
         }
         status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase(); // First letter capital

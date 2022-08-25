@@ -893,6 +893,421 @@
           "Internal/subscriber"
         ]
       }]
+    },
+    "LifeCycle": {
+      "$id": "#/properties/LifeCycle",
+      "type": "object",
+      "title": "The LifeCycle schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": {
+        "States": [
+          {
+            "State": "Created",
+            "CheckItems": [
+              "Deprecate old versions after publishing the API",
+              "Requires re-subscription when publishing the API"
+            ],
+            "Transitions": [
+              {
+                "Event": "Publish",
+                "Target": "Published"
+              },
+              {
+                "Event": "Deploy as a Prototype",
+                "Target": "Prototyped"
+              }
+            ]
+          },
+          {
+            "State": "Prototyped",
+            "CheckItems": [
+              "Deprecate old versions after publishing the API",
+              "Requires re-subscription when publishing the API"
+            ],
+            "Transitions": [
+              {
+                "Event": "Publish",
+                "Target": "Published"
+              },
+              {
+                "Event": "Demote to Created",
+                "Target": "Created"
+              },
+              {
+                "Event": "Deploy as a Prototype",
+                "Target": "Prototyped"
+              }
+            ]
+          },
+          {
+            "State": "Published",
+            "Transitions": [
+              {
+                "Event": "Block",
+                "Target": "Blocked"
+              },
+              {
+                "Event": "Deploy as a Prototype",
+                "Target": "Prototyped"
+              },
+              {
+                "Event": "Demote to Created",
+                "Target": "Created"
+              },
+              {
+                "Event": "Deprecate",
+                "Target": "Deprecated"
+              },
+              {
+                "Event": "Publish",
+                "Target": "Published"
+              }
+            ]
+          },
+          {
+            "State": "Blocked",
+            "Transitions": [
+              {
+                "Event": "Deprecate",
+                "Target": "Deprecated"
+              },
+              {
+                "Event": "Re-Publish",
+                "Target": "Published"
+              }
+            ]
+          },
+          {
+            "State": "Deprecated",
+            "Transitions": [
+              {
+                "Event": "Retire",
+                "Target": "Retired"
+              }
+            ]
+          },
+          {
+            "State": "Retired"
+          }
+        ]
+      },
+      "examples": {
+        "States": [
+          {
+            "State": "Created",
+            "CheckItems": [
+              "Deprecate old versions after publishing the API",
+              "Requires re-subscription when publishing the API"
+            ],
+            "Transitions": [
+              {
+                "Event": "Publish",
+                "Target": "Published"
+              },
+              {
+                "Event": "Deploy as a Prototype",
+                "Target": "Prototyped"
+              }
+            ]
+          },
+          {
+            "State": "Prototyped",
+            "CheckItems": [
+              "Deprecate old versions after publishing the API",
+              "Requires re-subscription when publishing the API"
+            ],
+            "Transitions": [
+              {
+                "Event": "Publish",
+                "Target": "Published"
+              },
+              {
+                "Event": "Demote to Created",
+                "Target": "Created"
+              },
+              {
+                "Event": "Deploy as a Prototype",
+                "Target": "Prototyped"
+              }
+            ]
+          },
+          {
+            "State": "Published",
+            "Transitions": [
+              {
+                "Event": "Block",
+                "Target": "Blocked"
+              },
+              {
+                "Event": "Deploy as a Prototype",
+                "Target": "Prototyped"
+              },
+              {
+                "Event": "Demote to Created",
+                "Target": "Created"
+              },
+              {
+                "Event": "Deprecate",
+                "Target": "Deprecated"
+              },
+              {
+                "Event": "Publish",
+                "Target": "Published"
+              }
+            ]
+          },
+          {
+            "State": "Blocked",
+            "Transitions": [
+              {
+                "Event": "Deprecate",
+                "Target": "Deprecated"
+              },
+              {
+                "Event": "Re-Publish",
+                "Target": "Published"
+              }
+            ]
+          },
+          {
+            "State": "Deprecated",
+            "Transitions": [
+              {
+                "Event": "Retire",
+                "Target": "Retired"
+              }
+            ]
+          },
+          {
+            "State": "Retired"
+          }
+        ]
+      },
+      "additionalProperties": false,
+      "properties": {
+        "States": {
+          "$id": "#/properties/LifeCycle/properties/States",
+          "type": "array",
+          "title": "The States schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": [],
+          "examples": [
+            [
+              {
+                "State": "Created",
+                "CheckItems": [
+                  "Deprecate old versions after publishing the API",
+                  "Requires re-subscription when publishing the API"
+                ],
+                "Transitions": [
+                  {
+                    "Event": "Publish",
+                    "Target": "Published"
+                  },
+                  {
+                    "Event": "Deploy as a Prototype",
+                    "Target": "Prototyped"
+                  }
+                ]
+              },
+              {
+                "State": "Prototyped",
+                "CheckItems": [
+                  "Deprecate old versions after publishing the API",
+                  "Requires re-subscription when publishing the API"
+                ],
+                "Transitions": [
+                  {
+                    "Event": "Publish",
+                    "Target": "Published"
+                  },
+                  {
+                    "Event": "Demote to Created",
+                    "Target": "Created"
+                  },
+                  {
+                    "Event": "Deploy as a Prototype",
+                    "Target": "Prototyped"
+                  }
+                ]
+              },
+              {
+                "State": "Published",
+                "Transitions": [
+                  {
+                    "Event": "Block",
+                    "Target": "Blocked"
+                  },
+                  {
+                    "Event": "Deploy as a Prototype",
+                    "Target": "Prototyped"
+                  },
+                  {
+                    "Event": "Demote to Created",
+                    "Target": "Created"
+                  },
+                  {
+                    "Event": "Deprecate",
+                    "Target": "Deprecated"
+                  },
+                  {
+                    "Event": "Publish",
+                    "Target": "Published"
+                  }
+                ]
+              },
+              {
+                "State": "Blocked",
+                "Transitions": [
+                  {
+                    "Event": "Deprecate",
+                    "Target": "Deprecated"
+                  },
+                  {
+                    "Event": "Re-Publish",
+                    "Target": "Published"
+                  }
+                ]
+              },
+              {
+                "State": "Deprecated",
+                "Transitions": [
+                  {
+                    "Event": "Retire",
+                    "Target": "Retired"
+                  }
+                ]
+              },
+              {
+                "State": "Retired"
+              }
+            ]
+          ],
+          "additionalProperties": false,
+          "items": {
+            "$id": "#/properties/LifeCycle/properties/States/items",
+            "anyOf": [
+              {
+                "$id": "#/properties/LifeCycle/properties/States/items/anyOf/0",
+                "type": "object",
+                "title": "The first anyOf schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "examples": [
+                  [
+                    {
+                      "State": "Prototyped",
+                      "CheckItems": [
+                        "Deprecate old versions after publishing the API",
+                        "Requires re-subscription when publishing the API"
+                      ],
+                      "Transitions": [
+                        {
+                          "Event": "Publish",
+                          "Target": "Published"
+                        },
+                        {
+                          "Event": "Demote to Created",
+                          "Target": "Created"
+                        },
+                        {
+                          "Event": "Deploy as a Prototype",
+                          "Target": "Prototyped"
+                        }
+                      ]
+                    }
+                  ]
+                ],
+                "properties": {
+                  "State": {
+                    "$id": "#/properties/LifeCycle/properties/Scope/items/anyOf/0/properties/State",
+                    "type": "string",
+                    "title": "The State schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": ["Prototyped"]
+                  },
+                  "CheckItems": {
+                    "$id": "#/properties/LifeCycle/properties/Scope/items/anyOf/0/properties/CheckItems",
+                    "type": "array",
+                    "title": "The CheckItems schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                      [
+                      "Deprecate old versions after publishing the API",
+                      "Requires re-subscription when publishing the API"
+                      ]
+                    ]
+                  },
+                  "Transitions": {
+                    "$id": "#/properties/LifeCycle/properties/Scope/items/anyOf/0/properties/Transitions",
+                    "type": "array",
+                    "title": "The Transitions schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [[
+                      {
+                        "Event": "Publish",
+                        "Target": "Published"
+                      },
+                      {
+                        "Event": "Demote to Created",
+                        "Target": "Created"
+                      }]],
+                    "items": {
+                      "$id": "#/properties/LifeCycle/properties/Scope/items/anyOf/0/properties/Transitions/items",
+                      "anyOf": [
+                        {
+                          "$id": "#/properties/LifeCycle/properties/Scope/items/anyOf/0/properties/Transitions/items/anyOf/0",
+                          "type": "object",
+                          "title": "The first anyOf schema",
+                          "description": "An explanation about the purpose of this instance.",
+                          "default": {},
+                          "examples": [
+                            [[
+                              {
+                                "Event": "Publish",
+                                "Target": "Published"
+                              },
+                              {
+                                "Event": "Demote to Created",
+                                "Target": "Created"
+                              }]]
+                          ],
+                          "properties": {
+                            "Event": {
+                              "$id": "#/properties/LifeCycle/properties/Scope/items/anyOf/0/properties/Transitions/items/anyOf/0/properties/Event",
+                              "type": "string",
+                              "title": "The Event schema",
+                              "description": "An explanation about the purpose of this instance.",
+                              "default": "",
+                              "examples": ["Publish"]
+                            },
+                            "Target": {
+                              "$id": "#/properties/LifeCycle/properties/Scope/items/anyOf/0/properties/Transitions/items/anyOf/0/properties/Target",
+                              "type": "string",
+                              "title": "The Target schema",
+                              "description": "An explanation about the purpose of this instance.",
+                              "default": "",
+                              "examples": ["Published"]
+                            }
+                          },
+                          "required": ["Event","Target"],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": ["State"],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "required": ["States"]
     }
   },
   "additionalProperties": true

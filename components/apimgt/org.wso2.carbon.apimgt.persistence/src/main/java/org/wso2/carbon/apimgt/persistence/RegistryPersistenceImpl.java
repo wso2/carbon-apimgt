@@ -159,8 +159,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
-            //Attach the API lifecycle
-            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = RegistryPersistenceUtil.getAPIProviderPath(api.getId());
             //provider ------provides----> API
@@ -1644,37 +1642,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
-        GenericArtifactManager artifactManager = null;
-        boolean isTenantFlowStarted = false;
-        try {
-            RegistryHolder holder = getRegistry(org.getName());
-            Registry registry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-
-            if (GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry) != null) {
-                artifactManager = new GenericArtifactManager(registry, APIConstants.API_KEY);
-                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
-                String action = LCManagerFactory.getInstance().getLCManager()
-                        .getTransitionAction(apiArtifact.getLifecycleState().toUpperCase(), status.toUpperCase());
-                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
-            } else {
-                log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + APIConstants.API_KEY +
-                        ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
-                        ", Tenant domain set in PrivilegedCarbonContext: " +
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
-            }
-
-        } catch (GovernanceException e) {
-            throw new APIPersistenceException("Error while changing the lifecycle. ", e);
-        } catch (RegistryException e) {
-            throw new APIPersistenceException("Error while accessing the registry. ", e);
-        } catch (PersistenceException e) {
-            throw new APIPersistenceException("Error while accessing the lifecycle. ", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
 
     }
 
@@ -3140,7 +3107,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
             artifactManager.addGenericArtifact(artifact);
-            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + id.getProviderName();
             //provider ------provides----> APIProduct
@@ -3632,7 +3598,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Map<String, Tag> tagsData = new HashMap<String, Tag>();
 
             Map<String, List<String>> criteriaPublished = new HashMap<String, List<String>>();
-            criteriaPublished.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {
+            criteriaPublished.put(APIConstants.API_OVERVIEW_STATUS_SEARCH_KEY, new ArrayList<String>() {
                 {
                     add(APIConstants.PUBLISHED);
                 }
@@ -3648,7 +3614,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
 
             Map<String, List<String>> criteriaPrototyped = new HashMap<String, List<String>>();
-            criteriaPrototyped.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {
+            criteriaPrototyped.put(APIConstants.API_OVERVIEW_STATUS_SEARCH_KEY, new ArrayList<String>() {
                 {
                     add(APIConstants.PROTOTYPED);
                 }

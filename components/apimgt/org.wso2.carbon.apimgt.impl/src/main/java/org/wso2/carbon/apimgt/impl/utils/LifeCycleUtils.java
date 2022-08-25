@@ -4,6 +4,7 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -25,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
@@ -38,6 +39,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -55,7 +57,7 @@ public class LifeCycleUtils {
 
     public static void changeLifecycle(String user, APIProvider apiProvider, String orgId,
                                        ApiTypeWrapper apiTypeWrapper, String action, Map<String,
-            Boolean> checklist) throws PersistenceException, APIPersistenceException, APIManagementException {
+            Boolean> checklist) throws PersistenceException, APIPersistenceException, APIManagementException, IOException, ParseException {
         String targetStatus;
         String apiName = apiTypeWrapper.getName();
         String apiType = apiTypeWrapper.geType();

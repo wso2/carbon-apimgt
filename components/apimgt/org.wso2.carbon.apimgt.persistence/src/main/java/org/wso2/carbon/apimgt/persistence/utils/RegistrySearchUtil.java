@@ -425,11 +425,11 @@ public class RegistrySearchUtil {
                             "&group=true&group.field=name&group.ngroups=true&group.sort=versionComparable desc";
                 }
             }
-            
-            String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
-            lcCriteria = lcCriteria + getORBasedSearchCriteria(statusList);
 
-            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
+            String apiOverviewStateCriteria = APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY;
+            apiOverviewStateCriteria = apiOverviewStateCriteria + getORBasedSearchCriteria(statusList);
+
+            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + apiOverviewStateCriteria;
         }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery, true), ctx);
         return modifiedQuery;

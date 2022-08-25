@@ -230,8 +230,10 @@ public final class APIConstants {
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
+    public static final String API_OVERVIEW_STATUS_SEARCH_TYPE_KEY = "status=";
     public static final String ENABLE_STORE_SEARCH_TYPE_KEY = "enableStore=(true OR null)";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
+    public static final String API_OVERVIEW_STATUS_SEARCH_KEY = "overview_status";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
