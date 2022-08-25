@@ -21,8 +21,6 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -37,8 +35,6 @@ import java.util.concurrent.Executors;
  * Service Implementation for One Time Token Revocation Mediator
  */
 public class OneTimeTokenRevocationMediator extends AbstractMediator {
-
-    private static final Log logger = LogFactory.getLog(OneTimeTokenRevocationMediator.class);
 
     private String scope;
     private ExecutorService oneTimeTokenExecutorService;
@@ -91,7 +87,7 @@ public class OneTimeTokenRevocationMediator extends AbstractMediator {
     @Override
     public void setTraceState(int traceState) {
 
-        traceState = 0;
+        this.traceState = 0;
     }
 
     @Override
