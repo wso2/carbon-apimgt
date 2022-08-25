@@ -1212,22 +1212,20 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         RevokeTokenInfoDTO revokeTokenDTO = new RevokeTokenInfoDTO();
         revokeTokenDTO.setToken(token);
         revokeTokenDTO.setConsumerKey(consumerKey);
-        String consumerKeyMessage = " with consumer key " + consumerKey;
         try {
             Response response = revokeClient.revokeToken(revokeTokenDTO);
-
             if (log.isDebugEnabled()) {
                 if (response.status() == HttpStatus.SC_OK) {
                     log.debug("Successfully revoked the token " + APIUtil.getMaskedToken(token) +
-                            consumerKeyMessage);
+                            " with consumer key " + consumerKey);
                 } else {
                     log.error("Error occurred while revoking one time token " + APIUtil.getMaskedToken(token) +
-                            consumerKeyMessage + ". Status: " + response.status());
+                            " with consumer key " + consumerKey + ". Status: " + response.status());
                 }
             }
         } catch (KeyManagerClientException e) {
             log.error("Could not reach the key manager resource for one time token revocation of the token "
-                    + APIUtil.getMaskedToken(token) + consumerKeyMessage + ". Error: " + e);
+                    + APIUtil.getMaskedToken(token) + " with consumer key " + consumerKey + ". Error: " + e);
         }
     }
 
