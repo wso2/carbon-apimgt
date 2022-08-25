@@ -7910,13 +7910,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (APIPersistenceException e) {
-            if (e.getErrorHandler().getErrorCode() == ExceptionCodes.INTERNAL_ERROR.getErrorCode()){
-                String msg = e.getMessage();
-                log.error(msg);
-                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_IS_NOT_FOUND_IN_REGISTRY, uuid));
-            } else {
-                throw new APIManagementException("Failed to get API", e);
-            }
+            throw new APIManagementException(e.getMessage(), e.getErrorHandler());
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
         } catch (ParseException e) {

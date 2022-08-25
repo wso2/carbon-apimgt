@@ -114,8 +114,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Environment specific api property config is not valid. %s", false),
     API_IS_NOT_FOUND_IN_DATABASE(900359, "API is not consistently stored", 500,
             "API is not consistently stored"),
-    API_IS_NOT_FOUND_IN_REGISTRY(900360, "API Not Found", 404, "Requested API with id '%s' not found")
-            "API is not consistently stored"),
+    API_IS_NOT_FOUND_IN_REGISTRY(900360, "API Not Found", 404, "Requested API with id '%s' not found"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
