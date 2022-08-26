@@ -71,7 +71,7 @@ public class EmitOnStateChange extends StreamProcessor {
             Boolean currentThrottleState = (Boolean) isThrottledExpressionExecutor.execute(event);
             String key = (String) keyExpressionExecutor.execute(event);
             Boolean lastThrottleState = throttleStateMap.get(key);
-            if (lastThrottleState.equals(currentThrottleState) && Boolean.TRUE.equals(!currentThrottleState)) {
+            if (lastThrottleState == currentThrottleState && !currentThrottleState) {
                 streamEventChunk.remove();
             } else {
                 throttleStateMap.put(key, currentThrottleState);
