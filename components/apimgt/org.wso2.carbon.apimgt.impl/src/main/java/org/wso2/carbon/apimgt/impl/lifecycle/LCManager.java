@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.impl.lifecycle;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -52,22 +54,22 @@ public class LCManager {
     private static final String EVENT_KEY = "Event";
     private static final String TARGET_KEY = "Target";
     private static JSONObject defaultLCObj;
+    private static final Log log = LogFactory.getLog(LCManager.class);
 
     static {
         if (defaultLCObj == null) {
 
             try {
                 defaultLCObj = getDefaultLCConfigJSON();
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
+            } catch (APIManagementException e) {
+                log.error("Error while Reading/Parsing the Default LifeCycle Json");
             }
-
         }
     }
 
-    private final Map<String, String> stateTransitionMap = new HashMap<String, String>();
-    private final Map<String, StateInfo> stateInfoMap = new HashMap<String, StateInfo>();
-    private final HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
+    private final Map<String, String> stateTransitionMap = new HashMap<>();
+    private final Map<String, StateInfo> stateInfoMap = new HashMap<>();
+    private final HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<>();
     private final String tenantDomain;
 
     /**
@@ -84,16 +86,18 @@ public class LCManager {
      * Reading the default API Lifecycle
      *
      * @return
-     * @throws IOException
-     * @throws ParseException
      * @throws URISyntaxException
      * @throws APIManagementException
      */
-    public static JSONObject getDefaultLCConfigJSON() throws IOException, ParseException {
+    public static JSONObject getDefaultLCConfigJSON() throws APIManagementException {
 
         InputStream lcStream = LCManager.class.getClassLoader().getResourceAsStream(API_LIFECYCLE_PATH);
         JSONParser jsonParser = new JSONParser();
-        return (JSONObject) jsonParser.parse(new InputStreamReader(lcStream, StandardCharsets.UTF_8));
+        try {
+            return (JSONObject) jsonParser.parse(new InputStreamReader(lcStream, StandardCharsets.UTF_8));
+        } catch (IOException | ParseException e) {
+            throw new APIManagementException(e);
+        }
     }
 
     /**
@@ -119,8 +123,8 @@ public class LCManager {
             JSONObject stateObj = (JSONObject) state;
             String stateId = (String) stateObj.get(STATE_KEY);
             LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
-            List<String> actions = new ArrayList<String>();
-            List<String> checklistItems = new ArrayList<String>();
+            List<String> actions = new ArrayList<>();
+            List<String> checklistItems = new ArrayList<>();
             if (stateObj.containsKey(TRANSITIONS_KEY)) {
                 JSONArray transitions = (JSONArray) stateObj.get(TRANSITIONS_KEY);
                 for (Object transition : transitions) {
@@ -168,8 +172,6 @@ public class LCManager {
      * @param targetState
      * @return
      * @throws APIManagementException
-     * @throws IOException
-     * @throws ParseException
      */
     public String getTransitionAction(String currentState, String targetState) throws APIManagementException {
 
@@ -200,8 +202,6 @@ public class LCManager {
      * @param state
      * @return
      * @throws APIManagementException
-     * @throws IOException
-     * @throws ParseException
      */
     public List<String> getCheckListItemsForState(String state) throws APIManagementException {
 
@@ -218,8 +218,6 @@ public class LCManager {
      * @param state
      * @return
      * @throws APIManagementException
-     * @throws IOException
-     * @throws ParseException
      */
     public List<String> getAllowedActionsForState(String state) throws APIManagementException {
 
@@ -271,8 +269,8 @@ public class LCManager {
     static class StateInfo {
 
         private String state;
-        private List<String> transitions = new ArrayList<String>();
-        private List<String> checkListItems = new ArrayList<String>();
+        private List<String> transitions = new ArrayList<>();
+        private List<String> checkListItems = new ArrayList<>();
 
         public List<String> getCheckListItems() {
 
