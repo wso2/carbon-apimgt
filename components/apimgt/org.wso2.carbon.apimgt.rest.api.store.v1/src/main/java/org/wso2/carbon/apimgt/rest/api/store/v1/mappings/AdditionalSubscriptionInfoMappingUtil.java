@@ -106,10 +106,10 @@ public class AdditionalSubscriptionInfoMappingUtil {
             }
         }
 
+        Application application = subscription.getApplication();
         if (api != null) {
             additionalSubscriptionInfoDTO.setApiId(api.getUuid());
             // Set Application information
-            Application application = subscription.getApplication();
             application = apiConsumer.getApplicationByUUID(application.getUUID());
             additionalSubscriptionInfoDTO.setApplicationId(subscription.getApplication().getUUID());
             additionalSubscriptionInfoDTO.setApplicationName(application.getName());

@@ -102,22 +102,21 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
-            if (log.isDeb
-                log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
+            if (log.isDebugEnabled()) {
+                log.debug("Delete API Product request: Id " + apiProductId + " by " + username);
             }
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, organization);
             if (apiProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            } else {
+                boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatus().equals(apiProduct.getState()) ||
+                        APIStatus.DEPRECATED.getStatus().equals(apiProduct.getState());
+                List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
+                if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
+                    RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
+                }
+                apiProduct.setOrganization(organization);
             }
-
-            boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatus().equals(apiProduct.getState()) ||
-                    APIStatus.DEPRECATED.getStatus().equals(apiProduct.getState());
-            List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
-            if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
-                RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
-            }
-
-            apiProduct.setOrganization(organization);
             apiProvider.deleteAPIProduct(apiProduct);
             return Response.ok().build();
         } catch (APIManagementException e) {
