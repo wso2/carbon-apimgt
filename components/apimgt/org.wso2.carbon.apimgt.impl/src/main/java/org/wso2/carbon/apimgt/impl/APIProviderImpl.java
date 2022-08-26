@@ -2910,28 +2910,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, Object> lcData = new HashMap<String, Object>();
         List<String> actionsList;
-        try {
-            actionsList = LCManagerFactory.getInstance().getLCManager().getAllowedActionsForState(status);
-            if (actionsList != null) {
-                String[] actionsArray = new String[actionsList.size()];
-                actionsArray = actionsList.toArray(actionsArray);
-                lcData.put(APIConstants.LC_NEXT_STATES, actionsArray);
-            }
-            ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
-            List<String> checklistItemsList =
-                    LCManagerFactory.getInstance().getLCManager().getCheckListItemsForState(status);
-            if (checklistItemsList != null) {
-                for (String name : checklistItemsList) {
-                    CheckListItem item = new CheckListItem();
-                    item.setName(name);
-                    item.setValue("false");
-                    checkListItems.add(item);
-                }
-            }
-            lcData.put("items", checkListItems);
-        } catch (PersistenceException | IOException | ParseException e) {
-            throw new APIManagementException("Error while parsing the lifecycle ", e);
+        actionsList = LCManagerFactory.getInstance().getLCManager().getAllowedActionsForState(status);
+        if (actionsList != null) {
+            String[] actionsArray = new String[actionsList.size()];
+            actionsArray = actionsList.toArray(actionsArray);
+            lcData.put(APIConstants.LC_NEXT_STATES, actionsArray);
         }
+        ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
+        List<String> checklistItemsList =
+                LCManagerFactory.getInstance().getLCManager().getCheckListItemsForState(status);
+        if (checklistItemsList != null) {
+            for (String name : checklistItemsList) {
+                CheckListItem item = new CheckListItem();
+                item.setName(name);
+                item.setValue("false");
+                checkListItems.add(item);
+            }
+        }
+        lcData.put("items", checkListItems);
         status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase(); // First letter capital
         lcData.put(APIConstants.LC_STATUS, status);
         return lcData;
