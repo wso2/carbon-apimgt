@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.certificatemgt.TrustStoreUtils;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dto.TrustStoreDTO;
@@ -170,7 +171,7 @@ public class CertificateMgtUtils {
                     File trustStoreFile = new File(trustStoreDTO.getLocation());
                     try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
                         KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
-                        trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
+                        TrustStoreUtils.loadCerts(trustStore, trustStoreLocation, trustStoreDTO.getPassword());
                         CertificateFactory cf = CertificateFactory.getInstance(certificateType);
                         while (serverCert.available() > 0) {
                             Certificate certificate = cf.generateCertificate(serverCert);
@@ -317,7 +318,7 @@ public class CertificateMgtUtils {
                 File trustStoreFile = new File(trustStoreDTO.getLocation());
                 KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
                 try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                    trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
+                    TrustStoreUtils.loadCerts(trustStore, trustStoreLocation, trustStoreDTO.getPassword());
                 }
 
                 if (trustStore.containsAlias(alias)) {
