@@ -171,7 +171,7 @@ public class CertificateMgtUtils {
                     File trustStoreFile = new File(trustStoreDTO.getLocation());
                     try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
                         KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
-                        TrustStoreUtils.loadCerts(trustStore, trustStoreLocation, trustStoreDTO.getPassword());
+                        TrustStoreUtils.loadCerts(trustStore, trustStoreDTO.getLocation(), trustStoreDTO.getPassword());
                         CertificateFactory cf = CertificateFactory.getInstance(certificateType);
                         while (serverCert.available() > 0) {
                             Certificate certificate = cf.generateCertificate(serverCert);
@@ -318,7 +318,7 @@ public class CertificateMgtUtils {
                 File trustStoreFile = new File(trustStoreDTO.getLocation());
                 KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
                 try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                    TrustStoreUtils.loadCerts(trustStore, trustStoreLocation, trustStoreDTO.getPassword());
+                    TrustStoreUtils.loadCerts(trustStore, trustStoreDTO.getLocation(), trustStoreDTO.getPassword());
                 }
 
                 if (trustStore.containsAlias(alias)) {
