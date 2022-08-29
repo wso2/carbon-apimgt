@@ -24,13 +24,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,6 @@ import java.util.Map;
  */
 public class LCManager {
 
-    private static final Log log = LogFactory.getLog(LCManager.class);
     private static final String STATE_ID_PROTOTYPED = "Prototyped";
     private static final String STATE_ID_PUBLISHED = "Published";
     private static final String TRANSITION_TARGET_PROTOTYPED = "Prototyped";
@@ -52,36 +51,53 @@ public class LCManager {
     private static final String TRANSITIONS_KEY = "Transitions";
     private static final String CHECK_ITEMS_KEY = "CheckItems";
     private static final String API_LIFECYCLE_PATH = "lifecycle/APILifeCycle.json";
-    private static final String UTF_8 = "UTF-8";
     private static final String EVENT_KEY = "Event";
     private static final String TARGET_KEY = "Target";
-    private Map<String, String> stateTransitionMap = new HashMap<String, String>();
-    private Map<String, StateInfo> stateInfoMap = new HashMap<String, StateInfo>();
-    private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
-    private String tenantDomain;
     private static JSONObject defaultLCObj;
-    private LCManager instance;
+    private static final Log log = LogFactory.getLog(LCManager.class);
 
     static {
         if (defaultLCObj == null) {
 
             try {
                 defaultLCObj = getDefaultLCConfigJSON();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
+            } catch (APIManagementException e) {
+                log.error("Error while Reading/Parsing the Default LifeCycle Json");
             }
-
         }
     }
 
+    private final Map<String, String> stateTransitionMap = new HashMap<>();
+    private final Map<String, StateInfo> stateInfoMap = new HashMap<>();
+    private final HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<>();
+    private final String tenantDomain;
+
     /**
      * Initialize LCManager Class
+     *
      * @param tenantDomain
      */
     public LCManager(String tenantDomain) {
+
         this.tenantDomain = tenantDomain;
+    }
+
+    /**
+     * Reading the default API Lifecycle
+     *
+     * @return
+     * @throws URISyntaxException
+     * @throws APIManagementException
+     */
+    public static JSONObject getDefaultLCConfigJSON() throws APIManagementException {
+
+        InputStream lcStream = LCManager.class.getClassLoader().getResourceAsStream(API_LIFECYCLE_PATH);
+        JSONParser jsonParser = new JSONParser();
+        try {
+            return (JSONObject) jsonParser.parse(new InputStreamReader(lcStream, StandardCharsets.UTF_8));
+        } catch (IOException | ParseException e) {
+            throw new APIManagementException(e);
+        }
     }
 
     /**
@@ -96,8 +112,8 @@ public class LCManager {
 
         //Checking whether the lifecycle exists in the tenantConfig
         if (tenantConfig.containsKey(LIFECYCLE_KEY)) {
-            JSONObject LCObj = (JSONObject) tenantConfig.get(LIFECYCLE_KEY);
-            states = (JSONArray) LCObj.get(STATES_KEY);
+            JSONObject lcObj = (JSONObject) tenantConfig.get(LIFECYCLE_KEY);
+            states = (JSONArray) lcObj.get(STATES_KEY);
         } else {
             JSONObject jsonObject = defaultLCObj;
             states = (JSONArray) jsonObject.get(STATES_KEY);
@@ -107,8 +123,8 @@ public class LCManager {
             JSONObject stateObj = (JSONObject) state;
             String stateId = (String) stateObj.get(STATE_KEY);
             LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
-            List<String> actions = new ArrayList<String>();
-            List<String> checklistItems = new ArrayList<String>();
+            List<String> actions = new ArrayList<>();
+            List<String> checklistItems = new ArrayList<>();
             if (stateObj.containsKey(TRANSITIONS_KEY)) {
                 JSONArray transitions = (JSONArray) stateObj.get(TRANSITIONS_KEY);
                 for (Object transition : transitions) {
@@ -150,35 +166,15 @@ public class LCManager {
     }
 
     /**
-     * Reading the default API Lifecycle
-     *
-     * @return
-     * @throws IOException
-     * @throws ParseException
-     * @throws URISyntaxException
-     * @throws APIManagementException
-     */
-    public static JSONObject getDefaultLCConfigJSON() throws IOException, ParseException {
-
-        InputStream lcStream = LCManager.class.getClassLoader().getResourceAsStream(API_LIFECYCLE_PATH);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(
-                new InputStreamReader(lcStream, UTF_8));
-
-        return jsonObject;
-    }
-
-    /**
      * Returning the Action for the current and the target state
      *
      * @param currentState
      * @param targetState
      * @return
      * @throws APIManagementException
-     * @throws IOException
-     * @throws ParseException
      */
-    public String getTransitionAction(String currentState, String targetState) throws APIManagementException, IOException, ParseException {
+    public String getTransitionAction(String currentState, String targetState) throws APIManagementException {
+
         processLifeCycle();
         if (stateHashMap.containsKey(currentState)) {
             LifeCycleTransition transition = stateHashMap.get(currentState);
@@ -194,72 +190,10 @@ public class LCManager {
      * @return
      * @throws APIManagementException
      */
-    public String getStateForTransition(String action) throws APIManagementException{
+    public String getStateForTransition(String action) throws APIManagementException {
+
         processLifeCycle();
         return stateTransitionMap.get(action);
-    }
-
-    static class LifeCycleTransition {
-        private HashMap<String, String> transitions;
-
-        /**
-         * Initialize class
-         */
-        public LifeCycleTransition() {
-            this.transitions = new HashMap<>();
-        }
-
-        /**
-         * Returns action required to transit to state.
-         *
-         * @param state State to get action
-         * @return lifecycle action associated or null if not found
-         */
-        public String getAction(String state) {
-            if (!transitions.containsKey(state)) {
-                return null;
-            }
-            return transitions.get(state);
-        }
-
-        /**
-         * Adds a transition.
-         *
-         * @param targetStatus target status
-         * @param action action associated with target
-         */
-        public void addTransition(String targetStatus, String action) {
-            transitions.put(targetStatus, action);
-        }
-    }
-
-    static class StateInfo {
-        private String state;
-        private List<String> transitions = new ArrayList<String>();
-        private List<String> checkListItems = new ArrayList<String>();
-
-        public List<String> getCheckListItems() {
-            return checkListItems;
-        }
-        public void setCheckListItems(List<String> checkListItems) {
-            this.checkListItems = checkListItems;
-        }
-
-        public List<String> getTransitions() {
-            return transitions;
-        }
-
-        public void setTransitions(List<String> transitions) {
-            this.transitions = transitions;
-        }
-
-        public String getState() {
-            return state;
-        }
-
-        public void setState(String state) {
-            this.state = state;
-        }
     }
 
     /**
@@ -268,10 +202,9 @@ public class LCManager {
      * @param state
      * @return
      * @throws APIManagementException
-     * @throws IOException
-     * @throws ParseException
      */
-    public List<String> getCheckListItemsForState(String state) throws APIManagementException, IOException, ParseException {
+    public List<String> getCheckListItemsForState(String state) throws APIManagementException {
+
         processLifeCycle();
         if (stateInfoMap.containsKey(state)) {
             return stateInfoMap.get(state).getCheckListItems();
@@ -285,15 +218,89 @@ public class LCManager {
      * @param state
      * @return
      * @throws APIManagementException
-     * @throws IOException
-     * @throws ParseException
      */
-    public List<String> getAllowedActionsForState(String state) throws APIManagementException, IOException, ParseException {
+    public List<String> getAllowedActionsForState(String state) throws APIManagementException {
+
         processLifeCycle();
         if (stateInfoMap.containsKey(state)) {
             return stateInfoMap.get(state).getTransitions();
         }
         return null;
+    }
+
+    static class LifeCycleTransition {
+
+        private final HashMap<String, String> transitions;
+
+        /**
+         * Initialize class
+         */
+        public LifeCycleTransition() {
+
+            this.transitions = new HashMap<>();
+        }
+
+        /**
+         * Returns action required to transit to state.
+         *
+         * @param state State to get action
+         * @return lifecycle action associated or null if not found
+         */
+        public String getAction(String state) {
+
+            if (!transitions.containsKey(state)) {
+                return null;
+            }
+            return transitions.get(state);
+        }
+
+        /**
+         * Adds a transition.
+         *
+         * @param targetStatus target status
+         * @param action       action associated with target
+         */
+        public void addTransition(String targetStatus, String action) {
+
+            transitions.put(targetStatus, action);
+        }
+    }
+
+    static class StateInfo {
+
+        private String state;
+        private List<String> transitions = new ArrayList<>();
+        private List<String> checkListItems = new ArrayList<>();
+
+        public List<String> getCheckListItems() {
+
+            return checkListItems;
+        }
+
+        public void setCheckListItems(List<String> checkListItems) {
+
+            this.checkListItems = checkListItems;
+        }
+
+        public List<String> getTransitions() {
+
+            return transitions;
+        }
+
+        public void setTransitions(List<String> transitions) {
+
+            this.transitions = transitions;
+        }
+
+        public String getState() {
+
+            return state;
+        }
+
+        public void setState(String state) {
+
+            this.state = state;
+        }
     }
 
 }

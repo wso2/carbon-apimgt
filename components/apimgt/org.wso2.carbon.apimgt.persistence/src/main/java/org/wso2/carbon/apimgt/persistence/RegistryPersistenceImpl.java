@@ -1642,7 +1642,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
-
+        //Unused method
     }
 
     @Override
