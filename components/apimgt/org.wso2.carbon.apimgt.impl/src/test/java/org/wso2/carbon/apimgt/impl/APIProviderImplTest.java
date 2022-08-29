@@ -1709,17 +1709,11 @@ public class APIProviderImplTest {
         Assert.assertEquals(response.getApis().size(), 0);
     }
 
-    @Test
+    @Test(expected = APIManagementException.class)
     public void testSearchPaginatedAPIsByFQDNWhenEndpointIsInvalid() throws APIManagementException, APIPersistenceException {
-
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
-
         APISearchResult response = apiProvider.searchPaginatedAPIsByFQDN("this is invalid url",
                 "carbon.super", 1 , 6);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getApiCount(), 0);
-        Assert.assertEquals(response.getApis().size(), 0);
     }
 
     private List<PublisherAPIInfo> createMockPublisherAPIInfoList(int num) {
