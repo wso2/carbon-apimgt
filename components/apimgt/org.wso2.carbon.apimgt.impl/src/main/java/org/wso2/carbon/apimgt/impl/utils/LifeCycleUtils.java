@@ -57,7 +57,7 @@ public class LifeCycleUtils {
 
     public static void changeLifecycle(String user, APIProvider apiProvider, String orgId,
                                        ApiTypeWrapper apiTypeWrapper, String action, Map<String,
-            Boolean> checklist) throws PersistenceException, APIPersistenceException, APIManagementException, IOException, ParseException {
+            Boolean> checklist) throws  APIPersistenceException, APIManagementException {
         String targetStatus;
         String apiName = apiTypeWrapper.getName();
         String apiType = apiTypeWrapper.geType();
