@@ -664,7 +664,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (log.isDebugEnabled()) {
             log.debug("Start to undeploy API" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
-        unDeployAPI(certificateManager, sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
+        unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                 endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " undeployed");
@@ -772,13 +772,13 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return true;
     }
 
-    private void unDeployAPI(CertificateManager certificateManager,
-                             SequenceAdminServiceProxy sequenceAdminServiceProxy,
+    private void unDeployAPI(SequenceAdminServiceProxy sequenceAdminServiceProxy,
                              RESTAPIAdminServiceProxy restapiAdminServiceProxy,
                              LocalEntryServiceProxy localEntryServiceProxy,
                              EndpointAdminServiceProxy endpointAdminServiceProxy, GatewayAPIDTO gatewayAPIDTO,
                              MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy) throws AxisFault {
 
+        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
         if (log.isDebugEnabled()) {
             log.debug("Start to undeploy default api " + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
@@ -883,7 +883,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean unDeployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
 
-        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
         SequenceAdminServiceProxy sequenceAdminServiceProxy =
                 getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
@@ -893,7 +892,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
                 new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
 
-        unDeployAPI(certificateManager, sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
+        unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                 endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
         return true;
     }

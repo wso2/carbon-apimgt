@@ -19,12 +19,11 @@ package org.wso2.carbon.apimgt.impl.certificatemgt.reloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.certificatemgt.TrustStoreUtils;
 import org.wso2.carbon.apimgt.impl.dto.TrustStoreDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.certificatemgt.TrustStoreUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
