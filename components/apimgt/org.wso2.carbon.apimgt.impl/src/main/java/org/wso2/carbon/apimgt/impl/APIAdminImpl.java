@@ -1350,15 +1350,13 @@ public class APIAdminImpl implements APIAdmin {
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         ThrottleProperties throttleProperties = apiManagerConfiguration.getThrottleProperties();
 
-        if (APIConstants.UNLIMITED_TIER.equals(policy.getPolicyName())) {
-            if (throttleProperties.isEnableUnlimitedTier()) {
-                return policy;
-            }
-        } else {
-            return policy;
+        if (policy != null && APIConstants.UNLIMITED_TIER.equals(policy.getPolicyName())
+                && !throttleProperties.isEnableUnlimitedTier()) {
+            return null;
         }
 
-        return null;
+        return policy;
+
     }
 
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
