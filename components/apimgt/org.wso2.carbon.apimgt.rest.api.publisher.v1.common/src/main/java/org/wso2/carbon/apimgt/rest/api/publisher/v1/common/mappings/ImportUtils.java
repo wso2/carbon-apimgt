@@ -1998,27 +1998,23 @@ public class ImportUtils {
         Map<String, String> lifeCycleActions = new LinkedHashMap<>();
         // No need to change the lifecycle if both the statuses are same
         if (!StringUtils.equalsIgnoreCase(currentStatus, targetStatus)) {
-            try {
-                LCManager lcManager = LCManagerFactory.getInstance().getLCManager();
-                if (StringUtils.equals(targetStatus, APIStatus.BLOCKED.toString()) || StringUtils.equals(targetStatus,
-                        APIStatus.DEPRECATED.toString()) || StringUtils.equals(targetStatus,
-                        APIStatus.RETIRED.toString())) {
-                    lifeCycleActions.put(APIStatus.PUBLISHED.toString(),
-                            lcManager.getTransitionAction(currentStatus.toUpperCase(), APIStatus.PUBLISHED.toString()));
-                    currentStatus = APIStatus.PUBLISHED.toString();
-                    if (StringUtils.equals(targetStatus, APIStatus.RETIRED.toString())) {
-                        // The API should be Deprecated prior Retiring the API
-                        lifeCycleActions.put(APIStatus.DEPRECATED.toString(),
-                                lcManager.getTransitionAction(currentStatus.toUpperCase(),
-                                        APIStatus.DEPRECATED.toString()));
-                        currentStatus = APIStatus.DEPRECATED.toString();
-                    }
+            LCManager lcManager = LCManagerFactory.getInstance().getLCManager();
+            if (StringUtils.equals(targetStatus, APIStatus.BLOCKED.toString()) || StringUtils.equals(targetStatus,
+                    APIStatus.DEPRECATED.toString()) || StringUtils.equals(targetStatus,
+                    APIStatus.RETIRED.toString())) {
+                lifeCycleActions.put(APIStatus.PUBLISHED.toString(),
+                        lcManager.getTransitionAction(currentStatus.toUpperCase(), APIStatus.PUBLISHED.toString()));
+                currentStatus = APIStatus.PUBLISHED.toString();
+                if (StringUtils.equals(targetStatus, APIStatus.RETIRED.toString())) {
+                    // The API should be Deprecated prior Retiring the API
+                    lifeCycleActions.put(APIStatus.DEPRECATED.toString(),
+                            lcManager.getTransitionAction(currentStatus.toUpperCase(),
+                                    APIStatus.DEPRECATED.toString()));
+                    currentStatus = APIStatus.DEPRECATED.toString();
                 }
-                lifeCycleActions.put(targetStatus,
-                        lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase()));
-            } catch (PersistenceException | ParseException | IOException e) {
-                throw new APIManagementException("Error while retrieving lifecycle configuration", e);
             }
+            lifeCycleActions.put(targetStatus,
+                    lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase()));
         }
         return lifeCycleActions;
     }
