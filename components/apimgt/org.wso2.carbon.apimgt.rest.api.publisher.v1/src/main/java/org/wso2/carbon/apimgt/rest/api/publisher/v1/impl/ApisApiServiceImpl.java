@@ -97,7 +97,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -3107,6 +3106,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO = (OpenAPIDefinitionValidationResponseDTO) validationResponseMap
                 .get(RestApiConstants.RETURN_DTO);
+        if (!validationResponseDTO.isIsValid()) {
+            List<ErrorListItemDTO> errors = validationResponseDTO.getErrors();
+            for (ErrorListItemDTO error : errors) {
+                log.error("Error while parsing OpenAPI definition. Error code: " + error.getCode() + ". Error: "
+                        + error.getDescription());
+            }
+        }
         return Response.ok().entity(validationResponseDTO).build();
     }
 
