@@ -3116,7 +3116,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO = (OpenAPIDefinitionValidationResponseDTO) validationResponseMap
                 .get(RestApiConstants.RETURN_DTO);
-        if (validationResponseMap != null && !validationResponseDTO.isIsValid()) {
+        if (validationResponseDTO != null && !validationResponseDTO.isIsValid()) {
             List<ErrorListItemDTO> errors = validationResponseDTO.getErrors();
             for (ErrorListItemDTO error : errors) {
                 log.error("Error while parsing OpenAPI definition. Error code: " + error.getCode() + ". Error: "

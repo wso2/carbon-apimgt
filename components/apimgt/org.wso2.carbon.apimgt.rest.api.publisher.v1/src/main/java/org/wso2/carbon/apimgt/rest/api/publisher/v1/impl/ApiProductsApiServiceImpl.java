@@ -125,8 +125,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             } else {
                 productState = null;
             }
-            boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatu
-            s().equals(productState) ||
+            boolean isAPIPublishedOrDeprecated = APIStatus.PUBLISHED.getStatus().equals(productState) ||
                     APIStatus.DEPRECATED.getStatus().equals(productState);
             List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
             if (isAPIPublishedOrDeprecated && (apiUsages != null && apiUsages.size() > 0)) {
