@@ -2794,9 +2794,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (APIPersistenceException e) {
             handleException("Error while accessing persistence layer", e);
-        } catch (PersistenceException | IOException | ParseException e) {
-            handleException("Error while accessing lifecycle information ", e);
-        }  finally {
+        } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
         return response;
