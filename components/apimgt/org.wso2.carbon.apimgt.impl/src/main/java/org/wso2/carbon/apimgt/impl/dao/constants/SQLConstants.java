@@ -1422,8 +1422,8 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS, ORGANIZATION)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS, ORGANIZATION, SCOPE_PREFIX)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1902,6 +1902,9 @@ public class SQLConstants {
 
     public static final String GET_API_CONTEXT_BY_API_UUID_SQL =
             "SELECT CONTEXT FROM AM_API WHERE API_UUID = ?";
+
+    public static final String GET_SCOPE_PREFIX =
+            "SELECT SCOPE_PREFIX FROM AM_API WHERE API_UUID = ? ";
 
     public static final String GET_ALL_CONTEXT_SQL = "SELECT CONTEXT FROM AM_API ";
 
@@ -2657,8 +2660,8 @@ public class SQLConstants {
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
-            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, ORGANIZATION) VALUES (?,?,?,?,?,?,?,?,?"
-                    + ",?,?)";
+            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, ORGANIZATION) +" +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
@@ -2929,7 +2932,8 @@ public class SQLConstants {
     public static final String UPDATE_REVISION_CREATED_BY_API_SQL = "UPDATE AM_API SET REVISIONS_CREATED = ? WHERE " +
             "API_UUID = ?";
     public static final String ADD_API_REVISION_METADATA = "INSERT INTO AM_API_REVISION_METADATA (API_UUID," +
-            "REVISION_UUID,API_TIER) VALUES(?,?,(SELECT API_TIER FROM AM_API WHERE API_UUID = ? ))";
+            "REVISION_UUID,API_TIER,SCOPE_PREFIX) VALUES(?,?,(SELECT API_TIER FROM AM_API WHERE API_UUID = ? )," +
+            "(SELECT SCOPE_PREFIX FROM AM_API WHERE API_UUID = ? ))";
     public static final String DELETE_API_REVISION_METADATA = "DELETE FROM AM_API_REVISION_METADATA WHERE API_UUID = " +
             "? AND REVISION_UUID = ?";
     public static final String GET_REVISIONED_API_TIER_SQL = "SELECT API_TIER FROM AM_API_REVISION_METADATA WHERE " +
@@ -3528,7 +3532,9 @@ public class SQLConstants {
                 "API_UUID = ? ORDER BY ID DESC FETCH NEXT 1 ROWS ONLY";
         public static final String GET_MOST_RECENT_REVISION_UUID_MSSQL = "SELECT TOP 1 REVISION_UUID FROM AM_REVISION WHERE " +
                 "API_UUID = ? ORDER BY ID DESC";
-        public static final String GET_REVISION_APIID_BY_REVISION_UUID = "SELECT API_UUID, ID FROM AM_REVISION WHERE REVISION_UUID = ?";
+        public static final String GET_REVISION_APIID_BY_REVISION_UUID = "SELECT AR.API_UUID AS API_UUID, AR.ID AS ID, " +
+                "ARM.SCOPE_PREFIX AS SCOPE_PREFIX FROM AM_REVISION AR, AM_API_REVISION_METADATA ARM WHERE" +
+                " AR.REVISION_UUID = ARM.REVISION_UUID & AR.REVISION_UUID = ?";
         public static final String GET_REVISIONS_BY_API_UUID = "SELECT ID, REVISION_UUID, DESCRIPTION, CREATED_TIME, " +
                 "CREATED_BY FROM AM_REVISION WHERE API_UUID = ? ORDER BY ID";
         public static final String ADD_API_REVISION_DEPLOYMENT_MAPPING =

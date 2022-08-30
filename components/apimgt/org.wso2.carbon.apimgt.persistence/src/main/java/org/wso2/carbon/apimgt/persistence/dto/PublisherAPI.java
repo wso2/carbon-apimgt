@@ -92,6 +92,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
+    private String scopePrefix;
     
     private String audience;
 
@@ -558,6 +559,10 @@ public class PublisherAPI extends PublisherAPIInfo {
     public void setAsyncApiDefinition(String asyncApiDefinition) {
         this.asyncApiDefinition = asyncApiDefinition;
     }
+
+    public String getScopePrefix() { return scopePrefix; }
+
+    public  void setScopePrefix(String scopePrefix) { this.scopePrefix = scopePrefix; }
 
     @Override
     public String toString() {

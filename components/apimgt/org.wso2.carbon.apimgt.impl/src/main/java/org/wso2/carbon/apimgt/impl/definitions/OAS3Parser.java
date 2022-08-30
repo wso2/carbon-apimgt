@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
+import io.swagger.models.apideclaration.Api;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
@@ -73,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,8 +90,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
-import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.*;
 
 /**
  * Models API definition using OAS (OpenAPI 3.0) parser

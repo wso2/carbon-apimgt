@@ -98,12 +98,10 @@ public class SwaggerData {
         }
 
         public List<Scope> getScopes() {
-
             return scopes;
         }
 
         public void setScopes(List<Scope> scopes) {
-
             this.scopes = scopes;
         }
 
@@ -119,6 +117,8 @@ public class SwaggerData {
     private String apiLevelPolicy;
     private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
+    private String scopePrefix;
+    private String fullScope;
 
     public SwaggerData(API api) {
         title = api.getId().getName();
@@ -133,6 +133,7 @@ public class SwaggerData {
         }
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
+        scopePrefix = api.getScopePrefix();
 
         for (URITemplate uriTemplate : uriTemplates) {
             Resource resource = new Resource();
@@ -142,6 +143,14 @@ public class SwaggerData {
             resource.policy = uriTemplate.getThrottlingTier();
             resource.scope = uriTemplate.getScope();
             resource.scopes = uriTemplate.retrieveAllScopes();
+            if (scopePrefix != null){
+                for (Scope scope: resource.scopes) {
+                    if (!scope.getKey().contains(scopePrefix)) {
+                        fullScope = scopePrefix + '/' + scope.getKey();
+                        scope.setKey(fullScope);
+                    }
+                }
+            }
             resource.amznResourceName = uriTemplate.getAmznResourceName();
             resource.amznResourceTimeout = uriTemplate.getAmznResourceTimeout();
             resources.add(resource);
