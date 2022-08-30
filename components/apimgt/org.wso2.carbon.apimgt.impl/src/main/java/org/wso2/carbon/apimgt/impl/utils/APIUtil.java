@@ -4923,8 +4923,6 @@ public final class APIUtil {
 
         String keyStorePath = CarbonUtils.getServerConfiguration()
                 .getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
-        String keyStorePassword = CarbonUtils.getServerConfiguration()
-                .getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
         try {
             KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
