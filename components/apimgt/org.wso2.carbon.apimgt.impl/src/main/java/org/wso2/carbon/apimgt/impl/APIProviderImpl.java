@@ -2791,6 +2791,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // apiWFState is null when simple wf executor is used because wf state is not stored in the db.
             if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                 LifeCycleUtils.changeLifecycle(this.username, this, orgId, apiTypeWrapper, action, checklist);
+                JSONObject apiLogObject = new JSONObject();
+                apiLogObject.put(APIConstants.AuditLogConstants.NAME, apiName);
+                apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, apiContext);
+                apiLogObject.put(APIConstants.AuditLogConstants.VERSION, apiVersion);
+                apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, providerName);
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                        APIConstants.AuditLogConstants.LIFECYCLE_CHANGED, this.username);
             }
         } catch (APIPersistenceException e) {
             handleException("Error while accessing persistence layer", e);
