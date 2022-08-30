@@ -110,6 +110,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -150,7 +151,8 @@ public class ImportUtils {
         API importedApi = null;
         String currentStatus;
         String targetStatus;
-        String lifecycleAction;
+        // Map to store the target life cycle state as key and life cycle action as the value
+        Map<String, String> lifecycleActions = new LinkedHashMap<>();
         GraphqlComplexityInfo graphqlComplexityInfo = null;
         int tenantId = 0;
         JsonArray deploymentInfoArray = null;
@@ -266,8 +268,8 @@ public class ImportUtils {
                 apiProvider.updateAPI(importedApi, oldAPI);
             }
 
-            // Retrieving the life cycle action to do the lifecycle state change explicitly later
-            lifecycleAction = getLifeCycleAction(currentStatus, targetStatus);
+            // Retrieving the life cycle actions to do the lifecycle state change explicitly later
+            lifecycleActions = getLifeCycleActions(currentStatus, targetStatus);
 
             // Add/update swagger content except for streaming APIs and GraphQL APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
@@ -313,16 +315,8 @@ public class ImportUtils {
             }
 
             // Change API lifecycle if state transition is required
-            if (StringUtils.isNotEmpty(lifecycleAction)) {
-                apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-                log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
-                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(importedApi);
-                String lcCheckList = "";
-                if (StringUtils.equals(lifecycleAction, APIConstants.LC_PUBLISH_LC_STATE)) {
-                    lcCheckList = "Requires re-subscription when publishing the API:" + true;
-                }
-                PublisherCommonUtils.changeApiOrApiProductLifecycle(lifecycleAction, apiTypeWrapper, lcCheckList,
-                        importedApi.getOrganization());
+            if (!lifecycleActions.isEmpty()) {
+                changeLifeCycleStatus(lifecycleActions, currentStatus, new ApiTypeWrapper(importedApi));
             }
             importedApi.setStatus(targetStatus);
 
@@ -1992,21 +1986,64 @@ public class ImportUtils {
     }
 
     /**
-     * This method returns the lifecycle action which can be used to transit from currentStatus to targetStatus.
+     * This method returns the life cycle actions which can be used to transit from currentStatus to targetStatus.
      *
      * @param currentStatus Current status to do status transition
      * @param targetStatus  Target status to do status transition
-     * @return Lifecycle action or null if target is not reachable
-     * @throws APIImportExportException If getting lifecycle action failed
+     * @return Life cycle actions or null if target is not reachable
+     * @throws APIManagementException If getting lifecycle action failed
      */
-    public static String getLifeCycleAction(String currentStatus, String targetStatus) throws APIManagementException {
-
+    public static Map<String, String> getLifeCycleActions(String currentStatus, String targetStatus)
+            throws APIManagementException {
+        Map<String, String> lifeCycleActions = new LinkedHashMap<>();
         // No need to change the lifecycle if both the statuses are same
-        if (StringUtils.equalsIgnoreCase(currentStatus, targetStatus)) {
-            return null;
+        if (!StringUtils.equalsIgnoreCase(currentStatus, targetStatus)) {
+            LCManager lcManager = LCManagerFactory.getInstance().getLCManager();
+            if (StringUtils.equals(targetStatus, APIStatus.BLOCKED.toString()) || StringUtils.equals(targetStatus,
+                    APIStatus.DEPRECATED.toString()) || StringUtils.equals(targetStatus,
+                    APIStatus.RETIRED.toString())) {
+                lifeCycleActions.put(APIStatus.PUBLISHED.toString(),
+                        lcManager.getTransitionAction(currentStatus.toUpperCase(), APIStatus.PUBLISHED.toString()));
+                currentStatus = APIStatus.PUBLISHED.toString();
+                if (StringUtils.equals(targetStatus, APIStatus.RETIRED.toString())) {
+                    // The API should be Deprecated prior Retiring the API
+                    lifeCycleActions.put(APIStatus.DEPRECATED.toString(),
+                            lcManager.getTransitionAction(currentStatus.toUpperCase(),
+                                    APIStatus.DEPRECATED.toString()));
+                    currentStatus = APIStatus.DEPRECATED.toString();
+                }
+            }
+            lifeCycleActions.put(targetStatus,
+                    lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase()));
         }
-        LCManager lcManager = LCManagerFactory.getInstance().getLCManager();
-        return lcManager.getTransitionAction(currentStatus.toUpperCase(), targetStatus.toUpperCase());
+        return lifeCycleActions;
+    }
+
+    /**
+     * This method changes the lifecycle status of an API
+     *
+     * @param lifecycleActions Life cycle actions map
+     * @param currentStatus    Current lifecycle status
+     * @param apiTypeWrapper   API or API Product
+     * @throws APIManagementException if an error occurs while changing the lifecycle status
+     */
+    private static void changeLifeCycleStatus(Map<String, String> lifecycleActions, String currentStatus,
+            ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
+        if (!lifecycleActions.isEmpty()) {
+            for (Map.Entry<String, String> lifeCycleAction : lifecycleActions.entrySet()) {
+                // Change API the life cycle if the state transition is required
+                if (StringUtils.isNotEmpty(lifeCycleAction.getValue())) {
+                    log.info("Changing lifecycle from " + currentStatus + " to " + lifeCycleAction.getKey());
+                    String lcCheckList = "";
+                    if (StringUtils.equals(lifeCycleAction.getValue(), APIConstants.LC_PUBLISH_LC_STATE)) {
+                        lcCheckList = "Requires re-subscription when publishing the API:" + true;
+                    }
+                    PublisherCommonUtils.changeApiOrApiProductLifecycle(lifeCycleAction.getValue(), apiTypeWrapper,
+                            lcCheckList, apiTypeWrapper.getOrganization());
+                    currentStatus = lifeCycleAction.getKey();
+                }
+            }
+        }
     }
 
     /**
@@ -2030,7 +2067,8 @@ public class ImportUtils {
         JsonArray deploymentInfoArray = null;
         String currentStatus;
         String targetStatus;
-        String lifecycleAction;
+        // Map to store the target life cycle state as key and life cycle action as the value
+        Map<String, String> lifecycleActions;
 
         try {
             JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
@@ -2090,8 +2128,8 @@ public class ImportUtils {
                                 importedApiProductDTO.getProvider(), organization);
             }
 
-            // Retrieving the life cycle action to do the lifecycle state change explicitly later
-            lifecycleAction = getLifeCycleAction(currentStatus, targetStatus);
+            // Retrieving the life cycle actions to do the lifecycle state change explicitly later
+            lifecycleActions = getLifeCycleActions(currentStatus, targetStatus);
 
             // Add/update swagger of API Product
             importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct.getUuid(),
@@ -2109,11 +2147,8 @@ public class ImportUtils {
             addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct, organization);
 
             // Change API Product lifecycle if state transition is required
-            if (StringUtils.isNotEmpty(lifecycleAction)) {
-                apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-                log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
-                apiProvider.changeLifeCycleStatus(currentTenantDomain, new ApiTypeWrapper(importedApiProduct),
-                        lifecycleAction, new HashMap<>());
+            if (!lifecycleActions.isEmpty()) {
+                changeLifeCycleStatus(lifecycleActions, currentStatus, new ApiTypeWrapper(importedApiProduct));
             }
             importedApiProduct.setState(targetStatus);
 
