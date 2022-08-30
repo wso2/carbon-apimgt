@@ -112,9 +112,12 @@ public enum ExceptionCodes implements ErrorHandler {
     ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
     INVALID_ENV_API_PROP_CONFIG(900358, "Invalid environment specific api property config", 400,
             "Environment specific api property config is not valid. %s", false),
-    API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
-    API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
-    SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
+    API_IS_NOT_FOUND_IN_DATABASE(900359, "API is not consistently stored", 500,
+            "API is not consistently stored"),
+    API_IS_NOT_FOUND_IN_REGISTRY(900360, "API Not Found", 404, "Requested API with id '%s' not found"),
+    API_OR_API_PRODUCT_NOT_FOUND(900361, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
+    API_PRODUCT_NOT_FOUND(900362, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
+    SUB_ORGANIZATION_NOT_IDENTIFIED(900363, "User's Organization Not Identified", 403, "User's Organization is not identified"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,

@@ -3861,7 +3861,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO getAPIByID(String apiId, APIProvider apiProvider, String organization) {
+    private APIDTO getAPIByID(String apiId, APIProvider apiProvider, String organization) throws APIManagementException {
         try {
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             api.setOrganization(organization);
@@ -3874,8 +3874,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         }
         return null;
