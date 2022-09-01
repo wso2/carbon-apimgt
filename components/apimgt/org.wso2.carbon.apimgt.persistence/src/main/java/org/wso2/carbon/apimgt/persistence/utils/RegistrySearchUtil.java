@@ -76,7 +76,8 @@ public class RegistrySearchUtil {
     public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
     public static final String NULL_USER_ROLE_LIST = "null";
     public static final String GET_API_PRODUCT_QUERY  = "type=APIProduct";
-    public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
+    public static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
+    public static final String[] API_SEARCH_PREFIXES = { ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX.toLowerCase(), DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
             LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(), API_STATUS.toLowerCase(),

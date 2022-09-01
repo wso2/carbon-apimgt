@@ -820,6 +820,13 @@ public interface APIProvider extends APIManager {
      */
     boolean isConfigured();
 
+    /**
+     * Method to retrieve certificate metadata uploaded for the tenant represent by the user.
+     * @param alias : The alias of the certificate.
+     * @return : CertificateMetadata
+     * @throws APIManagementException
+     */
+    CertificateMetadataDTO getCertificate(String alias) throws APIManagementException;
 
     /**
      * Method to retrieve all the certificates uploaded for the tenant represent by the user.
@@ -1625,6 +1632,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed get APIProduct from APIProductIdentifier
      */
     APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
+
     /**
      * Returns APIProduct Search result based on the provided query.
      *
@@ -1646,5 +1654,19 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
+
+    /**
+     * Returns API Search result based on fqdn of the provided endpoint.
+     * Returns empty API Search result if endpoint is invalid.
+     *
+     * @param endpoint        endpoint Ex: https://api.wso2.com
+     * @param tenantDomain    tenant domain
+     * @param start           starting number
+     * @param end             ending number
+     * @return APIProduct result
+     * @throws APIManagementException if search is failed
+     */
+    APISearchResult searchPaginatedAPIsByFQDN(String endpoint, String tenantDomain, int start, int end) throws
+            APIManagementException;
 
 }

@@ -28,16 +28,19 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
@@ -51,6 +54,7 @@ import java.util.List;
 public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesApiService {
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
+
     public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -224,6 +228,33 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                     alias + "'", log);
         }
         return null;
+    }
+
+    @Override
+    public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
+
+        limit = (limit != null) ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = (offset != null) ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        APIMetadataListDTO apiMetadataListDTO;
+        CertificateMetadataDTO certificateMetadataDTO;
+        String fqdn;
+        APISearchResult searchResult;
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        certificateMetadataDTO = apiProvider.getCertificate(alias);
+
+        if(certificateMetadataDTO != null) {
+            String endpoint = certificateMetadataDTO.getEndpoint();
+            searchResult = apiProvider.searchPaginatedAPIsByFQDN(endpoint, organization, offset, limit);
+        }else{
+            searchResult = new APISearchResult();
+        }
+
+        apiMetadataListDTO = APIMappingUtil.fromAPIListToAPIMetadataListDTO(searchResult.getApis());
+        APIMappingUtil.setPaginationParamsForAPIMetadataListDTO(apiMetadataListDTO, alias, offset, limit, searchResult.getApiCount());
+
+        return Response.status(Response.Status.OK).entity(apiMetadataListDTO).build();
     }
 
     public Response getEndpointCertificates(Integer limit, Integer offset, String alias, String endpoint,

@@ -87,6 +87,7 @@ public final class RestApiConstants {
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
+    public static final String ALIAS_PARAM = "{alias}";
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
     public static final String SORTBY_PARAM = "{sortBy}";
@@ -107,6 +108,8 @@ public final class RestApiConstants {
 
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String RESOURCE_PATH_ENDPOINT_CERTIFICATE_USAGE = "/endpoint-certificates/"
+            + ALIAS_PARAM + "/usage";
     public static final String RESOURCE_PATH_API_PRODUCTS = "/api-products";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
@@ -208,6 +211,9 @@ public final class RestApiConstants {
 
     public static final String APIS_GET_PAGINATION_URL =
             RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
+
+    public static final String ENDPOINT_CERTIFICATE_USAGE_GET_PAGINATION_URL =
+            RESOURCE_PATH_ENDPOINT_CERTIFICATE_USAGE + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String APPLICATIONS_GET_PAGINATION_URL =
             RESOURCE_PATH_APPLICATIONS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&groupId="
