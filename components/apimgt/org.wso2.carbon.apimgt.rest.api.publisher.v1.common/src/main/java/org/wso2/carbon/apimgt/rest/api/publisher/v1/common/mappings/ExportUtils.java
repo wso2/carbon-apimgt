@@ -176,9 +176,9 @@ public class ExportUtils {
 
         CommonUtil.createDirectory(archivePath);
         if (preserveDocs) {
-            addThumbnailToArchive(archivePath, apiIdentifier, apiProvider);
+            addThumbnailToArchive(archivePath, apiIdentifier, apiProvider, organization);
             addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider,
-                    APIConstants.API_IDENTIFIER_TYPE);
+                    APIConstants.API_IDENTIFIER_TYPE, organization);
         } else {
             if (StringUtils.equals(apiDtoToReturn.getType().toString().toLowerCase(),
                     APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
@@ -268,9 +268,9 @@ public class ExportUtils {
         CommonUtil.createDirectory(archivePath);
 
         if (preserveDocs) {
-            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider);
+            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider, organization);
             addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
-                    APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
+                    APIConstants.API_PRODUCT_IDENTIFIER_TYPE, organization);
 
         }
         addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
@@ -299,13 +299,13 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while retrieving image from the registry or
      *                                  storing in the archive directory
      */
-    public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider)
+    public static void addThumbnailToArchive(String archivePath, Identifier identifier,
+                                             APIProvider apiProvider, String organization)
             throws APIImportExportException, APIManagementException {
 
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
         try {
-            ResourceFile thumbnailResource = apiProvider.getIcon(identifier.getUUID(), tenantDomain);
+            ResourceFile thumbnailResource = apiProvider.getIcon(identifier.getUUID(), organization);
             if (thumbnailResource != null) {
                 String mediaType = thumbnailResource.getContentType();
                 String extension = ImportExportConstants.fileExtensionMapping.get(mediaType);
@@ -393,12 +393,12 @@ public class ExportUtils {
      * @throws APIManagementException   If an error occurs while retrieving document details
      */
     public static void addDocumentationToArchive(String archivePath, Identifier identifier,
-                                                 ExportFormat exportFormat, APIProvider apiProvider, String type)
+                                                 ExportFormat exportFormat, APIProvider apiProvider,
+                                                 String type, String organization)
             throws APIImportExportException, APIManagementException {
 
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         List<Documentation> docList = StringUtils.equals(type, APIConstants.API_IDENTIFIER_TYPE) ?
-                apiProvider.getAllDocumentation(identifier.getUUID(), tenantDomain) :
+                apiProvider.getAllDocumentation(identifier.getUUID(), organization) :
                 apiProvider.getAllDocumentation(identifier);
         if (!docList.isEmpty()) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -408,7 +408,7 @@ public class ExportUtils {
                 for (Documentation doc : docList) {
                     // Retrieving the document again since objects in docList might have missing fields
                     Documentation individualDocument = apiProvider.getDocumentation(identifier.getUUID(), doc.getId(),
-                            tenantDomain);
+                            organization);
                     String sourceType = individualDocument.getSourceType().name();
                     String resourcePath = null;
                     InputStream inputStream = null;
@@ -417,7 +417,7 @@ public class ExportUtils {
                             docDirectoryPath + File.separator + cleanFolderName(individualDocument.getName());
                     CommonUtil.createDirectory(individualDocDirectoryPath);
                     DocumentationContent documentationContent =
-                            apiProvider.getDocumentationContent(identifier.getUUID(), doc.getId(), tenantDomain);
+                            apiProvider.getDocumentationContent(identifier.getUUID(), doc.getId(), organization);
                     if (documentationContent != null) {
                         if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                             localFileName = individualDocument.getFilePath().substring(
