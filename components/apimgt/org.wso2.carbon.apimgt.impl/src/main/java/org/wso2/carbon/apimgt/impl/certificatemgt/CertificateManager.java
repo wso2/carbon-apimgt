@@ -84,6 +84,16 @@ public interface CertificateManager {
     boolean isConfigured();
 
     /**
+     * This method will return the Certificate Metadata object which maps to the alias and belongs to the provided
+     * tenant.
+     *
+     * @param alias : The alias to which the certificate is mapped.
+     * @param tenantId : The Id of the tenant that endpoint belongs to.
+     * @return CertificateMetadataDTO object which contains the certificate meta data.
+     */
+    CertificateMetadataDTO getCertificate(String alias, int tenantId);
+
+    /**
      * This method will return the Certificate Metadata object which maps to the endpoint and belongs to the provided
      * tenant.
      *

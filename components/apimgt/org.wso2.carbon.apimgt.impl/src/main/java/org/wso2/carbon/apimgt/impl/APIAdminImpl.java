@@ -601,9 +601,11 @@ public class APIAdminImpl implements APIAdmin {
                 if (configurationDto.isMask()) {
                     String value = (String) additionalProperties.get(configurationDto.getName());
                     if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
-                        Object unModifiedValue = retrievedKeyManagerConfigurationDTO.getAdditionalProperties()
-                                .get(configurationDto.getName());
-                        additionalProperties.replace(configurationDto.getName(), unModifiedValue);
+                        if (retrievedKeyManagerConfigurationDTO != null) {
+                            Object unModifiedValue = retrievedKeyManagerConfigurationDTO.getAdditionalProperties()
+                                    .get(configurationDto.getName());
+                            additionalProperties.replace(configurationDto.getName(), unModifiedValue);
+                        }
                     } else if (StringUtils.isNotEmpty(value)) {
                         additionalProperties.replace(configurationDto.getName(), encryptValues(value));
                     }
@@ -846,16 +848,18 @@ public class APIAdminImpl implements APIAdmin {
 
         KeyManagerConfigurationDTO keyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByName(organization, name);
-        if (keyManagerConfiguration != null &&
-                APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
-            APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
+        if (keyManagerConfiguration != null) {
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
+                APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
+            }
+            maskValues(keyManagerConfiguration);
+            if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfiguration.getTokenType())) {
+                getKeyManagerEndpoints(keyManagerConfiguration);
+            }
+            return keyManagerConfiguration;
         }
-        maskValues(keyManagerConfiguration);
-        if (!StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                keyManagerConfiguration.getTokenType())) {
-            getKeyManagerEndpoints(keyManagerConfiguration);
-        }
-        return keyManagerConfiguration;
+        return null;
     }
 
     @Override
@@ -1318,6 +1322,45 @@ public class APIAdminImpl implements APIAdmin {
         }
         policies = policiesWithoutUnlimitedTier.toArray(new Policy[0]);
         return policies;
+    }
+
+    /**
+     * Get Policy with corresponding name and type.
+     *
+     * @param tenantId tenantId
+     * @param level    policy type
+     * @param name     policy name
+     * @return Policy with corresponding name and type
+     * @throws APIManagementException
+     */
+    @Override public Policy getPolicyByNameAndType(int tenantId, String level, String name)
+            throws APIManagementException {
+
+        Policy policy = null;
+
+        if (PolicyConstants.POLICY_LEVEL_API.equals(level)) {
+            policy = apiMgtDAO.getAPIPolicy(name, tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equals(level)) {
+            policy = apiMgtDAO.getApplicationPolicy(name, tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(level)) {
+            policy = apiMgtDAO.getSubscriptionPolicy(name, tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)) {
+            policy = apiMgtDAO.getGlobalPolicy(name);
+        }
+
+        //Get the API Manager configurations and check whether the unlimited tier is disabled. If disabled, remove
+        // the tier from the array.
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ThrottleProperties throttleProperties = apiManagerConfiguration.getThrottleProperties();
+
+        if (policy != null && APIConstants.UNLIMITED_TIER.equals(policy.getPolicyName())
+                && !throttleProperties.isEnableUnlimitedTier()) {
+            return null;
+        }
+
+        return policy;
+
     }
 
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {

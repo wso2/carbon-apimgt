@@ -92,7 +92,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -224,7 +223,6 @@ import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -245,8 +243,6 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.xml.sax.SAXException;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -316,9 +312,7 @@ import javax.cache.Caching;
 import javax.net.ssl.SSLContext;
 import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
@@ -460,7 +454,7 @@ public final class APIUtil {
             for (APIProductIdentifier usedByProduct : usedByProducts) {
                 //TODO : removed registry call until find a proper fix
                 String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                usedByProduct.setUUID(apiProductPath);
+                usedByProduct.setUuid(apiProductPath);
             }
         }
     }
@@ -818,189 +812,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return provider;
-    }
-
-    /**
-     * Create Governance artifact from given attributes
-     *
-     * @param artifact initial governance artifact
-     * @param api      API object with the attributes value
-     * @return GenericArtifact
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create API
-     */
-    public static GenericArtifact createAPIArtifactContent(GenericArtifact artifact, API api)
-            throws APIManagementException {
-
-        try {
-            String apiStatus = api.getStatus();
-            artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, api.getVersionTimestamp());
-
-            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, api.getDescription());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_WADL, api.getWadlUrl());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, api.getThumbnailUrl());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiStatus);
-            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER, api.getTechnicalOwner());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL, api.getTechnicalOwnerEmail());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER, api.getBusinessOwner());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, api.getBusinessOwnerEmail());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, api.getVisibility());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES, api.getVisibleRoles());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS, api.getVisibleTenants());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED, Boolean.toString(api.isEndpointSecured()));
-            artifact.setAttribute(
-                    APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST, Boolean.toString(api.isEndpointAuthDigest()));
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME, api.getEndpointUTUsername());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD, api.getEndpointUTPassword());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_TRANSPORTS, api.getTransports());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_INSEQUENCE, api.getInSequence());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE, api.getOutSequence());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE, api.getFaultSequence());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING, api.getResponseCache());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(api.getCacheTimeout()));
-
-            artifact.setAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL, api.getRedirectURL());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_PRODUCTION_ENDPOINT,
-                    api.getApiExternalProductionEndpoint());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_EXTERNAL_SANDBOX_ENDPOINT,
-                    api.getApiExternalSandboxEndpoint());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_OWNER, api.getApiOwner());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, Boolean.toString(api.isAdvertiseOnly()));
-
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG, api.getEndpointConfig());
-
-            artifact.setAttribute(
-                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, api.getSubscriptionAvailability());
-            artifact.setAttribute(
-                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, api.getSubscriptionAvailableTenants());
-
-            artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
-
-            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
-            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
-                    Boolean.toString(api.isEnabledSchemaValidation()));
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(api.isEnableStore()));
-            artifact.setAttribute(APIConstants.API_OVERVIEW_TESTKEY, api.getTestKey());
-
-            //Validate if the API has an unsupported context before setting it in the artifact
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
-                String invalidContext = File.separator + APIConstants.VERSION_PLACEHOLDER;
-                if (invalidContext.equals(api.getContextTemplate())) {
-                    throw new APIManagementException(
-                            "API : " + api.getId() + " has an unsupported context : " + api.getContextTemplate());
-                }
-            } else {
-                String invalidContext =
-                        APIConstants.TENANT_PREFIX + tenantDomain + File.separator + APIConstants.VERSION_PLACEHOLDER;
-                if (invalidContext.equals(api.getContextTemplate())) {
-                    throw new APIManagementException(
-                            "API : " + api.getId() + " has an unsupported context : " + api.getContextTemplate());
-                }
-            }
-            // This is to support the pluggable version strategy.
-            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
-            artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, api.getType());
-
-            StringBuilder policyBuilder = new StringBuilder();
-            for (Tier tier : api.getAvailableTiers()) {
-                policyBuilder.append(tier.getName());
-                policyBuilder.append("||");
-            }
-
-            String policies = policyBuilder.toString();
-
-            if (!"".equals(policies)) {
-                policies = policies.substring(0, policies.length() - 2);
-                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, policies);
-            }
-
-            StringBuilder tiersBuilder = new StringBuilder();
-            for (Tier tier : api.getAvailableTiers()) {
-                tiersBuilder.append(tier.getName());
-                tiersBuilder.append("||");
-            }
-
-            String tiers = tiersBuilder.toString();
-
-            if (!"".equals(tiers)) {
-                tiers = tiers.substring(0, tiers.length() - 2);
-                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
-            } else {
-                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
-            }
-
-            if (APIConstants.PUBLISHED.equals(apiStatus)) {
-                artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
-            }
-            String[] keys = artifact.getAttributeKeys();
-            for (String key : keys) {
-                if (key.contains("URITemplate")) {
-                    artifact.removeAttribute(key);
-                }
-            }
-
-            Set<URITemplate> uriTemplateSet = api.getUriTemplates();
-            int i = 0;
-            for (URITemplate uriTemplate : uriTemplateSet) {
-                artifact.addAttribute(APIConstants.API_URI_PATTERN + i, uriTemplate.getUriTemplate());
-                artifact.addAttribute(APIConstants.API_URI_HTTP_METHOD + i, uriTemplate.getHTTPVerb());
-                artifact.addAttribute(APIConstants.API_URI_AUTH_TYPE + i, uriTemplate.getAuthType());
-
-                i++;
-
-            }
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api));
-
-            artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
-                    APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
-
-            artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION,
-                    APIUtil.getWebsubSubscriptionConfigurationJsonFromDto(api.getWebsubSubscriptionConfiguration()));
-
-            artifact.setAttribute(APIConstants.API_OVERVIEW_WS_URI_MAPPING, APIUtil.getWsUriMappingJsonFromDto(api.getWsUriMapping()));
-
-            //attaching api categories to the API
-            List<APICategory> attachedApiCategories = api.getApiCategories();
-            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
-            if (attachedApiCategories != null) {
-                for (APICategory category : attachedApiCategories) {
-                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
-                }
-            }
-
-            //set monetization status (i.e - enabled or disabled)
-            artifact.setAttribute(
-                    APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
-            //set additional monetization data
-            if (api.getMonetizationProperties() != null) {
-                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
-                        api.getMonetizationProperties().toJSONString());
-            }
-            if (api.getKeyManagers() != null) {
-                artifact.setAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS, new Gson().toJson(api.getKeyManagers()));
-            }
-
-            //check in github code to see this method was removed
-            String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
-            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
-                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
-            }
-        } catch (GovernanceException e) {
-            String msg = "Failed to create API for : " + api.getId().getApiName();
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-        return artifact;
     }
 
     /**
@@ -2825,52 +2636,26 @@ public final class APIUtil {
     }
 
     /**
-     * @param organization
-     * @throws APIManagementException
-     */
-    public static void loadTenantSelfSignUpConfigurations(String organization)
-            throws APIManagementException {
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Adding Self signup configuration to the tenant's registry");
-            }
-            InputStream inputStream;
-            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                inputStream =
-                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/default-sign-up-config" +
-                                ".xml");
-            } else {
-                inputStream =
-                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/tenant-sign-up-config" +
-                                ".xml");
-            }
-
-            ServiceReferenceHolder.getInstance().getApimConfigService().addSelfSighupConfig(organization, IOUtils.toString(inputStream));
-        } catch (IOException  e) {
-            throw new APIManagementException("Error while reading Self signup configuration file content", e);
-        }
-    }
-
-    /**
-     * Loads tenant-conf.json (tenant config) to registry from the tenant-conf.json available in the file system.
-     * If any REST API scopes are added to the local tenant-conf.json, they will be updated in the registry.
+     * Loads tenant-conf.json (tenant config) from the tenant-conf.json available in the file system.
+     * If any REST API scopes are added to the local tenant-conf.json, they will be updated.
      *
      * @param organization organization.
-     * @throws APIManagementException when error occurred while loading the tenant-conf to registry
+     * @throws APIManagementException when error occurred while loading the tenant-conf
      */
     public static void loadAndSyncTenantConf(String organization) throws APIManagementException {
 
         try {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonElement jsonElement = getFileBaseTenantConfig();
-            String currentConfig = ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+            String currentConfig = ServiceReferenceHolder.getInstance().getApimConfigService()
+                    .getTenantConfig(organization);
             if (currentConfig == null) {
-                ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
-                        gson.toJson(jsonElement));
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
+                ServiceReferenceHolder.getInstance().getApimConfigService()
+                        .addTenantConfig(organization, gson.toJson(fileBaseTenantConfig));
             }
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
+            throw new APIManagementException(
+                    "Error while saving tenant conf to the Advanced configuration of the " + "tenant " + organization, e);
         }
     }
 
@@ -2907,58 +2692,6 @@ public final class APIUtil {
             data = IOUtils.toByteArray(inputStream);
         }
         return data;
-    }
-
-
-
-    /**
-     * @param tenantId
-     * @throws APIManagementException
-     */
-    public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
-
-        try {
-            String selfSighupConfig =
-                    ServiceReferenceHolder.getInstance().getApimConfigService()
-                            .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
-            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-                factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                DocumentBuilder parser = factory.newDocumentBuilder();
-                InputStream inputStream = new ByteArrayInputStream(selfSighupConfig.getBytes());
-                Document dc = parser.parse(inputStream);
-                boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
-                String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0)
-                        .getFirstChild().getNodeValue();
-
-                if (enableSubscriberRoleCreation) {
-                    int roleLength = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
-                            .getLength();
-
-                    for (int i = 0; i < roleLength; i++) {
-                        String roleName = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
-                                .item(i).getFirstChild().getNodeValue();
-                        boolean isExternalRole = Boolean.parseBoolean(dc
-                                .getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL).item(i)
-                                .getFirstChild().getNodeValue());
-                        if (roleName != null) {
-                            // If isExternalRole==false ;create the subscriber role as an internal role
-                            if (isExternalRole && signUpDomain != null) {
-                                roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
-                            } else {
-                                roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR
-                                        + roleName;
-                            }
-                            createSubscriberRole(roleName, tenantId);
-                        }
-                    }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Adding Self signup configuration to the tenant's registry");
-            }
-
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new APIManagementException("Error while getting Self signup role information from the registry", e);
-        }
     }
 
     /**
@@ -3004,14 +2737,28 @@ public final class APIUtil {
             }
 
             // create creator role if it's creation is enabled in tenant-conf.json
-            JSONObject creatorRoleConfig = (JSONObject) defaultRoles
-                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE);
+            JSONObject creatorRoleConfig = (JSONObject) defaultRoles.get(
+                    APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE);
             if (isRoleCreationEnabled(creatorRoleConfig)) {
-                String creatorRoleName = String.valueOf(creatorRoleConfig
-                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                String creatorRoleName = String.valueOf(
+                        creatorRoleConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
                 if (!StringUtils.isBlank(creatorRoleName)) {
                     createCreatorRole(creatorRoleName, tenantId);
                 }
+            }
+
+            // create subscriber role if it's creation is enabled in tenant-conf.json
+            JSONObject subscriberRoleConfig = (JSONObject) defaultRoles.get(
+                    APIConstants.API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE);
+            if (isRoleCreationEnabled(subscriberRoleConfig)) {
+                String subscriberRoleName;
+                if (subscriberRoleConfig.containsKey(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME)) {
+                    subscriberRoleName = String.valueOf(
+                            subscriberRoleConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                } else {
+                    subscriberRoleName = APIConstants.SUBSCRIBER_ROLE;
+                }
+                createSubscriberRole(subscriberRoleName, tenantId);
             }
 
             // create devOps role if it's creation is enabled in tenant-conf.json
@@ -3048,7 +2795,6 @@ public final class APIUtil {
             }
 
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
-            createSelfSignUpRoles(tenantId);
         }
     }
 
@@ -3608,27 +3354,6 @@ public final class APIUtil {
 
     public static boolean isInternalOrganization(String organization) throws UserStoreException {
         return isTenantAvailable(organization);
-    }
-
-    /**
-     * Check whether the user has the given role
-     *
-     * @throws UserStoreException
-     * @throws APIManagementException
-     */
-    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
-        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
-        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
-        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
-        return abstractManager.isUserInRole(tenantAwareUserName, role);
     }
 
     /**
@@ -5198,11 +4923,8 @@ public final class APIUtil {
 
         String keyStorePath = CarbonUtils.getServerConfiguration()
                 .getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
-        String keyStorePassword = CarbonUtils.getServerConfiguration()
-                .getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
         try {
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
 
             X509HostnameVerifier hostnameVerifier;
@@ -5219,10 +4941,6 @@ public final class APIUtil {
             return new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
         } catch (KeyStoreException e) {
             handleException("Failed to read from Key Store", e);
-        } catch (IOException e) {
-            handleException("Key Store not found in " + keyStorePath, e);
-        } catch (CertificateException e) {
-            handleException("Failed to read Certificate", e);
         } catch (NoSuchAlgorithmException e) {
             handleException("Failed to load Key Store from " + keyStorePath, e);
         } catch (KeyManagementException e) {
@@ -7236,56 +6954,6 @@ public final class APIUtil {
         }
 
         return apiSwagger;
-    }
-
-    /**
-     * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
-     * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
-     * started with the system property 'migrationMode=true' if a migration related exports are to be done.
-     *
-     * @param targetTenantDomain Tenant domain of which resources are requested
-     * @param username           Logged in user name
-     * @throws APIMgtInternalException When internal error occurred
-     */
-    public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
-            throws APIMgtInternalException {
-
-        String superAdminRole = null;
-
-        //Accessing the same tenant as the user's tenant
-        if (targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username))) {
-            return true;
-        }
-
-        try {
-            superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
-        } catch (UserStoreException e) {
-            handleInternalException("Error in getting super admin role name", e);
-        }
-
-        //check whether logged in user is a super tenant user
-        String superTenantDomain = null;
-        try {
-            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getSuperTenantDomain();
-        } catch (UserStoreException e) {
-            handleInternalException("Error in getting the super tenant domain", e);
-        }
-        boolean isSuperTenantUser = MultitenantUtils.getTenantDomain(username).equals(superTenantDomain);
-        if (!isSuperTenantUser) {
-            return false;
-        }
-
-        //check whether the user has super tenant admin role
-        boolean isSuperAdminRoleNameExistInUser = false;
-        try {
-            isSuperAdminRoleNameExistInUser = isUserInRole(username, superAdminRole);
-        } catch (UserStoreException | APIManagementException e) {
-            handleInternalException("Error in checking whether the user has admin role", e);
-        }
-
-        return isSuperAdminRoleNameExistInUser;
     }
 
     /**

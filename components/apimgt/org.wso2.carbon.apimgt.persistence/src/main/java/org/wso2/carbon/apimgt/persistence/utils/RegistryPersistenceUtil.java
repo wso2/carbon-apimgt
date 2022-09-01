@@ -866,7 +866,7 @@ public class RegistryPersistenceUtil {
             Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
             for (APIProductIdentifier usedByProduct : usedByProducts) {
                 String apiProductPath = RegistryPersistenceUtil.getAPIProductPath(usedByProduct);
-                usedByProduct.setUUID(apiProductPath);
+                usedByProduct.setUuid(apiProductPath);
             }
         }
     }
@@ -1065,8 +1065,7 @@ public class RegistryPersistenceUtil {
     }
 
     public static String getLcStateFromArtifact(GovernanceArtifact artifact) throws GovernanceException {
-        String lcState = artifact.getLifecycleState();
-        String state = (lcState != null) ? lcState : artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+        String state = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
         return (state != null) ? state.toUpperCase() : null;
     }
 

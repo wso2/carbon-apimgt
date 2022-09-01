@@ -4,10 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.APIArtifactPropertyValues;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class GatewayArtifactsMgtDAO {
 
@@ -214,29 +216,39 @@ public class GatewayArtifactsMgtDAO {
     }
 
     /**
-     * This method retrieves the Organization given the API UUID
+     * This method retrieves the organization and the deployed time of an API revision.
      *
-     * @param uuid API UUID
-     * @return Organization
-     * @throws APIManagementException If failed to retrieve organization
+     * @param apiUUID API UUID
+     * @param envName Environment name
+     * @param revisionUUId API revision UUID
+     * @return Organization and Deployed Time
+     * @throws APIManagementException If failed to retrieve organization and deployed time
      */
-    public String retrieveOrganization(String uuid) throws APIManagementException {
+    public APIArtifactPropertyValues retrieveAPIArtifactPropertyValues(
+            String apiUUID, String envName, String revisionUUId) throws APIManagementException {
 
-        String query = SQLConstants.RETRIEVE_ORGANIZATION;
+        String query = SQLConstants.RETRIEVE_API_ARTIFACT_PROPERTY_VALUES;
         String organization = null;
+        Timestamp deployedTime = null;
+        APIArtifactPropertyValues propertyValues = new APIArtifactPropertyValues();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, uuid);
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, envName);
+            preparedStatement.setString(3, revisionUUId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     organization = resultSet.getString("ORGANIZATION");
+                    deployedTime = resultSet.getTimestamp("DEPLOYED_TIME");
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve organization", e);
+            handleException("Failed to retrieve organization and API revision deployed time", e);
         }
 
-        return organization;
+        propertyValues.setOrganization(organization);
+        propertyValues.setDeployedTime(deployedTime);
+        return propertyValues;
     }
 
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,
@@ -446,16 +458,12 @@ public class GatewayArtifactsMgtDAO {
                                                                         String tenantDomain)
             throws APIManagementException {
         // Logging the API ID List
-        log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
-        // Split apiId list into smaller list of size 25
-        List<List<String>> apiIdsChunk = new ArrayList<>();
-        int apiIdListSize = apiIds.size();
-        int apiIdArrayIndex = 0;
-        int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
-        while (apiIdArrayIndex < apiIdListSize) {
-            apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, Math.min(apiIdArrayIndex + apiIdsChunkSize, apiIdListSize)));
-            apiIdArrayIndex += apiIdsChunkSize;
+        if (log.isDebugEnabled()) {
+            log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
         }
+        // Split apiId list into smaller list of size 25
+        int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
+        Collection<List<String>> apiIdsChunk = getSlicedCollection(apiIds, apiIdsChunkSize);
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
 
         for (List<String> apiIdList: apiIdsChunk) {
@@ -515,6 +523,81 @@ public class GatewayArtifactsMgtDAO {
             }
         }
         return apiRuntimeArtifactDtoList;
+    }
+
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsOnlyByAPIIDs(List<String> apiIds, String tenantDomain)
+            throws APIManagementException {
+        // Logging the API ID List
+        if (log.isDebugEnabled()) {
+            log.debug("Getting runtime artifacts for the API ID List: " + apiIds.toString());
+        }
+        int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
+        Collection<List<String>> apiIdsChunk = getSlicedCollection(apiIds, apiIdsChunkSize);
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
+
+        for (List<String> apiIdList: apiIdsChunk) {
+            String query = SQLConstants.RETRIEVE_ARTIFACTS_ONLY_BY_MULTIPLE_APIIDS;
+            query = query.replaceAll(SQLConstants.API_ID_REGEX, String.join(",",Collections.nCopies(apiIdList.size(), "?")));
+
+            try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                int index = 1;
+                for (String apiId: apiIdList) {
+                    preparedStatement.setString(index, apiId);
+                    index++;
+                }
+                preparedStatement.setString(index, tenantDomain);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                        apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                        String apiId = resultSet.getString("API_ID");
+                        apiRuntimeArtifactDto.setApiId(apiId);
+                        String label = resultSet.getString("LABEL");
+                        String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSet.getString("VHOST"));
+                        apiRuntimeArtifactDto.setLabel(label);
+                        apiRuntimeArtifactDto.setVhost(resolvedVhost);
+                        apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
+                        apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
+                        apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
+                        apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
+                        apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
+                        InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
+                        if (artifact != null) {
+                            byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                            try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                                apiRuntimeArtifactDto.setArtifact(newArtifact);
+                            } catch (IOException e) {
+                                // Do not handle the exception here since runtime artifacts are retrieved by API UUID
+                                // throw the exception here.
+                                handleException("Error occurred retrieving input stream from byte array.", e);
+                            }
+                        }
+                        apiRuntimeArtifactDto.setFile(true);
+                        if (log.isDebugEnabled()){
+                            log.debug("Adding runtime artifact dto for the API ID: " + apiRuntimeArtifactDto.getApiId()
+                                    + ", revision ID: " + apiRuntimeArtifactDto.getRevision() + ", label: "
+                                    + apiRuntimeArtifactDto.getLabel());
+                        }
+                        apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                    }
+                }
+            } catch (SQLException e) {
+                handleException("Failed to retrieve Gateway Artifact for Apis : " + apiIdList, e);
+            }
+        }
+        return apiRuntimeArtifactDtoList;
+    }
+
+    private Collection<List<String>> getSlicedCollection(List<String> apiIds, int apiIdsChunkSize) {
+        Collection<List<String>> apiIdsChunk = IntStream.range(0, apiIds.size())
+                .boxed()
+                .collect(Collectors.groupingBy(partition -> (partition / apiIdsChunkSize),
+                        Collectors.mapping(elementIndex -> apiIds.get(elementIndex), Collectors.toList())))
+                .values();
+        return apiIdsChunk;
     }
 
     public List<APIRuntimeArtifactDto> retrieveAllGatewayArtifactsByAPIIDs(List<String> apiIds, String[] labels)

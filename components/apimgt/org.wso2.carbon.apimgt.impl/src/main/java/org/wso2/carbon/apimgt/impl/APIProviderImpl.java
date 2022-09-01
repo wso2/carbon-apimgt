@@ -80,7 +80,7 @@ import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
@@ -98,8 +98,11 @@ import javax.cache.Cache;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -129,6 +132,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private RecommendationEnvironment recommendationEnvironment;
     private GlobalMediationPolicyImpl globalMediationPolicyImpl;
+    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
+
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
@@ -220,7 +225,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(uuid, organization);
             for (UserApplicationAPIUsage usage : allApiResult) {
                 for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
-                    APIIdentifier subsApiId = apiSubscription.getApiId();
+                    APIIdentifier subsApiId = apiSubscription.getAPIIdentifier();
                     APIIdentifier subsApiIdEmailReplaced = new APIIdentifier(
                             APIUtil.replaceEmailDomain(subsApiId.getProviderName()), subsApiId.getApiName(),
                             subsApiId.getVersion());
@@ -858,7 +863,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher
-                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
+                    extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.ADD_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -2012,7 +2017,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateSubscription(subscribedAPI);
         subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
         Identifier identifier =
-                subscribedAPI.getApiId() != null ? subscribedAPI.getApiId() : subscribedAPI.getProductId();
+                subscribedAPI.getAPIIdentifier() != null ? subscribedAPI.getAPIIdentifier() : subscribedAPI.getProductId();
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         String orgId = subscribedAPI.getOrganization();
@@ -2171,7 +2176,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Extracting API details for the recommendation system
         if (api != null && recommendationEnvironment != null) {
             RecommenderEventPublisher
-                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
+                    extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.DELETE_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -2790,12 +2795,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // apiWFState is null when simple wf executor is used because wf state is not stored in the db.
             if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                 LifeCycleUtils.changeLifecycle(this.username, this, orgId, apiTypeWrapper, action, checklist);
+                JSONObject apiLogObject = new JSONObject();
+                apiLogObject.put(APIConstants.AuditLogConstants.NAME, apiName);
+                apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, apiContext);
+                apiLogObject.put(APIConstants.AuditLogConstants.VERSION, apiVersion);
+                apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, providerName);
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                        APIConstants.AuditLogConstants.LIFECYCLE_CHANGED, this.username);
             }
         } catch (APIPersistenceException e) {
             handleException("Error while accessing persistence layer", e);
-        } catch (PersistenceException e) {
-            handleException("Error while accessing lifecycle information ", e);
-        }  finally {
+        } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
         return response;
@@ -2909,28 +2919,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, Object> lcData = new HashMap<String, Object>();
         List<String> actionsList;
-        try {
-            actionsList = LCManagerFactory.getInstance().getLCManager().getAllowedActionsForState(status);
-            if (actionsList != null) {
-                String[] actionsArray = new String[actionsList.size()];
-                actionsArray = actionsList.toArray(actionsArray);
-                lcData.put(APIConstants.LC_NEXT_STATES, actionsArray);
-            }
-            ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
-            List<String> checklistItemsList =
-                    LCManagerFactory.getInstance().getLCManager().getCheckListItemsForState(status);
-            if (checklistItemsList != null) {
-                for (String name : checklistItemsList) {
-                    CheckListItem item = new CheckListItem();
-                    item.setName(name);
-                    item.setValue("false");
-                    checkListItems.add(item);
-                }
-            }
-            lcData.put("items", checkListItems);
-        } catch (PersistenceException e) {
-            throw new APIManagementException("Error while parsing the lifecycle ", e);
+        actionsList = LCManagerFactory.getInstance().getLCManager().getAllowedActionsForState(status);
+        if (actionsList != null) {
+            String[] actionsArray = new String[actionsList.size()];
+            actionsArray = actionsList.toArray(actionsArray);
+            lcData.put(APIConstants.LC_NEXT_STATES, actionsArray);
         }
+        ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
+        List<String> checklistItemsList =
+                LCManagerFactory.getInstance().getLCManager().getCheckListItemsForState(status);
+        if (checklistItemsList != null) {
+            for (String name : checklistItemsList) {
+                CheckListItem item = new CheckListItem();
+                item.setName(name);
+                item.setValue("false");
+                checkListItems.add(item);
+            }
+        }
+        lcData.put("items", checkListItems);
         status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase(); // First letter capital
         lcData.put(APIConstants.LC_STATUS, status);
         return lcData;
@@ -3389,9 +3395,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (createdBlockConditionsDto != null) {
             publishBlockingEvent(createdBlockConditionsDto, "true");
+            return createdBlockConditionsDto.getUUID();
         }
-
-        return createdBlockConditionsDto.getUUID();
+        return null;
     }
 
     @Override
@@ -3642,9 +3648,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return certificateManager.isConfigured();
     }
 
-
     @Override
-    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
+    public CertificateMetadataDTO getCertificate(String alias) throws APIManagementException {
         int tenantId = 0;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -3652,7 +3657,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
         }
-        return certificateManager.getCertificates(tenantId);
+        return certificateManager.getCertificate(alias, tenantId);
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
+        int tenantId = 0;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            return certificateManager.getCertificates(tenantId);
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return null;
     }
 
     @Override
@@ -4725,6 +4743,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public APISearchResult searchPaginatedAPIsByFQDN(String endpoint, String tenantDomain,
+                                                     int offset, int limit) throws APIManagementException {
+        String fqdn;
+        APISearchResult result = new APISearchResult();
+
+        try {
+            URI uri = new URI(endpoint);
+            fqdn = uri.getHost();
+            if(fqdn == null) {
+                return result;
+            }
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("Error while extracting fully qualified domain name from the given url: " + endpoint, e);
+        }
+
+        String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + fqdn;
+        Organization org = new Organization(tenantDomain);
+        String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(adminUser);
+        Map<String, Object> properties = APIUtil.getUserProperties(adminUser);
+        UserContext userCtx = new UserContext(adminUser, org, properties, roles);
+
+        try {
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
+                    offset, limit, userCtx, "createdTime", "desc");
+            if (log.isDebugEnabled()) {
+                log.debug("Running Solr query : " + query);
+            }
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                List<API> apiList = new ArrayList<>();
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    populateAPIStatus(mappedAPI);
+                    populateDefaultVersion(mappedAPI);
+                    apiList.add(mappedAPI);
+                }
+                result.setApis(apiList);
+                result.setApiCount(searchAPIs.getTotalAPIsCount());
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching for APIs with Solr query: " + query , e);
+        }
+
+        return result ;
+    }
+
     private void populateAPITier(APIProduct apiProduct) throws APIManagementException {
 
         if (apiProduct.isRevision()) {
@@ -5661,7 +5727,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
                     + apiRevision.getApiUUID(), ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevision.getApiUUID()));
         }
-        apiProductIdentifier.setUUID(apiRevision.getApiUUID());
+        apiProductIdentifier.setUuid(apiRevision.getApiUUID());
         String revisionUUID;
         try {
             revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(tenantDomain),
@@ -5818,7 +5884,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
-        apiProductIdentifier.setUUID(apiProductId);
+        apiProductIdentifier.setUuid(apiProductId);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
                     apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
@@ -5851,7 +5917,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                     EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
         }
-        apiProductIdentifier.setUUID(apiProductId);
+        apiProductIdentifier.setUuid(apiProductId);
         try {
             apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
                     apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
@@ -5888,7 +5954,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setEndUserName(username);
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
-        jwtTokenInfoDTO.setExpirationTime(60 * 1000);
+        jwtTokenInfoDTO.setExpirationTime(60000l);
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }

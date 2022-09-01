@@ -312,7 +312,11 @@ public class InMemoryAPIDeployer {
         if (artifactRepoPath != null && artifactRepoPath.isDirectory()) {
             for (File file : Objects.requireNonNull(artifactRepoPath.listFiles())) {
                 if (!skippedList.contains(file.getName())) {
-                    file.delete();
+                    if (!file.delete()){
+                        if (log.isDebugEnabled()) {
+                            log.debug("File " + file.getAbsolutePath() + " not Deleted");
+                        }
+                    }
                 }
             }
         }

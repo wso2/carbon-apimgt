@@ -991,7 +991,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Extracting clicked API name by the user, for the recommendation system
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            apiConsumer.publishClickedAPI(api, userName);
+            apiConsumer.publishClickedAPI(api, userName, organization);
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {

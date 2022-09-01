@@ -166,6 +166,23 @@ public class RestApiCommonUtil {
     }
 
     /**
+     * Returns the paginated url for Endpoint Certificate Usage API
+     *
+     * @param alias  alias of certificate
+     * @param offset starting index
+     * @param limit  max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getCertificateUsagePaginatedURL(String alias, Integer offset, Integer limit) {
+
+        String paginatedURL = RestApiConstants.ENDPOINT_CERTIFICATE_USAGE_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.ALIAS_PARAM, alias);
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
+    /**
      * Returns the paginated url for Applications API
      *
      * @param offset  starting index

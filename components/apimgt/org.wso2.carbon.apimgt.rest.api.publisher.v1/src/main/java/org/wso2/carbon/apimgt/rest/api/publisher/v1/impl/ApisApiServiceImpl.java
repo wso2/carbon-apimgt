@@ -97,7 +97,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -678,10 +677,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
         String username = RestApiCommonUtil.getLoggedInUsername();
+        boolean isWSAPI = APIDTO.TypeEnum.WS.equals(body.getType());
+
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
             validateAPIExistence(apiId);
+
+            // validate web socket api endpoint configurations
+            if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(body)) {
+                throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
+                        ExceptionCodes.INVALID_ENDPOINT_URL);
+            }
 
             // validate sandbox and production endpoints
             if (!PublisherCommonUtils.validateEndpoints(body)) {
@@ -2429,7 +2436,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             OperationPolicyData policyData =
                     apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, true);
             if (policyData != null) {
-                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData);
+                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, ExportFormat.YAML.name());
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             } else {
@@ -3107,6 +3114,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO = (OpenAPIDefinitionValidationResponseDTO) validationResponseMap
                 .get(RestApiConstants.RETURN_DTO);
+        if (!validationResponseDTO.isIsValid()) {
+            List<ErrorListItemDTO> errors = validationResponseDTO.getErrors();
+            for (ErrorListItemDTO error : errors) {
+                log.error("Error while parsing OpenAPI definition. Error code: " + error.getCode() + ". Error: "
+                        + error.getDescription());
+            }
+        }
         return Response.ok().entity(validationResponseDTO).build();
     }
 
@@ -3336,22 +3350,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (validationResponse.getWsdlInfo() == null) {
             // Validation failure
             RestApiUtil.handleBadRequest(validationResponse.getError(), log);
-        }
-
-        if (fileInputStream != null) {
-            if (fileInputStream.markSupported()) {
-                // For uploading the WSDL below will require re-reading from the input stream hence resetting
-                try {
-                    fileInputStream.reset();
-                } catch (IOException e) {
-                    throw new APIManagementException("Error occurred while trying to reset the content stream of the " +
-                            "WSDL", e);
-                }
-            } else {
-                log.warn("Marking is not supported in 'fileInputStream' InputStream type: "
-                        + fileInputStream.getClass() + ". Skipping validating WSDL to avoid re-reading from the " +
-                        "input stream.");
-            }
         }
         return validationResponse;
     }
@@ -3617,6 +3615,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             } else {
                 API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organization);
+                if (APIConstants.API_TYPE_SOAPTOREST.equals(versionedAPI.getType())) {
+                    updateSwagger(versionedAPI.getUuid(), versionedAPI.getSwaggerDefinition(), organization);
+                }
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             }
             //This URI used to set the location header of the POST response
@@ -3629,7 +3630,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 throw e;
             }
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | FaultGatewaysException e) {
             String errorMessage = "Error while retrieving API location of " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }

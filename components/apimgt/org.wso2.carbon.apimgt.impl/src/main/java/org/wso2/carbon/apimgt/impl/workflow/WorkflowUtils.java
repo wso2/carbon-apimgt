@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -46,6 +47,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -95,7 +97,7 @@ public class WorkflowUtils {
                     .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent;
             String orgId = sub.getOrganization();
-            if (sub.getApiId() != null) {
+            if (sub.getAPIIdentifier() != null) {
                 subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
                         subWFDto.getTenantId(), orgId,
@@ -117,7 +119,7 @@ public class WorkflowUtils {
                     .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
             String orgId = sub.getOrganization();
             SubscriptionEvent subscriptionEvent;
-            if (sub.getApiId() != null) {
+            if (sub.getAPIIdentifier() != null) {
                 subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
                         subWFDto.getTenantId(), orgId,
@@ -304,7 +306,7 @@ public class WorkflowUtils {
         } catch (APIManagementException e) {
             String errorMsg = "Could not complete api state change workflow";
             log.error(errorMsg, e);
-        } catch (APIPersistenceException | PersistenceException e) {
+        } catch (APIPersistenceException e) {
             log.error("Error while accessing lifecycle information ", e);
         }
     }

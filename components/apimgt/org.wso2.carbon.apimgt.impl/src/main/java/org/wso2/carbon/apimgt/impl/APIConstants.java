@@ -266,8 +266,7 @@ public final class APIConstants {
     public static final String ASSESSMENT_REPORT = "/assessmentreport?";
 
     //registry resource containing the self signup user config
-    public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
-    public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE = "signup-config";
+    public static final String SELF_SIGN_UP_NAME = "SelfSignUp";
 
     public static final String DOCUMENTATION_SEARCH_PATH_FIELD = "path";
 
@@ -868,15 +867,8 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";
 
-    //elements in the configuration file in the registry related to self signup
-    public static final String SELF_SIGN_UP_REG_DOMAIN_ELEM = "SignUpDomain";
+    //elements in the configuration file in the advance tenant configuration related to self signup
     public static final String SELF_SIGN_UP_REG_ROLES_ELEM = "SignUpRoles";
-    public static final String SELF_SIGN_UP_REG_ROLE_ELEM = "SignUpRole";
-    public static final String SELF_SIGN_UP_REG_USERNAME = "AdminUserName";
-    public static final String SELF_SIGN_UP_REG_PASSWORD = "AdminPassword";
-    public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
-    public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
-    public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
 
     public static final String ORG_RESOLVER = "OrganizationResolver";
 
@@ -1976,6 +1968,7 @@ public final class APIConstants {
         public static final String CREATED = "created";
         public static final String UPDATED = "updated";
         public static final String DELETED = "deleted";
+        public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
 
         public static final String API = "API";
         public static final String ORGANIZATION = "Organization";
@@ -2463,6 +2456,7 @@ public final class APIConstants {
         public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
         public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
         public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
+        public static final String KEY_MANAGER_OPERATIONS_REVOKE_TOKEN_ENDPOINT = "/keymanager-operations/revoke-one-time-token";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
         public static final String DISPLAY_TOKEN_ENDPOINT = "display_token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
@@ -2481,6 +2475,7 @@ public final class APIConstants {
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
         public static final String USERINFO_ENDPOINT = "userinfo_endpoint";
+        public static final String REVOKE_TOKEN_ENDPOINT = "revoke_token_endpoint";
         public static final String AUTHORIZE_ENDPOINT = "authorize_endpoint";
         public static final String EVENT_HUB_CONFIGURATIONS = "EventHubConfigurations";
         public static final String KEY_MANAGER = "KeyManager";

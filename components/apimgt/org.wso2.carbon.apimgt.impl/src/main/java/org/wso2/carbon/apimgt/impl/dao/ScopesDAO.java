@@ -60,32 +60,32 @@ public class ScopesDAO {
         }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            PreparedStatement addScopeStatement = null;
-            PreparedStatement addScopeBindingStatement = null;
             try {
-                addScopeStatement = connection.prepareStatement(SQLConstants.INSERT_SCOPE_SQL);
-                addScopeBindingStatement = connection.prepareStatement(SQLConstants.ADD_SCOPE_MAPPING);
-                for (Scope scope : scopeSet) {
-                    if (!isScopeExist(connection, scope.getKey(), tenantId)) {
-                        addScopeStatement.setString(1, scope.getKey());
-                        addScopeStatement.setString(2, scope.getName());
-                        addScopeStatement.setString(3, scope.getDescription());
-                        addScopeStatement.setInt(4, tenantId);
-                        addScopeStatement.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
-                        addScopeStatement.addBatch();
-                        addScopeBindingsToBatch(addScopeBindingStatement, scope, tenantId);
+                try (PreparedStatement addScopeStatement = connection.prepareStatement(SQLConstants.INSERT_SCOPE_SQL)) {
+                    for (Scope scope : scopeSet) {
+                        if (!isScopeExist(connection, scope.getKey(), tenantId)) {
+                            addScopeStatement.setString(1, scope.getKey());
+                            addScopeStatement.setString(2, scope.getName());
+                            addScopeStatement.setString(3, scope.getDescription());
+                            addScopeStatement.setInt(4, tenantId);
+                            addScopeStatement.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
+                            addScopeStatement.addBatch();
+                        }
+                    }
+                    addScopeStatement.executeBatch();
+                    try (PreparedStatement addScopeBindingStatement =
+                                 connection.prepareStatement(SQLConstants.ADD_SCOPE_MAPPING)) {
+                        for (Scope scope : scopeSet) {
+                            addScopeBindingsToBatch(addScopeBindingStatement, scope, tenantId);
+                        }
+                        addScopeBindingStatement.executeBatch();
                     }
                 }
-                addScopeStatement.executeBatch();
-                addScopeBindingStatement.executeBatch();
                 connection.commit();
                 return true;
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIManagementException("Error while saving scopes into db", e, ExceptionCodes.INTERNAL_ERROR);
-            } finally {
-                APIMgtDBUtil.closeStatement(addScopeBindingStatement);
-                APIMgtDBUtil.closeStatement(addScopeStatement);
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving database connection", e,
@@ -93,16 +93,16 @@ public class ScopesDAO {
         }
     }
 
-    private void addScopeBindingsToBatch(PreparedStatement addScopeBindingStatement, Scope scope, int tenantId)
+    private void addScopeBindingsToBatch(PreparedStatement preparedStatement, Scope scope, int tenantId)
             throws SQLException {
 
         if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().trim().length() > 0) {
             for (String role : scope.getRoles().split(",")) {
-                addScopeBindingStatement.setString(1, scope.getKey());
-                addScopeBindingStatement.setInt(2, tenantId);
-                addScopeBindingStatement.setString(3, role);
-                addScopeBindingStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
-                addScopeBindingStatement.addBatch();
+                preparedStatement.setString(1, scope.getKey());
+                preparedStatement.setInt(2, tenantId);
+                preparedStatement.setString(3, role);
+                preparedStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
+                preparedStatement.addBatch();
             }
         }
     }

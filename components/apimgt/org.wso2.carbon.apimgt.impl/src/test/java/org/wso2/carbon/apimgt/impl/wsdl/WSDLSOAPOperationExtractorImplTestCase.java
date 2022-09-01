@@ -30,6 +30,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtilTest;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
@@ -54,6 +55,7 @@ public class WSDLSOAPOperationExtractorImplTestCase {
                 wsdlReader);
 
         operations = processor.getWsdlInfo().getSoapBindingOperations();
+        System.setProperty("carbon.home", WSDLSOAPOperationExtractorImplTestCase.class.getResource("/").getFile());
     }
     @Test
     public void testGetWsdlDefinition() throws Exception {

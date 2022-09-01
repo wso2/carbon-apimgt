@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.dto.RevokeTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.dto.UserInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -62,6 +63,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.RevokeClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TenantHeaderInterceptor;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
@@ -99,6 +101,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private AuthClient authClient;
     private ScopeClient scopeClient;
     private UserClient userClient;
+    private RevokeClient revokeClient;
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -698,6 +701,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     .concat(getTenantAwareContext().trim()).concat
                             (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT);
         }
+        String revokeOneTimeTokenEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.REVOKE_TOKEN_ENDPOINT) != null) {
+            revokeOneTimeTokenEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT);
+        } else {
+            revokeOneTimeTokenEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim()).concat
+                            (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_REVOKE_TOKEN_ENDPOINT);
+        }
 
         dcrClient = Feign.builder()
                 .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(dcrEndpoint)))
@@ -745,6 +756,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
                 .errorDecoder(new KMClientErrorDecoder())
                 .target(UserClient.class, userInfoEndpoint);
+        revokeClient = Feign.builder()
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(revokeOneTimeTokenEndpoint)))
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(RevokeClient.class, revokeOneTimeTokenEndpoint);
     }
 
     @Override
@@ -860,13 +880,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Scope getScopeByName(String name) throws APIManagementException {
 
-        ScopeDTO scopeDTO = null;
+        ScopeDTO scopeDTO;
         try {
             scopeDTO = scopeClient.getScopeByName(name);
+            return fromDTOToScope(scopeDTO);
         } catch (KeyManagerClientException ex) {
             handleException("Cannot read scope : " + name, ex);
         }
-        return fromDTOToScope(scopeDTO);
+        return null;
     }
 
     /**
@@ -1186,8 +1207,32 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
+    public void revokeOneTimeToken(String token, String consumerKey) {
+
+        RevokeTokenInfoDTO revokeTokenDTO = new RevokeTokenInfoDTO();
+        revokeTokenDTO.setToken(token);
+        revokeTokenDTO.setConsumerKey(consumerKey);
+        try {
+            Response response = revokeClient.revokeToken(revokeTokenDTO);
+            if (log.isDebugEnabled()) {
+                if (response.status() == HttpStatus.SC_OK) {
+                    log.debug("Successfully revoked the token " + APIUtil.getMaskedToken(token) +
+                            " with consumer key " + consumerKey);
+                } else {
+                    log.error("Error occurred while revoking one time token " + APIUtil.getMaskedToken(token) +
+                            " with consumer key " + consumerKey + ". Status: " + response.status());
+                }
+            }
+        } catch (KeyManagerClientException e) {
+            log.error("Could not reach the key manager resource for one time token revocation of the token "
+                    + APIUtil.getMaskedToken(token) + " with consumer key " + consumerKey + ". Error: " + e);
+        }
+    }
+
+    @Override
     protected void validateOAuthAppCreationProperties(OAuthApplicationInfo oAuthApplicationInfo)
             throws APIManagementException {
+
         super.validateOAuthAppCreationProperties(oAuthApplicationInfo);
 
         String type = getType();

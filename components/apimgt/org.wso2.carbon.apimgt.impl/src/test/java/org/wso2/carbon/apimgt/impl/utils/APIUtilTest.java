@@ -879,34 +879,6 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testCreateAPIArtifactContent() throws Exception {
-
-        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
-                    .SUPER_TENANT_DOMAIN_NAME);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-            GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
-            API api = getUniqueAPI();
-            Mockito.when(genericArtifact.getAttributeKeys()).thenReturn(new String[]{"URITemplate"}).thenThrow
-                    (GovernanceException.class);
-            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-            PowerMockito.mockStatic(ApiMgtDAO.class);
-            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-            APIUtil.createAPIArtifactContent(genericArtifact, api);
-            Assert.assertTrue(true);
-            APIUtil.createAPIArtifactContent(genericArtifact, api);
-            Assert.fail();
-        } catch (APIManagementException ex) {
-            Assert.assertTrue(ex.getMessage().contains("Failed to create API for :"));
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-
-    }
-
-    @Test
     public void testGetDocumentation() throws GovernanceException, APIManagementException {
 
         PowerMockito.mockStatic(CarbonUtils.class);

@@ -23,12 +23,12 @@ package org.wso2.carbon.apimgt.tracing.telemetry;
  */
 public class TelemetryConstants {
 
-    static final String OPEN_TELEMETRY_TRACER_NAME = "OpenTelemetry.RemoteTelemetry.Name";
+    static final String OPEN_TELEMETRY_TRACER_NAME = "OpenTelemetry.RemoteTracer.Name";
     static final String DEFAULT_OPEN_TELEMETRY_TRACER_NAME = "zipkin";
-    static final String OPEN_TELEMETRY_TRACER_ENABLED = "OpenTelemetry.RemoteTelemetry.Enabled";
+    static final String OPEN_TELEMETRY_TRACER_ENABLED = "OpenTelemetry.RemoteTracer.Enabled";
     static final String DEFAULT_OPEN_TELEMETRY_TRACER_ENABLED = "false";
-    static final String REMOTE_TELEMETRY_TRACER_ENABLED = "OpenTelemetry.RemoteTelemetry.Enabled";
-    static final String LOG_TELEMETRY_TRACER_ENABLED = "OpenTelemetry.LogTelemetry.Enabled";
+    static final String REMOTE_TELEMETRY_TRACER_ENABLED = "OpenTelemetry.RemoteTracer.Enabled";
+    static final String LOG_TELEMETRY_TRACER_ENABLED = "OpenTelemetry.LogTracer.Enabled";
     static final String OPENTELEMETRY_INSTRUMENTATION_NAME = "org.wso2.carbon.apimgt.tracing.telemetry";
     static final String LATENCY = "Latency";
     static final String OPERATION_NAME = "Operation";
@@ -39,16 +39,16 @@ public class TelemetryConstants {
     /**
      * Jaeger Constants.
      */
-    static final String JAEGER_CONFIG_PORT = "OpenTelemetry.RemoteTelemetry.Properties.Port";
-    static final String JAEGER_CONFIG_HOST = "OpenTelemetry.RemoteTelemetry.Properties.HostName";
-    static final int JAEGER_DEFAULT_PORT = 5775;
+    static final String JAEGER_CONFIG_PORT = "OpenTelemetry.RemoteTracer.Port";
+    static final String JAEGER_CONFIG_HOST = "OpenTelemetry.RemoteTracer.HostName";
+    static final int JAEGER_DEFAULT_PORT = 14250;
     static final String JAEGER_DEFAULT_HOST = "localhost";
 
     /**
      * Zipkin Constants.
      */
-    static final String ZIPKIN_CONFIG_PORT = "OpenTelemetry.RemoteTelemetry.Properties.Port";
-    static final String ZIPKIN_CONFIG_HOST = "OpenTelemetry.RemoteTelemetry.Properties.HostName";
+    static final String ZIPKIN_CONFIG_PORT = "OpenTelemetry.RemoteTracer.Port";
+    static final String ZIPKIN_CONFIG_HOST = "OpenTelemetry.RemoteTracer.HostName";
     static final int ZIPKIN_DEFAULT_PORT = 9411;
     static final String ZIPKIN_DEFAULT_HOST = "localhost";
     static final String ZIPKIN_API_CONTEXT = "/api/v2/spans";
@@ -57,5 +57,14 @@ public class TelemetryConstants {
      * Log Constants.
      */
     static final String LOG = "log";
-    static final String LOG_ENABLED = "OpenTelemetry.LogTelemetry.Enabled";
+    static final String LOG_ENABLED = "OpenTelemetry.LogTracer.Enabled";
+
+    /**
+     * Otlp Constants.
+     */
+    static final String OTLP_CONFIG_URL = "OpenTelemetry.RemoteTracer.Url";
+    static final String OPENTELEMETRY_PROPERTIES_PREFIX = "OpenTelemetry.RemoteTracer.Properties.";
+
+    private TelemetryConstants() {
+    }
 }

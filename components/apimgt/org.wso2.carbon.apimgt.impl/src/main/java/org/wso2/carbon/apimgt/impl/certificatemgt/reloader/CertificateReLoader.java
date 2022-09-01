@@ -19,11 +19,11 @@ package org.wso2.carbon.apimgt.impl.certificatemgt.reloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.certificatemgt.TrustStoreUtils;
 import org.wso2.carbon.apimgt.impl.dto.TrustStoreDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -43,15 +43,14 @@ public class CertificateReLoader implements Runnable {
         TrustStoreDTO trustStoreDTO = CertificateReLoaderUtil.getTrustStore();
         if (trustStoreDTO != null) {
             File trustStoreFile = new File(trustStoreDTO.getLocation());
-            FileInputStream localTrustStoreStream;
             try {
                 long lastUpdatedTimeStamp = CertificateReLoaderUtil.getLastUpdatedTimeStamp();
                 long lastModified = trustStoreFile.lastModified();
                 if (lastUpdatedTimeStamp != lastModified) {
                     CertificateReLoaderUtil.setLastUpdatedTimeStamp(lastModified);
-                    localTrustStoreStream = new FileInputStream(trustStoreFile);
-                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
+                    KeyStore trustStore;
+                    trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    TrustStoreUtils.loadCerts(trustStore, trustStoreDTO.getLocation(), trustStoreDTO.getPassword());
                     ServiceReferenceHolder.getInstance().setListenerTrustStore(trustStore);
                 }
             } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {

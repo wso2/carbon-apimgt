@@ -73,7 +73,6 @@ import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
-import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -95,7 +94,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1371,24 +1369,22 @@ public class GatewayUtils {
         if (api != null) {
             return (API) api;
         } else {
-            synchronized (messageContext) {
-                api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
-                if (api != null) {
-                    return (API) api;
-                }
-                String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-                String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-                SubscriptionDataStore tenantSubscriptionStore =
-                        SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
-                if (tenantSubscriptionStore != null) {
-                    API api1 = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
-                    if (api1 != null) {
-                        messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
-                        return api1;
-                    }
-                }
-                return null;
+            api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+            if (api != null) {
+                return (API) api;
             }
+            String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+            String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+            SubscriptionDataStore tenantSubscriptionStore =
+                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
+            if (tenantSubscriptionStore != null) {
+                API api1 = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+                if (api1 != null) {
+                    messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
+                    return api1;
+                }
+            }
+            return null;
         }
     }
 

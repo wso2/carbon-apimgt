@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.tracing.ZipkinTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.APIMOpenTelemetry;
 import org.wso2.carbon.apimgt.tracing.telemetry.JaegerTelemetry;
 import org.wso2.carbon.apimgt.tracing.telemetry.LogTelemetry;
+import org.wso2.carbon.apimgt.tracing.telemetry.OTLPTelemetry;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryServiceImpl;
 import org.wso2.carbon.apimgt.tracing.telemetry.ZipkinTelemetry;
@@ -67,6 +68,7 @@ public class TracingServiceComponent {
             registration = bundleContext.registerService(APIMOpenTelemetry.class, new JaegerTelemetry(), null);
             registration = bundleContext.registerService(APIMOpenTelemetry.class, new ZipkinTelemetry(), null);
             registration = bundleContext.registerService(APIMOpenTelemetry.class, new LogTelemetry(), null);
+            registration = bundleContext.registerService(APIMOpenTelemetry.class, new OTLPTelemetry(), null);
             registration = bundleContext.registerService(TelemetryService.class, TelemetryServiceImpl.getInstance(),
                     null);
 
@@ -106,12 +108,12 @@ public class TracingServiceComponent {
             unbind = "unsetTracerService")
     protected void setTracerService(OpenTracer tracer) {
 
-        ServiceReferenceHolder.getInstance().getOpenTracerMap().put(tracer.getName(), tracer);
+        ServiceReferenceHolder.getOpenTracerMap().put(tracer.getName(), tracer);
     }
 
     protected void unsetTracerService(OpenTracer tracer) {
 
-        ServiceReferenceHolder.getInstance().getOpenTracerMap().remove(tracer.getName());
+        ServiceReferenceHolder.getOpenTracerMap().remove(tracer.getName());
     }
 
     @Reference(
@@ -122,13 +124,13 @@ public class TracingServiceComponent {
             unbind = "unsetTelemetryService")
     protected void setTelemetryService(APIMOpenTelemetry tracer) {
 
-        ServiceReferenceHolder.getInstance().getOpenTelemetryTracerMap().put(tracer.getName(), tracer);
+        ServiceReferenceHolder.getOpenTelemetryTracerMap().put(tracer.getName(), tracer);
     }
 
     protected void unsetTelemetryService(APIMOpenTelemetry tracer) {
 
         tracer.close();
-        ServiceReferenceHolder.getInstance().getOpenTelemetryTracerMap().remove(tracer.getName());
+        ServiceReferenceHolder.getOpenTelemetryTracerMap().remove(tracer.getName());
     }
 }
 

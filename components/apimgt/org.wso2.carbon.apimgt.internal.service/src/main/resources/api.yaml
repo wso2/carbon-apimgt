@@ -15,95 +15,6 @@ basePath: /v1
 produces:
   - application/json
 paths:
-  /throttle:
-    get:
-      summary: throttled events available
-      description: |
-        This will provide access to throttled events in database.
-      parameters:
-        - name : query
-          in: query
-          description: |
-            **Search condition**.
-
-            You can search for an application by specifying the name as "query" attribute.
-
-            Eg.
-            "app1" will match an application if the name is exactly "app1".
-
-            Currently this does not support wildcards. Given name must exactly match the application name.
-          type: string
-      tags:
-        - Throttling
-      responses:
-        200:
-          description: An array of Throttle Events
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ThrottledEvent'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /throttleAsString:
-    get:
-      summary: throttled events available
-      description: |
-        This will provide access to throttled events in database.
-      parameters:
-        - name : query
-          in: query
-          description: |
-            **Search condition**.
-
-            You can search for an application by specifying the name as "query" attribute.
-
-            Eg.
-            "app1" will match an application if the name is exactly "app1".
-
-            Currently this does not support wildcards. Given name must exactly match the application name.
-          type: string
-      tags:
-        - Throttling
-      responses:
-        200:
-          description: throttle events string
-          schema:
-            type: string
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /isThrottled:
-    get:
-      summary: throttled events available
-      description: |
-        This will provide access to throttled events in database.
-      parameters:
-        - name : query
-          in: query
-          description: |
-            **Search condition**.
-
-            You can search for an application by specifying the name as "query" attribute.
-
-            Eg.
-            "app1" will match an application if the name is exactly "app1".
-
-            Currently this does not support wildcards. Given name must exactly match the application name.
-          type: string
-      tags:
-        - Throttling
-      responses:
-        200:
-          description: Throttle Event
-          schema:
-            $ref: '#/definitions/ThrottledEvent'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
   /block:
     get:
       summary: blocking events available
@@ -740,17 +651,6 @@ definitions:
       apiId:
         type: string
 
-  ThrottledEvent:
-    properties:
-      throttle_key:
-        type: string
-        description: throttle key.
-      last_updated_time:
-        type: string
-        description: Last time decision updated.
-      throttle_state:
-        type: string
-        description: throttle state.
 
   Error:
     properties:
