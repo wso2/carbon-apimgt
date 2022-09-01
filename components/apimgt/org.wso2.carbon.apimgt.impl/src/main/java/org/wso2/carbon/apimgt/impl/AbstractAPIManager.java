@@ -3658,7 +3658,9 @@ public abstract class AbstractAPIManager implements APIManager {
         // TODO try to use a single query to get info from db
 
         //scopePrefix
-        apiMgtDAO.setScopePrefixToAPI(api);
+        if (!api.isRevision()) {
+            apiMgtDAO.setScopePrefixToAPI(api);
+        }
 
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);

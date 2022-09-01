@@ -208,6 +208,10 @@ public class SwaggerData {
         return scopes;
     }
 
+    public void setScopes(Set<Scope> scopes) {
+        this.scopes = scopes;
+    }
+
     public String getTitle() {
         return title;
     }
