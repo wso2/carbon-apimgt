@@ -293,6 +293,7 @@ public class RegistryPersistenceUtil {
 
             //set gateway vendor for the API
             artifact.setAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR, api.getGatewayVendor());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_GATEWAY_TYPE, api.getGatewayType());
 
             //set async transport protocols for the API
             artifact.setAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS, api.getAsyncTransportProtocols());
@@ -604,6 +605,7 @@ public class RegistryPersistenceUtil {
             api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
             api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
             api.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
+            api.setGatewayType(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_TYPE));
             api.setAsyncTransportProtocols(artifact.getAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS));
 
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;

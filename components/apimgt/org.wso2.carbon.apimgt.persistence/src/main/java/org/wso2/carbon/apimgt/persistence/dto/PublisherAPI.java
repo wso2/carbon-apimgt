@@ -88,6 +88,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
+    private String gatewayType;
     private String gatewayVendor;
     private String asyncTransportProtocols;
 
@@ -596,6 +597,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setVendor(String vendor) {
         this.vendor = vendor;
+    }
+
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
     }
 
     @Override

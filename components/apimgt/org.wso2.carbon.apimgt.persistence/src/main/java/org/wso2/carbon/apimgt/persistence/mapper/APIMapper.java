@@ -69,6 +69,7 @@ public interface APIMapper {
     @Mapping(source = "visibleTenants", target = "visibleOrganizations")
     @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
     @Mapping(source = "gatewayVendor", target = "gatewayVendor")
+    @Mapping(source = "gatewayType", target = "gatewayType")
     PublisherAPI toPublisherApi(API api);
 
     @Mapping(source = "providerName", target = "id.providerName")

@@ -377,5 +377,6 @@ public final class APIConstants {
     public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.json";
 
     public static final String API_OVERVIEW_GATEWAY_VENDOR = "overview_gatewayVendor";
+    public static final String API_OVERVIEW_GATEWAY_TYPE = "overview_gatewayType";
     public static final String ASYNC_API_TRANSPORT_PROTOCOLS = "overview_asyncTransportProtocols";
 }
