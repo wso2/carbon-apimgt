@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,11 +162,13 @@ public abstract class APIDefinition {
      *
      * @param api            API
      * @param oasDefinition  OAS definition
-     * @param hostsWithSchemes host addresses with protocol mapping
+     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param environmentName The name of the environment
      * @return updated OAS definition
      * @throws APIManagementException throws if an error occurred
      */
-    public abstract String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes)
+    public abstract String getOASDefinitionForStore(API api, String oasDefinition,
+                                                    String tenantDomainOrOrganization, String environmentName)
             throws APIManagementException;
 
     /**
@@ -175,12 +176,14 @@ public abstract class APIDefinition {
      *
      * @param product        APIProduct
      * @param oasDefinition  OAS definition
-     * @param hostsWithSchemes host addresses with protocol mapping
+     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param environmentName The name of the environment
      * @return updated OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     public abstract String getOASDefinitionForStore(APIProduct product, String oasDefinition,
-                                                    Map<String, String> hostsWithSchemes) throws APIManagementException;
+                                                    String tenantDomainOrOrganization, String environmentName)
+            throws APIManagementException;
 
     /**
      * Update OAS definition for API Publisher
