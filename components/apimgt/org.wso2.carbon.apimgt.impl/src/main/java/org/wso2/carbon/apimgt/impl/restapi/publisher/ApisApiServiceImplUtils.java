@@ -34,6 +34,9 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
 import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
 import com.amazonaws.services.securitytoken.model.Credentials;
+import com.fasterxml.jackson.core.type.*;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.dataformat.yaml.*;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
@@ -47,18 +50,19 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.json.JSONArray;
+import org.json.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.*;
-import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
+import org.wso2.carbon.apimgt.api.dto.*;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.*;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.util.*;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -70,9 +74,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
@@ -668,5 +670,267 @@ public class ApisApiServiceImplUtils {
         addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), organization);
 
         return addedAPI;
+    }
+
+    /**
+     * @param api API
+     * @param soapOperation SOAP Operation
+     * @return SOAP API Definition
+     * @throws APIManagementException if an error occurred while parsing string to JSON Object
+     */
+    public static String generateSOAPAPIDefinition(API api, String soapOperation) throws APIManagementException {
+
+        APIDefinition oasParser = new OAS2Parser();
+        SwaggerData swaggerData = new SwaggerData(api);
+        String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject apiJson;
+        JSONObject paths;
+        try {
+            apiJson = (JSONObject) jsonParser.parse(apiDefinition);
+            paths = (JSONObject) jsonParser.parse(soapOperation);
+            apiJson.replace("paths", paths);
+            return apiJson.toJSONString();
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing the api definition.", e);
+        }
+    }
+
+    /**
+     * @param fileInputStream File input stream for the WSDL file
+     * @param url URL
+     * @param wsdlArchiveExtractedPath Path to WSDL extracted directory
+     * @param filename File Name
+     * @return Swagger string
+     * @throws APIManagementException If the WSDL file not supported
+     * @throws IOException If error occurred in converting InputStream to a byte array
+     */
+    public static String getSwaggerString(InputStream fileInputStream, String url, String wsdlArchiveExtractedPath,
+                                          String filename) throws APIManagementException, IOException {
+
+        String swaggerStr = "";
+        if (StringUtils.isNotBlank(url)) {
+            swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(url);
+        } else if (fileInputStream != null) {
+            if (filename.endsWith(".zip")) {
+                swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);
+            } else if (filename.endsWith(".wsdl")) {
+                byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
+                swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
+            } else {
+                throw new APIManagementException(ExceptionCodes.UNSUPPORTED_WSDL_FILE_EXTENSION);
+            }
+        }
+        return swaggerStr;
+    }
+
+    /**
+     * @param wsdlInputStream WSDL file input stream
+     * @param contentType content type of the wsdl
+     * @return Resource file WSDL
+     */
+    public static ResourceFile getWSDLResource(InputStream wsdlInputStream, String contentType) {
+
+        ResourceFile wsdlResource;
+        if (org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_ZIP.equals(contentType) ||
+                org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(contentType)) {
+            wsdlResource = new ResourceFile(wsdlInputStream, APIConstants.APPLICATION_ZIP);
+        } else {
+            wsdlResource = new ResourceFile(wsdlInputStream, contentType);
+        }
+        return wsdlResource;
+    }
+
+    /**
+     * @param api API
+     * @return API definition
+     * @throws APIManagementException If any error occurred in generating API definition from swagger data
+     */
+    public static String getApiDefinition(API api) throws APIManagementException {
+
+        APIDefinition parser = new OAS3Parser();
+        SwaggerData swaggerData = new SwaggerData(api);
+        return parser.generateAPIDefinition(swaggerData);
+    }
+
+    /**
+     * @param apiPolicies Policy names applied to the API
+     * @param availableThrottlingPolicyList All available policies
+     * @return Filtered API policy list which are applied to the API
+     */
+    public static List<Tier> filterAPIThrottlingPolicies(List<String> apiPolicies, List<Tier> availableThrottlingPolicyList) {
+
+        List<Tier> apiThrottlingPolicies = new ArrayList<>();
+        if (apiPolicies != null && !apiPolicies.isEmpty()) {
+            for (Tier tier : availableThrottlingPolicyList) {
+                if (apiPolicies.contains(tier.getName())) {
+                    apiThrottlingPolicies.add(tier);
+                }
+            }
+        }
+        return apiThrottlingPolicies;
+    }
+
+    /**
+     * @param deploymentStatus Deployment status [deployed:true / deployed:false]
+     * @param apiRevisions API revisions list
+     * @return Filtered API revisions according to the deploymentStatus
+     */
+    public static List<APIRevision> filterAPIRevisionsByDeploymentStatus(String deploymentStatus, List<APIRevision> apiRevisions) {
+
+        if ("deployed:true".equalsIgnoreCase(deploymentStatus)) {
+            List<APIRevision> apiDeployedRevisions = new ArrayList<>();
+            for (APIRevision apiRevision : apiRevisions) {
+                if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
+                    apiDeployedRevisions.add(apiRevision);
+                }
+            }
+            return apiDeployedRevisions;
+        } else if ("deployed:false".equalsIgnoreCase(deploymentStatus)) {
+            List<APIRevision> apiNotDeployedRevisions = new ArrayList<>();
+            for (APIRevision apiRevision : apiRevisions) {
+                if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
+                    apiNotDeployedRevisions.add(apiRevision);
+                }
+            }
+            return apiNotDeployedRevisions;
+        }
+        return apiRevisions;
+    }
+
+    /**
+     * @param revisionId Revision ID
+     * @param environments Environments of the organization
+     * @param environment Selected environment
+     * @param displayOnDevportal Enable display on Developer Portal
+     * @param vhost Virtual Host of the revision deployment
+     * @param mandatoryVHOST Is vhost mandatory in this validation
+     * @return Created {@link APIRevisionDeployment} after validations
+     * @throws APIManagementException if any validation fails
+     */
+    public static APIRevisionDeployment mapAPIRevisionDeploymentWithValidation(String revisionId, Map<String, Environment> environments,
+                                                                               String environment, Boolean displayOnDevportal,
+                                                                               String vhost, boolean mandatoryVHOST)
+            throws APIManagementException {
+
+        if (environments.get(environment) == null) {
+            final String errorMessage = "Gateway environment not found: " + environment;
+            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                    ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("name '%s'", environment)));
+
+        }
+        if (mandatoryVHOST && StringUtils.isEmpty(vhost)) {
+            // vhost is only required when deploying a revision, not required when un-deploying a revision
+            // since the same scheme 'APIRevisionDeployment' is used for deploy and undeploy, handle it here.
+            throw new APIManagementException("Required field 'vhost' not found in deployment",
+                    ExceptionCodes.GATEWAY_ENVIRONMENT_VHOST_NOT_PROVIDED);
+        }
+        return mapApiRevisionDeployment(revisionId, vhost, displayOnDevportal, environment);
+    }
+
+    /**
+     * @param revisionId Revision ID
+     * @param vhost Virtual Host
+     * @param displayOnDevportal Enable displaying on Developer Portal
+     * @param deployment Deployment
+     * @return Mapped {@link APIRevisionDeployment}
+     */
+    public static APIRevisionDeployment mapApiRevisionDeployment(String revisionId, String vhost, Boolean displayOnDevportal,
+                                                                 String deployment) {
+
+        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+        apiRevisionDeployment.setRevisionUUID(revisionId);
+        apiRevisionDeployment.setDeployment(deployment);
+        apiRevisionDeployment.setVhost(vhost);
+        apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
+        return apiRevisionDeployment;
+    }
+
+    /**
+     * @param deploymentId Deployment ID
+     * @return Deployment name decoded from the deploymentId
+     * @throws APIMgtResourceNotFoundException If invalid or null deploymentId
+     */
+    public static String getDecodedDeploymentName(String deploymentId) throws APIMgtResourceNotFoundException {
+
+        String decodedDeploymentName;
+        if (deploymentId != null) {
+            try {
+                decodedDeploymentName = new String(Base64.getUrlDecoder().decode(deploymentId),
+                        StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                throw new APIMgtResourceNotFoundException("deployment with " + deploymentId +
+                        " not found", ExceptionCodes.from(ExceptionCodes.EXISTING_DEPLOYMENT_NOT_FOUND,
+                        deploymentId));
+            }
+        } else {
+            throw new APIMgtResourceNotFoundException("deployment id not found",
+                    ExceptionCodes.from(ExceptionCodes.DEPLOYMENT_ID_NOT_FOUND));
+        }
+        return decodedDeploymentName;
+    }
+
+    /**
+     * @param fileInputStream API spec file input stream
+     * @param isServiceAPI Is service API
+     * @param fileName File name
+     * @return Schema
+     * @throws APIManagementException if error while reading the spec file contents
+     */
+    public static String getSchemaToBeValidated(InputStream fileInputStream, Boolean isServiceAPI, String fileName)
+            throws APIManagementException {
+
+        String schemaToBeValidated = null;
+        if (Boolean.TRUE.equals(isServiceAPI) || fileName.endsWith(APIConstants.YAML_FILE_EXTENSION) || fileName
+                .endsWith(APIConstants.YML_FILE_EXTENSION)) {
+            //convert .yml or .yaml to JSON for validation
+            ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+            try {
+                Object obj = yamlReader.readValue(fileInputStream, Object.class);
+                ObjectMapper jsonWriter = new ObjectMapper();
+                schemaToBeValidated = jsonWriter.writeValueAsString(obj);
+            } catch (IOException e) {
+                throw new APIManagementException("Error while reading file content", e,
+                        ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+            }
+        } else if (fileName.endsWith(APIConstants.JSON_FILE_EXTENSION)) {
+            //continue with .json
+            JSONTokener jsonDataFile = new JSONTokener(fileInputStream);
+            schemaToBeValidated = new org.json.JSONObject(jsonDataFile).toString();
+        }
+        return schemaToBeValidated;
+    }
+
+    /**
+     * @param environmentPropertiesMap Environment Properties Map
+     * @return {@link EnvironmentPropertiesDTO} mapped from the properties in the environmentPropertiesMap
+     * @throws APIManagementException If error in converting environmentPropertiesMap to {@link EnvironmentPropertiesDTO}
+     */
+    public static EnvironmentPropertiesDTO generateEnvironmentPropertiesDTO(Map<String, String> environmentPropertiesMap)
+            throws APIManagementException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.convertValue(environmentPropertiesMap, new TypeReference<EnvironmentPropertiesDTO>() {
+            });
+        } catch (IllegalArgumentException e) {
+            String errorMessage = "Possible keys are productionEndpoint,sandboxEndpoint";
+            throw new APIManagementException(e.getMessage(),
+                    ExceptionCodes.from(ExceptionCodes.INVALID_ENV_API_PROP_CONFIG, errorMessage));
+        }
+    }
+
+    /**
+     * @param service service entry
+     * @return service info JSON Object
+     */
+    public static JSONObject getServiceInfo(ServiceEntry service) {
+
+        JSONObject serviceInfo = new JSONObject();
+        serviceInfo.put("name", service.getName());
+        serviceInfo.put("version", service.getVersion());
+        serviceInfo.put("key", service.getServiceKey());
+        serviceInfo.put("md5", service.getMd5());
+        return serviceInfo;
     }
 }

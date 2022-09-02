@@ -43,7 +43,7 @@ public class RolesApiServiceImpl implements RolesApiService {
      * @return 200 if the given role exists
      */
     public Response validateSystemRole(String roleId, MessageContext messageContext) {
-        Boolean isRoleExist = false;
+        boolean isRoleExist = false;
         String username = RestApiCommonUtil.getLoggedInUsername();
         if (roleId != null) {
             try {

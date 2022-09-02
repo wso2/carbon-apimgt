@@ -40,11 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
@@ -194,8 +190,8 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
                 tierList.addAll(apiTiersMap.values());
                 // if includeAsyncPolicies is not set, remove the async API policies from the list.
                 if (!includeAsyncPolicies) {
-                    tierList = tierList.stream().filter(x -> !PolicyConstants.EVENT_COUNT_TYPE.equals(
-                            x.getQuotaPolicyType())).collect(Collectors.toList());
+                    tierList = tierList.stream().filter(tier -> !PolicyConstants.EVENT_COUNT_TYPE.equals(
+                            tier.getQuotaPolicyType())).collect(Collectors.toList());
                 }
             } else if (ThrottlingPolicyDTO.PolicyLevelEnum.API.toString().equals(policyLevel)) {
                 Map<String, Tier> resourceTiersMap =
@@ -211,7 +207,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
             String errorMessage = "Error while retrieving tiers";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-        return null;
+        return Collections.emptyList();
     }
 
 }
