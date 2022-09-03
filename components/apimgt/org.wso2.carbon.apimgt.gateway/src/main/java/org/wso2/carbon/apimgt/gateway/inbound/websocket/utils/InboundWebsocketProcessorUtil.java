@@ -170,16 +170,10 @@ public class InboundWebsocketProcessorUtil {
     public static boolean authorizeGraphQLSubscriptionEvents(String matchingResource,
                                                              InboundMessageContext inboundMessageContext)
             throws APIManagementException, APISecurityException {
-        try {
-            JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), inboundMessageContext.getTenantDomain());
-            jwtValidator.validateScopesForGraphQLSubscriptions(inboundMessageContext.getApiContext(),
-                    inboundMessageContext.getVersion(), matchingResource, inboundMessageContext.getSignedJWTInfo(),
-                    inboundMessageContext.getAuthContext());
-        } catch (APIManagementException | APISecurityException e) {
-            log.error("Error while validating scopes for and and incoming GraphQL subscription", e);
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-        }
+        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), inboundMessageContext.getTenantDomain());
+        jwtValidator.validateScopesForGraphQLSubscriptions(inboundMessageContext.getApiContext(),
+                inboundMessageContext.getVersion(), matchingResource, inboundMessageContext.getSignedJWTInfo(),
+                inboundMessageContext.getAuthContext());
         return true;
     }
 
