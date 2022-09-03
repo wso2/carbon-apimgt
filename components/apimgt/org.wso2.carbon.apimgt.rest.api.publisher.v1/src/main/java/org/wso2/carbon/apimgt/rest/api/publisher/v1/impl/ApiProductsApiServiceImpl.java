@@ -117,7 +117,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 }
                 apiProduct.setOrganization(organization);
             }
-
             String productState;
             if (apiProduct != null) {
                 productState = apiProduct.getState();
