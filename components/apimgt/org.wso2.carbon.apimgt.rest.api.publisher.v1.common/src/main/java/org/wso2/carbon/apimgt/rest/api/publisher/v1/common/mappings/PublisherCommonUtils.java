@@ -682,8 +682,12 @@ public class PublisherCommonUtils {
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         Set<org.wso2.carbon.apimgt.api.model.Scope> sharedAPIScopes = new HashSet<>();
 
+        String scopePrefix = api.getScopePrefix();
         for (org.wso2.carbon.apimgt.api.model.Scope scope : api.getScopes()) {
             String scopeName = scope.getKey();
+            if (scopePrefix != null) {
+                scopeName = scopePrefix + '/' + scopeName;
+            }
             if (!(APIUtil.isAllowedScope(scopeName))) {
                 // Check if each scope key is already assigned as a local scope to a different API which is also not a
                 // different version of the same API. If true, return error.
@@ -694,7 +698,8 @@ public class PublisherCommonUtils {
                     throw new APIManagementException(
                             "Scope " + scopeName + " is already assigned locally by another API",
                             ExceptionCodes.SCOPE_ALREADY_ASSIGNED);
-                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantId)) {
+                } else
+                    if (apiProvider.isSharedScopeNameExists(scopeName, tenantId)) {
                     sharedAPIScopes.add(scope);
                     continue;
                 }

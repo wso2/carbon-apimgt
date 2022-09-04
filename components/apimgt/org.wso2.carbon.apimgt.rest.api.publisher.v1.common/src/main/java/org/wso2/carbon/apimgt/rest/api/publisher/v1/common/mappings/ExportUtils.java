@@ -41,19 +41,12 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -892,9 +885,41 @@ public class ExportUtils {
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
+                    String scopePrefix = api.getScopePrefix();
+                    SwaggerData swaggerData = new SwaggerData(api);
+                    Set<Scope> scopesSet = swaggerData.getScopes();
+                    Set<Scope> newScopeSet = new HashSet<>();
+                    for (Scope scope : scopesSet) {
+                        newScopeSet.add(scope);
+                        Scope scp = new Scope();
+                        scp.setKey(scope.getKey().replace(scopePrefix + '/' , ""));
+                        scp.setName(scope.getName());
+                        scp.setDescription(scope.getDescription());
+                        newScopeSet.add(scp);
+                    }
+                    swaggerData.setScopes(newScopeSet);
+                    for (SwaggerData.Resource resource : swaggerData.getResources()) {
+                        List<Scope> scopeList = new ArrayList<>();
+                        for (Scope scope: resource.getScopes()) {
+                            if (scope.getKey().startsWith(scopePrefix)) {
+                                scopeList.add(scope);
+                                Scope scp1 = new Scope();
+                                scp1.setKey(scope.getKey().replace(scopePrefix + '/' , ""));
+                                scp1.setName(scope.getName());
+                                scp1.setDescription(scope.getDescription());
+                                scopeList.add(scp1);
+                            }
+                        }
+                        resource.setScopes(scopeList);
+                    }
+
+                    // we updated swaggerdata object with correct scopes
+                    OAS3Parser oas3Parser = new OAS3Parser();
+                    String oas3 = oas3Parser.generateAPIDefinition(swaggerData, formattedSwaggerJson);
+
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
                             exportFormat,
-                            formattedSwaggerJson);
+                            oas3);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Meta information retrieved successfully for API: " + apiDtoToReturn.getName()

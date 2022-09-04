@@ -144,6 +144,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3655,6 +3656,12 @@ public abstract class AbstractAPIManager implements APIManager {
             api.setWorkflowStatus(status.toString());
         }
         // TODO try to use a single query to get info from db
+
+        //scopePrefix
+        if (!api.isRevision()) {
+            apiMgtDAO.setScopePrefixToAPI(api);
+        }
+
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);

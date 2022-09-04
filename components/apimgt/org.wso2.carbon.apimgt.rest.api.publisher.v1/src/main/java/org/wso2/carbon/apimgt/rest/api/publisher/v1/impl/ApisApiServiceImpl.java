@@ -5013,6 +5013,17 @@ public class ApisApiServiceImpl implements ApisApiService {
         definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
         Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
         Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
+
+        String scopePrefix = apiDTOFromProperties.getScopePrefix();
+
+        if (scopePrefix != null){
+            for (Scope scope: scopes) {
+                if (!scope.getKey().contains(scopePrefix)) {
+                    scope.setKey(scopePrefix + '/' + scope.getKey());
+                }
+            }
+        }
+
         apiToAdd.setUriTemplates(uriTemplates);
         apiToAdd.setScopes(scopes);
         //Set extensions from API definition to API object

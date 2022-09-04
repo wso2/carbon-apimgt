@@ -249,6 +249,10 @@ public class APIMappingUtil {
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
+
+        String scopePrefix = dto.getScopePrefix();
+        model.setScopePrefix(scopePrefix);
+
         //URI Templates
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
@@ -913,6 +917,8 @@ public class APIMappingUtil {
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         }
         APIDTO dto = new APIDTO();
+
+        dto.setScopePrefix(model.getScopePrefix());
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
@@ -2737,7 +2743,6 @@ public class APIMappingUtil {
         }
         return scopeDTOS;
     }
-
     /**
      * Convert ScopeDTO List to APIScopesDTO List adding the attribute 'isShared'.
      *
