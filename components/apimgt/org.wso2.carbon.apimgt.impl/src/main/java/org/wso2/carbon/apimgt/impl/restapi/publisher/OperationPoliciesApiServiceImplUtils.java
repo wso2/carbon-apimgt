@@ -25,6 +25,22 @@ public class OperationPoliciesApiServiceImplUtils {
     }
 
     /**
+     * @param policySpecification Operation policy spec
+     * @param organization        Validated organization
+     * @param apiId               API UUID
+     * @return OperationPolicyData object
+     */
+    public static OperationPolicyData prepareOperationPolicyData(OperationPolicySpecification policySpecification,
+                                                                 String organization, String apiId) {
+        OperationPolicyData operationPolicyData = new OperationPolicyData();
+        operationPolicyData.setOrganization(organization);
+        operationPolicyData.setApiUUID(apiId);
+        operationPolicyData.setSpecification(policySpecification);
+
+        return operationPolicyData;
+    }
+
+    /**
      * @param policyData       Operation policy data
      * @param policyDefinition Operation policy definition object
      * @param definition       Policy definition
