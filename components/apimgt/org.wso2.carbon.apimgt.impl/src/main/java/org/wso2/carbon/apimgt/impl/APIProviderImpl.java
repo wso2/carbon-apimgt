@@ -1802,6 +1802,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String existingAPIContextTemplate = existingAPI.getContextTemplate();
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
         Map<String, List<OperationPolicy>> operationPoliciesMap = extractAndDropOperationPoliciesFromURITemplate(existingAPI.getUriTemplates());
+
+        // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
+        // This value is determined considering the gateway type comes with the request.
+        existingAPI.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
+                existingAPI.getGatewayVendor(), existingAPI.getGatewayType()));
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         if (!operationPoliciesMap.isEmpty()){
@@ -4700,6 +4705,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setId(apiIdentifier);
                 //Gateway type is obtained considering the gateway vendor.
                 api.setGatewayType(APIUtil.getGatewayType(publisherAPI.getGatewayVendor()));
+                api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(publisherAPI.getGatewayVendor()));
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);
