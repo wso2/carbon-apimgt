@@ -27,9 +27,11 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
@@ -70,6 +72,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private WebSocketAnalyticsMetricsHandler metricsHandler;
     private InboundWebSocketProcessor webSocketProcessor;
     private final String API_PROPERTIES = "API_PROPERTIES";
+    private final String WEB_SC_API_UT = "api.ut.WS_SC";
 
     public WebsocketInboundHandler() {
         webSocketProcessor = initializeWebSocketProcessor();
@@ -341,5 +344,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             apiPropertiesMap.put(APIMgtGatewayConstants.API_VERSION, apiName + ":v" + apiVersion);
         }
         return apiPropertiesMap;
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        Attribute<Object> attributes = ctx.channel().attr(AttributeKey.valueOf(API_PROPERTIES));
+        if (cause instanceof CorruptedWebSocketFrameException && attributes != null) {
+            HashMap apiProperties = (HashMap) attributes.get();
+            CorruptedWebSocketFrameException corruptedWebSocketFrameException = ((CorruptedWebSocketFrameException) cause);
+            apiProperties.put(WEB_SC_API_UT, corruptedWebSocketFrameException.closeStatus().code());
+        }
+        super.exceptionCaught(ctx, cause);
     }
 }
