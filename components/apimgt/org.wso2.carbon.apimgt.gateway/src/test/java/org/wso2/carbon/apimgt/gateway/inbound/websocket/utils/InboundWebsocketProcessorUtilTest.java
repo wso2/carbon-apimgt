@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.inbound.websocket.utils;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -173,8 +174,8 @@ public class InboundWebsocketProcessorUtilTest {
         org.junit.Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
                 GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
         org.junit.Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
-        JSONObject payload = (JSONObject) errorJson.get(
-                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        JSONObject payload = (JSONObject) ((JSONArray) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD)).get(0);
         org.junit.Assert.assertEquals(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE),
                 WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR_MESSAGE);
         org.junit.Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),

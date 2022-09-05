@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.inbound.websocket;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
@@ -27,7 +28,10 @@ public class GraphQLProcessorResponseDTO extends InboundProcessorResponseDTO {
         JSONObject payload = new JSONObject();
         payload.put(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE, errorMessage);
         payload.put(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE, errorCode);
-        jsonObject.put(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD, payload);
+        // return error payload as an array
+        JSONArray errorPayloads = new JSONArray();
+        errorPayloads.put(payload);
+        jsonObject.put(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD, errorPayloads);
         return jsonObject.toString();
     }
 }

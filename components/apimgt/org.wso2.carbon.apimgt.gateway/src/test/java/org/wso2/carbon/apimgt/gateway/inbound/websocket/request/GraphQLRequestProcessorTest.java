@@ -26,6 +26,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
@@ -190,8 +191,8 @@ public class GraphQLRequestProcessorTest {
         Assert.assertTrue(errorJson.containsKey(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID));
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
         Assert.assertTrue(errorJson.containsKey(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD));
-        JSONObject payload = (JSONObject) errorJson.get(
-                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        JSONObject payload = (JSONObject) ((JSONArray) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD)).get(0);
         Assert.assertTrue(payload.containsKey(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE));
         Assert.assertTrue(payload.containsKey(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE));
         Assert.assertEquals(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE),
@@ -222,8 +223,8 @@ public class GraphQLRequestProcessorTest {
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
                 GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
-        payload = (JSONObject) errorJson.get(
-                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        payload = (JSONObject) ((JSONArray) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD)).get(0);
         Assert.assertEquals(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE),
                 "Invalid operation. Only allowed Subscription type operations");
         Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
@@ -267,8 +268,8 @@ public class GraphQLRequestProcessorTest {
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
                 GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
-        JSONObject payload = (JSONObject) errorJson.get(
-                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        JSONObject payload = (JSONObject) ((JSONArray) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD)).get(0);
         Assert.assertTrue(((String) payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE))
                 .contains(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY_MESSAGE));
         Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
@@ -335,8 +336,8 @@ public class GraphQLRequestProcessorTest {
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
                 GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
-        JSONObject payload = (JSONObject) errorJson.get(
-                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        JSONObject payload = (JSONObject) ((JSONArray) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD)).get(0);
         Assert.assertEquals(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE),
                 "User is NOT authorized to access the Resource");
         Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
@@ -460,8 +461,8 @@ public class GraphQLRequestProcessorTest {
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
                 GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
-        JSONObject payload = (JSONObject) errorJson.get(
-                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        JSONObject payload = (JSONObject) ((JSONArray) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD)).get(0);
         Assert.assertTrue(((String) payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE))
                 .contains(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE));
         Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
@@ -533,8 +534,8 @@ public class GraphQLRequestProcessorTest {
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE),
                 GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_TYPE_ERROR);
         Assert.assertEquals(errorJson.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID), "1");
-        JSONObject payload = (JSONObject) errorJson.get(
-                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD);
+        JSONObject payload = (JSONObject) ((JSONArray) errorJson.get(
+                GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD)).get(0);
         Assert.assertTrue(((String) payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_MESSAGE))
                 .contains(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR_MESSAGE));
         Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
