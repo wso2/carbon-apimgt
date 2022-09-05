@@ -39,11 +39,11 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorImpl;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoAdditionalPropertiesDTO;
@@ -77,6 +77,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.wso2.carbon.apimgt.api.model.VHost.HTTPS_PROTOCOL;
+import static org.wso2.carbon.apimgt.api.model.VHost.HTTP_PROTOCOL;
+import static org.wso2.carbon.apimgt.api.model.VHost.WSS_PROTOCOL;
+import static org.wso2.carbon.apimgt.api.model.VHost.WS_PROTOCOL;
 
 public class APIMappingUtil {
 
@@ -455,7 +460,7 @@ public class APIMappingUtil {
         }
 
         if (!AdvertiseInfoDTO.VendorEnum.AWS.toString().equals(apidto.getAdvertiseInfo().getVendor().value())) {
-            apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, organization));
+            apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(model, organization));
         } else {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
             apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, organization));
@@ -495,20 +500,13 @@ public class APIMappingUtil {
         return endpointUrls;
     }
 
-    public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String organization)
+    public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(ApiTypeWrapper model, String organization)
             throws APIManagementException {
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
-
-        // custom gateway URL of tenant
-        Map<String, String> domains = new HashMap<>();
-        if (organization != null) {
-            domains = apiConsumer.getTenantDomainMappings(organization,
-                    APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
-        }
-        String customGatewayUrl = domains.get(APIConstants.CUSTOM_URL);
+        List<APIRevisionDeployment> revisionDeployments =
+                apiConsumer.getAPIRevisionDeploymentListOfAPI(model.getUuid());
 
         List<APIEndpointURLsDTO> endpointUrls = new ArrayList<>();
         for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
@@ -516,8 +514,8 @@ public class APIMappingUtil {
                 // Deployed environment
                 Environment environment = environments.get(revisionDeployment.getDeployment());
                 if (environment != null) {
-                    APIEndpointURLsDTO apiEndpointURLsDTO = fromAPIRevisionToEndpoints(apidto, environment,
-                            revisionDeployment.getVhost(), customGatewayUrl, organization);
+                    APIEndpointURLsDTO apiEndpointURLsDTO =
+                            fromAPIRevisionToEndpoints(model, organization, environment);
                     endpointUrls.add(apiEndpointURLsDTO);
                 }
             }
@@ -525,59 +523,54 @@ public class APIMappingUtil {
         return endpointUrls;
     }
 
-    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto, Environment environment,
-                                                                 String host, String customGatewayUrl,
-                                                                 String tenantDomain) throws APIManagementException {
-        // Deployed VHost
-        VHost vHost;
-        String context = apidto.getContext();
-        if (StringUtils.isEmpty(customGatewayUrl)) {
-            vHost = VHostUtils.getVhostFromEnvironment(environment, host);
-        } else {
-            if (!StringUtils.contains(customGatewayUrl, "://")) {
-                customGatewayUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + customGatewayUrl;
-            }
-            vHost = VHost.fromEndpointUrls(new String[]{customGatewayUrl});
-            context = context.replace("/t/" + tenantDomain, "");
-        }
-
+    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(ApiTypeWrapper model, String organization,
+                                                                 Environment environment)
+            throws APIManagementException {
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
         apiEndpointURLsDTO.setEnvironmentName(environment.getName());
         apiEndpointURLsDTO.setEnvironmentDisplayName(environment.getDisplayName());
         apiEndpointURLsDTO.setEnvironmentType(environment.getType());
 
+        APIEndpointUrlExtractorImpl apiEndpointUrlExtractor = new APIEndpointUrlExtractorImpl();
+        List<EndpointUrl> endpointUrls = apiEndpointUrlExtractor.getApiEndpointUrlsForEnv(model, organization,
+                environment.getName());
+
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
-        boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
-        boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
-                && isGraphQLSubscriptionsAvailable(apidto);
-        if (!isWs) {
-            if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
-                apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
+        for (EndpointUrl endpointUrl : endpointUrls) {
+            switch (endpointUrl.getProtocol()) {
+                case HTTP_PROTOCOL:
+                    apiurLsDTO.setHttp(endpointUrl.getUrl());
+                    break;
+                case HTTPS_PROTOCOL:
+                    apiurLsDTO.setHttps(endpointUrl.getUrl());
+                    break;
+                case WS_PROTOCOL:
+                    apiurLsDTO.setWs(endpointUrl.getUrl());
+                    break;
+                case WSS_PROTOCOL:
+                    apiurLsDTO.setWss(endpointUrl.getUrl());
+                    break;
             }
-            if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
-                apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
-            }
-        }
-        if (isWs || isGQLSubscription) {
-            apiurLsDTO.setWs(vHost.getWsUrl() + context);
-            apiurLsDTO.setWss(vHost.getWssUrl() + context);
         }
         apiEndpointURLsDTO.setUrLs(apiurLsDTO);
 
         APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
-        if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
-            String defaultContext = context.replaceAll("/" + apidto.getVersion() + "$", "");
-            if (!isWs) {
-                if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
-                    apiDefaultVersionURLsDTO.setHttp(vHost.getHttpUrl() + defaultContext);
+        for (EndpointUrl endpointUrl : endpointUrls) {
+            if (endpointUrl.getIsDefaultVersion()) {
+                switch (endpointUrl.getProtocol()) {
+                    case HTTP_PROTOCOL:
+                        apiDefaultVersionURLsDTO.setHttp(endpointUrl.getUrl());
+                        break;
+                    case HTTPS_PROTOCOL:
+                        apiDefaultVersionURLsDTO.setHttps(endpointUrl.getUrl());
+                        break;
+                    case WS_PROTOCOL:
+                        apiDefaultVersionURLsDTO.setWs(endpointUrl.getUrl());
+                        break;
+                    case WSS_PROTOCOL:
+                        apiDefaultVersionURLsDTO.setWss(endpointUrl.getUrl());
+                        break;
                 }
-                if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
-                    apiDefaultVersionURLsDTO.setHttps(vHost.getHttpsUrl() + defaultContext);
-                }
-            }
-            if (isWs || isGQLSubscription) {
-                apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
-                apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
             }
         }
         apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
