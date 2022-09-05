@@ -19,11 +19,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
@@ -857,9 +858,19 @@ public class ApisApiServiceImpl implements ApisApiService {
                                         .build();
                             } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
                                     && StringUtils.isNotEmpty(roleRegion)) {
-                                AWSSecurityTokenService awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                                        .build();
+                                String stsRegion = String.valueOf(Regions.getCurrentRegion());
+                                AWSSecurityTokenService awsSTSClient;
+                                if (StringUtils.isEmpty(region)) {
+                                    awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
+                                            .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                                            .build();
+                                } else {
+                                    awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
+                                            .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                                            .withEndpointConfiguration(new EndpointConfiguration("https://sts."
+                                                    + stsRegion + ".amazonaws.com", stsRegion))
+                                            .build();
+                                }
                                 AssumeRoleRequest roleRequest = new AssumeRoleRequest()
                                         .withRoleArn(roleArn)
                                         .withRoleSessionName(roleSessionName);
@@ -898,7 +909,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                     && StringUtils.isNotEmpty(roleRegion)) {
                                 AWSSecurityTokenService awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
                                         .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                                        .withRegion(region)
+                                        .withEndpointConfiguration(new EndpointConfiguration("https://sts." + region
+                                                + ".amazonaws.com", region))
                                         .build();
                                 AssumeRoleRequest roleRequest = new AssumeRoleRequest()
                                         .withRoleArn(roleArn)
