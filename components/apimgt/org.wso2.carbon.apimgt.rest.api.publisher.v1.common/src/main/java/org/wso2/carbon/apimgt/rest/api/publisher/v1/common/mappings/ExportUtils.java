@@ -209,6 +209,16 @@ public class ExportUtils {
         }
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
                 organization);
+        return new File(exportAPIBasePath);
+    }
+
+    public static File exportApiArchive(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
+                                 String userName, ExportFormat exportFormat, boolean preserveStatus,
+                                 boolean preserveDocs, String originalDevPortalUrl, String organization)
+            throws APIManagementException, APIImportExportException {
+        File exportedAPIDir = exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, exportFormat,
+                preserveStatus, preserveDocs, originalDevPortalUrl, organization);
+        String exportAPIBasePath = exportedAPIDir.getAbsolutePath();
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -885,41 +895,8 @@ public class ExportUtils {
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
-                    String scopePrefix = api.getScopePrefix();
-                    SwaggerData swaggerData = new SwaggerData(api);
-                    Set<Scope> scopesSet = swaggerData.getScopes();
-                    Set<Scope> newScopeSet = new HashSet<>();
-                    for (Scope scope : scopesSet) {
-                        newScopeSet.add(scope);
-                        Scope scp = new Scope();
-                        scp.setKey(scope.getKey().replace(scopePrefix + '/' , ""));
-                        scp.setName(scope.getName());
-                        scp.setDescription(scope.getDescription());
-                        newScopeSet.add(scp);
-                    }
-                    swaggerData.setScopes(newScopeSet);
-                    for (SwaggerData.Resource resource : swaggerData.getResources()) {
-                        List<Scope> scopeList = new ArrayList<>();
-                        for (Scope scope: resource.getScopes()) {
-                            if (scope.getKey().startsWith(scopePrefix)) {
-                                scopeList.add(scope);
-                                Scope scp1 = new Scope();
-                                scp1.setKey(scope.getKey().replace(scopePrefix + '/' , ""));
-                                scp1.setName(scope.getName());
-                                scp1.setDescription(scope.getDescription());
-                                scopeList.add(scp1);
-                            }
-                        }
-                        resource.setScopes(scopeList);
-                    }
-
-                    // we updated swaggerdata object with correct scopes
-                    OAS3Parser oas3Parser = new OAS3Parser();
-                    String oas3 = oas3Parser.generateAPIDefinition(swaggerData, formattedSwaggerJson);
-
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
-                            exportFormat,
-                            oas3);
+                            exportFormat, formattedSwaggerJson);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Meta information retrieved successfully for API: " + apiDtoToReturn.getName()
@@ -1118,7 +1095,7 @@ public class ExportUtils {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
-            File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
+            File dependentAPI = exportApiArchive(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
                     isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }

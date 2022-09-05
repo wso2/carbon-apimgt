@@ -5019,7 +5019,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (scopePrefix != null){
             for (Scope scope: scopes) {
                 if (!scope.getKey().contains(scopePrefix)) {
-                    scope.setKey(scopePrefix + '/' + scope.getKey());
+                    scope.setKey(scopePrefix + scope.getKey());
                 }
             }
         }
