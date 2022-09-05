@@ -246,12 +246,24 @@ public class APIMappingUtil {
             model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
 
+        String scopePrefix = dto.getScopePrefix();
+        model.setScopePrefix(scopePrefix);
+
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
-
-        String scopePrefix = dto.getScopePrefix();
-        model.setScopePrefix(scopePrefix);
+        //preprocess operations with prefix
+        if (StringUtils.isNotBlank(scopePrefix)) {
+            for (APIOperationsDTO operationsDTO : dto.getOperations()) {
+                if (operationsDTO.getScopes() != null) {
+                    List<String> scopesWithPrefix = new ArrayList<>();
+                    for (String scope : operationsDTO.getScopes()) {
+                        scopesWithPrefix.add(APIUtil.prependScopePrefix(scopePrefix, scope));
+                    }
+                    operationsDTO.setScopes(scopesWithPrefix);
+                }
+            }
+        }
 
         //URI Templates
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
@@ -1690,7 +1702,7 @@ public class APIMappingUtil {
         for (APIScopeDTO apiScopeDTO : apiDTO.getScopes()) {
             Scope scope = new Scope();
             ScopeDTO scopeDTO = apiScopeDTO.getScope();
-            scope.setKey(scopeDTO.getName());
+            scope.setKey(APIUtil.prependScopePrefix(apiDTO.getScopePrefix(), scopeDTO.getName()));
             scope.setName(scopeDTO.getDisplayName());
             scope.setDescription(scopeDTO.getDescription());
             scope.setRoles(String.join(",", scopeDTO.getBindings()));

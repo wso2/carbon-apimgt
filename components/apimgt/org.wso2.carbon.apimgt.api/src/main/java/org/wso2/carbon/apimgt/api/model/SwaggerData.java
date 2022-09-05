@@ -117,8 +117,6 @@ public class SwaggerData {
     private String apiLevelPolicy;
     private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
-    private String scopePrefix;
-    private String fullScope;
 
     public SwaggerData(API api) {
         title = api.getId().getName();
@@ -133,7 +131,7 @@ public class SwaggerData {
         }
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
-        scopePrefix = api.getScopePrefix();
+        String scopePrefix = api.getScopePrefix();
 
         for (URITemplate uriTemplate : uriTemplates) {
             Resource resource = new Resource();
@@ -141,15 +139,34 @@ public class SwaggerData {
             resource.verb = uriTemplate.getHTTPVerb();
             resource.authType = uriTemplate.getAuthType();
             resource.policy = uriTemplate.getThrottlingTier();
-            resource.scope = uriTemplate.getScope();
-            resource.scopes = uriTemplate.retrieveAllScopes();
-            if (scopePrefix != null){
-                for (Scope scope: resource.scopes) {
-                    if (!scope.getKey().contains(scopePrefix)) {
-                        fullScope = scopePrefix + '/' + scope.getKey();
-                        scope.setKey(fullScope);
+            Scope scope = uriTemplate.getScope();
+            List<Scope> scopeList = uriTemplate.retrieveAllScopes();
+            if (scopePrefix != null) {
+                // if there is a scope prefix, add the prefix to all the scopes
+                List<Scope> prefixedScopeList = new ArrayList<>();
+                for (Scope scp: scopeList) {
+                    if (!scp.getKey().contains(scopePrefix)) {
+                        Scope scopeWithPrefix = new Scope();
+                        scopeWithPrefix.setDescription(scp.getDescription());
+                        scopeWithPrefix.setId(scp.getId());
+                        scopeWithPrefix.setKey(scopePrefix + scp.getKey());
+                        scopeWithPrefix.setName(scp.getName());
+                        scopeWithPrefix.setRoles(scp.getRoles());
+                        prefixedScopeList.add(scopeWithPrefix);
                     }
                 }
+                resource.setScopes(prefixedScopeList);
+
+                Scope scopeWithPrefix = new Scope();
+                scopeWithPrefix.setDescription(scope.getDescription());
+                scopeWithPrefix.setId(scope.getId());
+                scopeWithPrefix.setKey(scopePrefix + scope.getKey());
+                scopeWithPrefix.setName(scope.getName());
+                scopeWithPrefix.setRoles(scope.getRoles());
+                resource.setScope(scopeWithPrefix);
+            } else {
+                resource.setScopes(scopeList);
+                resource.setScope(scope);
             }
             resource.amznResourceName = uriTemplate.getAmznResourceName();
             resource.amznResourceTimeout = uriTemplate.getAmznResourceTimeout();

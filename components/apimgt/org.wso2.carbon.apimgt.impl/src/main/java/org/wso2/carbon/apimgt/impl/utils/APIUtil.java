@@ -11368,6 +11368,14 @@ public final class APIUtil {
         return tenantConfigJsonSchema;
     }
 
+    public static String prependScopePrefix(String scopePrefix, String scopeKey) {
+        if (StringUtils.isNotBlank(scopePrefix) && !scopeKey.startsWith(scopePrefix)) {
+            return scopePrefix + scopeKey;
+        } else {
+            return scopeKey;
+        }
+    }
+
     /**
      * Get gateway environments defined in the configuration: api-manager.xml
      *
