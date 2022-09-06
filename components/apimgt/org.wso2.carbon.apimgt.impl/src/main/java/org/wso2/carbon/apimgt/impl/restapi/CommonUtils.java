@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.impl.restapi;
 
 import org.apache.commons.lang3.StringUtils;
@@ -7,11 +25,26 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This class is used to have the functionalities common to all REST API utils
+ */
 public class CommonUtils {
+
+    private CommonUtils() {
+    }
+
+    /**
+     * @return The logged-in user
+     */
+    public static String getLoggedInUsername() {
+        return CarbonContext.getThreadLocalCarbonContext().getUsername();
+    }
+
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
 
         StringBuilder sb = new StringBuilder();
@@ -64,17 +97,27 @@ public class CommonUtils {
             if (StringUtils.isBlank(scope.getDescription())) {
                 scope.setDescription("");
             }
-            if (scope.getRoles() != null) {
-                for (String aRole : scope.getRoles().split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(username, aRole);
-                    if (!isValidRole) {
-                        throw new APIManagementException("Role '" + aRole + "' does not exist.",
-                                ExceptionCodes.ROLE_DOES_NOT_EXIST);
-                    }
+            validateScopeRoles(scope, username);
+        }
+
+        apiProvider.validateSharedScopes(sharedAPIScopes, tenantDomain);
+    }
+
+    /**
+     * @param scope    Scope whose roles should be validated
+     * @param username Username
+     * @throws APIManagementException when role validation fails
+     */
+    private static void validateScopeRoles(Scope scope, String username) throws APIManagementException {
+        if (scope.getRoles() != null) {
+            for (String aRole : scope.getRoles().split(",")) {
+                boolean isValidRole = APIUtil.isRoleNameExist(username, aRole);
+                if (!isValidRole) {
+                    throw new APIManagementException("Role '" + aRole + "' does not exist.",
+                            ExceptionCodes.ROLE_DOES_NOT_EXIST);
                 }
             }
         }
 
-        apiProvider.validateSharedScopes(sharedAPIScopes, tenantDomain);
     }
 }

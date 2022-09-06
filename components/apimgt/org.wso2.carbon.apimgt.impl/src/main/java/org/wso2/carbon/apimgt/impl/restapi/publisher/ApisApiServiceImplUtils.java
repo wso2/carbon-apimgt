@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
 import com.amazonaws.SdkClientException;
@@ -39,7 +57,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.restapi.Constants;
+import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
@@ -52,7 +70,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -62,7 +80,11 @@ import static org.wso2.carbon.apimgt.impl.restapi.Constants.CHARSET;
 
 public class ApisApiServiceImplUtils {
 
+    private ApisApiServiceImplUtils() {
+    }
+
     private static final Log log = LogFactory.getLog(ApisApiServiceImplUtils.class);
+    private static final String HTTP_STATUS_LOG = "HTTP status ";
 
     /**
      * @param content  Comment content
@@ -102,132 +124,184 @@ public class ApisApiServiceImplUtils {
     /**
      * @param api API
      * @return JSONObject with arns
-     * @throws ParseException               when JSON parsing fails
-     * @throws CryptoException              when encrypting secrets fail
-     * @throws UnsupportedEncodingException when converting to String fails
-     * @throws SdkClientException           if AWSLambda SDK throws an error
+     * @throws ParseException     when JSON parsing fails
+     * @throws CryptoException    when encrypting secrets fail
+     * @throws SdkClientException if AWSLambda SDK throws an error
      */
     public static JSONObject getAmazonResourceNames(API api)
-            throws ParseException, CryptoException, UnsupportedEncodingException, SdkClientException {
+            throws ParseException, CryptoException, SdkClientException {
         JSONObject arns = new JSONObject();
         String endpointConfigString = api.getEndpointConfig();
         if (StringUtils.isNotEmpty(endpointConfigString)) {
             JSONParser jsonParser = new JSONParser();
             JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
-            if (endpointConfig != null) {
-                if (endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY)
-                        && endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)
-                        && endpointConfig.containsKey(APIConstants.AMZN_REGION)
-                        && endpointConfig.containsKey(APIConstants.AMZN_ROLE_ARN)
-                        && endpointConfig.containsKey(APIConstants.AMZN_ROLE_SESSION_NAME)
-                        && endpointConfig.containsKey(APIConstants.AMZN_ROLE_REGION)) {
-                    String accessKey = (String) endpointConfig.get(APIConstants.AMZN_ACCESS_KEY);
-                    String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                    String region = (String) endpointConfig.get(APIConstants.AMZN_REGION);
-                    String roleArn = (String) endpointConfig.get(APIConstants.AMZN_ROLE_ARN);
-                    String roleSessionName = (String) endpointConfig.get(APIConstants.AMZN_ROLE_SESSION_NAME);
-                    String roleRegion = (String) endpointConfig.get(APIConstants.AMZN_ROLE_REGION);
-                    AWSLambda awsLambdaClient;
-                    if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Using temporary credentials supplied by the IAM role attached to AWS " +
-                                    "instance");
-                        }
-                        if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
-                                && StringUtils.isEmpty(roleRegion)) {
-                            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                                    .build();
-                        } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
-                                && StringUtils.isNotEmpty(roleRegion)) {
-                            String stsRegion = String.valueOf(Regions.getCurrentRegion());
-                            AWSSecurityTokenService awsSTSClient;
-                            if (StringUtils.isEmpty(stsRegion)) {
-                                awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                                        .build();
-                            } else {
-                                awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                                        .withEndpointConfiguration(new EndpointConfiguration("https://sts."
-                                                + stsRegion + ".amazonaws.com", stsRegion))
-                                        .build();
-                            }
-                            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
-                                    .withRoleArn(roleArn)
-                                    .withRoleSessionName(roleSessionName);
-                            AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
-                            Credentials sessionCredentials = assumeRoleResult.getCredentials();
-                            BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
-                                    sessionCredentials.getAccessKeyId(),
-                                    sessionCredentials.getSecretAccessKey(),
-                                    sessionCredentials.getSessionToken());
-                            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                                    .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
-                                    .withRegion(roleRegion)
-                                    .build();
-                        } else {
-                            log.error("Missing AWS STS configurations");
-                            return null;
-                        }
-                    } else if (StringUtils.isNotEmpty(accessKey) && StringUtils.isNotEmpty(secretKey) &&
-                            StringUtils.isNotEmpty(region)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Using user given stored credentials");
-                        }
-                        if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
-                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                            secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
-                                    APIConstants.DigestAuthConstants.CHARSET);
-                        }
-                        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-                        if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
-                                && StringUtils.isEmpty(roleRegion)) {
-                            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                                    .withRegion(region)
-                                    .build();
-                        } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
-                                && StringUtils.isNotEmpty(roleRegion)) {
-                            AWSSecurityTokenService awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                                    .withEndpointConfiguration(new EndpointConfiguration("https://sts."
-                                            + region + ".amazonaws.com", region))
-                                    .build();
-                            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
-                                    .withRoleArn(roleArn)
-                                    .withRoleSessionName(roleSessionName);
-                            AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
-                            Credentials sessionCredentials = assumeRoleResult.getCredentials();
-                            BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
-                                    sessionCredentials.getAccessKeyId(),
-                                    sessionCredentials.getSecretAccessKey(),
-                                    sessionCredentials.getSessionToken());
-                            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                                    .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
-                                    .withRegion(roleRegion)
-                                    .build();
-                        } else {
-                            log.error("Missing AWS STS configurations");
-                            return null;
-                        }
-                    } else {
-                        log.error("Missing AWS Credentials");
-                        return null;
-                    }
-                    ListFunctionsResult listFunctionsResult = awsLambdaClient.listFunctions();
-                    List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
-                    arns.put("count", functionConfigurations.size());
-                    JSONArray list = new JSONArray();
-                    for (FunctionConfiguration functionConfiguration : functionConfigurations) {
-                        list.put(functionConfiguration.getFunctionArn());
-                    }
-                    arns.put("list", list);
-                    return arns;
+            if (endpointConfig != null
+                    && endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY)
+                    && endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)
+                    && endpointConfig.containsKey(APIConstants.AMZN_REGION)
+                    && endpointConfig.containsKey(APIConstants.AMZN_ROLE_ARN)
+                    && endpointConfig.containsKey(APIConstants.AMZN_ROLE_SESSION_NAME)
+                    && endpointConfig.containsKey(APIConstants.AMZN_ROLE_REGION)) {
+                String accessKey = (String) endpointConfig.get(APIConstants.AMZN_ACCESS_KEY);
+                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                String region = (String) endpointConfig.get(APIConstants.AMZN_REGION);
+                String roleArn = (String) endpointConfig.get(APIConstants.AMZN_ROLE_ARN);
+                String roleSessionName = (String) endpointConfig.get(APIConstants.AMZN_ROLE_SESSION_NAME);
+                String roleRegion = (String) endpointConfig.get(APIConstants.AMZN_ROLE_REGION);
+                AWSLambda awsLambdaClient = getAWSLambdaClient(accessKey, secretKey, region,
+                        roleArn, roleSessionName, roleRegion);
+                if (awsLambdaClient == null) {
+                    return (JSONObject) Collections.emptyMap();
                 }
+                ListFunctionsResult listFunctionsResult = awsLambdaClient.listFunctions();
+                List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
+                arns.put("count", functionConfigurations.size());
+                JSONArray list = new JSONArray();
+                for (FunctionConfiguration functionConfiguration : functionConfigurations) {
+                    list.put(functionConfiguration.getFunctionArn());
+                }
+                arns.put("list", list);
+                return arns;
             }
         }
-        return null;
+        return (JSONObject) Collections.emptyMap();
+    }
+
+    /**
+     * @param accessKey       AWS access key
+     * @param secretKey       AWS secret key
+     * @param region          AWS region
+     * @param roleArn         AWS role ARN
+     * @param roleSessionName AWS role session name
+     * @param roleRegion      AWS role region
+     * @return AWS Lambda Client
+     * @throws CryptoException when decoding secrets fail
+     */
+    private static AWSLambda getAWSLambdaClient(String accessKey, String secretKey, String region,
+                                          String roleArn, String roleSessionName, String roleRegion) throws CryptoException {
+        AWSLambda awsLambdaClient;
+        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
+            awsLambdaClient = getARNsWithIAMRole(roleArn, roleSessionName, roleRegion);
+            return awsLambdaClient;
+        } else if (StringUtils.isNotEmpty(accessKey) && StringUtils.isNotEmpty(secretKey) &&
+                StringUtils.isNotEmpty(region)) {
+            awsLambdaClient = getARNsWithStoredCredentials(accessKey, secretKey, region,
+                    roleArn, roleSessionName, roleRegion);
+            return awsLambdaClient;
+        } else {
+            log.error("Missing AWS Credentials");
+            return null;
+        }
+    }
+
+    /**
+     * @param roleArn         AWS role ARN
+     * @param roleSessionName AWS role session name
+     * @param roleRegion      AWS role region
+     * @return AWS Lambda Client
+     */
+    private static AWSLambda getARNsWithIAMRole(String roleArn, String roleSessionName, String roleRegion) {
+        AWSLambda awsLambdaClient;
+        if (log.isDebugEnabled()) {
+            log.debug("Using temporary credentials supplied by the IAM role attached to AWS " +
+                    "instance");
+        }
+        if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
+                && StringUtils.isEmpty(roleRegion)) {
+            awsLambdaClient = AWSLambdaClientBuilder.standard()
+                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                    .build();
+            return awsLambdaClient;
+        } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                && StringUtils.isNotEmpty(roleRegion)) {
+            String stsRegion = String.valueOf(Regions.getCurrentRegion());
+            AWSSecurityTokenService awsSTSClient;
+            if (StringUtils.isEmpty(stsRegion)) {
+                awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
+                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                        .build();
+            } else {
+                awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
+                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                        .withEndpointConfiguration(new EndpointConfiguration("https://sts."
+                                + stsRegion + ".amazonaws.com", stsRegion))
+                        .build();
+            }
+            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
+                    .withRoleArn(roleArn)
+                    .withRoleSessionName(roleSessionName);
+            AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
+            Credentials sessionCredentials = assumeRoleResult.getCredentials();
+            BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
+                    sessionCredentials.getAccessKeyId(),
+                    sessionCredentials.getSecretAccessKey(),
+                    sessionCredentials.getSessionToken());
+            awsLambdaClient = AWSLambdaClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
+                    .withRegion(roleRegion)
+                    .build();
+            return awsLambdaClient;
+        } else {
+            log.error("Missing AWS STS configurations");
+            return null;
+        }
+    }
+
+    /**
+     * @param accessKey       AWS access key
+     * @param secretKey       AWS secret key
+     * @param region          AWS region
+     * @param roleArn         AWS role ARN
+     * @param roleSessionName AWS role session name
+     * @param roleRegion      AWS role region
+     * @return AWS Lambda Client
+     * @throws CryptoException when decoding secrets fail
+     */
+    private static AWSLambda getARNsWithStoredCredentials(String accessKey, String secretKey, String region,
+                                                          String roleArn, String roleSessionName, String roleRegion)
+            throws CryptoException {
+        AWSLambda awsLambdaClient;
+        if (log.isDebugEnabled()) {
+            log.debug("Using user given stored credentials");
+        }
+        if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
+            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+            secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
+                    StandardCharsets.UTF_8);
+        }
+        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+        if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
+                && StringUtils.isEmpty(roleRegion)) {
+            awsLambdaClient = AWSLambdaClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                    .withRegion(region)
+                    .build();
+            return awsLambdaClient;
+        } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                && StringUtils.isNotEmpty(roleRegion)) {
+            AWSSecurityTokenService awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                    .withEndpointConfiguration(new EndpointConfiguration("https://sts."
+                            + region + ".amazonaws.com", region))
+                    .build();
+            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
+                    .withRoleArn(roleArn)
+                    .withRoleSessionName(roleSessionName);
+            AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
+            Credentials sessionCredentials = assumeRoleResult.getCredentials();
+            BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
+                    sessionCredentials.getAccessKeyId(),
+                    sessionCredentials.getSecretAccessKey(),
+                    sessionCredentials.getSessionToken());
+            awsLambdaClient = AWSLambdaClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
+                    .withRegion(roleRegion)
+                    .build();
+            return awsLambdaClient;
+        } else {
+            log.error("Missing AWS STS configurations");
+            return null;
+        }
     }
 
     /**
@@ -274,7 +348,7 @@ public class ApisApiServiceImplUtils {
             // Code block for the processing of the response
             try (CloseableHttpResponse response = getHttpClient.execute(httpGet)) {
                 if (isDebugEnabled) {
-                    log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                    log.debug(HTTP_STATUS_LOG + response.getStatusLine().getStatusCode());
                 }
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     BufferedReader reader = new BufferedReader(
@@ -303,7 +377,7 @@ public class ApisApiServiceImplUtils {
                 }
             }
         }
-        return null;
+        return (JSONObject) Collections.emptyMap();
     }
 
     /**
@@ -339,9 +413,9 @@ public class ApisApiServiceImplUtils {
             // Code block for processing the response
             try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
                 if (isDebugEnabled) {
-                    log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                    log.debug(HTTP_STATUS_LOG + response.getStatusLine().getStatusCode());
                 }
-                if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) {
+                if ((response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
                     throw new APIManagementException(
                             "Error while sending data to the API Security Audit Feature. Found http status " +
                                     response.getStatusLine());
@@ -413,7 +487,7 @@ public class ApisApiServiceImplUtils {
         int status = httpConn.getResponseCode();
         if (status == HttpURLConnection.HTTP_OK) {
             if (isDebugEnabled) {
-                log.debug("HTTP status " + status);
+                log.debug(HTTP_STATUS_LOG + status);
             }
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(httpConn.getInputStream(), StandardCharsets.UTF_8));
@@ -546,17 +620,17 @@ public class ApisApiServiceImplUtils {
     /**
      * @param apiToAdd           API which will be added
      * @param apiProvider        API Provider Impl
-     * @param username           API Provider username
      * @param service            ServiceCatalog service
      * @param validationResponse OpenAPI defnition validation response
      * @param isServiceAPI       whether the API is created from a service
      * @param syncOperations     sync all API operations
      * @throws APIManagementException when scope validation or OpenAPI parsing fails
      */
-    public static API importAPIDefinition(API apiToAdd, APIProvider apiProvider, String username, String organization,
+    public static API importAPIDefinition(API apiToAdd, APIProvider apiProvider, String organization,
                                           ServiceEntry service, APIDefinitionValidationResponse validationResponse,
                                           boolean isServiceAPI, boolean syncOperations)
             throws APIManagementException {
+        String username = CommonUtils.getLoggedInUsername();
         if (isServiceAPI) {
             apiToAdd.setServiceInfo("key", service.getServiceKey());
             apiToAdd.setServiceInfo("md5", service.getMd5());
@@ -595,6 +669,4 @@ public class ApisApiServiceImplUtils {
 
         return addedAPI;
     }
-
-
 }
