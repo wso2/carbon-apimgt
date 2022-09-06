@@ -206,6 +206,8 @@ public enum ExceptionCodes implements ErrorHandler {
     IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
             + "identity provider"),
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
+    USERSTORE_INITIALIZATION_FAILED(900615, "Unable to get the user store manager", 500,
+            "Error while getting the user store manager from the realm"),
 
 
     // Labels related codes
