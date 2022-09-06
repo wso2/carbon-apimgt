@@ -20,10 +20,13 @@ package org.wso2.carbon.apimgt.impl.restapi;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -39,10 +42,35 @@ public class CommonUtils {
     }
 
     /**
+     * @return API Provider Impl
+     * @throws APIManagementException when getting provider fails
+     */
+    public static APIProvider getLoggedInUserProvider() throws APIManagementException {
+
+        return APIManagerFactory.getInstance().getAPIProvider(getLoggedInUsername());
+    }
+
+    /**
      * @return The logged-in user
      */
     public static String getLoggedInUsername() {
         return CarbonContext.getThreadLocalCarbonContext().getUsername();
+    }
+
+    /**
+     * @param apiId UUID of the API
+     * @return API details
+     * @throws APIManagementException when API does not exist in the DB
+     */
+    public static APIInfo validateAPIExistence(String apiId) throws APIManagementException {
+        APIProvider apiProvider = getLoggedInUserProvider();
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+        if (apiInfo == null) {
+            throw new APIManagementException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiId));
+        }
+        return apiInfo;
     }
 
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
