@@ -27,6 +27,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
+import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
@@ -40,6 +42,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
@@ -75,7 +78,9 @@ public class WebsocketInboundHandlerTestCase {
         inboundWebSocketProcessor = Mockito.mock(InboundWebSocketProcessor.class);
         channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         Channel channel = Mockito.mock(Channel.class);
+        Attribute attribute = Mockito.mock(Attribute.class);
         ChannelId channelId = Mockito.mock(ChannelId.class);
+        Mockito.when(channel.attr(AttributeKey.valueOf("API_PROPERTIES"))).thenReturn(attribute);
         Mockito.when(channelHandlerContext.channel()).thenReturn(channel);
         Mockito.when(channel.id()).thenReturn(channelId);
         Mockito.when(channelId.asLongText()).thenReturn(channelIdString);
@@ -182,9 +187,23 @@ public class WebsocketInboundHandlerTestCase {
 
         //close connection error response
         responseDTO.setCloseConnection(true);
+        responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.INTERNAL_SERVER_ERROR);
         websocketInboundHandler.channelRead(channelHandlerContext, msg);
         Assert.assertFalse((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
                 .containsKey(channelIdString)));
+    }
+
+    @Test
+    public void exceptionCaughtTest() throws Exception {
+        Throwable cause = new CorruptedWebSocketFrameException(WebSocketCloseStatus.MESSAGE_TOO_BIG,
+                "Max frame length of 65536 has been exceeded.");
+        Attribute<Object> attributes = Mockito.mock(Attribute.class);
+        Mockito.when(channelHandlerContext.channel().attr(AttributeKey.valueOf("API_PROPERTIES")))
+                .thenReturn(attributes);
+        HashMap apiProperties = new HashMap();
+        Mockito.when((HashMap)attributes.get()).thenReturn(apiProperties);
+        websocketInboundHandler.exceptionCaught(channelHandlerContext, cause);
+        Assert.assertEquals(apiProperties.get("api.ut.WS_SC"), 1009);
     }
 
     private InboundMessageContext createWebSocketApiMessageContext() {
