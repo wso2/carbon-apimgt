@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.dcr.web.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
@@ -54,14 +55,18 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -77,7 +82,10 @@ public class RegistrationServiceImpl implements RegistrationService {
     private static final Log log = LogFactory.getLog(RegistrationServiceImpl.class);
     private static final String APP_DISPLAY_NAME = "DisplayName";
 
+    @Context
+    MessageContext securityContext;
     @POST
+    @Path("/register")
     @Override
     public Response register(RegistrationProfile profile) {
         /**
@@ -255,7 +263,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             appToReturn = this.fromAppDTOToApplicationInfo(consumerAppDTO.getOauthConsumerKey(),
                     consumerAppDTO.getApplicationName(), consumerAppDTO.getCallbackUrl(),
-                    consumerAppDTO.getOauthConsumerSecret(), saasApp, null, valueMap);
+                    consumerAppDTO.getOauthConsumerSecret(), saasApp, null, consumerAppDTO.getTokenType(), valueMap);
 
         } catch (IdentityOAuthAdminException e) {
             log.error("error occurred while trying to get OAuth Application data", e);
@@ -275,6 +283,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
         String appName = applicationInfo.getClientName();
+        String orgId = RestApiUtil.getValidatedOrganization(securityContext);
         String userId = (String) applicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
         boolean isTenantFlowStarted = false;
 
@@ -297,26 +306,38 @@ public class RegistrationServiceImpl implements RegistrationService {
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + appName);
             serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[4];
+
+            // convert to list
+            List<ServiceProviderProperty> serviceProviderProperties = new ArrayList<>();
+
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(applicationName);
-            serviceProviderProperties[0] = serviceProviderProperty;
+            serviceProviderProperties.add(serviceProviderProperty);
             ServiceProviderProperty tokenTypeProviderProperty = new ServiceProviderProperty();
             tokenTypeProviderProperty.setName(APIConstants.APP_TOKEN_TYPE);
             tokenTypeProviderProperty.setValue(applicationInfo.getTokenType());
-            serviceProviderProperties[1] = tokenTypeProviderProperty;
+            serviceProviderProperties.add(tokenTypeProviderProperty);
             ServiceProviderProperty consentProperty = new ServiceProviderProperty();
             consentProperty.setDisplayName(APIConstants.APP_SKIP_CONSENT_DISPLAY);
             consentProperty.setName(APIConstants.APP_SKIP_CONSENT_NAME);
             consentProperty.setValue(APIConstants.APP_SKIP_CONSENT_VALUE);
-            serviceProviderProperties[2] = consentProperty;
+            serviceProviderProperties.add(consentProperty);
             ServiceProviderProperty logoutConsentProperty = new ServiceProviderProperty();
             logoutConsentProperty.setDisplayName(APIConstants.APP_SKIP_LOGOUT_CONSENT_DISPLAY);
             logoutConsentProperty.setName(APIConstants.APP_SKIP_LOGOUT_CONSENT_NAME);
             logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
-            serviceProviderProperties[3] = logoutConsentProperty;
-            serviceProvider.setSpProperties(serviceProviderProperties);
+            serviceProviderProperties.add(logoutConsentProperty);
+
+            if (!orgId.isEmpty()) {
+                ServiceProviderProperty orgIdProperty = new ServiceProviderProperty();
+                orgIdProperty.setDisplayName(APIConstants.APP_ORG_ID_DISPLAY);
+                orgIdProperty.setName(APIConstants.APP_ORG_ID_NAME);
+                orgIdProperty.setValue(orgId);
+                serviceProviderProperties.add(orgIdProperty);
+            }
+            ServiceProviderProperty[] spPropertyArr = serviceProviderProperties.toArray(new ServiceProviderProperty[0]);
+            serviceProvider.setSpProperties(spPropertyArr);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
 
@@ -359,7 +380,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             //Setting the SaasApplication attribute to created service provider
             createdServiceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            createdServiceProvider.setSpProperties(serviceProviderProperties);
+            createdServiceProvider.setSpProperties(spPropertyArr);
 
             //Updating the service provider with Inbound Authentication Configs and SaasApplication
             appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);
@@ -371,7 +392,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             return this.fromAppDTOToApplicationInfo(createdOauthApp.getOauthConsumerKey(),
                     applicationName, createdOauthApp.getCallbackUrl(), createdOauthApp.getOauthConsumerSecret(),
-                    createdServiceProvider.isSaasApp(), userId, valueMap);
+                    createdServiceProvider.isSaasApp(), userId, createdOauthApp.getTokenType(), valueMap);
 
         } catch (IdentityApplicationManagementException e) {
             log.error("Error occurred while creating the client application " + appName,e);
@@ -403,6 +424,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         oauthConsumerAppDTO.setUsername(userName);
         oauthConsumerAppDTO.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
         oauthConsumerAppDTO.setGrantTypes(grantTypes.trim());
+        oauthConsumerAppDTO.setTokenType(applicationInfo.getTokenType());
         try {
             boolean isHashDisabled = OAuth2Util.isHashDisabled();
             if (isHashDisabled) {
@@ -438,7 +460,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      */
     private OAuthApplicationInfo fromAppDTOToApplicationInfo(String clientId, String clientName,
             String callbackUrl, String clientSecret,
-            boolean saasApp, String appOwner,
+            boolean saasApp, String appOwner, String tokenType,
             Map<String, String> sampleMap) {
 
         OAuthApplicationInfo updatingApp = new OAuthApplicationInfo();
@@ -448,6 +470,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         updatingApp.setClientSecret(clientSecret);
         updatingApp.setIsSaasApplication(saasApp);
         updatingApp.setAppOwner(appOwner);
+        updatingApp.setTokenType(tokenType);
 
         Iterator it = sampleMap.entrySet().iterator();
         while (it.hasNext()) {
