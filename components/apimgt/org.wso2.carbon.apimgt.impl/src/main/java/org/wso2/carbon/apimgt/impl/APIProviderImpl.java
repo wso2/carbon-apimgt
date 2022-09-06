@@ -101,6 +101,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -130,6 +132,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private RecommendationEnvironment recommendationEnvironment;
     private GlobalMediationPolicyImpl globalMediationPolicyImpl;
+    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
+
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
@@ -3644,9 +3648,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return certificateManager.isConfigured();
     }
 
-
     @Override
-    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
+    public CertificateMetadataDTO getCertificate(String alias) throws APIManagementException {
         int tenantId = 0;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -3654,7 +3657,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
         }
-        return certificateManager.getCertificates(tenantId);
+        return certificateManager.getCertificate(alias, tenantId);
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
+        int tenantId = 0;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            return certificateManager.getCertificates(tenantId);
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return null;
     }
 
     @Override
@@ -4725,6 +4741,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
         }
+    }
+
+    @Override
+    public APISearchResult searchPaginatedAPIsByFQDN(String endpoint, String tenantDomain,
+                                                     int offset, int limit) throws APIManagementException {
+        String fqdn;
+        APISearchResult result = new APISearchResult();
+
+        try {
+            URI uri = new URI(endpoint);
+            fqdn = uri.getHost();
+            if(fqdn == null) {
+                return result;
+            }
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("Error while extracting fully qualified domain name from the given url: " + endpoint, e);
+        }
+
+        String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + fqdn;
+        Organization org = new Organization(tenantDomain);
+        String adminUser = APIUtil.getTenantAdminUserName(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(adminUser);
+        Map<String, Object> properties = APIUtil.getUserProperties(adminUser);
+        UserContext userCtx = new UserContext(adminUser, org, properties, roles);
+
+        try {
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
+                    offset, limit, userCtx, "createdTime", "desc");
+            if (log.isDebugEnabled()) {
+                log.debug("Running Solr query : " + query);
+            }
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                List<API> apiList = new ArrayList<>();
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    populateAPIStatus(mappedAPI);
+                    populateDefaultVersion(mappedAPI);
+                    apiList.add(mappedAPI);
+                }
+                result.setApis(apiList);
+                result.setApiCount(searchAPIs.getTotalAPIsCount());
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching for APIs with Solr query: " + query , e);
+        }
+
+        return result ;
     }
 
     private void populateAPITier(APIProduct apiProduct) throws APIManagementException {

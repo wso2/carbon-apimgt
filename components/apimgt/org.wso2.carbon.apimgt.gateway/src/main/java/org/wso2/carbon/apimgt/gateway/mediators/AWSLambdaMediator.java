@@ -23,6 +23,8 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
@@ -178,7 +180,8 @@ public class AWSLambdaMediator extends AbstractMediator {
                 } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
                         && StringUtils.isNotEmpty(roleRegion)) {
                     Credentials sessionCredentials = getSessionCredentials(
-                            DefaultAWSCredentialsProviderChain.getInstance(), roleArn, roleSessionName, "");
+                            DefaultAWSCredentialsProviderChain.getInstance(), roleArn, roleSessionName,
+                            String.valueOf(Regions.getCurrentRegion()));
                     BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
                             sessionCredentials.getAccessKeyId(),
                             sessionCredentials.getSecretAccessKey(),
@@ -266,7 +269,8 @@ public class AWSLambdaMediator extends AbstractMediator {
         } else {
             awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
                     .withCredentials(credentialsProvider)
-                    .withRegion(region)
+                    .withEndpointConfiguration(new EndpointConfiguration("https://sts." + region + ".amazonaws.com",
+                            region))
                     .build();
         }
         AssumeRoleRequest roleRequest = new AssumeRoleRequest()
@@ -283,14 +287,17 @@ public class AWSLambdaMediator extends AbstractMediator {
         return sessionCredentials;
     }
 
+    @Override
     public String getType() {
         return null;
     }
 
+    @Override
     public void setTraceState(int traceState) {
         traceState = 0;
     }
 
+    @Override
     public int getTraceState() {
         return 0;
     }

@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 
-import java.util.List;
+import java.util.*;
 
 public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecutor {
 
@@ -88,6 +88,6 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
     @Override
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
 
-        return null;
+        return Collections.emptyList();
     }
 }

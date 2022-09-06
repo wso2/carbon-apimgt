@@ -8450,7 +8450,7 @@ public class ApiMgtDAO {
      * @param internalRef Internal reference of the workflow
      * @param workflowType Workflow type of the workflow
      * @return External workflow reference for the given internal reference and workflow type if present. Null otherwise
-     * @throws APIManagementException
+     * @throws APIManagementException If an SQL exception occurs in database interactions
      */
     public String getExternalWorkflowRefByInternalRefWorkflowType(int internalRef, String workflowType) throws APIManagementException {
 
