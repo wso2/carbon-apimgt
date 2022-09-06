@@ -92,6 +92,7 @@ import javax.ws.rs.core.Response;
 public class RestApiUtil {
 
     public static final Log log = LogFactory.getLog(RestApiUtil.class);
+    private static Set<URITemplate> dcrResourceMappings;
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
     private static Set<URITemplate> adminAPIResourceMappings;
@@ -1034,6 +1035,32 @@ public class RestApiUtil {
     }
 
     /**
+     * This is static method to return URI Templates map of DCR REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with API Manager DCR REST API
+     */
+    public static Set<URITemplate> getDCRAppResourceMapping() {
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_STORE_CONTEXT,
+                RestApiConstants.REST_API_STORE_VERSION_0));
+
+        if (dcrResourceMappings == null) {
+            try {
+                String definition = IOUtils.toString(RestApiUtil.class.getResourceAsStream("/dcr.yaml"), "UTF-8");
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                dcrResourceMappings = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+            }
+        }
+        return dcrResourceMappings;
+    }
+
+    /**
      * This is static method to return URI Templates map of Service Catalog REST API.
      * This content need to load only one time and keep it in memory as content will not change
      * during runtime.
@@ -1337,6 +1364,8 @@ public class RestApiUtil {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION);
         } else if (basePath.contains(RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL)) {
             uriTemplates = RestApiUtil.getServiceCatalogAPIResourceMapping();
+        } else if (basePath.contains(RestApiConstants.REST_API_DCR_CONTEXT)) {
+            uriTemplates = RestApiUtil.getDCRAppResourceMapping();
         }
         return uriTemplates;
     }
