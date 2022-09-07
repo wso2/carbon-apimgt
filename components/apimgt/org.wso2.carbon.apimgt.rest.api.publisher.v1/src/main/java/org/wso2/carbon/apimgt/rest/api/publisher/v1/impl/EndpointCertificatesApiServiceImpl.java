@@ -127,8 +127,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 return Response.ok(updatedCertUri).entity(certificateDTO).build();
             }
         } catch (URISyntaxException e) {
-            RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
-                    alias + "'", log);
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR,
+                    "Error while generating the resource location URI for alias " + alias));
         }
         return null;
     }
@@ -141,19 +141,9 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         offset = (offset != null) ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         APIMetadataListDTO apiMetadataListDTO;
-        CertificateMetadataDTO certificateMetadataDTO;
-        String fqdn;
-        APISearchResult searchResult;
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        certificateMetadataDTO = apiProvider.getCertificate(alias);
-
-        if (certificateMetadataDTO != null) {
-            String endpoint = certificateMetadataDTO.getEndpoint();
-            searchResult = apiProvider.searchPaginatedAPIsByFQDN(endpoint, organization, offset, limit);
-        } else {
-            searchResult = new APISearchResult();
-        }
+        APISearchResult searchResult = EndpointCertificatesApiServiceImplUtils
+                .getCertificateUsageByAlias(alias, organization, offset, limit);
 
         apiMetadataListDTO = APIMappingUtil.fromAPIListToAPIMetadataListDTO(searchResult.getApis());
         APIMappingUtil.setPaginationParamsForAPIMetadataListDTO(apiMetadataListDTO, alias, offset, limit, searchResult.getApiCount());
@@ -162,63 +152,30 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     }
 
     public Response getEndpointCertificates(Integer limit, Integer offset, String alias, String endpoint,
-                                            MessageContext messageContext) {
+                                            MessageContext messageContext) throws APIManagementException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         List<CertificateMetadataDTO> certificates;
-        String userName = RestApiCommonUtil.getLoggedInUsername();
-        int tenantId = APIUtil.getTenantId(userName);
         String query = CertificateRestApiUtils.buildQueryString("alias", alias, "endpoint", endpoint);
 
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        certificates = EndpointCertificatesApiServiceImplUtils.getEndpointCertificates(alias, endpoint);
 
-            if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Call the search certificate api to get the filtered certificates for " +
-                            "tenant id : %d, alias : %s, and endpoint : %s", tenantId, alias, endpoint));
-                }
-                certificates = apiProvider.searchCertificates(tenantId, alias, endpoint);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("There is no query parameters provided. So, retrieve all the certificates" +
-                            " belongs to the tenantId : %d", tenantId));
-                }
-                certificates = apiProvider.getCertificates(userName);
-            }
-
-            CertificatesDTO certificatesDTO = CertificateRestApiUtils.getPaginatedCertificates(certificates, limit,
-                    offset, query);
-            return Response.status(Response.Status.OK).entity(certificatesDTO).build();
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving the certificates.", e, log);
-        }
-        return null;
+        CertificatesDTO certificatesDTO = CertificateRestApiUtils.getPaginatedCertificates(certificates, limit,
+                offset, query);
+        return Response.status(Response.Status.OK).entity(certificatesDTO).build();
     }
 
     public Response addEndpointCertificate(InputStream certificateInputStream, Attachment certificateDetail,
-                                           String alias, String endpoint, MessageContext messageContext) {
+                                           String alias, String endpoint, MessageContext messageContext)
+            throws APIManagementException {
         try {
-            if (StringUtils.isEmpty(alias) || StringUtils.isEmpty(endpoint)) {
-                RestApiUtil.handleBadRequest("The alias and/ or endpoint should not be empty", log);
-            }
-
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
             String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
 
-            if (StringUtils.isBlank(fileName)) {
-                RestApiUtil.handleBadRequest("Certificate update failed. Proper Certificate file should be provided",
-                        log);
-            }
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
-            int responseCode = apiProvider.addCertificate(userName, base64EncodedCert, alias, endpoint);
-
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Add certificate operation response code : %d", responseCode));
-            }
+            int responseCode = EndpointCertificatesApiServiceImplUtils
+                    .addEndpointCertificate(base64EncodedCert, alias, endpoint, fileName);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
                 CertMetadataDTO certificateDTO = new CertMetadataDTO();
@@ -227,21 +184,10 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
                 URI createdCertUri = new URI(RestApiConstants.CERTS_BASE_PATH + "?alias=" + alias);
                 return Response.created(createdCertUri).entity(certificateDTO).build();
-            } else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
-                RestApiUtil.handleInternalServerError("Error while adding the certificate due to an" +
-                        " internal server error", log);
-            } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
-                RestApiUtil.handleResourceAlreadyExistsError("The alias '" + alias +
-                        "' already exists in the trust store.", log);
-            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
-                RestApiUtil.handleBadRequest("Error while adding the certificate. Certificate Expired.", log);
             }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while adding the certificate due to an internal server " +
-                    "error", log);
         } catch (URISyntaxException e) {
-            RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
-                    alias + "'", log);
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR,
+                    "Error while generating the resource location URI for alias " + alias));
         }
         return null;
     }

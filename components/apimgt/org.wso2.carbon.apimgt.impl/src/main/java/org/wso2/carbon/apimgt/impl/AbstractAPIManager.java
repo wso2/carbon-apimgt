@@ -613,7 +613,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected final void handleExceptionWithCode(String msg, Exception e, ErrorHandler code) throws APIManagementException {
 
-        throw new APIManagementException(msg, e);
+        throw new APIManagementException(msg, e, code);
     }
 
     protected final void handleException(String msg) throws APIManagementException {

@@ -3592,12 +3592,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .getTenantId(tenantDomain);
             responseCode = certificateManager
                     .addCertificateToParentNode(certificate, alias, endpoint, tenantId);
+            int code = responseCode.getResponseCode();
+            if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INTERNAL_SERVER_CERT,
+                        "Error while adding the certificate due to an internal server error"));
+            } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_ALREADY_EXIST, alias));
+            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.EXPIRED_CERT,
+                        "Error while adding the certificate. Certificate Expired."));
+            }
             CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(),APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
                     tenantDomain,alias,endpoint);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
         return responseCode.getResponseCode();
     }
@@ -3675,7 +3686,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .getTenantId(tenantDomain);
             return certificateManager.getCertificates(tenantId);
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
         return null;
     }
@@ -4782,7 +4794,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 return result;
             }
         } catch (URISyntaxException e) {
-            throw new APIManagementException("Error while extracting fully qualified domain name from the given url: " + endpoint, e);
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR,
+                    "Error while extracting fully qualified domain name from the given url: " + endpoint));
         }
 
         String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + fqdn;
@@ -4811,7 +4824,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.setApiCount(searchAPIs.getTotalAPIsCount());
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching for APIs with Solr query: " + query , e);
+            throw new APIManagementException("Error while searching for APIs with Solr query: " + query, e,
+                    ExceptionCodes.from(ExceptionCodes.PERSISTENCE_ERROR, e.getMessage()));
         }
 
         return result ;

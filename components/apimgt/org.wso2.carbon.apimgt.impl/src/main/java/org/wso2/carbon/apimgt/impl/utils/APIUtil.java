@@ -2112,8 +2112,7 @@ public final class APIUtil {
 
         boolean authorized = false;
         if (userNameWithoutChange == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" +
-                    " the anonymous user");
+            throw new APIManagementException(ExceptionCodes.ANON_USER_ACTION);
         }
 
         if (isPermissionCheckDisabled()) {
@@ -2151,7 +2150,8 @@ public final class APIUtil {
             }
 
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while checking the user:" + userNameWithoutChange + " authorized or not", e);
+            throw new APIManagementException("Error while checking the user:" + userNameWithoutChange
+                    + " authorized or not", e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -2206,8 +2206,7 @@ public final class APIUtil {
     public static String[] getListOfRoles(String username) throws APIManagementException {
 
         if (username == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" +
-                    " the anonymous user");
+            throw new APIManagementException(ExceptionCodes.ANON_USER_ACTION);
         }
 
         String[] roles = getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username);
@@ -2225,7 +2224,7 @@ public final class APIUtil {
             return roles;
         } catch (UserStoreException e) {
             throw new APIManagementException("UserStoreException while trying the role list of the user " + username,
-                    e);
+                    e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
     }
 

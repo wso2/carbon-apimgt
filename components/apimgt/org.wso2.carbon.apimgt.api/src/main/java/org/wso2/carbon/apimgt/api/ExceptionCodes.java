@@ -117,6 +117,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
     ERROR_RETRIEVING_CATEGORY(900362, "Cannot retrieve categories", 500, "Error while retrieving categories for organization '%s'"),
+    PERSISTENCE_ERROR(900363, "Error occurred in registy transaction", 500, "'%s'"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -130,6 +131,7 @@ public enum ExceptionCodes implements ErrorHandler {
     RESOURCE_RETRIEVAL_FAILED(900402, "Resource retrieval failed", 400, "Resource retrieval failed"),
     USER_MAPPING_RETRIEVAL_FAILED(900404, "User mapping retrieval failed", 404, "User mapping retrieval failed"),
     MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
+    URI_PARSE_ERROR(900405, "Error constructing the URI", 500, "'%s'"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -212,6 +214,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
     USERSTORE_INITIALIZATION_FAILED(900615, "Unable to get the user store manager", 500,
             "Error while getting the user store manager from the realm"),
+    ANON_USER_ACTION(900616, "Operation not permitted", 401, "Attempt to execute privileged operation as the anonymous user"),
 
 
     // Labels related codes
@@ -555,7 +558,8 @@ public enum ExceptionCodes implements ErrorHandler {
     UPDATE_CERT(904007, "Could not update the certificate", 500, "'%s'"),
     ENCODE_CERT(904008, "Error occurred while encoding the certificate", 500, "'%s"),
     INTERNAL_SERVER_CERT(904009, "Internal server error", 500, "'%s'"),
-    EXPIRED_CERT(904010, "Certificate expired", 400, "'%s'");
+    EXPIRED_CERT(904010, "Certificate expired", 400, "'%s'"),
+    CERT_ALREADY_EXIST(904011, "Certificate alias already exists", 409, "The alias '%s' already exists in the truststore");
 
     private final long errorCode;
     private final String errorMessage;
