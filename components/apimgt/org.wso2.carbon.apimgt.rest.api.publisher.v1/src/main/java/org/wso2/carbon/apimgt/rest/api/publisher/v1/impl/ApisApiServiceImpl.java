@@ -995,10 +995,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(
                     "Error while updating the client certificate for the alias " + alias + " due to an internal "
                             + "server error", e, log);
-        } catch (IOException e) {
-            RestApiUtil
-                    .handleInternalServerError("Error while encoding client certificate for the alias " + alias, e,
-                            log);
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while generating the resource location URI for alias '" + alias + "'", e, log);
@@ -1094,9 +1090,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(
                     "APIManagement exception while adding the certificate to the API " + apiId + " due to an internal "
                             + "server error", e, log);
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError(
-                    "IOException while generating the encoded certificate for the API " + apiId, e, log);
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while generating the resource location URI for alias '" + alias + "'", e, log);

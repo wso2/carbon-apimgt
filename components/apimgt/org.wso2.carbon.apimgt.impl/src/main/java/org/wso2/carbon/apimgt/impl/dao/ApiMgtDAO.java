@@ -27,12 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
-import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
-import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -7054,6 +7049,11 @@ public class ApiMgtDAO {
 
         log.error(msg, t);
         throw new APIManagementException(msg, t);
+    }
+
+    private void handleExceptionWithCode(String msg, Throwable t, ErrorHandler code) throws APIManagementException {
+        log.error(msg, t);
+        throw new APIManagementException(msg, code);
     }
 
     public HashMap<String, String> getURITemplatesPerAPIAsString(String uuid)
@@ -15267,7 +15267,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve API categories for organization " + organization, e);
+            handleExceptionWithCode("Failed to retrieve API categories for organization " + organization,
+                    e, ExceptionCodes.from(ExceptionCodes.ERROR_RETRIEVING_CATEGORY, organization));
         }
         return categoriesList;
     }

@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.ExceptionConstants;
 import java.util.Arrays;
 
 /**
@@ -115,6 +116,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
+    ERROR_RETRIEVING_CATEGORY(900362, "Cannot retrieve categories", 500, "Error while retrieving categories for organization '%s'"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -404,6 +406,15 @@ public enum ExceptionCodes implements ErrorHandler {
         //External Stores related codes
     EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
             "External Store Not Found"),
+    EXTERNAL_STORE_CLASS_NOT_FOUND(901201,
+            ExceptionConstants.EXTERNAL_STORE_ERROR_MSG, 404,
+            "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found"),
+    EXTERNAL_STORE_CLASS_NOT_LOADED(901202,
+            ExceptionConstants.EXTERNAL_STORE_ERROR_MSG, 500,
+            "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be loaded"),
+    EXTERNAL_STORE_CLASS_NOT_ACCESSIBLE(901203,
+            ExceptionConstants.EXTERNAL_STORE_ERROR_MSG, 500,
+            "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be accessed"),
 
 
     // Tenant related
@@ -531,7 +542,20 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true),
     REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
-    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false);
+    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false),
+
+    // certificate related error codes
+
+    CERT_NOT_FOUND(904001, "Could not find the certificate", 404, "'Cannot find the certificate with alias '%s' in the truststore'"),
+    CERT_BAD_REQUEST(904002, "Bad Request", 400, "'%s"),
+    GET_CERT_CONTENT(904003, "Error getting the certificate content", 500, "'%s'"),
+    RETRIEVE_CERT(904004, "Could not retrieve the certificate", 500, "'%s"),
+    DELETE_CERT(904005, "Could not delete the certificate", 500, "Error while deleting the certificate for alias '%s'"),
+    GET_CERT_INFO(904006, "Could not get the certificate information", 500, "'%s"),
+    UPDATE_CERT(904007, "Could not update the certificate", 500, "'%s'"),
+    ENCODE_CERT(904008, "Error occurred while encoding the certificate", 500, "'%s"),
+    INTERNAL_SERVER_CERT(904009, "Internal server error", 500, "'%s'"),
+    EXPIRED_CERT(904010, "Certificate expired", 400, "'%s'");
 
     private final long errorCode;
     private final String errorMessage;

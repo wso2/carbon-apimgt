@@ -64,11 +64,15 @@ public class CertificateRestApiUtils {
      * @return : Base64 encoded certificate string.
      * @throws IOException :
      */
-    public static String generateEncodedCertificate(InputStream certificateInputStream) throws IOException {
+    public static String generateEncodedCertificate(InputStream certificateInputStream) throws APIManagementException {
 
-        byte[] certificateBytes = IOUtils.toByteArray(certificateInputStream);
-        byte[] encodedCert = Base64.encodeBase64(certificateBytes);
-        return new String(encodedCert, StandardCharset.UTF_8);
+       try {
+           byte[] certificateBytes = IOUtils.toByteArray(certificateInputStream);
+           byte[] encodedCert = Base64.encodeBase64(certificateBytes);
+           return new String(encodedCert, StandardCharset.UTF_8);
+       } catch (IOException e) {
+           throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.ENCODE_CERT, e.getMessage()));
+       }
     }
 
     /**

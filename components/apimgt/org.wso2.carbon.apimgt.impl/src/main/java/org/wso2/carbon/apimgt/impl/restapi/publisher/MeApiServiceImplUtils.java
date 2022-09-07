@@ -48,7 +48,7 @@ public class MeApiServiceImplUtils {
             isUserInRole = APIUtil.checkIfUserInRole(userName, roleName);
             return isUserInRole;
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while validating use role",
+            throw new APIManagementException("Error while validating user role", e,
                     ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }
     }

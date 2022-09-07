@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -394,8 +395,9 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, endpoint, tenantId);
         } catch (CertificateManagementException e) {
-            throw new APIManagementException("Error retrieving certificate information for tenantId '" + tenantId +
-                    "' and alias '" + alias + "'");
+            String msg = "Error retrieving certificate information for tenantId '" + tenantId +
+                    "' and alias '" + alias + "'";
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RETRIEVE_CERT, msg));
         }
         return certificateMetadataList;
     }
@@ -423,8 +425,9 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, null, tenantId);
         } catch (CertificateManagementException e) {
-            throw new APIManagementException("Error retrieving certificate information for tenantId '" + tenantId +
-                    "' and alias '" + alias + "'");
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RETRIEVE_CERT,
+                    "Error retrieving certificate information for tenantId '" + tenantId
+                            + "' and alias '" + alias + "'"));
         }
         return certificateMetadataList.size() == 1; // The list would not be null so we check the size.
     }
@@ -438,7 +441,7 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             return certificateMgtUtils.getCertificateInformation(alias);
         } catch (CertificateManagementException e) {
-            throw new APIManagementException(e);
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GET_CERT_INFO, e.getMessage()));
         }
     }
 
@@ -448,7 +451,7 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             return certificateMgtUtils.updateCertificate(certificate, alias);
         } catch (CertificateManagementException e) {
-            throw new APIManagementException(e);
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.UPDATE_CERT, e.getMessage()));
         }
     }
 
@@ -512,7 +515,7 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             return certificateMgtUtils.getCertificateContent(alias);
         } catch (CertificateManagementException e) {
-            throw new APIManagementException(e);
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GET_CERT_CONTENT, e.getMessage()));
         }
     }
 

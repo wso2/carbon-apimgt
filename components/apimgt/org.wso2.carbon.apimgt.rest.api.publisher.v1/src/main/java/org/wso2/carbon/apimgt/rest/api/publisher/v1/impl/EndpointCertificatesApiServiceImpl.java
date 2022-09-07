@@ -26,10 +26,12 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.EndpointCertificatesApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
@@ -40,13 +42,11 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,141 +56,69 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
 
-    public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+    public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext)
+            throws APIManagementException {
         String certFileName = alias + ".crt";
-
-        if (!StringUtils.isNotEmpty(alias)) {
-            RestApiUtil.handleBadRequest("The alias cannot be empty", log);
-        }
-
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            if (!apiProvider.isCertificatePresent(tenantId, alias)) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Could not find a certificate in truststore which belongs to tenant : %d " +
-                            "and with alias : %s. Hence the operation is terminated.", tenantId, alias));
-                }
-                String message = "Certificate for Alias '" + alias + "' is not found.";
-                RestApiUtil.handleResourceNotFoundError(message, log);
-            }
-
-            Object certificate = apiProvider.getCertificateContent(alias);
-            if (certificate != null) {
-                Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
-                responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
-                        + certFileName + "\"");
-                responseBuilder.header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
-                return responseBuilder.build();
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving the certificate status.", e, log);
+        Object certificate = EndpointCertificatesApiServiceImplUtils.getEndpointCertificateContentByAlias(alias);
+        if (certificate != null) {
+            Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
+            responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                    + certFileName + "\"");
+            responseBuilder.header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
+            return responseBuilder.build();
         }
         return null;
     }
 
-    public Response deleteEndpointCertificateByAlias(String alias, MessageContext messageContext) {
+    public Response deleteEndpointCertificateByAlias(String alias, MessageContext messageContext)
+            throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        String userName = RestApiCommonUtil.getLoggedInUsername();
 
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            if (!apiProvider.isCertificatePresent(tenantId, alias)) {
-                String message = "Certificate for alias '" + alias + "' is not found.";
-                RestApiUtil.handleResourceNotFoundError(message, log);
+        int responseCode = EndpointCertificatesApiServiceImplUtils.deleteEndpointCertificateByAlias(alias);
+
+        if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("The certificate which belongs to tenant : %d represented by the alias : " +
+                        "%s is deleted successfully", tenantId, alias));
             }
-
-            int responseCode = apiProvider.deleteCertificate(userName, alias, null);
-
-            if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("The certificate which belongs to tenant : %d represented by the alias : " +
-                            "%s is deleted successfully", tenantId, alias));
-                }
-                return Response.ok().build();
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Failed to delete the certificate which belongs to tenant : %d " +
-                            "represented by the alias : %s.", tenantId, alias));
-                }
-                RestApiUtil.handleInternalServerError("Error while deleting the certificate for alias '" +
-                        alias + "'.", log);
+            return Response.ok().build();
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Failed to delete the certificate which belongs to tenant : %d " +
+                        "represented by the alias : %s.", tenantId, alias));
             }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while deleting the certificate for alias '" +
-                    alias + "'.", e, log);
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.DELETE_CERT, alias));
         }
-        return null;
     }
 
-    public Response getEndpointCertificateByAlias(String alias, MessageContext messageContext) {
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+    public Response getEndpointCertificateByAlias(String alias, MessageContext messageContext)
+            throws APIManagementException {
 
-        if (!StringUtils.isNotEmpty(alias)) {
-            RestApiUtil.handleBadRequest("The alias cannot be empty", log);
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Retrieving the common information of the certificate which is represented by the" +
-                    " alias : %s", alias));
-        }
-
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            if (!apiProvider.isCertificatePresent(tenantId, alias)) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Could not find a certificate in truststore which belongs to tenant %d " +
-                            "and with alias %s. Hence the operation is terminated.", tenantId, alias));
-                }
-                String message = "Certificate for Alias '" + alias + "' is not found.";
-                RestApiUtil.handleResourceNotFoundError(message, log);
-            }
-
-            CertificateInformationDTO certificateInformationDTO = apiProvider.getCertificateStatus(alias);
-            CertificateInfoDTO certificateInfoDTO =
-                    CertificateMappingUtil.fromCertificateInformationToDTO(certificateInformationDTO);
-            return Response.ok().entity(certificateInfoDTO).build();
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving the certificate status.", e, log);
-        }
-        return null;
+        CertificateInformationDTO certificateInformationDTO = EndpointCertificatesApiServiceImplUtils
+                .getEndpointCertificateByAlias(alias);
+        CertificateInfoDTO certificateInfoDTO =
+                CertificateMappingUtil.fromCertificateInformationToDTO(certificateInformationDTO);
+        return Response.ok().entity(certificateInfoDTO).build();
     }
 
     public Response updateEndpointCertificateByAlias(String alias, InputStream certificateInputStream,
-                                                     Attachment certificateDetail, MessageContext messageContext) {
+                                                     Attachment certificateDetail, MessageContext messageContext)
+            throws APIManagementException {
         try {
-            if (StringUtils.isEmpty(alias)) {
-                RestApiUtil.handleBadRequest("The alias should not be empty", log);
-            }
-
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
             String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
 
-            if (StringUtils.isBlank(fileName)) {
-                RestApiUtil.handleBadRequest("Certificate update failed. The Certificate should not be empty", log);
-            }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(userName);
 
-            if (!apiProvider.isCertificatePresent(tenantId, alias)) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Could not find a certificate in truststore which belongs to tenant : %d " +
-                            "and with alias : %s. Hence the operation is terminated.", tenantId, alias));
-                }
-                RestApiUtil.handleResourceNotFoundError("Could not update the certificate. " +
-                        "The alias '" + alias + "' not found.", log);
-            }
-
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
-            int responseCode = apiProvider.updateCertificate(base64EncodedCert, alias);
+            int responseCode = EndpointCertificatesApiServiceImplUtils
+                    .updateEndpointCertificateByAlias(alias, fileName, base64EncodedCert);
             List<CertificateMetadataDTO> updatedCertificate = apiProvider.searchCertificates(tenantId, alias, null);
 
-            if (ResponseCode.SUCCESS.getResponseCode() == responseCode && updatedCertificate.size() > 0) {
-
+            if (ResponseCode.SUCCESS.getResponseCode() == responseCode && !updatedCertificate.isEmpty()) {
                 CertificateMetadataDTO certificateMetadata = updatedCertificate.get(0);
                 CertMetadataDTO certificateDTO = CertificateMappingUtil.fromCertificateMetadataToDTO(certificateMetadata);
 
@@ -198,20 +126,6 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
                 return Response.ok(updatedCertUri).entity(certificateDTO).build();
             }
-
-            if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
-                RestApiUtil.handleInternalServerError("Error while updating the certificate due to an internal " +
-                        "server error", log);
-            } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == responseCode) {
-                RestApiUtil.handleResourceNotFoundError("", log);
-            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
-                RestApiUtil.handleBadRequest("Error while updating the certificate. Certificate Expired.", log);
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while adding the certificate due to an internal server " +
-                    "error", log);
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error while encoding certificate", log);
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
                     alias + "'", log);
@@ -220,7 +134,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     }
 
     @Override
-    public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
+    public Response getCertificateUsageByAlias(String alias, Integer limit, Integer offset, MessageContext messageContext)
+            throws APIManagementException {
 
         limit = (limit != null) ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = (offset != null) ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -233,10 +148,10 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         certificateMetadataDTO = apiProvider.getCertificate(alias);
 
-        if(certificateMetadataDTO != null) {
+        if (certificateMetadataDTO != null) {
             String endpoint = certificateMetadataDTO.getEndpoint();
             searchResult = apiProvider.searchPaginatedAPIsByFQDN(endpoint, organization, offset, limit);
-        }else{
+        } else {
             searchResult = new APISearchResult();
         }
 
@@ -324,8 +239,6 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while adding the certificate due to an internal server " +
                     "error", log);
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error while generating the encoded certificate", log);
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
                     alias + "'", log);

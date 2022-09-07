@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
+import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
@@ -3629,7 +3630,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     tenantDomain, alias, endpoint);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information",
+                    e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }
         return responseCode.getResponseCode();
     }
@@ -3659,7 +3661,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information",
+                    e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }
         return certificateManager.getCertificate(alias, tenantId);
     }
@@ -3740,8 +3743,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     tenantDomain, alias);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         }
-        return responseCode != null ? responseCode.getResponseCode() :
+        int code = responseCode != null ? responseCode.getResponseCode() :
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
+        if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == code) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INTERNAL_SERVER_CERT,
+                    "Error while updating the certificate due to an internal server error"));
+        } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == code) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
+        } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == code) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.EXPIRED_CERT,
+                    "Error while updating the certificate. Certificate Expired"));
+        }
+        return code;
     }
 
 
@@ -3769,6 +3782,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        int tenantId = APIUtil.getTenantId(CommonUtils.getLoggedInUsername());
+        if (!apiProvider.isCertificatePresent(tenantId, alias)) {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Could not find a certificate in truststore which belongs to tenant : %d " +
+                        "and with alias : %s. Hence the operation is terminated.", tenantId, alias));
+            }
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
+        }
         return certificateManager.getCertificateContent(alias);
     }
 

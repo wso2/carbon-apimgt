@@ -1746,13 +1746,16 @@ public final class APIUtil {
             }
         } catch (ClassNotFoundException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
-            throw new APIManagementException(msg, e);
+            log.error(msg, e);
+            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_FOUND);
         } catch (InstantiationException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
-            throw new APIManagementException(msg, e);
+            log.error(msg, e);
+            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_LOADED);
         } catch (IllegalAccessException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
-            throw new APIManagementException(msg, e);
+            log.error(msg, e);
+            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_ACCESSIBLE);
         }
         return externalAPIStores;
     }
@@ -8465,7 +8468,8 @@ public final class APIUtil {
             }
             return adminUserName;
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error in getting tenant admin username", e);
+            throw new APIManagementException("Error in getting tenant admin username",
+                    e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
