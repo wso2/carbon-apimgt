@@ -32,4 +32,30 @@ public class GraphQLConstants {
     public static final String GRAPHQL_QUERY = "Query";
     public static final String GRAPHQL_MUTATION = "Mutation";
     public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
+
+    public static final int GRAPHQL_QUERY_TOO_DEEP = 900820;
+    public static final String GRAPHQL_QUERY_TOO_DEEP_MESSAGE = "QUERY TOO DEEP";
+
+    public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900821;
+    public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
+
+    public static final int GRAPHQL_INVALID_QUERY = 900422;
+    public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
+    public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
+
+    /**
+     * GraphQL Constants related to GraphQL Subscription operations
+     */
+    public static class SubscriptionConstants {
+        public static final String HTTP_METHOD_NAME = "SUBSCRIPTION";
+        public static final String PAYLOAD_FIELD_NAME_TYPE = "type";
+        public static final List<String> PAYLOAD_FIELD_NAME_ARRAY_FOR_SUBSCRIBE =
+                Collections.unmodifiableList(Arrays.asList("start", "subscribe"));
+        public static final List<String> PAYLOAD_FIELD_NAME_ARRAY_FOR_DATA =
+                Collections.unmodifiableList(Arrays.asList("data", "next"));
+        public static final String PAYLOAD_FIELD_NAME_PAYLOAD = "payload";
+        public static final String PAYLOAD_FIELD_NAME_QUERY = "query";
+        public static final String PAYLOAD_FIELD_NAME_ID = "id";
+        public static final String PAYLOAD_FIELD_TYPE_ERROR = "error";
+    }
 }

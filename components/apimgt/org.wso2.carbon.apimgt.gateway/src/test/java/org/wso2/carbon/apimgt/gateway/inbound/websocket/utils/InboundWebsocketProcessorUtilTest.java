@@ -28,10 +28,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.testng.Assert;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketWSClient;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(PowerMockRunner.class) 
+@RunWith(PowerMockRunner.class)
 @PrepareForTest({ InboundWebsocketProcessorUtil.class, PrivilegedCarbonContext.class,
         ServiceReferenceHolder.class, WebsocketUtil.class, ThrottleDataPublisher.class, APIUtil.class, DataHolder.class,
         InboundWebsocketProcessorUtil.class })
@@ -180,7 +180,7 @@ public class InboundWebsocketProcessorUtilTest {
         org.junit.Assert.assertEquals(String.valueOf(payload.get(WebSocketApiConstants.FrameErrorConstants.ERROR_CODE)),
                 String.valueOf(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR));
     }
-    
+
     @Test
     public void isAuthenticatedJWT() throws APISecurityException, APIManagementException {
         String authenticationHeader = "Bearer eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHU"
