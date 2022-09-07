@@ -33,7 +33,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.entity.ContentType;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -50,13 +49,11 @@ import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class GraphQLSchemaDefinition {
 
