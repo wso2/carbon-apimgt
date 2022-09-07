@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.Extension;
 import io.swagger.v3.core.util.Json;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -33,7 +32,15 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
