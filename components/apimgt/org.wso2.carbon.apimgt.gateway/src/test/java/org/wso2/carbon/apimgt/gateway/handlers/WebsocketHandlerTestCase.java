@@ -112,6 +112,7 @@ public class WebsocketHandlerTestCase {
         InboundMessageContextDataHolder.getInstance().addInboundMessageContextForConnection(channelIdString,
                 inboundMessageContext);
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(Mockito.anyObject())).thenReturn(responseDTO);
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottle(Mockito.anyInt(), Mockito.anyObject(),
                 Mockito.anyObject(), Mockito.anyObject())).thenReturn(responseDTO);
         websocketHandler.write(channelHandlerContext, msg, channelPromise);
@@ -133,6 +134,7 @@ public class WebsocketHandlerTestCase {
         responseDTO.setError(true);
         responseDTO.setCloseConnection(true);
         responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.INTERNAL_SERVER_ERROR);
+        PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(Mockito.anyObject())).thenReturn(responseDTO);
         PowerMockito.when(InboundWebsocketProcessorUtil.doThrottle(Mockito.anyInt(), Mockito.anyObject(),
                 Mockito.anyObject(), Mockito.anyObject())).thenReturn(responseDTO);
         websocketHandler.write(channelHandlerContext, msg, channelPromise);
