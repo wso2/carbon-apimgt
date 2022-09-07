@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -102,33 +103,27 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 }
                 policySpecification = APIUtil.getValidatedOperationPolicySpecification(jsonContent);
 
-                OperationPolicyData operationPolicyData = new OperationPolicyData();
-                operationPolicyData.setOrganization(organization);
-                operationPolicyData.setSpecification(policySpecification);
+                OperationPolicyData operationPolicyData = OperationPoliciesApiServiceImplUtils
+                        .prepareOperationPolicyData(policySpecification, organization);
 
                 if (synapsePolicyDefinitionFileInputStream != null) {
                     String synapsePolicyDefinition =
                             RestApiPublisherUtils.readInputStream(synapsePolicyDefinitionFileInputStream,
                                     synapsePolicyDefinitionFileDetail);
                     synapseDefinition = new OperationPolicyDefinition();
-                    synapseDefinition.setContent(synapsePolicyDefinition);
-                    synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-                    synapseDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(synapseDefinition));
-                    operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
+                    OperationPoliciesApiServiceImplUtils
+                            .preparePolicyDefinition(operationPolicyData, synapseDefinition,
+                                    synapsePolicyDefinition, OperationPolicyDefinition.GatewayType.Synapse);
                 }
 
                 if (ccPolicyDefinitionFileInputStream != null) {
                     String choreoConnectPolicyDefinition = RestApiPublisherUtils
                             .readInputStream(ccPolicyDefinitionFileInputStream, ccPolicyDefinitionFileDetail);
                     ccPolicyDefinition = new OperationPolicyDefinition();
-                    ccPolicyDefinition.setContent(choreoConnectPolicyDefinition);
-                    ccPolicyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
-                    ccPolicyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(ccPolicyDefinition));
-                    operationPolicyData.setCcPolicyDefinition(ccPolicyDefinition);
+                    OperationPoliciesApiServiceImplUtils
+                            .preparePolicyDefinition(operationPolicyData, ccPolicyDefinition,
+                                    choreoConnectPolicyDefinition, OperationPolicyDefinition.GatewayType.ChoreoConnect);
                 }
-
-                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
-
                 OperationPolicyData existingPolicy =
                         apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(),
                                 policySpecification.getVersion(), organization, false);
@@ -210,8 +205,9 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      * @param messageContext message context
      * @return A list of operation policies available for the API
      */
-    @Override public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query,
-            MessageContext messageContext) throws APIManagementException {
+    @Override
+    public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query,
+                                                  MessageContext messageContext) throws APIManagementException {
 
         String apiManagementExceptionErrorMessage = "";
         OperationPolicyDataListDTO policyListDTO = null;
@@ -223,14 +219,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
 
             // If name & version are given, it returns the policy data
             if (query != null) {
-                Map<String, String> queryParamMap = new HashMap<String, String>();
-                String[] queryParams = query.split(" ");
-                for (String param : queryParams) {
-                    String[] keyVal = param.split(":");
-                    if (keyVal.length == 2) {
-                        queryParamMap.put(keyVal[0], keyVal[1]);
-                    }
-                }
+                Map<String, String> queryParamMap = OperationPoliciesApiServiceImplUtils.getQueryParams(query);
                 name = queryParamMap.get(ImportExportConstants.POLICY_NAME);
                 version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
 
@@ -408,7 +397,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      */
     @Override
     public Response importOperationPolicy(InputStream fileInputStream, Attachment fileDetail,
-            MessageContext messageContext) throws APIManagementException {
+                                          MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
