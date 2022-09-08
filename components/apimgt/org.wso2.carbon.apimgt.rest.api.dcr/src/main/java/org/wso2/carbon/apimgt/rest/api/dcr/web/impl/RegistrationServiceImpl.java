@@ -329,7 +329,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
             serviceProviderProperties.add(logoutConsentProperty);
 
-            if (!orgId.isEmpty()) {
+            if (StringUtils.isNotBlank(orgId)) {
                 ServiceProviderProperty orgIdProperty = new ServiceProviderProperty();
                 orgIdProperty.setDisplayName(APIConstants.APP_ORG_ID_DISPLAY);
                 orgIdProperty.setName(APIConstants.APP_ORG_ID_NAME);
