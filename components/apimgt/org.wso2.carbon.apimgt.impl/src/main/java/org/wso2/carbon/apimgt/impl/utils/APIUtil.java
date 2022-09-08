@@ -11409,16 +11409,6 @@ public final class APIUtil {
         }
     }
 
-    public static Scope prependScopePrefix(String scopePrefix, Scope scope) {
-        Scope scopeWithPrefix = new Scope();
-        scopeWithPrefix.setDescription(scope.getDescription());
-        scopeWithPrefix.setId(scope.getId());
-        scopeWithPrefix.setKey(prependScopePrefix(scopePrefix, scope.getKey()));
-        scopeWithPrefix.setName(scope.getName());
-        scopeWithPrefix.setRoles(scope.getRoles());
-        return scopeWithPrefix;
-    }
-
     /**
      * Get gateway environments defined in the configuration: api-manager.xml
      *
