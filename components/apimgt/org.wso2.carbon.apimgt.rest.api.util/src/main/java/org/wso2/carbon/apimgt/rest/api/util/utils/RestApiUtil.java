@@ -1042,8 +1042,8 @@ public class RestApiUtil {
      * @return URITemplate set associated with API Manager DCR REST API
      */
     public static Set<URITemplate> getDCRAppResourceMapping() {
-        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_STORE_CONTEXT,
-                RestApiConstants.REST_API_STORE_VERSION_0));
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_DCR_CONTEXT,
+                RestApiConstants.REST_API_DCR_VERSION));
 
         if (dcrResourceMappings == null) {
             try {
@@ -1305,7 +1305,7 @@ public class RestApiUtil {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION);
         } else if (basePath.contains(RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL)) {
             uriTemplates = RestApiUtil.getServiceCatalogAPIResourceMapping();
-        } else if (basePath.contains(RestApiConstants.REST_API_DCR_CONTEXT)) {
+        } else if (basePath.contains(RestApiConstants.REST_API_DCR_CONTEXT_FULL)) {
             uriTemplates = RestApiUtil.getDCRAppResourceMapping();
         }
         return uriTemplates;
