@@ -24,7 +24,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import org.wso2.carbon.apimgt.impl.restapi.publisher.*;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.SettingsApiServiceImplUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SettingsMapp
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
-import java.nio.charset.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.ws.rs.core.Response;

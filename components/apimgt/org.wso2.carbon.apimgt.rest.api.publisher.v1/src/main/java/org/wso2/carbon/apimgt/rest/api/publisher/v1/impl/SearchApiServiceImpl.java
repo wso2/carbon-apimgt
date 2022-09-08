@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.restapi.publisher.*;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.SearchApiServiceImplUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SearchApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
