@@ -59,9 +59,9 @@ public class OneTimeTokenRevocationMediator extends AbstractMediator {
         if (authContext != null) {
             String issuer = authContext.getIssuer();
             List<String> scopes = authContext.getRequestTokenScopes();
-            if (StringUtils.isNotEmpty(issuer)) {
+            if (StringUtils.isNotBlank(issuer)) {
                 KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
-                if (keyManagerDto != null && StringUtils.isNotEmpty(scope) && scopes.contains(scope)) {
+                if (keyManagerDto != null && StringUtils.isNotBlank(scope) && scopes.contains(scope)) {
                     String token = authContext.getAccessToken();
                     String consumerKey = authContext.getConsumerKey();
                     oneTimeTokenExecutorService.execute(() ->

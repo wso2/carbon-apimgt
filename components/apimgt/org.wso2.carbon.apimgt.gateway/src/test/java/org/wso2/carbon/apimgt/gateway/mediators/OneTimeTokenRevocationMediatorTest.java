@@ -86,8 +86,7 @@ public class OneTimeTokenRevocationMediatorTest {
     public void testMediate() {
 
         Assert.assertTrue(mediator.mediate(messageContext));
-        Mockito.verify(authContext,Mockito.times(1)).
-                getConsumerKey();
+        Mockito.verify(authContext, Mockito.times(1)).getConsumerKey();
     }
 
     /**
@@ -98,8 +97,7 @@ public class OneTimeTokenRevocationMediatorTest {
 
         Mockito.when(messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT)).thenReturn(null);
         Assert.assertTrue(mediator.mediate(messageContext));
-        Mockito.verify(authContext,Mockito.times(0)).
-                getConsumerKey();
+        Mockito.verify(authContext, Mockito.times(0)).getConsumerKey();
     }
 
     /**
@@ -110,8 +108,7 @@ public class OneTimeTokenRevocationMediatorTest {
 
         Mockito.when(authContext.getIssuer()).thenReturn(null);
         Assert.assertTrue(mediator.mediate(messageContext));
-        Mockito.verify(authContext,Mockito.times(0)).
-                getConsumerKey();
+        Mockito.verify(authContext, Mockito.times(0)).getConsumerKey();
     }
 
     /**
@@ -123,8 +120,7 @@ public class OneTimeTokenRevocationMediatorTest {
         Mockito.when(KeyManagerHolder.getKeyManagerByIssuer(Mockito.anyString(), Mockito.anyString())).
                 thenReturn(null);
         Assert.assertTrue(mediator.mediate(messageContext));
-        Mockito.verify(authContext,Mockito.times(0)).
-                getConsumerKey();
+        Mockito.verify(authContext, Mockito.times(0)).getConsumerKey();
     }
 
     /**
@@ -135,8 +131,7 @@ public class OneTimeTokenRevocationMediatorTest {
 
         mediator.setScope(null);
         Assert.assertTrue(mediator.mediate(messageContext));
-        Mockito.verify(authContext,Mockito.times(0)).
-                getConsumerKey();
+        Mockito.verify(authContext, Mockito.times(0)).getConsumerKey();
     }
 
     /**
@@ -148,7 +143,6 @@ public class OneTimeTokenRevocationMediatorTest {
         List<String> nullScopes = new ArrayList<>();
         Mockito.when(authContext.getRequestTokenScopes()).thenReturn(nullScopes);
         Assert.assertTrue(mediator.mediate(messageContext));
-        Mockito.verify(authContext,Mockito.times(0)).
-                getConsumerKey();
+        Mockito.verify(authContext, Mockito.times(0)).getConsumerKey();
     }
 }
