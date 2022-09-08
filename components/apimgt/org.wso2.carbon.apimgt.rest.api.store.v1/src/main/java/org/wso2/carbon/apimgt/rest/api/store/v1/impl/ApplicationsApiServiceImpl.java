@@ -92,13 +92,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -1185,7 +1179,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     try {
                         // verify that the provided jsonInput is a valid json
                         if (body.getAdditionalProperties() != null
-                                && !body.getAdditionalProperties().toString().isEmpty()) {
+                                && !body.getAdditionalProperties().toString().isEmpty()
+                                && !Objects.equals(body.getAdditionalProperties().toString(), "{}")) {
                             jsonInput = validateAdditionalParameters(grantType, body);
                         }
                     } catch (JsonProcessingException | ParseException | ClassCastException e) {
