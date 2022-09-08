@@ -18341,10 +18341,12 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to add common operation policy " + policySpecification.getName(), e);
+                handleExceptionWithCode("Failed to add common operation policy " + policySpecification.getName(), e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to add common operation policy " + policySpecification.getName(), e);
+            handleExceptionWithCode("Failed to add common operation policy " + policySpecification.getName(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return policyUUID;
     }
@@ -18523,10 +18525,12 @@ public class ApiMgtDAO {
                 connection.commit();
             } else {
                 throw new APIManagementException("Cannot delete operation policy with id " + policyId
-                        + " as policy usages exists");
+                        + " as policy usages exists",
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_USAGE_EXISTS, policyId));
             }
         } catch (SQLException e) {
-            handleException("Failed to delete operation policy " + policyId, e);
+            handleExceptionWithCode("Failed to delete operation policy " + policyId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -19161,7 +19165,8 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             return getCommonOperationPolicyByPolicyID(connection, policyId, organization, isWithPolicyDefinition);
         } catch (SQLException e) {
-            handleException("Failed to get the operation policy for id " + policyId, e);
+            handleExceptionWithCode("Failed to get the operation policy for id " + policyId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return null;
     }
@@ -19213,8 +19218,9 @@ public class ApiMgtDAO {
             return getCommonOperationPolicyByPolicyName(connection, policyName, policyVersion, organization,
                     isWithPolicyDefinition);
         } catch (SQLException e) {
-            handleException("Failed to get common operation policy for name " + policyName + "for organization "
-                    + organization, e);
+            handleExceptionWithCode("Failed to get common operation policy for name " + policyName + "for organization "
+                            + organization, e,
+                    ExceptionCodes.APIM_DAO_EXCEPTION);
         }
         return null;
     }
@@ -19362,7 +19368,8 @@ public class ApiMgtDAO {
                 policyDataList.add(policyData);
             }
         } catch (SQLException e) {
-            handleException("Failed to get all the operation policy for tenant " + organization, e);
+            handleExceptionWithCode("Failed to get all the operation policy for tenant " + organization, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return policyDataList;
     }

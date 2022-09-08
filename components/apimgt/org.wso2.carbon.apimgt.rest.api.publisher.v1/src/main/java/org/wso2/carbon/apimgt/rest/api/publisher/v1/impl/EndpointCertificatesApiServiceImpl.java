@@ -127,8 +127,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 return Response.ok(updatedCertUri).entity(certificateDTO).build();
             }
         } catch (URISyntaxException e) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR,
-                    "Error while generating the resource location URI for alias " + alias));
+            throw new APIManagementException("Error while generating the resource location URI for alias " + alias,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }
@@ -186,8 +186,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 return Response.created(createdCertUri).entity(certificateDTO).build();
             }
         } catch (URISyntaxException e) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR,
-                    "Error while generating the resource location URI for alias " + alias));
+            throw new APIManagementException("Error while generating the resource location URI for alias " + alias,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }

@@ -445,7 +445,7 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_MISMATCH(901410,"Tenant mismatch", 400, "Tenant mismatch"),
     INVALID_APPLICATION_PROPERTIES(901411, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),
-    DECRYPT_CONFIG_ERROR(901412, "Error while decrypting key manager configuration", 500, "Unable to decrypt the value")
+    DECRYPT_CONFIG_ERROR(901412, "Error while decrypting key manager configuration", 500, "Unable to decrypt the value"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
@@ -535,11 +535,12 @@ public enum ExceptionCodes implements ErrorHandler {
     OPERATION_POLICY_ALREADY_EXISTS(903001, "The Operation Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
 
     OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "Operation Policy Not Found with given name and version", 404,
-            "Requested operation policy with name '%s' and version '%s not found"),
+            "Requested operation policy with name '%s' and version '%s' not found"),
 
     OPERATION_POLICY_GATEWAY_ERROR(903008,
             "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
             "Operation Policy cannot be imported due to the missing Gateway files."),
+    OPERATION_POLICY_USAGE_EXISTS(903009, "Operation policy usages exist", 500, "Policy usages exist for policy ID '%s'"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),

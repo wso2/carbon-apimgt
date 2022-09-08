@@ -47,6 +47,8 @@ public final class RestApiConstants {
     public static final String JWT_AUTHENTICATION = "jwt";
     public static final String JWT_TOKEN = "JWT_TOKEN";
     public static final String DOT = ".";
+
+    public static final String PATH_DELIMITER = "/";
     public static final long TIMESTAMP_SKEW_INSECONDS = 0;
 
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
