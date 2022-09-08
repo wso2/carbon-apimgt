@@ -307,9 +307,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             serviceProvider.setDescription("Service Provider for application " + appName);
             serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
 
-            // convert to list
             List<ServiceProviderProperty> serviceProviderProperties = new ArrayList<>();
-
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(applicationName);
