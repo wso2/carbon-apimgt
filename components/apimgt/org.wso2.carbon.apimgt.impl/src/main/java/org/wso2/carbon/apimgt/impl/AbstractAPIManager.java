@@ -3655,7 +3655,7 @@ public abstract class AbstractAPIManager implements APIManager {
             WorkflowStatus status = workflow.getStatus();
             api.setWorkflowStatus(status.toString());
         }
-
+        // TODO try to use a single query to get info from db
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
