@@ -252,8 +252,8 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
         } catch (GraphQLPersistenceException e) {
-            throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
-                    e);
+            throw new APIManagementException("Error while retrieving graphql definition from the persistence location",
+                    e, ExceptionCodes.INTERNAL_ERROR);
         }
         return definition;
     }
@@ -1399,7 +1399,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
                 resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
             } catch (APIPersistenceException e) {
-                throw new APIManagementException("Error while retrieving the api for api product " + e);
+                throw new APIManagementException("Error while retrieving the api for api product " + e,
+                        ExceptionCodes.INTERNAL_ERROR);
             }
 
         }

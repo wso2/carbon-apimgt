@@ -4841,7 +4841,7 @@ public final class APIUtil {
                 return Boolean.parseBoolean(value.toString());
             } else {
                 throw new APIManagementException(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID
-                        + " config does not exist for tenant " + tenantDomain);
+                        + " config does not exist for tenant " + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
             }
         }
 
@@ -5163,7 +5163,8 @@ public final class APIUtil {
                     tenantConfigCache.put(cacheName, jsonObject);
                     return jsonObject;
                 } catch (ParseException e) {
-                    throw new APIManagementException("Error occurred while converting to json",e);
+                    throw new APIManagementException("Error occurred while converting to json", e,
+                            ExceptionCodes.JSON_PARSE_ERROR);
                 }
             }
             return new JSONObject();
@@ -6184,7 +6185,7 @@ public final class APIUtil {
         } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
             policies = apiMgtDAO.getApplicationPolicies(tenantId);
         } else {
-            throw new APIManagementException("No such a policy type : " + policyLevel);
+            throw new APIManagementException("No such a policy type : " + policyLevel, ExceptionCodes.UNSUPPORTED_POLICY_TYPE);
         }
 
         for (Policy policy : policies) {
@@ -8584,7 +8585,8 @@ public final class APIUtil {
             }
             return endpointSecurityMap;
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing Endpoint Config json", e);
+            throw new APIManagementException("Error while parsing Endpoint Config json", e,
+                    ExceptionCodes.ENDPOINT_CONFIG_PARSE_FAILED);
         }
     }
 
@@ -8676,7 +8678,8 @@ public final class APIUtil {
             claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
             return claimValues;
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while retrieving user claim values from user store", e);
+            throw new APIManagementException("Error while retrieving user claim values from user store", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
     }
 

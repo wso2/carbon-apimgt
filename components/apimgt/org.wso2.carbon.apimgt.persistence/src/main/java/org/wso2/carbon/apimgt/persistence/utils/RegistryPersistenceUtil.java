@@ -29,6 +29,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -1650,7 +1651,8 @@ public class RegistryPersistenceUtil {
             }
             return adminUserName;
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error in getting tenant admin username", e);
+            throw new APIManagementException("Error in getting tenant admin username", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

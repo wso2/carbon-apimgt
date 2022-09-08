@@ -117,7 +117,9 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
     ERROR_RETRIEVING_CATEGORY(900362, "Cannot retrieve categories", 500, "Error while retrieving categories for organization '%s'"),
-    PERSISTENCE_ERROR(900363, "Error occurred in registy transaction", 500, "'%s'"),
+    PERSISTENCE_ERROR(900363, "Error occurred in registry transaction", 500, "'%s'"),
+    NO_VIEW_UPDATE_PERMISSIONS(900365, "Insufficient permission to view or update the API", 403, "Insufficient permission to view or update the API"),
+
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -138,6 +140,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ENDPOINT_ALREADY_EXISTS(900451, "Endpoint already exists", 409, "Endpoint already exists"),
     ENDPOINT_ADD_FAILED(900452, "Endpoint adding failed", 400, "Endpoint adding failed"),
     ENDPOINT_DELETE_FAILED(900453, "Endpoint Delete Failed", 400, "Endpoint Delete Failed"),
+    ENDPOINT_CRYPTO_ERROR(900454, "Error while encrypting/decrypting endpoint secrets", 500, "'%s'"),
+    ENDPOINT_CONFIG_PARSE_FAILED(900455, "Endpoint config parsing failed", 500, "Error occurred while parsing endpoint config json"),
+
 
     // Service Endpoint Discovery related codes
     ERROR_LOADING_SERVICE_DISCOVERY_IMPL_CLASS(900460, "Error loading service discovery impl class", 500,
@@ -328,6 +333,7 @@ public enum ExceptionCodes implements ErrorHandler {
 
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+    UNSUPPORTED_POLICY_TYPE(901001, "Policy type error", 400, "Unsupported policy type"),
 
     THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
             "Requested throttling policy with name '%s' and type '%s' not found"),
@@ -423,6 +429,7 @@ public enum ExceptionCodes implements ErrorHandler {
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    CONFIG_NOT_FOUND(901301, "Config not found", 404, "Config not found in tenant-config"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +

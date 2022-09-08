@@ -5557,7 +5557,8 @@ public class ApiMgtDAO {
                 workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving workflow details for " + workflowReference, e);
+            handleExceptionWithCode("Error while retrieving workflow details for " + workflowReference, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -6816,7 +6817,8 @@ public class ApiMgtDAO {
                 return getAPIID(uuid, connection);
             }
         } catch (SQLException e) {
-            handleException("Error while locating API with UUID : " + uuid + " from the database", e);
+            handleExceptionWithCode("Error while locating API with UUID : " + uuid + " from the database", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return id;
     }
@@ -6835,7 +6837,7 @@ public class ApiMgtDAO {
                 if (id == -1) {
                     String msg = "Unable to find the API with UUID : " + uuid + " in the database";
                     log.error(msg);
-                    throw new APIManagementException(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
                 }
             }
         }
@@ -6875,9 +6877,10 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while locating API Product: " + apiProductIdentifier.getName() + "-" +
-                    APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName())
-                    + "-" + apiProductIdentifier.getVersion() + " from the database", e);
+            handleExceptionWithCode("Error while locating API Product: " + apiProductIdentifier.getName() + "-" +
+                            APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName())
+                            + "-" + apiProductIdentifier.getVersion() + " from the database", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -7177,7 +7180,8 @@ public class ApiMgtDAO {
                 setAssociatedAPIProducts(currentApiUuid, uriTemplates);
                 setOperationPolicies(apiRevision.getRevisionUUID(), uriTemplates);
             } catch (SQLException e) {
-                handleException("Failed to get URI Templates of API with UUID " + uuid, e);
+                handleExceptionWithCode("Failed to get URI Templates of API with UUID " + uuid, e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } else {
             try (Connection conn = APIMgtDBUtil.getConnection();
@@ -7235,7 +7239,8 @@ public class ApiMgtDAO {
                 setAssociatedAPIProducts(currentApiUuid, uriTemplates);
                 setOperationPolicies(currentApiUuid, uriTemplates);
             } catch (SQLException e) {
-                handleException("Failed to get URI Templates of API with UUID " + currentApiUuid, e);
+                handleExceptionWithCode("Failed to get URI Templates of API with UUID " + currentApiUuid, e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         }
         return new LinkedHashSet<>(uriTemplates.values());
@@ -7455,8 +7460,8 @@ public class ApiMgtDAO {
                 connection.commit();
             }
         } catch (SQLException e) {
-            handleException("Failed to add comment data, for API with UUID " + uuid,
-                    e);
+            handleExceptionWithCode("Failed to add comment data, for API with UUID " + uuid,
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return commentId;
     }
@@ -7490,7 +7495,7 @@ public class ApiMgtDAO {
             id = getAPIID(uuid, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
-                throw new APIManagementException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
             }
             try (PreparedStatement prepStmt = connection.prepareStatement(getCommentQuery)) {
                 prepStmt.setString(1, uuid);
@@ -7512,8 +7517,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve comment for API " + identifier.getName() + "with comment ID " +
-                    commentId, e);
+            handleExceptionWithCode("Failed to retrieve comment for API " + identifier.getName() + "with comment ID " +
+                    commentId, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return null;
     }
@@ -7561,7 +7566,8 @@ public class ApiMgtDAO {
             }
             commentList = getComments(currentApiUuid, parentCommentID, limit, offset, connection);
         } catch (SQLException e) {
-            handleException("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e);
+            handleExceptionWithCode("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return commentList;
     }
@@ -9962,7 +9968,7 @@ public class ApiMgtDAO {
                 scopeKeySet.add(resultSet.getString(1));
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve api scope keys ", e);
+            handleExceptionWithCode("Failed to retrieve api scope keys ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -11493,7 +11499,7 @@ public class ApiMgtDAO {
                 policies.add(apiPolicy);
             }
         } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
+            handleExceptionWithCode("Error while executing SQL", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -11529,7 +11535,7 @@ public class ApiMgtDAO {
                 policies.add(appPolicy);
             }
         } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
+            handleExceptionWithCode("Error while executing SQL", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -11589,9 +11595,9 @@ public class ApiMgtDAO {
                 policies.add(subPolicy);
             }
         } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
+            handleExceptionWithCode("Error while executing SQL", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (IOException e) {
-            handleException("Error while converting input stream to byte array", e);
+            handleExceptionWithCode("Error while converting input stream to byte array", e, ExceptionCodes.INTERNAL_ERROR);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -13413,7 +13419,7 @@ public class ApiMgtDAO {
                     handleException("Failed to rollback getting API Details", ex);
                 }
             }
-            handleException("Failed to get API Details", e);
+            handleExceptionWithCode("Failed to get API Details", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
@@ -13440,7 +13446,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             return getAPILevelTier(connection, apiUUID, revisionUUID);
         } catch (SQLException e) {
-            handleException("Failed to retrieve Connection", e);
+            handleExceptionWithCode("Failed to retrieve Connection", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return null;
     }
@@ -13755,7 +13761,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get Environments in tenant domain: " + tenantDomain, e);
+            handleExceptionWithCode("Failed to get Environments in tenant domain: " + tenantDomain, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return envList;
     }
@@ -14832,7 +14839,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get product resources of api product : " + productIdentifier, e);
+            handleExceptionWithCode("Failed to get product resources of api product : " + productIdentifier, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return productResourceList;
     }
@@ -16559,7 +16567,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to search UUID: " + apiUUID + " in the revision db table", e);
+            handleExceptionWithCode("Failed to search UUID: " + apiUUID + " in the revision db table", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return null;
     }
@@ -17901,8 +17910,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving the service status associated with the API - "
-                    + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
+            handleExceptionWithCode("Error while retrieving the service status associated with the API - "
+                    + api.getId().getApiName() + "-" + api.getId().getVersion(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -19277,8 +19286,8 @@ public class ApiMgtDAO {
             return getAPISpecificOperationPolicyByPolicyName(connection, policyName, policyVersion, apiUUID,
                     revisionUUID, organization, isWithPolicyDefinition);
         } catch (SQLException e) {
-            handleException("Failed to get API specific operation policy for name " + policyName + " with API UUID "
-                    + apiUUID + " revision UUID " + revisionUUID, e);
+            handleExceptionWithCode("Failed to get API specific operation policy for name " + policyName + " with API UUID "
+                    + apiUUID + " revision UUID " + revisionUUID, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return null;
     }

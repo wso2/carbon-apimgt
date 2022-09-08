@@ -91,7 +91,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAllAPIs(Integer limit, Integer offset, String sortBy, String sortOrder, String xWSO2Tenant,
                                String query, String ifNoneMatch, String accept,
-                               MessageContext messageContext) {
+                               MessageContext messageContext) throws APIManagementException {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
@@ -103,65 +103,47 @@ public class ApisApiServiceImpl implements ApisApiService {
         query = query == null ? "" : query;
         sortBy = sortBy != null ? sortBy : RestApiConstants.DEFAULT_SORT_CRITERION;
         sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
-        try {
 
-            //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
-            if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
-                query = query
-                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
-            }
-
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-//            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
-
-            /*if (migrationMode) { // migration flow
-                if (!StringUtils.isEmpty(targetTenantDomain)) {
-                    tenantDomain = targetTenantDomain;
-                }
-                RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
-            }*/
-            Map<String, Object> result;
-
-            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, sortBy, sortOrder);
-
-            Set<API> apis = (Set<API>) result.get("apis");
-            allMatchedApis.addAll(apis);
-
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
-
-            //Add pagination section in the response
-            Object totalLength = result.get("length");
-            Integer length = 0;
-            if (totalLength != null) {
-                length = (Integer) totalLength;
-            }
-
-            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
-
-            if (APIConstants.APPLICATION_GZIP.equals(accept)) {
-                try {
-                    File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
-                    return Response.ok().entity(zippedResponse)
-                            .header("Content-Disposition", "attachment").
-                                    header("Content-Encoding", "gzip").build();
-                } catch (APIManagementException e) {
-                    RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
-                }
-            } else {
-                return Response.ok().entity(apiListDTO).build();
-            }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving APIs";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
+        if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
+            query = query
+                    .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
         }
-        return null;
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        Map<String, Object> result;
+
+        result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, sortBy, sortOrder);
+
+        Set<API> apis = (Set<API>) result.get("apis");
+        allMatchedApis.addAll(apis);
+
+        apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+
+        //Add pagination section in the response
+        Object totalLength = result.get("length");
+        Integer length = 0;
+        if (totalLength != null) {
+            length = (Integer) totalLength;
+        }
+
+        APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
+
+        if (APIConstants.APPLICATION_GZIP.equals(accept)) {
+            File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
+            return Response.ok().entity(zippedResponse)
+                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment").
+                    header("Content-Encoding", "gzip").build();
+        } else {
+            return Response.ok().entity(apiListDTO).build();
+        }
     }
 
     @Override
     public Response createAPI(APIDTO body, String oasVersion, MessageContext messageContext)
-            throws APIManagementException{
+            throws APIManagementException {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -176,13 +158,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (CryptoException e) {
-            String errorMessage = "Error while encrypting the secret key of API : " + body.getProvider() + "-" +
-                    body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
         }
-        return null;
     }
 
     @Override
@@ -213,16 +190,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + createdCommentId;
             URI uri = new URI(uriString);
             return Response.created(uri).entity(commentDTO).build();
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
-            }
         } catch (URISyntaxException e) {
-            throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
-        return null;
     }
 
     @Override
@@ -240,18 +211,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok(uri).entity(commentDTO).build();
-
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to get comments of API " + apiId, e, log);
-            }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comments content location for API " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
-        return null;
     }
 
     @Override
@@ -264,37 +227,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
 
-            if (comment != null) {
-                CommentDTO commentDTO;
-                if (includeCommenterInfo) {
-                    Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil
-                            .retrieveUserClaims(comment.getUser(), new HashMap<>());
-                    commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
-                } else {
-                    commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
-                }
-                String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                        RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
-                URI uri = new URI(uriString);
-                return Response.ok(uri).entity(commentDTO).build();
+            CommentDTO commentDTO;
+            if (Boolean.TRUE.equals(includeCommenterInfo)) {
+                Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil
+                        .retrieveUserClaims(comment.getUser(), new HashMap<>());
+                commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
-                        String.valueOf(commentId), log);
+                commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
             }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving comment for API : " + apiId + "with comment ID " + commentId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+            URI uri = new URI(uriString);
+            return Response.ok(uri).entity(commentDTO).build();
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comment content location : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
-        return null;
     }
 
     @Override
@@ -2802,11 +2750,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while retrieving API location : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (CryptoException e) {
-            String errorMessage =
-                    "Error while encrypting the secret key of API : " + apiDTOFromProperties.getProvider() + "-"
-                            + apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
-            throw new APIManagementException(errorMessage, e);
         }
         return null;
     }

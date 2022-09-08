@@ -4768,16 +4768,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Failed to get API", e);
+            throw new APIManagementException("Failed to get API", e, ExceptionCodes.INTERNAL_ERROR);
         } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while retrieving the OAS definition", e);
+            throw new APIManagementException("Error while retrieving the OAS definition", e, ExceptionCodes.INTERNAL_ERROR);
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing the OAS definition", e);
+            throw new APIManagementException("Error while parsing the OAS definition", e,
+                    ExceptionCodes.OPENAPI_PARSE_EXCEPTION);
         } catch (AsyncSpecPersistenceException e) {
-            throw new APIManagementException("Error while retrieving the Async API definition", e);
+            throw new APIManagementException("Error while retrieving the Async API definition", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -4891,11 +4893,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
                         + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, uuid));
             }
         } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
             String msg = "Failed to get API Product";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -4937,7 +4939,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.put("isMore", false);
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching the api ", e);
+            throw new APIManagementException("Error while searching the api ", e, ExceptionCodes.INTERNAL_ERROR);
         }
         return result ;
     }
@@ -4950,7 +4952,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset)
             throws APIManagementException {
-        return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+        Comment comment = apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+        if (comment != null) {
+            return comment;
+        } else {
+            throw new APIManagementException(ExceptionCodes.COMMENT_NOT_FOUND);
+        }
     }
 
     @Override
@@ -5216,7 +5223,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api");
+            throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api",
+                    ExceptionCodes.NO_VIEW_UPDATE_PERMISSIONS);
         }
 
     }
@@ -6248,11 +6256,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             } else {
                 throw new APIManagementException(
-                        "User " + username + " does not have permission to view API Product : " + uuid);
+                        "User " + username + " does not have permission to view API Product : " + uuid,
+                        ExceptionCodes.NO_READ_PERMISSIONS);
             }
         } else {
             String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-            throw new APIMgtResourceNotFoundException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
         }
     }
 }
