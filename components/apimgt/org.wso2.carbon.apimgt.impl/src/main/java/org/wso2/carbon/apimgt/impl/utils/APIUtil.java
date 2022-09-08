@@ -11369,10 +11369,43 @@ public final class APIUtil {
     }
 
     public static String prependScopePrefix(String scopePrefix, String scopeKey) {
-        if (StringUtils.isNotBlank(scopePrefix) && !scopeKey.startsWith(scopePrefix)) {
+        if (StringUtils.isNotBlank(scopePrefix) && scopeKey != null && !scopeKey.startsWith(scopePrefix)) {
             return scopePrefix + scopeKey;
         } else {
             return scopeKey;
+        }
+    }
+
+    public static String removeScopePrefix(String scopePrefix, String scopeKey) {
+        if (StringUtils.isNotBlank(scopePrefix) && scopeKey != null && scopeKey.startsWith(scopePrefix)) {
+            return scopeKey.replaceFirst(scopePrefix, "");
+        } else {
+            return scopeKey;
+        }
+    }
+
+    public static void updateAPIScopesWithPrefix(API api) {
+        // update scopes defined for the API
+        String scopePrefix = api.getScopePrefix();
+        if (StringUtils.isNotBlank(scopePrefix) && api.getScopes() != null) {
+            for (Scope scope: api.getScopes()) {
+                scope.setKey(prependScopePrefix(scopePrefix, scope.getKey()));
+            }
+        }
+        // updates scopes defined for the API's resources
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate: api.getUriTemplates()) {
+                Scope scope = uriTemplate.getScope();
+                if (scope != null) {
+                    scope.setKey(prependScopePrefix(scopePrefix, scope.getKey()));
+                }
+                List<Scope> scopeList = uriTemplate.getScopes();
+                if (scopeList != null) {
+                    for (Scope scopeItem: scopeList) {
+                        scopeItem.setKey(prependScopePrefix(scopePrefix, scopeItem.getKey()));
+                    }
+                }
+            }
         }
     }
 

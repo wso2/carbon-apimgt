@@ -119,12 +119,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         api.setUuid(apiId);
         apiIdentifier.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
-        File exportedAPI = ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
+        File exportedAPIFolder = ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs, StringUtils.EMPTY, organization);
         return postExportAPI(apiId, revisionUUID, api, preserveStatus, format, preserveDocs, preserveCredentials,
-                organization, exportedAPI);
+                organization, exportedAPIFolder);
     }
 
+    @Override
     public File postExportAPI(String apiId, String revisionUUID, API api, boolean preserveStatus,
                               ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
                               String organization, File exportedAPI) throws APIImportExportException {

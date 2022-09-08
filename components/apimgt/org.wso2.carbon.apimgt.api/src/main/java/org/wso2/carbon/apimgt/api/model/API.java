@@ -933,9 +933,13 @@ public class API implements Serializable {
         this.scopes = scopes;
     }
 
-    public String getScopePrefix() { return scopePrefix; }
+    public String getScopePrefix() {
+        return scopePrefix;
+    }
 
-    public void setScopePrefix(String scopePrefix) { this.scopePrefix = scopePrefix; }
+    public void setScopePrefix(String scopePrefix) {
+        this.scopePrefix = scopePrefix;
+    }
 
     @Deprecated
     public void setAsDefaultVersion(boolean value) {
