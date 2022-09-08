@@ -182,7 +182,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -5013,19 +5012,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
         Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
         Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
-
-        String scopePrefix = apiDTOFromProperties.getScopePrefix();
-
-        if (scopePrefix != null){
-            for (Scope scope: scopes) {
-                if (!scope.getKey().contains(scopePrefix)) {
-                    scope.setKey(scopePrefix + scope.getKey());
-                }
-            }
-        }
-
         apiToAdd.setUriTemplates(uriTemplates);
         apiToAdd.setScopes(scopes);
+
+        // update the API's scopes with scope prefix (if it is available)
+        apiToAdd.setScopePrefix(apiDTOFromProperties.getScopePrefix());
+        APIUtil.updateAPIScopesWithPrefix(apiToAdd);
+
         //Set extensions from API definition to API object
         apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
         if (!syncOperations) {

@@ -75,9 +75,13 @@ public class APIRevision implements Serializable {
         return createdTime;
     }
 
-    public String getScopePrefix() { return scopePrefix; }
+    public String getScopePrefix() {
+        return scopePrefix;
+    }
 
-    public void setScopePrefix(String scopePrefix) { this.scopePrefix = scopePrefix; }
+    public void setScopePrefix(String scopePrefix) {
+        this.scopePrefix = scopePrefix;
+    }
 
     public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
