@@ -3655,12 +3655,6 @@ public abstract class AbstractAPIManager implements APIManager {
             WorkflowStatus status = workflow.getStatus();
             api.setWorkflowStatus(status.toString());
         }
-        // TODO try to use a single query to get info from db
-
-        //scopePrefix
-        if (!api.isRevision()) {
-            apiMgtDAO.setScopePrefixToAPI(api);
-        }
 
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
@@ -3669,7 +3663,9 @@ public abstract class AbstractAPIManager implements APIManager {
         String apiLevelTier;
         if (api.isRevision()) {
             apiLevelTier = apiMgtDAO.getAPILevelTier(api.getRevisionedApiId(), api.getUuid());
+            //scope prefix is not set when API is a revision because it is already set at this level
         } else {
+            apiMgtDAO.setScopePrefixToAPI(currentApiUuid, api);
             apiLevelTier = apiMgtDAO.getAPILevelTier(internalId);
         }
         api.setApiLevelPolicy(apiLevelTier);

@@ -17687,16 +17687,14 @@ public class ApiMgtDAO {
      * @param api   API Object
      * @throws APIManagementException
      */
-
-
-    public void setScopePrefixToAPI(API api) throws APIManagementException{
+    public void setScopePrefixToAPI(String id, API api) throws APIManagementException{
 
         String scopePrefix = null;
         String query = SQLConstants.GET_SCOPE_PREFIX;
 
-        try ( Connection connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection();
               PreparedStatement prepStmt = connection.prepareStatement(query)) {
-            prepStmt.setString(1, api.getUuid());
+            prepStmt.setString(1, id);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     scopePrefix = resultSet.getString(1);
@@ -17705,7 +17703,7 @@ public class ApiMgtDAO {
             }
         }
         catch (SQLException e) {
-            handleException("Error while retrieving the scopeInfo associated with the API - "
+            handleException("Error while retrieving the scope info associated with the API - "
                     + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
         }
     }
