@@ -8952,10 +8952,9 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException(
-                    "Error while retrieving key manager configurations for organization " + organization, e);
+            handleExceptionWithCode("Error while retrieving key manager configurations for organization "
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-
         return keyManagerConfigurationDTOS;
     }
 
@@ -9025,7 +9024,7 @@ public class ApiMgtDAO {
         } catch (SQLException | IOException e) {
             throw new APIManagementException(
                     "Error while retrieving key manager configuration for " + name + " in organization " + organization,
-                    e);
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -9133,14 +9132,15 @@ public class ApiMgtDAO {
                     } else {
                         throw new APIManagementException("Error while Storing key manager configuration with name " +
                                 keyManagerConfigurationDTO.getName() + " in tenant " +
-                                keyManagerConfigurationDTO.getOrganization(), e);
+                                keyManagerConfigurationDTO.getOrganization(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                     }
                 }
             }
         } catch (SQLException | IOException e) {
             throw new APIManagementException(
                     "Error while Storing key manager configuration with name " + keyManagerConfigurationDTO.getName() +
-                            " in tenant " + keyManagerConfigurationDTO.getOrganization(), e);
+                            " in tenant " + keyManagerConfigurationDTO.getOrganization(),
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

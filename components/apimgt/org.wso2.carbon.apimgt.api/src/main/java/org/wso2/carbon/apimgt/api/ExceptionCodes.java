@@ -307,6 +307,7 @@ public enum ExceptionCodes implements ErrorHandler {
     MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
             "Please provide the Authorization : Basic <> token to proceed."),
     INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the resource."),
+    OPENID_CONFIG(900916, "Missing OpenID configurations", 500, "Error in fetching Open ID configuration"),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
     OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
@@ -441,9 +442,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required application properties are missing"),
     APPLICATION_ALREADY_REGISTERED(901408, "Application already Registered", 409, "Application already Registered"),
     KEY_MAPPING_ALREADY_EXIST(901409, "Key Mappings already exists", 409, "Key Mappings already exists"),
-    TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
-    INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
+    TENANT_MISMATCH(901410,"Tenant mismatch", 400, "Tenant mismatch"),
+    INVALID_APPLICATION_PROPERTIES(901411, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),
+    DECRYPT_CONFIG_ERROR(901412, "Error while decrypting key manager configuration", 500, "Unable to decrypt the value")
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),

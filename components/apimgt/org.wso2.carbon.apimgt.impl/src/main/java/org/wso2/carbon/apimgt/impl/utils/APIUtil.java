@@ -93,16 +93,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.APIMgtInternalException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.LoginPostExecutor;
-import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
-import org.wso2.carbon.apimgt.api.OrganizationResolver;
-import org.wso2.carbon.apimgt.api.PasswordResolver;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -1448,6 +1439,12 @@ public final class APIUtil {
     }
 
     public static void handleException(String msg, Throwable t) throws APIManagementException {
+
+        log.error(msg, t);
+        throw new APIManagementException(msg, t);
+    }
+
+    public static void handleExceptionWithCode(String msg, Throwable t, ErrorHandler code) throws APIManagementException {
 
         log.error(msg, t);
         throw new APIManagementException(msg, t);
@@ -4892,7 +4889,8 @@ public final class APIUtil {
         try {
             configUrl = new URL(url);
         } catch (MalformedURLException e) {
-            handleException("URL is malformed", e);
+            handleExceptionWithCode("URL is malformed",
+                    e, ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR, "Malformed url"));
         }
         int port = configUrl.getPort();
         String protocol = configUrl.getProtocol();
@@ -8819,7 +8817,7 @@ public final class APIUtil {
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.KeyManager.ISSUER)) {
                 if (openIdConnectConfigurations == null) {
-                    throw new APIMgtInternalException("Error in fetching Open ID configuration.");
+                    throw new APIManagementException(ExceptionCodes.OPENID_CONFIG);
                 }
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ISSUER,
                         openIdConnectConfigurations.getIssuer());

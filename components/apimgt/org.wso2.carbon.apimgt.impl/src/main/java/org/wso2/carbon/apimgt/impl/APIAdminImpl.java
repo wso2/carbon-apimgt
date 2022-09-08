@@ -344,7 +344,7 @@ public class APIAdminImpl implements APIAdmin {
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while retrieving tenant id for organization "
-                    + organization, e);
+                    + organization, e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
@@ -670,7 +670,7 @@ public class APIAdminImpl implements APIAdmin {
                 }
             }
         } catch (CryptoException e) {
-            throw new APIManagementException("Error while Decrypting value", e);
+            throw new APIManagementException("Error while Decrypting value", e, ExceptionCodes.DECRYPT_CONFIG_ERROR);
         } catch (JsonParseException e) {
             // check Element is a json element
             if (log.isDebugEnabled()) {
