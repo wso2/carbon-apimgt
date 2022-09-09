@@ -6937,7 +6937,8 @@ public class ApiMgtDAO {
             prepStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(6, api.getApiLevelPolicy());
             prepStmt.setString(7, api.getType());
-            prepStmt.setString(8, api.getUuid());
+            prepStmt.setString(8, api.getScopePrefix());
+            prepStmt.setString(9, api.getUuid());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
