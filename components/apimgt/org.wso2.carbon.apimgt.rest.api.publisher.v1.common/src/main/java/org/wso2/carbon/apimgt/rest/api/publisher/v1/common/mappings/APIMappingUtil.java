@@ -2735,8 +2735,8 @@ public class APIMappingUtil {
      * @return list of scopes
      * @throws APIManagementException throw if parsing exception occur
      */
-    private static List<ScopeDTO> getScopesFromSwagger(String swagger, String scopePrefix) throws APIManagementException {
-
+    private static List<ScopeDTO> getScopesFromSwagger(String swagger, String scopePrefix)
+            throws APIManagementException {
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swagger);
         Set<Scope> scopes = apiDefinition.getScopes(swagger);
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
