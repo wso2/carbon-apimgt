@@ -24,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -17688,7 +17687,6 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void setScopePrefixToAPI(String id, API api) throws APIManagementException{
-
         String scopePrefix = null;
         String query = SQLConstants.GET_SCOPE_PREFIX;
 

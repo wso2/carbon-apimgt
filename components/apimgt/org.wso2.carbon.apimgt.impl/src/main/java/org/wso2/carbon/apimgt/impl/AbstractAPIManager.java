@@ -144,7 +144,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

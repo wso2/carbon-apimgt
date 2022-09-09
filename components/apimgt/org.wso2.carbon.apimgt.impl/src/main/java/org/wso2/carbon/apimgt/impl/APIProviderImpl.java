@@ -815,7 +815,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if fails to extract Scopes from URI templates
      */
     private Set<Scope> getScopesToRegisterFromURITemplates(String apiName, String organization,
-            Set<URITemplate> uriTemplates ) throws APIManagementException {
+            Set<URITemplate> uriTemplates) throws APIManagementException {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         Set<Scope> scopesToRegister = new HashSet<>();
@@ -830,7 +830,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 uriTemplateScopes.add(scopeFromURITemplate);
             }
         }
-
 
         //Validate and extract only the local scopes which need to be registered in KM
         for (Scope scope : uriTemplateScopes) {
