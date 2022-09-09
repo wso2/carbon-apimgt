@@ -43,25 +43,32 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-
 public class LinterCustomRulesApiServiceImpl implements LinterCustomRulesApiService {
 
     private static final Log log = LogFactory.getLog(LinterCustomRulesApiServiceImpl.class);
+    private static final String linterCustomRulesKey = "LinterCustomRules";
 
+    /**
+     * Get linter custom rules (LinterCustomRules) from the tenant config
+     *
+     * @return content of LinterCustomRules in tenant config
+     * @throws APIManagementException
+     */
     public Response getLinterCustomRules(MessageContext messageContext) throws APIManagementException {
+
         APIAdmin apiAdmin = new APIAdminImpl();
         String tenantConfig = apiAdmin.getTenantConfig(RestApiCommonUtil.getLoggedInUserTenantDomain());
-        String linterCustomRulesKey = "LinterCustomRules";
 
         try {
             JSONObject jsonObject = new JSONObject(tenantConfig);
             if (jsonObject.has(linterCustomRulesKey)) {
                 String customRulesJson = jsonObject.getJSONObject(linterCustomRulesKey).toString();
-                return Response.ok().entity(customRulesJson.toString())
+                return Response.ok().entity(customRulesJson)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
             }
-        }catch (JSONException e) {
-            RestApiUtil.handleInternalServerError("Error while getting linter custom rules from the tenant config", e, log);
+        } catch (JSONException e) {
+            RestApiUtil.handleInternalServerError("Error while getting linter custom rules from the tenant " +
+                    "config", e, log);
         }
         return null;
     }
