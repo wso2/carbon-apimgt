@@ -37,15 +37,4 @@ public class JWTAuthenticationUtils {
         }
         return inMessage;
     }
-
-    /**
-     * To getting a message properties as a Map
-     * @param message - current inbound message
-     * @return Map object that contains all properties of cxf inbound message
-     */
-    public static HashMap<String,Object> addToJWTAuthenticationContext(Message message) {
-        HashMap<String,Object> hashMap = new HashMap<>();
-        message.forEach(hashMap::put);
-        return hashMap;
-    }
 }
