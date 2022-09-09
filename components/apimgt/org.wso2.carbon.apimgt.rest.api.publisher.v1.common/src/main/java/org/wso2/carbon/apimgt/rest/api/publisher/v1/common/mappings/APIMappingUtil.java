@@ -252,19 +252,6 @@ public class APIMappingUtil {
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
-        //preprocess operations with prefix
-        if (StringUtils.isNotBlank(scopePrefix)) {
-            for (APIOperationsDTO operationsDTO : dto.getOperations()) {
-                if (operationsDTO.getScopes() != null) {
-                    List<String> scopesWithPrefix = new ArrayList<>();
-                    for (String scope : operationsDTO.getScopes()) {
-                        scopesWithPrefix.add(APIUtil.prependScopePrefix(scopePrefix, scope));
-                    }
-                    operationsDTO.setScopes(scopesWithPrefix);
-                }
-            }
-        }
-
         //URI Templates
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
@@ -1581,7 +1568,10 @@ public class APIMappingUtil {
             if (scopeList != null) {
                 for (String scopeKey : scopeList) {
                     for (Scope definedScope : model.getScopes()) {
-                        if (definedScope.getKey().equalsIgnoreCase(scopeKey)) {
+                        // At this point, scopes in model are already prefixed with the scopePrefix
+                        // prepend the scopes of operations before comparing.
+                        String prependedOperationScope = APIUtil.prependScopePrefix(model.getScopePrefix(), scopeKey);
+                        if (definedScope.getKey().equalsIgnoreCase(prependedOperationScope)) {
                             template.setScopes(definedScope);
                             template.setScope(definedScope);
                             break;
@@ -2049,9 +2039,11 @@ public class APIMappingUtil {
     }
 
     /**
-     * Converts a URI template object to a REST API DTO.
+     * Converts a URI template object to a REST API DTO. If the scopePrefix is present, the provided scopePrefix
+     * will be removed from the scopes of the URITemplate
      *
      * @param uriTemplate URI Template object
+     * @param scopePrefix Scope Prefix. This can be null.
      * @return REST API DTO representing URI template object
      */
     private static APIOperationsDTO getOperationFromURITemplate(URITemplate uriTemplate, String scopePrefix) {
