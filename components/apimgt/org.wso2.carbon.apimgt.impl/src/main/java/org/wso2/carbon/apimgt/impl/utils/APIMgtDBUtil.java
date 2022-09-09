@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -287,7 +288,7 @@ public final class APIMgtDBUtil {
             } catch (IOException e) {
                 String msg = "Error while parsing JSON string";
                 log.error(msg, e);
-                throw new APIManagementException(msg, e);
+                throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
             }
         }
         return map;

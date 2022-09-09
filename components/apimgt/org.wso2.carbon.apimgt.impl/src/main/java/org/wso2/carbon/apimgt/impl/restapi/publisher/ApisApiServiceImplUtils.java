@@ -122,6 +122,13 @@ public class ApisApiServiceImplUtils {
         return comment;
     }
 
+    public static void checkCommentOwner(Comment comment, String username) throws APIManagementException {
+        if (!comment.getUser().equals(username)) {
+            throw new APIManagementException(ExceptionCodes
+                    .from(ExceptionCodes.COMMENT_NO_PERMISSION, username, comment.getId()));
+        }
+    }
+
     /**
      * @param name Name of URI Template
      * @param verb HTTP verb
@@ -194,7 +201,7 @@ public class ApisApiServiceImplUtils {
      * @throws CryptoException when decoding secrets fail
      */
     private static AWSLambda getAWSLambdaClient(String accessKey, String secretKey, String region,
-                                          String roleArn, String roleSessionName, String roleRegion) throws CryptoException {
+                                                String roleArn, String roleSessionName, String roleRegion) throws CryptoException {
         AWSLambda awsLambdaClient;
         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
             awsLambdaClient = getARNsWithIAMRole(roleArn, roleSessionName, roleRegion);

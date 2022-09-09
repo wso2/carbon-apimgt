@@ -1932,7 +1932,7 @@ public final class APIUtil {
         } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
             return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
         } else {
-            throw new APIManagementException("No such a tier type : " + tierType);
+            throw new APIManagementException("No such a tier type : " + tierType, ExceptionCodes.UNSUPPORTED_TIER_TYPE);
         }
     }
 

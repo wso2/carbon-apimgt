@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -47,9 +48,11 @@ public class GlobalMediationPolicyImpl {
                 registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(-1234);
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while retrieving Tenant id for organization" + organization);
+            throw new APIManagementException("Error while retrieving Tenant id for organization" + organization,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         } catch (RegistryException e) {
-            throw new APIManagementException("Error while retrieving Registry for organization" + organization);
+            throw new APIManagementException("Error while retrieving Registry for organization" + organization,
+                    ExceptionCodes.INTERNAL_ERROR);
         }finally {
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(internalOrganizationDomain)) {
                 endTenantFlow();
@@ -109,7 +112,7 @@ public class GlobalMediationPolicyImpl {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get global mediation policies";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
         return mediationList;
     }
@@ -209,7 +212,7 @@ public class GlobalMediationPolicyImpl {
             }
         } catch (RegistryException e) {
             String msg = "Error while accessing registry objects";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }

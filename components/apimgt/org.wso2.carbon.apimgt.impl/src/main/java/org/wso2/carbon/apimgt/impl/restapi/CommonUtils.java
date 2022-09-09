@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -147,5 +148,17 @@ public class CommonUtils {
             }
         }
 
+    }
+
+    /**
+     * @param apiTypeConst Expected API type
+     * @param apiType      Type of the API
+     * @throws APIManagementException when API type is not the expected type
+     */
+    public static void checkAPIType(String apiTypeConst, String apiType) throws APIManagementException {
+        boolean isExpectedType = apiTypeConst.equals(apiType);
+        if (APIConstants.GRAPHQL_API.equals(apiTypeConst) && !isExpectedType) {
+            throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+        }
     }
 }

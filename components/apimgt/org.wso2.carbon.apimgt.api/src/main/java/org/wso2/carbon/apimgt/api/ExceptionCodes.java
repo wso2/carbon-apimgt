@@ -334,6 +334,8 @@ public enum ExceptionCodes implements ErrorHandler {
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
     UNSUPPORTED_POLICY_TYPE(901001, "Policy type error", 400, "Unsupported policy type"),
+    UNSUPPORTED_TIER_TYPE(901002, "Policy tier error", 400, "Unsupported policy tier"),
+    INVALID_THROTTLE_TIER(901003, "Invalid throttle tier", 400, "Invalid x-throttling tier"),
 
     THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
             "Requested throttling policy with name '%s' and type '%s' not found"),
@@ -410,6 +412,7 @@ public enum ExceptionCodes implements ErrorHandler {
     COMMENT_NOT_FOUND(901102, "Comment not found", 404, "Couldn't retrieve comment"),
     COMMENT_LENGTH_EXCEEDED(901103, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
+    COMMENT_NO_PERMISSION(901104, "Insufficient permission", 403, "User '%s' doesn't have permission to access the comment with id '%s'"),
     NEED_ADMIN_PERMISSION(901100, "Admin permission needed", 403,
             "This user is not an admin"),
 
@@ -538,6 +541,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
     OPERATION_POLICY_NOT_FOUND(902010, "Operation Policy Not Found", 404,
             "Requested operation policy with id '%s' not found"),
+    OPERATION_POLICY_SPEC_MISMATCH(902011, "Applied policy does not match specification", 400, "Applied policy for URI template does not match specification"),
 
     OPERATION_POLICY_ALREADY_EXISTS(903001, "The Operation Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
 
@@ -556,6 +560,9 @@ public enum ExceptionCodes implements ErrorHandler {
     REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
     INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false),
+
+    // transport related codes
+    UNSUPPORTED_TRANSPORT_TYPE(904100, "Unsupported transport type", 400, "Transport type '%s' is not supported"),
 
     // certificate related error codes
 

@@ -260,18 +260,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok(uri).entity(commentDTO).build();
-
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to get comments of API " + apiId, e, log);
-            }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comments content location for API " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
-        return null;
     }
 
     @Override
@@ -283,43 +275,36 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
-            if (comment != null) {
-                if (comment.getUser().equals(username)) {
-                    boolean commentEdited = false;
-                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment
-                            .getCategory()))) {
-                        comment.setCategory(patchRequestBodyDTO.getCategory());
-                        commentEdited = true;
-                    }
-                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment
-                            .getText()))) {
-                        comment.setText(patchRequestBodyDTO.getContent());
-                        commentEdited = true;
-                    }
-                    if (commentEdited) {
-                        if (apiProvider.editComment(apiTypeWrapper, commentId, comment)) {
-                            Comment editedComment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
-                            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
 
-                            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
-                                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
-                            URI uri = new URI(uriString);
-                            return Response.ok(uri).entity(commentDTO).build();
-                        }
-                    } else {
-                        return Response.ok().build();
-                    }
-                } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId)
-                            , log);
+            ApisApiServiceImplUtils.checkCommentOwner(comment, username);
+
+            boolean commentEdited = false;
+            if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment
+                    .getCategory()))) {
+                comment.setCategory(patchRequestBodyDTO.getCategory());
+                commentEdited = true;
+            }
+            if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment
+                    .getText()))) {
+                comment.setText(patchRequestBodyDTO.getContent());
+                commentEdited = true;
+            }
+            if (commentEdited) {
+                if (apiProvider.editComment(apiTypeWrapper, commentId, comment)) {
+                    Comment editedComment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
+                    CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
+
+                    String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                            RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                    URI uri = new URI(uriString);
+                    return Response.ok(uri).entity(commentDTO).build();
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
-                        String.valueOf(commentId), log);
+                return Response.ok().build();
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comment content location for API " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }
@@ -329,41 +314,26 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIManagementException {
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String username = RestApiCommonUtil.getLoggedInUsername();
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
-            if (comment != null) {
-                String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
-                        .get(RestApiConstants.USER_REST_API_SCOPES);
-                if (Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE) || comment.getUser().equals(username)) {
-                    if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
-                        JSONObject obj = new JSONObject();
-                        obj.put("id", commentId);
-                        obj.put("message", "The comment has been deleted");
-                        return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
-                    } else {
-                        return Response.status(405, "Method Not Allowed").type(MediaType
-                                .APPLICATION_JSON).build();
-                    }
-                } else {
-                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
-                }
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+        Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
+
+        String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                .get(RestApiConstants.USER_REST_API_SCOPES);
+        if (Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE) || comment.getUser().equals(username)) {
+            if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
+                JSONObject obj = new JSONObject();
+                obj.put("id", commentId);
+                obj.put("message", "The comment has been deleted");
+                return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
-                        String.valueOf(commentId), log);
+                return Response.status(405, "Method Not Allowed").type(MediaType
+                        .APPLICATION_JSON).build();
             }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while deleting comment " + commentId + "for API " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+        } else {
+            return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
         }
-        return null;
     }
 
     /**
@@ -377,40 +347,23 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getGraphQLPolicyComplexityOfAPI(String apiId, MessageContext messageContext)
             throws APIManagementException {
-        try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String currentApiUuid;
-                // Resolve whether an API or a corresponding revision
-                APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiId);
-                if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                    currentApiUuid = apiRevision.getApiUUID();
-                } else {
-                    currentApiUuid = apiId;
-                }
-                GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(currentApiUuid);
-                GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
-                        GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
-                return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving complexity details of API : " + apiId, e, log);
-            } else {
-                String msg = "Error while retrieving complexity details of API " + apiId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        CommonUtils.checkAPIType(APIConstants.GRAPHQL_API, api.getType());
+
+        String currentApiUuid;
+        // Resolve whether an API or a corresponding revision
+        APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiId);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = apiId;
         }
-        return null;
+        GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(currentApiUuid);
+        GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
+                GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
+        return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
     }
 
     /**
@@ -425,44 +378,27 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateGraphQLPolicyComplexityOfAPI(String apiId, GraphQLQueryComplexityInfoDTO body,
                                                        MessageContext messageContext) throws APIManagementException {
-        try {
-            if (StringUtils.isBlank(apiId)) {
-                String errorMessage = "API ID cannot be empty or null.";
-                RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-
-            //validate if api exists
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
-            String schema = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
-
-            GraphqlComplexityInfo graphqlComplexityInfo =
-                    GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(body, schema);
-            if (APIConstants.GRAPHQL_API.equals(existingAPI.getType())) {
-                apiProvider.addOrUpdateComplexityDetails(apiId, graphqlComplexityInfo);
-                return Response.ok().build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating complexity details of API : " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while updating complexity details of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+        if (StringUtils.isBlank(apiId)) {
+            String errorMessage = "API ID cannot be empty or null.";
+            throw new APIManagementException(errorMessage, ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
-        return null;
+
+        //validate if api exists
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
+        String schema = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
+
+        GraphqlComplexityInfo graphqlComplexityInfo =
+                GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(body, schema);
+        CommonUtils.checkAPIType(APIConstants.GRAPHQL_API, existingAPI.getType());
+
+        apiProvider.addOrUpdateComplexityDetails(apiId, graphqlComplexityInfo);
+        return Response.ok().build();
     }
 
     @Override
@@ -491,7 +427,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.updateAPI(updatedAPI, existingAPI);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, ExceptionCodes.INTERNAL_ERROR);
         }
         return Response.ok().build();
     }

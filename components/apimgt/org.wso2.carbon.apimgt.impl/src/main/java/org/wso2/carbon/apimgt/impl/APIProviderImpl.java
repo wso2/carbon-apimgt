@@ -725,7 +725,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             defaultVersion = apiMgtDAO.getDefaultVersion(apiid);
         } catch (APIManagementException e) {
-            handleException("Error while getting default version :" + apiid.getApiName(), e);
+            handleExceptionWithCode("Error while getting default version :" + apiid.getApiName(), e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return defaultVersion;
     }
@@ -737,7 +738,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             defaultVersion = apiMgtDAO.getPublishedDefaultVersion(apiid);
         } catch (APIManagementException e) {
-            handleException("Error while getting published default version :" + apiid.getApiName(), e);
+            handleExceptionWithCode("Error while getting published default version :" + apiid.getApiName(), e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return defaultVersion;
     }
@@ -756,7 +758,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API updateAPI(API api, API existingAPI) throws APIManagementException {
 
         if (!existingAPI.getStatus().equals(api.getStatus())) {
-            throw new APIManagementException("Invalid API update operation involving API status changes");
+            throw new APIManagementException("Invalid API update operation involving API status changes",
+                    ExceptionCodes.UPDATE_STATE_CHANGE);
         }
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -787,7 +790,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
                     api.setMonetizationProperties(jsonObj);
                 } catch (ParseException e) {
-                    throw new APIManagementException("Error when parsing monetization properties ", e);
+                    throw new APIManagementException("Error when parsing monetization properties ", e,
+                            ExceptionCodes.JSON_PARSE_ERROR);
                 }
             }
         }
@@ -826,7 +830,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setCreatedTime(existingAPI.getCreatedTime());
             apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
+            throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
         }
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
@@ -838,7 +842,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setCreatedTime(existingAPI.getCreatedTime());
             apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
+            throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
         }
 
 
@@ -1065,7 +1069,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (ParseException | JsonProcessingException e) {
             throw new APIManagementException(
-                    "Error while processing endpoint security for API " + api.getId().toString(), e);
+                    "Error while processing endpoint security for API " + api.getId().toString(), e,
+                    ExceptionCodes.JSON_PARSE_ERROR);
         }
     }
 
@@ -1182,7 +1187,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             } catch (MediationPolicyPersistenceException e) {
-                throw new APIManagementException("Error while loading medation policies", e);
+                throw new APIManagementException("Error while loading medation policies", e, ExceptionCodes.INTERNAL_ERROR);
             }
         }
     }
@@ -1509,7 +1514,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     !policyData.getSpecification().getVersion().equals(policy.getPolicyVersion()) ) {
                                 throw new APIManagementException("Applied policy for uriTemplate "
                                         + uriTemplate.getUriTemplate() + " : " + policy.getPolicyName()
-                                        + "_" + policy.getPolicyVersion() + " does not match the specification");
+                                        + "_" + policy.getPolicyVersion() + " does not match the specification",
+                                        ExceptionCodes.OPERATION_POLICY_SPEC_MISMATCH);
                             }
 
                             OperationPolicySpecification policySpecification = policyData.getSpecification();
@@ -1531,7 +1537,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         !commonPolicyData.getSpecification().getVersion().equals(policy.getPolicyVersion()) ) {
                                     throw new APIManagementException("Applied policy for uriTemplate "
                                             + uriTemplate.getUriTemplate() + " : " + policy.getPolicyName()
-                                            + "_" + policy.getPolicyVersion() + " does not match the specification");
+                                            + "_" + policy.getPolicyVersion() + " does not match the specification",
+                                            ExceptionCodes.OPERATION_POLICY_SPEC_MISMATCH);
                                 }
 
                                 OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
@@ -1754,7 +1761,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void checkIfValidTransport(String transport) throws APIManagementException {
         if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
                 && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
-            handleException("Unsupported Transport [" + transport + ']');
+            throw new APIManagementException("Unsupported Transport [" + transport + ']',
+                    ExceptionCodes.from(ExceptionCodes.UNSUPPORTED_TRANSPORT_TYPE, transport));
         }
     }
 
@@ -2664,7 +2672,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             " found in api definition for resource " + template.getHTTPVerb() + " " +
                             template.getUriTemplate();
                     log.error(message);
-                    throw new APIManagementException(message);
+                    throw new APIManagementException(message, ExceptionCodes.INVALID_THROTTLE_TIER);
                 }
             }
         }
