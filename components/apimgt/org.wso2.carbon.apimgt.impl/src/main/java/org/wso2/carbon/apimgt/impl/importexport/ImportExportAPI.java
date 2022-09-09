@@ -73,11 +73,6 @@ public interface ImportExportAPI {
                           boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException;
 
-
-    File postExportAPI(String apiId, String revisionUUID, API api, boolean preserveStatus,
-                              ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-                              String organization, File exportedAPI)
-            throws APIManagementException, APIImportExportException;
     /**
      * Used to export API Product artifact
      *

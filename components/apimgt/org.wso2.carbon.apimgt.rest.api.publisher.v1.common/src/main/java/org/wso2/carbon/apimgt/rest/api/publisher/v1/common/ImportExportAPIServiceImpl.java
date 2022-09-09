@@ -103,7 +103,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         api = apiProvider.getAPIbyUUID(exportAPIUUID, organization);
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         apiIdentifier.setUuid(exportAPIUUID);
-        return ExportUtils.exportApiArchive(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
+        return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs, originalDevPortalUrl, organization);
     }
 
@@ -119,20 +119,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         api.setUuid(apiId);
         apiIdentifier.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
-        File exportedAPIFolder = ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
+        return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs, StringUtils.EMPTY, organization);
-        return postExportAPI(apiId, revisionUUID, api, preserveStatus, format, preserveDocs, preserveCredentials,
-                organization, exportedAPIFolder);
-    }
 
-    @Override
-    public File postExportAPI(String apiId, String revisionUUID, API api, boolean preserveStatus,
-                              ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-                              String organization, File exportedAPI) throws APIImportExportException {
-        String exportAPIBasePath = exportedAPI.getAbsolutePath();
-        CommonUtil.archiveDirectory(exportAPIBasePath);
-        FileUtils.deleteQuietly(new File(exportAPIBasePath));
-        return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
     }
 
     @Override

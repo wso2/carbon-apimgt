@@ -216,16 +216,6 @@ public class ExportUtils {
         }
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
                 organization);
-        return new File(exportAPIBasePath);
-    }
-
-    public static File exportApiArchive(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
-                                 String userName, ExportFormat exportFormat, boolean preserveStatus,
-                                 boolean preserveDocs, String originalDevPortalUrl, String organization)
-            throws APIManagementException, APIImportExportException {
-        File exportedAPIDir = exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, exportFormat,
-                preserveStatus, preserveDocs, originalDevPortalUrl, organization);
-        String exportAPIBasePath = exportedAPIDir.getAbsolutePath();
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -903,7 +893,8 @@ public class ExportUtils {
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
-                            exportFormat, formattedSwaggerJson);
+                            exportFormat,
+                            formattedSwaggerJson);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Meta information retrieved successfully for API: " + apiDtoToReturn.getName()
@@ -1102,7 +1093,7 @@ public class ExportUtils {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
-            File dependentAPI = exportApiArchive(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
+            File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
                     isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }

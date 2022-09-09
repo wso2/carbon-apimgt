@@ -210,7 +210,7 @@
                         </Import-Package>
                         <Export-Package>
                             org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.rest.api.publisher.v1.common.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
