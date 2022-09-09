@@ -62,7 +62,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
       security:
         - OAuth2Security:
-            - apim:dcr:app_register
+            - apim:dcr:app_manage
             
 components:
   schemas:
@@ -201,5 +201,5 @@ components:
           tokenUrl: https://localhost:9443/oauth2/token
           scopes:
             openid: Authorize access to user details
-            apim:dcr:app_register: create oauth app using dcr
+            apim:dcr:app_manage: create oauth app using dcr
 
