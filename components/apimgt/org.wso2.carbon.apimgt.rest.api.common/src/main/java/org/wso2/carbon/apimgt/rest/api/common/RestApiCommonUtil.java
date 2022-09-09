@@ -85,7 +85,7 @@ public class RestApiCommonUtil {
      * @return return true if we found matching scope in resource and token information
      * else false(means scope validation failed).
      */
-    public static boolean validateScopes(HashMap<String, Object> message, OAuthTokenInfo tokenInfo) {
+    public static boolean validateScopes(Map<String, Object> message, OAuthTokenInfo tokenInfo) {
         String basePath = (String) message.get("org.apache.cxf.message.Message.BASE_PATH");
         // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
         // decoded values of request parameters
@@ -108,7 +108,7 @@ public class RestApiCommonUtil {
 
         for (Object template : uriTemplates.toArray()) {
             org.wso2.uri.template.URITemplate templateToValidate = null;
-            Map<String, String> var = new HashMap<String, String>();
+            Map<String, String> var = new HashMap<>();
             //check scopes with what we have
             String templateString = ((URITemplate) template).getUriTemplate();
             try {
@@ -203,19 +203,19 @@ public class RestApiCommonUtil {
             try {
                 String definition;
                 if (RestApiConstants.REST_API_STORE_VERSION_0.equals(version)) {
-                    definition = IOUtils
-                            .toString(RestApiCommonUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/store-api.json"),
+                                    RestApiConstants.CHARSET);
                 } else {
-                    definition = IOUtils
-                            .toString(RestApiCommonUtil.class.getResourceAsStream("/devportal-api.yaml"), "UTF-8");
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/devportal-api.yaml"),
+                                    RestApiConstants.CHARSET);
                 }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content w created
                 storeResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+                log.error("Error while reading resource mappings for Store API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+                log.error("Error while reading the swagger definition for Store API: " + api.getId().getApiName(), e);
             }
             return storeResourceMappings;
         }
@@ -239,19 +239,19 @@ public class RestApiCommonUtil {
             try {
                 String definition;
                 if (RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version)) {
-                    definition = IOUtils
-                            .toString(RestApiCommonUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/admin-api.json"),
+                                    RestApiConstants.CHARSET);
                 } else {
-                    definition = IOUtils
-                            .toString(RestApiCommonUtil.class.getResourceAsStream("/admin-api.yaml"), "UTF-8");
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/admin-api.yaml"),
+                                    RestApiConstants.CHARSET);
                 }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 adminAPIResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+                log.error("Error while reading resource mappings for Admin API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+                log.error("Error while reading the swagger definition for Admin API: " + api.getId().getApiName(), e);
             }
             return adminAPIResourceMappings;
         }
@@ -274,19 +274,19 @@ public class RestApiCommonUtil {
             try {
                 String definition;
                 if (RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version)) {
-                    definition = IOUtils
-                            .toString(RestApiCommonUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/publisher-api.json"),
+                                    RestApiConstants.CHARSET);
                 } else {
-                    definition = IOUtils
-                            .toString(RestApiCommonUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/publisher-api.yaml"),
+                                    RestApiConstants.CHARSET);
                 }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 publisherResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+                log.error("Error while reading resource mappings for Publisher API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+                log.error("Error while reading the swagger definition for Publisher API: " + api.getId().getApiName(), e);
             }
             return publisherResourceMappings;
         }
@@ -308,15 +308,15 @@ public class RestApiCommonUtil {
         } else {
             try {
                 String definition;
-                definition = IOUtils
-                        .toString(RestApiCommonUtil.class.getResourceAsStream("/service-catalog-api.yaml"), "UTF-8");
+                definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/service-catalog-api.yaml"),
+                                RestApiConstants.CHARSET);
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 serviceCatalogAPIResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+                log.error("Error while reading resource mappings for Service catalog API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+                log.error("Error while reading the swagger definition for Service catalog API: " + api.getId().getApiName(), e);
             }
             return serviceCatalogAPIResourceMappings;
         }
