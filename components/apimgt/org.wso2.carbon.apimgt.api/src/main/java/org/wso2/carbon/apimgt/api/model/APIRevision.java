@@ -29,6 +29,7 @@ public class APIRevision implements Serializable {
     private String createdBy;
     private String createdTime;
     private List<APIRevisionDeployment>  apiRevisionDeploymentList;
+    private String scopePrefix;
 
     public int getId() {
         return id;
@@ -72,6 +73,14 @@ public class APIRevision implements Serializable {
 
     public String getCreatedTime() {
         return createdTime;
+    }
+
+    public String getScopePrefix() {
+        return scopePrefix;
+    }
+
+    public void setScopePrefix(String scopePrefix) {
+        this.scopePrefix = scopePrefix;
     }
 
     public void setCreatedTime(String createdTime) {
