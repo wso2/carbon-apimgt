@@ -339,7 +339,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
         String appName = applicationInfo.getClientName();
-        String orgId = RestApiUtil.getValidatedOrganization(securityContext);
         String userId = (String) applicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
         boolean isTenantFlowStarted = false;
 
@@ -383,6 +382,12 @@ public class RegistrationServiceImpl implements RegistrationService {
             logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
             serviceProviderProperties.add(logoutConsentProperty);
 
+            String orgId = null;
+            try {
+                orgId = RestApiUtil.getValidatedOrganization(securityContext);
+            } catch (APIManagementException e) {
+                log.debug("Could not extract orgId from the request. Reason:" + e.getMessage());
+            }
             if (StringUtils.isNotBlank(orgId)) {
                 ServiceProviderProperty orgIdProperty = new ServiceProviderProperty();
                 orgIdProperty.setDisplayName(APIConstants.APP_ORG_ID_DISPLAY);
