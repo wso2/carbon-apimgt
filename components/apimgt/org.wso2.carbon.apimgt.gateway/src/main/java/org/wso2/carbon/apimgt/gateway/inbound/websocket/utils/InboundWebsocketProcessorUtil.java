@@ -458,6 +458,7 @@ public class InboundWebsocketProcessorUtil {
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
+                    inboundMessageContext.setJWTToken(true);
                     if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())) {
                         return InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(inboundMessageContext);
                     } else {
@@ -675,7 +676,8 @@ public class InboundWebsocketProcessorUtil {
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
         try {
             //validate token and subscriptions
-            if (!InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(inboundMessageContext)) {
+            if (inboundMessageContext.isJWTToken() && !InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(
+                    inboundMessageContext)) {
                 inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
                         WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);

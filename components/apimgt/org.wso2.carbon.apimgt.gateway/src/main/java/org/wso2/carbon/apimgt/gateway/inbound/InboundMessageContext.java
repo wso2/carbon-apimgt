@@ -59,6 +59,7 @@ public class InboundMessageContext {
     private String userIP;
     private String matchingResource; //invoking API resource
     private ChannelHandlerContext ctx;
+    private boolean isJWTToken;
 
     //Graphql Subscription specific connection context information
     private GraphQLSchemaDTO graphQLSchemaDTO;
@@ -242,5 +243,13 @@ public class InboundMessageContext {
 
     public void setCtx(ChannelHandlerContext ctx) {
         this.ctx = ctx;
+    }
+
+    public boolean isJWTToken() {
+        return isJWTToken;
+    }
+
+    public void setJWTToken(boolean JWTToken) {
+        isJWTToken = JWTToken;
     }
 }
