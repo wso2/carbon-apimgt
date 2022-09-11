@@ -75,7 +75,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
             return;
         }
 
-        HashMap<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(inMessage);
+        Map<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(inMessage);
         RestAPIAuthenticator authenticator = RestAPIAuthenticationManager.getAuthenticator(authContext);
 
         if (authenticator != null) {

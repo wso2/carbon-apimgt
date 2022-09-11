@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This OAuthOpaqueAuthenticatorImpl class specifically implemented for API Manager store and publisher rest APIs'
@@ -108,7 +109,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 //put the token info into token cache
                 getRESTAPITokenCache().put(accessToken, tokenInfo);
             }
-            HashMap<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(message);
+            Map<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(message);
             String basePath = (String) message.get(RestApiConstants.BASE_PATH);
             String version = (String) message.get(RestApiConstants.API_VERSION);
             authContext.put(RestApiConstants.URI_TEMPLATES, RestApiCommonUtil.getURITemplatesForBasePath(basePath

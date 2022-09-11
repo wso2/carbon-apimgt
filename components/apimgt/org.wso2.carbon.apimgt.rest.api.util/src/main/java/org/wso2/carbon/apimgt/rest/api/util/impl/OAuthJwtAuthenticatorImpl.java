@@ -149,7 +149,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                     .toArray(size -> new String[size]);
             oauthTokenInfo.setScopes(scopes);
-            HashMap<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(message);
+            Map<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(message);
             String basePath = (String) message.get(RestApiConstants.BASE_PATH);
             String version = (String) message.get(RestApiConstants.API_VERSION);
             authContext.put(RestApiConstants.URI_TEMPLATES, RestApiCommonUtil.getURITemplatesForBasePath(basePath

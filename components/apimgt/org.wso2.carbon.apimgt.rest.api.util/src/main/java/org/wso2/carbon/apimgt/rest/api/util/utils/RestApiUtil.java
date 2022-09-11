@@ -35,8 +35,6 @@ import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -62,9 +60,7 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 
@@ -92,10 +88,6 @@ import javax.ws.rs.core.Response;
 public class RestApiUtil {
 
     public static final Log log = LogFactory.getLog(RestApiUtil.class);
-    private static Set<URITemplate> storeResourceMappings;
-    private static Set<URITemplate> publisherResourceMappings;
-    private static Set<URITemplate> adminAPIResourceMappings;
-    private static Set<URITemplate> serviceCatalogAPIResourceMappings;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
 
@@ -121,7 +113,7 @@ public class RestApiUtil {
      * @param message - current inbound message
      * @return Map object that contains all properties of cxf inbound message
      */
-    public static HashMap<String,Object> addToJWTAuthenticationContext(Message message) {
+    public static Map<String,Object> addToJWTAuthenticationContext(Message message) {
         HashMap<String,Object> hashMap = new HashMap<>();
         message.forEach(hashMap::put);
         return hashMap;

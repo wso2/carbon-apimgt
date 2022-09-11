@@ -20,7 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * RestAPIAuthenticationManager class handling authenticators for each request. Requests may receive via different
@@ -32,7 +32,7 @@ public class RestAPIAuthenticationManager {
 
     private static final Log log = LogFactory.getLog(RestAPIAuthenticationManager.class);
 
-    public static RestAPIAuthenticator getAuthenticator(HashMap<String, Object> authContext) {
+    public static RestAPIAuthenticator getAuthenticator(Map<String, Object> authContext) {
         ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
         if (serviceReferenceHolder.getAuthenticators() != null) {
             for (RestAPIAuthenticator restAPIAuthenticator : serviceReferenceHolder.getAuthenticators()) {
