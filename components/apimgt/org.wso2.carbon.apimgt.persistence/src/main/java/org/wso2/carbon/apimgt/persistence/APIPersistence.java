@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -40,7 +39,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceExc
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 

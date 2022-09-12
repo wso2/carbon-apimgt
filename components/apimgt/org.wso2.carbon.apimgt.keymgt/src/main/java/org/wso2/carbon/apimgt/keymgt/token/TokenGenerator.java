@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.keymgt.token;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 
 /**
