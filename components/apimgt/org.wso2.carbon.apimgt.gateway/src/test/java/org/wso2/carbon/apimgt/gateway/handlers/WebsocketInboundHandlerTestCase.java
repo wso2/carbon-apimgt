@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcesso
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
@@ -63,11 +64,19 @@ import java.util.UUID;
  * Test class for WebsocketInboundHandler.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WebSocketUtils.class, InboundWebsocketProcessorUtil.class, APIUtil.class})
+@PrepareForTest({ WebSocketUtils.class, InboundWebsocketProcessorUtil.class,
+        APIUtil.class, WebsocketInboundHandler.class })
 public class WebsocketInboundHandlerTestCase {
 
     private static final String channelIdString = "11111";
     private static final String remoteIP = "192.168.0.100";
+    private static final String APPLICATION_TIER = "ApplicationTier";
+    private static final String APPLICATION_NAME = "ApplicationName";
+    private static final String APPLICATION_ID = "1";
+    private static final String TIER = "Tier";
+    private static final String SUBSCRIBER = "subscriber";
+    private static final String APPLICATION_CONSUMER_KEY = "NdYZFnAfUa7uST1giZrmIq8he8Ya";
+    private String SUPER_TENANT_DOMAIN = "carbon.super";
     private ChannelHandlerContext channelHandlerContext;
     private InboundWebSocketProcessor inboundWebSocketProcessor;
     private WebsocketInboundHandler websocketInboundHandler;
@@ -128,7 +137,12 @@ public class WebsocketInboundHandlerTestCase {
     @Test
     public void testWSHandshakeResponse() throws Exception {
 
+        HashMap<String, Object> apiProperties = new HashMap<>();
+        PowerMockito.whenNew(HashMap.class).withAnyArguments().thenReturn(apiProperties);
         InboundMessageContext inboundMessageContext = createWebSocketApiMessageContext();
+        APIKeyValidationInfoDTO infoDTO = createAPIKeyValidationInfo(websocketAPI);
+        inboundMessageContext.setInfoDTO(infoDTO);
+        PowerMockito.when(APIUtil.getHostAddress()).thenReturn("localhost");
         InboundMessageContextDataHolder.getInstance().addInboundMessageContextForConnection(channelIdString,
                 inboundMessageContext);
         String headerName = "test-header";
@@ -142,6 +156,8 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.when(inboundWebSocketProcessor.handleHandshake(fullHttpRequest, channelHandlerContext,
                 inboundMessageContext)).thenReturn(responseDTO);
         websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
+        validateApiProperties(apiProperties, infoDTO, inboundMessageContext);
+
         Assert.assertTrue((InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap()
                 .containsKey(channelIdString)));// No error has occurred context exists in data-holder map.
         Assert.assertEquals(inboundMessageContext.getRequestHeaders().get(headerName), headerValue);
@@ -257,5 +273,47 @@ public class WebsocketInboundHandlerTestCase {
 
             }
         };
+    }
+
+    private void validateApiProperties(HashMap apiPropertiesMap, APIKeyValidationInfoDTO infoDTO, InboundMessageContext inboundMessageContext) {
+        API electedAPI = inboundMessageContext.getElectedAPI();
+        Assert.assertEquals(electedAPI.getApiName(), apiPropertiesMap.get(APIMgtGatewayConstants.API));
+        Assert.assertEquals(electedAPI.getApiVersion(), apiPropertiesMap.get(APIMgtGatewayConstants.VERSION));
+        Assert.assertEquals(electedAPI.getApiName() + ":v" + electedAPI.getApiVersion(),
+                apiPropertiesMap.get(APIMgtGatewayConstants.API_VERSION));
+        Assert.assertEquals(inboundMessageContext.getApiContext(),
+                apiPropertiesMap.get(APIMgtGatewayConstants.CONTEXT));
+        Assert.assertEquals(String.valueOf(APIConstants.ApiTypes.API),
+                apiPropertiesMap.get(APIMgtGatewayConstants.API_TYPE));
+        Assert.assertEquals(APIUtil.getHostAddress(), apiPropertiesMap.get(APIMgtGatewayConstants.HOST_NAME));
+        Assert.assertEquals(infoDTO.getConsumerKey(), apiPropertiesMap.get(APIMgtGatewayConstants.CONSUMER_KEY));
+        Assert.assertEquals(infoDTO.getEndUserName(), apiPropertiesMap.get(APIMgtGatewayConstants.USER_ID));
+        Assert.assertEquals(infoDTO.getApiPublisher(), apiPropertiesMap.get(APIMgtGatewayConstants.API_PUBLISHER));
+        Assert.assertEquals(infoDTO.getEndUserName(), apiPropertiesMap.get(APIMgtGatewayConstants.END_USER_NAME));
+        Assert.assertEquals(infoDTO.getApplicationName(),
+                apiPropertiesMap.get(APIMgtGatewayConstants.APPLICATION_NAME));
+        Assert.assertEquals(infoDTO.getApplicationId(), apiPropertiesMap.get(APIMgtGatewayConstants.APPLICATION_ID));
+    }
+
+    private APIKeyValidationInfoDTO createAPIKeyValidationInfo(API api) {
+        APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
+        info.setAuthorized(true);
+        info.setApplicationTier(APPLICATION_TIER);
+        info.setTier(TIER);
+        info.setSubscriberTenantDomain(SUPER_TENANT_DOMAIN);
+        info.setSubscriber(SUBSCRIBER);
+        info.setStopOnQuotaReach(true);
+        info.setApiName(api.getApiName());
+        info.setApplicationId(APPLICATION_ID);
+        info.setType("PRODUCTION");
+        info.setApiPublisher(api.getApiProvider());
+        info.setApplicationName(APPLICATION_NAME);
+        info.setConsumerKey(APPLICATION_CONSUMER_KEY);
+        info.setEndUserName(SUBSCRIBER+"@"+SUPER_TENANT_DOMAIN);
+        info.setApiTier(api.getApiTier());
+        info.setEndUserToken("callerToken");
+        info.setGraphQLMaxDepth(5);
+        info.setGraphQLMaxComplexity(5);
+        return info;
     }
 }
