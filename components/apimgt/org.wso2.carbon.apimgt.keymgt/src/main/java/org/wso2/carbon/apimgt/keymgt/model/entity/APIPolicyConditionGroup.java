@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 
 import java.util.Set;

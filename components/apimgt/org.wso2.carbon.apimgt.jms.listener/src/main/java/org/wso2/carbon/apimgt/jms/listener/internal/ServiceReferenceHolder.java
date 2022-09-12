@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.jms.listener.internal;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 
 /**
  * Class for keeping service references.

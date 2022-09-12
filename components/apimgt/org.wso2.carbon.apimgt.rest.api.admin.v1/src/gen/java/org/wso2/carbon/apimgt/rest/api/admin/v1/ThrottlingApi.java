@@ -11,19 +11,15 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ExportThrottlePolicyDTO;
-import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDetailsListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.ThrottlingApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.inject.Inject;
 
 import io.swagger.annotations.*;
 import java.io.InputStream;
@@ -32,8 +28,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import java.util.Map;
-import java.util.List;
 import javax.validation.constraints.*;
 @Path("/throttling")
 

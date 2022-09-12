@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import org.apache.poi.ss.formula.functions.T;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
@@ -37,7 +36,6 @@ import org.mapstruct.factory.Mappers;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
