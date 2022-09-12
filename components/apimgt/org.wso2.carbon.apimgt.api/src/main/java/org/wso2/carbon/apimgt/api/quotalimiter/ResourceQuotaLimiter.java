@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.quotalimiter;
 
-import java.util.List;
 import java.util.Map;
 
 /**

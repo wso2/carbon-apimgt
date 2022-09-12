@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * A Simple extension handler for message logging for the apis deployed in the API Gateway.

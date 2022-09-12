@@ -22,8 +22,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represent an Virtual Host

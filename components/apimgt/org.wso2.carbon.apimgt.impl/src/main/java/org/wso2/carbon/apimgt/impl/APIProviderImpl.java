@@ -410,6 +410,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getId().getVersion(), api.getOrganization());
         api.setVersionTimestamp(latestTimestamp);
 
+        // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
+        // This value is determined considering the gateway type comes with the request.
+        api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
+                api.getGatewayVendor(), api.getGatewayType()));
         try {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
                     APIMapper.INSTANCE.toPublisherApi(api));

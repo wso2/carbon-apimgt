@@ -27,9 +27,12 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
@@ -53,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,6 +71,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private static final Log log = LogFactory.getLog(WebsocketInboundHandler.class);
     private WebSocketAnalyticsMetricsHandler metricsHandler;
     private InboundWebSocketProcessor webSocketProcessor;
+    private final String API_PROPERTIES = "API_PROPERTIES";
+    private final String WEB_SC_API_UT = "api.ut.WS_SC";
 
     public WebsocketInboundHandler() {
         webSocketProcessor = initializeWebSocketProcessor();
@@ -128,6 +135,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
             if (!responseDTO.isError()) {
                 setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
+                setApiPropertiesMapToChannel(ctx, inboundMessageContext);
                 if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
                     req.headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, inboundMessageContext.getToken());
                 }
@@ -308,5 +316,44 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             }
         }
         return null;
+    }
+
+    private void setApiPropertiesMapToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
+
+        ctx.channel().attr(AttributeKey.valueOf(API_PROPERTIES)).set(createApiPropertiesMap(inboundMessageContext));
+    }
+
+    private Map<String, Object> createApiPropertiesMap(InboundMessageContext inboundMessageContext) {
+
+        Map<String, Object> apiPropertiesMap = new HashMap<>();
+        AuthenticationContext authenticationContext = inboundMessageContext.getAuthContext();
+        if (authenticationContext != null) {
+            String apiName = authenticationContext.getApiName();
+            String apiVersion = authenticationContext.getApiVersion();
+            apiPropertiesMap.put(APIMgtGatewayConstants.CONSUMER_KEY, authenticationContext.getConsumerKey());
+            apiPropertiesMap.put(APIMgtGatewayConstants.USER_ID, authenticationContext.getUsername());
+            apiPropertiesMap.put(APIMgtGatewayConstants.CONTEXT, inboundMessageContext.getApiContext());
+            apiPropertiesMap.put(APIMgtGatewayConstants.API, apiName);
+            apiPropertiesMap.put(APIMgtGatewayConstants.VERSION, apiVersion);
+            apiPropertiesMap.put(APIMgtGatewayConstants.API_TYPE, String.valueOf(APIConstants.ApiTypes.API));
+            apiPropertiesMap.put(APIMgtGatewayConstants.HOST_NAME, APIUtil.getHostAddress());
+            apiPropertiesMap.put(APIMgtGatewayConstants.API_PUBLISHER, authenticationContext.getApiPublisher());
+            apiPropertiesMap.put(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
+            apiPropertiesMap.put(APIMgtGatewayConstants.APPLICATION_NAME, authenticationContext.getApplicationName());
+            apiPropertiesMap.put(APIMgtGatewayConstants.APPLICATION_ID, authenticationContext.getApplicationId());
+            apiPropertiesMap.put(APIMgtGatewayConstants.API_VERSION, apiName + ":v" + apiVersion);
+        }
+        return apiPropertiesMap;
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        Attribute<Object> attributes = ctx.channel().attr(AttributeKey.valueOf(API_PROPERTIES));
+        if (cause instanceof CorruptedWebSocketFrameException && attributes != null) {
+            HashMap apiProperties = (HashMap) attributes.get();
+            CorruptedWebSocketFrameException corruptedWebSocketFrameException = ((CorruptedWebSocketFrameException) cause);
+            apiProperties.put(WEB_SC_API_UT, corruptedWebSocketFrameException.closeStatus().code());
+        }
+        super.exceptionCaught(ctx, cause);
     }
 }

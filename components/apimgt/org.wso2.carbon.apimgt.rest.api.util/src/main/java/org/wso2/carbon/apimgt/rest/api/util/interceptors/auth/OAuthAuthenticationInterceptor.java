@@ -27,6 +27,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticationManager;
@@ -37,7 +38,8 @@ import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.utils.JWTAuthenticationUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -73,7 +75,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
             return;
         }
 
-        HashMap<String, Object> authContext = JWTAuthenticationUtils.addToJWTAuthenticationContext(inMessage);
+        Map<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(inMessage);
         RestAPIAuthenticator authenticator = RestAPIAuthenticationManager.getAuthenticator(authContext);
 
         if (authenticator != null) {
@@ -82,7 +84,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, authenticator.getAuthenticationType());
                 String basePath = (String) inMessage.get(RestApiConstants.BASE_PATH);
                 String version = (String) inMessage.get(RestApiConstants.API_VERSION);
-                authContext.put(RestApiConstants.URI_TEMPLATES, RestApiUtil.getURITemplatesForBasePath(basePath + version));
+                authContext.put(RestApiConstants.URI_TEMPLATES, RestApiCommonUtil.getURITemplatesForBasePath(basePath + version));
                 authContext.put(RestApiConstants.ORG_ID, RestApiUtil.resolveOrganization(inMessage));
                 if (authenticator.authenticate(authContext)) {
                     inMessage = JWTAuthenticationUtils.addToMessageContext(inMessage, authContext);

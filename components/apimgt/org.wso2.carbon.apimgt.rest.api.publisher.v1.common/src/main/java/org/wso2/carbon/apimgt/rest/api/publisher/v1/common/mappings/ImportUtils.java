@@ -2002,9 +2002,11 @@ public class ImportUtils {
             if (StringUtils.equals(targetStatus, APIStatus.BLOCKED.toString()) || StringUtils.equals(targetStatus,
                     APIStatus.DEPRECATED.toString()) || StringUtils.equals(targetStatus,
                     APIStatus.RETIRED.toString())) {
-                lifeCycleActions.put(APIStatus.PUBLISHED.toString(),
-                        lcManager.getTransitionAction(currentStatus.toUpperCase(), APIStatus.PUBLISHED.toString()));
-                currentStatus = APIStatus.PUBLISHED.toString();
+                if (StringUtils.equals(currentStatus, APIStatus.CREATED.toString())) {
+                    lifeCycleActions.put(APIStatus.PUBLISHED.toString(),
+                            lcManager.getTransitionAction(currentStatus.toUpperCase(), APIStatus.PUBLISHED.toString()));
+                    currentStatus = APIStatus.PUBLISHED.toString();
+                }
                 if (StringUtils.equals(targetStatus, APIStatus.RETIRED.toString())) {
                     // The API should be Deprecated prior Retiring the API
                     lifeCycleActions.put(APIStatus.DEPRECATED.toString(),

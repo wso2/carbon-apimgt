@@ -21,16 +21,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ZIPUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
-import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;

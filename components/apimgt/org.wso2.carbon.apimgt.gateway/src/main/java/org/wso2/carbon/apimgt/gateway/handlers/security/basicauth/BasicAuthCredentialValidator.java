@@ -48,8 +48,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

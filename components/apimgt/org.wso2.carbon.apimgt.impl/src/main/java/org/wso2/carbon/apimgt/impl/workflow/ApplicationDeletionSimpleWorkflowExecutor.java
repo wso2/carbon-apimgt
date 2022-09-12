@@ -24,10 +24,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
