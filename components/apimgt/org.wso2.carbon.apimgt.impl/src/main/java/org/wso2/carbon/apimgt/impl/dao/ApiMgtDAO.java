@@ -15856,7 +15856,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get all Shared Scope Keys for tenant: " + tenantDomain, e);
+            handleExceptionWithCode("Failed to get all Shared Scope Keys for tenant: " + tenantDomain, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return scopeKeys;
     }

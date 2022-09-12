@@ -1670,7 +1670,7 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
+    public Set<Scope> getScopes(String resourceConfigsJSON) {
         Set<Scope> scopeSet = new LinkedHashSet<>();
         Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(resourceConfigsJSON);
         if (document.components != null && document.components.securitySchemes != null) {

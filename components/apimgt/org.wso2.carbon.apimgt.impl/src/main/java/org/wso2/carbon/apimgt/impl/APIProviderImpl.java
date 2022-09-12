@@ -5246,9 +5246,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         } catch (GraphQLPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
-                throw new APIMgtResourceNotFoundException(e);
+                throw new APIManagementException(ExceptionCodes.API_NOT_FOUND);
             } else {
-                throw new APIManagementException("Error while saving graphql definition ", e);
+                throw new APIManagementException("Error while saving graphql definition ", e,
+                        ExceptionCodes.INTERNAL_ERROR);
             }
         }
     }

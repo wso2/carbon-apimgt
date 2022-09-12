@@ -443,38 +443,23 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPIGraphQLSchema(String apiId, String accept, String ifNoneMatch,
-                                        MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
-                apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,organization).getId();
-            } else {
-                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            }
-            String schemaContent = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
-            GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
-            dto.setSchemaDefinition(schemaContent);
-            dto.setName(apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    apiIdentifier.getApiName() + apiIdentifier.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
-            return Response.ok().entity(dto).build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
-                                log);
-            } else {
-                String errorMessage = "Error while retrieving schema of API: " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+                                        MessageContext messageContext) throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        //this will fail if user does not have access to the API or the API does not exist
+        APIIdentifier apiIdentifier;
+        if (apiProvider.checkAPIUUIDIsARevisionUUID(apiId) != null) {
+            apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,organization).getId();
+        } else {
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         }
-        return null;
+        String schemaContent = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
+        GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
+        dto.setSchemaDefinition(schemaContent);
+        dto.setName(apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                apiIdentifier.getApiName() + apiIdentifier.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
+        return Response.ok().entity(dto).build();
     }
 
     /**
@@ -488,7 +473,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response updateAPIGraphQLSchema(String apiId, String schemaDefinition, String ifMatch,
-                                           MessageContext messageContext) {
+                                           MessageContext messageContext) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -501,21 +486,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
             APIDTO modifiedAPI = APIMappingUtil.fromAPItoDTO(originalAPI);
             return Response.ok().entity(modifiedAPI.getOperations()).build();
-        } catch (APIManagementException | FaultGatewaysException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
-                                log);
-            } else {
-                String errorMessage = "Error while uploading schema of the API: " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while uploading schema of the API: " + apiId;
+            throw new APIManagementException(errorMessage, ExceptionCodes.INTERNAL_ERROR);
         }
-        return null;
     }
 
     @Override

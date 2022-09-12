@@ -1444,10 +1444,16 @@ public final class APIUtil {
         throw new APIManagementException(msg, t);
     }
 
+    public static void handleExceptionWithCode(String msg, ErrorHandler code) throws APIManagementException {
+
+        log.error(msg);
+        throw new APIManagementException(msg, code);
+    }
+
     public static void handleExceptionWithCode(String msg, Throwable t, ErrorHandler code) throws APIManagementException {
 
         log.error(msg, t);
-        throw new APIManagementException(msg, t);
+        throw new APIManagementException(msg, t, code);
     }
 
     public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {

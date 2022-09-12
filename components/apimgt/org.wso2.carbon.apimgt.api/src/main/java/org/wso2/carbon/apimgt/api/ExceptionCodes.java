@@ -134,6 +134,8 @@ public enum ExceptionCodes implements ErrorHandler {
     USER_MAPPING_RETRIEVAL_FAILED(900404, "User mapping retrieval failed", 404, "User mapping retrieval failed"),
     MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
     URI_PARSE_ERROR(900405, "Error constructing the URI", 500, "'%s'"),
+    INVALID_OPERATION_TYPE(900406, "Unsupported '%s' operation", 400, "The '%s' operation type '%s' is invalid"),
+    VERB_NOT_FOUND(900407, "Missing '%s' type", 400, "Missing '%s type in URI templates"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -293,7 +295,6 @@ public enum ExceptionCodes implements ErrorHandler {
             "GraphQL Schema cannot be empty or null"),
     UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900802, "Unsupported GraphQL Schema File Extension", 400,
             "Unsupported extension. Only supported extensions are .graphql, .txt and .sdl"),
-
 
     // Oauth related codes
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),

@@ -360,7 +360,8 @@ public class OAS2Parser extends APIDefinition {
                         if (StringUtils.isNotBlank(firstScope)) {
                             Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
                             if (scope == null) {
-                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                                        ExceptionCodes.SCOPE_NOT_FOUND);
                             }
                             template.setScope(scope);
                             template.setScopes(scope);
@@ -453,7 +454,7 @@ public class OAS2Parser extends APIDefinition {
      * @param swagger swagger object
      * @return Scope set
      */
-    private Set<Scope> getScopesFromExtensions(Swagger swagger) throws APIManagementException {
+    private Set<Scope> getScopesFromExtensions(Swagger swagger) {
         Set<Scope> scopeList = new LinkedHashSet<>();
         Map<String, Object> extensions = swagger.getVendorExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {

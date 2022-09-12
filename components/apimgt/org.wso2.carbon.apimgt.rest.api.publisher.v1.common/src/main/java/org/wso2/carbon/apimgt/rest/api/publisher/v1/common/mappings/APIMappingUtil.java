@@ -146,6 +146,7 @@ import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getDefaultWebsubSubscriptionConfiguration;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleExceptionWithCode;
 
 /**
  * This class used for mapping utility to API.
@@ -1669,36 +1670,52 @@ public class APIMappingUtil {
                 uriTemplates.add(template);
             } else {
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
-                    handleException(
-                            "The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                                    + "' is invalid");
+                    handleExceptionWithCode(String
+                                    .format("The GRAPHQL operation Type '%s' provided for operation '%s' is invalid",
+                                            httpVerb, uriTemplates),
+                            ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_TYPE,
+                                    "GraphQL", "GraphQL", httpVerb));
                 } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType())) {
-                    handleException("The WEBSUB operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is invalid");
+                    handleExceptionWithCode(String
+                                    .format("The WEBSUB operation Type '%s' provided for operation '%s' is invalid",
+                                            httpVerb, uriTemplates),
+                            ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_TYPE,
+                                    "WEBSUB", "WEBSUB", httpVerb));
                 } else if (APIConstants.API_TYPE_SSE.equals(model.getType())) {
-                    handleException("The SSE operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is invalid");
+                    handleExceptionWithCode(String
+                                    .format("The SSE operation Type '%s' provided for operation '%s' is invalid",
+                                            httpVerb, uriTemplates),
+                            ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_TYPE,
+                                    "SSE", "SSE", httpVerb));
                 } else if (APIConstants.API_TYPE_WS.equals(model.getType())) {
-                    handleException(
-                            "The WEBSOCKET operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                                    + "' is invalid");
+                    handleExceptionWithCode(String
+                                    .format("The WEBSOCKET operation Type '%s' provided for operation '%s' is invalid",
+                                            httpVerb, uriTemplates),
+                            ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_TYPE,
+                                    "WEBSOCKET", "WEBSOCKET", httpVerb));
                 } else {
-                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                            + "' is invalid");
+                    handleExceptionWithCode(String
+                                    .format("The HTTP operation Type '%s' provided for operation '%s' is invalid",
+                                            httpVerb, uriTemplates),
+                            ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_TYPE,
+                                    "HTTP", "HTTP", httpVerb));
                 }
             }
 
             if (!isHttpVerbDefined) {
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
-                    handleException("Operation '" + uriTempVal + "' has global parameters without " +
-                            "Operation Type");
+                    handleExceptionWithCode("Operation '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type", ExceptionCodes.from(ExceptionCodes.VERB_NOT_FOUND,
+                            "operation", "operation"));
                 } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType()) ||
                         APIConstants.API_TYPE_SSE.equals(model.getType())) {
-                    handleException("Topic '" + uriTempVal + "' has global parameters without " +
-                            "Operation Type");
+                    handleExceptionWithCode("Topic '" + uriTempVal + "' has global parameters without " +
+                            "topic Type", ExceptionCodes.from(ExceptionCodes.VERB_NOT_FOUND,
+                            "topic", "topic"));
                 } else {
-                    handleException("Resource '" + uriTempVal + "' has global parameters without " +
-                            "HTTP methods");
+                    handleExceptionWithCode("Resource '" + uriTempVal + "' has global parameters without " +
+                            "HTTP methods", ExceptionCodes.from(ExceptionCodes.VERB_NOT_FOUND,
+                            "method", "method"));
                 }
             }
         }

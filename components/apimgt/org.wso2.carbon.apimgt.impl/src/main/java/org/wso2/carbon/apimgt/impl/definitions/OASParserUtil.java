@@ -201,7 +201,8 @@ public class OASParserUtil {
         try {
             rootNode = mapper.readTree(apiDefinition.getBytes());
         } catch (IOException e) {
-            throw new APIManagementException("Error occurred while parsing OAS definition", e);
+            throw new APIManagementException("Error occurred while parsing OAS definition", e,
+                    ExceptionCodes.OPENAPI_PARSE_EXCEPTION);
         }
         ObjectNode node = (ObjectNode) rootNode;
         JsonNode openapi = node.get("openapi");
@@ -213,7 +214,8 @@ public class OASParserUtil {
             return SwaggerVersion.SWAGGER;
         }
 
-        throw new APIManagementException("Invalid OAS definition provided.");
+        throw new APIManagementException("Invalid OAS definition provided.",
+                ExceptionCodes.MALFORMED_OPENAPI_DEFINITON);
     }
 
     public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
@@ -1146,7 +1148,8 @@ public class OASParserUtil {
             if (StringUtils.isNotBlank(scopeName)) {
                 Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
                 if (scope == null) {
-                    throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                    throw new APIManagementException("Resource Scope '" + scopeName + "' not found.",
+                            ExceptionCodes.SCOPE_NOT_FOUND);
                 }
                 template.setScopes(scope);
             }

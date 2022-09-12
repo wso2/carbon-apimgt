@@ -265,7 +265,8 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             definition = apiPersistenceInstance.getOASDefinition(new Organization(organization), apiId);
         } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
+            throw new APIManagementException("Error while retrieving OAS definition from the persistence location", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return definition;
     }
@@ -277,7 +278,8 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             definition = apiPersistenceInstance.getAsyncDefinition(new Organization(organization), apiId);
         } catch (AsyncSpecPersistenceException e) {
-            throw new APIManagementException("Error while retrieving Async definition from the persistance location", e);
+            throw new APIManagementException("Error while retrieving Async definition from the persistence location", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return definition;
     }

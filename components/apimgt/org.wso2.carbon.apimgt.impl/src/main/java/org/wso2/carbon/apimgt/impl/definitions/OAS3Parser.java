@@ -984,7 +984,7 @@ public class OAS3Parser extends APIDefinition {
      * @return Scope set
      * @throws APIManagementException if an error occurred
      */
-    private Set<Scope> getScopesFromExtensions(OpenAPI openAPI) throws APIManagementException {
+    private Set<Scope> getScopesFromExtensions(OpenAPI openAPI) {
         Set<Scope> scopeList = new LinkedHashSet<>();
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
