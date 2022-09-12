@@ -562,6 +562,11 @@ public enum ExceptionCodes implements ErrorHandler {
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
     INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false),
 
+    // audit related codes
+
+    AUDIT_SEND_FAILED(904200, "Error sending audit data", 500, "Sending audit data failed. Response code: '%s'"),
+    AUDIT_RETRIEVE_FAILED(904201, "Error retrieving audit data", 500, "Error retrieving audit data"),
+
     // transport related codes
     UNSUPPORTED_TRANSPORT_TYPE(904100, "Unsupported transport type", 400, "Transport type '%s' is not supported"),
 

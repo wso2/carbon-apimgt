@@ -100,6 +100,7 @@ public class ApisApiServiceImplUtils {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImplUtils.class);
     private static final String HTTP_STATUS_LOG = "HTTP status ";
+    private static final String AUDIT_ERROR = "Error while parsing the audit response";
 
     /**
      * @param content  Comment content
@@ -146,17 +147,20 @@ public class ApisApiServiceImplUtils {
     /**
      * @param api API
      * @return JSONObject with arns
-     * @throws ParseException     when JSON parsing fails
-     * @throws CryptoException    when encrypting secrets fail
      * @throws SdkClientException if AWSLambda SDK throws an error
      */
-    public static JSONObject getAmazonResourceNames(API api)
-            throws ParseException, CryptoException, SdkClientException {
+    public static JSONObject getAmazonResourceNames(API api) throws SdkClientException, APIManagementException {
         JSONObject arns = new JSONObject();
         String endpointConfigString = api.getEndpointConfig();
         if (StringUtils.isNotEmpty(endpointConfigString)) {
             JSONParser jsonParser = new JSONParser();
-            JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
+            JSONObject endpointConfig;
+            try {
+                endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
+            } catch (ParseException e) {
+                throw new APIManagementException("Error while parsing endpoint config",
+                        ExceptionCodes.JSON_PARSE_ERROR);
+            }
             if (endpointConfig != null
                     && endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY)
                     && endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)
@@ -170,20 +174,25 @@ public class ApisApiServiceImplUtils {
                 String roleArn = (String) endpointConfig.get(APIConstants.AMZN_ROLE_ARN);
                 String roleSessionName = (String) endpointConfig.get(APIConstants.AMZN_ROLE_SESSION_NAME);
                 String roleRegion = (String) endpointConfig.get(APIConstants.AMZN_ROLE_REGION);
-                AWSLambda awsLambdaClient = getAWSLambdaClient(accessKey, secretKey, region,
-                        roleArn, roleSessionName, roleRegion);
-                if (awsLambdaClient == null) {
-                    return (JSONObject) Collections.emptyMap();
+                try {
+                    AWSLambda awsLambdaClient = getAWSLambdaClient(accessKey, secretKey, region,
+                            roleArn, roleSessionName, roleRegion);
+                    if (awsLambdaClient == null) {
+                        return (JSONObject) Collections.emptyMap();
+                    }
+                    ListFunctionsResult listFunctionsResult = awsLambdaClient.listFunctions();
+                    List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
+                    arns.put("count", functionConfigurations.size());
+                    JSONArray list = new JSONArray();
+                    for (FunctionConfiguration functionConfiguration : functionConfigurations) {
+                        list.put(functionConfiguration.getFunctionArn());
+                    }
+                    arns.put("list", list);
+                    return arns;
+                } catch (CryptoException e) {
+                    throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.ENDPOINT_CRYPTO_ERROR,
+                            "Error while decrypting AWS Lambda secret key"));
                 }
-                ListFunctionsResult listFunctionsResult = awsLambdaClient.listFunctions();
-                List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
-                arns.put("count", functionConfigurations.size());
-                JSONArray list = new JSONArray();
-                for (FunctionConfiguration functionConfiguration : functionConfigurations) {
-                    list.put(functionConfiguration.getFunctionArn());
-                }
-                arns.put("list", list);
-                return arns;
             }
         }
         return (JSONObject) Collections.emptyMap();
@@ -334,11 +343,10 @@ public class ApisApiServiceImplUtils {
      * @return JSONObject containing audit response
      * @throws APIManagementException when there's an unexpected response
      * @throws IOException            when http client fails
-     * @throws ParseException         when createAuditApi fails
      */
     public static JSONObject getAuditReport(API api, JSONObject securityAuditPropertyObject,
                                             String apiDefinition, String organization)
-            throws APIManagementException, IOException, ParseException {
+            throws APIManagementException {
         boolean isDebugEnabled = log.isDebugEnabled();
         APIIdentifier apiIdentifier = api.getId();
         String apiToken = (String) securityAuditPropertyObject.get("apiToken");
@@ -356,12 +364,12 @@ public class ApisApiServiceImplUtils {
             auditUuid = createAuditApi(collectionId, apiToken, apiIdentifier, apiDefinition, baseUrl,
                     isDebugEnabled, organization);
         }
-
         String getUrl = baseUrl + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
-        URL getReportUrl = new URL(getUrl);
 
-        try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil
-                .getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
+        try {
+            URL getReportUrl = new URL(getUrl);
+            CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil
+                    .getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol());
             HttpGet httpGet = new HttpGet(getUrl);
             // Set the header properties of the request
             httpGet.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
@@ -398,6 +406,10 @@ public class ApisApiServiceImplUtils {
                     return output;
                 }
             }
+        } catch (IOException e) {
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.INTERNAL_ERROR);
+        } catch (ParseException e) {
+            throw new APIManagementException(AUDIT_ERROR, ExceptionCodes.JSON_PARSE_ERROR);
         }
         return (JSONObject) Collections.emptyMap();
     }
@@ -410,42 +422,48 @@ public class ApisApiServiceImplUtils {
      * @param auditUuid      Respective UUID of API in Security Audit
      * @param baseUrl        Base URL to communicate with Security Audit
      * @param isDebugEnabled Boolean whether debug is enabled
-     * @throws IOException            In the event of any problems with the request
      * @throws APIManagementException In the event of unexpected response
      */
     private static void updateAuditApi(String apiDefinition, String apiToken, String auditUuid, String baseUrl,
                                        boolean isDebugEnabled)
-            throws IOException, APIManagementException {
+            throws APIManagementException {
         // Set the property to be attached in the body of the request
         // Attach API Definition to property called specfile to be sent in the request
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes(StandardCharsets.UTF_8)));
         // Logic for HTTP Request
         String putUrl = baseUrl + "/" + auditUuid;
-        URL updateApiUrl = new URL(putUrl);
-        try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
-                .getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
-            HttpPut httpPut = new HttpPut(putUrl);
-            // Set the header properties of the request
-            httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
-            httpPut.setHeader(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
-            httpPut.setEntity(new StringEntity(jsonBody.toJSONString()));
-            // Code block for processing the response
-            try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
-                if (isDebugEnabled) {
-                    log.debug(HTTP_STATUS_LOG + response.getStatusLine().getStatusCode());
+        try {
+            URL updateApiUrl = new URL(putUrl);
+            try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
+                    .getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
+                HttpPut httpPut = new HttpPut(putUrl);
+                // Set the header properties of the request
+                httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+                httpPut.setHeader(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
+                httpPut.setEntity(new StringEntity(jsonBody.toJSONString()));
+                // Code block for processing the response
+                try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+                    if (isDebugEnabled) {
+                        log.debug(HTTP_STATUS_LOG + response.getStatusLine().getStatusCode());
+                    }
+                    if ((response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
+                        throw new APIManagementException(
+                                "Error while sending data to the API Security Audit Feature. Found http status " +
+                                        response.getStatusLine(),
+                                ExceptionCodes.from(ExceptionCodes.AUDIT_SEND_FAILED,
+                                        String.valueOf(response.getStatusLine())));
+                    }
+                } finally {
+                    httpPut.releaseConnection();
                 }
-                if ((response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
-                    throw new APIManagementException(
-                            "Error while sending data to the API Security Audit Feature. Found http status " +
-                                    response.getStatusLine());
-                }
-            } finally {
-                httpPut.releaseConnection();
             }
+        } catch (IOException e) {
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.INTERNAL_ERROR);
         }
+
     }
 
     /**
@@ -459,29 +477,66 @@ public class ApisApiServiceImplUtils {
      * @param isDebugEnabled Boolean whether debug is enabled
      * @param organization   Organization
      * @return String UUID of API in Security Audit
-     * @throws IOException            In the event of any problems in the request
      * @throws APIManagementException In the event of unexpected response
-     * @throws ParseException         In the event of any parse errors from the response
      */
     private static String createAuditApi(String collectionId, String apiToken, APIIdentifier apiIdentifier,
                                          String apiDefinition, String baseUrl, boolean isDebugEnabled, String organization)
-            throws IOException, APIManagementException, ParseException {
+            throws APIManagementException {
         HttpURLConnection httpConn;
         OutputStream outputStream;
-        PrintWriter writer;
         String auditUuid = null;
-        URL url = new URL(baseUrl);
-        httpConn = (HttpURLConnection) url.openConnection();
-        httpConn.setUseCaches(false);
-        httpConn.setDoOutput(true); // indicates POST method
-        httpConn.setDoInput(true);
-        httpConn.setRequestProperty(APIConstants.HEADER_CONTENT_TYPE,
-                APIConstants.MULTIPART_CONTENT_TYPE + APIConstants.MULTIPART_FORM_BOUNDARY);
-        httpConn.setRequestProperty(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-        httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
-        httpConn.setRequestProperty(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
-        outputStream = httpConn.getOutputStream();
-        writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8), true);
+        try {
+            URL url = new URL(baseUrl);
+            httpConn = (HttpURLConnection) url.openConnection();
+            httpConn.setUseCaches(false);
+            httpConn.setDoOutput(true); // indicates POST method
+            httpConn.setDoInput(true);
+            httpConn.setRequestProperty(APIConstants.HEADER_CONTENT_TYPE,
+                    APIConstants.MULTIPART_CONTENT_TYPE + APIConstants.MULTIPART_FORM_BOUNDARY);
+            httpConn.setRequestProperty(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
+            httpConn.setRequestProperty(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
+            outputStream = httpConn.getOutputStream();
+            writeAuditResponse(outputStream, apiIdentifier, apiDefinition, collectionId);
+            // Checks server's status code first
+            int status = httpConn.getResponseCode();
+            if (status == HttpURLConnection.HTTP_OK) {
+                if (isDebugEnabled) {
+                    log.debug(HTTP_STATUS_LOG + status);
+                }
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(httpConn.getInputStream(), StandardCharsets.UTF_8));
+                String inputLine;
+                StringBuilder responseString = new StringBuilder();
+
+                while ((inputLine = reader.readLine()) != null) {
+                    responseString.append(inputLine);
+                }
+                reader.close();
+                httpConn.disconnect();
+                JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+                auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
+                ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid, organization);
+            } else {
+                handleAuditCreateError(httpConn);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.INTERNAL_ERROR);
+        } catch (ParseException e) {
+            throw new APIManagementException(AUDIT_ERROR, ExceptionCodes.JSON_PARSE_ERROR);
+        }
+        return auditUuid;
+    }
+
+    /**
+     * @param outputStream  HTTP output stream
+     * @param apiIdentifier API Identifier object
+     * @param apiDefinition API Definition of API
+     * @param collectionId  Collection ID in which the Definition should be sent to
+     */
+    private static void writeAuditResponse(OutputStream outputStream, APIIdentifier apiIdentifier,
+                                           String apiDefinition, String collectionId) {
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8), true);
         // Name property
         writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
                 .append("Content-Disposition: form-data; name=\"name\"")
@@ -505,14 +560,13 @@ public class ApisApiServiceImplUtils {
         writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY + "--")
                 .append(APIConstants.MULTIPART_LINE_FEED);
         writer.close();
-        // Checks server's status code first
-        int status = httpConn.getResponseCode();
-        if (status == HttpURLConnection.HTTP_OK) {
-            if (isDebugEnabled) {
-                log.debug(HTTP_STATUS_LOG + status);
-            }
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(httpConn.getInputStream(), StandardCharsets.UTF_8));
+    }
+
+    private static void handleAuditCreateError(HttpURLConnection httpConn)
+            throws IOException, ParseException, APIManagementException {
+        if (httpConn.getErrorStream() != null) {
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(httpConn.getErrorStream(), StandardCharsets.UTF_8));
             String inputLine;
             StringBuilder responseString = new StringBuilder();
 
@@ -522,35 +576,20 @@ public class ApisApiServiceImplUtils {
             reader.close();
             httpConn.disconnect();
             JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
-            auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
-            ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid, organization);
-        } else {
-            if (httpConn.getErrorStream() != null) {
-                BufferedReader reader =
-                        new BufferedReader(new InputStreamReader(httpConn.getErrorStream(), StandardCharsets.UTF_8));
-                String inputLine;
-                StringBuilder responseString = new StringBuilder();
-
-                while ((inputLine = reader.readLine()) != null) {
-                    responseString.append(inputLine);
-                }
-                reader.close();
-                httpConn.disconnect();
-                JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
-                String errorMessage = httpConn.getResponseMessage();
-                if (responseJson.containsKey("message")) {
-                    errorMessage = (String) responseJson.get("message");
-                }
-                throw new APIManagementException(
-                        "Error while retrieving data for the API Security Audit Report. Found http status: " +
-                                httpConn.getResponseCode() + " - " + errorMessage);
-            } else {
-                throw new APIManagementException(
-                        "Error while retrieving data for the API Security Audit Report. Found http status: " +
-                                httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
+            String errorMessage = httpConn.getResponseMessage();
+            if (responseJson.containsKey("message")) {
+                errorMessage = (String) responseJson.get("message");
             }
+            throw new APIManagementException(
+                    "Error while retrieving data for the API Security Audit Report. Found http status: " +
+                            httpConn.getResponseCode() + " - " + errorMessage,
+                    ExceptionCodes.AUDIT_RETRIEVE_FAILED);
+        } else {
+            throw new APIManagementException(
+                    "Error while retrieving data for the API Security Audit Report. Found http status: " +
+                            httpConn.getResponseCode() + " - " + httpConn.getResponseMessage(),
+                    ExceptionCodes.AUDIT_RETRIEVE_FAILED);
         }
-        return auditUuid;
     }
 
     /**

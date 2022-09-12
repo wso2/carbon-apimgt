@@ -8158,7 +8158,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get the UUID for API : ", e);
+            handleExceptionWithCode("Failed to get the UUID for API : ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return uuid;
     }
@@ -14878,7 +14878,7 @@ public class ApiMgtDAO {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            handleException("Error while adding new audit api id: ", e);
+            handleExceptionWithCode("Error while adding new audit api id: ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -14903,7 +14903,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while getting audit api id: ", e);
+            handleExceptionWithCode("Error while getting audit api id: ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return auditUuid;
     }
@@ -15287,7 +15287,7 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to retrieve API categories for organization " + organization,
-                    e, ExceptionCodes.from(ExceptionCodes.ERROR_RETRIEVING_CATEGORY, organization));
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return categoriesList;
     }

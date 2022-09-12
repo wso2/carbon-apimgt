@@ -493,7 +493,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response updateAPI(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
+    public Response updateAPI(String apiId, APIDTO body, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
         String[] tokenScopes =
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
@@ -524,27 +525,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIOperationsPerLC(originalAPI.getStatus());
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while updating the API : " + apiId + " - " + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (CryptoException e) {
-            String errorMessage = "Error while encrypting the secret key of API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (ParseException e) {
-            String errorMessage = "Error while parsing endpoint config of API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+
         return null;
     }
 
@@ -585,46 +570,26 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param messageContext message context
      * @return Response with all the types and fields found within the schema definition
      */
-    @Override public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) {
+    @Override public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext)
+            throws APIManagementException {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIIdentifier apiIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
-                apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,organization).getId();
-            } else {
-                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            }
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String schemaContent = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
-                List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
-                GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
-                        GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
-                return Response.ok().entity(graphQLSchemaTypeListDTO).build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving types and fields of API : " + apiId, e, log);
-            } else {
-                String msg = "Error while retrieving types and fields of the schema of API " + apiId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        CommonUtils.validateAPIExistence(apiId);
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        CommonUtils.checkAPIType(APIConstants.GRAPHQL_API, api.getType());
+        String schemaContent = apiProvider.getGraphqlSchemaDefinition(apiId, organization);
+        List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
+        GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
+                GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
+        return Response.ok().entity(graphQLSchemaTypeListDTO).build();
     }
 
     // AWS Lambda: rest api operation to get ARNs
     @Override
-    public Response getAmazonResourceNamesOfAPI(String apiId, MessageContext messageContext) {
+    public Response getAmazonResourceNamesOfAPI(String apiId, MessageContext messageContext)
+            throws APIManagementException {
         JSONObject arns = new JSONObject();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -644,15 +609,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.error("Unable to access Lambda functions under the given access method of API : " + apiId, e);
                 return Response.serverError().entity(arns.toString()).build();
             }
-        } catch (ParseException e) {
-            String errorMessage = "Error while parsing endpoint config of the API: " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (CryptoException e) {
-            String errorMessage = "Error while decrypting the secret key of the API: " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving the API: " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -665,34 +621,25 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response object of Security Audit
      */
     @Override
-    public Response getAuditReportOfAPI(String apiId, String accept, MessageContext messageContext) {
-        try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
-            // Get configuration file, retrieve API token and collection id
-            JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
-            JSONObject responseJson = ApisApiServiceImplUtils
-                    .getAuditReport(api, securityAuditPropertyObject, apiDefinition, organization);
-            if (responseJson != null) {
-                AuditReportDTO auditReportDTO = new AuditReportDTO();
-                auditReportDTO.setReport((String) responseJson.get("decodedReport"));
-                auditReportDTO.setGrade((String) responseJson.get("grade"));
-                auditReportDTO.setNumErrors((Integer) responseJson.get("numErrors"));
-                auditReportDTO.setExternalApiId((String) responseJson.get("auditUuid"));
-                return Response.ok().entity(auditReportDTO).build();
-            }
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while getting "
-                    + "HttpClient instance", e, log);
-        } catch (ParseException e) {
-            RestApiUtil.handleInternalServerError("API Definition String "
-                    + "could not be parsed into JSONObject.", e, log);
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while Auditing API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+    public Response getAuditReportOfAPI(String apiId, String accept, MessageContext messageContext)
+            throws APIManagementException {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
+        // Get configuration file, retrieve API token and collection id
+        JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
+        JSONObject responseJson = ApisApiServiceImplUtils
+                .getAuditReport(api, securityAuditPropertyObject, apiDefinition, organization);
+        if (responseJson != null) {
+            AuditReportDTO auditReportDTO = new AuditReportDTO();
+            auditReportDTO.setReport((String) responseJson.get("decodedReport"));
+            auditReportDTO.setGrade((String) responseJson.get("grade"));
+            auditReportDTO.setNumErrors((Integer) responseJson.get("numErrors"));
+            auditReportDTO.setExternalApiId((String) responseJson.get("auditUuid"));
+            return Response.ok().entity(auditReportDTO).build();
         }
         return null;
     }

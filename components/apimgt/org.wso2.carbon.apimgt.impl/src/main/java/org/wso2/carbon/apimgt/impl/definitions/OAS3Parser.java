@@ -404,7 +404,8 @@ public class OAS3Parser extends APIDefinition {
                             if (StringUtils.isNoneBlank(firstScope)) {
                                 Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
                                 if (scope == null) {
-                                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                    throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                                            ExceptionCodes.SCOPE_NOT_FOUND);
                                 }
                                 template.setScope(scope);
                                 template.setScopes(scope);
@@ -418,7 +419,8 @@ public class OAS3Parser extends APIDefinition {
                             String firstScope = opScopes.get(0);
                             Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
                             if (scope == null) {
-                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                                        ExceptionCodes.SCOPE_NOT_FOUND);
                             }
                             template.setScope(scope);
                             template.setScopes(scope);
@@ -608,7 +610,7 @@ public class OAS3Parser extends APIDefinition {
      * @return API definition in string format
      * @throws APIManagementException if error occurred when generating API Definition
      */
-    private String generateAPIDefinition(SwaggerData swaggerData, OpenAPI openAPI) throws APIManagementException {
+    private String generateAPIDefinition(SwaggerData swaggerData, OpenAPI openAPI) {
         Set<SwaggerData.Resource> copy = new HashSet<>(swaggerData.getResources());
 
         Iterator<Map.Entry<String, PathItem>> itr = openAPI.getPaths().entrySet().iterator();

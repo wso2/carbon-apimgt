@@ -27,6 +27,7 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -1631,7 +1632,8 @@ public class AsyncApiParser extends APIDefinition {
                 String firstScope = opScopes.get(0);
                 Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
                 if (scope == null) {
-                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                    throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                            ExceptionCodes.SCOPE_NOT_FOUND);
                 }
                 template.setScope(scope);
                 template.setScopes(scope);
@@ -1639,7 +1641,8 @@ public class AsyncApiParser extends APIDefinition {
                 for (String scopeName : opScopes) {
                     Scope scope = APIUtil.findScopeByKey(scopes, scopeName);
                     if (scope == null) {
-                        throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                        throw new APIManagementException("Resource Scope '" + scopeName + "' not found.",
+                                ExceptionCodes.SCOPE_NOT_FOUND);
                     }
                     template.setScopes(scope);
                 }

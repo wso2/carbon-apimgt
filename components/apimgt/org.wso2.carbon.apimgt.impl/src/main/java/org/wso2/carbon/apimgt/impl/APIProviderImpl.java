@@ -2698,7 +2698,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.saveOASDefinition(new Organization(organization), apiId, jsonText);
         } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while persisting OAS definition ", e);
+            throw new APIManagementException("Error while persisting OAS definition ", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -4634,7 +4635,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
         } catch (AsyncSpecPersistenceException e) {
-            throw new APIManagementException("Error while persisting Async API definition ", e);
+            throw new APIManagementException("Error while persisting Async API definition ", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -5030,11 +5032,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
         } catch (APIPersistenceException e) {
             String msg = "Failed to get API with uuid " + uuid;
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 

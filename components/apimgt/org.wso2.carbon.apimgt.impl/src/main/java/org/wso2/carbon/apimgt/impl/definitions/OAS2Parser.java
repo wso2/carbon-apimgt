@@ -1067,10 +1067,10 @@ public class OAS2Parser extends APIDefinition {
         mapper.addMixIn(Response.class, ResponseSchemaMixin.class);
         try {
             //this is to remove responesObject from swagger content
-            String modifiedSwaggerString = removeResponsesObject(swaggerObj, new String(mapper.writeValueAsBytes(swaggerObj)));
-            return modifiedSwaggerString;
+            return removeResponsesObject(swaggerObj, new String(mapper.writeValueAsBytes(swaggerObj)));
         } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while generating Swagger json from model", e);
+            throw new APIManagementException("Error while generating Swagger json from model", e,
+                    ExceptionCodes.JSON_PARSE_ERROR);
         }
     }
 

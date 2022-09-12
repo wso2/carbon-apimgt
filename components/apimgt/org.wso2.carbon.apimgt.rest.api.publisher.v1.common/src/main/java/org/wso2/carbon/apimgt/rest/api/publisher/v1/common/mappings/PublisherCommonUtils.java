@@ -122,7 +122,7 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
-            throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
+            throws APIManagementException, FaultGatewaysException {
 
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
@@ -146,7 +146,12 @@ public class PublisherCommonUtils {
         String oldEndpointConfigString = originalAPI.getEndpointConfig();
         JSONObject oldEndpointConfig = null;
         if (StringUtils.isNotBlank(oldEndpointConfigString)) {
-            oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+            try {
+                oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+            } catch (ParseException e) {
+                throw new APIManagementException("Error while parsing endpoint config",
+                        ExceptionCodes.JSON_PARSE_ERROR);
+            }
         }
         String oldProductionApiSecret = null;
         String oldSandboxApiSecret = null;
@@ -192,16 +197,27 @@ public class PublisherCommonUtils {
                 String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                 if (!StringUtils.isEmpty(secretKey)) {
                     if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
-                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                        apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                        try {
+                            String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                            apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                        } catch (CryptoException e) {
+                            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.ENDPOINT_CRYPTO_ERROR,
+                                    "Error while encrypting AWS secret key"));
+                        }
+
                     } else {
-                        JSONParser jsonParser = new JSONParser();
-                        JSONObject originalEndpointConfig = (JSONObject) jsonParser
-                                .parse(originalAPI.getEndpointConfig());
-                        String encryptedSecretKey = (String) originalEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                        apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                        try {
+                            JSONParser jsonParser = new JSONParser();
+                            JSONObject originalEndpointConfig = (JSONObject) jsonParser
+                                    .parse(originalAPI.getEndpointConfig());
+                            String encryptedSecretKey = (String) originalEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                            apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                        } catch (ParseException e) {
+                            throw new APIManagementException("Error while parsing endpoint config",
+                                    ExceptionCodes.JSON_PARSE_ERROR);
+                        }
                     }
                 }
             }
