@@ -681,6 +681,8 @@ public class InboundWebsocketProcessorUtil {
                 inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
                         WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, true);
+            } else {
+                log.debug("Authentication not supported for Opaque tokens");
             }
         } catch (APIManagementException e) {
             log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
