@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.restapi;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -78,8 +77,8 @@ public class CommonUtils {
 
         StringBuilder sb = new StringBuilder();
         String endpointType = Constants.TypeEnum.HTTP.value().toLowerCase();
-        if (StringUtils.isNotEmpty(protocol) && (Constants.TypeEnum.SSE.equals(protocol.toUpperCase())
-                || Constants.TypeEnum.WS.equals(protocol.toUpperCase()))) {
+        if (StringUtils.isNotEmpty(protocol) && (Constants.TypeEnum.SSE.toString().equals(protocol.toUpperCase())
+                || Constants.TypeEnum.WS.toString().equals(protocol.toUpperCase()))) {
             endpointType = "ws";
         }
         if (StringUtils.isNotEmpty(serviceUrl)) {
@@ -89,7 +88,7 @@ public class CommonUtils {
                     .append("\"production_endpoints\": {\"url\": \"")
                     .append(serviceUrl)
                     .append("\"}}");
-        } // TODO Need to check on the endpoint security
+        }
         return sb.toString();
     }
 

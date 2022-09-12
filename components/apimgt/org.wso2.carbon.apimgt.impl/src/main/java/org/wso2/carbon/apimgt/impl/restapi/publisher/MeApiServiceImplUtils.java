@@ -43,7 +43,8 @@ public class MeApiServiceImplUtils {
     public static boolean checkUserInRole(String roleId, String userName) throws APIManagementException {
         boolean isUserInRole = false;
         String roleName = new String(Base64.getUrlDecoder().decode(roleId));
-        log.debug("Checking whether user :" + userName + " has role : " + roleName);
+        log.debug("Checking whether user :" + userName.replaceAll("[\n\r\t]", "_") + " has role : "
+                + roleName.replaceAll("[\n\r\t]", "_"));
         try {
             isUserInRole = APIUtil.checkIfUserInRole(userName, roleName);
             return isUserInRole;

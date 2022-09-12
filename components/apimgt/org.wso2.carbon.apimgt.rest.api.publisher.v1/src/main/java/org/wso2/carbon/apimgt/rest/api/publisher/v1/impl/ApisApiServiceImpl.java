@@ -3330,7 +3330,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String fileName = null;
 
         OpenAPIDefinitionValidationResponseDTO responseDTO;
-        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        APIDefinitionValidationResponse validationResponse;
         if (fileDetail != null) {
             fileName = fileDetail.getContentDisposition().getFilename();
         }

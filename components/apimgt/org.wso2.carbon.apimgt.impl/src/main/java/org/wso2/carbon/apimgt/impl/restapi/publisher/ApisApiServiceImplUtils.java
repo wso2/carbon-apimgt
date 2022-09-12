@@ -92,7 +92,6 @@ import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
-import static org.wso2.carbon.apimgt.impl.restapi.Constants.CHARSET;
 
 public class ApisApiServiceImplUtils {
 
@@ -563,7 +562,13 @@ public class ApisApiServiceImplUtils {
      */
     public static APIEndpointValidationDTO sendHttpHEADRequest(String urlVal)
             throws APIManagementException, MalformedURLException {
-        URL url = new URL(urlVal);
+        URL url;
+        try {
+            url = new URL(urlVal);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("URL is malformed",
+                    e, ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR, "Malformed url"));
+        }
         if (url.getProtocol().matches("https")) {
             ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
             String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
@@ -622,11 +627,11 @@ public class ApisApiServiceImplUtils {
                         validationResponse =
                                 OASParserUtil.extractAndValidateOpenAPIArchive(inputStream, returnContent);
                     } else {
-                        String openAPIContent = IOUtils.toString(inputStream, CHARSET);
+                        String openAPIContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
                         validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
                     }
                 } else {
-                    String openAPIContent = IOUtils.toString(inputStream, CHARSET);
+                    String openAPIContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
                     validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
                 }
             } catch (IOException e) {
