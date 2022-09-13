@@ -258,6 +258,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     /**
      * Check whether user have any of create, publish or subscribe permissions
      *
+     * The legacy permission validation (publish, subscribe, create) is skipped when the authentication is
+     * OAuth (Opaque or JWT). There's already a scope validation engaged there so no need of another permission check.
+     *
      * @param username username
      * @return true if user has any of create, publish or subscribe permissions
      */
