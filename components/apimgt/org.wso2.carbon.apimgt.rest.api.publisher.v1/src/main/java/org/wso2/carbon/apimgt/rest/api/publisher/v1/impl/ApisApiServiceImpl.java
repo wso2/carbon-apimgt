@@ -4151,8 +4151,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (service != null) {
             isServiceAPI = true;
         }
-        validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
-                true, isServiceAPI);
+        try {
+            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
+                    true, isServiceAPI);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+        }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
                 (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
