@@ -1001,38 +1001,20 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response deleteAPIDocument(String apiId, String documentId, String ifMatch,
-                                                       MessageContext messageContext) {
+                                                       MessageContext messageContext) throws APIManagementException {
         Documentation documentation;
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            //validate if api exists
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            //this will fail if user does not have access to the API or the API does not exist
-            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
-            documentation = apiProvider.getDocumentation(apiId, documentId, organization);
-            if (documentation == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-            }
-            apiProvider.removeDocumentation(apiId, documentId, organization);
-            return Response.ok().build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while deleting : " + documentId + " of API " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
+        //validate if api exists
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+
+        documentation = apiProvider.getDocumentation(apiId, documentId, organization);
+        apiProvider.removeDocumentation(apiId, documentId, organization);
+        return Response.ok().build();
     }
 
     @Override

@@ -1924,7 +1924,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.deleteDocumentation(new Organization(organization), apiId, docId);
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while deleting the document " + docId);
+            throw new APIManagementException("Error while deleting the document " + docId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
 
     }
