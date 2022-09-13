@@ -829,8 +829,8 @@ public class ApisApiServiceImplUtils {
 
         if (environments.get(environment) == null) {
             final String errorMessage = "Gateway environment not found: " + environment;
-            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
-                    ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("name '%s'", environment)));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(
+                    ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT, String.format("name '%s'", environment)));
 
         }
         if (mandatoryVHOST && StringUtils.isEmpty(vhost)) {
