@@ -163,6 +163,18 @@
             <groupId>org.wso2.orbit.io.swagger.v3</groupId>
             <artifactId>swagger-parser</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -284,6 +296,9 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.analytics:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.atlassian.oai:swagger-request-validator-core:${org.wso2.orbit.atlassian.oai.version}</bundleDef>
+                                <bundleDef>io.swagger:swagger-core</bundleDef>
+                                <bundleDef>io.swagger:swagger-models</bundleDef>
+                                <bundleDef>io.swagger:swagger-annotations</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>
