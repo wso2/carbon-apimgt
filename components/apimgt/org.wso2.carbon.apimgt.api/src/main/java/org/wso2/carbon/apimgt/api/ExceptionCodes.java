@@ -54,6 +54,7 @@ public enum ExceptionCodes implements ErrorHandler {
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
     DOCUMENT_INVALID_SOURCE_TYPE(900319, "Invalid document source type", 500, "Source type of the document '%s' is invalid"),
+    UNSUPPORTED_DOC_EXTENSION(900367, "Document file type not supported", 400, "Unsupported extension type of document file"),
 
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
@@ -91,6 +92,8 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_USED_RESOURCES(900344,
             "Cannot remove the resource paths because they are used by one or more API Products",
             409, "Cannot update API: %s:%s, due to the resources to remove are used by one or more API Products"),
+    API_DELETE_API_PRODUCT_USED_RESOURCES(900344, API_PRODUCT_USED_RESOURCES.getErrorMessage(), 409,
+            "Cannot delete API since the resources to remove are used by one or more API Products"),
     API_CATEGORY_INVALID(
             900345, "The API category is invalid.", 400, " The API category is invalid for API: %s:%s"),
     INVALID_ADDITIONAL_PROPERTIES(900346, "Invalid additional properties", 400,
@@ -119,6 +122,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_RETRIEVING_CATEGORY(900362, "Cannot retrieve categories", 500, "Error while retrieving categories for organization '%s'"),
     PERSISTENCE_ERROR(900363, "Error occurred in registry transaction", 500, "'%s'"),
     NO_VIEW_UPDATE_PERMISSIONS(900365, "Insufficient permission to view or update the API", 403, "Insufficient permission to view or update the API"),
+    API_DELETE_FAILED_SUBSCRIPTIONS(900366, "Failed to delete the API", 409, "Cannot remove the API as active subscriptions exist"),
 
 
     //Lifecycle related codes
@@ -288,6 +292,7 @@ public enum ExceptionCodes implements ErrorHandler {
     CONTAIN_SPECIAL_CHARACTERS(900706, "contain invalid characters", 400,
             "%s property value of payload cannot contain invalid characters"),
     INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
+    INVALID_PARAMETERS_PROVIDED(900708, "Invalid parameter(s) provided", 400, "Bad Request. Mandatory parameters are invalid/missing"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
@@ -582,7 +587,8 @@ public enum ExceptionCodes implements ErrorHandler {
     ENCODE_CERT(904008, "Error occurred while encoding the certificate", 500, "'%s"),
     INTERNAL_SERVER_CERT(904009, "Internal server error", 500, "'%s'"),
     EXPIRED_CERT(904010, "Certificate expired", 400, "'%s'"),
-    CERT_ALREADY_EXIST(904011, "Certificate alias already exists", 409, "The alias '%s' already exists in the truststore");
+    CERT_ALREADY_EXIST(904011, "Certificate alias already exists", 409, "The alias '%s' already exists in the truststore"),
+    DECODE_CERT(904012, "Error occurred while decoding the certificate", 500, "'%s'");
 
     private final long errorCode;
     private final String errorMessage;

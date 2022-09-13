@@ -93,7 +93,8 @@ public class CertificateRestApiUtils {
                 return new ByteArrayInputStream(x509Certificate.getEncoded());
             }
         } catch (CertificateException e) {
-            throw new APIManagementException("Error while decoding the certificate", e);
+            throw new APIManagementException("Error while decoding the certificate", e,
+                    ExceptionCodes.from(ExceptionCodes.DECODE_CERT, e.getMessage()));
         }
         return null;
     }
@@ -285,7 +286,7 @@ public class CertificateRestApiUtils {
                         organization, alias));
             }
             String message = "Certificate for alias '" + alias + "' is not found.";
-            throw new APIMgtResourceNotFoundException(message);
+            throw new APIManagementException(message, ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
         }
         return clientCertificate;
     }

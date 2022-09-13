@@ -61,6 +61,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -590,6 +592,32 @@ public class ApisApiServiceImplUtils {
                             httpConn.getResponseCode() + " - " + httpConn.getResponseMessage(),
                     ExceptionCodes.AUDIT_RETRIEVE_FAILED);
         }
+    }
+
+    /**
+     * @param apiId        API UUID
+     * @param organization Tenant organization
+     * @throws APIManagementException when prerequisites for API delete are not met
+     */
+    public static void deleteAPI(String apiId, String organization) throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        //check if the API has subscriptions
+        //Todo : need to optimize this check. This method seems too costly to check if subscription exists
+        List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
+        if (apiUsages != null && !apiUsages.isEmpty()) {
+            throw new APIManagementException("Cannot remove the API "
+                    + apiId + " as active subscriptions exist", ExceptionCodes.API_DELETE_FAILED_SUBSCRIPTIONS);
+        }
+        List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
+
+        if (!usedProductResources.isEmpty()) {
+            throw new APIManagementException("Cannot remove the API because following resource paths " +
+                    usedProductResources.toString() + " are used by one or more API Products",
+                    ExceptionCodes.API_DELETE_API_PRODUCT_USED_RESOURCES);
+        }
+
+        // Delete the API
+        apiProvider.deleteAPI(apiId, organization);
     }
 
     /**

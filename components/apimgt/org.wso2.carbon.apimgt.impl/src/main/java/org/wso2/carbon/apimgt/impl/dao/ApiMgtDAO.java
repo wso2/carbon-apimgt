@@ -2620,7 +2620,8 @@ public class ApiMgtDAO {
             }
             return userApplicationUsages.values().toArray(new UserApplicationAPIUsage[userApplicationUsages.size()]);
         } catch (SQLException e) {
-            handleException("Failed to find API Usage for API with UUID :" + uuid, e);
+            handleExceptionWithCode("Failed to find API Usage for API with UUID :" + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
             return null;
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
@@ -7307,7 +7308,8 @@ public class ApiMgtDAO {
 
             setAssociatedAPIProductsURLMappings(uuid, uriTemplates);
         } catch (SQLException e) {
-            handleException("Failed to get URI Templates of API with UUID " + uuid, e);
+            handleExceptionWithCode("Failed to get URI Templates of API with UUID " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return uriTemplates;
     }
@@ -7981,7 +7983,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve the API Identifier details for UUID : " + uuid, e);
+            handleExceptionWithCode("Failed to retrieve the API Identifier details for UUID : " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return identifier;
     }

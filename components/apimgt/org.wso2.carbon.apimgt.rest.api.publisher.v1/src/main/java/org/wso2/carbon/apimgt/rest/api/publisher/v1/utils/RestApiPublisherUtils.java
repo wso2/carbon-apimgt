@@ -27,6 +27,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -76,7 +77,8 @@ public class RestApiPublisherUtils {
 
         boolean folderCreated = docFile.mkdirs();
         if (!folderCreated) {
-            RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, log);
+            throw new APIManagementException("Failed to add content to the document " + documentId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
 
         InputStream docInputStream = null;
@@ -101,7 +103,7 @@ public class RestApiPublisherUtils {
                             documentId, organization);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
-            RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
+            throw new APIManagementException("Unable to read the file from path ", e, ExceptionCodes.INTERNAL_ERROR);
         } finally {
             IOUtils.closeQuietly(docInputStream);
         }

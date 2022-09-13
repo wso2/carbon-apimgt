@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.EndpointCertificatesApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -645,108 +646,87 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIClientCertificateContentByAlias(String apiId, String alias,
-                                                               MessageContext messageContext) {
+    public Response getAPIClientCertificateContentByAlias(String apiId, String alias, MessageContext messageContext)
+            throws APIManagementException {
         String organization = null;
         String certFileName = alias + ".crt";
-        try {
-            organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
-            ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper, organization);
-            if (clientCertificateDTO != null) {
-                Object certificate = CertificateRestApiUtils
-                        .getDecodedCertificate(clientCertificateDTO.getCertificate());
-                Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
-                responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + certFileName + "\"");
-                responseBuilder.header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
-                return responseBuilder.build();
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while retrieving the client certificate with alias " + alias + " for the tenant "
-                            + organization, e, log);
+        organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+        ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
+                apiTypeWrapper, organization);
+        if (clientCertificateDTO != null) {
+            Object certificate = CertificateRestApiUtils
+                    .getDecodedCertificate(clientCertificateDTO.getCertificate());
+            Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
+            responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                    RestApiConstants.CONTENT_DISPOSITION_ATTACHMENT_FILENAME + "\"" + certFileName + "\"");
+            responseBuilder.header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
+            return responseBuilder.build();
         }
         return null;
     }
 
     @Override
-    public Response deleteAPIClientCertificateByAlias(String alias, String apiId,
-                                                           MessageContext messageContext) {
+    public Response deleteAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext)
+            throws APIManagementException {
         String organization = null;
-        try {
-            organization = RestApiUtil.getValidatedOrganization(messageContext);
-            //validate if api exists
-            CommonUtils.validateAPIExistence(apiId);
+        organization = RestApiUtil.getValidatedOrganization(messageContext);
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
 
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
-            apiTypeWrapper.setOrganization(organization);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+        apiTypeWrapper.setOrganization(organization);
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
-            ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper, organization);
-            int responseCode = apiProvider
-                    .deleteClientCertificate(RestApiCommonUtil.getLoggedInUsername(), apiTypeWrapper, alias);
-            if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
+        CertificateRestApiUtils.preValidateClientCertificate(alias, apiTypeWrapper, organization);
+        int responseCode = apiProvider
+                .deleteClientCertificate(RestApiCommonUtil.getLoggedInUsername(), apiTypeWrapper, alias);
+        if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
 
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("The client certificate which belongs to tenant : %s represented by the "
-                            + "alias : %s is deleted successfully", organization, alias));
-                }
-                return Response.ok().entity("The certificate for alias '" + alias + "' deleted successfully.").build();
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Failed to delete the client certificate which belongs to tenant : %s "
-                            + "represented by the alias : %s.", organization, alias));
-                }
-                RestApiUtil.handleInternalServerError(
-                        "Error while deleting the client certificate for alias '" + alias + "'.", log);
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("The client certificate which belongs to tenant : %s represented by the "
+                        + "alias : %s is deleted successfully", organization, alias));
             }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while deleting the client certificate with alias " + alias + " for the tenant "
-                            + organization, e, log);
+            return Response.ok().entity("The certificate for alias '" + alias + "' deleted successfully.").build();
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Failed to delete the client certificate which belongs to tenant : %s "
+                        + "represented by the alias : %s.", organization, alias));
+            }
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.DELETE_CERT, alias));
         }
-        return null;
     }
 
     @Override
-    public Response getAPIClientCertificateByAlias(String alias, String apiId,
-                                                        MessageContext messageContext) {
+    public Response getAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext)
+            throws APIManagementException {
         String organization = null;
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
-        try {
-            organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
-            ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper, organization);
-            CertificateInformationDTO certificateInformationDTO = certificateMgtUtils
-                    .getCertificateInfo(clientCertificateDTO.getCertificate());
-            if (certificateInformationDTO != null) {
-                CertificateInfoDTO certificateInfoDTO = CertificateMappingUtil
-                        .fromCertificateInformationToDTO(certificateInformationDTO);
-                return Response.ok().entity(certificateInfoDTO).build();
-            } else {
-                RestApiUtil.handleResourceNotFoundError("Certificate is empty for alias " + alias, log);
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while retrieving the client certificate with alias " + alias + " for the tenant "
-                            + organization, e, log);
+        organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+        ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
+                apiTypeWrapper, organization);
+        CertificateInformationDTO certificateInformationDTO = certificateMgtUtils
+                .getCertificateInfo(clientCertificateDTO.getCertificate());
+        if (certificateInformationDTO != null) {
+            CertificateInfoDTO certificateInfoDTO = CertificateMappingUtil
+                    .fromCertificateInformationToDTO(certificateInformationDTO);
+            return Response.ok().entity(certificateInfoDTO).build();
+        } else {
+            throw new APIManagementException("Certificate is empty for alias " + alias,
+                    ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
         }
-        return null;
     }
 
     @Override
     public Response updateAPIClientCertificateByAlias(String alias, String apiId,
                                                       InputStream certificateInputStream,
                                                       Attachment certificateDetail, String tier,
-                                                      MessageContext messageContext) {
+                                                      MessageContext messageContext) throws APIManagementException {
         try {
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
@@ -759,7 +739,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
             apiTypeWrapper.setOrganization(organization);
 
-            String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     apiTypeWrapper, organization);
@@ -785,79 +764,61 @@ public class ApisApiServiceImpl implements ApisApiService {
                 URI updatedCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + "?alias=" + alias);
 
                 return Response.ok(updatedCertUri).entity(clientCertMetadataDTO).build();
-            } else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
-                RestApiUtil.handleInternalServerError(
-                        "Error while updating the client certificate for the alias " + alias + " due to an internal "
-                                + "server error", log);
-            } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == responseCode) {
-                RestApiUtil.handleResourceNotFoundError("", log);
-            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
-                RestApiUtil.handleBadRequest(
-                        "Error while updating the client certificate for the alias " + alias + " Certificate Expired.",
-                        log);
             }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while updating the client certificate for the alias " + alias + " due to an internal "
-                            + "server error", e, log);
         } catch (URISyntaxException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while generating the resource location URI for alias '" + alias + "'", e, log);
+            throw new APIManagementException("Error while generating the resource location URI for alias '"
+                    + alias + "'", ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }
 
     @Override
     public Response getAPIClientCertificates(String apiId, Integer limit, Integer offset, String alias,
-                                                   MessageContext messageContext) {
+                                                   MessageContext messageContext) throws APIManagementException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         List<ClientCertificateDTO> certificates = new ArrayList<>();
         String query = CertificateRestApiUtils.buildQueryString("alias", alias, "apiId", apiId);
 
-        try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            int tenantId = APIUtil.getInternalOrganizationId(organization);
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            int totalCount = apiProvider.getClientCertificateCount(tenantId);
-            if (totalCount > 0) {
-                APIIdentifier apiIdentifier = null;
-                if (StringUtils.isNotEmpty(apiId)) {
-                    API api = apiProvider.getAPIbyUUID(apiId, organization);
-                    apiIdentifier = api.getId();
-                }
-                certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        int totalCount = apiProvider.getClientCertificateCount(tenantId);
+        if (totalCount > 0) {
+            APIIdentifier apiIdentifier = null;
+            if (StringUtils.isNotEmpty(apiId)) {
+                API api = apiProvider.getAPIbyUUID(apiId, organization);
+                apiIdentifier = api.getId();
             }
-
-            ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils
-                    .getPaginatedClientCertificates(certificates, limit, offset, query);
-            PaginationDTO paginationDTO = new PaginationDTO();
-            paginationDTO.setLimit(limit);
-            paginationDTO.setOffset(offset);
-            paginationDTO.setTotal(totalCount);
-            certificatesDTO.setPagination(paginationDTO);
-            return Response.status(Response.Status.OK).entity(certificatesDTO).build();
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving the client certificates.", e, log);
+            certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
         }
-        return null;
+
+        ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils
+                .getPaginatedClientCertificates(certificates, limit, offset, query);
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(totalCount);
+        certificatesDTO.setPagination(paginationDTO);
+        return Response.status(Response.Status.OK).entity(certificatesDTO).build();
     }
 
     @Override
         public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream,
                                                 Attachment certificateDetail, String alias, String tier,
-                                                MessageContext messageContext) {
+                                                MessageContext messageContext) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
             if (StringUtils.isEmpty(alias) || StringUtils.isEmpty(apiId)) {
-                RestApiUtil.handleBadRequest("The alias and/ or apiId should not be empty", log);
+                throw new APIManagementException("The alias and/ or apiId should not be empty",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
             if (StringUtils.isBlank(fileName)) {
-                RestApiUtil.handleBadRequest(
-                        "Certificate addition failed. Proper Certificate file should be provided", log);
+                throw new APIManagementException("Certificate addition failed. "
+                        + "Proper Certificate file should be provided", ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
@@ -881,23 +842,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 certificateDTO.setTier(tier);
                 URI createdCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + "?alias=" + alias);
                 return Response.created(createdCertUri).entity(certificateDTO).build();
-            } else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
-                RestApiUtil.handleInternalServerError(
-                        "Internal server error while adding the client certificate to " + "API " + apiId, log);
-            } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "The alias '" + alias + "' already exists in the trust store.", log);
-            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
-                RestApiUtil.handleBadRequest(
-                        "Error while adding the certificate to the API " + apiId + ". " + "Certificate Expired.", log);
             }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    "APIManagement exception while adding the certificate to the API " + apiId + " due to an internal "
-                            + "server error", e, log);
         } catch (URISyntaxException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while generating the resource location URI for alias '" + alias + "'", e, log);
+            throw new APIManagementException("Error while generating the resource location URI for alias '"
+                    + alias + "'", ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }
@@ -908,117 +856,22 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiId   API Id
      * @param ifMatch If-Match header value
      * @return Status of API Deletion
+     * @throws APIManagementException when API delete operation fails
      */
     @Override
-    public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext) {
-        try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+    public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        //validate if api exists
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
 
-            boolean isAPIExistDB = false;
-            APIManagementException error = null;
-            APIInfo apiInfo = null;
-            try {
-                //validate if api exists
-                apiInfo = CommonUtils.validateAPIExistence(apiId);
-                isAPIExistDB = true;
-            } catch (APIManagementException e) {
-                log.error("Error while validating API existence for deleting API " + apiId + " on organization "
-                        + organization);
-                error = e;
-            }
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            if (isAPIExistDB) {
-                //validate API update operation permitted based on the LC state
-                validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+        // Delete the API
+        ApisApiServiceImplUtils.deleteAPI(apiId, organization);
 
-                try {
-                    //check if the API has subscriptions
-                    //Todo : need to optimize this check. This method seems too costly to check if subscription exists
-                    List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
-                    if (apiUsages != null && !apiUsages.isEmpty()) {
-                        List<SubscribedAPI> filteredUsages = new ArrayList<>();
-                        for (SubscribedAPI usage:apiUsages) {
-                            String subsCreatedStatus = usage.getSubCreatedStatus();
-                            if (!APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subsCreatedStatus)) {
-                                filteredUsages.add(usage);
-                            }
-                        }
-                        if (!filteredUsages.isEmpty()) {
-                            RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
-                        }
-                    }
-                } catch (APIManagementException e) {
-                    log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
-                            + organization);
-                    error = e;
-                }
-
-                try {
-                    List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
-
-                    if (!usedProductResources.isEmpty()) {
-                        RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
-                                usedProductResources.toString() + " are used by one or more API Products", log);
-                    }
-                } catch (APIManagementException e) {
-                    log.error("Error while checking API products using same resources for deleting API " + apiId +
-                            " on organization " + organization);
-                    error = e;
-                }
-            }
-
-            // Delete the API
-            boolean isDeleted = false;
-            try {
-                apiProvider.deleteAPI(apiId, organization);
-                isDeleted = true;
-            } catch (APIManagementException e) {
-                log.error("Error while deleting API " + apiId + "on organization " + organization, e);
-            }
-
-            if (error != null) {
-                throw error;
-            } else if (!isDeleted) {
-                RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId + " on organization "
-                        + organization, log);
-                return null;
-            }
-            return Response.ok().build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while deleting API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get resources of an API that are reused by API Products
-     *
-     * @param api API
-     * @return List of resources reused by API Products
-     */
-    private List<APIResource> getUsedProductResources(API api) {
-        List<APIResource> usedProductResources = new ArrayList<>();
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-
-        for (URITemplate uriTemplate : uriTemplates) {
-            // If existing URITemplate is used by any API Products
-            if (!uriTemplate.retrieveUsedByProducts().isEmpty()) {
-                APIResource apiResource = new APIResource(uriTemplate.getHTTPVerb(), uriTemplate.getUriTemplate());
-                usedProductResources.add(apiResource);
-            }
-        }
-
-        return usedProductResources;
+        return Response.ok().build();
     }
 
     /**
@@ -1031,16 +884,13 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPIDocumentContentByDocumentId(String apiId, String documentId,
-                                                           String ifNoneMatch, MessageContext messageContext) {
+                                                      String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             DocumentationContent docContent = apiProvider.getDocumentationContent(apiId, documentId, organization);
-            if (docContent == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-                return null;
-            }
 
             // gets the content depending on the type of the document
             if (docContent.getSourceType().equals(DocumentationContent.ContentSourceType.FILE)) {
@@ -1061,21 +911,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String sourceUrl = docContent.getTextContent();
                 return Response.seeOther(new URI(sourceUrl)).build();
             }
-        } catch (APIManagementException e) {
-            // Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving source URI location of " + documentId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }
@@ -1093,7 +931,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response addAPIDocumentContent(String apiId, String documentId, String ifMatch,
-            InputStream inputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) {
+            InputStream inputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext)
+            throws APIManagementException {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1102,38 +941,38 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
             if (inputStream != null && inlineContent != null) {
-                RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
+                throw new APIManagementException("Only one of 'file' and 'inlineContent' should be specified",
+                        ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
             }
 
             //retrieves the document and send 404 if not found
             Documentation documentation = apiProvider.getDocumentation(apiId, documentId, organization);
-            if (documentation == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-                return null;
-            }
 
             //add content depending on the availability of either input stream or inline content
             if (inputStream != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
-                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
+                    throw new APIManagementException("Source type of document " + documentId + " is not FILE",
+                            ExceptionCodes.INVALID_DOCUMENT_CONTENT_DATA);
                 }
                 String filename = fileDetail.getContentDisposition().getFilename();
                 if (APIUtil.isSupportedFileType(filename)) {
                     RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail, organization);
                 } else {
-                    RestApiUtil.handleBadRequest("Unsupported extension type of document file: " + filename, log);
+                    throw new APIManagementException("Unsupported extension type of document file: " + filename,
+                            ExceptionCodes.UNSUPPORTED_DOC_EXTENSION);
                 }
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) &&
                         !documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
-                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE " +
-                            "or MARKDOWN", log);
+                    throw new APIManagementException("Source type of document " + documentId + " is not INLINE " +
+                            "or MARKDOWN", ExceptionCodes.INVALID_DOCUMENT_CONTENT_DATA);
                 }
                 PublisherCommonUtils
                         .addDocumentationContent(documentation, apiProvider, apiId, documentId, organization,
                                 inlineContent);
             } else {
-                RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
+                throw new APIManagementException("Either 'file' or 'inlineContent' should be specified",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
 
             //retrieving the updated doc and the URI
@@ -1144,24 +983,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
             URI uri = new URI(uriString);
             return Response.created(uri).entity(documentDTO).build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while adding content to the document: " + documentId + " of API "
-                                + apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
-            }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving document content location : " + documentId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, ExceptionCodes.INTERNAL_ERROR);
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
-        return null;
     }
 
     /**

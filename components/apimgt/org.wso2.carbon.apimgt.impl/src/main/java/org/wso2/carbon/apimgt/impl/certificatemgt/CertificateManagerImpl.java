@@ -411,7 +411,8 @@ public class CertificateManagerImpl implements CertificateManager {
             return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier, organization);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
-                    "Error while retrieving client certificate information for the tenant : " + tenantId, e);
+                    "Error while retrieving client certificate information for the tenant : " + tenantId, e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -476,7 +477,7 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
                     "Certificate management exception while trying to update the certificate of alias " + alias
-                            + " of tenant " + tenantId, e);
+                            + " of tenant " + tenantId, e, ExceptionCodes.INTERNAL_ERROR);
         }
         return responseCode;
     }
@@ -502,7 +503,7 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
                     "Certificate management exception while getting count of client certificates of the tenant "
-                            + tenantId, e);
+                            + tenantId, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 

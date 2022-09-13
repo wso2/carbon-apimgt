@@ -271,7 +271,7 @@ public class RestApiUtil {
         } catch (IOException e) {
             String errorMessage = "Error in transferring files.";
             log.error(errorMessage, e);
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
         } finally {
             IOUtils.closeQuietly(outFileStream);
         }

@@ -2197,7 +2197,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // if one of the above has failed throw an error
         if (isError) {
             throw new APIManagementException("Error while deleting the API " + apiUuid + " on organization "
-                    + organization);
+                    + organization, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -3632,7 +3632,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         responseCode = certificateManager
                 .addClientCertificate(apiTypeWrapper.getId(), certificate, alias, tierName, tenantId, organization);
-        return responseCode.getResponseCode();
+        int code = responseCode.getResponseCode();
+        if (responseCode != null) {
+            if (ResponseCode.SUCCESS.getResponseCode() == code) {
+                return responseCode.getResponseCode();
+            } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
+            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.EXPIRED_CERT,
+                        "Error while updating the client certificate for the alias "
+                                + alias + " Certificate Expired."));
+            } else {
+                throw new APIManagementException("Error while updating the client certificate for the alias "
+                        + alias + " due to an internal " + "server error", ExceptionCodes.INTERNAL_ERROR);
+            }
+        } else {
+            throw new APIManagementException("Error while updating the client certificate for the alias "
+                    + alias + " due to an internal " + "server error", ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 
     @Override
@@ -3786,9 +3803,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiTypeWrapper.getAccessControlRoles());
         ResponseCode responseCode = certificateManager
                 .updateClientCertificate(certificate, alias, tier, tenantId, organization);
-        return responseCode != null ?
-                responseCode.getResponseCode() :
-                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
+        if (responseCode != null) {
+            if (ResponseCode.SUCCESS.getResponseCode() == responseCode.getResponseCode()) {
+                return responseCode.getResponseCode();
+            } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == responseCode.getResponseCode()) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
+            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode.getResponseCode()) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.EXPIRED_CERT,
+                        "Error while updating the client certificate for the alias "
+                                + alias + " Certificate Expired."));
+            } else {
+                throw new APIManagementException("Error while updating the client certificate for the alias "
+                        + alias + " due to an internal " + "server error", ExceptionCodes.INTERNAL_ERROR);
+            }
+        } else {
+            throw new APIManagementException("Error while updating the client certificate for the alias "
+                    + alias + " due to an internal " + "server error", ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 
     @Override
@@ -5064,7 +5095,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organization), uuid, docId,
                     mappedContent);
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while adding content to doc " + docId);
+            throw new APIManagementException("Error while adding content to doc " + docId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 

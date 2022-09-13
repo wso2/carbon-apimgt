@@ -336,10 +336,11 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String msg = "Failed to get the document. Artifact corresponding to document id " + docId
                         + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_NOT_FOUND);
             }
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while retrieving document for id " + docId, e);
+            throw new APIManagementException("Error while retrieving document for id " + docId, e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return documentation;
     }
@@ -357,11 +358,12 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String msg = "Failed to get the document content. Artifact corresponding to document id " + docId
                         + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND);
             }
             return docContent;
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while retrieving document content ", e);
+            throw new APIManagementException("Error while retrieving document content ", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
