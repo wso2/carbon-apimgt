@@ -263,7 +263,8 @@ public class RegistrationServiceImpl implements RegistrationService {
      */
     private boolean isUserAccessAllowed(String username) {
         String authScheme = (String) securityContext.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME);
-        if (StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)) {
+        if (StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION) || StringUtils.equals(authScheme,
+                RestApiConstants.OPAQUE_AUTHENTICATION)) {
             log.debug("Ignore permission validation as authentication schema is JWT");
             return true;
         }
