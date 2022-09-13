@@ -258,10 +258,20 @@ public class RegistrationServiceImpl implements RegistrationService {
     /**
      * Check whether user have any of create, publish or subscribe permissions
      *
+     * The legacy permission validation (publish, subscribe, create) is skipped when the authentication is
+     * OAuth (Opaque or JWT). There's already a scope validation engaged there so no need of another permission check.
+     *
      * @param username username
      * @return true if user has any of create, publish or subscribe permissions
      */
     private boolean isUserAccessAllowed(String username) {
+        String authScheme = (String) securityContext.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME);
+        if (StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION) || StringUtils.equals(authScheme,
+                RestApiConstants.OPAQUE_AUTHENTICATION)) {
+            log.debug("Ignore permission validation as authentication schema is OAuth2");
+            return true;
+        }
+
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Checking 'subscribe' permission for user " + username);
