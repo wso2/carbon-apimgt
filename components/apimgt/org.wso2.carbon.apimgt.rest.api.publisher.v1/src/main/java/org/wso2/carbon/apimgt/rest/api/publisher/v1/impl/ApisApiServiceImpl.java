@@ -4171,7 +4171,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     "The API's type is not supported when importing an OpenAPI definition");
         }
         // Import the API and Definition
-        String username = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // Add description from definition if it is not defined by user
         if (validationResponseDTO.getInfo().getDescription() != null
@@ -4184,7 +4183,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
-        API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, username,
+        API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
                 service, validationResponse, isServiceAPI, syncOperations);
         return APIMappingUtil.fromAPItoDTO(addedAPI);
     }
