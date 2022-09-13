@@ -262,6 +262,12 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @return true if user has any of create, publish or subscribe permissions
      */
     private boolean isUserAccessAllowed(String username) {
+        String authScheme = (String) securityContext.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME);
+        if (StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)) {
+            log.debug("Ignore permission validation as authentication schema is JWT");
+            return true;
+        }
+
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Checking 'subscribe' permission for user " + username);
