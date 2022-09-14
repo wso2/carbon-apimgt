@@ -5,3 +5,6 @@ coverage:
   precision: 2
   round: down
   range: "40...100"
+  
+comment:
+    after_n_builds: 3
