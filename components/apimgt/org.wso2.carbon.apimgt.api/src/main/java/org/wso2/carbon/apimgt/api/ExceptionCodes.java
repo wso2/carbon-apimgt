@@ -270,6 +270,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OAS3_FOUND(900762, "Invalid OpenAPI V3 definition found", 400, "Invalid OpenAPI V3 definition found"),
     NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
     ERROR_REMOVING_EXAMPLES(900764, "Internal Error While Processing Swagger Definition", 500, "Couldn't remove one or more examples from the swagger definition"),
+    MOCK_HTTP_METHOD_MISSING(900765, "Could not find HTTP methods", 400, "Cannot find the HTTP method for the API Resource Mediation Policy"),
 
     //AsyncApi related error codes
     ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
@@ -566,6 +567,11 @@ public enum ExceptionCodes implements ErrorHandler {
     REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
     INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false),
+
+    // monetization related codes
+
+    INVALID_API_STATE_MONETIZATION(904300, "Invalid API state", 400, "Invalid API state to configure monetization"),
+    MONETIZATION_STATE_CHANGE_FAILED(904301, "Could not change the monetization state", 500, "Monetization state change to '%s' failed"),
 
     // audit related codes
 

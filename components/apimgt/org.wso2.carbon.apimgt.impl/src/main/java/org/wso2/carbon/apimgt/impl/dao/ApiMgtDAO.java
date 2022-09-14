@@ -4978,7 +4978,7 @@ public class ApiMgtDAO {
 
             Collections.sort(events, (o1, o2) -> o1.getDate().compareTo(o2.getDate()));
         } catch (SQLException e) {
-            handleException("Error when executing the SQL : " + sqlQuery, e);
+            handleExceptionWithCode("Error while getting the lifecycle events", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -16029,8 +16029,8 @@ public class ApiMgtDAO {
                 versions.add(resultSet.getString("API_VERSION"));
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
-                    e);
+            handleExceptionWithCode("Error while retrieving versions for api " + apiName + " for the provider "
+                    + apiProvider, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return versions;
     }

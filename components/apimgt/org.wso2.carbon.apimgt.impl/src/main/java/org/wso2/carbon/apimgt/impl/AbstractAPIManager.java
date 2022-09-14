@@ -307,7 +307,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (DocumentationPersistenceException e) {
             String msg = "Failed to get documentations for api/product " + uuid;
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
         return convertedList;
     }

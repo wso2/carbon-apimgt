@@ -1951,7 +1951,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }
             } catch (DocumentationPersistenceException e) {
-                handleException("Failed to add documentation", e);
+                handleExceptionWithCode("Failed to add documentation", e, ExceptionCodes.INTERNAL_ERROR);
             }
         }
         return null;
@@ -1970,7 +1970,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
                 }
             } catch (DocumentationPersistenceException e) {
-                handleException("Failed to add documentation", e);
+                handleExceptionWithCode("Failed to add documentation", e, ExceptionCodes.INTERNAL_ERROR);
             }
         }
         return null;
@@ -1990,7 +1990,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         } catch (DocumentationPersistenceException e) {
-            handleException("Failed to search documentation for name " + docName, e);
+            handleExceptionWithCode("Failed to search documentation for name " + docName, e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return exist;
     }
@@ -3058,7 +3059,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
+            throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -3143,7 +3144,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 try {
                     monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                    APIUtil.handleException("Failed to load monetization implementation class.", e);
+                    APIUtil.handleExceptionWithCode("Failed to load monetization implementation class.", e,
+                            ExceptionCodes.INTERNAL_ERROR);
                 }
             }
         }
@@ -3867,7 +3869,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiId = apiMgtDAO.getAPIID(identifier.getUUID());
             cleanUpPendingAPIStateChangeTask(apiId, identifier instanceof APIProductIdentifier);
         } catch (APIManagementException | WorkflowException e) {
-            handleException("Error while deleting the workflow task.", e);
+            handleExceptionWithCode("Error while deleting the workflow task.", e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -3902,7 +3904,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
         } catch (WorkflowException e) {
-            handleException("Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType);
+            handleExceptionWithCode("Error while obtaining WorkflowExecutor instance for workflow type :"
+                    + workflowType, e, ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }

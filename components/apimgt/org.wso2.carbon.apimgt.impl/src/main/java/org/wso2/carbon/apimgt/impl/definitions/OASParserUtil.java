@@ -139,6 +139,9 @@ public class OASParserUtil {
     private static final String ARRAY_DATA_TYPE = "array";
     private static final String OBJECT_DATA_TYPE = "object";
 
+    private static final String OPENAPI_ERROR_MESSAGE = "Cannot update destination swagger"
+            + " because it is not in OpenAPI format";
+
     static class SwaggerUpdateContext {
         private final Paths paths = new Paths();
         private final Set<Scope> aggregatedScopes = new HashSet<>();
@@ -226,7 +229,7 @@ public class OASParserUtil {
         } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
             return oas2Parser.generateExample(apiDefinition);
         } else {
-            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+            throw new APIManagementException(OPENAPI_ERROR_MESSAGE, ExceptionCodes.UNRECOGNIZED_OPENAPI_DEFINITON);
         }
     }
 

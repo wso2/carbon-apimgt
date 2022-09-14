@@ -24,9 +24,11 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -159,5 +161,21 @@ public class CommonUtils {
         if (APIConstants.GRAPHQL_API.equals(apiTypeConst) && !isExpectedType) {
             throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
         }
+    }
+
+    /**
+     * @param apiId API UUID
+     * @return API or API revision UUID
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static String getAPIUUID(String apiId) throws APIManagementException {
+        String uuid;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            uuid = apiRevision.getApiUUID();
+        } else {
+            uuid = apiId;
+        }
+        return uuid;
     }
 }

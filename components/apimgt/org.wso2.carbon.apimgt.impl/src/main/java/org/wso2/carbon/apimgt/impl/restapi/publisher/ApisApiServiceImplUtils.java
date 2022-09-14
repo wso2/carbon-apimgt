@@ -34,10 +34,12 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
 import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
 import com.amazonaws.services.securitytoken.model.Credentials;
+import com.google.gson.Gson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,6 +93,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
@@ -1025,5 +1029,97 @@ public class ApisApiServiceImplUtils {
         serviceInfo.put("key", service.getServiceKey());
         serviceInfo.put("md5", service.getMd5());
         return serviceInfo;
+    }
+
+    /**
+     * @param apiId        API UUID
+     * @param organization Tenant organization
+     * @return A list of API resource mediation policies with mock scripts
+     * @throws APIManagementException when an internal errors occurs
+     */
+    public static List<APIResourceMediationPolicy> generateMockScripts(String apiId, String organization)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        CommonUtils.validateAPIExistence(apiId);
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
+        Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
+
+        return (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
+    }
+
+    /**
+     * @param apiId        API UUID
+     * @param organization Tenant organization
+     * @return Monetized policies to plan mapping
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static Map<String, String> getAPIMonetization(String apiId, String organization) throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        CommonUtils.validateAPIExistence(apiId);
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        try {
+            Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+            return monetizationImplementation.getMonetizedPoliciesToPlanMapping(api);
+        } catch (MonetizationException e) {
+            throw new APIManagementException("Error occurred while getting the Monetization mappings for API "
+                    + api.getId().getApiName(), e, ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    /**
+     * @param apiId                  API UUID
+     * @param organization           Tenant organization
+     * @param monetizationEnabled    Whether to enable or disable monetization
+     * @param monetizationProperties Monetization properties map
+     * @return true if monetization state change is successful
+     * @throws APIManagementException when a monetization related error occurs
+     */
+    public static boolean addAPIMonetization(String apiId, String organization,
+                                             boolean monetizationEnabled, Map<String, String> monetizationProperties)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
+            String errorMessage = "API " + api.getId().getApiName() +
+                    " should be in published state to configure monetization.";
+            throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_API_STATE_MONETIZATION);
+        }
+        //set the monetization status
+        api.setMonetizationEnabled(monetizationEnabled);
+        //clear the existing properties related to monetization
+        api.getMonetizationProperties().clear();
+        for (Map.Entry<String, String> currentEntry : monetizationProperties.entrySet()) {
+            api.addMonetizationProperty(currentEntry.getKey(), currentEntry.getValue());
+        }
+
+        Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+        HashMap<String, String> monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(),
+                HashMap.class);
+        if (MapUtils.isEmpty(monetizationDataMap)) {
+            String errorMessage = "Monetization is not configured. Monetization data is empty for "
+                    + api.getId().getApiName();
+            throw new APIManagementException(errorMessage, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        }
+        boolean isMonetizationStateChangeSuccessful = false;
+        try {
+            if (monetizationEnabled) {
+                isMonetizationStateChangeSuccessful = monetizationImplementation.enableMonetization
+                        (organization, api, monetizationDataMap);
+            } else {
+                isMonetizationStateChangeSuccessful = monetizationImplementation.disableMonetization
+                        (organization, api, monetizationDataMap);
+            }
+        } catch (MonetizationException e) {
+            String errorMessage = "Error while changing monetization status for API ID : " + apiId;
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
+        }
+        if (isMonetizationStateChangeSuccessful) {
+            apiProvider.configureMonetizationInAPIArtifact(api);
+            return true;
+        } else {
+            throw new APIManagementException("Unable to change monetization status for API : " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.MONETIZATION_STATE_CHANGE_FAILED,
+                            String.valueOf(monetizationEnabled)));
+        }
     }
 }

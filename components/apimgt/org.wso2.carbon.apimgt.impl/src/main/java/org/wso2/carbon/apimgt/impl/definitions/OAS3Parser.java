@@ -148,7 +148,8 @@ public class OAS3Parser extends APIDefinition {
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
                 } else {
                     throw new
-                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy",
+                            ExceptionCodes.MOCK_HTTP_METHOD_MISSING);
                 }
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
