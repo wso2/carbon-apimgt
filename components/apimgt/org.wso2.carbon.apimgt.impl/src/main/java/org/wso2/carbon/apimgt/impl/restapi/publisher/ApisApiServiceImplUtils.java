@@ -1122,4 +1122,54 @@ public class ApisApiServiceImplUtils {
                             String.valueOf(monetizationEnabled)));
         }
     }
+
+    /**
+     * @param policySpecification Operation policy specification
+     * @param operationPolicyData Operation policy metadata
+     * @param apiId               API UUID
+     * @param organization        Tenant organization
+     * @return Created policy ID
+     * @throws APIManagementException when adding an operation policy fails
+     */
+    public static String addAPISpecificOperationPolicy(OperationPolicySpecification policySpecification,
+                                                       OperationPolicyData operationPolicyData,
+                                                       String apiId, String organization)
+            throws APIManagementException {
+        String policyId;
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        OperationPolicyData existingPolicy =
+                apiProvider.getAPISpecificOperationPolicyByPolicyName(policySpecification.getName(),
+                        policySpecification.getVersion(), apiId, null, organization, false);
+        if (existingPolicy == null) {
+            policyId = apiProvider.addAPISpecificOperationPolicy(apiId, operationPolicyData, organization);
+            if (log.isDebugEnabled()) {
+                log.debug("An API specific operation policy has been added for the API " + apiId);
+            }
+        } else {
+            throw new APIManagementException("An API specific operation policy found for the same name.",
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS,
+                            policySpecification.getName(), policySpecification.getVersion()));
+        }
+        return policyId;
+    }
+
+    public static void deleteAPISpecificOperationPolicyByPolicyId(String operationPolicyId, String apiId,
+                                                                  String organization)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        OperationPolicyData existingPolicy = apiProvider
+                .getAPISpecificOperationPolicyByPolicyId(operationPolicyId, apiId, organization, false);
+        if (existingPolicy != null) {
+            apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
+
+            if (log.isDebugEnabled()) {
+                log.debug("The operation policy " + operationPolicyId + " has been deleted from the the API "
+                        + apiId);
+            }
+        } else {
+            throw new APIManagementException("Couldn't retrieve an existing operation policy with ID: "
+                    + operationPolicyId + " for API " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
+        }
+    }
 }

@@ -27,9 +27,12 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +73,19 @@ public class OperationPoliciesApiServiceImplUtils {
         operationPolicyData.setSpecification(policySpecification);
 
         return operationPolicyData;
+    }
+
+    public static OperationPolicySpecification getPolicySpecification(String fileContentType, String jsonContent)
+            throws APIManagementException {
+        try {
+            if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
+                jsonContent = CommonUtil.yamlToJson(jsonContent);
+            }
+            return APIUtil.getValidatedOperationPolicySpecification(jsonContent);
+        } catch (IOException e) {
+            throw new APIManagementException("Error occurred while validating the policy specification",
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 
     /**

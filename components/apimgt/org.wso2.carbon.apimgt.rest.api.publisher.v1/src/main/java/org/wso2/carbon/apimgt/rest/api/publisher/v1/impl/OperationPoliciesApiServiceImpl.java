@@ -94,10 +94,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();
                 }
-                if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
-                    jsonContent = CommonUtil.yamlToJson(jsonContent);
-                }
-                policySpecification = APIUtil.getValidatedOperationPolicySpecification(jsonContent);
+                policySpecification = OperationPoliciesApiServiceImplUtils
+                        .getPolicySpecification(fileContentType, jsonContent);
 
                 OperationPolicyData operationPolicyData = OperationPoliciesApiServiceImplUtils
                         .prepareOperationPolicyData(policySpecification, organization);
@@ -133,12 +131,9 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                     return Response.created(createdPolicyUri).entity(createdPolicy).build();
                 }
             }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding a common operation policy." + e.getMessage();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while adding common operation policy",
-                    e, log);
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("An Error has occurred while adding common operation policy", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }

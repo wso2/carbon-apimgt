@@ -385,7 +385,7 @@ public class ImportUtils {
                         "was updated and not deployed in any of the gateway environments.");
             }
             return importedApi;
-        } catch (CryptoException | IOException e) {
+        } catch (IOException e) {
             throw new APIManagementException(
                     "Error while reading API meta information from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_META_DATA);
@@ -394,9 +394,6 @@ public class ImportUtils {
         } catch (APIMgtAuthorizationFailedException e) {
             throw new APIManagementException("Please enable preserveProvider property for cross tenant API Import.", e,
                     ExceptionCodes.TENANT_MISMATCH);
-        } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing the endpoint configuration of the API",
-                    ExceptionCodes.JSON_PARSE_ERROR);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API: ";
             if (importedApi != null) {

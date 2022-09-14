@@ -238,7 +238,7 @@ public class RestApiPublisherUtils {
      * @return String
      * @throws IOException
      * */
-    public static String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws IOException {
+    public static String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws APIManagementException {
 
         String content = null;
         if (fileInputStream != null) {
@@ -249,11 +249,17 @@ public class RestApiPublisherUtils {
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                 fileContentType = fileDetail.getContentType().toString();
             }
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            IOUtils.copy(fileInputStream, outputStream);
-            byte[] sequenceBytes = outputStream.toByteArray();
-            InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
-            content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+            try {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                IOUtils.copy(fileInputStream, outputStream);
+                byte[] sequenceBytes = outputStream.toByteArray();
+                InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+                content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+            } catch (IOException e) {
+                throw new APIManagementException("Error occurred while reading inputs", e,
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
+
         }
         return content;
     }
@@ -304,7 +310,8 @@ public class RestApiPublisherUtils {
             FileUtils.deleteQuietly(new File(exportAPIBasePath));
             return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (APIImportExportException | IOException e) {
-            throw new APIManagementException("Error while exporting operation policy", e);
+            throw new APIManagementException("Error while exporting operation policy", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 }
