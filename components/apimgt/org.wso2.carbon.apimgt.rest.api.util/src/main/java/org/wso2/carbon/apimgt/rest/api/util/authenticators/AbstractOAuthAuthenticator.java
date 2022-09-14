@@ -31,7 +31,11 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.uri.template.URITemplateException;
 
 import javax.cache.Cache;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Arrays;
 
 /**
  * This class implemented for common methods of JWT and Opaque Authentications
