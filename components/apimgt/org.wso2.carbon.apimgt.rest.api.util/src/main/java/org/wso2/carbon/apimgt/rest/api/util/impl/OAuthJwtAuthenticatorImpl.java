@@ -140,6 +140,9 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject());
         oauthTokenInfo.setConsumerKey(signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY));
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
+        if (log.isDebugEnabled()) {
+            log.debug("scopeClaim in the signedJWTInfo: " + scopeClaim);
+        }
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
             String[] scopes = scopeClaim.split(JwtTokenConstants.SCOPE_DELIMITER);
