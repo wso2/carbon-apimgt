@@ -54,7 +54,9 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponse
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -326,22 +328,24 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private Map<String, Object> createApiPropertiesMap(InboundMessageContext inboundMessageContext) {
 
         Map<String, Object> apiPropertiesMap = new HashMap<>();
-        AuthenticationContext authenticationContext = inboundMessageContext.getAuthContext();
-        if (authenticationContext != null) {
-            String apiName = authenticationContext.getApiName();
-            String apiVersion = authenticationContext.getApiVersion();
-            apiPropertiesMap.put(APIMgtGatewayConstants.CONSUMER_KEY, authenticationContext.getConsumerKey());
-            apiPropertiesMap.put(APIMgtGatewayConstants.USER_ID, authenticationContext.getUsername());
-            apiPropertiesMap.put(APIMgtGatewayConstants.CONTEXT, inboundMessageContext.getApiContext());
-            apiPropertiesMap.put(APIMgtGatewayConstants.API, apiName);
-            apiPropertiesMap.put(APIMgtGatewayConstants.VERSION, apiVersion);
-            apiPropertiesMap.put(APIMgtGatewayConstants.API_TYPE, String.valueOf(APIConstants.ApiTypes.API));
-            apiPropertiesMap.put(APIMgtGatewayConstants.HOST_NAME, APIUtil.getHostAddress());
-            apiPropertiesMap.put(APIMgtGatewayConstants.API_PUBLISHER, authenticationContext.getApiPublisher());
-            apiPropertiesMap.put(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
-            apiPropertiesMap.put(APIMgtGatewayConstants.APPLICATION_NAME, authenticationContext.getApplicationName());
-            apiPropertiesMap.put(APIMgtGatewayConstants.APPLICATION_ID, authenticationContext.getApplicationId());
-            apiPropertiesMap.put(APIMgtGatewayConstants.API_VERSION, apiName + ":v" + apiVersion);
+        API api = inboundMessageContext.getElectedAPI();
+        String apiName = api.getApiName();
+        String apiVersion = api.getApiVersion();
+        apiPropertiesMap.put(APIMgtGatewayConstants.API, apiName);
+        apiPropertiesMap.put(APIMgtGatewayConstants.VERSION, apiVersion);
+        apiPropertiesMap.put(APIMgtGatewayConstants.API_VERSION, apiName + ":v" + apiVersion);
+        apiPropertiesMap.put(APIMgtGatewayConstants.CONTEXT, inboundMessageContext.getApiContext());
+        apiPropertiesMap.put(APIMgtGatewayConstants.API_TYPE, String.valueOf(APIConstants.ApiTypes.API));
+        apiPropertiesMap.put(APIMgtGatewayConstants.HOST_NAME, APIUtil.getHostAddress());
+
+        APIKeyValidationInfoDTO infoDTO = inboundMessageContext.getInfoDTO();
+        if (infoDTO != null) {
+            apiPropertiesMap.put(APIMgtGatewayConstants.CONSUMER_KEY, infoDTO.getConsumerKey());
+            apiPropertiesMap.put(APIMgtGatewayConstants.USER_ID, infoDTO.getEndUserName());
+            apiPropertiesMap.put(APIMgtGatewayConstants.API_PUBLISHER, infoDTO.getApiPublisher());
+            apiPropertiesMap.put(APIMgtGatewayConstants.END_USER_NAME, infoDTO.getEndUserName());
+            apiPropertiesMap.put(APIMgtGatewayConstants.APPLICATION_NAME, infoDTO.getApplicationName());
+            apiPropertiesMap.put(APIMgtGatewayConstants.APPLICATION_ID, infoDTO.getApplicationId());
         }
         return apiPropertiesMap;
     }
