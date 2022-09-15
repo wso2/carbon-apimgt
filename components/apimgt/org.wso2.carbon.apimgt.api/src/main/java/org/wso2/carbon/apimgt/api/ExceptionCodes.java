@@ -274,6 +274,7 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
     ERROR_REMOVING_EXAMPLES(900764, "Internal Error While Processing Swagger Definition", 500, "Couldn't remove one or more examples from the swagger definition"),
     MOCK_HTTP_METHOD_MISSING(900765, "Could not find HTTP methods", 400, "Cannot find the HTTP method for the API Resource Mediation Policy"),
+    SWAGGER_ARCHIVE_MISSING(900766, "Could not find an archive in the given ZIP file", 500, "Could not find an archive in the given ZIP file"),
 
     //AsyncApi related error codes
     ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),

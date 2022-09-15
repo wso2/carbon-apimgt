@@ -725,8 +725,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             defaultVersion = apiMgtDAO.getDefaultVersion(apiid);
         } catch (APIManagementException e) {
-            handleExceptionWithCode("Error while getting default version :" + apiid.getApiName(), e,
-                    ExceptionCodes.INTERNAL_ERROR);
+            String errorMessage = "Error while getting default version :" + apiid.getApiName();
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         return defaultVersion;
     }
@@ -738,8 +739,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             defaultVersion = apiMgtDAO.getPublishedDefaultVersion(apiid);
         } catch (APIManagementException e) {
-            handleExceptionWithCode("Error while getting published default version :" + apiid.getApiName(), e,
-                    ExceptionCodes.INTERNAL_ERROR);
+            String errorMessage = "Error while getting published default version :" + apiid.getApiName();
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         return defaultVersion;
     }
@@ -1187,7 +1189,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             } catch (MediationPolicyPersistenceException e) {
-                throw new APIManagementException("Error while loading medation policies", e, ExceptionCodes.INTERNAL_ERROR);
+                String errorMessage = "Error while loading medation policies";
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, errorMessage));
             }
         }
     }
@@ -2198,8 +2202,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // if one of the above has failed throw an error
         if (isError) {
-            throw new APIManagementException("Error while deleting the API " + apiUuid + " on organization "
-                    + organization, ExceptionCodes.INTERNAL_ERROR);
+            String errorMessage = "Error while deleting the API " + apiUuid + " on organization " + organization;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 
@@ -2700,8 +2705,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.saveOASDefinition(new Organization(organization), apiId, jsonText);
         } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while persisting OAS definition ", e,
-                    ExceptionCodes.INTERNAL_ERROR);
+            String errorMessage = "Error while persisting OAS definition ";
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 
@@ -3144,8 +3150,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 try {
                     monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                    APIUtil.handleExceptionWithCode("Failed to load monetization implementation class.", e,
-                            ExceptionCodes.INTERNAL_ERROR);
+                    String errorMessage = "Failed to load monetization implementation class";
+                    APIUtil.handleExceptionWithCode(errorMessage, e,
+                            ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
                 }
             }
         }
@@ -3904,8 +3911,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
         } catch (WorkflowException e) {
-            handleExceptionWithCode("Error while obtaining WorkflowExecutor instance for workflow type :"
-                    + workflowType, e, ExceptionCodes.INTERNAL_ERROR);
+            String errorMessage = "Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType;
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         return null;
     }
@@ -4670,8 +4678,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
         } catch (AsyncSpecPersistenceException e) {
-            throw new APIManagementException("Error while persisting Async API definition ", e,
-                    ExceptionCodes.INTERNAL_ERROR);
+            String errorMessage = "Error while persisting Async API definition ";
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 
@@ -4790,6 +4799,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
         Organization org = new Organization(organization);
+        String msg = "";
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
@@ -4812,19 +4822,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateDefaultVersion(api);
                 return api;
             } else {
-                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIManagementException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Failed to get API", e, ExceptionCodes.INTERNAL_ERROR);
+            msg = "Failed to get API";
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while retrieving the OAS definition", e, ExceptionCodes.INTERNAL_ERROR);
+            msg = "Error while retrieving the OAS definition";
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing the OAS definition", e,
                     ExceptionCodes.OPENAPI_PARSE_EXCEPTION);
         } catch (AsyncSpecPersistenceException e) {
-            throw new APIManagementException("Error while retrieving the Async API definition", e,
-                    ExceptionCodes.INTERNAL_ERROR);
+            msg = "Error while retrieving the Async API definition";
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         }
     }
 
@@ -5231,7 +5246,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
             } else {
-                throw new APIManagementException("Error while saving thumbnail ", e);
+                String errorMessage = "Error while saving thumbnail ";
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
         }
     }
@@ -5286,8 +5303,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIManagementException(ExceptionCodes.API_NOT_FOUND);
             } else {
-                throw new APIManagementException("Error while saving graphql definition ", e,
-                        ExceptionCodes.INTERNAL_ERROR);
+                String errorMessage = "Error while saving graphql definition";
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
         }
     }

@@ -1506,7 +1506,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 return thumbnail;
             }
         } catch (ThumbnailPersistenceException e) {
-            throw new APIManagementException("Error while accessing thumbnail resource ", e);
+            throw new APIManagementException("Error while accessing thumbnail resource ", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }

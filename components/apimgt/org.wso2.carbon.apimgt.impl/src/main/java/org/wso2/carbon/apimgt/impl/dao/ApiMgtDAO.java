@@ -10182,7 +10182,8 @@ public class ApiMgtDAO {
                 return true;
             }
         } catch (SQLException e) {
-            handleException("Failed to check api Name availability : " + apiName, e);
+            handleExceptionWithCode("Failed to check api Name availability : " + apiName, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
@@ -10232,7 +10233,8 @@ public class ApiMgtDAO {
                 return true;
             }
         } catch (SQLException e) {
-            handleException("Failed to check different letter case api name availability : " + apiName, e);
+            handleExceptionWithCode("Failed to check different letter case api name availability : " + apiName, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
@@ -14266,7 +14268,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while obtaining Resource Paths of api " + apiId, e);
+            handleExceptionWithCode("Error while obtaining Resource Paths of api " + apiId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return resourcePathList;
     }

@@ -83,8 +83,9 @@ public class OperationPoliciesApiServiceImplUtils {
             }
             return APIUtil.getValidatedOperationPolicySpecification(jsonContent);
         } catch (IOException e) {
-            throw new APIManagementException("Error occurred while validating the policy specification",
-                    ExceptionCodes.INTERNAL_ERROR);
+            String errorMessage = "Error occurred while validating the policy specification";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 

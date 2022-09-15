@@ -51,7 +51,8 @@ public class PublisherUtils {
             builder.parse(new InputSource(new StringReader(xmlContent)));
         } catch (ParserConfigurationException | IOException | SAXException e) {
             String errorMessage = "Error while validating the resource policy xml content";
-            throw new APIManagementException(errorMessage, ExceptionCodes.INTERNAL_ERROR);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         return true;
     }

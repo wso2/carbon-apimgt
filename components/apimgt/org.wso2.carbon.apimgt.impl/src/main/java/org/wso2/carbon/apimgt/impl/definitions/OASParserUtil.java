@@ -838,7 +838,7 @@ public class OASParserUtil {
         //If it is a single  swagger file without remote references it can be imported directly, without zipping.
         if (archiveDirectory == null) {
             throw new APIManagementException("Could not find an archive in the given ZIP file.",
-                    ExceptionCodes.INTERNAL_ERROR);
+                    ExceptionCodes.SWAGGER_ARCHIVE_MISSING);
         }
         File masterSwagger = checkMasterSwagger(archiveDirectory);
         String content;

@@ -634,7 +634,7 @@ public class ApisApiServiceImplUtils {
      * to test the endpoint url
      */
     public static APIEndpointValidationDTO sendHttpHEADRequest(String urlVal)
-            throws APIManagementException, MalformedURLException {
+            throws APIManagementException {
         URL url;
         try {
             url = new URL(urlVal);
@@ -1064,7 +1064,9 @@ public class ApisApiServiceImplUtils {
             return monetizationImplementation.getMonetizedPoliciesToPlanMapping(api);
         } catch (MonetizationException e) {
             throw new APIManagementException("Error occurred while getting the Monetization mappings for API "
-                    + api.getId().getApiName(), e, ExceptionCodes.INTERNAL_ERROR);
+                    + api.getId().getApiName(), e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            "Error occurred while getting the Monetization mappings for API"));
         }
     }
 
@@ -1113,7 +1115,8 @@ public class ApisApiServiceImplUtils {
             }
         } catch (MonetizationException e) {
             String errorMessage = "Error while changing monetization status for API ID : " + apiId;
-            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         if (isMonetizationStateChangeSuccessful) {
             apiProvider.configureMonetizationInAPIArtifact(api);
@@ -1150,7 +1153,8 @@ public class ApisApiServiceImplUtils {
             return monetizationImplementation.getTotalRevenue(api, apiProvider);
         } catch (MonetizationException e) {
             String errorMessage = "Error while getting revenue information for API ID : " + apiId;
-            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 
@@ -1293,8 +1297,9 @@ public class ApisApiServiceImplUtils {
             try {
                 apiProvider.updateAPI(api, originalAPI);
             } catch (FaultGatewaysException e) {
-                throw new APIManagementException("Error while updating the API with resource policies",
-                        ExceptionCodes.INTERNAL_ERROR);
+                String errorMessage = "Error while updating the API with resource policies";
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
             SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId, xmlContent);
             return SequenceUtils.getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
@@ -1302,4 +1307,38 @@ public class ApisApiServiceImplUtils {
         return "";
     }
 
+    /**
+     * @param query        Search query
+     * @param organization Tenant organization
+     * @return whether the API exists
+     * @throws APIManagementException when validating API existence fails
+     */
+    public static boolean validateAPI(String query, String organization) throws APIManagementException {
+        if (StringUtils.isEmpty(query)) {
+            throw new APIManagementException("The query should not be empty", ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        }
+
+        boolean isSearchArtifactExists = false;
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        if (query.contains(":")) {
+            String[] queryTokens = query.split(":");
+            switch (queryTokens[0]) {
+                case "name":
+                    isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1], organization) ||
+                            apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1], organization);
+                    break;
+                case "context":
+                default: // API version validation.
+                    isSearchArtifactExists = apiProvider.isContextExist(queryTokens[1], organization);
+                    break;
+            }
+
+        } else { // consider the query as api name
+            isSearchArtifactExists =
+                    apiProvider.isApiNameExist(query, organization) ||
+                            apiProvider.isApiNameWithDifferentCaseExist(query, organization);
+
+        }
+        return isSearchArtifactExists;
+    }
 }
