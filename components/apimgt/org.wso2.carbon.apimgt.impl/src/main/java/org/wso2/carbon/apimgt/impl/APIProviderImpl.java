@@ -6218,4 +6218,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException(msg);
         }
     }
+
+    @Override
+    public boolean isValidContext(String providerName, String apiName, String contextTemplate, String userName,
+                                  String organization) throws APIManagementException {
+        if (isApiNameExist(apiName, organization)) {
+            if (!contextTemplate.startsWith("/")) {
+                contextTemplate = "/" + contextTemplate;
+            }
+            List<String> versions = getApiVersionsMatchingApiNameAndOrganization(apiName, userName, organization);
+            for (String version : versions) {
+                APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+                String apiUUID = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, organization);
+                String currentContextTemplate = getAPIbyUUID(apiUUID, organization).getContextTemplate();
+                if (currentContextTemplate.equals(contextTemplate)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
 }
