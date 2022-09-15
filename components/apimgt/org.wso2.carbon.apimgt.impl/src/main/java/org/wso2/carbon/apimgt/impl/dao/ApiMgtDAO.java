@@ -15832,7 +15832,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to check is exists Shared Scope : " + scopeName + "-" + tenantId, e);
+            handleExceptionWithCode("Failed to check is exists Shared Scope : " + scopeName + "-" + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return isExist;
     }
@@ -18637,7 +18638,8 @@ public class ApiMgtDAO {
             }
             uriTemplateList.addAll(uriTemplates.values());
         } catch (SQLException e) {
-            handleException("Error while fetching URI templates with operation policies for " + apiUUID, e);
+            handleExceptionWithCode("Error while fetching URI templates with operation policies for " + apiUUID, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return uriTemplateList;
     }

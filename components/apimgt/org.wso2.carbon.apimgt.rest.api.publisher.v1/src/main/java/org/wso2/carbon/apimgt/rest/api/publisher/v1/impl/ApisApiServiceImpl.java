@@ -1623,35 +1623,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return revenue data for a given API
      */
     @Override
-    public Response getAPIRevenue(String apiId, MessageContext messageContext) {
+    public Response getAPIRevenue(String apiId, MessageContext messageContext) throws APIManagementException {
 
-        if (StringUtils.isBlank(apiId)) {
-            String errorMessage = "API ID cannot be empty or null when getting revenue details.";
-            RestApiUtil.handleBadRequest(errorMessage, log);
-        }
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
-                String errorMessage = "API " + api.getId().getName() +
-                        " should be in published state to get total revenue.";
-                RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-            Map<String, String> revenueUsageData = monetizationImplementation.getTotalRevenue(api, apiProvider);
-            APIRevenueDTO apiRevenueDTO = new APIRevenueDTO();
-            apiRevenueDTO.setProperties(revenueUsageData);
-            return Response.ok().entity(apiRevenueDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Failed to retrieve revenue data for API ID : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (MonetizationException e) {
-            String errorMessage = "Failed to get current revenue data for API ID : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
+        Map<String, String> revenueUsageData = ApisApiServiceImplUtils.getAPIRevenue(apiId, organization);
+        APIRevenueDTO apiRevenueDTO = new APIRevenueDTO();
+        apiRevenueDTO.setProperties(revenueUsageData);
+        return Response.ok().entity(apiRevenueDTO).build();
     }
 
     /**
@@ -1662,30 +1641,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Swagger document of the API
      */
     @Override
-    public Response getAPISwagger(String apiId, String ifNoneMatch, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            //this will fail if user does not have access to the API or the API does not exist
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            api.setOrganization(organization);
-            String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(apiId, api, apiProvider);
-            return Response.ok().entity(updatedDefinition).header("Content-Disposition",
-                    "attachment; filename=\"" + "swagger.json" + "\"" ).build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while retrieving swagger of API : " + apiId,
-                                e, log);
-            } else {
-                String errorMessage = "Error while retrieving swagger of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
+    public Response getAPISwagger(String apiId, String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        //this will fail if user does not have access to the API or the API does not exist
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        api.setOrganization(organization);
+        String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(apiId, api, apiProvider);
+        return Response.ok().entity(updatedDefinition).header("Content-Disposition",
+                "attachment; filename=\"" + "swagger.json" + "\"" ).build();
     }
     /**
      * Updates the swagger definition of an existing API
@@ -1700,48 +1665,30 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url,
-                                     InputStream fileInputStream, Attachment fileDetail,MessageContext messageContext) {
-        try {
-            String updatedSwagger;
-            //validate if api exists
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().getStatus());
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                                     InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
+            throws APIManagementException {
+        String updatedSwagger;
+        //validate if api exists
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().getStatus());
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            //Handle URL and file based definition imports
-            if(url != null || fileInputStream != null) {
-                // Validate and retrieve the OpenAPI definition
-                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, null,
-                        true, false);
-                APIDefinitionValidationResponse validationResponse =
-                        (APIDefinitionValidationResponse) validationResponseMap .get(RestApiConstants.RETURN_MODEL);
-                if (!validationResponse.isValid()) {
-                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
-                }
-                updatedSwagger = PublisherCommonUtils.updateSwagger(apiId, validationResponse, false, organization);
-            } else {
-                updatedSwagger = updateSwagger(apiId, apiDefinition, organization);
+        //Handle URL and file based definition imports
+        if (url != null || fileInputStream != null) {
+            // Validate and retrieve the OpenAPI definition
+            Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, null,
+                    true, false);
+            APIDefinitionValidationResponse validationResponse =
+                    (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+            if (!validationResponse.isValid()) {
+                RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
             }
-            return Response.ok().entity(updatedSwagger).build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating swagger definition of API: " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while updating the swagger definition of the API: " + apiId + " - "
-                        + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            updatedSwagger = PublisherCommonUtils.updateSwagger(apiId, validationResponse, false, organization);
+        } else {
+            updatedSwagger = updateSwagger(apiId, apiDefinition, organization);
         }
-        return null;
+        return Response.ok().entity(updatedSwagger).build();
     }
 
     /**
@@ -1752,14 +1699,15 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param organization  Organization Identifier
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
-     * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     private String updateSwagger(String apiId, String apiDefinition, String organization)
-            throws APIManagementException, FaultGatewaysException {
+            throws APIManagementException {
         APIDefinitionValidationResponse response = OASParserUtil
                 .validateAPIDefinition(apiDefinition, true);
         if (!response.isValid()) {
-            RestApiUtil.handleBadRequest(response.getErrorItems(), log);
+            String errorDescription = CommonUtils.getErrorDescriptionFromErrorHandlers(response.getErrorItems());
+            throw new APIManagementException(ExceptionCodes
+                    .from(ExceptionCodes.OPENAPI_PARSE_EXCEPTION_WITH_CUSTOM_MESSAGE, errorDescription));
         }
         return PublisherCommonUtils.updateSwagger(apiId, response, false, organization);
     }
@@ -2460,7 +2408,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 throw e;
             }
-        } catch (URISyntaxException | FaultGatewaysException e) {
+        } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location of " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }

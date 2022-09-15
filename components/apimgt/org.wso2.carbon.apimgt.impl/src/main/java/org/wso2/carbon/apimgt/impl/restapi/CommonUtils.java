@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.restapi;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
@@ -33,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -180,5 +182,18 @@ public class CommonUtils {
             uuid = apiId;
         }
         return uuid;
+    }
+
+    public static String getErrorDescriptionFromErrorHandlers(List<ErrorHandler> errorHandlerList) {
+        String errorDescription = "";
+        if (!errorHandlerList.isEmpty()) {
+            for (ErrorHandler errorHandler : errorHandlerList) {
+                if (StringUtils.isNotBlank(errorDescription)) {
+                    errorDescription = errorDescription.concat(". ");
+                }
+                errorDescription = errorDescription.concat(errorHandler.getErrorDescription());
+            }
+        }
+        return errorDescription;
     }
 }

@@ -772,7 +772,7 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * @param api API
+     * @param api           API
      * @param soapOperation SOAP Operation
      * @return SOAP API Definition
      * @throws APIManagementException if an error occurred while parsing string to JSON Object
@@ -796,13 +796,13 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * @param fileInputStream File input stream for the WSDL file
-     * @param url URL
+     * @param fileInputStream          File input stream for the WSDL file
+     * @param url                      URL
      * @param wsdlArchiveExtractedPath Path to WSDL extracted directory
-     * @param filename File Name
+     * @param filename                 File Name
      * @return Swagger string
      * @throws APIManagementException If the WSDL file not supported
-     * @throws IOException If error occurred in converting InputStream to a byte array
+     * @throws IOException            If error occurred in converting InputStream to a byte array
      */
     public static String getSwaggerString(InputStream fileInputStream, String url, String wsdlArchiveExtractedPath,
                                           String filename) throws APIManagementException, IOException {
@@ -825,7 +825,7 @@ public class ApisApiServiceImplUtils {
 
     /**
      * @param wsdlInputStream WSDL file input stream
-     * @param contentType content type of the wsdl
+     * @param contentType     content type of the wsdl
      * @return Resource file WSDL
      */
     public static ResourceFile getWSDLResource(InputStream wsdlInputStream, String contentType) {
@@ -853,7 +853,7 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * @param apiPolicies Policy names applied to the API
+     * @param apiPolicies                   Policy names applied to the API
      * @param availableThrottlingPolicyList All available policies
      * @return Filtered API policy list which are applied to the API
      */
@@ -872,7 +872,7 @@ public class ApisApiServiceImplUtils {
 
     /**
      * @param deploymentStatus Deployment status [deployed:true / deployed:false]
-     * @param apiRevisions API revisions list
+     * @param apiRevisions     API revisions list
      * @return Filtered API revisions according to the deploymentStatus
      */
     public static List<APIRevision> filterAPIRevisionsByDeploymentStatus(String deploymentStatus, List<APIRevision> apiRevisions) {
@@ -898,12 +898,12 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * @param revisionId Revision ID
-     * @param environments Environments of the organization
-     * @param environment Selected environment
+     * @param revisionId         Revision ID
+     * @param environments       Environments of the organization
+     * @param environment        Selected environment
      * @param displayOnDevportal Enable display on Developer Portal
-     * @param vhost Virtual Host of the revision deployment
-     * @param mandatoryVHOST Is vhost mandatory in this validation
+     * @param vhost              Virtual Host of the revision deployment
+     * @param mandatoryVHOST     Is vhost mandatory in this validation
      * @return Created {@link APIRevisionDeployment} after validations
      * @throws APIManagementException if any validation fails
      */
@@ -928,10 +928,10 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * @param revisionId Revision ID
-     * @param vhost Virtual Host
+     * @param revisionId         Revision ID
+     * @param vhost              Virtual Host
      * @param displayOnDevportal Enable displaying on Developer Portal
-     * @param deployment Deployment
+     * @param deployment         Deployment
      * @return Mapped {@link APIRevisionDeployment}
      */
     public static APIRevisionDeployment mapApiRevisionDeployment(String revisionId, String vhost, Boolean displayOnDevportal,
@@ -971,8 +971,8 @@ public class ApisApiServiceImplUtils {
 
     /**
      * @param fileInputStream API spec file input stream
-     * @param isServiceAPI Is service API
-     * @param fileName File name
+     * @param isServiceAPI    Is service API
+     * @param fileName        File name
      * @return Schema
      * @throws APIManagementException if error while reading the spec file contents
      */
@@ -1122,6 +1122,35 @@ public class ApisApiServiceImplUtils {
             throw new APIManagementException("Unable to change monetization status for API : " + apiId,
                     ExceptionCodes.from(ExceptionCodes.MONETIZATION_STATE_CHANGE_FAILED,
                             String.valueOf(monetizationEnabled)));
+        }
+    }
+
+    /**
+     * @param apiId        API UUID
+     * @param organization Tenant organization
+     * @return A map of revenue details
+     * @throws APIManagementException when retrieving monetization details fail
+     */
+    public static Map<String, String> getAPIRevenue(String apiId, String organization) throws APIManagementException {
+        if (StringUtils.isBlank(apiId)) {
+            String errorMessage = "API ID cannot be empty or null when getting revenue details.";
+            throw new APIManagementException(errorMessage, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        }
+
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
+            String errorMessage = "API " + api.getId().getApiName() +
+                    " should be in published state to configure monetization.";
+            throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_API_STATE_MONETIZATION);
+        }
+
+        try {
+            return monetizationImplementation.getTotalRevenue(api, apiProvider);
+        } catch (MonetizationException e) {
+            String errorMessage = "Error while getting revenue information for API ID : " + apiId;
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 

@@ -788,11 +788,9 @@ public class OAS3Parser extends APIDefinition {
      * @param oasDefinition OAS definition
      * @param swaggerData   API related Swagger data
      * @return Generated OAS definition
-     * @throws APIManagementException If an error occurred
      */
     @Override
-    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
-            throws APIManagementException {
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         removePublisherSpecificInfo(openAPI);
         return generateAPIDefinition(swaggerData, openAPI);
@@ -859,7 +857,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
+    public String getOASDefinitionForPublisher(API api, String oasDefinition) {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         if (openAPI.getComponents() == null) {
             openAPI.setComponents(new Components());
@@ -1446,9 +1444,8 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param swaggerContent resource json
      * @return boolean
-     * @throws APIManagementException
      */
-    private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
+    private boolean isDefaultGiven(String swaggerContent) {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
 
         Components components = openAPI.getComponents();
@@ -1519,7 +1516,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
-    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
         Paths paths = openAPI.getPaths();
         for (String pathKey : paths.keySet()) {
@@ -1599,9 +1596,8 @@ public class OAS3Parser extends APIDefinition {
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param openAPI openAPI definition
      * @return
-     * @throws APIManagementException
      */
-    private OpenAPI processLegacyScopes(OpenAPI openAPI) throws APIManagementException {
+    private OpenAPI processLegacyScopes(OpenAPI openAPI) {
         Set<Scope> scopes = getScopesFromExtensions(openAPI);
 
         if (!scopes.isEmpty()) {
@@ -1965,10 +1961,9 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param swaggerContent String
      * @return String
-     * @throws APIManagementException
      */
     @Override
-    public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException {
+    public String processDisableSecurityExtension(String swaggerContent) {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
         Map<String, Object> apiExtensions = openAPI.getExtensions();
         if (apiExtensions == null) {

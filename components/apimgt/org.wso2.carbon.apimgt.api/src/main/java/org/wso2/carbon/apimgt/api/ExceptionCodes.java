@@ -140,6 +140,7 @@ public enum ExceptionCodes implements ErrorHandler {
     URI_PARSE_ERROR(900405, "Error constructing the URI", 500, "'%s'"),
     INVALID_OPERATION_TYPE(900406, "Unsupported '%s' operation", 400, "The '%s' operation type '%s' is invalid"),
     VERB_NOT_FOUND(900407, "Missing '%s' type", 400, "Missing '%s type in URI templates"),
+    YAML_PARSE_ERROR(900408, "Yaml parse error", 500, "Yaml parse error"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -264,6 +265,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OPENAPI_VERSION(900752, "Invalid OpenAPI Definition", 400, "Unsupported OpenAPI version provided. Please add with OpenAPI version 3.0.0."),
     INVALID_OPENAPI_NO_INFO_PATH(900753, "Invalid OpenAPI Definition", 400, "Required property 'info' or 'paths' are not provided."),
     OPENAPI_PARSE_EXCEPTION(900754, "Error while parsing OpenAPI definition", 400, "Error while parsing OpenAPI definition"),
+    OPENAPI_PARSE_EXCEPTION_WITH_CUSTOM_MESSAGE(OPENAPI_PARSE_EXCEPTION.getErrorCode(), OPENAPI_PARSE_EXCEPTION.getErrorMessage(), OPENAPI_PARSE_EXCEPTION.getHttpStatusCode(), "'%s'"),
     OPENAPI_NOT_FOUND(900755, "OpenAPI definition not found", 404, "OpenAPI definition not found"),
     OPENAPI_URL_MALFORMED(900756, "OpenAPI definition retrieval from URL failed", 400, "Exception occurred while retrieving the OpenAPI definition from URL"),
     OPENAPI_URL_NO_200(900757, "OpenAPI definition retrieval from URL failed", 400, "Response didn't return a 200 OK status"),

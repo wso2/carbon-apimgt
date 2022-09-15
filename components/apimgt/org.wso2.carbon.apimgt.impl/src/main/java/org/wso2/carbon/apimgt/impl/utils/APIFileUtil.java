@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -66,7 +67,7 @@ public class APIFileUtil {
             APIFileUtil.deleteDirectory(extractLocation);
             String errorMsg = "Error in accessing uploaded API archive";
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.INTERNAL_ERROR);
         }
         return archiveExtractLocation;
     }
@@ -99,7 +100,7 @@ public class APIFileUtil {
         } catch (IOException e) {
             String errorMsg = "Error while deleting directory : " + path;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 

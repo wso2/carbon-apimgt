@@ -688,7 +688,8 @@ public class OAS2Parser extends APIDefinition {
                         JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
                         validationResponse.setJsonContent(jsonNode.toString());
                     } catch (IOException e) {
-                        throw new APIManagementException("Error while reading API definition yaml", e);
+                        throw new APIManagementException("Error while reading API definition yaml", e,
+                                ExceptionCodes.YAML_PARSE_ERROR);
                     }
                 } else {
                     validationResponse.setJsonContent(apiDefinition);
@@ -1347,9 +1348,8 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swaggerContent resource json
      * @return boolean
-     * @throws APIManagementException
      */
-    private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
+    private boolean isDefaultGiven(String swaggerContent) {
         Swagger swagger = getSwagger(swaggerContent);
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
@@ -1479,9 +1479,8 @@ public class OAS2Parser extends APIDefinition {
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param swagger swagger definition
      * @return
-     * @throws APIManagementException
      */
-    private Swagger processLegacyScopes(Swagger swagger) throws APIManagementException {
+    private Swagger processLegacyScopes(Swagger swagger) {
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         OAuth2Definition oAuth2Definition = new OAuth2Definition();
@@ -1512,9 +1511,8 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swagger resource json
      * @return Swagger
-     * @throws APIManagementException
      */
-    private Swagger injectOtherScopesToDefaultScheme(Swagger swagger) throws APIManagementException {
+    private Swagger injectOtherScopesToDefaultScheme(Swagger swagger) {
         //Get security definitions from swagger
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         List<String> otherSetOfSchemes = new ArrayList<>();
@@ -1577,9 +1575,8 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swagger Swagger
      * @return Swagger
-     * @throws APIManagementException
      */
-    private Swagger injectOtherResourceScopesToDefaultScheme(Swagger swagger) throws APIManagementException {
+    private Swagger injectOtherResourceScopesToDefaultScheme(Swagger swagger) {
         List<String> schemes = getOtherSchemes();
 
         Map<String, Path> paths = swagger.getPaths();

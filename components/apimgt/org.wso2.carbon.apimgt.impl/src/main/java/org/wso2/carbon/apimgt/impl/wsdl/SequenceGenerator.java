@@ -48,6 +48,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
@@ -88,6 +89,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleExceptionWithCode;
 
 /**
  * Class uses to generate api sequences for soap to rest conversion.
@@ -211,7 +213,8 @@ public class SequenceGenerator {
                         sequences.add(outSeq);
                     }
                 } catch (APIManagementException e) {
-                    handleException("Error when generating sequence property and arg elements for soap operation: " + operationId, e);
+                    handleExceptionWithCode("Error when generating sequence property and "
+                            + "arg elements for soap operation: " + operationId, e, ExceptionCodes.INTERNAL_ERROR);
                 }
             }
         }
@@ -489,11 +492,13 @@ public class SequenceGenerator {
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.transform(new DOMSource(doc), new StreamResult(stringWriter));
         } catch (ParserConfigurationException e) {
-            handleException("Error occurred when building in sequence xml", e);
+            handleExceptionWithCode("Error occurred when building in sequence xml", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         } catch (TransformerConfigurationException e) {
-            handleException("Error in transport configuration", e);
+            handleExceptionWithCode("Error in transport configuration", e, ExceptionCodes.INTERNAL_ERROR);
         } catch (TransformerException e) {
-            handleException("Error occurred when transforming in sequence xml", e);
+            handleExceptionWithCode("Error occurred when transforming in sequence xml", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         if (log.isDebugEnabled()) {
             log.debug("parameter mapping for used in payload factory for soap operation:" + operationId + " is "

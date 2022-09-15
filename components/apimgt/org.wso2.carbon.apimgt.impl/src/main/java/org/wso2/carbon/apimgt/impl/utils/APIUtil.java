@@ -3369,7 +3369,7 @@ public final class APIUtil {
      * @return true if exist and false if not
      * @throws APIManagementException If an error occurs
      */
-    public static boolean isRoleNameExist(String userName, String roleName) throws APIManagementException {
+    public static boolean isRoleNameExist(String userName, String roleName) {
 
         if (roleName == null || StringUtils.isEmpty(roleName.trim())) {
             return true;

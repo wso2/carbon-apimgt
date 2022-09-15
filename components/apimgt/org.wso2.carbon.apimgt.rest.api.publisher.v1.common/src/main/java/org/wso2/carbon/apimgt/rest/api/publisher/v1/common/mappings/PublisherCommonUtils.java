@@ -1238,11 +1238,10 @@ public class PublisherCommonUtils {
      * @param organization  Organization Identifier
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
-     * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI,
                                        String organization)
-            throws APIManagementException, FaultGatewaysException {
+            throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fail if user does not have access to the API or the API does not exist
@@ -1272,7 +1271,8 @@ public class PublisherCommonUtils {
                 for (String aRole : roles.split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
                     if (!isValidRole) {
-                        throw new APIManagementException("Role '" + aRole + "' Does not exist.");
+                        throw new APIManagementException("Role '" + aRole + "' Does not exist.",
+                                ExceptionCodes.ROLE_DOES_NOT_EXIST);
                     }
                 }
             }
@@ -1301,7 +1301,12 @@ public class PublisherCommonUtils {
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        apiProvider.updateAPI(existingAPI, unModifiedAPI);
+        try {
+            apiProvider.updateAPI(existingAPI, unModifiedAPI);
+        } catch (FaultGatewaysException e) {
+            throw new APIManagementException("Error while updating the API: " + apiId, ExceptionCodes.INTERNAL_ERROR);
+        }
+
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
         // instead of passing same
