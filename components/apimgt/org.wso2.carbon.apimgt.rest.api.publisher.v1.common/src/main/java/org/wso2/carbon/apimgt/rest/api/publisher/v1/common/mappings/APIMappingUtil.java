@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
+import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -92,6 +93,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
@@ -3126,6 +3128,16 @@ public class APIMappingUtil {
             }
         }
         return apiRevisionDeploymentDTO;
+    }
+
+    public static ApiEndpointValidationResponseDTO fromEndpointValidationToDTO(
+            APIEndpointValidationDTO endpointValidationDTO) {
+        ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
+        apiEndpointValidationResponseDTO.setStatusCode(endpointValidationDTO.getStatusCode());
+        apiEndpointValidationResponseDTO.setStatusMessage(endpointValidationDTO.getStatusMessage());
+        apiEndpointValidationResponseDTO.setError(endpointValidationDTO.getError());
+
+        return apiEndpointValidationResponseDTO;
     }
 
     private static Date parseStringToDate(String time) throws java.text.ParseException {

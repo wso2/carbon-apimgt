@@ -161,6 +161,8 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "A Gateway Environment cannot exists with duplicate virtual hosts"),
     READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment cannot be changed",
             400, "Name of the gateway is read only"),
+    GATEWAY_ENVIRONMENT_VHOST_NOT_PROVIDED(900511, "Gateway Environment virtual hosts name not provided",
+            400, "Gateway Environment VHOST name not provided"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -206,6 +208,8 @@ public enum ExceptionCodes implements ErrorHandler {
     IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
             + "identity provider"),
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
+    USERSTORE_INITIALIZATION_FAILED(900615, "Unable to get the user store manager", 500,
+            "Error while getting the user store manager from the realm"),
 
 
     // Labels related codes
@@ -251,6 +255,11 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
     ERROR_REMOVING_EXAMPLES(900764, "Internal Error While Processing Swagger Definition", 500, "Couldn't remove one or more examples from the swagger definition"),
 
+    //AsyncApi related error codes
+    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
+    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
+
+    ERROR_READING_ASYNCAPI_SPECIFICATION(900765, "AsyncAPI specification read error", 500, "Exception occurred while reading the AsyncAPI Specification file"),
 
     // REST API related codes
     PARAMETER_NOT_PROVIDED(900700, "Parameter value missing", 400,
@@ -471,11 +480,6 @@ public enum ExceptionCodes implements ErrorHandler {
     APICTL_OPENAPI_PARSE_EXCEPTION(
             OPENAPI_PARSE_EXCEPTION.getErrorCode(), OPENAPI_PARSE_EXCEPTION.getErrorMessage(),
             OPENAPI_PARSE_EXCEPTION.getHttpStatusCode(), "%s"),
-
-    //AsyncApi related error codes
-    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
-    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
-
     GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
             "Gateway type not found available Gateway types : " + "%s"),
 
