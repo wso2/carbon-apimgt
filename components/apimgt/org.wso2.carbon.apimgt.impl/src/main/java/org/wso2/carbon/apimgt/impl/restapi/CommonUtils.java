@@ -161,6 +161,9 @@ public class CommonUtils {
         if (APIConstants.GRAPHQL_API.equals(apiTypeConst) && !isExpectedType) {
             throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
         }
+        if (APIConstants.API_TYPE_SOAPTOREST.equals(apiTypeConst) && !isExpectedType) {
+            throw new APIManagementException(ExceptionCodes.API_NOT_SOAPTOREST);
+        }
     }
 
     /**

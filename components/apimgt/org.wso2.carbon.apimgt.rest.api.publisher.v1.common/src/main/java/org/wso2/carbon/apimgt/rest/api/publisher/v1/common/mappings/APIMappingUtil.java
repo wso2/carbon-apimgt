@@ -747,7 +747,8 @@ public class APIMappingUtil {
                     policyInfoDTOs.add(policyInfoDTO);
                 }
             } catch (ParseException e) {
-                throw new APIManagementException("Couldn't parse the conversion policy string.", e);
+                throw new APIManagementException("Couldn't parse the conversion policy string.", e,
+                        ExceptionCodes.JSON_PARSE_ERROR);
             }
         }
         policyListDTO.setCount(policyInfoDTOs.size());
@@ -781,7 +782,8 @@ public class APIMappingUtil {
                     policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
                 }
             } catch (ParseException e) {
-                throw new APIManagementException("Couldn't parse the conversion policy string.", e);
+                throw new APIManagementException("Couldn't parse the conversion policy string.", e,
+                        ExceptionCodes.JSON_PARSE_ERROR);
             }
         }
         return policyInfoDTO;

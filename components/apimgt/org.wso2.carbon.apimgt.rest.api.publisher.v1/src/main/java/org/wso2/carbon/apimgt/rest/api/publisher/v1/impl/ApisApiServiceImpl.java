@@ -1538,25 +1538,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = null;
+        CommonUtils.validateAPIExistence(apiId);
         List<String> externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
-        try {
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                        apiId));
-            }
-            api = apiProvider.getAPIbyUUID(apiId, organization);
-            api.setOrganization(organization);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while getting API: " + apiId;
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
+        api = apiProvider.getAPIbyUUID(apiId, organization);
+        api.setOrganization(organization);
         if (apiProvider.publishToExternalAPIStores(api, externalStoreIdList)) {
             Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getUuid());
             APIExternalStoreListDTO apiExternalStoreListDTO =
@@ -1578,56 +1563,13 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPIResourcePolicies(String apiId, String sequenceType, String resourcePath,
-            String verb, String ifNoneMatch, MessageContext messageContext) {
-        try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, organization);
-            if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
-                if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
-                        || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
-                    String errorMessage = "Sequence type should be either of the values from 'in' or 'out'";
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                }
-                String resourcePolicy = SequenceUtils.getRestToSoapConvertedSequence(api, sequenceType);
-                if (StringUtils.isEmpty(resourcePath) && StringUtils.isEmpty(verb)) {
-                    ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
-                            .fromResourcePolicyStrToDTO(resourcePolicy);
-                    return Response.ok().entity(resourcePolicyListDTO).build();
-                }
-                if (StringUtils.isNotEmpty(resourcePath) && StringUtils.isNotEmpty(verb)) {
-                    JSONObject sequenceObj = (JSONObject) new JSONParser().parse(resourcePolicy);
-                    JSONObject resultJson = new JSONObject();
-                    String key = resourcePath + "_" + verb;
-                    JSONObject sequenceContent = (JSONObject) sequenceObj.get(key);
-                    if (sequenceContent == null) {
-                        String errorMessage = "Cannot find any resource policy for Resource path : " + resourcePath +
-                                " with type: " + verb;
-                        RestApiUtil.handleResourceNotFoundError(errorMessage, log);
-                    }
-                    resultJson.put(key, sequenceObj.get(key));
-                    ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
-                            .fromResourcePolicyStrToDTO(resultJson.toJSONString());
-                    return Response.ok().entity(resourcePolicyListDTO).build();
-                } else if (StringUtils.isEmpty(resourcePath)) {
-                    String errorMessage = "Resource path cannot be empty for the defined verb: " + verb;
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                } else if (StringUtils.isEmpty(verb)) {
-                    String errorMessage = "HTTP verb cannot be empty for the defined resource path: " + resourcePath;
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                }
-            } else {
-                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
-                RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving the API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (ParseException e) {
-            String errorMessage = "Error while retrieving the resource policies for the API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
+            String verb, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        String resourcePolicy = ApisApiServiceImplUtils
+                .getAPIResourcePolicies(apiId, organization, sequenceType, resourcePath, verb);
+        ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
+                .fromResourcePolicyStrToDTO(resourcePolicy);
+        return Response.ok().entity(resourcePolicyListDTO).build();
     }
 
     /**
@@ -1640,29 +1582,19 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId,
-            String ifNoneMatch, MessageContext messageContext) {
-        try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, organization);
-            if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
-                if (StringUtils.isEmpty(resourcePolicyId)) {
-                    String errorMessage = "Resource id should not be empty to update a resource policy.";
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                }
-                String policyContent = SequenceUtils.getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
-                ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
-                        .fromResourcePolicyStrToInfoDTO(policyContent);
-                return Response.ok().entity(resourcePolicyInfoDTO).build();
-            } else {
-                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
-                RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving the API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                                                     String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
+        API api = provider.getLightweightAPIByUUID(apiId, organization);
+        CommonUtils.checkAPIType(APIConstants.API_TYPE_SOAPTOREST, api.getType());
+        if (StringUtils.isEmpty(resourcePolicyId)) {
+            String errorMessage = "Resource id should not be empty to update a resource policy.";
+            throw new APIManagementException(errorMessage, ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
-        return null;
+        String policyContent = SequenceUtils.getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
+        ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil.fromResourcePolicyStrToInfoDTO(policyContent);
+        return Response.ok().entity(resourcePolicyInfoDTO).build();
     }
 
     /**
@@ -1676,56 +1608,19 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response updateAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId,
-            ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
-        try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getAPIbyUUID(apiId, organization);
-            if (api == null) {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                        apiId));
-            }
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(api.getStatus());
+                                                        ResourcePolicyInfoDTO body, String ifMatch,
+                                                        MessageContext messageContext)
+            throws APIManagementException {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
-                if (StringUtils.isEmpty(resourcePolicyId)) {
-                    String errorMessage = "Resource id should not be empty to update a resource policy.";
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                }
-                boolean isValidSchema = RestApiPublisherUtils.validateXMLSchema(body.getContent());
-                if (isValidSchema) {
-                    List<SOAPToRestSequence> sequence = api.getSoapToRestSequences();
-                    for (SOAPToRestSequence soapToRestSequence : sequence) {
-                        if (soapToRestSequence.getUuid().equals(resourcePolicyId)) {
-                            soapToRestSequence.setContent(body.getContent());
-                            break;
-                        }
-                    }
-                    API originalAPI = provider.getAPIbyUUID(apiId, organization);
-                    provider.updateAPI(api, originalAPI);
-                    SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
-                            body.getContent());
-                    String updatedPolicyContent = SequenceUtils
-                            .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
-                    ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
-                            .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
-                    return Response.ok().entity(resourcePolicyInfoDTO).build();
-                } else {
-                    String errorMessage =
-                            "Error while validating the resource policy xml content for the API : " + apiId;
-                    RestApiUtil.handleInternalServerError(errorMessage, log);
-                }
-            } else {
-                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
-                RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-        } catch (APIManagementException | FaultGatewaysException e) {
-            String errorMessage = "Error while retrieving the API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
+        String updatedPolicyContent = ApisApiServiceImplUtils
+                .updateAPIResourcePoliciesByPolicyId(apiId, organization, resourcePolicyId, body.getContent());
+        ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
+                .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
+        return Response.ok().entity(resourcePolicyInfoDTO).build();
     }
 
     /**

@@ -200,28 +200,6 @@ public class RestApiPublisherUtils {
     }
 
     /**
-     * This method will validate the given xml content for the syntactical correctness
-     *
-     * @param xmlContent string of xml content
-     * @return true if the xml content is valid, false otherwise
-     * @throws APIManagementException
-     */
-    public static boolean validateXMLSchema(String xmlContent) throws APIManagementException {
-        xmlContent = "<xml>" + xmlContent + "</xml>";
-        DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
-        factory.setValidating(false);
-        factory.setNamespaceAware(false);
-        try {
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            builder.parse(new InputSource(new StringReader(xmlContent)));
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            log.error("Error occurred while parsing the provided xml content.", e);
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * This method is to get the default SOAP API Resource definition. (SOAPAction, SOAP Request)
      * @return String
      * */

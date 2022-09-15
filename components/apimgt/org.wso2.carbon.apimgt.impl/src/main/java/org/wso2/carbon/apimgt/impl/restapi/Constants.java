@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public class Constants {
     public static final String CHARSET = "UTF-8";
 
+    public static final String IN_SEQUENCE = "in";
+    public static final String OUT_SEQUENCE = "out";
+
     public enum TypeEnum {
         HTTP("HTTP"),
         WS("WS"),

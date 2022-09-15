@@ -74,8 +74,11 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
+import org.wso2.carbon.apimgt.impl.restapi.Constants;
+import org.wso2.carbon.apimgt.impl.restapi.PublisherUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -1153,6 +1156,12 @@ public class ApisApiServiceImplUtils {
         return policyId;
     }
 
+    /**
+     * @param operationPolicyId Operation policy ID
+     * @param apiId             API UUID
+     * @param organization      Tenant organization
+     * @throws APIManagementException when deleting API specific operation policy fails
+     */
     public static void deleteAPISpecificOperationPolicyByPolicyId(String operationPolicyId, String apiId,
                                                                   String organization)
             throws APIManagementException {
@@ -1172,4 +1181,97 @@ public class ApisApiServiceImplUtils {
                     ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, operationPolicyId));
         }
     }
+
+    /**
+     * @param apiId        API UUID
+     * @param organization Tenant organization
+     * @param sequenceType Sequence type
+     * @param resourcePath Resource path
+     * @param verb         HTTP verb
+     * @return Resource policy
+     * @throws APIManagementException when getting resource policy fails
+     */
+    public static String getAPIResourcePolicies(String apiId, String organization,
+                                                String sequenceType, String resourcePath, String verb)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        API api = apiProvider.getLightweightAPIByUUID(apiId, organization);
+        CommonUtils.checkAPIType(APIConstants.API_TYPE_SOAPTOREST, api.getType());
+        if (StringUtils.isEmpty(sequenceType) || !(Constants.IN_SEQUENCE.equals(sequenceType)
+                || Constants.OUT_SEQUENCE.equals(sequenceType))) {
+            throw new APIManagementException("Sequence type should be either of the values from 'in' or 'out'",
+                    ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
+        }
+        String resourcePolicy = SequenceUtils.getRestToSoapConvertedSequence(api, sequenceType);
+        if (StringUtils.isEmpty(resourcePath) && StringUtils.isEmpty(verb)) {
+            return resourcePolicy;
+        }
+        if (StringUtils.isNotEmpty(resourcePath) && StringUtils.isNotEmpty(verb)) {
+            try {
+                JSONObject sequenceObj = (JSONObject) new JSONParser().parse(resourcePolicy);
+                JSONObject resultJson = new JSONObject();
+                String key = resourcePath + "_" + verb;
+                JSONObject sequenceContent = (JSONObject) sequenceObj.get(key);
+                if (sequenceContent == null) {
+                    String errorMessage = "Cannot find any resource policy for Resource path : " + resourcePath +
+                            " with type: " + verb;
+                    throw new APIManagementException(errorMessage, ExceptionCodes.RESOURCE_NOT_FOUND);
+                }
+                resultJson.put(key, sequenceObj.get(key));
+                return resultJson.toJSONString();
+            } catch (ParseException e) {
+                throw new APIManagementException("Error while retrieving the resource policies for the API : " + apiId,
+                        ExceptionCodes.JSON_PARSE_ERROR);
+            }
+        } else if (StringUtils.isEmpty(resourcePath)) {
+            throw new APIManagementException("Resource path cannot be empty for the defined verb: " + verb,
+                    ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
+        } else if (StringUtils.isEmpty(verb)) {
+            throw new APIManagementException("HTTP verb cannot be empty for the defined resource path: " + resourcePath,
+                    ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
+        }
+        return "";
+    }
+
+    /**
+     * @param apiId            API UUID
+     * @param organization     Tenant organization
+     * @param resourcePolicyId Resource policy ID
+     * @param xmlContent       Policy xml content
+     * @return Updates resource policy
+     * @throws APIManagementException when updating a resource policy fails
+     */
+    public static String updateAPIResourcePoliciesByPolicyId(String apiId, String organization,
+                                                             String resourcePolicyId, String xmlContent)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        CommonUtils.checkAPIType(APIConstants.API_TYPE_SOAPTOREST, api.getType());
+        if (StringUtils.isEmpty(resourcePolicyId)) {
+            String errorMessage = "Resource id should not be empty to update a resource policy.";
+            throw new APIManagementException(errorMessage, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        }
+
+        boolean isValidSchema = PublisherUtils.validateXMLSchema(xmlContent);
+        if (isValidSchema) {
+            List<SOAPToRestSequence> sequence = api.getSoapToRestSequences();
+            for (SOAPToRestSequence soapToRestSequence : sequence) {
+                if (soapToRestSequence.getUuid().equals(resourcePolicyId)) {
+                    soapToRestSequence.setContent(xmlContent);
+                    break;
+                }
+            }
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
+            try {
+                apiProvider.updateAPI(api, originalAPI);
+            } catch (FaultGatewaysException e) {
+                throw new APIManagementException("Error while updating the API with resource policies",
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
+            SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId, xmlContent);
+            return SequenceUtils.getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
+        }
+        return "";
+    }
+
 }
