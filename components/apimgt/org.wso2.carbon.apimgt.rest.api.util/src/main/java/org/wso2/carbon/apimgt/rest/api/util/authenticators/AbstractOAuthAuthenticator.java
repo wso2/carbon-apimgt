@@ -100,9 +100,6 @@ public abstract class AbstractOAuthAuthenticator {
             Map<String, String> var = new HashMap<String, String>();
             //check scopes with what we have
             String templateString = ((URITemplate) template).getUriTemplate();
-            if (log.isDebugEnabled()) {
-                log.debug("URITemplate string: " + templateString);
-            }
             try {
                 templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
             } catch (URITemplateException e) {

@@ -50,6 +50,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -146,10 +147,19 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
             String[] scopes = scopeClaim.split(JwtTokenConstants.SCOPE_DELIMITER);
+            if (log.isDebugEnabled()) {
+                log.debug("scopes after spliting from scope delimiter: " + Arrays.toString(scopes));
+            }
             scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                     .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                     .toArray(size -> new String[size]);
+            if (log.isDebugEnabled()) {
+                log.debug("scopes after filtering: " + Arrays.toString(scopes));
+            }
             oauthTokenInfo.setScopes(scopes);
+            if (log.isDebugEnabled()) {
+                log.debug("scopes available in oauthTokenInfo: " + Arrays.toString(oauthTokenInfo.getScopes()));
+            }
 
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
