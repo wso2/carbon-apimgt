@@ -211,7 +211,8 @@ public class PublisherCommonUtils {
                             JSONParser jsonParser = new JSONParser();
                             JSONObject originalEndpointConfig = (JSONObject) jsonParser
                                     .parse(originalAPI.getEndpointConfig());
-                            String encryptedSecretKey = (String) originalEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                            String encryptedSecretKey = (String) originalEndpointConfig
+                                    .get(APIConstants.AMZN_SECRET_KEY);
                             endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                             apiDtoToUpdate.setEndpointConfig(endpointConfig);
                         } catch (ParseException e) {
