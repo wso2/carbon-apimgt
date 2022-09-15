@@ -6222,11 +6222,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean isValidContext(String providerName, String apiName, String contextTemplate, String userName,
                                   String organization) throws APIManagementException {
+        providerName = (StringUtils.isBlank(providerName)) ? userName : providerName;
         if (isApiNameExist(apiName, organization)) {
             if (!contextTemplate.startsWith("/")) {
                 contextTemplate = "/" + contextTemplate;
             }
-            List<String> versions = getApiVersionsMatchingApiNameAndOrganization(apiName, userName, organization);
+            List<String> versions = getApiVersionsMatchingApiNameAndOrganization(apiName, providerName, organization);
             for (String version : versions) {
                 APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
                 String apiUUID = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, organization);
