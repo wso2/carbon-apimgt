@@ -21,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +34,7 @@ public class GZIPUtils {
     private static final Log log = LogFactory.getLog(GZIPUtils.class);
     private static final int BUFFER_SIZE = 1028;
 
-    public static void compressFile(String sourcePath, String destinationPath) throws APIManagementException{
+    public static void compressFile(String sourcePath, String destinationPath) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Compressing file : " + sourcePath + " to : " + destinationPath);
         }
@@ -53,7 +54,8 @@ public class GZIPUtils {
             }
             gzipOutputStream.finish();
         } catch (IOException e) {
-            throw new APIManagementException("Error while compressing file at " + sourcePath + " to" + destinationPath, e);
+            throw new APIManagementException("Error while compressing file at " + sourcePath + " to" + destinationPath,
+                    e, ExceptionCodes.INTERNAL_ERROR);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
             IOUtils.closeQuietly(fileOutputStream);
@@ -64,7 +66,7 @@ public class GZIPUtils {
     public static File constructZippedResponse(Object data) throws APIManagementException {
         String tmpSourceFileName = System.currentTimeMillis() + APIConstants.JSON_FILE_EXTENSION;
         String tmpDestinationFileName = System.currentTimeMillis() + APIConstants.JSON_GZIP_FILENAME_EXTENSION;
-        String sourcePath = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator  + tmpSourceFileName;
+        String sourcePath = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator + tmpSourceFileName;
         String destinationPath = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator + tmpDestinationFileName;
         File zippedResponse;
 
@@ -78,7 +80,7 @@ public class GZIPUtils {
             compressFile(sourcePath, destinationPath);
             zippedResponse = new File(destinationPath);
         } catch (IOException e) {
-            throw new APIManagementException("Error while constructing zipped response..", e);
+            throw new APIManagementException("Error while constructing zipped response..", e, ExceptionCodes.INTERNAL_ERROR);
         } finally {
             IOUtils.closeQuietly(fileWriter);
         }

@@ -18,15 +18,29 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class OperationPoliciesApiServiceImplUtils {
+
+    private static final Log log = LogFactory.getLog(OperationPoliciesApiServiceImplUtils.class);
 
     private OperationPoliciesApiServiceImplUtils() {
     }
@@ -61,6 +75,20 @@ public class OperationPoliciesApiServiceImplUtils {
         return operationPolicyData;
     }
 
+    public static OperationPolicySpecification getPolicySpecification(String fileContentType, String jsonContent)
+            throws APIManagementException {
+        try {
+            if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
+                jsonContent = CommonUtil.yamlToJson(jsonContent);
+            }
+            return APIUtil.getValidatedOperationPolicySpecification(jsonContent);
+        } catch (IOException e) {
+            String errorMessage = "Error occurred while validating the policy specification";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
+        }
+    }
+
     /**
      * @param policyData       Operation policy data
      * @param policyDefinition Operation policy definition object
@@ -81,6 +109,139 @@ public class OperationPoliciesApiServiceImplUtils {
         }
 
         policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+    }
+
+    /**
+     * @param policySpecification Operation policy specification
+     * @param operationPolicyData Operation policy metadata
+     * @param organization        Organization
+     * @return Policy ID of the created policy
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static String addCommonOperationPolicy(OperationPolicySpecification policySpecification,
+                                                  OperationPolicyData operationPolicyData, String organization)
+            throws APIManagementException {
+        String policyId;
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        OperationPolicyData existingPolicy =
+                apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(),
+                        policySpecification.getVersion(), organization, false);
+        if (existingPolicy == null) {
+            policyId = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
+            if (log.isDebugEnabled()) {
+                log.debug("A common operation policy has been added with name "
+                        + policySpecification.getName());
+            }
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_ALREADY_EXISTS,
+                    policySpecification.getName(), policySpecification.getVersion()));
+        }
+        return policyId;
+    }
+
+    /**
+     * @param policyId     Operation policy ID
+     * @param organization Organization
+     * @return True if policy was deleted successfully
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static boolean deleteCommonOperationPolicyByPolicyId(String policyId, String organization)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        OperationPolicyData existingPolicy =
+                apiProvider.getCommonOperationPolicyByPolicyId(policyId, organization, false);
+        if (existingPolicy != null) {
+            apiProvider.deleteOperationPolicyById(policyId, organization);
+            if (log.isDebugEnabled()) {
+                log.debug("The common operation policy " + policyId + " has been deleted");
+            }
+            return true;
+        } else {
+            throw new APIManagementException("Couldn't retrieve an existing API policy with ID: "
+                    + policyId, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
+                    policyId));
+        }
+    }
+
+    /**
+     * @param name         Operation policy name
+     * @param version      Operation policy version
+     * @param organization Organization
+     * @return List of operation policies
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static List<OperationPolicyData> getAllCommonOperationPolicies(String name, String version,
+                                                                          String organization)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version,
+                organization, false);
+        if (policyData != null) {
+            List<OperationPolicyData> commonOperationPolicyLIst = new ArrayList<>();
+            commonOperationPolicyLIst.add(policyData);
+            return commonOperationPolicyLIst;
+        } else {
+            String apiManagementExceptionErrorMessage =
+                    "Couldn't retrieve an existing common policy with Name: " + name + " and Version: "
+                            + version;
+            throw new APIMgtResourceNotFoundException(apiManagementExceptionErrorMessage,
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name,
+                            version));
+        }
+    }
+
+    /**
+     * @param organization Organization
+     * @return List of operation policies
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static List<OperationPolicyData> getAllCommonOperationPolicies(String organization)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        return apiProvider.getAllCommonOperationPolicies(organization);
+    }
+
+    /**
+     * @param operationPolicyId      Operation policy ID
+     * @param organization           Organization
+     * @param isWithPolicyDefinition Whether to return policy content
+     * @return Operation policy
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static OperationPolicyData getCommonOperationPolicyByPolicyId(String operationPolicyId, String organization,
+                                                                         boolean isWithPolicyDefinition)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        OperationPolicyData existingPolicy =
+                apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, isWithPolicyDefinition);
+        if (existingPolicy != null) {
+            return existingPolicy;
+        } else {
+            throw new APIManagementException("Couldn't retrieve an existing common policy with ID: "
+                    + operationPolicyId, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
+                    operationPolicyId));
+        }
+    }
+
+    /**
+     * @param name         Operation policy name
+     * @param version      Operation policy version
+     * @param organization Organization
+     * @return Operation policy
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static OperationPolicyData exportOperationPolicy(String name, String version, String organization)
+            throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version, organization,
+                true);
+        if (policyData != null) {
+            return policyData;
+        } else {
+            throw new APIManagementException(
+                    "Couldn't retrieve an existing common policy with Name: " + name + " and Version: " + version,
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name, version));
+        }
     }
 
     /**

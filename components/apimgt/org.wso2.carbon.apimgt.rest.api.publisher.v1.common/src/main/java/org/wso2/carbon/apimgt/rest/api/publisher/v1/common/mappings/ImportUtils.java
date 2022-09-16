@@ -32,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -88,7 +87,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
-import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -385,7 +383,7 @@ public class ImportUtils {
                         "was updated and not deployed in any of the gateway environments.");
             }
             return importedApi;
-        } catch (CryptoException | IOException e) {
+        } catch (IOException e) {
             throw new APIManagementException(
                     "Error while reading API meta information from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_META_DATA);
@@ -394,9 +392,6 @@ public class ImportUtils {
         } catch (APIMgtAuthorizationFailedException e) {
             throw new APIManagementException("Please enable preserveProvider property for cross tenant API Import.", e,
                     ExceptionCodes.TENANT_MISMATCH);
-        } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing the endpoint configuration of the API",
-                    ExceptionCodes.JSON_PARSE_ERROR);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API: ";
             if (importedApi != null) {

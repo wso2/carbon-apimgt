@@ -145,7 +145,8 @@ public class OAS2Parser extends APIDefinition {
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
                 } else {
                     throw new
-                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy",
+                            ExceptionCodes.MOCK_HTTP_METHOD_MISSING);
                 }
                 StringBuilder genCode = new StringBuilder();
                 boolean hasJsonPayload = false;
@@ -360,7 +361,8 @@ public class OAS2Parser extends APIDefinition {
                         if (StringUtils.isNotBlank(firstScope)) {
                             Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
                             if (scope == null) {
-                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                                        ExceptionCodes.SCOPE_NOT_FOUND);
                             }
                             template.setScope(scope);
                             template.setScopes(scope);
@@ -453,7 +455,7 @@ public class OAS2Parser extends APIDefinition {
      * @param swagger swagger object
      * @return Scope set
      */
-    private Set<Scope> getScopesFromExtensions(Swagger swagger) throws APIManagementException {
+    private Set<Scope> getScopesFromExtensions(Swagger swagger) {
         Set<Scope> scopeList = new LinkedHashSet<>();
         Map<String, Object> extensions = swagger.getVendorExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
@@ -686,7 +688,8 @@ public class OAS2Parser extends APIDefinition {
                         JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
                         validationResponse.setJsonContent(jsonNode.toString());
                     } catch (IOException e) {
-                        throw new APIManagementException("Error while reading API definition yaml", e);
+                        throw new APIManagementException("Error while reading API definition yaml", e,
+                                ExceptionCodes.YAML_PARSE_ERROR);
                     }
                 } else {
                     validationResponse.setJsonContent(apiDefinition);
@@ -1066,10 +1069,10 @@ public class OAS2Parser extends APIDefinition {
         mapper.addMixIn(Response.class, ResponseSchemaMixin.class);
         try {
             //this is to remove responesObject from swagger content
-            String modifiedSwaggerString = removeResponsesObject(swaggerObj, new String(mapper.writeValueAsBytes(swaggerObj)));
-            return modifiedSwaggerString;
+            return removeResponsesObject(swaggerObj, new String(mapper.writeValueAsBytes(swaggerObj)));
         } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while generating Swagger json from model", e);
+            throw new APIManagementException("Error while generating Swagger json from model", e,
+                    ExceptionCodes.JSON_PARSE_ERROR);
         }
     }
 
@@ -1345,9 +1348,8 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swaggerContent resource json
      * @return boolean
-     * @throws APIManagementException
      */
-    private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
+    private boolean isDefaultGiven(String swaggerContent) {
         Swagger swagger = getSwagger(swaggerContent);
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
@@ -1477,9 +1479,8 @@ public class OAS2Parser extends APIDefinition {
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param swagger swagger definition
      * @return
-     * @throws APIManagementException
      */
-    private Swagger processLegacyScopes(Swagger swagger) throws APIManagementException {
+    private Swagger processLegacyScopes(Swagger swagger) {
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         OAuth2Definition oAuth2Definition = new OAuth2Definition();
@@ -1510,9 +1511,8 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swagger resource json
      * @return Swagger
-     * @throws APIManagementException
      */
-    private Swagger injectOtherScopesToDefaultScheme(Swagger swagger) throws APIManagementException {
+    private Swagger injectOtherScopesToDefaultScheme(Swagger swagger) {
         //Get security definitions from swagger
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         List<String> otherSetOfSchemes = new ArrayList<>();
@@ -1575,9 +1575,8 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swagger Swagger
      * @return Swagger
-     * @throws APIManagementException
      */
-    private Swagger injectOtherResourceScopesToDefaultScheme(Swagger swagger) throws APIManagementException {
+    private Swagger injectOtherResourceScopesToDefaultScheme(Swagger swagger) {
         List<String> schemes = getOtherSchemes();
 
         Map<String, Path> paths = swagger.getPaths();

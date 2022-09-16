@@ -100,6 +100,7 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -138,6 +139,9 @@ public class OASParserUtil {
     private static final String REF_PREFIX = "#/components/";
     private static final String ARRAY_DATA_TYPE = "array";
     private static final String OBJECT_DATA_TYPE = "object";
+
+    private static final String OPENAPI_ERROR_MESSAGE = "Cannot update destination swagger"
+            + " because it is not in OpenAPI format";
 
     static class SwaggerUpdateContext {
         private final Paths paths = new Paths();
@@ -201,7 +205,8 @@ public class OASParserUtil {
         try {
             rootNode = mapper.readTree(apiDefinition.getBytes());
         } catch (IOException e) {
-            throw new APIManagementException("Error occurred while parsing OAS definition", e);
+            throw new APIManagementException("Error occurred while parsing OAS definition", e,
+                    ExceptionCodes.OPENAPI_PARSE_EXCEPTION);
         }
         ObjectNode node = (ObjectNode) rootNode;
         JsonNode openapi = node.get("openapi");
@@ -213,7 +218,8 @@ public class OASParserUtil {
             return SwaggerVersion.SWAGGER;
         }
 
-        throw new APIManagementException("Invalid OAS definition provided.");
+        throw new APIManagementException("Invalid OAS definition provided.",
+                ExceptionCodes.MALFORMED_OPENAPI_DEFINITON);
     }
 
     public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
@@ -224,7 +230,7 @@ public class OASParserUtil {
         } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
             return oas2Parser.generateExample(apiDefinition);
         } else {
-            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+            throw new APIManagementException(OPENAPI_ERROR_MESSAGE, ExceptionCodes.UNRECOGNIZED_OPENAPI_DEFINITON);
         }
     }
 
@@ -795,7 +801,7 @@ public class OASParserUtil {
             return masterSwagger;
         } else {
             throw new APIManagementException("Could not find a master swagger file with the name of swagger.json " +
-                    "/swagger.yaml");
+                    "/swagger.yaml", ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -818,7 +824,8 @@ public class OASParserUtil {
         File archiveDirectory = null;
         if (listOfFiles != null) {
             if (listOfFiles.length > 1) {
-                throw new APIManagementException("Swagger Definitions should be placed under one root folder.");
+                throw new APIManagementException("Swagger Definitions should be placed under one root folder.",
+                        ExceptionCodes.INTERNAL_ERROR);
             }
             for (File file: listOfFiles) {
                 if (file.isDirectory()) {
@@ -830,15 +837,16 @@ public class OASParserUtil {
         //Verify whether the zipped input is archive or file.
         //If it is a single  swagger file without remote references it can be imported directly, without zipping.
         if (archiveDirectory == null) {
-            throw new APIManagementException("Could not find an archive in the given ZIP file.");
+            throw new APIManagementException("Could not find an archive in the given ZIP file.",
+                    ExceptionCodes.SWAGGER_ARCHIVE_MISSING);
         }
         File masterSwagger = checkMasterSwagger(archiveDirectory);
         String content;
         try {
             InputStream masterInputStream = new FileInputStream(masterSwagger);
-            content = IOUtils.toString(masterInputStream, APIConstants.DigestAuthConstants.CHARSET);
+            content = IOUtils.toString(masterInputStream, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new APIManagementException("Error reading master swagger file" + e);
+            throw new APIManagementException("Error reading master swagger file" + e, ExceptionCodes.INTERNAL_ERROR);
         }
         String openAPIContent = "";
         SwaggerVersion version;
@@ -856,7 +864,8 @@ public class OASParserUtil {
             try {
                 openAPIContent = Yaml.pretty().writeValueAsString(swagger);
             } catch (IOException e) {
-                throw new APIManagementException("Error in converting swagger to openAPI content. " + e);
+                throw new APIManagementException("Error in converting swagger to openAPI content. " + e,
+                        ExceptionCodes.INTERNAL_ERROR);
             }
         }
         APIDefinitionValidationResponse apiDefinitionValidationResponse;
@@ -1146,7 +1155,8 @@ public class OASParserUtil {
             if (StringUtils.isNotBlank(scopeName)) {
                 Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
                 if (scope == null) {
-                    throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                    throw new APIManagementException("Resource Scope '" + scopeName + "' not found.",
+                            ExceptionCodes.SCOPE_NOT_FOUND);
                 }
                 template.setScopes(scope);
             }
@@ -1584,9 +1594,8 @@ public class OASParserUtil {
      *
      * @param extensions Map<String, Object>
      * @return security disable or enable value as String
-     * @throws APIManagementException throws if an error occurred
      */
-    public static boolean getDisableSecurity(Map<String, Object> extensions) throws APIManagementException {
+    public static boolean getDisableSecurity(Map<String, Object> extensions) {
         boolean disableSecurity = false;
         if (extensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
             disableSecurity = Boolean.parseBoolean(String.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));

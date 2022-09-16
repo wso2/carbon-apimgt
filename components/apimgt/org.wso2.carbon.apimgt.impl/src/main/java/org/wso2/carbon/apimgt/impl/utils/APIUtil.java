@@ -93,16 +93,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.APIMgtInternalException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.LoginPostExecutor;
-import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
-import org.wso2.carbon.apimgt.api.OrganizationResolver;
-import org.wso2.carbon.apimgt.api.PasswordResolver;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -1453,6 +1444,18 @@ public final class APIUtil {
         throw new APIManagementException(msg, t);
     }
 
+    public static void handleExceptionWithCode(String msg, ErrorHandler code) throws APIManagementException {
+
+        log.error(msg);
+        throw new APIManagementException(msg, code);
+    }
+
+    public static void handleExceptionWithCode(String msg, Throwable t, ErrorHandler code) throws APIManagementException {
+
+        log.error(msg, t);
+        throw new APIManagementException(msg, t, code);
+    }
+
     public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {
 
         log.error(msg, t);
@@ -1746,13 +1749,16 @@ public final class APIUtil {
             }
         } catch (ClassNotFoundException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
-            throw new APIManagementException(msg, e);
+            log.error(msg, e);
+            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_FOUND);
         } catch (InstantiationException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
-            throw new APIManagementException(msg, e);
+            log.error(msg, e);
+            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_LOADED);
         } catch (IllegalAccessException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
-            throw new APIManagementException(msg, e);
+            log.error(msg, e);
+            throw new APIManagementException(ExceptionCodes.EXTERNAL_STORE_CLASS_NOT_ACCESSIBLE);
         }
         return externalAPIStores;
     }
@@ -1932,7 +1938,7 @@ public final class APIUtil {
         } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
             return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
         } else {
-            throw new APIManagementException("No such a tier type : " + tierType);
+            throw new APIManagementException("No such a tier type : " + tierType, ExceptionCodes.UNSUPPORTED_TIER_TYPE);
         }
     }
 
@@ -2109,8 +2115,7 @@ public final class APIUtil {
 
         boolean authorized = false;
         if (userNameWithoutChange == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" +
-                    " the anonymous user");
+            throw new APIManagementException(ExceptionCodes.ANON_USER_ACTION);
         }
 
         if (isPermissionCheckDisabled()) {
@@ -2148,7 +2153,8 @@ public final class APIUtil {
             }
 
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while checking the user:" + userNameWithoutChange + " authorized or not", e);
+            throw new APIManagementException("Error while checking the user:" + userNameWithoutChange
+                    + " authorized or not", e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -2203,8 +2209,7 @@ public final class APIUtil {
     public static String[] getListOfRoles(String username) throws APIManagementException {
 
         if (username == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" +
-                    " the anonymous user");
+            throw new APIManagementException(ExceptionCodes.ANON_USER_ACTION);
         }
 
         String[] roles = getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username);
@@ -2222,7 +2227,7 @@ public final class APIUtil {
             return roles;
         } catch (UserStoreException e) {
             throw new APIManagementException("UserStoreException while trying the role list of the user " + username,
-                    e);
+                    e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
     }
 
@@ -3364,7 +3369,7 @@ public final class APIUtil {
      * @return true if exist and false if not
      * @throws APIManagementException If an error occurs
      */
-    public static boolean isRoleNameExist(String userName, String roleName) throws APIManagementException {
+    public static boolean isRoleNameExist(String userName, String roleName) {
 
         if (roleName == null || StringUtils.isEmpty(roleName.trim())) {
             return true;
@@ -4842,7 +4847,7 @@ public final class APIUtil {
                 return Boolean.parseBoolean(value.toString());
             } else {
                 throw new APIManagementException(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID
-                        + " config does not exist for tenant " + tenantDomain);
+                        + " config does not exist for tenant " + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
             }
         }
 
@@ -4890,7 +4895,8 @@ public final class APIUtil {
         try {
             configUrl = new URL(url);
         } catch (MalformedURLException e) {
-            handleException("URL is malformed", e);
+            handleExceptionWithCode("URL is malformed",
+                    e, ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR, "Malformed url"));
         }
         int port = configUrl.getPort();
         String protocol = configUrl.getProtocol();
@@ -5163,7 +5169,8 @@ public final class APIUtil {
                     tenantConfigCache.put(cacheName, jsonObject);
                     return jsonObject;
                 } catch (ParseException e) {
-                    throw new APIManagementException("Error occurred while converting to json",e);
+                    throw new APIManagementException("Error occurred while converting to json", e,
+                            ExceptionCodes.JSON_PARSE_ERROR);
                 }
             }
             return new JSONObject();
@@ -6184,7 +6191,7 @@ public final class APIUtil {
         } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
             policies = apiMgtDAO.getApplicationPolicies(tenantId);
         } else {
-            throw new APIManagementException("No such a policy type : " + policyLevel);
+            throw new APIManagementException("No such a policy type : " + policyLevel, ExceptionCodes.UNSUPPORTED_POLICY_TYPE);
         }
 
         for (Policy policy : policies) {
@@ -8465,7 +8472,8 @@ public final class APIUtil {
             }
             return adminUserName;
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error in getting tenant admin username", e);
+            throw new APIManagementException("Error in getting tenant admin username",
+                    e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -8583,7 +8591,8 @@ public final class APIUtil {
             }
             return endpointSecurityMap;
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing Endpoint Config json", e);
+            throw new APIManagementException("Error while parsing Endpoint Config json", e,
+                    ExceptionCodes.ENDPOINT_CONFIG_PARSE_FAILED);
         }
     }
 
@@ -8675,7 +8684,8 @@ public final class APIUtil {
             claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
             return claimValues;
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while retrieving user claim values from user store", e);
+            throw new APIManagementException("Error while retrieving user claim values from user store", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
     }
 
@@ -8816,7 +8826,7 @@ public final class APIUtil {
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.KeyManager.ISSUER)) {
                 if (openIdConnectConfigurations == null) {
-                    throw new APIMgtInternalException("Error in fetching Open ID configuration.");
+                    throw new APIManagementException(ExceptionCodes.OPENID_CONFIG);
                 }
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ISSUER,
                         openIdConnectConfigurations.getIssuer());

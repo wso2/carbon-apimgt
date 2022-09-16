@@ -34,6 +34,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
@@ -272,6 +273,19 @@ public abstract class AbstractKeyManager implements KeyManager {
     protected void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
+    }
+
+    /**
+     * common method to throw exception with exception code.
+     *
+     * @param msg this parameter contain error message that we need to throw.
+     * @param e   Exception object.
+     * @param code Error handler type
+     * @throws APIManagementException
+     */
+    protected void handleExceptionWithCode(String msg, Exception e, ErrorHandler code) throws APIManagementException {
+        log.error(msg, e);
+        throw new APIManagementException(msg, e, code);
     }
 
     protected void validateOAuthAppCreationProperties(OAuthApplicationInfo oAuthApplicationInfo)

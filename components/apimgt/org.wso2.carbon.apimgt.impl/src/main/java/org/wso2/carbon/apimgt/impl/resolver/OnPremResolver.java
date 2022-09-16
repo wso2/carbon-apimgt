@@ -21,10 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
-import org.wso2.carbon.apimgt.api.APIMgtInternalException;
-import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -78,7 +75,8 @@ public class OnPremResolver implements OrganizationResolver {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(organization);
         } catch (UserStoreException e) {
-            throw new APIMgtInternalException("Error while accessing tenant manager ", e);
+            throw new APIManagementException("Error while accessing tenant manager ", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
         return tenantId;
     }

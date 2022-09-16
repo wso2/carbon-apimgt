@@ -20,17 +20,21 @@ package org.wso2.carbon.apimgt.impl.restapi;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -77,8 +81,8 @@ public class CommonUtils {
 
         StringBuilder sb = new StringBuilder();
         String endpointType = Constants.TypeEnum.HTTP.value().toLowerCase();
-        if (StringUtils.isNotEmpty(protocol) && (Constants.TypeEnum.SSE.equals(protocol.toUpperCase())
-                || Constants.TypeEnum.WS.equals(protocol.toUpperCase()))) {
+        if (StringUtils.isNotEmpty(protocol) && (Constants.TypeEnum.SSE.toString().equals(protocol.toUpperCase())
+                || Constants.TypeEnum.WS.toString().equals(protocol.toUpperCase()))) {
             endpointType = "ws";
         }
         if (StringUtils.isNotEmpty(serviceUrl)) {
@@ -88,7 +92,7 @@ public class CommonUtils {
                     .append("\"production_endpoints\": {\"url\": \"")
                     .append(serviceUrl)
                     .append("\"}}");
-        } // TODO Need to check on the endpoint security
+        }
         return sb.toString();
     }
 
@@ -147,5 +151,49 @@ public class CommonUtils {
             }
         }
 
+    }
+
+    /**
+     * @param apiTypeConst Expected API type
+     * @param apiType      Type of the API
+     * @throws APIManagementException when API type is not the expected type
+     */
+    public static void checkAPIType(String apiTypeConst, String apiType) throws APIManagementException {
+        boolean isExpectedType = apiTypeConst.equals(apiType);
+        if (APIConstants.GRAPHQL_API.equals(apiTypeConst) && !isExpectedType) {
+            throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+        }
+        if (APIConstants.API_TYPE_SOAPTOREST.equals(apiTypeConst) && !isExpectedType) {
+            throw new APIManagementException(ExceptionCodes.API_NOT_SOAPTOREST);
+        }
+    }
+
+    /**
+     * @param apiId API UUID
+     * @return API or API revision UUID
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static String getAPIUUID(String apiId) throws APIManagementException {
+        String uuid;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            uuid = apiRevision.getApiUUID();
+        } else {
+            uuid = apiId;
+        }
+        return uuid;
+    }
+
+    public static String getErrorDescriptionFromErrorHandlers(List<ErrorHandler> errorHandlerList) {
+        String errorDescription = "";
+        if (!errorHandlerList.isEmpty()) {
+            for (ErrorHandler errorHandler : errorHandlerList) {
+                if (StringUtils.isNotBlank(errorDescription)) {
+                    errorDescription = errorDescription.concat(". ");
+                }
+                errorDescription = errorDescription.concat(errorHandler.getErrorDescription());
+            }
+        }
+        return errorDescription;
     }
 }

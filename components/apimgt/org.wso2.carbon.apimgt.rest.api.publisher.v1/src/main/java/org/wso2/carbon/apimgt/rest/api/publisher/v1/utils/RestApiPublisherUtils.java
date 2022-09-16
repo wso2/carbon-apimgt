@@ -27,6 +27,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -76,7 +77,8 @@ public class RestApiPublisherUtils {
 
         boolean folderCreated = docFile.mkdirs();
         if (!folderCreated) {
-            RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, log);
+            throw new APIManagementException("Failed to add content to the document " + documentId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
 
         InputStream docInputStream = null;
@@ -101,7 +103,7 @@ public class RestApiPublisherUtils {
                             documentId, organization);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
-            RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
+            throw new APIManagementException("Unable to read the file from path ", e, ExceptionCodes.INTERNAL_ERROR);
         } finally {
             IOUtils.closeQuietly(docInputStream);
         }
@@ -113,32 +115,35 @@ public class RestApiPublisherUtils {
      * @param monetizationProperties map of monetization properties
      * @return error message if there is an validation error with monetization properties.
      */
-    public static String validateMonetizationProperties(Map<String, String> monetizationProperties) {
+    public static void validateMonetizationProperties(Map<String, String> monetizationProperties) throws APIManagementException {
 
+        String errorMessage;
         if (monetizationProperties != null) {
             for (Map.Entry<String, String> entry : monetizationProperties.entrySet()) {
                 String monetizationPropertyKey = entry.getKey().trim();
                 String propertyValue = entry.getValue();
                 if (monetizationPropertyKey.contains(" ")) {
-                    return "Monetization property names should not contain space character. " +
+                    errorMessage = "Monetization property names should not contain space character. " +
                             "Monetization property '" + monetizationPropertyKey + "' "
                             + "contains space in it.";
+                    throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
                 }
                 // Maximum allowable characters of registry property name and value is 100 and 1000.
                 // Hence we are restricting them to be within 80 and 900.
                 if (monetizationPropertyKey.length() > 80) {
-                    return "Monetization property name can have maximum of 80 characters. " +
+                    errorMessage = "Monetization property name can have maximum of 80 characters. " +
                             "Monetization property '" + monetizationPropertyKey + "' + contains "
                             + monetizationPropertyKey.length() + "characters";
+                    throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
                 }
                 if (propertyValue.length() > 900) {
-                    return "Monetization property value can have maximum of 900 characters. " +
+                    errorMessage = "Monetization property value can have maximum of 900 characters. " +
                             "Property '" + monetizationPropertyKey + "' + "
                             + "contains a value with " + propertyValue.length() + "characters";
+                    throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
                 }
             }
         }
-        return "";
     }
 
     /**
@@ -195,28 +200,6 @@ public class RestApiPublisherUtils {
     }
 
     /**
-     * This method will validate the given xml content for the syntactical correctness
-     *
-     * @param xmlContent string of xml content
-     * @return true if the xml content is valid, false otherwise
-     * @throws APIManagementException
-     */
-    public static boolean validateXMLSchema(String xmlContent) throws APIManagementException {
-        xmlContent = "<xml>" + xmlContent + "</xml>";
-        DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
-        factory.setValidating(false);
-        factory.setNamespaceAware(false);
-        try {
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            builder.parse(new InputSource(new StringReader(xmlContent)));
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            log.error("Error occurred while parsing the provided xml content.", e);
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * This method is to get the default SOAP API Resource definition. (SOAPAction, SOAP Request)
      * @return String
      * */
@@ -233,7 +216,7 @@ public class RestApiPublisherUtils {
      * @return String
      * @throws IOException
      * */
-    public static String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws IOException {
+    public static String readInputStream (InputStream fileInputStream, Attachment fileDetail) throws APIManagementException {
 
         String content = null;
         if (fileInputStream != null) {
@@ -244,11 +227,17 @@ public class RestApiPublisherUtils {
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                 fileContentType = fileDetail.getContentType().toString();
             }
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            IOUtils.copy(fileInputStream, outputStream);
-            byte[] sequenceBytes = outputStream.toByteArray();
-            InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
-            content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+            try {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                IOUtils.copy(fileInputStream, outputStream);
+                byte[] sequenceBytes = outputStream.toByteArray();
+                InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+                content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+            } catch (IOException e) {
+                throw new APIManagementException("Error occurred while reading inputs", e,
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
+
         }
         return content;
     }
@@ -299,7 +288,8 @@ public class RestApiPublisherUtils {
             FileUtils.deleteQuietly(new File(exportAPIBasePath));
             return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (APIImportExportException | IOException e) {
-            throw new APIManagementException("Error while exporting operation policy", e);
+            throw new APIManagementException("Error while exporting operation policy", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 }

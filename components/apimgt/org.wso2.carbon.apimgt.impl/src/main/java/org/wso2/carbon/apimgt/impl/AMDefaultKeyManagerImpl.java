@@ -885,7 +885,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             scopeDTO = scopeClient.getScopeByName(name);
             return fromDTOToScope(scopeDTO);
         } catch (KeyManagerClientException ex) {
-            handleException("Cannot read scope : " + name, ex);
+            handleExceptionWithCode("Cannot read scope : " + name, ex, ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }

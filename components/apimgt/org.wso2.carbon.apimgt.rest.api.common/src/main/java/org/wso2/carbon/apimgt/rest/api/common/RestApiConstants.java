@@ -31,6 +31,7 @@ public final class RestApiConstants {
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
     public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     public static final String CONTENT_DISPOSITION_FILENAME = "filename";
+    public static final String CONTENT_DISPOSITION_ATTACHMENT_FILENAME = "attachment; filename=";
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_ZIP = "application/zip";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
@@ -47,6 +48,8 @@ public final class RestApiConstants {
     public static final String JWT_AUTHENTICATION = "jwt";
     public static final String JWT_TOKEN = "JWT_TOKEN";
     public static final String DOT = ".";
+
+    public static final String PATH_DELIMITER = "/";
     public static final long TIMESTAMP_SKEW_INSECONDS = 0;
 
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";

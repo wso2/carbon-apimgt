@@ -48,7 +48,7 @@ public class CommentMappingUtil {
      * @param comment comment object
      * @return CommentDTO
      */
-    public static CommentDTO fromCommentToDTO(Comment comment) throws APIManagementException {
+    public static CommentDTO fromCommentToDTO(Comment comment) {
 
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setId(comment.getId());
@@ -76,7 +76,7 @@ public class CommentMappingUtil {
      * @return CommentDTO
      */
     public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment, Map<String,
-            Map<String, String>> userClaimsMap) throws APIManagementException {
+            Map<String, String>> userClaimsMap) {
 
         CommentDTO commentDTO = fromCommentToDTO(comment);
         if (userClaimsMap.get(comment.getUser()) != null) {

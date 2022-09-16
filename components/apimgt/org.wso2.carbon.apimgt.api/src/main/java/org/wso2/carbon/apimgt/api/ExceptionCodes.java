@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.ExceptionConstants;
 import java.util.Arrays;
 
 /**
@@ -53,6 +54,7 @@ public enum ExceptionCodes implements ErrorHandler {
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
     DOCUMENT_INVALID_SOURCE_TYPE(900319, "Invalid document source type", 500, "Source type of the document '%s' is invalid"),
+    UNSUPPORTED_DOC_EXTENSION(900367, "Document file type not supported", 400, "Unsupported extension type of document file"),
 
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
@@ -90,6 +92,8 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_USED_RESOURCES(900344,
             "Cannot remove the resource paths because they are used by one or more API Products",
             409, "Cannot update API: %s:%s, due to the resources to remove are used by one or more API Products"),
+    API_DELETE_API_PRODUCT_USED_RESOURCES(900344, API_PRODUCT_USED_RESOURCES.getErrorMessage(), 409,
+            "Cannot delete API since the resources to remove are used by one or more API Products"),
     API_CATEGORY_INVALID(
             900345, "The API category is invalid.", 400, " The API category is invalid for API: %s:%s"),
     INVALID_ADDITIONAL_PROPERTIES(900346, "Invalid additional properties", 400,
@@ -115,6 +119,11 @@ public enum ExceptionCodes implements ErrorHandler {
     API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
+    ERROR_RETRIEVING_CATEGORY(900362, "Cannot retrieve categories", 500, "Error while retrieving categories for organization '%s'"),
+    PERSISTENCE_ERROR(900363, "Error occurred in registry transaction", 500, "'%s'"),
+    NO_VIEW_UPDATE_PERMISSIONS(900365, "Insufficient permission to view or update the API", 403, "Insufficient permission to view or update the API"),
+    API_DELETE_FAILED_SUBSCRIPTIONS(900366, "Failed to delete the API", 409, "Cannot remove the API as active subscriptions exist"),
+
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -128,12 +137,19 @@ public enum ExceptionCodes implements ErrorHandler {
     RESOURCE_RETRIEVAL_FAILED(900402, "Resource retrieval failed", 400, "Resource retrieval failed"),
     USER_MAPPING_RETRIEVAL_FAILED(900404, "User mapping retrieval failed", 404, "User mapping retrieval failed"),
     MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
+    URI_PARSE_ERROR(900405, "Error constructing the URI", 500, "'%s'"),
+    INVALID_OPERATION_TYPE(900406, "Unsupported '%s' operation", 400, "The '%s' operation type '%s' is invalid"),
+    VERB_NOT_FOUND(900407, "Missing '%s' type", 400, "Missing '%s type in URI templates"),
+    YAML_PARSE_ERROR(900408, "Yaml parse error", 500, "Yaml parse error"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
     ENDPOINT_ALREADY_EXISTS(900451, "Endpoint already exists", 409, "Endpoint already exists"),
     ENDPOINT_ADD_FAILED(900452, "Endpoint adding failed", 400, "Endpoint adding failed"),
     ENDPOINT_DELETE_FAILED(900453, "Endpoint Delete Failed", 400, "Endpoint Delete Failed"),
+    ENDPOINT_CRYPTO_ERROR(900454, "Error while encrypting/decrypting endpoint secrets", 500, "'%s'"),
+    ENDPOINT_CONFIG_PARSE_FAILED(900455, "Endpoint config parsing failed", 500, "Error occurred while parsing endpoint config json"),
+
 
     // Service Endpoint Discovery related codes
     ERROR_LOADING_SERVICE_DISCOVERY_IMPL_CLASS(900460, "Error loading service discovery impl class", 500,
@@ -210,6 +226,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
     USERSTORE_INITIALIZATION_FAILED(900615, "Unable to get the user store manager", 500,
             "Error while getting the user store manager from the realm"),
+    ANON_USER_ACTION(900616, "Operation not permitted", 401, "Attempt to execute privileged operation as the anonymous user"),
 
 
     // Labels related codes
@@ -237,6 +254,7 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_WSDL_AVAILABLE_FOR_API(900684, "WSDL Not Found", 404, "No WSDL Available for the API %s:%s"),
     CORRUPTED_STORED_WSDL(900685, "Corrupted Stored WSDL", 500, "The WSDL of the API %s is corrupted."),
     UNSUPPORTED_WSDL_FILE_EXTENSION(900686, "Unsupported WSDL File Extension", 400, "Unsupported extension. Only supported extensions are .wsdl and .zip"),
+    API_NOT_SOAPTOREST(900687, "Provided API is not a SOAP to REST converted API", 400, "Provided API is not a SOAP to REST converted API"),
 
 
     //OpenAPI/Swagger related codes [900750 900???)
@@ -247,6 +265,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OPENAPI_VERSION(900752, "Invalid OpenAPI Definition", 400, "Unsupported OpenAPI version provided. Please add with OpenAPI version 3.0.0."),
     INVALID_OPENAPI_NO_INFO_PATH(900753, "Invalid OpenAPI Definition", 400, "Required property 'info' or 'paths' are not provided."),
     OPENAPI_PARSE_EXCEPTION(900754, "Error while parsing OpenAPI definition", 400, "Error while parsing OpenAPI definition"),
+    OPENAPI_PARSE_EXCEPTION_WITH_CUSTOM_MESSAGE(OPENAPI_PARSE_EXCEPTION.getErrorCode(), OPENAPI_PARSE_EXCEPTION.getErrorMessage(), OPENAPI_PARSE_EXCEPTION.getHttpStatusCode(), "'%s'"),
     OPENAPI_NOT_FOUND(900755, "OpenAPI definition not found", 404, "OpenAPI definition not found"),
     OPENAPI_URL_MALFORMED(900756, "OpenAPI definition retrieval from URL failed", 400, "Exception occurred while retrieving the OpenAPI definition from URL"),
     OPENAPI_URL_NO_200(900757, "OpenAPI definition retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
@@ -254,6 +273,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OAS3_FOUND(900762, "Invalid OpenAPI V3 definition found", 400, "Invalid OpenAPI V3 definition found"),
     NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
     ERROR_REMOVING_EXAMPLES(900764, "Internal Error While Processing Swagger Definition", 500, "Couldn't remove one or more examples from the swagger definition"),
+    MOCK_HTTP_METHOD_MISSING(900765, "Could not find HTTP methods", 400, "Cannot find the HTTP method for the API Resource Mediation Policy"),
+    SWAGGER_ARCHIVE_MISSING(900766, "Could not find an archive in the given ZIP file", 500, "Could not find an archive in the given ZIP file"),
 
     //AsyncApi related error codes
     ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
@@ -276,6 +297,7 @@ public enum ExceptionCodes implements ErrorHandler {
     CONTAIN_SPECIAL_CHARACTERS(900706, "contain invalid characters", 400,
             "%s property value of payload cannot contain invalid characters"),
     INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
+    INVALID_PARAMETERS_PROVIDED(900708, "Invalid parameter(s) provided", 400, "Bad Request. Mandatory parameters are invalid/missing"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
@@ -283,7 +305,6 @@ public enum ExceptionCodes implements ErrorHandler {
             "GraphQL Schema cannot be empty or null"),
     UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900802, "Unsupported GraphQL Schema File Extension", 400,
             "Unsupported extension. Only supported extensions are .graphql, .txt and .sdl"),
-
 
     // Oauth related codes
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
@@ -302,6 +323,7 @@ public enum ExceptionCodes implements ErrorHandler {
     MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
             "Please provide the Authorization : Basic <> token to proceed."),
     INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the resource."),
+    OPENID_CONFIG(900916, "Missing OpenID configurations", 500, "Error in fetching Open ID configuration"),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
     OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
@@ -322,6 +344,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+    UNSUPPORTED_POLICY_TYPE(901001, "Policy type error", 400, "Unsupported policy type"),
+    UNSUPPORTED_TIER_TYPE(901002, "Policy tier error", 400, "Unsupported policy tier"),
+    INVALID_THROTTLE_TIER(901003, "Invalid throttle tier", 400, "Invalid x-throttling tier"),
 
     THROTTLING_POLICY_NOT_FOUND(903005, "Throttling Policy Not Found", 404,
             "Requested throttling policy with name '%s' and type '%s' not found"),
@@ -398,16 +423,27 @@ public enum ExceptionCodes implements ErrorHandler {
     COMMENT_NOT_FOUND(901102, "Comment not found", 404, "Couldn't retrieve comment"),
     COMMENT_LENGTH_EXCEEDED(901103, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
+    COMMENT_NO_PERMISSION(901104, "Insufficient permission", 403, "User '%s' doesn't have permission to access the comment with id '%s'"),
     NEED_ADMIN_PERMISSION(901100, "Admin permission needed", 403,
             "This user is not an admin"),
 
         //External Stores related codes
     EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
             "External Store Not Found"),
+    EXTERNAL_STORE_CLASS_NOT_FOUND(901201,
+            ExceptionConstants.EXTERNAL_STORE_ERROR_MSG, 404,
+            "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found"),
+    EXTERNAL_STORE_CLASS_NOT_LOADED(901202,
+            ExceptionConstants.EXTERNAL_STORE_ERROR_MSG, 500,
+            "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be loaded"),
+    EXTERNAL_STORE_CLASS_NOT_ACCESSIBLE(901203,
+            ExceptionConstants.EXTERNAL_STORE_ERROR_MSG, 500,
+            "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be accessed"),
 
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    CONFIG_NOT_FOUND(901301, "Config not found", 404, "Config not found in tenant-config"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
@@ -427,9 +463,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required application properties are missing"),
     APPLICATION_ALREADY_REGISTERED(901408, "Application already Registered", 409, "Application already Registered"),
     KEY_MAPPING_ALREADY_EXIST(901409, "Key Mappings already exists", 409, "Key Mappings already exists"),
-    TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
-    INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
+    TENANT_MISMATCH(901410,"Tenant mismatch", 400, "Tenant mismatch"),
+    INVALID_APPLICATION_PROPERTIES(901411, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),
+    DECRYPT_CONFIG_ERROR(901412, "Error while decrypting key manager configuration", 500, "Unable to decrypt the value"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
@@ -515,15 +552,17 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required attributes(s) %s for operation policy specification %s are either missing or empty"),
     OPERATION_POLICY_NOT_FOUND(902010, "Operation Policy Not Found", 404,
             "Requested operation policy with id '%s' not found"),
+    OPERATION_POLICY_SPEC_MISMATCH(902011, "Applied policy does not match specification", 400, "Applied policy for URI template does not match specification"),
 
     OPERATION_POLICY_ALREADY_EXISTS(903001, "The Operation Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
 
     OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "Operation Policy Not Found with given name and version", 404,
-            "Requested operation policy with name '%s' and version '%s not found"),
+            "Requested operation policy with name '%s' and version '%s' not found"),
 
     OPERATION_POLICY_GATEWAY_ERROR(903008,
             "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
             "Operation Policy cannot be imported due to the missing Gateway files."),
+    OPERATION_POLICY_USAGE_EXISTS(903009, "Operation policy usages exist", 500, "Policy usages exist for policy ID '%s'"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false),
@@ -531,7 +570,35 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true),
     REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
-    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false);
+    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false),
+
+    // monetization related codes
+
+    INVALID_API_STATE_MONETIZATION(904300, "Invalid API state", 400, "Invalid API state to configure monetization"),
+    MONETIZATION_STATE_CHANGE_FAILED(904301, "Could not change the monetization state", 500, "Monetization state change to '%s' failed"),
+
+    // audit related codes
+
+    AUDIT_SEND_FAILED(904200, "Error sending audit data", 500, "Sending audit data failed. Response code: '%s'"),
+    AUDIT_RETRIEVE_FAILED(904201, "Error retrieving audit data", 500, "Error retrieving audit data"),
+
+    // transport related codes
+    UNSUPPORTED_TRANSPORT_TYPE(904100, "Unsupported transport type", 400, "Transport type '%s' is not supported"),
+
+    // certificate related error codes
+
+    CERT_NOT_FOUND(904001, "Could not find the certificate", 404, "'Cannot find the certificate with alias '%s' in the truststore'"),
+    CERT_BAD_REQUEST(904002, "Bad Request", 400, "'%s"),
+    GET_CERT_CONTENT(904003, "Error getting the certificate content", 500, "'%s'"),
+    RETRIEVE_CERT(904004, "Could not retrieve the certificate", 500, "'%s"),
+    DELETE_CERT(904005, "Could not delete the certificate", 500, "Error while deleting the certificate for alias '%s'"),
+    GET_CERT_INFO(904006, "Could not get the certificate information", 500, "'%s"),
+    UPDATE_CERT(904007, "Could not update the certificate", 500, "'%s'"),
+    ENCODE_CERT(904008, "Error occurred while encoding the certificate", 500, "'%s"),
+    INTERNAL_SERVER_CERT(904009, "Internal server error", 500, "'%s'"),
+    EXPIRED_CERT(904010, "Certificate expired", 400, "'%s'"),
+    CERT_ALREADY_EXIST(904011, "Certificate alias already exists", 409, "The alias '%s' already exists in the truststore"),
+    DECODE_CERT(904012, "Error occurred while decoding the certificate", 500, "'%s'");
 
     private final long errorCode;
     private final String errorMessage;

@@ -26,6 +26,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -54,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleExceptionWithCode;
 
 /**
  * Util class used for sequence generation of the soap to rest converted operations.
@@ -204,7 +206,8 @@ public class SequenceUtils {
             String[] resources = collection.getChildren();
 
             if (resources == null) {
-                handleException("Cannot find any resource policies at the path: " + resourcePath);
+                handleExceptionWithCode("Cannot find any resource policies at the path: " + resourcePath,
+                        ExceptionCodes.RESOURCE_NOT_FOUND);
             }
             for (String path : resources) {
                 Collection resourcePolicyCollection = (Collection) registry.get(path);
@@ -229,11 +232,12 @@ public class SequenceUtils {
                 log.debug("Number of REST resources for " + resourcePath + " is: " + resources.length);
             }
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information", e, ExceptionCodes.INTERNAL_ERROR);
         } catch (RegistryException e) {
-            handleException("Error when create registry instance", e);
+            handleExceptionWithCode("Error when create registry instance", e, ExceptionCodes.INTERNAL_ERROR);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            handleException("Error while setting the resource policy content for the registry resource", e);
+            handleExceptionWithCode("Error while setting the resource policy content for the registry resource", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -254,7 +258,8 @@ public class SequenceUtils {
         String response = null;
         List<SOAPToRestSequence> sequences = api.getSoapToRestSequences();
         if (sequences == null) {
-            handleException("Cannot find any resource policies for the api " + api.getUuid());
+            handleExceptionWithCode("Cannot find any resource policies for the api " + api.getUuid(),
+                    ExceptionCodes.RESOURCE_NOT_FOUND);
         }
         boolean found = false;
         for (SOAPToRestSequence soapToRestSequence : sequences) {
@@ -276,7 +281,8 @@ public class SequenceUtils {
             }
         }
         if (!found) {
-            handleException("Cannot find any resource policies with policy id : " + resourceId);
+            handleExceptionWithCode("Cannot find any resource policies with policy id : " + resourceId,
+                    ExceptionCodes.RESOURCE_NOT_FOUND);
         }
         return response;
     }

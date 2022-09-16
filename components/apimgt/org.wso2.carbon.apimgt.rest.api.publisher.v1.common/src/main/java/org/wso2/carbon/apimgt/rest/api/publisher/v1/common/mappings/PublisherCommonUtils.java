@@ -122,7 +122,7 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
-            throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
+            throws APIManagementException, FaultGatewaysException {
 
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
@@ -146,7 +146,12 @@ public class PublisherCommonUtils {
         String oldEndpointConfigString = originalAPI.getEndpointConfig();
         JSONObject oldEndpointConfig = null;
         if (StringUtils.isNotBlank(oldEndpointConfigString)) {
-            oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+            try {
+                oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+            } catch (ParseException e) {
+                throw new APIManagementException("Error while parsing endpoint config",
+                        ExceptionCodes.JSON_PARSE_ERROR);
+            }
         }
         String oldProductionApiSecret = null;
         String oldSandboxApiSecret = null;
@@ -192,16 +197,28 @@ public class PublisherCommonUtils {
                 String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                 if (!StringUtils.isEmpty(secretKey)) {
                     if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
-                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                        apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                        try {
+                            String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                            apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                        } catch (CryptoException e) {
+                            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.ENDPOINT_CRYPTO_ERROR,
+                                    "Error while encrypting AWS secret key"));
+                        }
+
                     } else {
-                        JSONParser jsonParser = new JSONParser();
-                        JSONObject originalEndpointConfig = (JSONObject) jsonParser
-                                .parse(originalAPI.getEndpointConfig());
-                        String encryptedSecretKey = (String) originalEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                        apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                        try {
+                            JSONParser jsonParser = new JSONParser();
+                            JSONObject originalEndpointConfig = (JSONObject) jsonParser
+                                    .parse(originalAPI.getEndpointConfig());
+                            String encryptedSecretKey = (String) originalEndpointConfig
+                                    .get(APIConstants.AMZN_SECRET_KEY);
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                            apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                        } catch (ParseException e) {
+                            throw new APIManagementException("Error while parsing endpoint config",
+                                    ExceptionCodes.JSON_PARSE_ERROR);
+                        }
                     }
                 }
             }
@@ -368,12 +385,11 @@ public class PublisherCommonUtils {
      * @param oldProductionApiSecret existing production API secret
      * @param oldSandboxApiSecret    existing sandbox API secret
      * @param apidto                 API DTO
-     * @throws CryptoException        if an error occurs while encrypting and base64 encode
      * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
      */
     public static void encryptEndpointSecurityOAuthCredentials(Map endpointConfig, CryptoUtil cryptoUtil,
             String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto)
-            throws CryptoException, APIManagementException {
+            throws APIManagementException {
         // OAuth 2.0 backend protection: API Key and API Secret encryption
         String customParametersString;
         if (endpointConfig != null) {
@@ -409,9 +425,15 @@ public class PublisherCommonUtils {
                                         .toString())) {
                             String apiSecret = endpointSecurityProduction
                                     .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
-                            String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
-                            endpointSecurityProduction
-                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                            try {
+                                String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
+                                endpointSecurityProduction
+                                        .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                            } catch (CryptoException e) {
+                                throw new APIManagementException(ExceptionCodes
+                                        .from(ExceptionCodes.ENDPOINT_CRYPTO_ERROR,
+                                                "Error while encoding OAuth client secret"));
+                            }
                         } else if (StringUtils.isNotBlank(oldProductionApiSecret)) {
                             endpointSecurityProduction
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldProductionApiSecret);
@@ -455,9 +477,15 @@ public class PublisherCommonUtils {
                                         .toString())) {
                             String apiSecret = endpointSecuritySandbox
                                     .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
-                            String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
-                            endpointSecuritySandbox
-                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                            try {
+                                String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
+                                endpointSecuritySandbox
+                                        .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                            } catch (CryptoException e) {
+                                throw new APIManagementException(ExceptionCodes
+                                        .from(ExceptionCodes.ENDPOINT_CRYPTO_ERROR,
+                                                "Error while encoding OAuth client secret"));
+                            }
                         } else if (StringUtils.isNotBlank(oldSandboxApiSecret)) {
                             endpointSecuritySandbox
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldSandboxApiSecret);
@@ -760,11 +788,10 @@ public class PublisherCommonUtils {
      * @param organization  Organization Identifier
      * @return Created API object
      * @throws APIManagementException Error while creating the API
-     * @throws CryptoException        Error while encrypting
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
                                                            String organization)
-            throws APIManagementException, CryptoException {
+            throws APIManagementException {
         if (APIUtil.isOnPremResolver()) {
             String name = apiDto.getName();
             //replace all white spaces in the API Name
@@ -805,9 +832,15 @@ public class PublisherCommonUtils {
             if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
                 String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                 if (!StringUtils.isEmpty(secretKey)) {
-                    String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                    endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                    apiDto.setEndpointConfig(endpointConfig);
+                    try {
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        apiDto.setEndpointConfig(endpointConfig);
+                    } catch (CryptoException e) {
+                        throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.ENDPOINT_CRYPTO_ERROR,
+                                "Error while encrypting AWS secret key"));
+                    }
+
                 }
             }
         }
@@ -1205,11 +1238,10 @@ public class PublisherCommonUtils {
      * @param organization  Organization Identifier
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
-     * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI,
                                        String organization)
-            throws APIManagementException, FaultGatewaysException {
+            throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fail if user does not have access to the API or the API does not exist
@@ -1239,7 +1271,8 @@ public class PublisherCommonUtils {
                 for (String aRole : roles.split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
                     if (!isValidRole) {
-                        throw new APIManagementException("Role '" + aRole + "' Does not exist.");
+                        throw new APIManagementException("Role '" + aRole + "' Does not exist.",
+                                ExceptionCodes.ROLE_DOES_NOT_EXIST);
                     }
                 }
             }
@@ -1268,7 +1301,12 @@ public class PublisherCommonUtils {
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        apiProvider.updateAPI(existingAPI, unModifiedAPI);
+        try {
+            apiProvider.updateAPI(existingAPI, unModifiedAPI);
+        } catch (FaultGatewaysException e) {
+            throw new APIManagementException("Error while updating the API: " + apiId, ExceptionCodes.INTERNAL_ERROR);
+        }
+
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
         // instead of passing same

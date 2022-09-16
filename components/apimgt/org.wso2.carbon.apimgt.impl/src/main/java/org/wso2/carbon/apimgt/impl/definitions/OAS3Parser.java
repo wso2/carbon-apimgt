@@ -148,7 +148,8 @@ public class OAS3Parser extends APIDefinition {
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
                 } else {
                     throw new
-                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy",
+                            ExceptionCodes.MOCK_HTTP_METHOD_MISSING);
                 }
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
@@ -404,7 +405,8 @@ public class OAS3Parser extends APIDefinition {
                             if (StringUtils.isNoneBlank(firstScope)) {
                                 Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
                                 if (scope == null) {
-                                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                    throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                                            ExceptionCodes.SCOPE_NOT_FOUND);
                                 }
                                 template.setScope(scope);
                                 template.setScopes(scope);
@@ -418,7 +420,8 @@ public class OAS3Parser extends APIDefinition {
                             String firstScope = opScopes.get(0);
                             Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
                             if (scope == null) {
-                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                                        ExceptionCodes.SCOPE_NOT_FOUND);
                             }
                             template.setScope(scope);
                             template.setScopes(scope);
@@ -608,7 +611,7 @@ public class OAS3Parser extends APIDefinition {
      * @return API definition in string format
      * @throws APIManagementException if error occurred when generating API Definition
      */
-    private String generateAPIDefinition(SwaggerData swaggerData, OpenAPI openAPI) throws APIManagementException {
+    private String generateAPIDefinition(SwaggerData swaggerData, OpenAPI openAPI) {
         Set<SwaggerData.Resource> copy = new HashSet<>(swaggerData.getResources());
 
         Iterator<Map.Entry<String, PathItem>> itr = openAPI.getPaths().entrySet().iterator();
@@ -785,11 +788,9 @@ public class OAS3Parser extends APIDefinition {
      * @param oasDefinition OAS definition
      * @param swaggerData   API related Swagger data
      * @return Generated OAS definition
-     * @throws APIManagementException If an error occurred
      */
     @Override
-    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
-            throws APIManagementException {
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         removePublisherSpecificInfo(openAPI);
         return generateAPIDefinition(swaggerData, openAPI);
@@ -856,7 +857,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
+    public String getOASDefinitionForPublisher(API api, String oasDefinition) {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         if (openAPI.getComponents() == null) {
             openAPI.setComponents(new Components());
@@ -984,7 +985,7 @@ public class OAS3Parser extends APIDefinition {
      * @return Scope set
      * @throws APIManagementException if an error occurred
      */
-    private Set<Scope> getScopesFromExtensions(OpenAPI openAPI) throws APIManagementException {
+    private Set<Scope> getScopesFromExtensions(OpenAPI openAPI) {
         Set<Scope> scopeList = new LinkedHashSet<>();
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
@@ -1443,9 +1444,8 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param swaggerContent resource json
      * @return boolean
-     * @throws APIManagementException
      */
-    private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
+    private boolean isDefaultGiven(String swaggerContent) {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
 
         Components components = openAPI.getComponents();
@@ -1516,7 +1516,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
-    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
         Paths paths = openAPI.getPaths();
         for (String pathKey : paths.keySet()) {
@@ -1596,9 +1596,8 @@ public class OAS3Parser extends APIDefinition {
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param openAPI openAPI definition
      * @return
-     * @throws APIManagementException
      */
-    private OpenAPI processLegacyScopes(OpenAPI openAPI) throws APIManagementException {
+    private OpenAPI processLegacyScopes(OpenAPI openAPI) {
         Set<Scope> scopes = getScopesFromExtensions(openAPI);
 
         if (!scopes.isEmpty()) {
@@ -1962,10 +1961,9 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param swaggerContent String
      * @return String
-     * @throws APIManagementException
      */
     @Override
-    public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException {
+    public String processDisableSecurityExtension(String swaggerContent) {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
         Map<String, Object> apiExtensions = openAPI.getExtensions();
         if (apiExtensions == null) {

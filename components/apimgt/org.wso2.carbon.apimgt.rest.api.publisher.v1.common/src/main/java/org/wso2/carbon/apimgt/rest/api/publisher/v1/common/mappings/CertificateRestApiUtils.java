@@ -24,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -64,11 +63,15 @@ public class CertificateRestApiUtils {
      * @return : Base64 encoded certificate string.
      * @throws IOException :
      */
-    public static String generateEncodedCertificate(InputStream certificateInputStream) throws IOException {
+    public static String generateEncodedCertificate(InputStream certificateInputStream) throws APIManagementException {
 
-        byte[] certificateBytes = IOUtils.toByteArray(certificateInputStream);
-        byte[] encodedCert = Base64.encodeBase64(certificateBytes);
-        return new String(encodedCert, StandardCharset.UTF_8);
+       try {
+           byte[] certificateBytes = IOUtils.toByteArray(certificateInputStream);
+           byte[] encodedCert = Base64.encodeBase64(certificateBytes);
+           return new String(encodedCert, StandardCharset.UTF_8);
+       } catch (IOException e) {
+           throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.ENCODE_CERT, e.getMessage()));
+       }
     }
 
     /**
@@ -89,7 +92,8 @@ public class CertificateRestApiUtils {
                 return new ByteArrayInputStream(x509Certificate.getEncoded());
             }
         } catch (CertificateException e) {
-            throw new APIManagementException("Error while decoding the certificate", e);
+            throw new APIManagementException("Error while decoding the certificate", e,
+                    ExceptionCodes.from(ExceptionCodes.DECODE_CERT, e.getMessage()));
         }
         return null;
     }
@@ -281,7 +285,7 @@ public class CertificateRestApiUtils {
                         organization, alias));
             }
             String message = "Certificate for alias '" + alias + "' is not found.";
-            throw new APIMgtResourceNotFoundException(message);
+            throw new APIManagementException(message, ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
         }
         return clientCertificate;
     }

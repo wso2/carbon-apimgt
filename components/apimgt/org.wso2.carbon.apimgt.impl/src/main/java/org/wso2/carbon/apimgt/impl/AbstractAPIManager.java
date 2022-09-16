@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -121,7 +123,8 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while getting user registry for user:" + username;
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }
         apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
     }
@@ -258,8 +261,8 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
         } catch (GraphQLPersistenceException e) {
-            throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
-                    e);
+            throw new APIManagementException("Error while retrieving graphql definition from the persistence location",
+                    e, ExceptionCodes.INTERNAL_ERROR);
         }
         return definition;
     }
@@ -271,7 +274,8 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             definition = apiPersistenceInstance.getOASDefinition(new Organization(organization), apiId);
         } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
+            throw new APIManagementException("Error while retrieving OAS definition from the persistence location", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return definition;
     }
@@ -283,7 +287,8 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             definition = apiPersistenceInstance.getAsyncDefinition(new Organization(organization), apiId);
         } catch (AsyncSpecPersistenceException e) {
-            throw new APIManagementException("Error while retrieving Async definition from the persistance location", e);
+            throw new APIManagementException("Error while retrieving Async definition from the persistence location", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return definition;
     }
@@ -311,7 +316,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (DocumentationPersistenceException e) {
             String msg = "Failed to get documentations for api/product " + uuid;
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
         return convertedList;
     }
@@ -340,10 +345,11 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String msg = "Failed to get the document. Artifact corresponding to document id " + docId
                         + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_NOT_FOUND);
             }
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while retrieving document for id " + docId, e);
+            throw new APIManagementException("Error while retrieving document for id " + docId, e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return documentation;
     }
@@ -361,11 +367,12 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String msg = "Failed to get the document content. Artifact corresponding to document id " + docId
                         + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND);
             }
             return docContent;
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while retrieving document content ", e);
+            throw new APIManagementException("Error while retrieving document content ", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -615,6 +622,11 @@ public abstract class AbstractAPIManager implements APIManager {
     protected final void handleException(String msg, Exception e) throws APIManagementException {
 
         throw new APIManagementException(msg, e);
+    }
+
+    protected final void handleExceptionWithCode(String msg, Exception e, ErrorHandler code) throws APIManagementException {
+
+        throw new APIManagementException(msg, e, code);
     }
 
     protected final void handleException(String msg) throws APIManagementException {
@@ -1400,7 +1412,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
                 resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
             } catch (APIPersistenceException e) {
-                throw new APIManagementException("Error while retrieving the api for api product " + e);
+                throw new APIManagementException("Error while retrieving the api for api product " + e,
+                        ExceptionCodes.INTERNAL_ERROR);
             }
 
         }
@@ -1502,7 +1515,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 return thumbnail;
             }
         } catch (ThumbnailPersistenceException e) {
-            throw new APIManagementException("Error while accessing thumbnail resource ", e);
+            throw new APIManagementException("Error while accessing thumbnail resource ", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }

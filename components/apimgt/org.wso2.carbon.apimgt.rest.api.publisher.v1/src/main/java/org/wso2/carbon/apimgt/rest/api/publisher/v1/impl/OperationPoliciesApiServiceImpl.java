@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
@@ -51,8 +50,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +83,6 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             OperationPolicyDefinition ccPolicyDefinition = null;
             OperationPolicyDefinition synapseDefinition = null;
             OperationPolicySpecification policySpecification;
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             if (policySpecFileInputStream != null) {
@@ -98,10 +94,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();
                 }
-                if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
-                    jsonContent = CommonUtil.yamlToJson(jsonContent);
-                }
-                policySpecification = APIUtil.getValidatedOperationPolicySpecification(jsonContent);
+                policySpecification = OperationPoliciesApiServiceImplUtils
+                        .getPolicySpecification(fileContentType, jsonContent);
 
                 OperationPolicyData operationPolicyData = OperationPoliciesApiServiceImplUtils
                         .prepareOperationPolicyData(policySpecification, organization);
@@ -124,32 +118,22 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                             .preparePolicyDefinition(operationPolicyData, ccPolicyDefinition,
                                     choreoConnectPolicyDefinition, OperationPolicyDefinition.GatewayType.ChoreoConnect);
                 }
-                OperationPolicyData existingPolicy =
-                        apiProvider.getCommonOperationPolicyByPolicyName(policySpecification.getName(),
-                                policySpecification.getVersion(), organization, false);
-                String policyID;
-                if (existingPolicy == null) {
-                    policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
-                    if (log.isDebugEnabled()) {
-                        log.debug("A common operation policy has been added with name "
-                                + policySpecification.getName());
-                    }
-                } else {
-                    throw new APIManagementException("Existing common operation policy found for the same name.");
+
+                if (policySpecification != null) {
+                    String policyID = OperationPoliciesApiServiceImplUtils.addCommonOperationPolicy(policySpecification,
+                            operationPolicyData, organization);
+                    operationPolicyData.setPolicyId(policyID);
+                    OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil
+                            .fromOperationPolicyDataToDTO(operationPolicyData);
+                    URI createdPolicyUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION
+                            + RestApiConstants.PATH_DELIMITER + RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES
+                            + RestApiConstants.PATH_DELIMITER + policyID);
+                    return Response.created(createdPolicyUri).entity(createdPolicy).build();
                 }
-                operationPolicyData.setPolicyId(policyID);
-                OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil
-                        .fromOperationPolicyDataToDTO(operationPolicyData);
-                URI createdPolicyUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION + "/"
-                        + RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES + "/" + policyID);
-                return Response.created(createdPolicyUri).entity(createdPolicy).build();
             }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding a common operation policy." + e.getMessage();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while adding common operation policy",
-                    e, log);
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("An Error has occurred while adding common operation policy", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return null;
     }
@@ -162,37 +146,14 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      * @return ok if deleted successfully
      */
     @Override
-    public Response deleteCommonOperationPolicyByPolicyId(String operationPolicyId, MessageContext messageContext) {
+    public Response deleteCommonOperationPolicyByPolicyId(String operationPolicyId, MessageContext messageContext)
+            throws APIManagementException {
 
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            OperationPolicyData existingPolicy =
-                    apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, false);
-            if (existingPolicy != null) {
-                apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
-                if (log.isDebugEnabled()) {
-                    log.debug("The common operation policy " + operationPolicyId + " has been deleted");
-                }
-                return Response.ok().build();
-            } else {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing API policy with ID: "
-                        + operationPolicyId, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
-                        operationPolicyId));
-            }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
-                        operationPolicyId, e, log);
-            } else {
-                String errorMessage = "Error while deleting the common operation policy with ID: " + operationPolicyId
-                        + " " + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while deleting the common operation policy + "
-                    + operationPolicyId, e, log);
+        if (OperationPoliciesApiServiceImplUtils
+                .deleteCommonOperationPolicyByPolicyId(operationPolicyId, organization)) {
+            return Response.ok().build();
         }
         return null;
     }
@@ -208,65 +169,35 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
     @Override
     public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query,
                                                   MessageContext messageContext) throws APIManagementException {
-
-        String apiManagementExceptionErrorMessage = "";
         OperationPolicyDataListDTO policyListDTO = null;
+        List<OperationPolicyData> commonOperationPolicyList;
         String name = null;
         String version = null;
-        try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            // If name & version are given, it returns the policy data
-            if (query != null) {
-                Map<String, String> queryParamMap = OperationPoliciesApiServiceImplUtils.getQueryParams(query);
-                name = queryParamMap.get(ImportExportConstants.POLICY_NAME);
-                version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
+        // If name & version are given, it returns the policy data
+        if (query != null) {
+            Map<String, String> queryParamMap = OperationPoliciesApiServiceImplUtils.getQueryParams(query);
+            name = queryParamMap.get(ImportExportConstants.POLICY_NAME);
+            version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
 
-                apiManagementExceptionErrorMessage = "Error while retrieving the policy by name & version.";
-                OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version,
-                        organization, false);
+            commonOperationPolicyList = OperationPoliciesApiServiceImplUtils
+                    .getAllCommonOperationPolicies(name, version, organization);
+            policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(
+                    commonOperationPolicyList, 0, 1);
+        } else {
+            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-                // if not found, throw not found error
-                if (policyData != null) {
-                    List<OperationPolicyData> commonOperationPolicyLIst = new ArrayList<>();
-                    commonOperationPolicyLIst.add(policyData);
-                    policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(
-                            commonOperationPolicyLIst, 0, 1);
-                } else {
-                    apiManagementExceptionErrorMessage =
-                            "Couldn't retrieve an existing common policy with Name: " + name + " and Version: "
-                                    + version;
-                    throw new APIMgtResourceNotFoundException(apiManagementExceptionErrorMessage,
-                            ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name,
-                                    version));
-                }
-            } else {
-                offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-                apiManagementExceptionErrorMessage = "Error while retrieving the list of all common operation policies.";
+            // Since policy definition is bit bulky, we don't query the definition unnecessarily.
+            commonOperationPolicyList = OperationPoliciesApiServiceImplUtils
+                    .getAllCommonOperationPolicies(organization);
 
-                // Since policy definition is bit bulky, we don't query the definition unnecessarily.
-                List<OperationPolicyData> commonOperationPolicyLIst = apiProvider.getAllCommonOperationPolicies(
-                        organization);
-
-                // Set limit to the query param value or the count of all policies
-                limit = limit != null ? limit : commonOperationPolicyLIst.size();
-                policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(commonOperationPolicyLIst,
-                        offset, limit);
-            }
-            return Response.ok().entity(policyListDTO).build();
-
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                throw new APIManagementException(apiManagementExceptionErrorMessage,
-                        ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name,
-                                version));
-            } else {
-                apiManagementExceptionErrorMessage += e.getMessage();
-                RestApiUtil.handleInternalServerError(apiManagementExceptionErrorMessage, e, log);
-            }
+            // Set limit to the query param value or the count of all policies
+            limit = limit != null ? limit : commonOperationPolicyList.size();
+            policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(commonOperationPolicyList,
+                    offset, limit);
         }
-        return null;
+        return Response.ok().entity(policyListDTO).build();
     }
 
     /**
@@ -277,38 +208,16 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      * @return Operation policy DTO as response
      */
     @Override
-    public Response getCommonOperationPolicyByPolicyId(String operationPolicyId, MessageContext messageContext) {
+    public Response getCommonOperationPolicyByPolicyId(String operationPolicyId, MessageContext messageContext)
+            throws APIManagementException {
 
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            OperationPolicyData existingPolicy =
-                    apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, false);
-            if (existingPolicy != null) {
-                OperationPolicyDataDTO policyDataDTO =
-                        OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
-                return Response.ok().entity(policyDataDTO).build();
-            } else {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing common policy with ID: "
-                        + operationPolicyId, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
-                        operationPolicyId));
-            }
-
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
-                        operationPolicyId, e, log);
-            } else {
-                String errorMessage = "Error while getting the common operation policy with ID :" + operationPolicyId
-                        + " " + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An error has occurred while getting the common operation " +
-                    " policy with ID: " + operationPolicyId, e, log);
-        }
-        return null;
+        OperationPolicyData existingPolicy = OperationPoliciesApiServiceImplUtils
+                .getCommonOperationPolicyByPolicyId(operationPolicyId, organization, false);
+        OperationPolicyDataDTO policyDataDTO =
+                OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
+        return Response.ok().entity(policyDataDTO).build();
     }
 
     /**
@@ -319,38 +228,16 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
      * @return A zip file containing both (if exists) operation policy specification and policy definition
      */
     @Override
-    public Response getCommonOperationPolicyContentByPolicyId(String operationPolicyId, MessageContext messageContext) {
+    public Response getCommonOperationPolicyContentByPolicyId(String operationPolicyId, MessageContext messageContext)
+            throws APIManagementException {
 
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            OperationPolicyData policyData =
-                    apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, true);
-            if (policyData != null) {
-                File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, ExportFormat.YAML.name());
-                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + file.getName() + "\"").build();
-            } else {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing common policy with ID: "
-                        + operationPolicyId, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
-                        operationPolicyId));
-            }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PATH_OPERATION_POLICIES,
-                        operationPolicyId, e, log);
-            } else {
-                String errorMessage = "Error while getting the content of common operation policy with ID :"
-                        + operationPolicyId + " " + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError(
-                    "An error has occurred while getting the content of the common operation " +
-                            " policy with ID " + operationPolicyId, e, log);
-        }
-        return null;
+        OperationPolicyData policyData = OperationPoliciesApiServiceImplUtils
+                .getCommonOperationPolicyByPolicyId(operationPolicyId, organization, true);
+        File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, ExportFormat.YAML.name());
+        return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getName() + "\"").build();
     }
 
     /**
@@ -367,24 +254,16 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
     public Response exportOperationPolicy(String name, String version, String format, MessageContext messageContext)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version, organization,
-                true);
-        if (policyData != null) {
-            ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
-                    ExportFormat.valueOf(format.toUpperCase()) :
-                    ExportFormat.YAML;
-            File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, exportFormat.name());
-            return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + file.getName() + "\"").build();
-        } else {
-            // if not found, throw not found error
-            throw new APIManagementException(
-                    "Couldn't retrieve an existing common policy with Name: " + name + " and Version: " + version,
-                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name, version));
-        }
+        OperationPolicyData policyData = OperationPoliciesApiServiceImplUtils
+                .exportOperationPolicy(name, version, organization);
+        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
+                ExportFormat.valueOf(format.toUpperCase()) :
+                ExportFormat.YAML;
+        File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, exportFormat.name());
+        return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getName() + "\"").build();
     }
 
     /**

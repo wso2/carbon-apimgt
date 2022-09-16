@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
+import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
@@ -724,7 +725,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             defaultVersion = apiMgtDAO.getDefaultVersion(apiid);
         } catch (APIManagementException e) {
-            handleException("Error while getting default version :" + apiid.getApiName(), e);
+            String errorMessage = "Error while getting default version :" + apiid.getApiName();
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         return defaultVersion;
     }
@@ -736,7 +739,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             defaultVersion = apiMgtDAO.getPublishedDefaultVersion(apiid);
         } catch (APIManagementException e) {
-            handleException("Error while getting published default version :" + apiid.getApiName(), e);
+            String errorMessage = "Error while getting published default version :" + apiid.getApiName();
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         return defaultVersion;
     }
@@ -755,7 +760,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API updateAPI(API api, API existingAPI) throws APIManagementException {
 
         if (!existingAPI.getStatus().equals(api.getStatus())) {
-            throw new APIManagementException("Invalid API update operation involving API status changes");
+            throw new APIManagementException("Invalid API update operation involving API status changes",
+                    ExceptionCodes.UPDATE_STATE_CHANGE);
         }
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -786,7 +792,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
                     api.setMonetizationProperties(jsonObj);
                 } catch (ParseException e) {
-                    throw new APIManagementException("Error when parsing monetization properties ", e);
+                    throw new APIManagementException("Error when parsing monetization properties ", e,
+                            ExceptionCodes.JSON_PARSE_ERROR);
                 }
             }
         }
@@ -825,7 +832,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setCreatedTime(existingAPI.getCreatedTime());
             apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
+            throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
         }
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
@@ -837,7 +844,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setCreatedTime(existingAPI.getCreatedTime());
             apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
+            throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
         }
 
 
@@ -1064,7 +1071,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (ParseException | JsonProcessingException e) {
             throw new APIManagementException(
-                    "Error while processing endpoint security for API " + api.getId().toString(), e);
+                    "Error while processing endpoint security for API " + api.getId().toString(), e,
+                    ExceptionCodes.JSON_PARSE_ERROR);
         }
     }
 
@@ -1181,7 +1189,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             } catch (MediationPolicyPersistenceException e) {
-                throw new APIManagementException("Error while loading medation policies", e);
+                String errorMessage = "Error while loading medation policies";
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR, errorMessage));
             }
         }
     }
@@ -1508,7 +1518,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     !policyData.getSpecification().getVersion().equals(policy.getPolicyVersion()) ) {
                                 throw new APIManagementException("Applied policy for uriTemplate "
                                         + uriTemplate.getUriTemplate() + " : " + policy.getPolicyName()
-                                        + "_" + policy.getPolicyVersion() + " does not match the specification");
+                                        + "_" + policy.getPolicyVersion() + " does not match the specification",
+                                        ExceptionCodes.OPERATION_POLICY_SPEC_MISMATCH);
                             }
 
                             OperationPolicySpecification policySpecification = policyData.getSpecification();
@@ -1530,7 +1541,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         !commonPolicyData.getSpecification().getVersion().equals(policy.getPolicyVersion()) ) {
                                     throw new APIManagementException("Applied policy for uriTemplate "
                                             + uriTemplate.getUriTemplate() + " : " + policy.getPolicyName()
-                                            + "_" + policy.getPolicyVersion() + " does not match the specification");
+                                            + "_" + policy.getPolicyVersion() + " does not match the specification",
+                                            ExceptionCodes.OPERATION_POLICY_SPEC_MISMATCH);
                                 }
 
                                 OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
@@ -1753,7 +1765,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void checkIfValidTransport(String transport) throws APIManagementException {
         if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
                 && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
-            handleException("Unsupported Transport [" + transport + ']');
+            throw new APIManagementException("Unsupported Transport [" + transport + ']',
+                    ExceptionCodes.from(ExceptionCodes.UNSUPPORTED_TRANSPORT_TYPE, transport));
         }
     }
 
@@ -1915,7 +1928,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.deleteDocumentation(new Organization(organization), apiId, docId);
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while deleting the document " + docId);
+            throw new APIManagementException("Error while deleting the document " + docId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
 
     }
@@ -1941,7 +1955,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }
             } catch (DocumentationPersistenceException e) {
-                handleException("Failed to add documentation", e);
+                handleExceptionWithCode("Failed to add documentation", e, ExceptionCodes.INTERNAL_ERROR);
             }
         }
         return null;
@@ -1960,7 +1974,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
                 }
             } catch (DocumentationPersistenceException e) {
-                handleException("Failed to add documentation", e);
+                handleExceptionWithCode("Failed to add documentation", e, ExceptionCodes.INTERNAL_ERROR);
             }
         }
         return null;
@@ -1980,7 +1994,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         } catch (DocumentationPersistenceException e) {
-            handleException("Failed to search documentation for name " + docName, e);
+            handleExceptionWithCode("Failed to search documentation for name " + docName, e,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
         return exist;
     }
@@ -2187,8 +2202,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // if one of the above has failed throw an error
         if (isError) {
-            throw new APIManagementException("Error while deleting the API " + apiUuid + " on organization "
-                    + organization);
+            String errorMessage = "Error while deleting the API " + apiUuid + " on organization " + organization;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 
@@ -2663,7 +2679,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             " found in api definition for resource " + template.getHTTPVerb() + " " +
                             template.getUriTemplate();
                     log.error(message);
-                    throw new APIManagementException(message);
+                    throw new APIManagementException(message, ExceptionCodes.INVALID_THROTTLE_TIER);
                 }
             }
         }
@@ -2689,7 +2705,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.saveOASDefinition(new Organization(organization), apiId, jsonText);
         } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while persisting OAS definition ", e);
+            String errorMessage = "Error while persisting OAS definition ";
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 
@@ -3047,7 +3065,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
+            throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -3132,7 +3150,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 try {
                     monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                    APIUtil.handleException("Failed to load monetization implementation class.", e);
+                    String errorMessage = "Failed to load monetization implementation class";
+                    APIUtil.handleExceptionWithCode(errorMessage, e,
+                            ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
                 }
             }
         }
@@ -3591,12 +3611,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .getTenantId(tenantDomain);
             responseCode = certificateManager
                     .addCertificateToParentNode(certificate, alias, endpoint, tenantId);
+            int code = responseCode.getResponseCode();
+            if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INTERNAL_SERVER_CERT,
+                        "Error while adding the certificate due to an internal server error"));
+            } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_ALREADY_EXIST, alias));
+            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.EXPIRED_CERT,
+                        "Error while adding the certificate. Certificate Expired."));
+            }
             CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(),APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
                     tenantDomain,alias,endpoint);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
         return responseCode.getResponseCode();
     }
@@ -3611,7 +3642,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         responseCode = certificateManager
                 .addClientCertificate(apiTypeWrapper.getId(), certificate, alias, tierName, tenantId, organization);
-        return responseCode.getResponseCode();
+        int code = responseCode.getResponseCode();
+        if (responseCode != null) {
+            if (ResponseCode.SUCCESS.getResponseCode() == code) {
+                return responseCode.getResponseCode();
+            } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
+            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == code) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.EXPIRED_CERT,
+                        "Error while updating the client certificate for the alias "
+                                + alias + " Certificate Expired."));
+            } else {
+                throw new APIManagementException("Error while updating the client certificate for the alias "
+                        + alias + " due to an internal " + "server error", ExceptionCodes.INTERNAL_ERROR);
+            }
+        } else {
+            throw new APIManagementException("Error while updating the client certificate for the alias "
+                    + alias + " due to an internal " + "server error", ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 
     @Override
@@ -3629,7 +3677,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     tenantDomain, alias, endpoint);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information",
+                    e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }
         return responseCode.getResponseCode();
     }
@@ -3659,7 +3708,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information",
+                    e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }
         return certificateManager.getCertificate(alias, tenantId);
     }
@@ -3672,7 +3722,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .getTenantId(tenantDomain);
             return certificateManager.getCertificates(tenantId);
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
+            handleExceptionWithCode("Error while reading tenant information", e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
         return null;
     }
@@ -3740,8 +3791,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     tenantDomain, alias);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         }
-        return responseCode != null ? responseCode.getResponseCode() :
+        int code = responseCode != null ? responseCode.getResponseCode() :
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
+        if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == code) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INTERNAL_SERVER_CERT,
+                    "Error while updating the certificate due to an internal server error"));
+        } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == code) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
+        } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == code) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.EXPIRED_CERT,
+                    "Error while updating the certificate. Certificate Expired"));
+        }
+        return code;
     }
 
 
@@ -3752,9 +3813,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiTypeWrapper.getAccessControlRoles());
         ResponseCode responseCode = certificateManager
                 .updateClientCertificate(certificate, alias, tier, tenantId, organization);
-        return responseCode != null ?
-                responseCode.getResponseCode() :
-                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
+        if (responseCode != null) {
+            if (ResponseCode.SUCCESS.getResponseCode() == responseCode.getResponseCode()) {
+                return responseCode.getResponseCode();
+            } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == responseCode.getResponseCode()) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
+            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode.getResponseCode()) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.EXPIRED_CERT,
+                        "Error while updating the client certificate for the alias "
+                                + alias + " Certificate Expired."));
+            } else {
+                throw new APIManagementException("Error while updating the client certificate for the alias "
+                        + alias + " due to an internal " + "server error", ExceptionCodes.INTERNAL_ERROR);
+            }
+        } else {
+            throw new APIManagementException("Error while updating the client certificate for the alias "
+                    + alias + " due to an internal " + "server error", ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 
     @Override
@@ -3769,6 +3844,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+        APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
+        int tenantId = APIUtil.getTenantId(CommonUtils.getLoggedInUsername());
+        if (!apiProvider.isCertificatePresent(tenantId, alias)) {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Could not find a certificate in truststore which belongs to tenant : %d " +
+                        "and with alias : %s. Hence the operation is terminated.", tenantId, alias));
+            }
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CERT_NOT_FOUND, alias));
+        }
         return certificateManager.getCertificateContent(alias);
     }
 
@@ -3792,7 +3876,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiId = apiMgtDAO.getAPIID(identifier.getUUID());
             cleanUpPendingAPIStateChangeTask(apiId, identifier instanceof APIProductIdentifier);
         } catch (APIManagementException | WorkflowException e) {
-            handleException("Error while deleting the workflow task.", e);
+            handleExceptionWithCode("Error while deleting the workflow task.", e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -3827,7 +3911,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
         } catch (WorkflowException e) {
-            handleException("Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType);
+            String errorMessage = "Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType;
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         return null;
     }
@@ -4592,7 +4678,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiPersistenceInstance.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
         } catch (AsyncSpecPersistenceException e) {
-            throw new APIManagementException("Error while persisting Async API definition ", e);
+            String errorMessage = "Error while persisting Async API definition ";
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
     }
 
@@ -4711,6 +4799,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
         Organization org = new Organization(organization);
+        String msg = "";
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
@@ -4733,17 +4822,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateDefaultVersion(api);
                 return api;
             } else {
-                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                throw new APIManagementException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Failed to get API", e);
+            msg = "Failed to get API";
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         } catch (OASPersistenceException e) {
-            throw new APIManagementException("Error while retrieving the OAS definition", e);
+            msg = "Error while retrieving the OAS definition";
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing the OAS definition", e);
+            throw new APIManagementException("Error while parsing the OAS definition", e,
+                    ExceptionCodes.OPENAPI_PARSE_EXCEPTION);
         } catch (AsyncSpecPersistenceException e) {
-            throw new APIManagementException("Error while retrieving the Async API definition", e);
+            msg = "Error while retrieving the Async API definition";
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         }
     }
 
@@ -4760,7 +4856,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 return result;
             }
         } catch (URISyntaxException e) {
-            throw new APIManagementException("Error while extracting fully qualified domain name from the given url: " + endpoint, e);
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.URI_PARSE_ERROR,
+                    "Error while extracting fully qualified domain name from the given url: " + endpoint));
         }
 
         String query = ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX + fqdn;
@@ -4789,7 +4886,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.setApiCount(searchAPIs.getTotalAPIsCount());
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching for APIs with Solr query: " + query , e);
+            throw new APIManagementException("Error while searching for APIs with Solr query: " + query, e,
+                    ExceptionCodes.from(ExceptionCodes.PERSISTENCE_ERROR, e.getMessage()));
         }
 
         return result ;
@@ -4855,11 +4953,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
                         + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND, uuid));
             }
         } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
             String msg = "Failed to get API Product";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -4901,7 +4999,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.put("isMore", false);
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching the api ", e);
+            throw new APIManagementException("Error while searching the api ", e, ExceptionCodes.INTERNAL_ERROR);
         }
         return result ;
     }
@@ -4914,7 +5012,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset)
             throws APIManagementException {
-        return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+        Comment comment = apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+        if (comment != null) {
+            return comment;
+        } else {
+            throw new APIManagementException(ExceptionCodes.COMMENT_NOT_FOUND);
+        }
     }
 
     @Override
@@ -4979,11 +5082,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
         } catch (APIPersistenceException e) {
             String msg = "Failed to get API with uuid " + uuid;
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -5011,7 +5114,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organization), uuid, docId,
                     mappedContent);
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while adding content to doc " + docId);
+            throw new APIManagementException("Error while adding content to doc " + docId,
+                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -5142,7 +5246,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
             } else {
-                throw new APIManagementException("Error while saving thumbnail ", e);
+                String errorMessage = "Error while saving thumbnail ";
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
         }
     }
@@ -5180,7 +5286,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api");
+            throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api",
+                    ExceptionCodes.NO_VIEW_UPDATE_PERMISSIONS);
         }
 
     }
@@ -5194,9 +5301,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         } catch (GraphQLPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
-                throw new APIMgtResourceNotFoundException(e);
+                throw new APIManagementException(ExceptionCodes.API_NOT_FOUND);
             } else {
-                throw new APIManagementException("Error while saving graphql definition ", e);
+                String errorMessage = "Error while saving graphql definition";
+                throw new APIManagementException(errorMessage, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
         }
     }
@@ -6212,11 +6321,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             } else {
                 throw new APIManagementException(
-                        "User " + username + " does not have permission to view API Product : " + uuid);
+                        "User " + username + " does not have permission to view API Product : " + uuid,
+                        ExceptionCodes.NO_READ_PERMISSIONS);
             }
         } else {
             String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-            throw new APIMgtResourceNotFoundException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
         }
     }
 }

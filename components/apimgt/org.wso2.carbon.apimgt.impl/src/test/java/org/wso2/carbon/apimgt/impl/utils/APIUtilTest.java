@@ -1696,7 +1696,7 @@ public class APIUtilTest {
         try {
             APIUtil.hasPermission(userNameWithoutChange, permission);
         } catch (APIManagementException exception) {
-            actualErrorMessage = exception.getMessage();
+            actualErrorMessage = exception.getErrorHandler().getErrorDescription();
         }
         Assert.assertEquals(expectedExceptionMessage, actualErrorMessage);
     }
@@ -2006,7 +2006,8 @@ public class APIUtilTest {
         } catch (APIManagementException ex) {
             exception = ex;
         }
-        Assert.assertEquals("Attempt to execute privileged operation as the anonymous user", exception.getMessage());
+        Assert.assertEquals("Attempt to execute privileged operation as the anonymous user",
+                exception.getErrorHandler().getErrorDescription());
     }
 
     @Test

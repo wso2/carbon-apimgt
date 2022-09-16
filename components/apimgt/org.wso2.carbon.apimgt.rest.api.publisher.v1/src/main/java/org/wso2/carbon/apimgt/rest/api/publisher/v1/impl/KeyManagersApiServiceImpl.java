@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.KeyManagerMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
