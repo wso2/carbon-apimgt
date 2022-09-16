@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil.getRestApiJWTAuthAudiences;
 
@@ -150,9 +151,12 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             if (log.isDebugEnabled()) {
                 log.debug("scopes after spliting from scope delimiter: " + Arrays.toString(scopes));
             }
-            scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
-                    .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
-                    .toArray(size -> new String[size]);
+
+            Stream<String> stream = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
+                    .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""));
+
+            scopes = stream.toArray(size -> new String[size]);
+
             if (log.isDebugEnabled()) {
                 log.debug("scopes after filtering: " + Arrays.toString(scopes));
             }
