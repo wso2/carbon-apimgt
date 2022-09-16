@@ -150,12 +150,6 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             if (log.isDebugEnabled()) {
                 log.debug("scopes after spliting from scope delimiter: " + Arrays.toString(scopes));
             }
-            scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
-                    .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
-                    .toArray(size -> new String[size]);
-            if (log.isDebugEnabled()) {
-                log.debug("scopes after filtering: " + Arrays.toString(scopes));
-            }
             oauthTokenInfo.setScopes(scopes);
             if (log.isDebugEnabled()) {
                 log.debug("scopes available in oauthTokenInfo: " + Arrays.toString(oauthTokenInfo.getScopes()));
