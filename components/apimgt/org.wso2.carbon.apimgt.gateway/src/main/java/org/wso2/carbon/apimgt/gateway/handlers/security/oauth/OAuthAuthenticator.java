@@ -217,7 +217,8 @@ public class OAuthAuthenticator implements Authenticator {
             //Initial guess of a JWT token using the presence of a DOT.
             if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
                 try {
-                    if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
+                    String[] JWTElements = accessToken.split("\\.");
+                    if (JWTElements.length != 3){
                         log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 "Invalid JWT token");
