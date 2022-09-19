@@ -141,19 +141,10 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject());
         oauthTokenInfo.setConsumerKey(signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY));
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
-        if (log.isDebugEnabled()) {
-            log.debug("scopeClaim in the signedJWTInfo: " + scopeClaim);
-        }
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
             String[] scopes = scopeClaim.split(JwtTokenConstants.SCOPE_DELIMITER);
-            if (log.isDebugEnabled()) {
-                log.debug("scopes after spliting from scope delimiter: " + Arrays.toString(scopes));
-            }
             oauthTokenInfo.setScopes(scopes);
-            if (log.isDebugEnabled()) {
-                log.debug("scopes available in oauthTokenInfo: " + Arrays.toString(oauthTokenInfo.getScopes()));
-            }
 
             if (validateScopes(message, oauthTokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
