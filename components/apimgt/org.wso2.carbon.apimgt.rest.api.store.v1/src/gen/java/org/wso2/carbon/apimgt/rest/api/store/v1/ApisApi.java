@@ -15,26 +15,16 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApisApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.inject.Inject;
 
 import io.swagger.annotations.*;
-import java.io.InputStream;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-import java.util.Map;
-import java.util.List;
-import javax.validation.constraints.*;
 @Path("/apis")
 
 @Api(description = "the apis API")

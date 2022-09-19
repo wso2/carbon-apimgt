@@ -5,16 +5,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import java.io.File;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.EndpointCertificatesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.inject.Inject;
 
 import io.swagger.annotations.*;
 import java.io.InputStream;
@@ -23,8 +19,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import java.util.Map;
-import java.util.List;
 import javax.validation.constraints.*;
 @Path("/endpoint-certificates")
 

@@ -1,36 +1,15 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.*;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PostRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicListDTO;
-
-import java.util.List;
-
-import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApisApiService {

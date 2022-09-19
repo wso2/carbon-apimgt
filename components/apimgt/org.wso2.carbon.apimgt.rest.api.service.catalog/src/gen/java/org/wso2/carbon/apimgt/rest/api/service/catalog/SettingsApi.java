@@ -2,26 +2,16 @@ package org.wso2.carbon.apimgt.rest.api.service.catalog;
 
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.impl.SettingsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.inject.Inject;
 
 import io.swagger.annotations.*;
-import java.io.InputStream;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-import java.util.Map;
-import java.util.List;
-import javax.validation.constraints.*;
 @Path("/settings")
 
 @Api(description = "the settings API")
