@@ -414,7 +414,6 @@
         <dependency>
             <groupId>org.wso2.orbit.com.amazonaws</groupId>
             <artifactId>awslambda</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
@@ -558,6 +557,7 @@
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
                             com.google.gson,
+                            com.amazonaws.*; version="${com.amazonaws.version}",
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.*,
                             org.apache.http.*,
