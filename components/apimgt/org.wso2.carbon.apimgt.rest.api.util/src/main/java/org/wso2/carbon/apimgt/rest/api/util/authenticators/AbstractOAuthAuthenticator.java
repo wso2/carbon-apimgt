@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Arrays;
 
 /**
  * This class implemented for common methods of JWT and Opaque Authentications
@@ -79,9 +78,6 @@ public abstract class AbstractOAuthAuthenticator {
         String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
-        if (log.isDebugEnabled()) {
-            log.debug("Scopes array in the tokenInfo: " + Arrays.toString(scopes));
-        }
 
         String version = (String) message.get(RestApiConstants.API_VERSION);
 
@@ -110,10 +106,6 @@ public abstract class AbstractOAuthAuthenticator {
                     && verb != null && verb.equalsIgnoreCase(((URITemplate) template).getHTTPVerb())) {
                 for (String scope : scopes) {
                     Scope scp = ((URITemplate) template).getScope();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Scope available in the tokenInfo: " + scope +
-                                ", scope available in the template: " + scp);
-                    }
                     if (scp != null) {
                         if (scope.equalsIgnoreCase(scp.getKey())) {
                             //we found scopes matches
