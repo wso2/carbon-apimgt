@@ -30,6 +30,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIEndpointUrlExtractor;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
@@ -924,6 +925,20 @@ public class APIManagerComponent {
 
     protected void unsetAPIMConfigService(APIMConfigService apimConfigService) {
         ServiceReferenceHolder.getInstance().setAPIMConfigService(null);
+    }
+
+    @Reference(
+            name = "apiEndpointUrlExtractor.service",
+            service = APIEndpointUrlExtractor.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetApiEndpointUrlExtractor")
+    protected void setApiEndpointUrlExtractor(APIEndpointUrlExtractor apiEndpointUrlExtractor) {
+        ServiceReferenceHolder.getInstance().setApiEndpointUrlExtractor(apiEndpointUrlExtractor);
+    }
+
+    protected void unsetApiEndpointUrlExtractor(APIEndpointUrlExtractor apiEndpointUrlExtractor) {
+        ServiceReferenceHolder.getInstance().setApiEndpointUrlExtractor(null);
     }
 }
 

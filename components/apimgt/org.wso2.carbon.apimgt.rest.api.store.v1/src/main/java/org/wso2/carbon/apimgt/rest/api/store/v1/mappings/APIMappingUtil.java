@@ -26,6 +26,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIEndpointUrlExtractor;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -40,9 +41,9 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorManager;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -519,7 +520,7 @@ public class APIMappingUtil {
         apiEndpointURLsDTO.setEnvironmentDisplayName(environment.getDisplayName());
         apiEndpointURLsDTO.setEnvironmentType(environment.getType());
 
-        APIEndpointUrlExtractorImpl apiEndpointUrlExtractor = new APIEndpointUrlExtractorImpl();
+        APIEndpointUrlExtractor apiEndpointUrlExtractor = APIEndpointUrlExtractorManager.getApiEndpointUrlExtractor();
         List<EndpointUrl> endpointUrls = apiEndpointUrlExtractor.getApiEndpointUrlsForEnv(model, organization,
                 environment.getName());
 
