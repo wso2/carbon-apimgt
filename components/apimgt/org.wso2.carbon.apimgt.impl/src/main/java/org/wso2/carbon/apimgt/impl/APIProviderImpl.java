@@ -413,14 +413,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // This value is determined considering the gateway type comes with the request.
         api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
                 api.getGatewayVendor(), api.getGatewayType()));
-        try {
-            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
-                    APIMapper.INSTANCE.toPublisherApi(api));
-            api.setUuid(addedAPI.getId());
-            api.setCreatedTime(addedAPI.getCreatedTime());
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while persisting API ", e);
-        }
 
         if (log.isDebugEnabled()) {
             log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
@@ -474,7 +466,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while adding the API
      */
     private void addAPI(API api, int tenantId) throws APIManagementException {
-        int apiId = apiMgtDAO.addAPI(api, tenantId, api.getOrganization());
+        int apiId = apiDAOImpl.addAPI(api, tenantId, api.getOrganization());
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));

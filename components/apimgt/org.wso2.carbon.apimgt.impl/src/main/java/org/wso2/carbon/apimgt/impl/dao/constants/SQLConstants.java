@@ -161,6 +161,9 @@ public class SQLConstants {
     public static final String ADD_API_SERVICE_MAPPING_SQL = "INSERT INTO AM_API_SERVICE_MAPPING (API_ID, SERVICE_KEY" +
             ", MD5, TENANT_ID) VALUES (?,?,?,?)";
 
+    public static final String ADD_API_DEFINITION_SQL = "INSERT INTO AM_API_ARTIFACT (ORGANIZATION, API_UUID" +
+            ", API_DEFINITION, MEDIA_TYPE) VALUES (?,?,?,?)";
+
     public static final String GET_SERVICE_KEY_BY_API_ID_SQL = "SELECT SERVICE_KEY FROM AM_API_SERVICE_MAPPING WHERE " +
             " API_ID = ? AND TENANT_ID = ?";
 
@@ -1450,8 +1453,8 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE)" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE,ARTEFACT)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,to_json(?::json))";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
