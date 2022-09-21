@@ -142,7 +142,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Map<String, Object> properties = APIUtil.getUserProperties(username);
         UserContext userCtx = new UserContext(username, org, properties, roles);
         try {
-            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, "", 0,
+            PublisherAPISearchResult searchAPIs = apiDAOImpl.searchAPIsForPublisher(org, "", 0,
                     Integer.MAX_VALUE, userCtx, null, null);
 
             if (searchAPIs != null) {
@@ -152,7 +152,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     apiSortedList.add(mappedAPI);
                 }
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
 
@@ -1394,7 +1394,7 @@ public abstract class AbstractAPIManager implements APIManager {
             String resourceAPIUUID = resource.getApiIdentifier().getUUID();
             resource.setApiId(resourceAPIUUID);
             try {
-                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, resourceAPIUUID);
+                PublisherAPI publisherAPI = apiDAOImpl.getPublisherAPI(org, resourceAPIUUID);
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 if (api.isAdvertiseOnly()) {
                     resource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
@@ -1402,7 +1402,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     resource.setEndpointConfig(api.getEndpointConfig());
                 }
                 resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
-            } catch (APIPersistenceException e) {
+            } catch (APIManagementException e) {
                 throw new APIManagementException("Error while retrieving the api for api product " + e);
             }
 

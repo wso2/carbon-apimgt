@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
+import org.wso2.carbon.apimgt.impl.dao.impl.ApiDAOImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -4703,7 +4704,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
         Organization org = new Organization(organization);
         try {
-            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            PublisherAPI publisherAPI = apiDAOImpl.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 APIIdentifier apiIdentifier = api.getId();
@@ -4727,8 +4728,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
             }
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Failed to get API", e);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
         } catch (ParseException e) {
@@ -4762,7 +4761,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         UserContext userCtx = new UserContext(adminUser, org, properties, roles);
 
         try {
-            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
+            PublisherAPISearchResult searchAPIs = apiDAOImpl.searchAPIsForPublisher(org, query,
                     offset, limit, userCtx, "createdTime", "desc");
             if (log.isDebugEnabled()) {
                 log.debug("Running Solr query : " + query);
@@ -4779,7 +4778,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.setApis(apiList);
                 result.setApiCount(searchAPIs.getTotalAPIsCount());
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while searching for APIs with Solr query: " + query , e);
         }
 
@@ -4867,7 +4866,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
-            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
+            PublisherAPISearchResult searchAPIs = apiDAOImpl.searchAPIsForPublisher(org, searchQuery,
                     start, end, userCtx, sortBy, sortOrder);
             if (log.isDebugEnabled()) {
                 log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
@@ -4891,7 +4890,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.put("length", 0);
                 result.put("isMore", false);
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
         return result ;
@@ -4938,7 +4937,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);
-            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            PublisherAPI publisherAPI = apiDAOImpl.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
@@ -4972,7 +4971,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             String msg = "Failed to get API with uuid " + uuid;
             throw new APIManagementException(msg, e);
         }

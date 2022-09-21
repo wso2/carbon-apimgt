@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.impl.dao.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -35,14 +37,18 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.*;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -416,5 +422,123 @@ public class ApiDAOImpl implements ApiDAO {
             preparedStatement.executeUpdate();
         }
     }
+
+    @Override
+    public PublisherAPI getPublisherAPI(Organization organization, String apiUUID) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        PublisherAPI publisherAPI = null;
+        String getAPIArtefactQuery = SQLConstants.GET_API_ARTIFACT_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getAPIArtefactQuery);
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, organization.getName());
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String json = resultSet.getString("ARTIFACT");
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode tree = mapper.readTree(json);
+                publisherAPI = mapper.treeToValue(tree, PublisherAPI.class);
+                String mediaType = resultSet.getString("MEDIA_TYPE");
+                InputStream apiDefinitionBlob = resultSet.getBinaryStream("API_DEFINITION");
+                if (apiDefinitionBlob != null) {
+                    if (StringUtils.equals("swagger.json",mediaType)) {
+                        publisherAPI.setSwaggerDefinition(APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob));
+                    } else if (StringUtils.equals("asyncapi.json",mediaType)) {
+                        publisherAPI.setAsyncApiDefinition(APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving api artefact for API uuid: " + apiUUID);
+            }
+            handleException("Error while retrieving api artefact for API uuid: " + apiUUID, e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return publisherAPI;
+    }
+
+
+    @Override
+    public PublisherAPISearchResult searchAPIsForPublisher(Organization organization, String searchQuery, int start,
+                                                           int offset, UserContext ctx, String sortBy, String sortOrder)
+            throws APIManagementException {
+        PublisherAPISearchResult result = null;
+        String searchAllQuery = SQLConstants.SEARCH_ALL_APIS_SQL;
+
+        if (StringUtils.isEmpty(searchQuery)) {
+            result = searchPaginatedPublisherAPIs(organization.getName(), searchAllQuery, start, offset);
+        }
+        return result;
+    }
+
+    private PublisherAPISearchResult searchPaginatedPublisherAPIs(String org, String searchQuery, int start,
+                                                                  int offset) throws APIManagementException {
+
+        int totalLength = 0;
+        PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
+        PublisherAPI publisherAPI;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(searchQuery);
+            preparedStatement.setString(1, org);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
+            while (resultSet.next()) {
+                String json = resultSet.getString(1);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode tree = mapper.readTree(json);
+                publisherAPI = mapper.treeToValue(tree, PublisherAPI.class);
+                PublisherAPIInfo apiInfo = new PublisherAPIInfo();
+                apiInfo.setType(publisherAPI.getType());
+                apiInfo.setId(resultSet.getString(2));
+                apiInfo.setApiName(publisherAPI.getApiName());
+                apiInfo.setDescription(publisherAPI.getDescription());
+                apiInfo.setContext(publisherAPI.getContext());
+                apiInfo.setProviderName(publisherAPI.getProviderName());
+                apiInfo.setStatus(publisherAPI.getStatus());
+                apiInfo.setThumbnail(publisherAPI.getThumbnail());
+                apiInfo.setVersion(publisherAPI.getVersion());
+                apiInfo.setAudience(publisherAPI.getAudience());
+                apiInfo.setCreatedTime(publisherAPI.getCreatedTime());
+                apiInfo.setUpdatedTime(publisherAPI.getUpdatedTime());
+                publisherAPIInfoList.add(apiInfo);
+                totalLength ++;
+            }
+            Collections.sort(publisherAPIInfoList, new PublisherAPISearchResultComparator());
+            searchResults.setPublisherAPIInfoList(publisherAPIInfoList);
+            searchResults.setReturnedAPIsCount(publisherAPIInfoList.size());
+            searchResults.setTotalAPIsCount(totalLength);
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving api artefacts");
+            }
+            handleException("Error while retrieving api artefacts", e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return searchResults;
+    }
+
+
 
 }

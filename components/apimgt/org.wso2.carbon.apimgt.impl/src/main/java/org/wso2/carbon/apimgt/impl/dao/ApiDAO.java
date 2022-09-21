@@ -21,6 +21,11 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,6 +44,10 @@ public interface ApiDAO {
 
     void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws APIManagementException;
 
+    PublisherAPI getPublisherAPI(Organization organization, String apiUUID) throws APIManagementException;
+
+    PublisherAPISearchResult searchAPIsForPublisher(Organization organization, String searchQuery, int start,
+                                                    int offset, UserContext ctx, String sortBy, String sortOrder) throws APIManagementException;
 
 
 }
