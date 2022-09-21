@@ -117,6 +117,7 @@ public class APIManagerConfiguration {
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
+    private static Map<String, String> operationPolicyProperties = new HashMap<String, String>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
@@ -369,6 +370,17 @@ public class APIManagerConfiguration {
                 }
                 
                 persistenceProperties = persistenceProps;
+            } else if ("OperationPolicyConfigs".equals(localName)) {
+                    OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                    Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                    Map<String, String> operationPolicyProps = new HashMap<>();
+                    while (analyticsPropertiesIterator.hasNext()) {
+                        OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                        String name = propertyElem.getAttributeValue(new QName("name"));
+                        String value = propertyElem.getText();
+                        operationPolicyProps.put(name, value);
+                    }
+                operationPolicyProperties = operationPolicyProps;
             } else if (APIConstants.REDIS_CONFIG.equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_HOST));
                 OMElement redisPort = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PORT));
@@ -2050,6 +2062,10 @@ public class APIManagerConfiguration {
     
     public static Map<String, String> getPersistenceProperties() {
         return persistenceProperties;
+    }
+
+    public static Map<String, String> getOperationalPolicyProperties() {
+        return operationPolicyProperties;
     }
 
     /**

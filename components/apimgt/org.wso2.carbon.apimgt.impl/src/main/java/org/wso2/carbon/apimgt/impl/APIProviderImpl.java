@@ -1877,10 +1877,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (OperationPolicy operationPolicy : operationPolicies) {
                     String clonedPolicyId;
                     if (!clonedPolicies.containsKey(operationPolicy.getPolicyId())) {
-                        OperationPolicyData apiSpecificOperationPolicy =
-                                apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(operationPolicy.getPolicyId(),
-                                        oldAPIUuid, newAPI.getOrganization(), true);
-                        clonedPolicyId = apiMgtDAO.cloneOperationPolicy(newAPI.getUuid(), apiSpecificOperationPolicy);
+                        clonedPolicyId = operationPolicyProviderInstance.cloneAPISpecificOperationPolicy(operationPolicy.getPolicyId(), oldAPIUuid,
+                                newAPI.getUuid(), newAPI.getOrganization());
                         clonedPolicies.put(operationPolicy.getPolicyId(), clonedPolicyId);
                     } else {
                         clonedPolicyId = clonedPolicies.get(operationPolicy.getPolicyId());
@@ -5999,60 +5997,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String importOperationPolicy(OperationPolicyData importedPolicyData, String organization)
             throws APIManagementException {
-
-        OperationPolicySpecification importedSpec = importedPolicyData.getSpecification();
-        OperationPolicyData existingOperationPolicy =
-                getAPISpecificOperationPolicyByPolicyName(importedSpec.getName(), importedSpec.getVersion(),
-                        importedPolicyData.getApiUUID(), null, organization, false);
-        String policyId = null;
-        if (existingOperationPolicy != null) {
-            if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Matching API specific policy found for imported policy and MD5 hashes match.");
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Even though existing API specific policy name match with imported policy, "
-                            + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId()
-                            + ".Therefore updating the existing policy");
-                }
-                updateOperationPolicy(existingOperationPolicy.getPolicyId(), importedPolicyData, organization);
-            }
-            policyId = existingOperationPolicy.getPolicyId();
-        } else {
-            existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(),
-                    importedSpec.getVersion(),organization, false);
-            if (existingOperationPolicy != null) {
-                if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Matching common policy found for imported policy and Md5 hashes match.");
-                    }
-                    policyId = existingOperationPolicy.getPolicyId();
-                } else {
-                    importedSpec.setName(importedSpec.getName() + "_imported");
-                    importedSpec.setDisplayName(importedSpec.getDisplayName() + " Imported");
-                    importedPolicyData.setSpecification(importedSpec);
-                    importedPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(importedPolicyData));
-                    policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
-                            organization);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Even though existing common policy name match with imported policy, "
-                                + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId()
-                                + ". A new policy created with ID " + policyId);
-                    }
-                }
-            } else {
-                policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
-                        organization);
-                if (log.isDebugEnabled()) {
-                    log.debug(
-                            "There aren't any existing policies for the imported policy. A new policy created with ID "
-                                    + policyId);
-                }
-            }
-        }
-
-        return policyId;
+        return operationPolicyProviderInstance.importOperationPolicy(importedPolicyData,tenantDomain);
     }
 
     @Override
@@ -6060,14 +6005,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                 String tenantDomain)
             throws APIManagementException {
 
-        return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, null, operationPolicyData);
+        return operationPolicyProviderInstance.addAPISpecificOperationPolicy(apiUUID,operationPolicyData,tenantDomain);
     }
 
     @Override
     public String addCommonOperationPolicy(OperationPolicyData operationPolicyData, String tenantDomain)
             throws APIManagementException {
-
-        return apiMgtDAO.addCommonOperationPolicy(operationPolicyData);
+        return operationPolicyProviderInstance.addCommonOperationPolicy(operationPolicyData, organization);
     }
 
     @Override
@@ -6077,8 +6021,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                          boolean isWithPolicyDefinition)
             throws APIManagementException {
 
-        return apiMgtDAO.getAPISpecificOperationPolicyByPolicyName(policyName, policyVersion, apiUUID, revisionUUID,
-                tenantDomain, isWithPolicyDefinition);
+        return operationPolicyProviderInstance.getAPISpecificOperationPolicyByPolicyName(apiUUID, policyName, policyVersion, tenantDomain, isWithPolicyDefinition);
     }
 
     @Override
@@ -6086,8 +6029,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                     String tenantDomain,
                                                                     boolean isWithPolicyDefinition)
             throws APIManagementException {
-
-        return apiMgtDAO.getCommonOperationPolicyByPolicyName(policyName, policyVersion, tenantDomain, isWithPolicyDefinition);
+        return operationPolicyProviderInstance.getCommonOperationPolicyByPolicyName(policyName, policyVersion, tenantDomain, isWithPolicyDefinition);
     }
 
     @Override
@@ -6096,43 +6038,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                        boolean isWithPolicyDefinition)
             throws APIManagementException {
 
-        return apiMgtDAO
-                .getAPISpecificOperationPolicyByPolicyID(policyId, apiUUID, organization, isWithPolicyDefinition);
+        return operationPolicyProviderInstance
+                .getAPISpecificOperationPolicyByPolicyID(apiUUID, policyId, organization,isWithPolicyDefinition);
     }
 
     @Override
     public OperationPolicyData getCommonOperationPolicyByPolicyId(String policyId, String organization,
                                                                   boolean isWithPolicyDefinition)
             throws APIManagementException {
-
-        return apiMgtDAO.getCommonOperationPolicyByPolicyID(policyId, organization, isWithPolicyDefinition);
+        return operationPolicyProviderInstance.getCommonOperationPolicyByPolicyId(policyId, organization, isWithPolicyDefinition);
     }
 
     @Override
     public void updateOperationPolicy(String operationPolicyId, OperationPolicyData operationPolicyData,
                                       String tenantDomain) throws APIManagementException {
-
-        apiMgtDAO.updateOperationPolicy(operationPolicyId, operationPolicyData);
+        operationPolicyProviderInstance.updateOperationPolicy(operationPolicyId, operationPolicyData, tenantDomain);
     }
 
     @Override
     public List<OperationPolicyData> getAllCommonOperationPolicies(String tenantDomain)
             throws APIManagementException {
 
-        return apiMgtDAO.getLightWeightVersionOfAllOperationPolicies(null, tenantDomain);
+        return operationPolicyProviderInstance.getAllCommonOperationPolicies(tenantDomain);
     }
 
     @Override
     public List<OperationPolicyData> getAllAPISpecificOperationPolicies(String apiUUID, String tenantDomain)
             throws APIManagementException {
 
-        return apiMgtDAO.getLightWeightVersionOfAllOperationPolicies(apiUUID, tenantDomain);
+        return operationPolicyProviderInstance.getAllAPiSpecificOperationPolicies(apiUUID,tenantDomain);
     }
 
     @Override
     public void deleteOperationPolicyById(String policyId, String tenantDomain) throws APIManagementException {
 
-        apiMgtDAO.deleteOperationPolicyByPolicyId(policyId);
+        operationPolicyProviderInstance.deleteOperationPolicyById(policyId, tenantDomain);
     }
 
     private static Map<String, List<OperationPolicy>> extractAndDropOperationPoliciesFromURITemplate
