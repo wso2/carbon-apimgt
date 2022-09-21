@@ -218,6 +218,29 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /apis/{apiId}/operation-policy/is-attached:
+    get:
+      summary: Get policy attachment status of an API.
+      description: |
+        If at least one policy is attached to an API this resource returns true, otherwise returns false.
+      tags:
+        - 'Operation Policy'
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: path
+          description: ID of the API
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'True or False'
+          schema:
+            $ref: '#/definitions/OperationPolicyAttachmentStatus'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /applications:
     get:
       summary: Get all applications
@@ -696,7 +719,6 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -841,6 +863,11 @@ definitions:
         type: string
       id:
         type: integer
+  OperationPolicyAttachmentStatus:
+    properties:
+      isAttached:
+        type: boolean
+        description: True if attached false if else.
   #-----------------------------------------------------
   # The API List resource
   #-----------------------------------------------------

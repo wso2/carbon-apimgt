@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.OperationPolicyProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -73,11 +74,27 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         this.scopesDAO = scopesDAO;
     }
 
+    public APIProviderImplWrapper(OperationPolicyProvider operationPolicyProviderInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO) throws APIManagementException {
+
+        super(null);
+        this.apiMgtDAO = apimgtDAO;
+        this.scopesDAO = scopesDAO;
+        this.operationPolicyProviderInstance = operationPolicyProviderInstance;
+    }
+
     public APIProviderImplWrapper(APIPersistence apiPersistenceInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO)
             throws APIManagementException {
 
         this(apimgtDAO,scopesDAO);
         this.apiPersistenceInstance = apiPersistenceInstance;
+    }
+
+    public APIProviderImplWrapper(OperationPolicyProvider operationPolicyProviderInstance, APIPersistence apiPersistenceInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO)
+            throws APIManagementException {
+
+        this(apimgtDAO,scopesDAO);
+        this.apiPersistenceInstance = apiPersistenceInstance;
+        this.operationPolicyProviderInstance = operationPolicyProviderInstance;
     }
 
     public APIProviderImplWrapper(ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO, List<Documentation> documentationList)

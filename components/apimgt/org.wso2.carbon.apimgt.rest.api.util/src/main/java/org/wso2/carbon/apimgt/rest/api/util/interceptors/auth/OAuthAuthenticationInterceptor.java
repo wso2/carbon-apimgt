@@ -27,6 +27,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.UserTokenUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticationManager;
@@ -89,6 +90,9 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Request has been Authenticated , authentication type : "+ authenticationType);
                     }
+                    String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(inMessage,
+                            RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
+                    UserTokenUtil.setToken(accessToken);
                     logAuditOperation(inMessage);
                 } else {
                     logger.error("Failed to Authenticate , authentication type : "+ authenticationType);
@@ -129,6 +133,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     if (logger.isDebugEnabled()) {
                         logger.debug("User logged into Web app using OAuth Authentication");
                     }
+                    UserTokenUtil.setToken(accessToken);
                     logAuditOperation(inMessage);
                 } else {
                     throw new AuthenticationException("Unauthenticated request");

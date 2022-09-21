@@ -260,6 +260,40 @@
         }
       }
     },
+    "/apis/{apiId}/operation-policy/is-attached" : {
+      "get" : {
+        "tags" : [ "Operation Policy" ],
+        "summary" : "Get policy attachment status of an API.",
+        "description" : "If at least one policy is attached to an API this resource returns true, otherwise returns false.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "path",
+          "description" : "ID of the API",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "True or False",
+            "schema" : {
+              "$ref" : "#/definitions/OperationPolicyAttachmentStatus"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/applications" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
@@ -1056,6 +1090,14 @@
         },
         "id" : {
           "type" : "integer"
+        }
+      }
+    },
+    "OperationPolicyAttachmentStatus" : {
+      "properties" : {
+        "isAttached" : {
+          "type" : "boolean",
+          "description" : "True if attached false if else."
         }
       }
     },

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.OperationPolicyProvider;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
@@ -138,6 +139,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.cache.Cache;
 
 @Component(
@@ -208,7 +210,13 @@ public class APIManagerComponent {
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+            // Avoid load default operation policies to the database if policy provider is BCentral
+            if (!Objects.equals(configuration.getOperationalPolicyProperties().get(APIConstants.OperationPolicyConstants.CONFIG_KEY_PROVIDER),
+                    APIConstants.OperationPolicyConstants.CONFIG_VALUE_BCENTRAL)) {
+                APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            }
+
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -965,6 +973,21 @@ public class APIManagerComponent {
 
     protected void unsetAPIMConfigService(APIMConfigService apimConfigService) {
         ServiceReferenceHolder.getInstance().setAPIMConfigService(null);
+    }
+
+    @Reference(
+            name = "operation.policy.provider.service",
+            service = org.wso2.carbon.apimgt.api.OperationPolicyProvider.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOperationPolicyProviderService"
+    )
+    protected void setOperationPolicyProviderService(OperationPolicyProvider operationPolicyProvider) {
+        ServiceReferenceHolder.getInstance().setApiPolicyProvider(operationPolicyProvider);
+    }
+
+    protected void unsetOperationPolicyProviderService(OperationPolicyProvider operationPolicyProvider) {
+        ServiceReferenceHolder.getInstance().setApiPolicyProvider(null);
     }
 
     @Reference(
