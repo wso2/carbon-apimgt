@@ -2679,7 +2679,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void saveSwaggerDefinition(String apiId, String jsonText, String organization) throws APIManagementException {
         try {
-            apiPersistenceInstance.saveOASDefinition(new Organization(organization), apiId, jsonText);
+            apiDAOImpl.saveOASDefinition(new Organization(organization), apiId, jsonText);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while persisting OAS definition ", e);
         }
@@ -4582,7 +4582,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            apiPersistenceInstance.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
+            apiDAOImpl.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while persisting Async API definition ", e);
         }
@@ -5023,7 +5023,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     wsdlContent, null);
             try {
-                apiPersistenceInstance.saveWSDL(
+                apiDAOImpl.saveWSDL(
                         new Organization(organization), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
@@ -5033,7 +5033,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
             try {
-                apiPersistenceInstance.saveWSDL(
+                apiDAOImpl.saveWSDL(
                         new Organization(organization), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
@@ -5180,7 +5180,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         try {
-            apiPersistenceInstance.saveGraphQLSchemaDefinition(new Organization(organization), apiId, definition);
+            apiDAOImpl.saveGraphQLSchemaDefinition(new Organization(organization), apiId, definition);
 
         } catch (GraphQLPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {

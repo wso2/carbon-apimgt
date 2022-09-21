@@ -240,7 +240,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource =
-                    apiPersistenceInstance.getWSDL(new Organization(organization), apiId);
+                    apiDAOImpl.getWSDL(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile resourceFile = new ResourceFile(resource.getContent(), resource.getContentType());
                 resourceFile.setName(resource.getName());
@@ -259,7 +259,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String definition;
         try {
-            definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
+            definition = apiDAOImpl.getGraphQLSchema(new Organization(tenantDomain), apiId);
         } catch (GraphQLPersistenceException e) {
             throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
                     e);
@@ -272,7 +272,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(organization), apiId);
+            definition = apiDAOImpl.getOASDefinition(new Organization(organization), apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -284,7 +284,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getAsyncDefinition(new Organization(organization), apiId);
+            definition = apiDAOImpl.getAsyncDefinition(new Organization(organization), apiId);
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving Async definition from the persistance location", e);
         }
@@ -1127,7 +1127,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getSwaggerDefinition() != null) {
             resourceConfigsString = api.getSwaggerDefinition();
         } else {
-            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
         }
         api.setSwaggerDefinition(resourceConfigsString);
 
@@ -1135,7 +1135,7 @@ public abstract class AbstractAPIManager implements APIManager {
             if (api.getAsyncApiDefinition() != null) {
                 resourceConfigsString = api.getAsyncApiDefinition();
             } else {
-                resourceConfigsString = apiPersistenceInstance.getAsyncDefinition(org, uuid);
+                resourceConfigsString = apiDAOImpl.getAsyncDefinition(org, uuid);
             }
             api.setAsyncApiDefinition(resourceConfigsString);
         }
@@ -1276,7 +1276,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getSwaggerDefinition() != null) {
             resourceConfigsString = api.getSwaggerDefinition();
         } else {
-            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
         }
         api.setSwaggerDefinition(resourceConfigsString);
 
@@ -1457,7 +1457,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiProduct.getDefinition() != null) {
             resourceConfigsString = apiProduct.getDefinition();
         } else {
-            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
             apiProduct.setDefinition(resourceConfigsString);
         }
         //CORS . if null is returned, set default config from the configuration

@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.dto.*;
-import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -537,6 +537,277 @@ public class ApiDAOImpl implements ApiDAO {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return searchResults;
+    }
+
+    @Override
+    public void saveWSDL(Organization organization, String apiId, ResourceFile wsdlResourceFile) throws WSDLPersistenceException {
+//        String mediaType;
+//        if (APIConstants.APPLICATION_ZIP.equals(wsdlResourceFile.getContentType())) {
+//            mediaType = wsdlResourceFile.getName() + APIConstants.ZIP_FILE_EXTENSION;
+//        } else {
+//            mediaType = wsdlResourceFile.getName() + ".wsdl";
+//        }
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatementUpdate = null;
+        String saveWSDLQuery = SQLConstants.UPDATE_API_DEFINITION_SQL;
+        String updateArtifactQuery = "UPDATE AM_API SET ARTIFACT[?] = TO_JSONB(?) WHERE ORGANIZATION=? AND API_UUID=?;";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(saveWSDLQuery);
+            if (wsdlResourceFile.getContent() != null) {
+                preparedStatement.setBinaryStream(1, wsdlResourceFile.getContent());
+                preparedStatement.setString(2, wsdlResourceFile.getContentType());
+            }
+            preparedStatement.setString(3, organization.getName());
+            preparedStatement.setString(4, apiId);
+            preparedStatement.executeUpdate();
+
+            preparedStatementUpdate = connection.prepareStatement(updateArtifactQuery);
+            if (wsdlResourceFile.getContent() != null) {
+                preparedStatementUpdate.setString(1,"wsdlUrl");
+                preparedStatementUpdate.setString(2,"wsdl");
+            }
+            preparedStatementUpdate.setString(3, organization.getName());
+            preparedStatementUpdate.setString(4, apiId);
+            preparedStatementUpdate.executeUpdate();
+
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"Save WSDL definition");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while updating entry in AM_API_ARTIFACT table ", e);
+            }
+            throw new WSDLPersistenceException("Error while updating entry in AM_API_ARTIFACT table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
+
+    @Override
+    public ResourceFile getWSDL(Organization organization, String apiId) throws WSDLPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        ResourceFile returnResource = null;
+        String getWSDLQuery = SQLConstants.GET_API_DEFINITION_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getWSDLQuery);
+            preparedStatement.setString(1, organization.getName());
+            preparedStatement.setString(2, apiId);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String mediaType = resultSet.getString("MEDIA_TYPE");
+                InputStream apiDefinitionBlob = resultSet.getBinaryStream("API_DEFINITION");
+                if (apiDefinitionBlob != null) {
+                    byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(apiDefinitionBlob);
+                    try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                        returnResource = new ResourceFile(newArtifact, mediaType);
+                        //returnResource.setName(resourceFileName);
+                    } catch (IOException e) {
+                        throw new WSDLPersistenceException("Error occurred retrieving input stream from byte array.", e);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving WSDL definition for api uuid: " + apiId);
+            }
+            throw new WSDLPersistenceException("Error while retrieving WSDL definition for api uuid: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return returnResource;
+    }
+
+    @Override
+    public void saveOASDefinition(Organization organization, String apiId, String apiDefinition) throws OASPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String saveOASQuery = SQLConstants.UPDATE_API_DEFINITION_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(saveOASQuery);
+            if (apiDefinition != null) {
+                byte[] apiDefinitionBytes = apiDefinition.getBytes();
+                preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
+                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
+            }
+            preparedStatement.setString(3, organization.getName());
+            preparedStatement.setString(4, apiId);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"Save OAS definition");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while updating entry in AM_API_ARTIFACT table ", e);
+            }
+            throw new OASPersistenceException("Error while updating entry in AM_API_ARTIFACT table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
+
+    @Override
+    public String getOASDefinition(Organization organization, String apiId) throws OASPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String oasDefinition = null;
+        String getOASDefinitionQuery = SQLConstants.GET_API_DEFINITION_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getOASDefinitionQuery);
+            preparedStatement.setString(1, organization.getName());
+            preparedStatement.setString(2, apiId);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String mediaType = resultSet.getString("MEDIA_TYPE");
+                InputStream apiDefinitionBlob = resultSet.getBinaryStream("API_DEFINITION");
+                if (apiDefinitionBlob != null) {
+                    oasDefinition = APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob);
+                }
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving oas definition for api uuid: " + apiId);
+            }
+            throw new OASPersistenceException("Error while retrieving oas definition for api uuid: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return oasDefinition;
+    }
+
+    @Override
+    public void saveAsyncDefinition(Organization organization, String apiId, String apiDefinition) throws AsyncSpecPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String saveOASQuery = SQLConstants.UPDATE_API_DEFINITION_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(saveOASQuery);
+            if (apiDefinition != null) {
+                byte[] apiDefinitionBytes = apiDefinition.getBytes();
+                preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
+                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME);
+            }
+            preparedStatement.setString(3, organization.getName());
+            preparedStatement.setString(4, apiId);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"Save Async API definition");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while updating entry in API_ARTIFACTS table ", e);
+            }
+            throw new AsyncSpecPersistenceException("Error while updating entry in API_ARTIFACTS table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
+
+    @Override
+    public String getAsyncDefinition(Organization organization, String apiId) throws AsyncSpecPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String asyncDefinition = null;
+        String getAsyncDefinitionQuery = SQLConstants.GET_API_DEFINITION_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getAsyncDefinitionQuery);
+            preparedStatement.setString(1, organization.getName());
+            preparedStatement.setString(2, apiId);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String mediaType = resultSet.getString("MEDIA_TYPE");
+                InputStream apiDefinitionBlob = resultSet.getBinaryStream("API_DEFINITION");
+                if (apiDefinitionBlob != null) {
+                    asyncDefinition = APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob);
+                }
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving async definition for api uuid: " + apiId);
+            }
+            throw new AsyncSpecPersistenceException("Error while retrieving async definition for api uuid: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return asyncDefinition;
+    }
+
+    @Override
+    public void saveGraphQLSchemaDefinition(Organization organization, String apiId, String schemaDefinition) throws GraphQLPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String saveOASQuery = SQLConstants.UPDATE_API_DEFINITION_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(saveOASQuery);
+            if (schemaDefinition != null) {
+                byte[] apiDefinitionBytes = schemaDefinition.getBytes();
+                preparedStatement.setBinaryStream(1, new ByteArrayInputStream(apiDefinitionBytes));
+                preparedStatement.setString(2, "graphqlapi" + org.wso2.carbon.apimgt.persistence.APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
+            }
+            preparedStatement.setString(3, organization.getName());
+            preparedStatement.setString(4, apiId);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"Save GraphQL Schema Definition");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while updating entry in AM_API_ARTIFACT table ", e);
+            }
+            throw new GraphQLPersistenceException("Error while updating entry in AM_API_ARTIFACT table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
+
+    @Override
+    public String getGraphQLSchema(Organization organization, String apiId) throws GraphQLPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String graphQLDefinition = null;
+        String getGraphQLDefinitionQuery = SQLConstants.GET_API_DEFINITION_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getGraphQLDefinitionQuery);
+            preparedStatement.setString(1, organization.getName());
+            preparedStatement.setString(2, apiId);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String mediaType = resultSet.getString("MEDIA_TYPE");
+                InputStream apiDefinitionBlob = resultSet.getBinaryStream("API_DEFINITION");
+                if (apiDefinitionBlob != null) {
+                    graphQLDefinition = APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob);
+                }
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving graphQL definition for api uuid: " + apiId);
+            }
+            throw new GraphQLPersistenceException("Error while retrieving graphQL definition for api uuid: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return graphQLDefinition;
     }
 
 

@@ -229,6 +229,22 @@ public final class APIMgtDBUtil {
 
     /**
      * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
+     * @param connection Connection
+     * @param error Error message to be logged
+     */
+    public static void rollbackConnection(Connection connection, String error) {
+        if (connection != null) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackException) {
+                // rollback failed
+                log.error(error, rollbackException);
+            }
+        }
+    }
+
+    /**
+     * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
      * @param rs result set
      * @throws SQLException sql exception
      * @throws APIManagementException api management exception
