@@ -45,7 +45,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This listener class will execute upon user deletion, role update of user and user update of role operations. It is

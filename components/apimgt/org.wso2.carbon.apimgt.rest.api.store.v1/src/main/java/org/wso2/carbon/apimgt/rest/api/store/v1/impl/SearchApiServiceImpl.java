@@ -20,16 +20,13 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SearchApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
@@ -37,7 +34,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SearchResultMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.ArrayList;
 import java.util.Collection;
