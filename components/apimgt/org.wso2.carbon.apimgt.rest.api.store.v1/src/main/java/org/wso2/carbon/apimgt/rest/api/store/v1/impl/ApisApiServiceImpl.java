@@ -265,9 +265,44 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Retrieves the swagger document of an API
+     *
+     * @param apiId API identifier
+     * @param environmentName name of the gateway environment
+     * @param ifNoneMatch If-None-Match header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param messageContext CXF message context
+     * @return Swagger document of the API for the given cluster or gateway environment
+     */
     @Override
     public Response apisApiIdAsyncApiSpecificationGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
-        return null;
+            try {
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+
+                API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
+                if (api.getUuid() == null) {
+                    api.setUuid(apiId);
+                }
+
+                api.setAsyncApiDefinition(apiConsumer.getAsyncAPIDefinition(apiId, organization));
+                String asyncApiSpecification = api.getAsyncApiDefinition();
+
+                return Response.ok().entity(asyncApiSpecification).header("Content-Disposition",
+                        "attachment; filename=\"" + "async_api.json" + "\"" ).build();
+
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else {
+                    String errorMessage = "Error while retrieving Async API Specification of API : " + apiId;
+                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                }
+            }
+            return null;
     }
 
     @Override
