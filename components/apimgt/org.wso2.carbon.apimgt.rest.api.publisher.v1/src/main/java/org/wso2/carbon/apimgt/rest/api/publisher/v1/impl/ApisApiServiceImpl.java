@@ -3022,7 +3022,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdAsyncapiGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getAsyncAPIDefinition(String apiId, String ifNoneMatch, MessageContext messageContext) throws
+            APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -3049,7 +3050,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url,
+    public Response updateAsyncAPIDefinition(String apiId, String ifMatch, String apiDefinition, String url,
             InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
             throws APIManagementException {
         try {
@@ -3361,7 +3362,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiId, String envId, MessageContext messageContext)
+    public Response getEnvironmentSpecificAPIProperties(String apiId, String envId, MessageContext messageContext)
             throws APIManagementException {
         // validate api UUID
         CommonUtils.validateAPIExistence(apiId);
@@ -3379,7 +3380,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId, Map<String, String> requestBody,
+    public Response updateEnvironmentSpecificAPIProperties(String apiId, String envId, Map<String, String> requestBody,
             MessageContext messageContext) throws APIManagementException {
         // validate api UUID
         CommonUtils.validateAPIExistence(apiId);

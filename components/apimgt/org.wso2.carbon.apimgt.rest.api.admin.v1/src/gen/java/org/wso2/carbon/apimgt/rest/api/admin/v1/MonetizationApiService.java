@@ -22,6 +22,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface MonetizationApiService {
-      public Response monetizationPublishUsagePost(MessageContext messageContext) throws APIManagementException;
-      public Response monetizationPublishUsageStatusGet(MessageContext messageContext) throws APIManagementException;
+      public Response getMonetizationUsagePublisherStatus(MessageContext messageContext) throws APIManagementException;
+      public Response publishMonetizationRecords(MessageContext messageContext) throws APIManagementException;
 }

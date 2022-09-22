@@ -37,25 +37,6 @@ public class MonetizationApi  {
 MonetizationApiService delegate = new MonetizationApiServiceImpl();
 
 
-    @POST
-    @Path("/publish-usage")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Publish Usage Records", notes = "Publish usage records of monetized APIs ", response = PublishStatusDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
-        })
-    }, tags={ "Monetization (Collection)",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Usage records successfully published.", response = PublishStatusDTO.class),
-        @ApiResponse(code = 202, message = "Request is sucessfully accepted for processing.", response = PublishStatusDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response monetizationPublishUsagePost() throws APIManagementException{
-        return delegate.monetizationPublishUsagePost(securityContext);
-    }
-
     @GET
     @Path("/publish-usage/status")
     
@@ -65,10 +46,29 @@ MonetizationApiService delegate = new MonetizationApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
         })
-    }, tags={ "Monetization (Collection)" })
+    }, tags={ "Monetization (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Status returned ", response = MonetizationUsagePublishInfoDTO.class) })
-    public Response monetizationPublishUsageStatusGet() throws APIManagementException{
-        return delegate.monetizationPublishUsageStatusGet(securityContext);
+    public Response getMonetizationUsagePublisherStatus() throws APIManagementException{
+        return delegate.getMonetizationUsagePublisherStatus(securityContext);
+    }
+
+    @POST
+    @Path("/publish-usage")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Publish Usage Records", notes = "Publish usage records of monetized APIs ", response = PublishStatusDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
+        })
+    }, tags={ "Monetization (Collection)" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Usage records successfully published.", response = PublishStatusDTO.class),
+        @ApiResponse(code = 202, message = "Request is sucessfully accepted for processing.", response = PublishStatusDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response publishMonetizationRecords() throws APIManagementException{
+        return delegate.publishMonetizationRecords(securityContext);
     }
 }

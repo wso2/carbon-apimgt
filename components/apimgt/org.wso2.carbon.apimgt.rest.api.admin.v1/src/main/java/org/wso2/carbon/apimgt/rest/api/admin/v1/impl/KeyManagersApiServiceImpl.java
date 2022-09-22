@@ -42,7 +42,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     private static final Log log = LogFactory.getLog(KeyManagersApiServiceImpl.class);
 
     @Override
-    public Response keyManagersDiscoverPost(String url, String type, MessageContext messageContext)
+    public Response getWellKnownInfoKeyManager(String url, String type, MessageContext messageContext)
             throws APIManagementException {
         if (StringUtils.isNotEmpty(url)) {
             Gson gson = new GsonBuilder().serializeNulls().create();
@@ -65,7 +65,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         return Response.ok(new KeyManagerWellKnownResponseDTO()).build();
     }
 
-    public Response keyManagersGet(MessageContext messageContext) throws APIManagementException {
+    public Response getAllKeyManagers(MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
@@ -76,7 +76,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         return Response.ok().entity(keyManagerListDTO).build();
     }
 
-    public Response keyManagersKeyManagerIdDelete(String keyManagerId, MessageContext messageContext)
+    public Response removeKeyManager(String keyManagerId, MessageContext messageContext)
             throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
@@ -96,7 +96,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         }
     }
 
-    public Response keyManagersKeyManagerIdGet(String keyManagerId, MessageContext messageContext)
+    public Response getKeyManagerConfiguration(String keyManagerId, MessageContext messageContext)
             throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
@@ -110,7 +110,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         throw new APIManagementException("Requested KeyManager not found", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
     }
 
-    public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, MessageContext messageContext)
+    public Response updateKeyManager(String keyManagerId, KeyManagerDTO body, MessageContext messageContext)
             throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
@@ -143,7 +143,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         }
     }
 
-    public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
+    public Response addNewKeyManager(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();

@@ -22,8 +22,8 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiCategoriesApiService {
-      public Response apiCategoriesApiCategoryIdDelete(String apiCategoryId, MessageContext messageContext) throws APIManagementException;
-      public Response apiCategoriesApiCategoryIdPut(String apiCategoryId, APICategoryDTO apICategoryDTO, MessageContext messageContext) throws APIManagementException;
-      public Response apiCategoriesGet(MessageContext messageContext) throws APIManagementException;
-      public Response apiCategoriesPost(APICategoryDTO apICategoryDTO, MessageContext messageContext) throws APIManagementException;
+      public Response addCategory(APICategoryDTO apICategoryDTO, MessageContext messageContext) throws APIManagementException;
+      public Response getAllCategories(MessageContext messageContext) throws APIManagementException;
+      public Response removeCategory(String apiCategoryId, MessageContext messageContext) throws APIManagementException;
+      public Response updateCategory(String apiCategoryId, APICategoryDTO apICategoryDTO, MessageContext messageContext) throws APIManagementException;
 }

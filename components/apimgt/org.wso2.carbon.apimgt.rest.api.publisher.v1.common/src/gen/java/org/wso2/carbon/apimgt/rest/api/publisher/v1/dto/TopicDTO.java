@@ -69,10 +69,10 @@ public class TopicDTO   {
   }
 
   
-  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store.", required = true, value = "")
+  @ApiModelProperty(example = "Pizza", required = true, value = "")
   @JsonProperty("mode")
   @NotNull
- @Size(max=32766)  public String getMode() {
+ @Size(max=20)  public String getMode() {
     return mode;
   }
   public void setMode(String mode) {

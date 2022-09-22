@@ -56,7 +56,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
 
     @Override
-    public Response applicationsApplicationIdChangeOwnerPost(String owner, String applicationId,
+    public Response changeApplicationOwner(String owner, String applicationId,
                                                              MessageContext messageContext) {
 
         APIConsumer apiConsumer = null;
@@ -79,7 +79,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, MessageContext messageContext) throws APIManagementException {
+    public Response removeApplication(String applicationId, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -97,7 +97,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String applicationName,
+    public Response getApplicationsByUser(String user, Integer limit, Integer offset, String accept, String applicationName,
                                     String tenantDomain, String sortBy, String sortOrder,
                                     MessageContext messageContext) {
         // To store the initial value of the user (specially if it is null or empty)
@@ -161,7 +161,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, MessageContext messageContext)
+    public Response getApplicationById(String applicationId, MessageContext messageContext)
             throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();

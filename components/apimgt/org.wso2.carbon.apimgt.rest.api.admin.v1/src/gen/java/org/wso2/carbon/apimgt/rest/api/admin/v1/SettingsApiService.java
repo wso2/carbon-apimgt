@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SettingsApiService {
-      public Response settingsGet(MessageContext messageContext) throws APIManagementException;
+      public Response getAdminSettings(MessageContext messageContext) throws APIManagementException;
 }

@@ -39,19 +39,20 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
 
 
     @POST
-    @Path("/discover")
-    @Consumes({ "multipart/form-data" })
+    
+    @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve Well-known information from Key Manager Well-known Endpoint", notes = "Retrieve well-known information from key manager's well-known endpoint ", response = KeyManagerWellKnownResponseDTO.class, authorizations = {
+    @ApiOperation(value = "Add a new API Key Manager", notes = "Add a new API Key Manager ", response = KeyManagerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
         })
     }, tags={ "Key Manager (Collection)",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. KeyManagers returned ", response = KeyManagerWellKnownResponseDTO.class) })
-    public Response keyManagersDiscoverPost(@Multipart(value = "url", required = false)  String url, @Multipart(value = "type", required = false)  String type) throws APIManagementException{
-        return delegate.keyManagersDiscoverPost(url, type, securityContext);
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. ", response = KeyManagerDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
+    public Response addNewKeyManager(@ApiParam(value = "Key Manager object that should to be added " ,required=true) KeyManagerDTO keyManagerDTO) throws APIManagementException{
+        return delegate.addNewKeyManager(keyManagerDTO, securityContext);
     }
 
     @GET
@@ -66,25 +67,8 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     }, tags={ "Key Manager (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. KeyManagers returned ", response = KeyManagerListDTO.class) })
-    public Response keyManagersGet() throws APIManagementException{
-        return delegate.keyManagersGet(securityContext);
-    }
-
-    @DELETE
-    @Path("/{keyManagerId}")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a Key Manager", notes = "Delete a Key Manager by keyManager id ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
-        })
-    }, tags={ "Key Manager (Individual)",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Key Manager successfully deleted. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response keyManagersKeyManagerIdDelete(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId) throws APIManagementException{
-        return delegate.keyManagersKeyManagerIdDelete(keyManagerId, securityContext);
+    public Response getAllKeyManagers() throws APIManagementException{
+        return delegate.getAllKeyManagers(securityContext);
     }
 
     @GET
@@ -101,8 +85,41 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. KeyManager Configuration returned ", response = KeyManagerDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response keyManagersKeyManagerIdGet(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId) throws APIManagementException{
-        return delegate.keyManagersKeyManagerIdGet(keyManagerId, securityContext);
+    public Response getKeyManagerConfiguration(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId) throws APIManagementException{
+        return delegate.getKeyManagerConfiguration(keyManagerId, securityContext);
+    }
+
+    @POST
+    @Path("/discover")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve Well-known information from Key Manager Well-known Endpoint", notes = "Retrieve well-known information from key manager's well-known endpoint ", response = KeyManagerWellKnownResponseDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
+        })
+    }, tags={ "Key Manager (Collection)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. KeyManagers returned ", response = KeyManagerWellKnownResponseDTO.class) })
+    public Response getWellKnownInfoKeyManager(@Multipart(value = "url", required = false)  String url, @Multipart(value = "type", required = false)  String type) throws APIManagementException{
+        return delegate.getWellKnownInfoKeyManager(url, type, securityContext);
+    }
+
+    @DELETE
+    @Path("/{keyManagerId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete a Key Manager", notes = "Delete a Key Manager by keyManager id ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
+        })
+    }, tags={ "Key Manager (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Key Manager successfully deleted. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response removeKeyManager(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId) throws APIManagementException{
+        return delegate.removeKeyManager(keyManagerId, securityContext);
     }
 
     @PUT
@@ -114,29 +131,12 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
         })
-    }, tags={ "Key Manager (Individual)",  })
+    }, tags={ "Key Manager (Individual)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Label updated. ", response = KeyManagerDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response keyManagersKeyManagerIdPut(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId, @ApiParam(value = "Key Manager object with updated information " ,required=true) KeyManagerDTO keyManagerDTO) throws APIManagementException{
-        return delegate.keyManagersKeyManagerIdPut(keyManagerId, keyManagerDTO, securityContext);
-    }
-
-    @POST
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Add a new API Key Manager", notes = "Add a new API Key Manager ", response = KeyManagerDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
-        })
-    }, tags={ "Key Manager (Collection)" })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. ", response = KeyManagerDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response keyManagersPost(@ApiParam(value = "Key Manager object that should to be added " ,required=true) KeyManagerDTO keyManagerDTO) throws APIManagementException{
-        return delegate.keyManagersPost(keyManagerDTO, securityContext);
+    public Response updateKeyManager(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId, @ApiParam(value = "Key Manager object with updated information " ,required=true) KeyManagerDTO keyManagerDTO) throws APIManagementException{
+        return delegate.updateKeyManager(keyManagerId, keyManagerDTO, securityContext);
     }
 }

@@ -23,9 +23,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SystemScopesApiService {
+      public Response addRoleAliasMapping(RoleAliasListDTO roleAliasListDTO, MessageContext messageContext) throws APIManagementException;
+      public Response getRoleAliasMappings(MessageContext messageContext) throws APIManagementException;
       public Response systemScopesGet(MessageContext messageContext) throws APIManagementException;
-      public Response systemScopesRoleAliasesGet(MessageContext messageContext) throws APIManagementException;
-      public Response systemScopesRoleAliasesPut(RoleAliasListDTO roleAliasListDTO, MessageContext messageContext) throws APIManagementException;
       public Response systemScopesScopeNameGet(String scopeName, String username, MessageContext messageContext) throws APIManagementException;
       public Response updateRolesForScope(ScopeListDTO scopeListDTO, MessageContext messageContext) throws APIManagementException;
 }

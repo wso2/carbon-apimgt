@@ -57,13 +57,13 @@ TenantConfigApiService delegate = new TenantConfigApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a tenant-config.", notes = "This operation can be used to update tenant-config. ", response = Object.class, authorizations = {
+    @ApiOperation(value = "Update a tenant-config.", notes = "This operation can be used to update tenant-config. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Tenant Config" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Role mapping alias returned ", response = Object.class),
+        @ApiResponse(code = 200, message = "OK. Role mapping alias returned ", response = String.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 413, message = "Payload Too Large. Request entity is larger than limits defined by server.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })

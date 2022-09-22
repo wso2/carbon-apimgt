@@ -23,8 +23,8 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApplicationsApiService {
-      public Response applicationsApplicationIdChangeOwnerPost(String owner, String applicationId, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdDelete(String applicationId, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdGet(String applicationId, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String name, String tenantDomain, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException;
+      public Response changeApplicationOwner(String owner, String applicationId, MessageContext messageContext) throws APIManagementException;
+      public Response getApplicationById(String applicationId, MessageContext messageContext) throws APIManagementException;
+      public Response getApplicationsByUser(String user, Integer limit, Integer offset, String accept, String name, String tenantDomain, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException;
+      public Response removeApplication(String applicationId, MessageContext messageContext) throws APIManagementException;
 }

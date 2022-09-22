@@ -45,7 +45,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
 
 
     @Override
-    public Response apiCategoriesGet(MessageContext messageContext) {
+    public Response getAllCategories(MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String organization = RestApiUtil.getOrganization(messageContext);
@@ -60,7 +60,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     }
 
     @Override
-    public Response apiCategoriesPost(APICategoryDTO body, MessageContext messageContext) {
+    public Response addCategory(APICategoryDTO body, MessageContext messageContext) {
         APICategory apiCategory = null;
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
@@ -95,7 +95,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     }
 
     @Override
-    public Response apiCategoriesApiCategoryIdPut(String apiCategoryId, APICategoryDTO body,
+    public Response updateCategory(String apiCategoryId, APICategoryDTO body,
                                                   MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
@@ -135,7 +135,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     }
 
     @Override
-    public Response apiCategoriesApiCategoryIdDelete(String apiCategoryId, MessageContext messageContext) {
+    public Response removeCategory(String apiCategoryId, MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();

@@ -18,12 +18,10 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.RolesApiService;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.Base64;
 import javax.ws.rs.core.Response;
@@ -42,15 +40,11 @@ public class RolesApiServiceImpl implements RolesApiService {
         Boolean isRoleExist = false;
         String username = RestApiCommonUtil.getLoggedInUsername();
         if (roleId != null) {
-            try {
-                String roleName = new String(Base64.getUrlDecoder().decode(roleId));
-                if (log.isDebugEnabled()) {
-                    log.debug("Checking whether the role: " + roleName + " exists");
-                }
-                isRoleExist = APIUtil.isRoleNameExist(username, roleName);
-            } catch (APIManagementException e) {
-                RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
+            String roleName = new String(Base64.getUrlDecoder().decode(roleId));
+            if (log.isDebugEnabled()) {
+                log.debug("Checking whether the role: " + roleName + " exists");
             }
+            isRoleExist = APIUtil.isRoleNameExist(username, roleName);
         }
         if (isRoleExist) {
             return Response.status(Response.Status.OK).build();

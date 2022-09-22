@@ -23,7 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface WorkflowsApiService {
-      public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, MessageContext messageContext) throws APIManagementException;
-      public Response workflowsGet(Integer limit, Integer offset, String accept, String workflowType, MessageContext messageContext) throws APIManagementException;
-      public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO workflowDTO, MessageContext messageContext) throws APIManagementException;
+      public Response getAllPendingWorkflows(Integer limit, Integer offset, String accept, String workflowType, MessageContext messageContext) throws APIManagementException;
+      public Response getWorkflowByExternalRef(String externalWorkflowRef, MessageContext messageContext) throws APIManagementException;
+      public Response updateWorkflowStatus(String workflowReferenceId, WorkflowDTO workflowDTO, MessageContext messageContext) throws APIManagementException;
 }
