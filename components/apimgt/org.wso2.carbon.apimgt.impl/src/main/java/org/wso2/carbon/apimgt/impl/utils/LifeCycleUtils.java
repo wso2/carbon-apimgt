@@ -9,6 +9,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.impl.ApiDAOImpl;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
@@ -45,10 +46,12 @@ import java.util.*;
 public class LifeCycleUtils {
     private static final Log log = LogFactory.getLog(LifeCycleUtils.class);
     private static final ApiMgtDAO apiMgtDAO;
+    private static final ApiDAOImpl apiDaoImpl;
     private static final APIPersistence apiPersistence;
 
     static {
         apiMgtDAO = ApiMgtDAO.getInstance();
+        apiDaoImpl = ApiDAOImpl.getInstance();
         apiPersistence = PersistenceFactory.getAPIPersistenceInstance();
     }
 
@@ -543,11 +546,7 @@ public class LifeCycleUtils {
                 api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
                         api.getGatewayVendor(), api.getGatewayType()));
                 PublisherAPI publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
-                try {
-                    apiPersistence.updateAPI(new Organization(api.getOrganization()), publisherAPI);
-                } catch (APIPersistenceException e) {
-                    handleException("Error while persisting the updated API ", e);
-                }
+                apiDaoImpl.updateAPI(new Organization(api.getOrganization()), publisherAPI);
 
             }
             isSuccess = true;

@@ -144,5 +144,8 @@ public interface ApiDAO {
 
     int getAPIID(String uuid) throws APIManagementException;
 
+    PublisherAPI updateAPI(Organization organization, PublisherAPI publisherAPI) throws APIManagementException;
+
+    void deleteAPI(Organization organization, String apiUUID) throws APIManagementException;
 
 }

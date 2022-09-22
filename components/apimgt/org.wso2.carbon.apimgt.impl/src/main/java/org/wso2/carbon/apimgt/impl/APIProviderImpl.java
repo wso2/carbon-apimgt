@@ -813,24 +813,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
         apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
-        try {
-            api.setCreatedTime(existingAPI.getCreatedTime());
-            apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
-        }
+
+        api.setCreatedTime(existingAPI.getCreatedTime());
+        apiDAOImpl.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
+
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
-        try {
-            api.setCreatedTime(existingAPI.getCreatedTime());
-            apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
-        }
 
 
         //notify key manager with API update
@@ -1856,13 +1848,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             existingAPI.setDefaultVersion(isExsitingAPIdefaultVersion);
         }
-
-        try {
-            apiPersistenceInstance.updateAPI(new Organization(organization),
-                    APIMapper.INSTANCE.toPublisherApi(existingAPI));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
-        }
+        apiDAOImpl.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(existingAPI));
         return getAPIbyUUID(newAPIId, organization);
     }
 
@@ -2105,12 +2091,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            apiPersistenceInstance.deleteAPI(new Organization(organization), apiUuid);
+            apiDAOImpl.deleteAPI(new Organization(organization), apiUuid);
             log.debug("API " + apiUuid + " on organization " + organization +
                     " has successfully removed from the persistence instance.");
-        } catch (APIPersistenceException e) {
-            log.error("Error while executing API delete operation on persistence instance for API "
-                    + apiUuid + " on organization " + organization, e);
+        } catch (APIManagementException e) {
+            log.error("Error while executing API delete operation on API Definitions for API " + apiUuid, e);
             isError = true;
         }
 
@@ -3036,11 +3021,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void configureMonetizationInAPIArtifact(API api) throws APIManagementException {
 
         Organization org = new Organization(api.getOrganization());
-        try {
-            apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
-        }
+        apiDAOImpl.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
+
     }
 
     /**

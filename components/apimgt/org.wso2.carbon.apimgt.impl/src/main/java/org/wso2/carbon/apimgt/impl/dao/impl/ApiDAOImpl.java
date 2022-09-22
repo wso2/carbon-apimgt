@@ -1454,6 +1454,64 @@ public class ApiDAOImpl implements ApiDAO {
         return operationPolicy;
     }
 
+    @Override
+    public PublisherAPI updateAPI(Organization organization, PublisherAPI publisherAPI) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String updateAPIQuery = SQLConstants.UPDATE_API_ARTIFACT_SQL;
+        API api = APIMapper.INSTANCE.toApi(publisherAPI);
+        String uuid = api.getUuid();
+        String json = "";
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        try {
+            json = ow.writeValueAsString(publisherAPI);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(updateAPIQuery);
+            preparedStatement.setString(1, json);
+            preparedStatement.setString(2, organization.getName());
+            preparedStatement.setString(3, uuid);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"update api");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while updating entry in AM_API table ", e);
+            }
+            handleException("Error while updating entry in AM_API table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        PublisherAPI returnAPI = APIMapper.INSTANCE.toPublisherApi(api);
+        return returnAPI;
+    }
 
+    @Override
+    public void deleteAPI(Organization organization, String apiUUID) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String deleteAPIQuery = SQLConstants.DELETE_API_DEFINITION_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(deleteAPIQuery);
+            preparedStatement.setString(1, organization.getName());
+            preparedStatement.setString(2, apiUUID);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"delete api");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while deleting entry from AM_API_ARTIFACT table ", e);
+            }
+            handleException("Error occurred while deleting entry from AM_API_ARTIFACT table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
 
 }
