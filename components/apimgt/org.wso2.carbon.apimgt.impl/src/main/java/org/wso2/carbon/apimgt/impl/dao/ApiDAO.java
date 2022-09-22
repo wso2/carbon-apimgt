@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 
@@ -136,6 +137,12 @@ public interface ApiDAO {
      * @throws GraphQLPersistenceException
      */
     String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException;
+
+    void addAPIRevision(APIRevision apiRevision) throws APIManagementException;
+
+    APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
+
+    int getAPIID(String uuid) throws APIManagementException;
 
 
 }

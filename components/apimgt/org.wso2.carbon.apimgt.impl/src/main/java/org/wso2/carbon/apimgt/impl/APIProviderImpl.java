@@ -5274,22 +5274,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiRevision.getApiUUID()));
         }
         apiId.setUuid(apiRevision.getApiUUID());
-        String revisionUUID;
-        try {
-            revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(organization),
-                    apiId.getUUID(), revisionId);
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to add revision registry artifacts";
-            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
-        }
-        if (StringUtils.isEmpty(revisionUUID)) {
-            String errorMessage = "Failed to retrieve revision uuid";
-            throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
-        }
+        String revisionUUID = UUID.nameUUIDFromBytes((apiRevision.getApiUUID()+revisionId).getBytes()).toString();
+//        try {
+//            revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(organization),
+//                    apiId.getUUID(), revisionId);
+//        } catch (APIPersistenceException e) {
+//            String errorMessage = "Failed to add revision registry artifacts";
+//            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+//                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
+//        }
+//        if (StringUtils.isEmpty(revisionUUID)) {
+//            String errorMessage = "Failed to retrieve revision uuid";
+//            throw new APIManagementException(errorMessage,
+//                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+//        }
         apiRevision.setRevisionUUID(revisionUUID);
-        apiMgtDAO.addAPIRevision(apiRevision);
+        apiDAOImpl.addAPIRevision(apiRevision);
         if (importExportAPI != null) {
             try {
                 File artifact = importExportAPI
