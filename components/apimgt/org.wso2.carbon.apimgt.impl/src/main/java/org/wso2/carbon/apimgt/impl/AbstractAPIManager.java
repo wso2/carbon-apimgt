@@ -300,7 +300,7 @@ public abstract class AbstractAPIManager implements APIManager {
         List<Documentation> convertedList = null;
         try {
             DocumentSearchResult list =
-                    apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);
+                    apiDAOImpl.searchDocumentation(org, uuid, 0, 0, null, ctx);
             if (list != null) {
                 convertedList = new ArrayList<Documentation>();
                 List<org.wso2.carbon.apimgt.persistence.dto.Documentation> docList = list.getDocumentationList();
@@ -333,7 +333,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Documentation documentation = null;
         try {
-            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
+            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiDAOImpl
                     .getDocumentation(new Organization(organization), apiId, docId);
             if (doc != null) {
                 if (log.isDebugEnabled()) {
@@ -356,7 +356,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throws APIManagementException {
 
         try {
-            DocumentContent content = apiPersistenceInstance
+            DocumentContent content = apiDAOImpl
                     .getDocumentationContent(new Organization(organization), apiId, docId);
             DocumentationContent docContent = null;
             if (content != null) {

@@ -36,23 +36,32 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDe
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiDAO;
+import org.wso2.carbon.apimgt.impl.dao.ResourceCategoryDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.dto.*;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentationType;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants.ResourceCategory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -63,7 +72,7 @@ public class ApiDAOImpl implements ApiDAO {
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
 
-    private ApiDAOImpl() {
+    private ApiDAOImpl() throws APIManagementException {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
@@ -72,6 +81,7 @@ public class ApiDAOImpl implements ApiDAO {
             forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
         }
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
+        initResourceCategories();
     }
 
     /**
@@ -81,7 +91,11 @@ public class ApiDAOImpl implements ApiDAO {
      */
     public static ApiDAOImpl getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new ApiDAOImpl();
+            try {
+                INSTANCE = new ApiDAOImpl();
+            } catch (APIManagementException e) {
+                throw new RuntimeException(e);
+            }
         }
         return INSTANCE;
     }
@@ -1513,5 +1527,374 @@ public class ApiDAOImpl implements ApiDAO {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
     }
+
+    @Override
+    public Documentation addDocumentation(Organization organization, String apiUUID, Documentation documentation) throws DocumentationPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        final String addDocumentQuery = "INSERT INTO AM_API_DOC_META_DATA (UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, " +
+                "SOURCE_URL, FILE_NAME, SOURCE_TYPE, VISIBILITY, CREATED_BY, UPDATED_BY) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        String docUUID = UUID.nameUUIDFromBytes((documentation.getName() + apiUUID).getBytes()).toString();
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            addResourceWithoutValue(connection, apiUUID, docUUID, ResourceCategory.DOC);
+
+            preparedStatement = connection.prepareStatement(addDocumentQuery);
+            preparedStatement.setString(1, docUUID);
+            preparedStatement.setString(2, documentation.getName());
+            preparedStatement.setString(3, documentation.getSummary());
+            preparedStatement.setString(4, documentation.getType().getType());
+            preparedStatement.setString(5, documentation.getOtherTypeName());
+            preparedStatement.setString(6, documentation.getSourceUrl());
+            preparedStatement.setString(7, documentation.getFilePath());
+            preparedStatement.setString(8, documentation.getSourceType().name());
+            preparedStatement.setString(9, documentation.getVisibility().toString());
+            preparedStatement.setString(10, null);
+            preparedStatement.setString(11, null);
+            preparedStatement.executeUpdate();
+            connection.commit();
+
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"add document");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while adding entry to AM_API_DOC_META_DATA table ", e);
+            }
+            throw new DocumentationPersistenceException("Error while persisting entry to AM_API_DOC_META_DATA table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        documentation.setId(docUUID);
+        return documentation;
+    }
+
+    private void addResourceWithoutValue(Connection connection, String apiID, String resourceID,
+                                        ResourceCategory category) throws SQLException {
+        final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID) VALUES (?,?,?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, resourceID);
+            statement.setString(2, apiID);
+            statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.execute();
+        }
+    }
+
+    @Override
+    public Documentation updateDocumentation(Organization organization, String s, Documentation documentation) throws DocumentationPersistenceException {
+        return null;
+    }
+
+    @Override
+    public Documentation getDocumentation(Organization organization, String apiUUID, String docUUID) throws DocumentationPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        Documentation documentation = null;
+        final String getDocumentQuery = "SELECT AM_API_DOC_META_DATA.UUID, AM_API_DOC_META_DATA.NAME, AM_API_DOC_META_DATA" +
+                ".SUMMARY, AM_API_DOC_META_DATA.TYPE, AM_API_DOC_META_DATA.OTHER_TYPE_NAME, AM_API_DOC_META_DATA" +
+                ".SOURCE_URL, AM_API_DOC_META_DATA.FILE_NAME, AM_API_DOC_META_DATA.SOURCE_TYPE, AM_API_DOC_META_DATA" +
+                ".VISIBILITY, AM_API_DOC_META_DATA.CREATED_TIME, AM_API_DOC_META_DATA.LAST_UPDATED_TIME FROM AM_API_DOC_META_DATA WHERE AM_API_DOC_META_DATA.UUID = ?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getDocumentQuery);
+            preparedStatement.setString(1, docUUID);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String docType = resultSet.getString("TYPE");
+                DocumentationType type;
+                if (docType.equalsIgnoreCase(DocumentationType.HOWTO.getType())) {
+                    type = DocumentationType.HOWTO;
+                } else if (docType.equalsIgnoreCase(DocumentationType.PUBLIC_FORUM.getType())) {
+                    type = DocumentationType.PUBLIC_FORUM;
+                } else if (docType.equalsIgnoreCase(DocumentationType.SUPPORT_FORUM.getType())) {
+                    type = DocumentationType.SUPPORT_FORUM;
+                } else if (docType.equalsIgnoreCase(DocumentationType.API_MESSAGE_FORMAT.getType())) {
+                    type = DocumentationType.API_MESSAGE_FORMAT;
+                } else if (docType.equalsIgnoreCase(DocumentationType.SAMPLES.getType())) {
+                    type = DocumentationType.SAMPLES;
+                } else {
+                    type = DocumentationType.OTHER;
+                }
+                String docName = resultSet.getString("NAME");
+                documentation = new Documentation(type, docName);
+                documentation.setId(docUUID);
+                documentation.setSummary(resultSet.getString("SUMMARY"));
+                documentation.setSourceUrl(resultSet.getString("SOURCE_URL"));
+                String visibilityAttr = resultSet.getString("VISIBILITY");
+                Documentation.DocumentVisibility documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
+
+                if (visibilityAttr != null) {
+                    if (visibilityAttr.equals(Documentation.DocumentVisibility.API_LEVEL.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
+                    } else if (visibilityAttr.equals(Documentation.DocumentVisibility.PRIVATE.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.PRIVATE;
+                    } else if (visibilityAttr.equals(Documentation.DocumentVisibility.OWNER_ONLY.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.OWNER_ONLY;
+                    }
+                }
+                documentation.setVisibility(documentVisibility);
+
+                Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
+                String artifactAttribute = resultSet.getString("SOURCE_TYPE");
+
+                if (Documentation.DocumentSourceType.URL.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.URL;
+                } else if (Documentation.DocumentSourceType.FILE.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.FILE;
+                } else if (Documentation.DocumentSourceType.MARKDOWN.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.MARKDOWN;
+                }
+                documentation.setSourceType(docSourceType);
+                documentation.setOtherTypeName(resultSet.getString("OTHER_TYPE_NAME"));
+                documentation.setCreatedDate(parseStringToDate(resultSet.getString("CREATED_TIME")));
+                documentation.setLastUpdated(parseStringToDate(resultSet.getString("LAST_UPDATED_TIME")));
+                documentation.setFilePath(resultSet.getString("FILE_NAME"));
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving document for doc uuid: " + docUUID);
+            }
+            throw new DocumentationPersistenceException("Error while retrieving document for doc uuid: " + docUUID, e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return documentation;
+    }
+
+    private static Date parseStringToDate(String time) throws java.text.ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.parse(time);
+    }
+
+    @Override
+    public DocumentContent getDocumentationContent(Organization organization, String apiUUID, String docUUID) throws DocumentationPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        DocumentContent documentContent = null;
+        String getDocumentContentQuery = "SELECT RESOURCE_BINARY_VALUE,DATA_TYPE FROM AM_API_RESOURCES WHERE API_ID=? AND UUID=?;";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getDocumentContentQuery);
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, docUUID);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String docSourceType = resultSet.getString("DATA_TYPE");
+                InputStream docBlob = resultSet.getBinaryStream("RESOURCE_BINARY_VALUE");
+                String doc = null;
+                if (docBlob != null) {
+                    doc = APIMgtDBUtil.getStringFromInputStream(docBlob);
+                }
+                documentContent = new DocumentContent();
+                if (StringUtils.equals(docSourceType,Documentation.DocumentSourceType.FILE.toString())) {
+                    if (doc != null) {
+                        ResourceFile resourceFile = new ResourceFile(docBlob, "PDF");
+                        documentContent.setResourceFile(resourceFile);
+                        documentContent
+                                .setSourceType(DocumentContent.ContentSourceType.valueOf(docSourceType));
+                    }
+                } else if (StringUtils.equals(docSourceType,Documentation.DocumentSourceType.INLINE.toString())
+                        || StringUtils.equals(docSourceType,Documentation.DocumentSourceType.MARKDOWN.toString())) {
+                    if (doc != null) {
+                        documentContent.setTextContent(doc);
+                        documentContent
+                                .setSourceType(DocumentContent.ContentSourceType.valueOf(docSourceType));
+                    }
+
+                }
+//                else if (StringUtils.equals(docSourceType,Documentation.DocumentSourceType.URL.toString())) {
+//
+//                    String sourceUrl = resultSet.getString("docSourceUrl");
+//                    documentContent.setTextContent(sourceUrl);
+//                    documentContent
+//                            .setSourceType(DocumentContent.ContentSourceType.valueOf(docSourceType));
+//                }
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving document content for doc uuid: " + docUUID);
+            }
+            throw new DocumentationPersistenceException("Error while retrieving document content for doc uuid: " + docUUID, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return documentContent;
+    }
+
+    @Override
+    public DocumentContent addDocumentationContent(Organization organization, String apiUUID, String docUUID, DocumentContent documentContent) throws DocumentationPersistenceException {
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        final String addDocumentContentQuery = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, RESOURCE_CONTENT=TO_TSVECTOR(?), DATA_TYPE = ?, UPDATED_BY = ?, "
+                + "LAST_UPDATED_TIME = ? WHERE UUID = ?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            preparedStatement = connection.prepareStatement(addDocumentContentQuery);
+            if (documentContent.getResourceFile() != null && documentContent.getResourceFile().getContent() != null) {
+                byte[] docByte = documentContent.getResourceFile().getContent().toString().getBytes();
+                preparedStatement.setBinaryStream(1, new ByteArrayInputStream(docByte));
+                preparedStatement.setString(2, documentContent.getResourceFile().getContent().toString());
+                preparedStatement.setString(3, documentContent.getSourceType().toString());
+
+            } else {
+                preparedStatement.setBinaryStream(1, new ByteArrayInputStream(documentContent.getTextContent().getBytes()));
+                preparedStatement.setString(2, documentContent.getTextContent());
+                preparedStatement.setString(3, Documentation.DocumentSourceType.INLINE.toString());
+            }
+            preparedStatement.setString(4, null);
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            preparedStatement.setString(6, docUUID);
+            preparedStatement.executeUpdate();
+            connection.commit();
+
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"add document content");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while adding entry to AM_API_DOCUMENT table ", e);
+            }
+            throw new DocumentationPersistenceException("Error while persisting entry to AM_API_DOCUMENT table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        return documentContent;
+    }
+
+    @Override
+    public DocumentSearchResult searchDocumentation(Organization org, String apiUUID, int start, int offset,
+                                                    String searchQuery, UserContext ctx) throws DocumentationPersistenceException {
+        DocumentSearchResult result = new DocumentSearchResult();
+
+        int totalLength = 0;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        String searchAllQuery = "SELECT AM_API_DOC_META_DATA.UUID, AM_API_DOC_META_DATA.NAME, AM_API_DOC_META_DATA" +
+                ".SUMMARY, AM_API_DOC_META_DATA.TYPE, AM_API_DOC_META_DATA.OTHER_TYPE_NAME, AM_API_DOC_META_DATA" +
+                ".SOURCE_URL, AM_API_DOC_META_DATA.FILE_NAME, AM_API_DOC_META_DATA.SOURCE_TYPE, AM_API_DOC_META_DATA" +
+                ".VISIBILITY, AM_API_DOC_META_DATA.CREATED_TIME, AM_API_DOC_META_DATA.LAST_UPDATED_TIME " +
+                "FROM AM_API_DOC_META_DATA, AM_API_RESOURCES WHERE AM_API_DOC_META_DATA.UUID=AM_API_RESOURCES.UUID AND AM_API_RESOURCES.API_ID=?;";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(searchAllQuery);
+            preparedStatement.setString(1, apiUUID);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            List<Documentation> documentationList = new ArrayList<Documentation>();
+            Documentation documentation = null;
+            while (resultSet.next()) {
+                String docType = resultSet.getString("TYPE");
+                DocumentationType type;
+                if (docType.equalsIgnoreCase(DocumentationType.HOWTO.getType())) {
+                    type = DocumentationType.HOWTO;
+                } else if (docType.equalsIgnoreCase(DocumentationType.PUBLIC_FORUM.getType())) {
+                    type = DocumentationType.PUBLIC_FORUM;
+                } else if (docType.equalsIgnoreCase(DocumentationType.SUPPORT_FORUM.getType())) {
+                    type = DocumentationType.SUPPORT_FORUM;
+                } else if (docType.equalsIgnoreCase(DocumentationType.API_MESSAGE_FORMAT.getType())) {
+                    type = DocumentationType.API_MESSAGE_FORMAT;
+                } else if (docType.equalsIgnoreCase(DocumentationType.SAMPLES.getType())) {
+                    type = DocumentationType.SAMPLES;
+                } else {
+                    type = DocumentationType.OTHER;
+                }
+                String docName = resultSet.getString("NAME");
+                documentation = new Documentation(type, docName);
+                documentation.setId(resultSet.getString("UUID"));
+                documentation.setSummary(resultSet.getString("SUMMARY"));
+                documentation.setSourceUrl(resultSet.getString("SOURCE_URL"));
+                String visibilityAttr = resultSet.getString("VISIBILITY");
+                Documentation.DocumentVisibility documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
+
+                if (visibilityAttr != null) {
+                    if (visibilityAttr.equals(Documentation.DocumentVisibility.API_LEVEL.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
+                    } else if (visibilityAttr.equals(Documentation.DocumentVisibility.PRIVATE.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.PRIVATE;
+                    } else if (visibilityAttr.equals(Documentation.DocumentVisibility.OWNER_ONLY.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.OWNER_ONLY;
+                    }
+                }
+                documentation.setVisibility(documentVisibility);
+
+                Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
+                String artifactAttribute = resultSet.getString("SOURCE_TYPE");
+
+                if (Documentation.DocumentSourceType.URL.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.URL;
+                } else if (Documentation.DocumentSourceType.FILE.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.FILE;
+                } else if (Documentation.DocumentSourceType.MARKDOWN.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.MARKDOWN;
+                }
+                documentation.setSourceType(docSourceType);
+                documentation.setOtherTypeName(resultSet.getString("OTHER_TYPE_NAME"));
+                documentation.setCreatedDate(parseStringToDate(resultSet.getString("CREATED_TIME")));
+                documentation.setLastUpdated(parseStringToDate(resultSet.getString("LAST_UPDATED_TIME")));
+                documentation.setFilePath(resultSet.getString("FILE_NAME"));
+                if (searchQuery != null) {
+                    if (searchQuery.toLowerCase().startsWith("name:")) {
+                        String requestedDocName = searchQuery.split(":")[1];
+                        if (documentation.getName().equalsIgnoreCase(requestedDocName)) {
+                            documentationList.add(documentation);
+                        }
+                    } else {
+                        log.warn("Document search not implemented for the query " + searchQuery);
+                    }
+                } else {
+                    documentationList.add(documentation);
+                }
+                totalLength ++;
+            }
+            result.setDocumentationList(documentationList);
+            result.setTotalDocsCount(totalLength);
+            result.setReturnedDocsCount(totalLength);
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving documents");
+            }
+            throw new DocumentationPersistenceException("Error while retrieving documents", e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return result;
+    }
+
+    @Override
+    public void deleteDocumentation(Organization organization, String s, String s1) throws DocumentationPersistenceException {
+
+    }
+
+    private void initResourceCategories() throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                if (!ResourceCategoryDAO.isStandardResourceCategoriesExist(connection)) {
+                    connection.setAutoCommit(false);
+                    ResourceCategoryDAO.addResourceCategories(connection);
+                    connection.commit();
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIManagementException("Error while adding API resource categories", e);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException( "Error while adding API resource categories", e);
+        }
+    }
+
 
 }

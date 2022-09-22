@@ -147,5 +147,18 @@ public interface ApiDAO {
     PublisherAPI updateAPI(Organization organization, PublisherAPI publisherAPI) throws APIManagementException;
 
     void deleteAPI(Organization organization, String apiUUID) throws APIManagementException;
+    Documentation addDocumentation(Organization organization, String apiUUID, Documentation documentation) throws DocumentationPersistenceException;
+
+    Documentation updateDocumentation(Organization organization, String s, Documentation documentation) throws DocumentationPersistenceException;
+
+    Documentation getDocumentation(Organization organization, String apiUUID, String docUUID) throws DocumentationPersistenceException;
+
+    DocumentContent getDocumentationContent(Organization organization, String apiUUID, String docUUID) throws DocumentationPersistenceException;
+
+    DocumentSearchResult searchDocumentation(Organization org, String apiUUID, int start, int offset,
+                                             String searchQuery, UserContext ctx) throws DocumentationPersistenceException;
+    DocumentContent addDocumentationContent(Organization organization, String apiUUID, String docUUID, DocumentContent documentContent) throws DocumentationPersistenceException;
+    void deleteDocumentation(Organization organization, String s, String s1) throws DocumentationPersistenceException;
+
 
 }

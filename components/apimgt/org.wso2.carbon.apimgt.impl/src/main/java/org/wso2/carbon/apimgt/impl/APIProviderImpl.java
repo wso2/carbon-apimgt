@@ -1891,7 +1891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void removeDocumentation(String apiId, String docId, String organization) throws APIManagementException {
         try {
-            apiPersistenceInstance.deleteDocumentation(new Organization(organization), apiId, docId);
+            apiDAOImpl.deleteDocumentation(new Organization(organization), apiId, docId);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while deleting the document " + docId);
         }
@@ -1913,7 +1913,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
-                org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
+                org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiDAOImpl
                         .updateDocumentation(new Organization(organization), apiId, mappedDoc);
                 if (updatedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
@@ -1932,7 +1932,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
-                org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance.addDocumentation(
+                org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiDAOImpl.addDocumentation(
                         new Organization(organization), uuid, mappedDoc);
                 if (addedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
@@ -1949,7 +1949,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean exist = false;
         UserContext ctx = null;
         try {
-            DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(new Organization(organization), uuid, 0, 0,
+            DocumentSearchResult result = apiDAOImpl.searchDocumentation(new Organization(organization), uuid, 0, 0,
                     "name:" + docName, ctx);
             if (result != null && result.getDocumentationList() != null && !result.getDocumentationList().isEmpty()) {
                 String returnDocName = result.getDocumentationList().get(0).getName();
@@ -4980,7 +4980,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         DocumentContent mappedContent = null;
         try {
             mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
-            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organization), uuid, docId,
+            DocumentContent doc = apiDAOImpl.addDocumentationContent(new Organization(organization), uuid, docId,
                     mappedContent);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId);
