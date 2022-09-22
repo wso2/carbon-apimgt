@@ -7332,6 +7332,7 @@ paths:
       summary: Get AsyncAPI definition
       description: |
         This operation can be used to retrieve the AsyncAPI definition of an API.
+      operationId: getAsyncAPIDefinition
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
@@ -7387,6 +7388,7 @@ paths:
       summary: Update AsyncAPI definition
       description: |
         This operation can be used to update the AsyncAPI definition of an existing API. AsyncAPI definition to be updated is passed as a form data parameter 'apiDefinition'.
+      operationId: updateAsyncAPIDefinition
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
@@ -7460,6 +7462,7 @@ paths:
       summary: Get environment specific API properties
       description: |
         This operation can be used to retrieve environment specific API properties from an existing API.
+      operationId: getEnvironmentSpecificAPIProperties
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/envId'
@@ -7492,6 +7495,7 @@ paths:
       summary: Update environment specific API properties
       description: |
         This operation can be used to update the environment specific API properties of an existing API.
+      operationId: updateEnvironmentSpecificAPIProperties
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/envId'
