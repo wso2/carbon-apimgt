@@ -266,6 +266,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response apisApiIdAsyncApiSpecificationGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
                                         Boolean includeCommenterInfo, MessageContext messageContext)
             throws APIManagementException {
