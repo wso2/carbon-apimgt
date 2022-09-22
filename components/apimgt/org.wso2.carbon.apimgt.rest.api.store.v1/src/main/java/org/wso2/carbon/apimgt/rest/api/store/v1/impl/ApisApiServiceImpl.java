@@ -266,14 +266,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Retrieves the swagger document of an API
+     * Retrieves the async api specification document of an API
      *
      * @param apiId API identifier
      * @param environmentName name of the gateway environment
      * @param ifNoneMatch If-None-Match header value
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param messageContext CXF message context
-     * @return Swagger document of the API for the given cluster or gateway environment
+     * @return Async API Specification document of the API for the given cluster or gateway environment
      */
     @Override
     public Response apisApiIdAsyncApiSpecificationGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
