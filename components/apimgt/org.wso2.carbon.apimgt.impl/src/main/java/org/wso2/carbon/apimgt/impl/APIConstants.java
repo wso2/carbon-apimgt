@@ -1283,10 +1283,6 @@ public final class APIConstants {
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "WSO2GraphQLAccessControlPolicy";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
-    public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
-    public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
-    public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
-    public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
 
     public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";

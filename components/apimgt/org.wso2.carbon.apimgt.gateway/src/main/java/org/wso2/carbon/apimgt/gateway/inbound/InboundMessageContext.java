@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.gateway.inbound;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.synapse.api.API;
-import org.wso2.carbon.apimgt.common.gateway.dto.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;

@@ -206,9 +206,9 @@ public class JWTValidator {
                     synCtx.setProperty("API_NAME", apiKeyValidationInfoDTO.getApiName());
                     /* GraphQL Query Analysis Information */
                     if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                        synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH,
+                        synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH,
                                 apiKeyValidationInfoDTO.getGraphQLMaxDepth());
-                        synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY,
+                        synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY,
                                 apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
                     }
                     log.debug("JWT authentication successful.");

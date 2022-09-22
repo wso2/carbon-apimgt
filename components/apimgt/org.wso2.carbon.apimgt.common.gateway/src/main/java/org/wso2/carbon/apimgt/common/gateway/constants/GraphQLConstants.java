@@ -43,6 +43,11 @@ public class GraphQLConstants {
     public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
     public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
 
+    public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
+    public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
+    public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
+    public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
+
     /**
      * GraphQL Constants related to GraphQL Subscription operations
      */

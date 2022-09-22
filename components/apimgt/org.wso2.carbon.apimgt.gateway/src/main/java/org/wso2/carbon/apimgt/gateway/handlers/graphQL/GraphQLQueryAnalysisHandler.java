@@ -81,8 +81,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
 
     private boolean isDepthValid(MessageContext messageContext, String payload) {
         int maxQueryDepth = -1;
-        if (messageContext.getPropertyKeySet().contains(APIConstants.MAXIMUM_QUERY_DEPTH)) {
-            maxQueryDepth = (int) messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH);
+        if (messageContext.getPropertyKeySet().contains(GraphQLConstants.MAXIMUM_QUERY_DEPTH)) {
+            maxQueryDepth = (int) messageContext.getProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH);
         }
         QueryAnalyzerResponseDTO responseDTO = queryAnalyzer.analyseQueryDepth(maxQueryDepth, payload);
         if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
@@ -96,8 +96,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
 
     private boolean isComplexityValid(MessageContext messageContext, String payload) {
         int queryComplexity = -1;
-        if (messageContext.getPropertyKeySet().contains(APIConstants.MAXIMUM_QUERY_COMPLEXITY)) {
-            queryComplexity = (int) messageContext.getProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
+        if (messageContext.getPropertyKeySet().contains(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY)) {
+            queryComplexity = (int) messageContext.getProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY);
         }
         String complexityInfoJson = (String) messageContext
                 .getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);

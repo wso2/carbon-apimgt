@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.common.gateway.dto;
+package org.wso2.carbon.apimgt.api.gateway;
 
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.TypeDefinitionRegistry;
