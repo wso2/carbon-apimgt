@@ -84,7 +84,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
     }
 
     @Override
-    public Response systemScopesRoleAliasesGet(MessageContext messageContext) throws APIManagementException {
+    public Response getRoleAliasMappings(MessageContext messageContext) throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomain(RestApiCommonUtil.getLoggedInUsername());
         JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
         JSONObject roleMapping = (JSONObject) tenantConfig.get(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
@@ -97,7 +97,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
     }
 
     @Override
-    public Response systemScopesRoleAliasesPut(RoleAliasListDTO body, MessageContext messageContext)
+    public Response addRoleAliasMapping(RoleAliasListDTO body, MessageContext messageContext)
             throws APIManagementException {
         RoleAliasListDTO roleAliasListDTO = new RoleAliasListDTO();
         JSONObject newRoleMappingJson = SystemScopesMappingUtil.createJsonObjectOfRoleMapping(body);

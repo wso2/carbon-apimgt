@@ -49,7 +49,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = SettingsDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response settingsGet() throws APIManagementException{
-        return delegate.settingsGet(securityContext);
+    public Response getAdminSettings() throws APIManagementException{
+        return delegate.getAdminSettings(securityContext);
     }
 }

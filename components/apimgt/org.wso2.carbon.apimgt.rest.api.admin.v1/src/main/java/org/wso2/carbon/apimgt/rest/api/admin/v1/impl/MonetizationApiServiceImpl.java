@@ -51,7 +51,7 @@ public class MonetizationApiServiceImpl implements MonetizationApiService {
      * @return Response of the server
      */
     @Override
-    public Response monetizationPublishUsagePost(MessageContext messageContext) {
+    public Response publishMonetizationRecords(MessageContext messageContext) {
 
         MonetizationUsagePublishInfo monetizationUsagePublishInfo;
         try {
@@ -109,7 +109,7 @@ public class MonetizationApiServiceImpl implements MonetizationApiService {
      * @return Retruns the status of the last monetization usage publishing jon
      */
     @Override
-    public Response monetizationPublishUsageStatusGet(MessageContext messageContext) {
+    public Response getMonetizationUsagePublisherStatus(MessageContext messageContext) {
 
         MonetizationUsagePublishInfo monetizationUsagePublishInfo;
         try {

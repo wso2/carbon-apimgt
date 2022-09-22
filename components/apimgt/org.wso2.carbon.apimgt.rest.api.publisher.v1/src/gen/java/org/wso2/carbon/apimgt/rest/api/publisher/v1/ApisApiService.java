@@ -70,10 +70,6 @@ public interface ApisApiService {
       public Response addAPIMonetization(String apiId, APIMonetizationInfoDTO apIMonetizationInfoDTO, MessageContext messageContext) throws APIManagementException;
       public Response addAPISpecificOperationPolicy(String apiId, InputStream policySpecFileInputStream, Attachment policySpecFileDetail, InputStream synapsePolicyDefinitionFileInputStream, Attachment synapsePolicyDefinitionFileDetail, InputStream ccPolicyDefinitionFileInputStream, Attachment ccPolicyDefinitionFileDetail, MessageContext messageContext) throws APIManagementException;
       public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdAsyncapiGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiId, String envId, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId, Map<String, String> requestBody, MessageContext messageContext) throws APIManagementException;
       public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response createAPI(APIDTO APIDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
@@ -117,8 +113,10 @@ public interface ApisApiService {
       public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAmazonResourceNamesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response getAsyncAPIDefinition(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAuditReportOfAPI(String apiId, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;
+      public Response getEnvironmentSpecificAPIProperties(String apiId, String envId, MessageContext messageContext) throws APIManagementException;
       public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
@@ -144,6 +142,8 @@ public interface ApisApiService {
       public Response updateAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId, ResourcePolicyInfoDTO resourcePolicyInfoDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response updateAsyncAPIDefinition(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
+      public Response updateEnvironmentSpecificAPIProperties(String apiId, String envId, Map<String, String> requestBody, MessageContext messageContext) throws APIManagementException;
       public Response updateGraphQLPolicyComplexityOfAPI(String apiId, GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateTopics(String apiId, TopicListDTO topicListDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException;

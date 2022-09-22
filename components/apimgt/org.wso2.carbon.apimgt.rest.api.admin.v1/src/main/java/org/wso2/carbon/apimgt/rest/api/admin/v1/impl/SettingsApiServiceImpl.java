@@ -42,7 +42,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response settingsGet(MessageContext messageContext) throws APIManagementException {
+    public Response getAdminSettings(MessageContext messageContext) throws APIManagementException {
 
             String username = RestApiCommonUtil.getLoggedInUsername();
             boolean isUserAvailable = false;

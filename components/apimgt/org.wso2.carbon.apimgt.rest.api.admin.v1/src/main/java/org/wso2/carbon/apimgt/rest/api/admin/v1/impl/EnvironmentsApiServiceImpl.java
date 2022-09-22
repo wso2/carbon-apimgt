@@ -38,7 +38,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      * @return 200 with empty response body
      * @throws APIManagementException if failed to delete
      */
-    public Response environmentsEnvironmentIdDelete(String environmentId, MessageContext messageContext) throws APIManagementException {
+    public Response removeEnvironment(String environmentId, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -55,7 +55,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      * @return updated environment
      * @throws APIManagementException if failed to update
      */
-    public Response environmentsEnvironmentIdPut(String environmentId, EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
+    public Response updateEnvironment(String environmentId, EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         body.setId(environmentId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -78,7 +78,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      * @return created environment
      * @throws APIManagementException if failed to get list
      */
-    public Response environmentsGet(MessageContext messageContext) throws APIManagementException {
+    public Response getEnvironments(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         List<Environment> envList = apiAdmin.getAllEnvironments(organization);
@@ -93,7 +93,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      * @return created environment
      * @throws APIManagementException if failed to create
      */
-    public Response environmentsPost(EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
+    public Response addEnvironment(EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();

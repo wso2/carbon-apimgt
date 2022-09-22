@@ -61,7 +61,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @return
      */
     @Override
-    public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, MessageContext messageContext)
+    public Response getWorkflowByExternalRef(String externalWorkflowRef, MessageContext messageContext)
             throws APIManagementException {
         WorkflowInfoDTO workflowinfoDTO;
         try {
@@ -89,7 +89,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @return
      */
     @Override
-    public Response workflowsGet(Integer limit, Integer offset, String accept, String workflowType,
+    public Response getAllPendingWorkflows(Integer limit, Integer offset, String accept, String workflowType,
                                  MessageContext messageContext) throws APIManagementException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -136,7 +136,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @return
      */
     @Override
-    public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body,
+    public Response updateWorkflowStatus(String workflowReferenceId, WorkflowDTO body,
                                                       MessageContext messageContext) {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         boolean isTenantFlowStarted = false;
