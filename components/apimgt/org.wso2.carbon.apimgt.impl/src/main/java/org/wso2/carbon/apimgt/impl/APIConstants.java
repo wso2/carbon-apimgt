@@ -2936,6 +2936,12 @@ public final class APIConstants {
         public static final String CONFIG_VALUE_BCENTRAL = "bcentral";
     }
 
+    public static class ApiManagerConfigurationConstants {
+        public static final String PROPERTIES = "Property";
+        public static final String PROPERTY = "Properties";
+        public static final String OPERATION_POLICY_CONFIGS = "OperationPolicyConfigs";
+    }
+
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
 }

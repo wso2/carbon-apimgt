@@ -370,9 +370,11 @@ public class APIManagerConfiguration {
                 }
                 
                 persistenceProperties = persistenceProps;
-            } else if ("OperationPolicyConfigs".equals(localName)) {
-                    OMElement properties = element.getFirstChildWithName(new QName("Properties"));
-                    Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+            } else if (APIConstants.ApiManagerConfigurationConstants.OPERATION_POLICY_CONFIGS.equals(localName)) {
+                    OMElement properties = element
+                            .getFirstChildWithName(new QName(APIConstants.ApiManagerConfigurationConstants.PROPERTIES));
+                    Iterator analyticsPropertiesIterator = properties
+                            .getChildrenWithLocalName(APIConstants.ApiManagerConfigurationConstants.PROPERTY);
                     Map<String, String> operationPolicyProps = new HashMap<>();
                     while (analyticsPropertiesIterator.hasNext()) {
                         OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();

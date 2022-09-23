@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
@@ -43,8 +59,11 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public OperationPolicyData getCommonOperationPolicyByPolicyName(String policyName, String policyVersion, String organization, boolean isWithPolicyDefinition) throws APIManagementException {
-        return apiMgtDAO.getCommonOperationPolicyByPolicyName(policyName, policyVersion, organization, isWithPolicyDefinition);
+    public OperationPolicyData getCommonOperationPolicyByPolicyName
+    (String policyName, String policyVersion, String organization, boolean isWithPolicyDefinition)
+            throws APIManagementException {
+        return apiMgtDAO.getCommonOperationPolicyByPolicyName(policyName, policyVersion, organization,
+                isWithPolicyDefinition);
     }
 
     /**
@@ -56,7 +75,8 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public OperationPolicyData getCommonOperationPolicyByPolicyId(String policyId, String organization, boolean isWithPolicyDefinition) throws APIManagementException {
+    public OperationPolicyData getCommonOperationPolicyByPolicyId
+    (String policyId, String organization, boolean isWithPolicyDefinition) throws APIManagementException {
         return apiMgtDAO.getCommonOperationPolicyByPolicyID(policyId, organization, isWithPolicyDefinition);
     }
 
@@ -69,7 +89,8 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public String addCommonOperationPolicy(OperationPolicyData operationPolicyData, String organization) throws APIManagementException {
+    public String addCommonOperationPolicy(OperationPolicyData operationPolicyData, String organization)
+            throws APIManagementException {
         return apiMgtDAO.addCommonOperationPolicy(operationPolicyData);
     }
 
@@ -81,7 +102,8 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public void updateOperationPolicy(String policyId, OperationPolicyData operationPolicyData, String organization) throws APIManagementException {
+    public void updateOperationPolicy(String policyId, OperationPolicyData operationPolicyData, String organization)
+            throws APIManagementException {
         apiMgtDAO.updateOperationPolicy(policyId, operationPolicyData);
     }
 
@@ -109,8 +131,11 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public OperationPolicyData getAPISpecificOperationPolicyByPolicyName(String apiUUID, String policyName, String policyVersion, String organization, boolean isWithPolicyDefinition) throws APIManagementException {
-        return apiMgtDAO.getAPISpecificOperationPolicyByPolicyName(policyName, policyVersion, apiUUID, null, organization, isWithPolicyDefinition);
+    public OperationPolicyData getAPISpecificOperationPolicyByPolicyName
+    (String apiUUID, String policyName, String policyVersion, String organization, boolean isWithPolicyDefinition)
+            throws APIManagementException {
+        return apiMgtDAO.getAPISpecificOperationPolicyByPolicyName(policyName, policyVersion, apiUUID,
+                null, organization, isWithPolicyDefinition);
     }
 
     /**
@@ -123,7 +148,8 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public OperationPolicyData getAPISpecificOperationPolicyByPolicyID(String apiUUID, String policyId, String organization, boolean isWithPolicyDefinition) throws APIManagementException {
+    public OperationPolicyData getAPISpecificOperationPolicyByPolicyID
+    (String apiUUID, String policyId, String organization, boolean isWithPolicyDefinition) throws APIManagementException {
         return apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyId, apiUUID, organization, isWithPolicyDefinition);
     }
 
@@ -138,7 +164,8 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public List<OperationPolicyData> getAllAPiSpecificOperationPolicies(String apiUUID, String organization) throws APIManagementException {
+    public List<OperationPolicyData> getAllAPiSpecificOperationPolicies(String apiUUID, String organization)
+            throws APIManagementException {
         return apiMgtDAO.getLightWeightVersionOfAllOperationPolicies(apiUUID, organization);
     }
 
@@ -153,8 +180,10 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public String revisionOperationPolicy(String policyId, String apiUUID, String revisionId, String organization) throws APIManagementException {
-        OperationPolicyData policyData = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyId, apiUUID, organization, true);
+    public String revisionOperationPolicy(String policyId, String apiUUID, String revisionId, String organization)
+            throws APIManagementException {
+        OperationPolicyData policyData = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyId, apiUUID,
+                organization, true);
         if (policyData != null) {
             return apiMgtDAO.addAPISpecificOperationPolicy(apiUUID, revisionId, policyData);
         } else {
@@ -172,7 +201,8 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public String addAPISpecificOperationPolicy(String apiID, OperationPolicyData operationPolicyData, String organization) throws APIManagementException {
+    public String addAPISpecificOperationPolicy(String apiID, OperationPolicyData operationPolicyData,
+                                                String organization) throws APIManagementException {
         return apiMgtDAO.addAPISpecificOperationPolicy(apiID, null, operationPolicyData);
     }
 
@@ -188,9 +218,11 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public String cloneAPISpecificOperationPolicy(String policyId, String oldApiUUID, String newApiUUID, String organization) throws APIManagementException {
+    public String cloneAPISpecificOperationPolicy
+    (String policyId, String oldApiUUID, String newApiUUID, String organization) throws APIManagementException {
 
-        OperationPolicyData apiSpecificOperationPolicy = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyId, oldApiUUID, organization, true);
+        OperationPolicyData apiSpecificOperationPolicy = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID
+                (policyId, oldApiUUID, organization, true);
         return apiMgtDAO.cloneOperationPolicy(newApiUUID, apiSpecificOperationPolicy);
     }
 
@@ -204,7 +236,8 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException
      */
     @Override
-    public void cloneAllApiSpecificOperationPolicies(String oldApiUUID, String newApiUUID, String organization) throws APIManagementException {
+    public void cloneAllApiSpecificOperationPolicies(String oldApiUUID, String newApiUUID, String organization)
+            throws APIManagementException {
         List<OperationPolicyData> operationPolicyDataList = getAllAPiSpecificOperationPolicies(oldApiUUID, organization);
         for (OperationPolicyData policyData : operationPolicyDataList) {
             apiMgtDAO.cloneOperationPolicy(newApiUUID, policyData);
@@ -225,7 +258,8 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * then common policy.
      * If API specific policy exists and MD5 hash matches, it will not import and will return the existing API specific policy.
      * If the existing API specific policy is different in md5, it will be updated the existing policy
-     * If a common policy exists and MD5 hash match, it will return the common policy's id. This policy will be imported at the API update.
+     * If a common policy exists and MD5 hash match, it will return the common policy's id.
+     * This policy will be imported at the API update.
      * If the common policy is different from the imported policy, a new API specific policy will be created.
      * If there aren't any existing policies, a new API specific policy will be created.
      *
@@ -235,10 +269,12 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
      * @throws APIManagementException if failed to delete APIRevision
      */
     @Override
-    public String importOperationPolicy(OperationPolicyData importedPolicyData, String organization) throws APIManagementException {
+    public String importOperationPolicy(OperationPolicyData importedPolicyData, String organization)
+            throws APIManagementException {
 
         OperationPolicySpecification importedSpec = importedPolicyData.getSpecification();
-        OperationPolicyData existingOperationPolicy = getAPISpecificOperationPolicyByPolicyName(importedPolicyData.getApiUUID(), importedSpec.getName(),
+        OperationPolicyData existingOperationPolicy = getAPISpecificOperationPolicyByPolicyName
+                (importedPolicyData.getApiUUID(), importedSpec.getName(),
                 importedSpec.getVersion(), organization, false);
         String policyId = null;
         if (existingOperationPolicy != null) {
@@ -248,13 +284,16 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Even though existing API specific policy name match with imported policy, " + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId() + ".Therefore updating the existing policy");
+                    log.debug("Even though existing API specific policy name match with imported policy, "
+                            + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId()
+                            + ".Therefore updating the existing policy");
                 }
                 updateOperationPolicy(existingOperationPolicy.getPolicyId(), importedPolicyData, organization);
             }
             policyId = existingOperationPolicy.getPolicyId();
         } else {
-            existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(), importedSpec.getVersion(), organization, false);
+            existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(),
+                    importedSpec.getVersion(), organization, false);
             if (existingOperationPolicy != null) {
                 if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
                     if (log.isDebugEnabled()) {
@@ -266,15 +305,20 @@ public class OperationPolicyProviderImpl implements OperationPolicyProvider {
                     importedSpec.setDisplayName(importedSpec.getDisplayName() + " Imported");
                     importedPolicyData.setSpecification(importedSpec);
                     importedPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(importedPolicyData));
-                    policyId = apiMgtDAO.addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), null, importedPolicyData);
+                    policyId = apiMgtDAO.addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), null,
+                            importedPolicyData);
                     if (log.isDebugEnabled()) {
-                        log.debug("Even though existing common policy name match with imported policy, " + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId() + ". A new policy created with ID " + policyId);
+                        log.debug("Even though existing common policy name match with imported policy, " +
+                                "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId()
+                                + ". A new policy created with ID " + policyId);
                     }
                 }
             } else {
-                policyId = apiMgtDAO.addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), null, importedPolicyData);
+                policyId = apiMgtDAO.addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(),
+                        null, importedPolicyData);
                 if (log.isDebugEnabled()) {
-                    log.debug("There aren't any existing policies for the imported policy. A new policy created with ID " + policyId);
+                    log.debug("There aren't any existing policies for the imported policy. A new policy created with ID "
+                            + policyId);
                 }
             }
         }

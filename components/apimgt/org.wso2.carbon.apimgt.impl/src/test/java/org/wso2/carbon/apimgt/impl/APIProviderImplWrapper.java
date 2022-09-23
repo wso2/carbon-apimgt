@@ -74,7 +74,8 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         this.scopesDAO = scopesDAO;
     }
 
-    public APIProviderImplWrapper(OperationPolicyProvider operationPolicyProviderInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO) throws APIManagementException {
+    public APIProviderImplWrapper(OperationPolicyProvider operationPolicyProviderInstance,
+                                  ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO) throws APIManagementException {
 
         super(null);
         this.apiMgtDAO = apimgtDAO;
@@ -89,7 +90,8 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         this.apiPersistenceInstance = apiPersistenceInstance;
     }
 
-    public APIProviderImplWrapper(OperationPolicyProvider operationPolicyProviderInstance, APIPersistence apiPersistenceInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO)
+    public APIProviderImplWrapper(OperationPolicyProvider operationPolicyProviderInstance,
+                                  APIPersistence apiPersistenceInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO)
             throws APIManagementException {
 
         this(apimgtDAO,scopesDAO);

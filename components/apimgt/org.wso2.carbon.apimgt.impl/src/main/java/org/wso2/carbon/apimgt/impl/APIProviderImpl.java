@@ -6021,7 +6021,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                          boolean isWithPolicyDefinition)
             throws APIManagementException {
 
-        return operationPolicyProviderInstance.getAPISpecificOperationPolicyByPolicyName(apiUUID, policyName, policyVersion, tenantDomain, isWithPolicyDefinition);
+        return operationPolicyProviderInstance
+                .getAPISpecificOperationPolicyByPolicyName(apiUUID, policyName, policyVersion, tenantDomain,
+                        isWithPolicyDefinition);
     }
 
     @Override
@@ -6029,7 +6031,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                     String tenantDomain,
                                                                     boolean isWithPolicyDefinition)
             throws APIManagementException {
-        return operationPolicyProviderInstance.getCommonOperationPolicyByPolicyName(policyName, policyVersion, tenantDomain, isWithPolicyDefinition);
+        return operationPolicyProviderInstance
+                .getCommonOperationPolicyByPolicyName(policyName, policyVersion, tenantDomain, isWithPolicyDefinition);
     }
 
     @Override
@@ -6046,7 +6049,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public OperationPolicyData getCommonOperationPolicyByPolicyId(String policyId, String organization,
                                                                   boolean isWithPolicyDefinition)
             throws APIManagementException {
-        return operationPolicyProviderInstance.getCommonOperationPolicyByPolicyId(policyId, organization, isWithPolicyDefinition);
+        return operationPolicyProviderInstance.getCommonOperationPolicyByPolicyId(policyId, organization,
+                isWithPolicyDefinition);
     }
 
     @Override
