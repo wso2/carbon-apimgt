@@ -212,7 +212,8 @@ public class APIManagerComponent {
             APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
             // Avoid load default operation policies to the database if policy provider is BCentral
-            if (!Objects.equals(configuration.getOperationalPolicyProperties().get(APIConstants.OperationPolicyConstants.CONFIG_KEY_PROVIDER),
+            if (!Objects.equals(configuration.getOperationalPolicyProperties()
+                            .get(APIConstants.OperationPolicyConstants.CONFIG_KEY_PROVIDER),
                     APIConstants.OperationPolicyConstants.CONFIG_VALUE_BCENTRAL)) {
                 APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             }

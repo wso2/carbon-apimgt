@@ -149,7 +149,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdOperationPolicyIsAttachedGet(String xWSO2Tenant, String apiId, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdOperationPolicyIsAttachedGet(String xWSO2Tenant, String apiId, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, xWSO2Tenant);
@@ -169,7 +170,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             Response.Status status = Response.Status.BAD_REQUEST;
             errorObject.setCode(status.getStatusCode());
             errorObject.setMessage(status.toString());
-            errorObject.setMessage("An error has occurred while getting API for the given X-WSo2-Tenant and ApiID combination.");
+            errorObject
+                    .setMessage("An error has occurred while getting API for the given X-WSo2-Tenant and ApiID combination.");
             return Response.status(status).entity(errorObject).build();
         }
     }
