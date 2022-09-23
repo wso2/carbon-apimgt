@@ -162,5 +162,11 @@ public interface ApiDAO {
 
     PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int i, int i1, UserContext userContext) throws APIPersistenceException;
 
+    void saveThumbnail(Organization organization, String apiId, ResourceFile resourceFile) throws ThumbnailPersistenceException;
+
+    ResourceFile getThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException;
+
+    void deleteThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException;
+
 
 }

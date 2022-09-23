@@ -1498,7 +1498,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public ResourceFile getIcon(String apiId, String organization) throws APIManagementException {
 
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiDAOImpl
                     .getThumbnail(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());

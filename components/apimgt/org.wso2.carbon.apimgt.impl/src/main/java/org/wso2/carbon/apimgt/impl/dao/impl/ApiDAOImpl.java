@@ -2035,4 +2035,193 @@ public class ApiDAOImpl implements ApiDAO {
         return searchResults;
     }
 
+    @Override
+    public void saveThumbnail(Organization organization, String apiId, ResourceFile resourceFile) throws ThumbnailPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String saveThumbnailQuery = "UPDATE AM_API SET ARTIFACT[?] = TO_JSONB(?) WHERE ORGANIZATION=? AND API_UUID=?;";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            if (isResourceExistsForCategory(connection, apiId, ResourceCategory.IMAGE)) {
+                updateBinaryResourceForCategory(connection, apiId, ResourceCategory.IMAGE, resourceFile.getContent(), null);
+            } else {
+                addBinaryResource(connection, apiId, UUID.randomUUID().toString(),
+                        ResourceCategory.IMAGE, resourceFile.getContentType(), resourceFile.getContent(), null);
+            }
+            preparedStatement = connection.prepareStatement(saveThumbnailQuery);
+            if (resourceFile.getContent() != null) {
+                preparedStatement.setString(1, "thumbnail");
+                preparedStatement.setString(2, org.wso2.carbon.apimgt.persistence.APIConstants.API_ICON_IMAGE + resourceFile.getContentType());
+                preparedStatement.setString(3, organization.getName());
+                preparedStatement.setString(4, apiId);
+            }
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"Save API Thumbnail");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while updating entry in AM_API_RESOURCES table ", e);
+            }
+            throw new ThumbnailPersistenceException("Error while updating entry in AM_API_RESOURCES table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
+
+    private void addBinaryResource(Connection connection, String apiID, String resourceID, ResourceCategory category,
+                                  String dataType, InputStream binaryValue, String createdBy) throws SQLException {
+        final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID, " +
+                "DATA_TYPE, RESOURCE_BINARY_VALUE, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME) "
+                + "VALUES (?,?,?,?,?,?,?,?,?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, resourceID);
+            statement.setString(2, apiID);
+            statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.setString(4, dataType);
+            statement.setBinaryStream(5, binaryValue);
+            statement.setString(6, createdBy);
+            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(8, createdBy);
+            statement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            statement.execute();
+        }
+    }
+
+    @Override
+    public ResourceFile getThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        ResourceFile returnResource = null;
+        final String getThumbnailQuery = "SELECT DATA_TYPE,RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES " +
+                "WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getThumbnailQuery);
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, ResourceCategory.IMAGE));
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String mediaType = resultSet.getString("DATA_TYPE");
+                InputStream thumbnailBlob = resultSet.getBinaryStream("RESOURCE_BINARY_VALUE");
+                if (thumbnailBlob != null) {
+                    byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(thumbnailBlob);
+                    try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                        returnResource = new ResourceFile(newArtifact, mediaType);
+                    } catch (IOException e) {
+                        throw new ThumbnailPersistenceException("Error occurred retrieving input stream from byte array.", e);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving Thumbnail for api uuid: " + apiId);
+            }
+            throw new ThumbnailPersistenceException("Error while retrieving Thumbnail for api uuid: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return returnResource;
+    }
+
+    private InputStream getBinaryValueForCategory(Connection connection, String apiID,
+                                                 ResourceCategory category)
+            throws SQLException, IOException {
+        final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES " +
+                "WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.execute();
+
+            try (ResultSet rs =  statement.getResultSet()) {
+                if (rs.next()) {
+                    InputStream inputStream = new ByteArrayInputStream(IOUtils.toByteArray(rs.getBinaryStream
+                            ("RESOURCE_BINARY_VALUE")));
+                    return inputStream;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String deleteThumbnailQuery = "UPDATE AM_API SET ARTIFACT[?] = TO_JSONB(?) WHERE ORGANIZATION=? AND API_UUID=?;";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            deleteUniqueResourceForCategory(connection,apiId,ResourceCategory.IMAGE);
+            preparedStatement = connection.prepareStatement(deleteThumbnailQuery);
+            preparedStatement.setString(1, "thumbnail");
+            preparedStatement.setString(2, null);
+            preparedStatement.setString(3, organization.getName());
+            preparedStatement.setString(4, apiId);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"Delete API Thumbnail");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while updating entry in AM_API_RESOURCES table ", e);
+            }
+            throw new ThumbnailPersistenceException("Error while updating entry in AM_API_RESOURCES table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
+
+    private boolean isResourceExistsForCategory(Connection connection, String apiID,
+                                               ResourceCategory category) throws SQLException {
+        final String query = "SELECT 1 FROM AM_API_RESOURCES WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.execute();
+
+            try (ResultSet rs =  statement.getResultSet()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void updateBinaryResourceForCategory(Connection connection, String apiID, ResourceCategory category,
+                                                InputStream resourceValue, String updatedBy)
+            throws SQLException {
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, UPDATED_BY = ?, "
+                + "LAST_UPDATED_TIME = ? WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setBinaryStream(1, resourceValue);
+            statement.setString(2, updatedBy);
+            statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(4, apiID);
+            statement.setInt(5, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+
+            statement.execute();
+        }
+    }
+
+    static void deleteUniqueResourceForCategory(Connection connection, String apiID, ResourceCategory resourceCategory)
+            throws SQLException {
+        final String query = "DELETE FROM AM_API_RESOURCES WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, resourceCategory));
+
+            statement.execute();
+        }
+    }
+
 }
