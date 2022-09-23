@@ -5041,7 +5041,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         try {
-            PublisherContentSearchResult results = apiPersistenceInstance.searchContentForPublisher(org, searchQuery,
+            PublisherContentSearchResult results = apiDAOImpl.searchContentForPublisher(org, searchQuery,
                     start, end, ctx);
             if (results != null) {
                 List<SearchContent> resultList = results.getResults();

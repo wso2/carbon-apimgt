@@ -160,5 +160,7 @@ public interface ApiDAO {
     DocumentContent addDocumentationContent(Organization organization, String apiUUID, String docUUID, DocumentContent documentContent) throws DocumentationPersistenceException;
     void deleteDocumentation(Organization organization, String s, String s1) throws DocumentationPersistenceException;
 
+    PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int i, int i1, UserContext userContext) throws APIPersistenceException;
+
 
 }
