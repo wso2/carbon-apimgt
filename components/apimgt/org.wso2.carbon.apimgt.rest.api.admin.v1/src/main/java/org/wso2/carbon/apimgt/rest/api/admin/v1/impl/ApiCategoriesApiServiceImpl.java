@@ -27,11 +27,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiCategoriesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APICategoryMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.APICategoryMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;

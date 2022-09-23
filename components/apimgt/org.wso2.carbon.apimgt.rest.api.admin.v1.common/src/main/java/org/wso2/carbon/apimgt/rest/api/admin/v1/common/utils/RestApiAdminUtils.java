@@ -1,21 +1,22 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com).
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils;
+package org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -41,9 +42,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -212,33 +213,33 @@ public class RestApiAdminUtils {
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
 
-            APIAdmin apiAdmin = new APIAdminImpl();
-            //add or update the tenant theme in the database
-            if (apiAdmin.isTenantThemeExist(tenantId)) {
-                existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
-                apiAdmin.updateTenantTheme(tenantId, themeContentInputStream);
-            } else {
-                apiAdmin.addTenantTheme(tenantId, themeContentInputStream);
-            }
-            //retrieve the tenant theme from the database to import it to the file system
-            themeContent = apiAdmin.getTenantTheme(tenantId);
+        APIAdmin apiAdmin = new APIAdminImpl();
+        //add or update the tenant theme in the database
+        if (apiAdmin.isTenantThemeExist(tenantId)) {
+            existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
+            apiAdmin.updateTenantTheme(tenantId, themeContentInputStream);
+        } else {
+            apiAdmin.addTenantTheme(tenantId, themeContentInputStream);
+        }
+        //retrieve the tenant theme from the database to import it to the file system
+        themeContent = apiAdmin.getTenantTheme(tenantId);
 
-            //import the tenant theme to the file system
-            String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
-            tenantThemeDirectory = new File(outputFolder);
-            if (!tenantThemeDirectory.exists()) {
-                if (!tenantThemeDirectory.mkdirs()) {
-                    APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
-                }
-            } else {
-                //copy the existing tenant theme as a backup in case a restoration is needed to take place
-                String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
-                backupDirectory = new File(tempPath);
-                FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
-                //remove existing files inside the directory
-                FileUtils.cleanDirectory(tenantThemeDirectory);
+        //import the tenant theme to the file system
+        String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
+        tenantThemeDirectory = new File(outputFolder);
+        if (!tenantThemeDirectory.exists()) {
+            if (!tenantThemeDirectory.mkdirs()) {
+                APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
             }
-            //get the zip file content
+        } else {
+            //copy the existing tenant theme as a backup in case a restoration is needed to take place
+            String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
+            backupDirectory = new File(tempPath);
+            FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
+            //remove existing files inside the directory
+            FileUtils.cleanDirectory(tenantThemeDirectory);
+        }
+        //get the zip file content
         try (ZipInputStream zipInputStream = new ZipInputStream(themeContent)) {
             //get the zipped file list entry
             ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -381,3 +382,4 @@ public class RestApiAdminUtils {
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
     }
 }
+

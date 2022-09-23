@@ -28,7 +28,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.BotDetectionDataApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.BotDetectionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.BotDetectionMappingUtil;
 
 import java.util.List;
 

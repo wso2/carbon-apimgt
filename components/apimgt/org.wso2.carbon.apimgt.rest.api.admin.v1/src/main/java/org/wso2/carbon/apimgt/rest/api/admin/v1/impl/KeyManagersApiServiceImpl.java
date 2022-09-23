@@ -13,7 +13,6 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -25,16 +24,14 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.KeyManagerMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.KeyManagerMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 import javax.ws.rs.core.Response;
 
 public class KeyManagersApiServiceImpl implements KeyManagersApiService {

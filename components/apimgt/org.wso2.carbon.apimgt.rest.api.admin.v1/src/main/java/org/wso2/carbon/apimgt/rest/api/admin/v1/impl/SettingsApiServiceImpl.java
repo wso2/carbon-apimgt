@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
 import javax.ws.rs.core.Response;

@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.WorkflowsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.WorkflowMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.WorkflowMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;

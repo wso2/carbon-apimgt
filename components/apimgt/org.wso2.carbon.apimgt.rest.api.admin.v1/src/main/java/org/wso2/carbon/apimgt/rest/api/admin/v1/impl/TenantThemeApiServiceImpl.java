@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;

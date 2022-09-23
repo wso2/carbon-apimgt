@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationUsagePublishAgent;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.MonetizationApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.MonetizationAPIMappinUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.MonetizationAPIMappinUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.text.DateFormat;

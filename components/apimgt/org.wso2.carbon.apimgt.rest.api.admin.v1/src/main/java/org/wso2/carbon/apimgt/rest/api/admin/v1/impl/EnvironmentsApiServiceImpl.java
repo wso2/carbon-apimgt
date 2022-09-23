@@ -7,15 +7,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.EnvironmentMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.EnvironmentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 

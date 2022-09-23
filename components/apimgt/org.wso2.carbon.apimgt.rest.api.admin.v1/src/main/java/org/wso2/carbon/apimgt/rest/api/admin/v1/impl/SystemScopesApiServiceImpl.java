@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SystemScopesMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.SystemScopesMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
