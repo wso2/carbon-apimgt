@@ -3803,7 +3803,8 @@ public class ApiMgtDAO {
                 return true;
             }
         } catch (SQLException e) {
-            handleException("Error while getting the id  of " + appName + " from the persistence store.", e);
+            handleExceptionWithCode("Error while getting the id  of " + appName + " from the persistence store.", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
@@ -4008,7 +4009,8 @@ public class ApiMgtDAO {
                 handleException(errorMessage, new APIManagementException(errorMessage));
             }
         } catch (SQLException e) {
-            handleException("Error when updating application owner for user " + userName, e);
+            handleExceptionWithCode("Error when updating application owner for user " + userName, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
@@ -4346,7 +4348,8 @@ public class ApiMgtDAO {
             }
             applications = applicationList.toArray(new Application[applicationList.size()]);
         } catch (SQLException e) {
-            handleException("Error while obtaining details of the Application for tenant id : " + tenantId, e);
+            handleExceptionWithCode("Error while obtaining details of the Application for tenant id : " + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -4378,7 +4381,8 @@ public class ApiMgtDAO {
                 return applicationCount;
             }
         } catch (SQLException e) {
-            handleException("Failed to get application count of tenant id : " + tenantId, e);
+            handleExceptionWithCode("Failed to get application count of tenant id : " + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
@@ -4414,7 +4418,8 @@ public class ApiMgtDAO {
             }
             applications = applicationsList.toArray(new Application[applicationsList.size()]);
         } catch (SQLException e) {
-            handleException("Error when reading the application information from the persistence store.", e);
+            handleExceptionWithCode("Error when reading the application information from the persistence store.", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             if (prepStmt != null) {
                 try {
@@ -15243,7 +15248,7 @@ public class ApiMgtDAO {
             statement.setString(4, organization);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to add Category: " + uuid, e);
+            handleExceptionWithCode("Failed to add Category: " + uuid, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return category;
     }
@@ -15264,8 +15269,9 @@ public class ApiMgtDAO {
             statement.setString(4, apiCategory.getId());
             statement.execute();
         } catch (SQLException e) {
-            handleException("Failed to update API Category : " + apiCategory.getName() + " of tenant " +
-                    APIUtil.getTenantDomainFromTenantId(apiCategory.getTenantID()), e);
+            handleExceptionWithCode("Failed to update API Category : " + apiCategory.getName() + " of tenant " +
+                            APIUtil.getTenantDomainFromTenantId(apiCategory.getTenantID()), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -15335,7 +15341,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to check whether API category name : " + categoryName + " exists", e);
+            handleExceptionWithCode("Failed to check whether API category name : " + categoryName + " exists",
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return false;
     }
@@ -15355,7 +15362,8 @@ public class ApiMgtDAO {
                 apiCategory.setId(apiCategoryID);
             }
         } catch (SQLException e) {
-            handleException("Failed to fetch API category : " + apiCategoryID, e);
+            handleExceptionWithCode("Failed to fetch API category : " + apiCategoryID, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiCategory;
     }
@@ -15367,7 +15375,8 @@ public class ApiMgtDAO {
             statement.setString(1, categoryID);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to delete API category : " + categoryID, e);
+            handleExceptionWithCode("Failed to delete API category : " + categoryID,
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

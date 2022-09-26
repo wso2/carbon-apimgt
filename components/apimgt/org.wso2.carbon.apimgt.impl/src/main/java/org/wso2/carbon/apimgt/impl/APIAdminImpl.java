@@ -948,7 +948,8 @@ public class APIAdminImpl implements APIAdmin {
     public APICategory addCategory(APICategory category, String userName, String organization) throws APIManagementException {
 
         if (isCategoryNameExists(category.getName(), null, organization)) {
-            APIUtil.handleException("Category with name '" + category.getName() + "' already exists");
+            APIUtil.handleExceptionWithCode("Category with name '" + category.getName() + "' already exists",
+                    ExceptionCodes.from(ExceptionCodes.CATEGORY_ALREADY_EXISTS, category.getName()));
         }
         return apiMgtDAO.addCategory(category, organization);
     }
@@ -961,9 +962,10 @@ public class APIAdminImpl implements APIAdmin {
     public void deleteCategory(String categoryID, String username) throws APIManagementException {
 
         APICategory category = getAPICategoryByID(categoryID);
-        int attchedAPICount = isCategoryAttached(category, username);
-        if (attchedAPICount > 0) {
-            APIUtil.handleException("Unable to delete the category. It is attached to API(s)");
+        int attachedAPICount = isCategoryAttached(category, username);
+        if (attachedAPICount > 0) {
+            APIUtil.handleExceptionWithCode("Unable to delete the category. It is attached to API(s)",
+                    ExceptionCodes.CATEGORY_USED);
         }
         apiMgtDAO.deleteCategory(categoryID);
     }
@@ -998,7 +1000,8 @@ public class APIAdminImpl implements APIAdmin {
         } else {
             String msg = "Failed to get APICategory. API category corresponding to UUID " + apiCategoryId
                     + " does not exist";
-            throw new APIMgtResourceNotFoundException(msg);
+            throw new APIManagementException(msg,
+                    ExceptionCodes.from(ExceptionCodes.CATEGORY_NOT_FOUND, apiCategoryId));
         }
     }
 

@@ -123,6 +123,12 @@ public enum ExceptionCodes implements ErrorHandler {
     PERSISTENCE_ERROR(900363, "Error occurred in registry transaction", 500, "'%s'"),
     NO_VIEW_UPDATE_PERMISSIONS(900365, "Insufficient permission to view or update the API", 403, "Insufficient permission to view or update the API"),
     API_DELETE_FAILED_SUBSCRIPTIONS(900366, "Failed to delete the API", 409, "Cannot remove the API as active subscriptions exist"),
+    CATEGORY_NAME_CONTAINS_SPECIAL_CHARS(900368, "Name field contains special characters", 400, "API Category name contains special characters"),
+    CATEGORY_NAME_TOO_LONG(900369, "API Category name is too long", 400, "API Category name exceeds 255 characters"),
+    CATEGORY_ALREADY_EXISTS(900370, "API Category name already exists", 409, "Category with name '%s' already exists"),
+    CATEGORY_NOT_FOUND(900371, "Category not found", 404, "No API Category with the given category ID '%s' exists"),
+    CATEGORY_USED(900372, "Category has usages", 409, "Category is attached to one or more APIs"),
+    ERROR_CHANGING_APP_OWNER(900373, "Failed to change the application owner", 500, "Error while changing the application owner"),
 
 
     //Lifecycle related codes

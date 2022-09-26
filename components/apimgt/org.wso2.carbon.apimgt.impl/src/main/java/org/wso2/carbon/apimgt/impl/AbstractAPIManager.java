@@ -66,6 +66,7 @@ import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.TenantManager;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -493,10 +494,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 // Add a default application once subscriber is added
                 addDefaultApplicationForSubscriber(subscriber);
             }
-        } catch (APIManagementException e) {
-            String msg = "Error while adding the subscriber " + subscriber.getName();
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (APIManagementException | UserStoreException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
         }
