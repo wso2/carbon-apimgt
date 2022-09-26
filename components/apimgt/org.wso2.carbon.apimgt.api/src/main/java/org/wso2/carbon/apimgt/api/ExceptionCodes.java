@@ -449,8 +449,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
 
     // Tenant related
-    INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    INVALID_TENANT(901300,"Tenant Not Found", 404, "Tenant Not Found"),
     CONFIG_NOT_FOUND(901301, "Config not found", 404, "Config not found in tenant-config"),
+    ERROR_GETTING_CUSTOM_URLS(901302, "Failed to get custom url info", 500, "Error while retrieving custom url info for tenant : '%s'"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +

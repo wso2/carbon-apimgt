@@ -9008,9 +9008,10 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException | IOException e) {
-            throw new APIManagementException(
-                    "Error while retrieving key manager configuration for " + id + " in organization " + organization,
-                    e);
+            String error = "Error while retrieving key manager configuration for "
+                    + id + " in organization " + organization;
+            throw new APIManagementException(error, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, error));
         }
         return null;
 
@@ -9233,7 +9234,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             throw new APIManagementException(
                     "Error while deleting key manager configuration with id " + id + " in organization " + organization,
-                    e);
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
     }
@@ -13819,7 +13820,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get Environment in tenant domain:" + tenantDomain, e);
+            handleExceptionWithCode("Failed to get Environment in tenant domain:" + tenantDomain, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return env;
     }
@@ -13859,10 +13861,10 @@ public class ApiMgtDAO {
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
-                handleException("Failed to add VHost: " + uuid, e);
+                handleExceptionWithCode("Failed to add VHost: " + uuid, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to add VHost: " + uuid, e);
+            handleExceptionWithCode("Failed to add VHost: " + uuid, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return environment;
     }
@@ -13891,7 +13893,8 @@ public class ApiMgtDAO {
             }
             prepStmt.executeBatch();
         } catch (SQLException e) {
-            handleException("Failed to add VHosts for environment ID: " + id, e);
+            handleExceptionWithCode("Failed to add VHosts for environment ID: " + id, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -13945,7 +13948,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get gateway environments list of VHost: ", e);
+            handleExceptionWithCode("Failed to get gateway environments list of VHost: ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return vhosts;
     }
@@ -13966,10 +13970,10 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to delete Environment", e);
+                handleExceptionWithCode("Failed to delete Environment", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to delete Environment", e);
+            handleExceptionWithCode("Failed to delete Environment", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -13994,10 +13998,10 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to update Environment", e);
+                handleExceptionWithCode("Failed to update Environment", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to update Environment", e);
+            handleExceptionWithCode("Failed to update Environment", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return environment;
     }
