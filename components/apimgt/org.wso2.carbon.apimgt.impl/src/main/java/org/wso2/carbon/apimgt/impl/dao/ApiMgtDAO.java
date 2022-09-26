@@ -10495,7 +10495,7 @@ public class ApiMgtDAO {
                 map.put(resultSet.getInt(1), resultSet.getString(2));
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve alert types ", e);
+            handleExceptionWithCode("Failed to retrieve alert types ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -10531,7 +10531,8 @@ public class ApiMgtDAO {
                 list.add(resultSet.getInt(1));
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve saved alert types by user name. ", e);
+            handleExceptionWithCode("Failed to retrieve saved alert types by user name. ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -10565,7 +10566,8 @@ public class ApiMgtDAO {
                 list.add(resultSet.getString(1));
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve saved alert types by user name. ", e);
+            handleExceptionWithCode("Failed to retrieve saved alert types by user name. ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -10620,7 +10622,7 @@ public class ApiMgtDAO {
             connection.commit();
 
         } catch (SQLException e) {
-            handleException("Failed to delete alert email data.", e);
+            handleExceptionWithCode("Failed to delete alert email data.", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
 
@@ -15060,7 +15062,8 @@ public class ApiMgtDAO {
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while adding bot detection alert subscription", e);
+            handleExceptionWithCode("Error while adding bot detection alert subscription", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -15083,7 +15086,8 @@ public class ApiMgtDAO {
                 list.add(botDetectedData);
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving bot detection alert subscriptions", e);
+            handleExceptionWithCode("Error while retrieving bot detection alert subscriptions", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return list;
     }
@@ -15104,7 +15108,8 @@ public class ApiMgtDAO {
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while deleting bot detection alert subscription", e);
+            handleExceptionWithCode("Error while deleting bot detection alert subscription", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -15137,7 +15142,8 @@ public class ApiMgtDAO {
                 alertSubscription.setEmail(resultSet.getString("SUBSCRIBER_ADDRESS"));
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve bot detection alert subscription of " + field + ": " + value, e);
+            handleExceptionWithCode("Failed to retrieve bot detection alert subscription of " + field + ": " + value,
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return alertSubscription;
     }

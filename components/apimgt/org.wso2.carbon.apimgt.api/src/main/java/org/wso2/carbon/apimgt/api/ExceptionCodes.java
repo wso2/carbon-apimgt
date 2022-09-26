@@ -341,6 +341,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
+    INTERNAL_ERROR_WITH_SPECIFIC_DESC(903007, "Server Error Occurred", 500, "'%s'"),
 
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
@@ -477,6 +478,11 @@ public enum ExceptionCodes implements ErrorHandler {
     //Analytics related codes
     ANALYTICS_NOT_ENABLED(901600, "%s not accessible", 404,
             "Analytics should be enabled to access %s"),
+    UNSUPPORTED_ALERT_TYPE(901601, "Unsupported alert type", 400, "Unsupported alert type: '%s' is provided"),
+    MALFORMED_SP_URL(901602, "Malformed URL", 500, "Error while parsing the stream processor url"),
+    ERROR_INVOKING_SP_REST_API(901603, "Error while invoking steam processor REST API", 500, "'%s'"),
+    ALREADY_SUBSCRIBED_FOR_BOT_ALERTS(901604, "Subscription already exists", 409, "Email: '%s' has already been subscribed for bot detection alerts"),
+    BOT_DETECTION_SUBSCRIPTION_NOT_FOUND(901605, "Subscription does not exist", 404, "Bot detection alert subscription with uuid: '%s' uuid does not exist"),
 
     // Password change related
     PASSWORD_CHANGE_DISABLED(901450, "Password change disabled", 400, "Password change operation is disabled in the system"),

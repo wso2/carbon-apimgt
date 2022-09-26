@@ -7316,7 +7316,8 @@ public final class APIUtil {
                     String error = "Error while invoking SP rest api :  " + response.getStatusLine().getStatusCode()
                             + " " + response.getStatusLine().getReasonPhrase();
                     log.error(error);
-                    throw new APIManagementException(error);
+                    throw new APIManagementException(error,
+                            ExceptionCodes.from(ExceptionCodes.ERROR_INVOKING_SP_REST_API, error));
                 }
                 String responseStr = EntityUtils.toString(entity);
                 if (log.isDebugEnabled()) {
@@ -7326,17 +7327,22 @@ public final class APIUtil {
                 return (JSONObject) parser.parse(responseStr);
 
             } catch (ClientProtocolException e) {
-                handleException("Error while connecting to the server ", e);
+                String error = "Error while connecting to the server";
+                handleExceptionWithCode(error, e, ExceptionCodes
+                        .from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC,error));
             } catch (IOException e) {
-                handleException("Error while connecting to the server ", e);
+                String error = "Error while parsing the response";
+                handleExceptionWithCode(error, e, ExceptionCodes
+                        .from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, error));
             } catch (ParseException e) {
-                handleException("Error while parsing the response ", e);
+                handleExceptionWithCode("Error while parsing the response ", e, ExceptionCodes.JSON_PARSE_ERROR);
             } finally {
                 httpPost.reset();
             }
 
         } catch (MalformedURLException e) {
-            handleException("Error while parsing the stream processor url", e);
+            handleExceptionWithCode("Error while parsing the stream processor url", e,
+                    ExceptionCodes.MALFORMED_SP_URL);
         }
 
         return null;
