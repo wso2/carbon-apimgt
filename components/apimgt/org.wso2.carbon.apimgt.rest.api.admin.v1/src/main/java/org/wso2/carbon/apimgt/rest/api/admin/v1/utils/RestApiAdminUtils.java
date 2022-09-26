@@ -194,7 +194,7 @@ public class RestApiAdminUtils {
     }
 
     /**
-     * Import the content of the provided tenant theme archive to the file system and the database
+     * Import the content of the provided tenant theme archive to the file system and the database.
      *
      * @param themeContentInputStream content relevant to the tenant theme
      * @param tenantDomain            tenant to which the theme is imported
