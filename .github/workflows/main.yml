@@ -9,6 +9,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
 jobs:
   build-carbon:
     runs-on: ubuntu-latest
