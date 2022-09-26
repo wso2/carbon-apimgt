@@ -67,5 +67,6 @@
         <module>org.wso2.carbon.apimgt.cleanup.service</module>
         <module>org.wso2.carbon.apimgt.rest.api.devops</module>
         <module>org.wso2.carbon.apimgt.devops.impl</module>
+        <module>org.wso2.carbon.apimgt.user</module>
     </modules>
 </project>
