@@ -5624,14 +5624,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         apiIdentifier.setUuid(apiId);
-        try {
-            apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
-                    apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to restore registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
-        }
         apiMgtDAO.restoreAPIRevision(apiRevision);
     }
 
@@ -5666,14 +5658,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
         }
         apiIdentifier.setUuid(apiId);
-        try {
-            apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
-                    apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to delete registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
-        }
         apiMgtDAO.deleteAPIRevision(apiRevision);
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {

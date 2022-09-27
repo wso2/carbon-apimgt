@@ -140,6 +140,10 @@ public interface ApiDAO {
 
     void addAPIRevision(APIRevision apiRevision) throws APIManagementException;
 
+    void restoreAPIRevision(APIRevision apiRevision) throws APIManagementException;
+
+    void deleteAPIRevision(APIRevision apiRevision) throws APIManagementException;
+
     APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
 
     int getAPIID(String uuid) throws APIManagementException;

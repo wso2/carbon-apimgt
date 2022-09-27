@@ -1466,6 +1466,780 @@ public class ApiDAOImpl implements ApiDAO {
         return operationPolicy;
     }
 
+
+    /**
+     * Restore API revision database records as the Current API of an API
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when restoring an API revision
+     */
+    @Override
+    public void restoreAPIRevision(APIRevision apiRevision) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Retrieve API ID
+                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+                int apiId = getAPIID(apiRevision.getApiUUID(), connection);
+                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+                // Removing related Current API entries from AM_API_URL_MAPPING table
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID);
+                removeURLMappingsStatement.setInt(1, apiId);
+                removeURLMappingsStatement.executeUpdate();
+
+                // Restoring to AM_API_URL_MAPPING table
+                PreparedStatement getURLMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_REVISION_UUID);
+                getURLMappingsStatement.setInt(1, apiId);
+                getURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                List<URITemplate> urlMappingList = new ArrayList<>();
+                try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
+                    while (rs.next()) {
+                        String script = null;
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setHTTPVerb(rs.getString(1));
+                        uriTemplate.setAuthType(rs.getString(2));
+                        uriTemplate.setUriTemplate(rs.getString(3));
+                        uriTemplate.setThrottlingTier(rs.getString(4));
+                        InputStream mediationScriptBlob = rs.getBinaryStream(5);
+                        if (mediationScriptBlob != null) {
+                            script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                        }
+                        uriTemplate.setMediationScript(script);
+                        if (!StringUtils.isEmpty(rs.getString(6))) {
+                            Scope scope = new Scope();
+                            scope.setKey(rs.getString(6));
+                            uriTemplate.setScope(scope);
+                        }
+                        if (rs.getInt(7) != 0) {
+                            // Adding product id to uri template id just to store value
+                            uriTemplate.setId(rs.getInt(7));
+                        }
+                        urlMappingList.add(uriTemplate);
+                    }
+                }
+
+                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                for (URITemplate urlMapping : urlMappingList) {
+                    if (urlMapping.getScope() != null) {
+                        URITemplate urlMappingNew = urlMapping;
+                        URITemplate urlMappingExisting = uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
+                            if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
+                                urlMappingExisting.setScopes(urlMapping.getScope());
+                                uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
+                                        urlMappingExisting);
+                            }
+                        } else {
+                            urlMappingNew.setScopes(urlMapping.getScope());
+                            uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(),
+                                    urlMappingNew);
+                        }
+                    } else {
+                        uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                    }
+                }
+
+                setOperationPoliciesToURITemplatesMap(apiRevision.getRevisionUUID(), uriTemplateMap);
+
+                PreparedStatement insertURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    insertURLMappingsStatement.setInt(1, apiId);
+                    insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                    insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                    insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                    insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    insertURLMappingsStatement.addBatch();
+                }
+                insertURLMappingsStatement.executeBatch();
+
+                // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
+                PreparedStatement getCurrentAPIURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CURRENT_API_URL_MAPPINGS_ID);
+                PreparedStatement insertScopeResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                PreparedStatement insertProductResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                PreparedStatement insertOperationPolicyMappingStatement = connection
+                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
+                PreparedStatement deleteOutdatedOperationPolicyStatement = connection
+                        .prepareStatement(SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_POLICY_ID);
+
+                Map<String, String> restoredPolicyMap = new HashMap<>();
+                Set<String> usedClonedPolicies = new HashSet<String>();
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    if (urlMapping.getScopes() != null) {
+                        getCurrentAPIURLMappingsStatement.setInt(1, apiId);
+                        getCurrentAPIURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                        getCurrentAPIURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                        getCurrentAPIURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                        getCurrentAPIURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                for (Scope scope : urlMapping.getScopes()) {
+                                    insertScopeResourceMappingStatement.setString(1, scope.getKey());
+                                    insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
+                                    insertScopeResourceMappingStatement.setInt(3, tenantId);
+                                    insertScopeResourceMappingStatement.addBatch();
+                                }
+                            }
+                        }
+                    }
+                    if (urlMapping.getId() != 0) {
+                        getCurrentAPIURLMappingsStatement.setInt(1, apiId);
+                        getCurrentAPIURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                        getCurrentAPIURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                        getCurrentAPIURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                        getCurrentAPIURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                insertProductResourceMappingStatement.setInt(1, urlMapping.getId());
+                                insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
+                                insertProductResourceMappingStatement.addBatch();
+                            }
+                        }
+                    }
+                    if (!urlMapping.getOperationPolicies().isEmpty()) {
+                        getCurrentAPIURLMappingsStatement.setInt(1, apiId);
+                        getCurrentAPIURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                        getCurrentAPIURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                        getCurrentAPIURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                        getCurrentAPIURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                    if (!restoredPolicyMap.keySet().contains(policy.getPolicyName())) {
+                                        String restoredPolicyId = restoreOperationPolicyRevision(connection,
+                                                apiRevision.getApiUUID(), policy.getPolicyId(), apiRevision.getId(),
+                                                tenantDomain);
+                                        // policy ID is stored in a map as same policy can be applied to multiple operations
+                                        // and we only need to create the policy once.
+                                        restoredPolicyMap.put(policy.getPolicyName(), restoredPolicyId);
+                                        usedClonedPolicies.add(restoredPolicyId);
+                                    }
+
+                                    Gson gson = new Gson();
+                                    String paramJSON = gson.toJson(policy.getParameters());
+                                    insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
+                                    insertOperationPolicyMappingStatement.setString(2, restoredPolicyMap.get(policy.getPolicyName()));
+                                    insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
+                                    insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                    insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
+                                    insertOperationPolicyMappingStatement.addBatch();
+                                }
+                            }
+                        }
+                    }
+                }
+                insertScopeResourceMappingStatement.executeBatch();
+                insertProductResourceMappingStatement.executeBatch();
+                insertOperationPolicyMappingStatement.executeBatch();
+                deleteOutdatedOperationPolicyStatement.executeBatch();
+                cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, apiRevision.getApiUUID());
+
+                // Restoring AM_API_CLIENT_CERTIFICATE table entries
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
+                removeClientCertificatesStatement.setInt(1, apiId);
+                removeClientCertificatesStatement.executeUpdate();
+
+                PreparedStatement getClientCertificatesStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID);
+                getClientCertificatesStatement.setInt(1, apiId);
+                getClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
+                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                        clientCertificateDTO.setAlias(rs.getString(1));
+                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                        clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTOS.add(clientCertificateDTO);
+                    }
+                }
+                PreparedStatement insertClientCertificateStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                    insertClientCertificateStatement.setInt(1, tenantId);
+                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                    insertClientCertificateStatement.setInt(3, apiId);
+                    insertClientCertificateStatement.setBinaryStream(4,
+                            getInputStream(clientCertificateDTO.getCertificate()));
+                    insertClientCertificateStatement.setBoolean(5, false);
+                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                    insertClientCertificateStatement.setString(7, "Current API");
+                    insertClientCertificateStatement.addBatch();
+                }
+                insertClientCertificateStatement.executeBatch();
+
+                // Restoring AM_GRAPHQL_COMPLEXITY table
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID);
+                removeGraphQLComplexityStatement.setInt(1, apiId);
+                removeGraphQLComplexityStatement.executeUpdate();
+
+                PreparedStatement getGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
+                getGraphQLComplexityStatement.setInt(1, apiId);
+                getGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
+                try (ResultSet rs1 = getGraphQLComplexityStatement.executeQuery()) {
+                    while (rs1.next()) {
+                        CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
+                        customComplexityDetails.setType(rs1.getString("TYPE"));
+                        customComplexityDetails.setField(rs1.getString("FIELD"));
+                        customComplexityDetails.setComplexityValue(rs1.getInt("COMPLEXITY_VALUE"));
+                        customComplexityDetailsList.add(customComplexityDetails);
+                    }
+                }
+
+                PreparedStatement insertGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
+                for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
+                    insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
+                    insertGraphQLComplexityStatement.setInt(2, apiId);
+                    insertGraphQLComplexityStatement.setString(3, customComplexityDetails.getType());
+                    insertGraphQLComplexityStatement.setString(4, customComplexityDetails.getField());
+                    insertGraphQLComplexityStatement.setInt(5, customComplexityDetails.getComplexityValue());
+                    insertGraphQLComplexityStatement.addBatch();
+                }
+                insertGraphQLComplexityStatement.executeBatch();
+                restoreAPIRevisionMetaDataToWorkingCopy(connection, apiRevision.getApiUUID(),
+                        apiRevision.getRevisionUUID());
+                restoreAPIDefinition(connection, apiRevision.getApiUUID(),
+                        apiRevision.getRevisionUUID());
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to restore API Revision entry of API UUID "
+                        + apiRevision.getApiUUID(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to restore API Revision entry of API UUID "
+                    + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    /**
+     * When we apply a common policy to an operation, this policy will be cloned to the API at the backend. However, if
+     * that policy is removed from the UI, this method is used to clean such unused policies that are imported,
+     * but not used
+     *
+     * @param connection            DB connection
+     * @param usedClonedPoliciesSet Currently used imported API specific policies set
+     * @param apiUUID               UUID of the API
+     * @throws SQLException
+     */
+    private void cleanUnusedClonedOperationPolicies(Connection connection, Set<String> usedClonedPoliciesSet,
+                                                    String apiUUID)
+            throws SQLException {
+
+        Set<String> allClonedPoliciesForAPI = getAllClonedPolicyIdsForAPI(connection, apiUUID);
+        Set<String> policiesToDelete = allClonedPoliciesForAPI;
+        policiesToDelete.removeAll(usedClonedPoliciesSet);
+        for (String policyId : allClonedPoliciesForAPI) {
+            deleteOperationPolicyByPolicyId(connection, policyId);
+        }
+    }
+
+    private void deleteOperationPolicyByPolicyId(Connection connection, String policyId) throws SQLException {
+
+        String dbQuery = SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_ID;
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, policyId);
+        statement.execute();
+        statement.close();
+    }
+
+    /**
+     * This method will return a list of all cloned policies for an API.
+     *
+     * @param connection DB connection
+     * @param apiUUID    UUID of the API if exists. Null for common operation policies
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    private Set<String> getAllClonedPolicyIdsForAPI(Connection connection, String apiUUID)
+            throws SQLException {
+
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_ALL_CLONED_POLICIES_FOR_API;
+        Set<String> policyIds = new HashSet<>();
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, apiUUID);
+        ResultSet rs = statement.executeQuery();
+        while (rs.next()) {
+            policyIds.add(rs.getString("POLICY_UUID"));
+        }
+        rs.close();
+        statement.close();
+        return policyIds;
+    }
+
+    /**
+     * This method is used to restore an API specific operation policy revision.
+     *
+     * @param connection   DB connection
+     * @param apiUUID      UUID of the API
+     * @param policyId     Original policy's ID that needs to be cloned
+     * @param revisionId   The revision number
+     * @param organization Organization name
+     * @throws SQLException
+     * @throws APIManagementException
+     **/
+    private String restoreOperationPolicyRevision(Connection connection, String apiUUID, String policyId,
+                                                  int revisionId,
+                                                  String organization) throws SQLException, APIManagementException {
+
+        OperationPolicyData revisionedPolicy = getAPISpecificOperationPolicyByPolicyID(connection, policyId,
+                apiUUID, organization, true);
+        String restoredPolicyId = null;
+        if (revisionedPolicy != null) {
+            // First check whether there exists a API specific policy for same policy name with revision uuid null
+            // This is the state where we record the policies applied in the working copy.
+            OperationPolicyData apiSpecificPolicy = getAPISpecificOperationPolicyByPolicyName(connection,
+                    revisionedPolicy.getSpecification().getName(), revisionedPolicy.getSpecification().getVersion(),
+                    revisionedPolicy.getApiUUID(), null, organization, false);
+            if (apiSpecificPolicy != null) {
+                if (apiSpecificPolicy.getMd5Hash().equals(revisionedPolicy.getMd5Hash())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Matching API specific operation policy found for the revisioned policy and " +
+                                "MD5 hashes match");
+                    }
+
+                } else {
+                    updateAPISpecificOperationPolicyWithClonedPolicyId(connection, apiSpecificPolicy.getPolicyId(),
+                            revisionedPolicy);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Even though a matching API specific operation policy found for name,"
+                                + " MD5 hashes does not match. Policy " + apiSpecificPolicy.getPolicyId()
+                                + " has been updated from the revision.");
+                    }
+                }
+                restoredPolicyId = apiSpecificPolicy.getPolicyId();
+            } else {
+                if (revisionedPolicy.isClonedPolicy()) {
+                    // Check for a common operation policy only if it is a cloned policy.
+                    OperationPolicyData commonPolicy = getCommonOperationPolicyByPolicyID(connection,
+                            revisionedPolicy.getClonedCommonPolicyId(), organization, false);
+                    if (commonPolicy != null) {
+                        if (commonPolicy.getMd5Hash().equals(revisionedPolicy.getMd5Hash())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Matching common operation policy found. MD5 hash match");
+                            }
+                            //This means the common policy is same with our revision. A clone is created and original
+                            // common policy ID is referenced as the ClonedCommonPolicyId
+                            restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null,
+                                    revisionedPolicy, revisionedPolicy.getClonedCommonPolicyId());
+                        } else {
+                            // This means the common policy is updated since we created the revision.
+                            // we have to create a clone and since policy is different, we can't refer the original common
+                            // policy as ClonedCommonPolicyId. This should be a new API specific policy
+                            revisionedPolicy.getSpecification().setName(revisionedPolicy.getSpecification().getName()
+                                    + "_restored-" + revisionId);
+                            revisionedPolicy.getSpecification()
+                                    .setDisplayName(revisionedPolicy.getSpecification().getDisplayName()
+                                            + " Restored from revision " + revisionId);
+                            revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(revisionedPolicy));
+                            revisionedPolicy.setRevisionUUID(null);
+                            restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null,
+                                    revisionedPolicy, null);
+                            if (log.isDebugEnabled()) {
+                                log.debug(
+                                        "An updated matching common operation policy found. A new API specific operation " +
+                                                "policy created by the display name " +
+                                                revisionedPolicy.getSpecification().getName());
+                            }
+                        }
+                    } else {
+                        // This means this is a clone of a deleted common policy. A new API specific policy will be created.
+                        revisionedPolicy.getSpecification().setName(revisionedPolicy.getSpecification().getName()
+                                + "_restored-" + revisionId);
+                        revisionedPolicy.getSpecification()
+                                .setDisplayName(revisionedPolicy.getSpecification().getDisplayName()
+                                        + " Restored from revision " + revisionId);
+                        revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(revisionedPolicy));
+                        revisionedPolicy.setRevisionUUID(null);
+                        restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null, revisionedPolicy, null);
+                        if (log.isDebugEnabled()) {
+                            log.debug("No matching operation policy found. A new API specific operation " +
+                                    "policy created by the name " + revisionedPolicy.getSpecification().getName());
+                        }
+                    }
+                } else {
+                    // This means this is a completely new policy and we don't have any reference of a previous state in
+                    // working copy. A new API specific policy will be created.
+                    revisionedPolicy.setRevisionUUID(null);
+                    restoredPolicyId = addAPISpecificOperationPolicy(connection, apiUUID, null, revisionedPolicy, null);
+                    if (log.isDebugEnabled()) {
+                        log.debug("No matching operation policy found. A new API specific operation " +
+                                "policy created by the name " + revisionedPolicy.getSpecification().getName());
+                    }
+                }
+            }
+        } else {
+            throw new APIManagementException("A revisioned operation policy not found for " + policyId);
+        }
+        return restoredPolicyId;
+    }
+
+    public OperationPolicyData getCommonOperationPolicyByPolicyID(String policyId, String organization,
+                                                                  boolean isWithPolicyDefinition)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getCommonOperationPolicyByPolicyID(connection, policyId, organization, isWithPolicyDefinition);
+        } catch (SQLException e) {
+            handleException("Failed to get the operation policy for id " + policyId, e);
+        }
+        return null;
+    }
+
+    private OperationPolicyData getCommonOperationPolicyByPolicyID(Connection connection, String policyId,
+                                                                   String organization,
+                                                                   boolean isWithPolicyDefinition)
+            throws SQLException {
+
+        String dbQuery =
+                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_WITH_OUT_DEFINITION_FROM_POLICY_ID;
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, policyId);
+        statement.setString(2, organization);
+        ResultSet rs = statement.executeQuery();
+        OperationPolicyData policyData = null;
+        if (rs.next()) {
+            policyData = new OperationPolicyData();
+            policyData.setPolicyId(policyId);
+            policyData.setOrganization(organization);
+            policyData.setMd5Hash(rs.getString("POLICY_MD5"));
+            policyData.setSpecification(populatePolicySpecificationFromRS(rs));
+        }
+        rs.close();
+        statement.close();
+
+        if (isWithPolicyDefinition && policyData != null) {
+            populatePolicyDefinitions(connection, policyId, policyData);
+        }
+
+        return policyData;
+    }
+
+    /**
+     * This method is used the restore flow. At the restore, apart from the policy details, CLONED_POLICY_ID column
+     * too can change and that needs to be updated.
+     *
+     * @param connection DB connection
+     * @param policyId   Original policy's ID that needs to be cloned
+     * @param policyData Updated policy data
+     * @throws APIManagementException
+     * @throws SQLException
+     **/
+    private void updateAPISpecificOperationPolicyWithClonedPolicyId(Connection connection, String policyId,
+                                                                    OperationPolicyData policyData)
+            throws SQLException {
+
+        if (policyData.getClonedCommonPolicyId() != null) {
+            PreparedStatement statement = connection.prepareStatement(
+                    SQLConstants.OperationPolicyConstants.UPDATE_API_OPERATION_POLICY_BY_POLICY_ID);
+            statement.setString(1, policyData.getClonedCommonPolicyId());
+            statement.executeUpdate();
+            statement.close();
+        }
+        updateOperationPolicy(connection, policyId, policyData);
+    }
+
+    /**
+     * Update an existing operation policy
+     *
+     * @param connection DB connection
+     * @param policyId   Shared policy UUID
+     * @param policyData Updated policy definition
+     * @throws SQLException
+     */
+    private void updateOperationPolicy(Connection connection, String policyId, OperationPolicyData policyData)
+            throws SQLException {
+
+        OperationPolicySpecification policySpecification = policyData.getSpecification();
+        PreparedStatement statement = connection.prepareStatement(
+                SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_CONTENT);
+
+        statement.setString(1, policySpecification.getName());
+        statement.setString(2, policySpecification.getVersion());
+        statement.setString(3, policySpecification.getDisplayName());
+        statement.setString(4, policySpecification.getDescription());
+        statement.setString(5, policySpecification.getApplicableFlows().toString());
+        statement.setString(6, policySpecification.getSupportedGateways().toString());
+        statement.setString(7, policySpecification.getSupportedApiTypes().toString());
+        statement.setBinaryStream(8,
+                new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
+        statement.setString(9, policyData.getOrganization());
+        statement.setString(10, policySpecification.getCategory().toString());
+        statement.setString(11, policyData.getMd5Hash());
+        statement.setString(12, policyId);
+        statement.executeUpdate();
+        statement.close();
+
+        if (policyData.getSynapsePolicyDefinition() != null) {
+            updateOperationPolicyDefinition(connection, policyId, policyData.getSynapsePolicyDefinition());
+        }
+        if (policyData.getCcPolicyDefinition() != null) {
+            updateOperationPolicyDefinition(connection, policyId, policyData.getCcPolicyDefinition());
+        }
+
+    }
+
+    private void updateOperationPolicyDefinition(Connection connection, String policyId,
+                                                 OperationPolicyDefinition policyDefinition) throws SQLException {
+
+        String dbQuery = SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_DEFINITION;
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, policyDefinition.getMd5Hash());
+        statement.setBinaryStream(2, new ByteArrayInputStream(policyDefinition.getContent().getBytes()));
+        statement.setString(3, policyId);
+        statement.setString(4, policyDefinition.getGatewayType().toString());
+        statement.executeUpdate();
+        statement.close();
+    }
+
+    private OperationPolicyData getAPISpecificOperationPolicyByPolicyName(Connection connection,
+                                                                          String policyName, String policyVersion,
+                                                                          String apiUUID, String revisionUUID,
+                                                                          String tenantDomain,
+                                                                          boolean isWithPolicyDefinition)
+            throws SQLException {
+
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_NAME;
+        if (revisionUUID != null) {
+            dbQuery += " AND AOP.REVISION_UUID = ?";
+        } else {
+            dbQuery += " AND AOP.REVISION_UUID IS NULL";
+        }
+
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, policyName);
+        statement.setString(2, policyVersion);
+        statement.setString(3, tenantDomain);
+        statement.setString(4, apiUUID);
+        if (revisionUUID != null) {
+            statement.setString(5, revisionUUID);
+        }
+        ResultSet rs = statement.executeQuery();
+        OperationPolicyData policyData = null;
+        if (rs.next()) {
+            policyData = new OperationPolicyData();
+            policyData.setOrganization(tenantDomain);
+            policyData.setPolicyId(rs.getString("POLICY_UUID"));
+            policyData.setApiUUID(rs.getString("API_UUID"));
+            policyData.setRevisionUUID(rs.getString("REVISION_UUID"));
+            policyData.setMd5Hash(rs.getString("POLICY_MD5"));
+            policyData.setClonedCommonPolicyId(rs.getString("CLONED_POLICY_UUID"));
+            policyData.setSpecification(populatePolicySpecificationFromRS(rs));
+        }
+
+        if (isWithPolicyDefinition && policyData != null) {
+            if (isWithPolicyDefinition && policyData != null) {
+                populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
+            }
+        }
+        return policyData;
+    }
+
+    /**
+     * This method will query AM_API_OPERATION_POLICY table from CLONED_POLICY_ID row for a matching policy ID
+     * for the required API. This is useful to find the cloned API specific policy ID from a common policy.
+     *
+     * @param connection     DB connection
+     * @param commonPolicyId Common policy ID
+     * @param apiUUID        UUID of API
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    private String getClonedPolicyIdForCommonPolicyId(Connection connection, String commonPolicyId, String apiUUID)
+            throws SQLException {
+
+        String dbQuery = SQLConstants.OperationPolicyConstants.GET_CLONED_POLICY_ID_FOR_COMMON_POLICY_ID;
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, commonPolicyId);
+        statement.setString(2, apiUUID);
+        ResultSet rs = statement.executeQuery();
+        String policyId = null;
+        if (rs.next()) {
+            policyId = rs.getString("POLICY_UUID");
+        }
+        rs.close();
+        statement.close();
+        return policyId;
+    }
+
+    /**
+     * Restore API revision database records as the Current API of an API
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when restoring an API revision
+     */
+    @Override
+    public void deleteAPIRevision(APIRevision apiRevision) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Retrieve API ID
+                int apiId = getAPIID(apiRevision.getApiUUID(), connection);
+
+                // Removing related revision entries from AM_REVISION table
+                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.DELETE_API_REVISION);
+                removeAMRevisionStatement.setString(1, apiRevision.getRevisionUUID());
+                removeAMRevisionStatement.executeUpdate();
+
+                // Removing related revision entries from AM_API_URL_MAPPING table
+                // This will cascade remove entries from AM_API_RESOURCE_SCOPE_MAPPING and AM_API_PRODUCT_MAPPING tables
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID);
+                removeURLMappingsStatement.setInt(1, apiId);
+                removeURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                removeURLMappingsStatement.executeUpdate();
+
+                // Removing related revision entries from AM_API_CLIENT_CERTIFICATE table
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
+                removeClientCertificatesStatement.setInt(1, apiId);
+                removeClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
+                removeClientCertificatesStatement.executeUpdate();
+
+                // Removing related revision entries from AM_GRAPHQL_COMPLEXITY table
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                removeGraphQLComplexityStatement.setInt(1, apiId);
+                removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
+                removeGraphQLComplexityStatement.executeUpdate();
+                deleteAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+
+                // Removing related revision entries from operation policies
+                deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+                deleteAPIRevisionArtifacts(connection, apiRevision.getRevisionUUID());
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete API Revision entry of API UUID "
+                        + apiRevision.getApiUUID(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete API Revision entry of API UUID "
+                    + apiRevision.getApiUUID(), e);
+        }
+    }
+
+
+    private void restoreAPIDefinition(Connection connection, String apiUUID, String revisionUUID)
+            throws APIManagementException {;
+        PreparedStatement preparedStatement = null;
+        String restoreAPIRevisionQuery = "UPDATE AM_API_ARTIFACT SET (API_DEFINITION, MEDIA_TYPE) =" +
+                " (SELECT API_DEFINITION, MEDIA_TYPE FROM AM_API_ARTIFACT " +
+                " WHERE API_UUID=?) WHERE API_UUID=?";
+        try {
+            preparedStatement = connection.prepareStatement(restoreAPIRevisionQuery);
+            preparedStatement.setString(1, revisionUUID);
+            preparedStatement.setString(2, apiUUID);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"restore api revision");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while updating entry in AM_API_ARTIFACT table ", e);
+            }
+            throw new APIManagementException("Error while updating entry in AM_API_ARTIFACT table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
+
+    private void deleteAPIRevisionArtifacts(Connection connection, String revisionUUID)
+            throws APIManagementException {
+        PreparedStatement preparedStatement = null;
+        String deleteAPIRevisionQuery = "DELETE FROM AM_API_ARTIFACT WHERE API_UUID=?;";
+        try {
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(deleteAPIRevisionQuery);
+            preparedStatement.setString(1, revisionUUID);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"delete api revision");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while deleting entry from AM_API_ARTIFACT table ", e);
+            }
+            throw new APIManagementException("Error occurred while deleting entry from AM_API_ARTIFACT table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+    }
+
+    private void deleteAPIRevisionMetaData(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.DELETE_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void restoreAPIRevisionMetaDataToWorkingCopy(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.RESTORE_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.setString(3, apiUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+
+    /**
+     * Delete all the API specific policies for a given API UUID. If revision UUID is provided, only the policies that
+     * are revisioned will be deleted. This is used when we delete an API revision.
+     * If revision id is null, all the API specific policies will be deleted. This is used in API deleting flow.
+     *
+     * @param connection   DB connection
+     * @param apiUUID      UUID of API
+     * @param revisionUUID Revision UUID
+     * @return List of Operation Policies
+     * @throws APIManagementException
+     */
+    private void deleteAllAPISpecificOperationPoliciesByAPIUUID(Connection connection, String apiUUID,
+                                                                String revisionUUID)
+            throws SQLException {
+
+        String dbQuery;
+        if (revisionUUID != null) {
+            dbQuery = SQLConstants.OperationPolicyConstants.GET_ALL_API_SPECIFIC_POLICIES_FOR_REVISION_UUID;
+        } else {
+            dbQuery = SQLConstants.OperationPolicyConstants.GET_ALL_API_SPECIFIC_POLICIES_FOR_API_ID;
+        }
+        PreparedStatement statement = connection.prepareStatement(dbQuery);
+        statement.setString(1, apiUUID);
+        if (revisionUUID != null) {
+            statement.setString(2, revisionUUID);
+        }
+        ResultSet rs = statement.executeQuery();
+        while (rs.next()) {
+            String deleteQuery = SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_ID;
+            PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
+            deleteStatement.setString(1, rs.getString("POLICY_UUID"));
+            deleteStatement.execute();
+            deleteStatement.close();
+        }
+        rs.close();
+        statement.close();
+    }
+
+
     @Override
     public PublisherAPI updateAPI(Organization organization, PublisherAPI publisherAPI) throws APIManagementException {
         Connection connection = null;
