@@ -15938,8 +15938,8 @@ public class ApiMgtDAO {
             statement.setBinaryStream(2, themeContent);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to add tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+            handleExceptionWithCode("Failed to add tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -15959,8 +15959,8 @@ public class ApiMgtDAO {
             statement.setInt(2, tenantId);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to update tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+            handleExceptionWithCode("Failed to update tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -15983,8 +15983,8 @@ public class ApiMgtDAO {
                 tenantThemeContent = resultSet.getBinaryStream("THEME");
             }
         } catch (SQLException e) {
-            handleException("Failed to fetch tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+            handleExceptionWithCode("Failed to fetch tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return tenantThemeContent;
     }
@@ -16006,8 +16006,8 @@ public class ApiMgtDAO {
             ResultSet resultSet = statement.executeQuery();
             return resultSet.next();
         } catch (SQLException e) {
-            handleException("Failed to check whether tenant theme exist for tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+            handleExceptionWithCode("Failed to check whether tenant theme exist for tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return false;
     }
@@ -16026,8 +16026,8 @@ public class ApiMgtDAO {
             statement.setInt(1, tenantId);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to delete tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+            handleExceptionWithCode("Failed to delete tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

@@ -505,6 +505,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s"),
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
+    TENANT_THEME_NOT_FOUND(901703, "Tenant theme does not exist", 404, "Tenant theme for tenant: '%s' does not exist"),
 
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),

@@ -16,99 +16,48 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.RestApiAdminUtils;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.impl.TenantThemeCommonImpl;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.InputStream;
 
 public class TenantThemeApiServiceImpl implements TenantThemeApiService {
-
-    private static final Log log = LogFactory.getLog(TenantThemeApiServiceImpl.class);
-    private static final String TENANT_THEMES_EXPORT_DIR_PREFIX = "exported-tenant-themes";
 
     /**
      * Import a Tenant Theme for a particular tenant by uploading an archive file.
      *
      * @param fileInputStream content relevant to the tenant theme
      * @param fileDetail      file details as Attachment
-     * @param messageContext
+     * @param messageContext  cxf message context
      * @return Theme import response
      * @throws APIManagementException if an error occurs when importing a tenant theme
      */
     @Override
     public Response importTenantTheme(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
             throws APIManagementException {
-
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            String errorMessage = "Super Tenant " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME +
-                    " is not allowed to import a tenant theme";
-            throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_NOT_ALLOWED,
-                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
-        }
-
-        try {
-            RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
-            return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
-        } catch (IOException e) {
-            throw new APIManagementException(e.getMessage(), e,
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
-        }
+        TenantThemeCommonImpl.importTenantTheme(fileInputStream);
+        return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
     }
 
     /**
      * Export a Tenant Theme of a particular tenant as an archive file.
      *
-     * @param messageContext
+     * @param messageContext cxf message context
      * @return Theme export response
      * @throws APIManagementException if an error occurs when importing a tenant theme
      */
     @Override
     public Response exportTenantTheme(MessageContext messageContext) throws APIManagementException {
-
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        APIAdminImpl apiAdmin = new APIAdminImpl();
-        if (!apiAdmin.isTenantThemeExist(tenantId)) {
-            RestApiUtil.handleResourceNotFoundError(
-                    "Tenant Theme for tenant " + tenantDomain + " does not exist.", log);
-        }
-
-        InputStream tenantTheme = apiAdmin.getTenantTheme(tenantId);
-        String tempPath =
-                System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + TENANT_THEMES_EXPORT_DIR_PREFIX;
-        String tempFile = tenantDomain + APIConstants.ZIP_FILE_EXTENSION;
-        File tenantThemeArchive = new File(tempPath, tempFile);
-
-        try {
-            FileUtils.copyInputStreamToFile(tenantTheme, tenantThemeArchive);
-            return Response.ok(tenantThemeArchive, MediaType.APPLICATION_OCTET_STREAM)
-                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
-                            + tenantThemeArchive.getName() + "\"").build();
-        } catch (IOException e) {
-            throw new APIManagementException(e.getMessage(), e,
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, e.getMessage()));
-        }
+        File tenantThemeArchive = TenantThemeCommonImpl.exportTenantTheme();
+        return Response.ok(tenantThemeArchive, MediaType.APPLICATION_OCTET_STREAM)
+                .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                        + tenantThemeArchive.getName() + "\"").build();
     }
 }
