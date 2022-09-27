@@ -168,5 +168,12 @@ public interface ApiDAO {
 
     void deleteThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException;
 
+    DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
+                                                    UserContext ctx) throws APIPersistenceException;
+    DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
+                                                           int offset, UserContext ctx) throws APIPersistenceException;
+
+    DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException;
+
 
 }

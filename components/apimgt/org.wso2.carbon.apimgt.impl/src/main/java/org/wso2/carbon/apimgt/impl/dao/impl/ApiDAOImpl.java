@@ -2283,4 +2283,259 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    @Override
+    public DevPortalAPI getDevPortalAPI(Organization organization, String apiId) throws APIPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        PublisherAPI api = null;
+        DevPortalAPI devPortalAPI = null;
+        String getAPIArtefactQuery = SQLConstants.GET_DEVPORTAL_API_ARTIFACT_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(getAPIArtefactQuery);
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setString(2, organization.getName());
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            while (resultSet.next()) {
+                String json = resultSet.getString("ARTIFACT");
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode tree = mapper.readTree(json);
+                api = mapper.treeToValue(tree, PublisherAPI.class);
+                String mediaType = resultSet.getString("MEDIA_TYPE");
+                InputStream apiDefinitionBlob = resultSet.getBinaryStream("API_DEFINITION");
+                if (apiDefinitionBlob != null) {
+                    if (StringUtils.equals("swagger.json",mediaType)) {
+                        api.setSwaggerDefinition(APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob));
+                    } else if (StringUtils.equals("asyncapi.json",mediaType)) {
+                        api.setAsyncApiDefinition(APIMgtDBUtil.getStringFromInputStream(apiDefinitionBlob));
+                    }
+                }
+                API apiObject = APIMapper.INSTANCE.toApi(api);
+                devPortalAPI = APIMapper.INSTANCE.toDevPortalApi(apiObject);
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving api artefact for API uuid: " + apiId);
+            }
+            throw new APIPersistenceException("Error while retrieving api artefact for API uuid: " + apiId, e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return devPortalAPI;
+    }
+
+    @Override
+    public DevPortalAPISearchResult searchAPIsForDevPortal(Organization organization, String searchQuery, int start,
+                                                           int offset, UserContext ctx) throws APIPersistenceException {
+        DevPortalAPISearchResult result = null;
+        String searchAllQuery = "SELECT ARTIFACT, API_UUID FROM AM_API WHERE ORGANIZATION=? AND ARTIFACT @> '{\"status\": \"PUBLISHED\"}';";
+        if (StringUtils.isEmpty(searchQuery)) {
+            result = searchPaginatedDevportalAPIs(organization.getName(), searchAllQuery, start, offset);
+        }
+        return result;
+    }
+
+
+    private DevPortalAPISearchResult searchPaginatedDevportalAPIs(String org, String searchQuery, int start,
+                                                                  int offset) throws APIPersistenceException {
+        int totalLength = 0;
+        DevPortalAPISearchResult searchResults = new DevPortalAPISearchResult();
+        PublisherAPI devPortalAPI;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(searchQuery);
+            preparedStatement.setString(1, org);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            List<DevPortalAPIInfo> devportalAPIInfoList = new ArrayList<>();
+            while (resultSet.next()) {
+                String json = resultSet.getString(1);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode tree = mapper.readTree(json);
+                devPortalAPI = mapper.treeToValue(tree, PublisherAPI.class);
+                DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
+                apiInfo.setType(devPortalAPI.getType());
+                apiInfo.setId(resultSet.getString(2));
+                apiInfo.setApiName(devPortalAPI.getApiName());
+                apiInfo.setDescription(devPortalAPI.getDescription());
+                apiInfo.setContext(devPortalAPI.getContext());
+                apiInfo.setProviderName(devPortalAPI.getProviderName());
+                apiInfo.setStatus(devPortalAPI.getStatus());
+                apiInfo.setThumbnail(devPortalAPI.getThumbnail());
+                apiInfo.setVersion(devPortalAPI.getVersion());
+                apiInfo.setCreatedTime(devPortalAPI.getCreatedTime());
+                apiInfo.setBusinessOwner(devPortalAPI.getBusinessOwner());
+                apiInfo.setAvailableTierNames(devPortalAPI.getAvailableTierNames());
+                apiInfo.setSubscriptionAvailability(devPortalAPI.getSubscriptionAvailability());
+                apiInfo.setSubscriptionAvailableOrgs(devPortalAPI.getSubscriptionAvailableOrgs());
+                //apiInfo.setGatewayVendor(devPortalAPI.getAPIVendor());
+                devportalAPIInfoList.add(apiInfo);
+                totalLength ++;
+            }
+            searchResults.setDevPortalAPIInfoList(devportalAPIInfoList);
+            searchResults.setReturnedAPIsCount(devportalAPIInfoList.size());
+            searchResults.setTotalAPIsCount(totalLength);
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving api artefacts");
+            }
+            throw new APIPersistenceException("Error while retrieving api artefacts", e);
+        } catch (JsonProcessingException e) {
+            throw new APIPersistenceException("Error while retrieving api artefacts", e);
+        } catch (IOException e) {
+            throw new APIPersistenceException("Error while retrieving api artefacts", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return searchResults;
+    }
+
+    @Override
+    public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
+        int totalLength = 0;
+        DevPortalContentSearchResult searchResults = new DevPortalContentSearchResult();
+        PublisherAPI publisherAPI;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatementDoc = null;
+        ResultSet resultSet = null;
+        ResultSet resultSetDoc = null;
+
+        String searchContentQuery = "SELECT DISTINCT ARTIFACT,API_UUID FROM AM_API JOIN JSONB_EACH_TEXT(ARTIFACT) e ON TRUE \n" +
+                " WHERE ORGANIZATION=? AND e.value LIKE ? AND ARTIFACT @> '{\"status\": \"PUBLISHED\"}';";
+
+        String modifiedSearchQuery = "%" + searchQuery.substring(8) +"%";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(searchContentQuery);
+            preparedStatement.setString(1, org.getName());
+            preparedStatement.setString(2, modifiedSearchQuery);
+            resultSet = preparedStatement.executeQuery();
+            connection.commit();
+            List<SearchContent> contentData = new ArrayList<>();
+            while (resultSet.next()) {
+                String json = resultSet.getString(1);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode tree = mapper.readTree(json);
+                publisherAPI = mapper.treeToValue(tree, PublisherAPI.class);
+                DevPortalSearchContent content = new DevPortalSearchContent();
+                content.setContext(publisherAPI.getContext());
+                content.setDescription(publisherAPI.getDescription());
+                content.setId(resultSet.getString(2));
+                content.setName(publisherAPI.getApiName());
+                content.setProvider(publisherAPI.getProviderName());
+                content.setType("API");
+                content.setVersion(publisherAPI.getVersion());
+                content.setStatus(publisherAPI.getStatus());
+                contentData.add(content);
+                totalLength ++;
+            }
+
+            // Adding doc search
+            String docSearchQuery = "SELECT ad.API_ID, adm.UUID, ar.API_NAME, ar.API_VERSION, ar.API_PROVIDER, ar.API_TYPE, adm.NAME, adm.TYPE, adm.SOURCE_TYPE, adm.VISIBILITY FROM AM_API_RESOURCES ad, AM_API ar, AM_API_DOC_META_DATA adm WHERE ar.ORGANIZATION=? AND ad.RESOURCE_CONTENT @@ to_tsquery(?) AND ad.API_ID=ar.API_UUID AND ad.UUID=adm.RESOURCE_UUID  AND ar.ARTIFACT @> '{\"status\": \"PUBLISHED\"}';";
+            String modifiedDocQuery = "";
+            if (searchQuery.substring(8).split(" ").length <= 1) {
+                modifiedDocQuery = searchQuery.substring(8);
+            } else {
+                modifiedDocQuery = searchQuery.substring(8).replace(" "," & ");
+            }
+            preparedStatementDoc = connection.prepareStatement(docSearchQuery);
+            preparedStatementDoc.setString(1, org.getName());
+            preparedStatementDoc.setString(2, modifiedDocQuery);
+            resultSetDoc = preparedStatementDoc.executeQuery();
+            connection.commit();
+            while (resultSetDoc.next()) {
+                DocumentSearchContent docSearch = new DocumentSearchContent();
+                String apiUUID = resultSetDoc.getString("API_ID");
+                String docUUID = resultSetDoc.getString("UUID");
+                String apiType = resultSetDoc.getString("API_TYPE");
+                String accociatedType;
+                if (apiType.
+                        equals("APIProduct")) {
+                    accociatedType = "APIProduct";
+                } else {
+                    accociatedType = "API";
+                }
+                String docType = resultSetDoc.getString("TYPE");
+                DocumentationType type;
+                if (docType.equalsIgnoreCase(DocumentationType.HOWTO.getType())) {
+                    type = DocumentationType.HOWTO;
+                } else if (docType.equalsIgnoreCase(DocumentationType.PUBLIC_FORUM.getType())) {
+                    type = DocumentationType.PUBLIC_FORUM;
+                } else if (docType.equalsIgnoreCase(DocumentationType.SUPPORT_FORUM.getType())) {
+                    type = DocumentationType.SUPPORT_FORUM;
+                } else if (docType.equalsIgnoreCase(DocumentationType.API_MESSAGE_FORMAT.getType())) {
+                    type = DocumentationType.API_MESSAGE_FORMAT;
+                } else if (docType.equalsIgnoreCase(DocumentationType.SAMPLES.getType())) {
+                    type = DocumentationType.SAMPLES;
+                } else {
+                    type = DocumentationType.OTHER;
+                }
+
+                String visibilityAttr = resultSetDoc.getString("VISIBILITY");
+                Documentation.DocumentVisibility documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
+
+                if (visibilityAttr != null) {
+                    if (visibilityAttr.equals(Documentation.DocumentVisibility.API_LEVEL.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
+                    } else if (visibilityAttr.equals(Documentation.DocumentVisibility.PRIVATE.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.PRIVATE;
+                    } else if (visibilityAttr.equals(Documentation.DocumentVisibility.OWNER_ONLY.name())) {
+                        documentVisibility = Documentation.DocumentVisibility.OWNER_ONLY;
+                    }
+                }
+
+                Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
+                String artifactAttribute = resultSetDoc.getString("SOURCE_TYPE");
+
+                if (Documentation.DocumentSourceType.URL.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.URL;
+                } else if (Documentation.DocumentSourceType.FILE.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.FILE;
+                } else if (Documentation.DocumentSourceType.MARKDOWN.name().equals(artifactAttribute)) {
+                    docSourceType = Documentation.DocumentSourceType.MARKDOWN;
+                }
+                docSearch.setApiName(resultSetDoc.getString("API_NAME"));
+                docSearch.setApiProvider(resultSetDoc.getString("API_PROVIDER"));
+                docSearch.setApiVersion(resultSetDoc.getString("API_VERSION"));
+                docSearch.setApiUUID(apiUUID);
+                docSearch.setAssociatedType(accociatedType);
+                docSearch.setDocType(type);
+                docSearch.setId(docUUID);
+                docSearch.setSourceType(docSourceType);
+                docSearch.setVisibility(documentVisibility);
+                docSearch.setName(resultSetDoc.getString("NAME"));
+                contentData.add(docSearch);
+                totalLength ++;
+            }
+            searchResults.setResults(contentData);
+            searchResults.setReturnedCount(contentData.size());
+            searchResults.setTotalCount(totalLength);
+
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while content searching api artefacts");
+            }
+            throw new APIPersistenceException("Error while content searching api artefacts", e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return searchResults;
+    }
+
 }
