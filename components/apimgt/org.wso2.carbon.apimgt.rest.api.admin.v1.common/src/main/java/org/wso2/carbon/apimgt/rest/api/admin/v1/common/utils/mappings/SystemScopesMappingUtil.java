@@ -99,15 +99,14 @@ public class SystemScopesMappingUtil {
      * @param body          body of a Role Scope  Mapping
      * @return JSONObject   role scope mapping data
      */
-    public static JSONObject createJsonObjectOfScopeMapping(ScopeListDTO body)
-            throws APIManagementException {
+    public static JSONObject createJsonObjectOfScopeMapping(ScopeListDTO body) {
         JSONObject responseJson = new JSONObject();
         JSONArray scopeJson = new JSONArray();
         for (ScopeDTO scope : body.getList()) {
             JSONObject scopeRoleJson = new JSONObject();
             String roles = scope.getRoles().toString().replaceAll("\\[", "").
                     replaceAll("\\]", "").replaceAll("\\s", "");
-            if ( !roles.isEmpty()) {
+            if (!roles.isEmpty()) {
                 scopeRoleJson.put("Name", scope.getName());
                 scopeRoleJson.put("Roles", roles);
                 scopeJson.put(scopeRoleJson);

@@ -467,7 +467,8 @@ public class ApiMgtDAO {
                 return monetizationUsagePublishInfo;
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving Monetization Usage Publish Info: ", e);
+            handleExceptionWithCode("Error while retrieving Monetization Usage Publish Info: ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -507,7 +508,8 @@ public class ApiMgtDAO {
                     log.error("Error while rolling back the failed operation", ex);
                 }
             }
-            handleException("Error while adding monetization usage publish Info: ", e);
+            handleExceptionWithCode("Error while adding monetization usage publish Info: ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }

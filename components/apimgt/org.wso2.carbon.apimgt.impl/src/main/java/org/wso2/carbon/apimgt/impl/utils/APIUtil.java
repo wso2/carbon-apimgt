@@ -2240,7 +2240,8 @@ public final class APIUtil {
     public static boolean isUserExist(String username) throws APIManagementException {
 
         if (username == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as the anonymous user");
+            throw new APIManagementException("Attempt to execute privileged operation as the anonymous user",
+                    ExceptionCodes.ANON_USER_ACTION);
         }
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
@@ -2252,7 +2253,8 @@ public final class APIUtil {
                             .getUserStoreManager();
             return manager.isExistingUser(tenantAwareUserName);
         } catch (UserStoreException e) {
-            throw new APIManagementException("UserStoreException while trying the user existence " + username, e);
+            throw new APIManagementException("UserStoreException while trying the user existence " + username, e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
     }
 
@@ -5114,7 +5116,7 @@ public final class APIUtil {
             restAPIConfigJSON = getRESTAPIScopesFromTenantConfig(tenantConfJson);
             if (restAPIConfigJSON == null) {
                 throw new APIManagementException("RESTAPIScopes config does not exist for tenant "
-                        + tenantDomain);
+                        + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
             }
         }
         return restAPIConfigJSON;
@@ -5169,7 +5171,7 @@ public final class APIUtil {
                     tenantConfigCache.put(cacheName, jsonObject);
                     return jsonObject;
                 } catch (ParseException e) {
-                    throw new APIManagementException("Error occurred while converting to json", e,
+                    throw new APIManagementException("Error occurred while converting tenant-conf to json", e,
                             ExceptionCodes.JSON_PARSE_ERROR);
                 }
             }

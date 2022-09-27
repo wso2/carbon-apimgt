@@ -16,23 +16,15 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
-
 import org.apache.cxf.jaxrs.ext.MessageContext;
-
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.impl.SettingsCommonImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.SettingsMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
 import javax.ws.rs.core.Response;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
-
-    private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
     /**
      * Retrieves admin portal related server settings
@@ -43,14 +35,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
      */
     @Override
     public Response getAdminSettings(MessageContext messageContext) throws APIManagementException {
-
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            boolean isUserAvailable = false;
-            if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
-                isUserAvailable = true;
-            }
-            SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
-            return Response.ok().entity(settingsDTO).build();
+        SettingsDTO settingsDTO = SettingsCommonImpl.getAdminSettings();
+        return Response.ok().entity(settingsDTO).build();
     }
 }
