@@ -299,6 +299,114 @@ paths:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
 
+  /apis/{apiId}/async-api-specification:
+    get:
+      tags:
+        - APIs
+      summary: |
+        Get async api specification definition
+      description: |
+        You can use this operation to retrieve the async api specification of an API.
+        
+         `X-WSO2-Tenant` header can be used to retrieve the async api specification an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+        
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/environmentName'
+        - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/requestedTenant'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested async api specification document of the API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: '{"asyncapi": "2.0.0","defaultContentType": "application/json","info": {"title": "Streetlights 
+                API","version": "1.0.0","description": "The Smartylighting Streetlights API allows you to remotely manag
+                e the city lights.\n\n### Check out its awesome features:\n\n* Turn a specific streetlight on/off\n* Dim 
+                a specific streetlight\n* Receive real-time information about environmental lighting conditions\n","licen
+                se": {"name": "Apache 2.0","url":"https://www.apache.org/licenses/LICENSE-2.0" }},"servers": {"productio
+                n": {"url": "ws://localhost:8080","protocol": "ws"},"sandbox": {"url": "ws://localhost:8080","protocol":
+                "ws"}},"channels": {"smartylighting/streetlights/1/0/event/{streetlightId}/lighting/measured": {"descrip
+                tion": "The topic on which measured values may be produced and consumed.",“publish": {"operationId": "re
+                ceiveLightMeasurement","summary": "Inform about environmental lighting conditions of a particular street
+                light.","traits": [{"$ref": "#/components/operationTraits/kafka"}],"message": {"$ref": "#/components/mes
+                sages/lightMeasured"}},"parameters": {"streetlightId": {"$ref": "#/components/parameters/streetlightId"}
+                }},"smartylighting/streetlights/1/0/action/{streetlightId}/turn/on": {"subscribe": {"operationId": "turn
+                On","traits": [{"$ref": "#/components/operationTraits/kafka"}],"message": {"$ref": "#/components/message
+                s/turnOnOff"}},"parameters": {"streetlightId": {"$ref": "#/components/parameters/streetlightId"}}},"smar
+                tylighting/streetlights/1/0/action/{streetlightId}/turn/off": {"subscribe": {"operationId": "turnOff","t
+                raits": [{"$ref": "#/components/operationTraits/kafka"}],"message": {"$ref": "#/components/messages/turn
+                OnOff"}},"parameters": {"streetlightId": {"$ref": "#/components/parameters/streetlightId"}}},"smartyligh
+                ting/streetlights/1/0/action/{streetlightId}/dim": {"subscribe": {"operationId": "dimLight","traits": [{
+                "$ref": "#/components/operationTraits/kafka"}],"message": {"$ref": "#/components/messages/dimLight"}},"p
+                arameters": {"streetlightId": {"$ref": "#/components/parameters/streetlightId"}}}},"components": {"schem
+                as": {"lightMeasuredPayload": {"type": "object","properties": {"lumens": {"description": "Light intensit
+                y measured in lumens.","minimum": 0,"type": "integer"},"sentAt": {“$ref": "#/components/schemas/sentAt"}
+                }},"turnOnOffPayload": {"type": "object","properties": {"command": {"description": "Whether to turn on o
+                r off the light.","enum": [true,false],"type": "string"},"sentAt": {"$ref": "#/components/schemas/sentAt
+                "}}},"dimLightPayload": {"type": "object","properties": {"percentage": {"description": "Percentage to wh
+                ich the light should be dimmed to.","maximum": 100,"minimum": 0,"type": "integer"},"sentAt": {"$ref": "#
+                /components/schemas/sentAt"}}},"sentAt": {"format": "date-time","description": "Date and time when the m
+                essage was sent.","type": "string"}},"messages": {"lightMeasured": {"contentType": "application/json","n
+                ame": "lightMeasured","title": "Light measured","summary": "Inform about environmental lighting conditio
+                ns of a particular streetlight.","payload": {"$ref": "#/components/schemas/lightMeasuredPayload"},"trait
+                s": [{"$ref": "#/components/messageTraits/commonHeaders"}]},"turnOnOff": {"name": "turnOnOff","title": "
+                on/off","summary": "Command a particular streetlight to turn the lights on or off.","payload": {"$ref":"
+                #/components/schemas/turnOnOffPayload"},"traits": [{"$ref": "#/components/messageTraits/commonHeaders"}]
+                },"dimLight": {"name": "dimLight","title": "Dim light","summary": "Command a particular streetlight to d
+                im the lights.","payload": {"$ref": "#/components/schemas/dimLightPayload"},"traits": [{"$ref":"#/compon
+                ents/messageTraits/commonHeaders"}]}},"securitySchemes": {"apiKey": {"type": "apiKey","description": "Pr
+                ovide your API key as the user and leave the password empty.","in": "user"},"supportedOauthFlows": {"typ
+                e": "oauth2","description": "Flows to support OAuth 2.0","flows": {"implicit": {"authorizationUrl": "http
+                s://authserver.example/auth","scopes": {"streetlights:on": "Ability to switch lights on","streetlights:o
+                ff": "Ability to switch lights off","streetlights:dim": "Ability to dim the lights"}},"password": {"toke
+                nUrl": "https://authserver.example/token","scopes": {"streetlights:on": "Ability to switch lights on","s
+                treetlights:off": "Ability to switch lights off","streetlights:dim": "Ability to dim the lights"}},"clie
+                ntCredentials": {"tokenUrl": "https://authserver.example/token","scopes": {"streetlights:on": "Ability t
+                o switch lights on","streetlights:off": "Ability to switch lights off","streetlights:dim": "Ability to d
+                im the lights"}},"authorizationCode": {"authorizationUrl": "https://authserver.example/auth","tokenUrl":
+                "https://authserver.example/token","refreshUrl": "https://authserver.example/refresh","scopes": {"street
+                lights:on": "Ability to switch lights on","streetlights:off": "Ability to switch lights off","streetligh
+                ts:dim": "Ability to dim the lights"}}}},"openIdConnectWellKnown": {"type": "openIdConnect","openIdConne
+                ctUrl": "https://authserver.example/.well-known"},"oauth2": {"type": "oauth2","flows": {"implicit": {"aut
+                horizationUrl": "http://localhost:9999","scopes": {},"x-scopes-bindings": {}}}}},"parameters": {"streetl
+                ightId": {"description": "The ID of the streetlight.","schema": {"type": "string"}}},"operationTraits": 
+                {"kafka": {"bindings": {"kafka": {"clientId": "my-app-id"}}}},"messageTraits": {"commonHeaders": {"heade
+                rs": {"type": "object","properties": {"my-app-header": {"type": "integer","minimum": 0,"maximum": 100}}}
+                }}}}'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security: [ ]
+      x-code-samples:
+        - lang: Curl
+          source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/async-api-specification"
+
   /apis/{apiId}/graphql-schema:
     get:
       tags:
