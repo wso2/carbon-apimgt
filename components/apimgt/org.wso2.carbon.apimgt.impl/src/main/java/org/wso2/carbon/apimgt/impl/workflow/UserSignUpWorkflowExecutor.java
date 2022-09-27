@@ -20,10 +20,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 
 import java.util.List;
 
@@ -41,25 +38,20 @@ public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
      */
     protected static void updateRolesOfUser(String userName, List<String> roleList, String tenantDomain)
             throws Exception {
-
         if (log.isDebugEnabled()) {
             log.debug("Adding roles to " + userName + "in " + tenantDomain + " Domain");
         }
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-        UserStoreManager manager = realm.getUserStoreManager();
-
-        if (manager.isExistingUser(userName)) {
+        int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+        if (UserManagerHolder.getUserManager().isExistingUser(tenantId, userName)) {
             // check whether given roles exist
             for (String role : roleList) {
-                if (!manager.isExistingRole(role)) {
+                if (!UserManagerHolder.getUserManager().isExistingRole(tenantId, role)) {
                     log.error("Could not find role " + role + " in the user store");
                     throw new Exception("Could not find role " + role + " in the user store");
                 }
             }
-            manager.updateRoleListOfUser(userName, null, roleList.toArray(new String[0]));
+            UserManagerHolder.getUserManager()
+                    .updateRoleListOfUser(tenantId, userName, null, roleList.toArray(new String[0]));
         } else {
             log.error("User does not exist. Unable to approve user " + userName);
         }
@@ -74,16 +66,11 @@ public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
      * @throws Exception
      */
     protected static void deleteUser(String tenantDomain, String userName) throws Exception {
-
         if (log.isDebugEnabled()) {
             log.debug("Remove the rejected user :" + userName);
         }
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-        UserStoreManager manager = realm.getUserStoreManager();
-        manager.deleteUser(userName);
+        int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+        UserManagerHolder.getUserManager().deleteUser(tenantId, userName);
     }
 
 }

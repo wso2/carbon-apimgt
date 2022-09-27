@@ -33,11 +33,11 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.cache.Caching;
 import java.util.*;
@@ -283,16 +283,12 @@ public class SystemScopeUtils {
      * @return tenantId
      */
     public static int getTenantIdFromTenantDomain(String tenantDomain) {
-
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-
-        if (realmService == null || tenantDomain == null) {
+        if (tenantDomain == null) {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
-
         try {
-            return realmService.getTenantManager().getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
+            return UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+        } catch (UserException e) {
             String msg = "Failed to get the Tenant Id of the the Tenant Domain : " + tenantDomain;
             log.error(msg, e);
         }

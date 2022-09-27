@@ -28,8 +28,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDevPortalDTO;
 import java.util.Map;
 
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.Response;
 
@@ -59,7 +59,7 @@ public class CustomUrlsApiServiceImpl implements CustomUrlsApiService {
             customUrlInfoDTO.setEnabled(perTenantServiceProviderEnabled);
             customUrlInfoDTO.setTenantDomain(tenantDomain);
             return Response.ok().entity(customUrlInfoDTO).build();
-        } catch (UserStoreException | APIManagementException | RegistryException e) {
+        } catch (APIManagementException | RegistryException | UserException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving custom url info for tenant : " + tenantDomain, log);
         }
         return null;

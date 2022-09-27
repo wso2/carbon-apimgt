@@ -44,10 +44,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.InputStream;
@@ -295,9 +295,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_GLOBAL_POLICIES_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in loading Global Policies for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
@@ -320,9 +319,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_GLOBAL_POLICY_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in loading Global Policy for tenantDomain : " + tenantDomain, e);
             }
             ps.setString(1, policyName);
@@ -458,9 +456,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in getting tenant id for loading Subscriptions for tenant : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
@@ -526,9 +523,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in loading ApplicationKeyMappings for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
@@ -609,9 +605,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTION_POLICIES_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in loading SubscriptionPolicies for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
@@ -638,9 +633,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in loading ApplicationPolicies for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
@@ -688,9 +682,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICIES_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in loading ApplicationPolicies for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
@@ -852,9 +845,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_POLICY_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in loading ApplicationPolicy for tenantDomain : " + tenantDomain, e);
             }
             ps.setString(1, policyName);
@@ -895,9 +887,8 @@ public class SubscriptionValidationDAO {
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL)) {
             int tenantId = 0;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            } catch (UserException e) {
                 log.error("Error in loading ApplicationPolicy for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
@@ -929,9 +920,8 @@ public class SubscriptionValidationDAO {
                          conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_POLICY_SQL)) {
                 int tenantId = 0;
                 try {
-                    tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                            .getTenantId(tenantDomain);
-                } catch (UserStoreException e) {
+                    tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+                } catch (UserException e) {
                     log.error("Error in loading ApplicationPolicy for tenantDomain : " + tenantDomain, e);
                 }
                 ps.setString(1, policyName);

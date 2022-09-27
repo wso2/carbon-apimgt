@@ -47,12 +47,13 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLOperationParam;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -282,8 +283,7 @@ public class SOAPOperationBindingUtils {
             UserRegistry registry;
 
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
@@ -296,7 +296,7 @@ public class SOAPOperationBindingUtils {
                 return registry.resourceExists(resourcePath);
             } catch (RegistryException e) {
                 handleException("Error when create registry instance", e);
-            } catch (UserStoreException e) {
+            } catch (UserException e) {
                 handleException("Error while reading tenant information", e);
             }
         } finally {

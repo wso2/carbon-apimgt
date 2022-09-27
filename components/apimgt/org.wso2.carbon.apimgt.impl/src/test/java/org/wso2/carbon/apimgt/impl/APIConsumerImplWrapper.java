@@ -82,7 +82,7 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
     protected void endTenantFlow(){
     }
 
-    protected  int getTenantId(String requestedTenantDomain) throws UserStoreException {
+    protected  int getTenantId(String requestedTenantDomain) {
         return -1234;
     }
 

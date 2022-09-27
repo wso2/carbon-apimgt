@@ -32,6 +32,8 @@ import org.wso2.carbon.apimgt.impl.dao.SystemConfigurationsDAO;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -41,7 +43,6 @@ import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.user.api.UserStoreException;
 import javax.cache.Cache;
 import java.io.IOException;
 import java.io.StringReader;
@@ -73,9 +74,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
             }
-            org.wso2.carbon.user.api.AuthorizationManager authManager =
-                    ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId).
-                            getAuthorizationManager();
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (!registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
@@ -86,11 +84,11 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                         APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
                                 + APIConstants.EXTERNAL_API_STORES_LOCATION);
-                authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-
+                UserManagerHolder.getUserManager().denyRole(
+                        tenantId, APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
             }
 
-        } catch (RegistryException | IOException | UserStoreException e) {
+        } catch (RegistryException | IOException | UserException e) {
             String msg = "Error while adding External Stores Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
@@ -369,16 +367,14 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                 resource.setMediaType(APIConstants.GA_CONF_MEDIA_TYPE);
                 registry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
                 /*set resource permission*/
-                org.wso2.carbon.user.api.AuthorizationManager authManager =
-                        ServiceReferenceHolder.getInstance().getRealmService().
-                                getTenantUserRealm(tenantId).getAuthorizationManager();
                 String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                         APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
                                 + APIConstants.GA_CONFIGURATION_LOCATION);
-                authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                UserManagerHolder.getUserManager().denyRole(
+                        tenantId, APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
             }
-        } catch (RegistryException | IOException | UserStoreException e) {
+        } catch (RegistryException | IOException | UserException e) {
             String msg = "Error while add Google Analytics Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);

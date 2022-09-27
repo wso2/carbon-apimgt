@@ -58,12 +58,13 @@ import org.wso2.carbon.apimgt.impl.wsdl.template.RESTToSOAPMsgTemplate;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -319,8 +320,7 @@ public class SequenceGenerator {
             UserRegistry registry;
 
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantManager().getTenantId(tenantDomain);
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
@@ -349,7 +349,7 @@ public class SequenceGenerator {
                         resourcePath);
                 SequenceUtils.saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath,
                         resourcePath);
-            } catch (UserStoreException e) {
+            } catch (UserException e) {
                 handleException("Error while reading tenant information", e);
             } catch (RegistryException e) {
                 handleException("Error while creating registry resource", e);

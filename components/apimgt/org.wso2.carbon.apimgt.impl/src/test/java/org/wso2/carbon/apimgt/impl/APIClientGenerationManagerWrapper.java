@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.File;
 
@@ -32,7 +31,7 @@ public class APIClientGenerationManagerWrapper extends APIClientGenerationManage
     private final Log log = LogFactory.getLog(APIClientGenerationManagerWrapper.class);
 
     @Override
-    protected int getTenantId(String requestedTenant) throws UserStoreException {
+    protected int getTenantId(String requestedTenant) {
         return -1234;
     }
 

@@ -63,6 +63,8 @@ import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.TenantManager;
@@ -114,14 +116,14 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String tenantDomainName = APIUtil.getInternalOrganizationDomain(organization);
                 String tenantUserName = getTenantAwareUsername(username);
-                int tenantId = getTenantManager().getTenantId(tenantDomainName);
+                int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
                 this.organization = organization;
                 this.username = tenantUserName;
 
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserException e) {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e,
                     ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
@@ -190,9 +192,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPIInfoByUUID(id);
     }
 
-
     protected TenantManager getTenantManager() {
-
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
     }
 
@@ -483,8 +483,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Subscriber subscriber = new Subscriber(username);
         subscriber.setSubscribedDate(new Date());
         try {
-            int tenantId = getTenantManager()
-                    .getTenantId(getTenantDomain(username));
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(getTenantDomain(username));
                 subscriber.setEmail(StringUtils.EMPTY);
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
@@ -496,7 +495,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIManagementException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
         }

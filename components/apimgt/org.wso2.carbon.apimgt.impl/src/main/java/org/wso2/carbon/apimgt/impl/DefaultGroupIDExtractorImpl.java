@@ -7,10 +7,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class DefaultGroupIDExtractorImpl implements NewPostLoginExecutor {
@@ -36,25 +35,19 @@ public class DefaultGroupIDExtractorImpl implements NewPostLoginExecutor {
             username = (String) obj.get("user");
             isSuperTenant = (Boolean) obj.get("isSuperTenant");
 
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-
             //if the user is not in the super tenant domain then find the domain name and tenant id.
             if (!isSuperTenant) {
                 tenantDomain = MultitenantUtils.getTenantDomain(username);
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             }
-
-            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-            UserStoreManager manager = realm.getUserStoreManager();
-            organization =
-                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+            organization = UserManagerHolder.getUserManager()
+                    .getUserClaimValue(tenantId, MultitenantUtils.getTenantAwareUsername(username), claim, null);
             if (organization != null) {
                 organization = tenantDomain + "/" + organization.trim();
             }
         } catch (JSONException e) {
             log.error("Exception occured while trying to get group Identifier from login response", e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserException e) {
             log.error("Error while checking user existence for " + username, e);
         }
 
@@ -81,19 +74,13 @@ public class DefaultGroupIDExtractorImpl implements NewPostLoginExecutor {
             username = (String) obj.get("user");
             isSuperTenant = (Boolean) obj.get("isSuperTenant");
 
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-
             //if the user is not in the super tenant domain then find the domain name and tenant id.
             if (!isSuperTenant) {
                 tenantDomain = MultitenantUtils.getTenantDomain(username);
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             }
-
-            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-            UserStoreManager manager = realm.getUserStoreManager();
-            organization =
-                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+            organization = UserManagerHolder.getUserManager()
+                    .getUserClaimValue(tenantId, MultitenantUtils.getTenantAwareUsername(username), claim, null);
             if (organization != null) {
                 if (organization.contains(",")) {
                     groupIdArray = organization.split(",");
@@ -110,7 +97,7 @@ public class DefaultGroupIDExtractorImpl implements NewPostLoginExecutor {
             }
         } catch (JSONException e) {
             log.error("Exception occured while trying to get group Identifier from login response", e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserException e) {
             log.error("Error while checking user existence for " + username, e);
         }
 

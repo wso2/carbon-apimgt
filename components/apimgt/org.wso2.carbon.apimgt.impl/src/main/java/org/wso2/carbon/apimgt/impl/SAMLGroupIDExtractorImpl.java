@@ -36,11 +36,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
@@ -92,14 +90,10 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                     }
                 }
             }
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-            UserStoreManager manager = realm.getUserStoreManager();
-            organization =
-                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            organization = UserManagerHolder.getUserManager()
+                    .getUserClaimValue(tenantId, MultitenantUtils.getTenantAwareUsername(username), claim, null);
             if (log.isDebugEnabled()) {
                 log.debug("User organization " + organization);
             }
@@ -118,9 +112,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
         } catch (IOException e) {
             String msg = "IO exception happen while unmarshalling the SAML Assertion";
             log.error(msg, e);
-        } catch (UserStoreException e) {
-            log.error("User store exception occurred for user" + username, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserException e) {
             log.error("Error while checking user existence for " + username, e);
         } finally {
             if (samlResponseStream != null) {
@@ -276,14 +268,10 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
             if (!StringUtils.isEmpty(isSAML2Enabled) && Boolean.parseBoolean(isSAML2Enabled)) {
                 organization = getOrganizationFromSamlAssertion(assertions);
             } else {
-                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
                 String tenantDomain = MultitenantUtils.getTenantDomain(username);
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-                UserStoreManager manager = realm.getUserStoreManager();
-                organization =
-                        manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+                int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+                organization = UserManagerHolder.getUserManager()
+                        .getUserClaimValue(tenantId, MultitenantUtils.getTenantAwareUsername(username), claim, null);
             }
             if (log.isDebugEnabled()) {
                 log.debug("User organization " + organization);
@@ -315,9 +303,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
         } catch (IOException e) {
             String msg = "IO exception happen while unmarshalling the SAML Assertion";
             log.error(msg, e);
-        } catch (UserStoreException e) {
-            log.error("User store exception occurred for user" + username, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserException e) {
             log.error("Error while checking user existence for " + username, e);
         } finally {
             if (samlResponseStream != null) {

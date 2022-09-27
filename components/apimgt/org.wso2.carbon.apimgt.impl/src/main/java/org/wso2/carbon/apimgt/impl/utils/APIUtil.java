@@ -183,6 +183,9 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.UserConstants;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -227,7 +230,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
@@ -2136,23 +2138,15 @@ public final class APIUtil {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
-
-                org.wso2.carbon.user.api.AuthorizationManager manager =
-                        ServiceReferenceHolder.getInstance()
-                                .getRealmService()
-                                .getTenantUserRealm(tenantId)
-                                .getAuthorizationManager();
-                authorized =
-                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
-                                CarbonConstants.UI_PERMISSION_ACTION);
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            authorized = UserManagerHolder.getUserManager().isUserAuthorized(tenantId,
+                    MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
+                    CarbonConstants.UI_PERMISSION_ACTION);
             if (APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
                 addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange,
                         authorized ? 1 : 2);
             }
-
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error while checking the user:" + userNameWithoutChange
                     + " authorized or not", e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         } finally {
@@ -2218,14 +2212,12 @@ public final class APIUtil {
         }
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            UserStoreManager manager = ServiceReferenceHolder.getInstance().getRealmService()
-                    .getTenantUserRealm(tenantId).getUserStoreManager();
-            roles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            roles = UserManagerHolder.getUserManager().getRoleListOfUser(tenantId,
+                    MultitenantUtils.getTenantAwareUsername(username));
             addToRolesCache(APIConstants.API_USER_ROLE_CACHE, username, roles);
             return roles;
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("UserStoreException while trying the role list of the user " + username,
                     e, ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
@@ -2245,13 +2237,9 @@ public final class APIUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
         try {
-            int tenantId =
-                    ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            UserStoreManager manager =
-                    ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
-                            .getUserStoreManager();
-            return manager.isExistingUser(tenantAwareUserName);
-        } catch (UserStoreException e) {
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            return UserManagerHolder.getUserManager().isExistingUser(tenantId, tenantAwareUserName);
+        } catch (UserException e) {
             throw new APIManagementException("UserStoreException while trying the user existence " + username, e);
         }
     }
@@ -2318,18 +2306,14 @@ public final class APIUtil {
      */
 
     public static void setFilePermission(String filePath) throws APIManagementException {
-
         try {
             String filePathString = filePath.replaceFirst("/registry/resource/", "");
-            org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
-                    getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
-                    getAuthorizationManager();
-            if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                    filePathString, ActionConstants.GET)) {
-                accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                        filePathString, ActionConstants.GET);
+            if (!UserManagerHolder.getUserManager().isRoleAuthorized(MultitenantConstants.SUPER_TENANT_ID,
+                    CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME, filePathString, ActionConstants.GET)) {
+                UserManagerHolder.getUserManager().authorizeRole(MultitenantConstants.SUPER_TENANT_ID,
+                        CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME, filePathString, ActionConstants.GET);
             }
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error while setting up permissions for file location", e);
         }
     }
@@ -2403,8 +2387,7 @@ public final class APIUtil {
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomainName);
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomainName);
 
             String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             api.setApiLevelPolicy(apiLevelTier);
@@ -2463,7 +2446,7 @@ public final class APIUtil {
         } catch (RegistryException e) {
             String msg = "Failed to get LastAccess time or Rating";
             throw new APIManagementException(msg, e);
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             String msg = "Failed to get User Realm of API Provider";
             throw new APIManagementException(msg, e);
         }
@@ -2556,19 +2539,15 @@ public final class APIUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
 
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(tenantId).getAuthorizationManager();
-            String[] allowedRoles = authManager.getAllowedRolesForResource(sourceResourcePath, ActionConstants.GET);
-
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+            String[] allowedRoles = UserManagerHolder.getUserManager().getAllowedRolesForResource(tenantId, sourceResourcePath, ActionConstants.GET);
             if (allowedRoles != null) {
-
                 for (String allowedRole : allowedRoles) {
-                    authManager.authorizeRole(allowedRole, targetResourcePath, ActionConstants.GET);
+                    UserManagerHolder.getUserManager().authorizeRole(tenantId, allowedRole, targetResourcePath, ActionConstants.GET);
                 }
             }
 
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error while adding role permissions to API", e);
         }
     }
@@ -2872,8 +2851,8 @@ public final class APIUtil {
     public static void createSubscriberRole(String roleName, int tenantId) throws APIManagementException {
 
         Permission[] subscriberPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
+                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserConstants.EXECUTE_ACTION)};
         createRole(roleName, subscriberPermissions, tenantId);
     }
 
@@ -2887,8 +2866,8 @@ public final class APIUtil {
     public static void createPublisherRole(String roleName, int tenantId) throws APIManagementException {
 
         Permission[] publisherPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION)};
+                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_PUBLISH, UserConstants.EXECUTE_ACTION)};
         createRole(roleName, publisherPermissions, tenantId);
     }
 
@@ -2902,10 +2881,10 @@ public final class APIUtil {
     public static void createCreatorRole(String roleName, int tenantId) throws APIManagementException {
 
         Permission[] creatorPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserMgtConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.RESOURCE_GOVERN, UserMgtConstants.EXECUTE_ACTION)};
+                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_CREATE, UserConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.RESOURCE_GOVERN, UserConstants.EXECUTE_ACTION)};
         createRole(roleName, creatorPermissions, tenantId);
     }
 
@@ -2919,10 +2898,10 @@ public final class APIUtil {
     public static void createDevOpsRole(String roleName, int tenantId) throws APIManagementException {
 
         Permission[] devOpsPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION),
-                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_CREATE, UserConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_PUBLISH, UserConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserConstants.EXECUTE_ACTION),
         };
         createRole(roleName, devOpsPermissions, tenantId);
     }
@@ -2937,7 +2916,7 @@ public final class APIUtil {
     public static void createObserverRole(String roleName, int tenantId) throws APIManagementException {
 
         Permission[] observerPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION)
+                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION)
         };
         createRole(roleName, observerPermissions, tenantId);
     }
@@ -2965,7 +2944,7 @@ public final class APIUtil {
     public static void createAnalyticsRole(String roleName, int tenantId) throws APIManagementException {
 
         Permission[] analyticsPermissions = new Permission[]{
-                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION)};
+                new Permission(APIConstants.Permissions.LOGIN, UserConstants.EXECUTE_ACTION)};
         createRole(roleName, analyticsPermissions, tenantId);
     }
 
@@ -3262,26 +3241,10 @@ public final class APIUtil {
      * Get active tenant domains
      *
      * @return
-     * @throws UserStoreException
+     * @throws UserException
      */
-    public static Set<String> getActiveTenantDomains() throws UserStoreException {
-
-        Set<String> tenantDomains;
-        Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
-        if (tenants == null || tenants.length == 0) {
-            tenantDomains = Collections.<String>emptySet();
-        } else {
-            tenantDomains = new HashSet<String>();
-            for (Tenant tenant : tenants) {
-                if (tenant.isActive()) {
-                    tenantDomains.add(tenant.getDomain());
-                }
-            }
-            if (!tenantDomains.isEmpty()) {
-                tenantDomains.add(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            }
-        }
-        return tenantDomains;
+    public static Set<String> getActiveTenantDomains() throws UserException {
+        return UserManagerHolder.getUserManager().getTenantDomainsByState(UserConstants.TENANT_STATE_ACTIVE);
     }
 
     /**
@@ -3289,22 +3252,10 @@ public final class APIUtil {
      *
      * @param state state of the tenant
      * @return set of tenants
-     * @throws UserStoreException
+     * @throws UserException
      */
-    public static Set<String> getTenantDomainsByState(String state) throws UserStoreException {
-
-        boolean isActive = state.equalsIgnoreCase(APIConstants.TENANT_STATE_ACTIVE);
-        if (isActive) {
-            return getActiveTenantDomains();
-        }
-        Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
-        Set<String> tenantDomains = new HashSet<>();
-        for (Tenant tenant : tenants) {
-            if (!tenant.isActive()) {
-                tenantDomains.add(tenant.getDomain());
-            }
-        }
-        return tenantDomains;
+    public static Set<String> getTenantDomainsByState(String state) throws UserException {
+        return UserManagerHolder.getUserManager().getTenantDomainsByState(state);
     }
 
     /**
@@ -3312,19 +3263,10 @@ public final class APIUtil {
      *
      * @param tenantDomain tenant Domain
      * @return isTenantAvailable
-     * @throws UserStoreException
+     * @throws UserException
      */
-    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
-
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-
-        if (tenantId == -1) {
-            return false;
-        }
-
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .isTenantActive(tenantId);
+    public static boolean isTenantAvailable(String tenantDomain) throws UserException {
+        return UserManagerHolder.getUserManager().isTenantAvailable(tenantDomain);
     }
 
     public static OrganizationResolver getOrganizationResolver() throws APIManagementException {
@@ -3357,7 +3299,7 @@ public final class APIUtil {
         return APIUtil.getTenantDomainFromTenantId(APIUtil.getInternalOrganizationId(organization));
     }
 
-    public static boolean isInternalOrganization(String organization) throws UserStoreException {
+    public static boolean isInternalOrganization(String organization) throws UserException {
         return isTenantAvailable(organization);
     }
 
@@ -3370,31 +3312,23 @@ public final class APIUtil {
      * @throws APIManagementException If an error occurs
      */
     public static boolean isRoleNameExist(String userName, String roleName) {
-
         if (roleName == null || StringUtils.isEmpty(roleName.trim())) {
             return true;
         }
-
         //disable role validation if "disableRoleValidationAtScopeCreation" system property is set
         String disableRoleValidation = System.getProperty(DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION);
         if (Boolean.parseBoolean(disableRoleValidation)) {
             return true;
         }
-
-        org.wso2.carbon.user.api.UserStoreManager userStoreManager;
         try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(MultitenantUtils.getTenantDomain(userName));
-            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(MultitenantUtils.getTenantDomain(userName));
             String[] roles = roleName.split(",");
             for (String role : roles) {
-                if (!userStoreManager.isExistingRole(role.trim())) {
+                if (!UserManagerHolder.getUserManager().isExistingRole(tenantId, role.trim())) {
                     return false;
                 }
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserException e) {
             log.error("Error when getting the list of roles", e);
             return false;
         }
@@ -3561,19 +3495,14 @@ public final class APIUtil {
      * @return tenantId
      */
     public static int getTenantIdFromTenantDomain(String tenantDomain) {
-
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-
-        if (realmService == null || tenantDomain == null) {
+        if (tenantDomain == null) {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
-
         try {
             return getInternalOrganizationId(tenantDomain);
         } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
         }
-
         return -1;
     }
 
@@ -3584,8 +3513,7 @@ public final class APIUtil {
      * @return tenantId
      */
     public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        if (realmService == null || organization == null) {
+        if (organization == null) {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
         try {
@@ -3603,16 +3531,9 @@ public final class APIUtil {
      * @return tenantId
      */
     public static String getTenantDomainFromTenantId(int tenantId) {
-
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-
-        if (realmService == null) {
-            return MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-
         try {
-            return realmService.getTenantManager().getDomain(tenantId);
-        } catch (UserStoreException e) {
+            return UserManagerHolder.getUserManager().getTenantDomainByTenantId(tenantId);
+        } catch (UserException e) {
             log.error(e.getMessage(), e);
         }
         return null;
@@ -4649,12 +4570,12 @@ public final class APIUtil {
      * This method will update the permission cache of the tenant which is related to the given usename
      *
      * @param username User name to find the relevant tenant
-     * @throws UserStoreException if the permission update failed
+     * @throws UserException if the permission update failed
      */
-    public static void updatePermissionCache(String username) throws UserStoreException {
+    public static void updatePermissionCache(String username) throws UserException {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+        int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
         PermissionUpdateUtil.updatePermissionTree(tenantId);
     }
 
@@ -7633,17 +7554,12 @@ public final class APIUtil {
         String adminName = "admin";
         try {
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
-
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-
-            adminName = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
-                    .getRealmConfiguration().getAdminUserName();
-
-        } catch (UserStoreException e) {
+            adminName = UserManagerHolder.getUserManager().getAdminUsername(tenantId);
+        } catch (UserException e) {
             handleInternalException("Error in getting admin username from user-mgt.xml", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -7658,21 +7574,16 @@ public final class APIUtil {
      * @throws APIMgtInternalException
      */
     public static String getAdminPassword() throws APIMgtInternalException {
-
         String adminPassword = "admin";
         try {
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
 
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-
-            adminPassword = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
-                    .getRealmConfiguration().getAdminPassword();
-
-        } catch (UserStoreException e) {
+            adminPassword = UserManagerHolder.getUserManager().getAdminPassword(tenantId);
+        } catch (UserException e) {
             handleInternalException("Error in getting admin password from user-mgt.xml", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -7741,20 +7652,13 @@ public final class APIUtil {
      *
      * @param username Logged-in username
      * @param roleName role that needs to be checked
-     * @throws UserStoreException
+     * @throws UserException
      */
-    public static boolean checkIfUserInRole(String username, String roleName) throws UserStoreException {
-
+    public static boolean checkIfUserInRole(String username, String roleName) throws UserException {
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
-        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
-        return abstractManager.isUserInRole(tenantAwareUserName, roleName);
+        int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+        return UserManagerHolder.getUserManager().isUserInRole(tenantId, tenantAwareUserName, roleName);
     }
 
     public static JSONArray getMonetizationAttributes() {
@@ -8200,15 +8104,14 @@ public final class APIUtil {
             }
             int tenantId;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantManager().getTenantId(tenantDomain);
+                tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
                 if (APIUtil.isPerAPISequence(api.getFaultSequence(), tenantId, api.getId(),
                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
                     return APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
                 } else {
                     return api.getFaultSequence();
                 }
-            } catch (UserStoreException e) {
+            } catch (UserException e) {
                 throw new APIManagementException("Error while retrieving tenant Id from " +
                         api.getId().getProviderName(), e);
             } catch (APIManagementException e) {
@@ -8460,18 +8363,16 @@ public final class APIUtil {
     public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
 
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-            String adminUserName = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
-                    .getRealmConfiguration().getAdminUserName();
+            String adminUserName = UserManagerHolder.getUserManager().getAdminUsername(tenantId);
             if (!tenantDomain.contentEquals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 return adminUserName.concat("@").concat(tenantDomain);
             }
             return adminUserName;
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error in getting tenant admin username",
                     e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         } finally {

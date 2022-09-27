@@ -87,12 +87,12 @@ import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
@@ -1404,9 +1404,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String configuredClaims = "";
         try {
             tenantId = getTenantId(tenantDomain);
-            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
-                    getTenantUserRealm(tenantId).getUserStoreManager();
-            if (userStoreManager.isExistingUser(subscriber)) {
+            if (UserManagerHolder.getUserManager().isExistingUser(tenantId, subscriber)) {
                 subscriberClaims = APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
                 APIManagerConfiguration configuration = getAPIManagerConfiguration();
                 configuredClaims = configuration.getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
@@ -1416,7 +1414,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     claimMap.put(claimURI, subscriberClaims.get(claimURI));
                 }
             }
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error while retrieving tenant id for tenant domain "
                     + tenantDomain, e);
         }
@@ -3607,8 +3605,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
 
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             responseCode = certificateManager
                     .addCertificateToParentNode(certificate, alias, endpoint, tenantId);
             int code = responseCode.getResponseCode();
@@ -3625,7 +3622,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     System.currentTimeMillis(),APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
                     tenantDomain,alias,endpoint);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             handleExceptionWithCode("Error while reading tenant information", e,
                     ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
@@ -3669,14 +3666,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
 
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             responseCode = certificateManager.deleteCertificateFromParentNode(alias, endpoint, tenantId);
             CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_REMOVE.toString(),
                     tenantDomain, alias, endpoint);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             handleExceptionWithCode("Error while reading tenant information",
                     e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }
@@ -3705,9 +3701,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public CertificateMetadataDTO getCertificate(String alias) throws APIManagementException {
         int tenantId = 0;
         try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
+            tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
+        } catch (UserException e) {
             handleExceptionWithCode("Error while reading tenant information",
                     e, ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }
@@ -3718,10 +3713,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
         int tenantId = 0;
         try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
+            tenantId = UserManagerHolder.getUserManager().getTenantId(tenantDomain);
             return certificateManager.getCertificates(tenantId);
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             handleExceptionWithCode("Error while reading tenant information", e,
                     ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
@@ -3931,8 +3925,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs, environmentsToRemove);
     }
 
-    protected int getTenantId(String tenantDomain) throws UserStoreException {
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+    protected int getTenantId(String tenantDomain) throws UserException {
+        return UserManagerHolder.getUserManager().getTenantId(tenantDomain);
     }
 
     protected void sendAsncNotification(NotificationDTO notificationDTO) throws NotificationException {

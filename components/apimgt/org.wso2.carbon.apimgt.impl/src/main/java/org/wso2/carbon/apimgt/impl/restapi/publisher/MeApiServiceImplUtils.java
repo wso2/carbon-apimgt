@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.Base64;
@@ -48,7 +49,7 @@ public class MeApiServiceImplUtils {
         try {
             isUserInRole = APIUtil.checkIfUserInRole(userName, roleName);
             return isUserInRole;
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             throw new APIManagementException("Error while validating user role", e,
                     ExceptionCodes.from(ExceptionCodes.USERSTORE_INITIALIZATION_FAILED));
         }

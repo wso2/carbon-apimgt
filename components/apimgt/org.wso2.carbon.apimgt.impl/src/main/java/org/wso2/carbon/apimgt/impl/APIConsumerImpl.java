@@ -130,12 +130,9 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.mgt.UserAdmin;
-import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -257,9 +254,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
     }
 
-    protected int getTenantId(String requestedTenantDomain) throws UserStoreException {
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                             .getTenantId(requestedTenantDomain);
+    protected int getTenantId(String requestedTenantDomain) throws UserException {
+        return UserManagerHolder.getUserManager().getTenantId(requestedTenantDomain);
     }
 
 
@@ -2393,18 +2389,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private static List<Scope> getAllowedScopesForUserApplication(String username,
                                                                   Set<Scope> reqScopeSet) {
         String[] userRoles = null;
-        org.wso2.carbon.user.api.UserStoreManager userStoreManager = null;
         String preservedCaseSensitiveValue = System.getProperty(PRESERVED_CASE_SENSITIVE_VARIABLE);
         boolean preservedCaseSensitive = JavaUtils.isTrueExplicitly(preservedCaseSensitiveValue);
 
         List<Scope> authorizedScopes = new ArrayList<Scope>();
         try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(MultitenantUtils.getTenantDomain(username));
-            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-            userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            int tenantId = UserManagerHolder.getUserManager().getTenantId(MultitenantUtils.getTenantDomain(username));
+            userRoles = UserManagerHolder.getUserManager().getRoleListOfUser(tenantId,
+                    MultitenantUtils.getTenantAwareUsername(username));
+        } catch (UserException e) {
             // Log and return since we do not want to stop issuing the token in
             // case of scope validation failures.
             log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
@@ -2798,19 +2791,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String newTenantDomain = MultitenantUtils.getTenantDomain(userId);
         if (oldTenantDomain.equals(newTenantDomain)) {
             if (!isSubscriberValid(userId)) {
-                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
                 try {
-                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                            .getTenantId(newTenantDomain);
-                    UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-                    if (userStoreManager.isExistingUser(userId)) {
+                    int tenantId = UserManagerHolder.getUserManager().getTenantId(newTenantDomain);
+                    if (UserManagerHolder.getUserManager().isExistingUser(tenantId, userId)) {
                         if (apiMgtDAO.getSubscriber(userId) == null){
                             addSubscriber(userId, "");
                         }
                     } else {
                         throw new APIManagementException("User " + userId + " doesn't exist in user store");
                     }
-                } catch (UserStoreException e) {
+                } catch (UserException e) {
                     throw new APIManagementException("Error while adding user " + userId + " as a subscriber");
                 }
             }
@@ -3099,7 +3089,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int tenantId = 0;
         try {
             tenantId = getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             handleException("Error in getting tenantId of " + tenantDomain, e);
         }
         JSONArray applicationAttributes = null;
@@ -3131,7 +3121,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         try {
             tenantId = getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
+        } catch (UserException e) {
             handleException("Error in getting tenantId of " + tenantDomain, e);
         }
 
@@ -3520,11 +3510,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Password change operation is disabled in the system",
                     ExceptionCodes.PASSWORD_CHANGE_DISABLED);
         }
-
-        UserAdmin userAdmin = new UserAdmin();
         try {
-            userAdmin.changePasswordByUser(userNameWithoutChange, currentPassword, newPassword);
-        } catch (UserAdminException e) {
+            UserManagerHolder.getUserManager().changePasswordByUser(userNameWithoutChange, currentPassword, newPassword);
+        } catch (UserException e) {
             String genericErrorMessage = "Error occurred while changing the user password";
             if (log.isDebugEnabled()) {
                 log.debug(genericErrorMessage, e);

@@ -69,9 +69,9 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.TenantHeaderInterceptor;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.UserClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.mgt.UserConstants;
+import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
-import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -121,9 +121,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
-            String domain = UserCoreUtil.extractDomainFromName(userId);
-            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
-                userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+            String domain = UserManagerHolder.getUserManager().extractDomainFromName(userId);
+            if (domain != null && !domain.isEmpty() && !UserConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
+                userId = userId.replace(UserConstants.DOMAIN_SEPARATOR, "_");
             }
             oauthClientName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
                     getTenantAwareUsername(userId)), oauthClientName, keyType);
@@ -358,9 +358,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
             // Replace the domain name separator with an underscore for secondary user stores
-            String domain = UserCoreUtil.extractDomainFromName(userId);
-            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
-                userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+            String domain = UserManagerHolder.getUserManager().extractDomainFromName(userId);
+            if (domain != null && !domain.isEmpty() && !UserConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
+                userId = userId.replace(UserConstants.DOMAIN_SEPARATOR, "_");
             }
             // Construct the application name subsequent to replacing email domain separator
             oauthClientName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.

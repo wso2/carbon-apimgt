@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -286,7 +285,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     private ConfigContext createConfigContext(API api, Environment environment)
-            throws UserStoreException, RegistryException {
+            throws RegistryException {
 
         ConfigContext configcontext = new APIConfigContext(api);
         configcontext = new TransportConfigContext(configcontext, api);
