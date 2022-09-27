@@ -51,9 +51,7 @@ import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparat
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants.ResourceCategory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.text.ParseException;
@@ -1532,26 +1530,28 @@ public class ApiDAOImpl implements ApiDAO {
     public Documentation addDocumentation(Organization organization, String apiUUID, Documentation documentation) throws DocumentationPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        final String addDocumentQuery = "INSERT INTO AM_API_DOC_META_DATA (UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, " +
-                "SOURCE_URL, FILE_NAME, SOURCE_TYPE, VISIBILITY, CREATED_BY, UPDATED_BY) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        final String addDocumentQuery = "INSERT INTO AM_API_DOC_META_DATA (UUID, RESOURCE_UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, " +
+                "SOURCE_URL, FILE_NAME, SOURCE_TYPE, VISIBILITY, CREATED_BY, UPDATED_BY) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         String docUUID = UUID.nameUUIDFromBytes((documentation.getName() + apiUUID).getBytes()).toString();
+        String resourceUUID = UUID.randomUUID().toString();
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            addResourceWithoutValue(connection, apiUUID, docUUID, ResourceCategory.DOC);
+            addResourceWithoutValue(connection, apiUUID, resourceUUID, ResourceCategory.DOC);
 
             preparedStatement = connection.prepareStatement(addDocumentQuery);
             preparedStatement.setString(1, docUUID);
-            preparedStatement.setString(2, documentation.getName());
-            preparedStatement.setString(3, documentation.getSummary());
-            preparedStatement.setString(4, documentation.getType().getType());
-            preparedStatement.setString(5, documentation.getOtherTypeName());
-            preparedStatement.setString(6, documentation.getSourceUrl());
-            preparedStatement.setString(7, documentation.getFilePath());
-            preparedStatement.setString(8, documentation.getSourceType().name());
-            preparedStatement.setString(9, documentation.getVisibility().toString());
-            preparedStatement.setString(10, null);
+            preparedStatement.setString(2, resourceUUID);
+            preparedStatement.setString(3, documentation.getName());
+            preparedStatement.setString(4, documentation.getSummary());
+            preparedStatement.setString(5, documentation.getType().getType());
+            preparedStatement.setString(6, documentation.getOtherTypeName());
+            preparedStatement.setString(7, documentation.getSourceUrl());
+            preparedStatement.setString(8, documentation.getFilePath());
+            preparedStatement.setString(9, documentation.getSourceType().name());
+            preparedStatement.setString(10, documentation.getVisibility().toString());
             preparedStatement.setString(11, null);
+            preparedStatement.setString(12, null);
             preparedStatement.executeUpdate();
             connection.commit();
 
@@ -1580,8 +1580,39 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
-    public Documentation updateDocumentation(Organization organization, String s, Documentation documentation) throws DocumentationPersistenceException {
-        return null;
+    public Documentation updateDocumentation(Organization organization, String apiId, Documentation documentation)
+            throws DocumentationPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        final String updateDocumentQuery = "UPDATE AM_API_DOC_META_DATA SET NAME=?, SUMMARY=?, TYPE=?, OTHER_TYPE_NAME=?, " +
+                "SOURCE_URL=?, FILE_NAME=?, SOURCE_TYPE=?, VISIBILITY=?, CREATED_BY=?, UPDATED_BY=? WHERE UUID=?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(updateDocumentQuery);
+            preparedStatement.setString(1, documentation.getName());
+            preparedStatement.setString(2, documentation.getSummary());
+            preparedStatement.setString(3, documentation.getType().getType());
+            preparedStatement.setString(4, documentation.getOtherTypeName());
+            preparedStatement.setString(5, documentation.getSourceUrl());
+            preparedStatement.setString(6, documentation.getFilePath());
+            preparedStatement.setString(7, documentation.getSourceType().name());
+            preparedStatement.setString(8, documentation.getVisibility().toString());
+            preparedStatement.setString(9, null);
+            preparedStatement.setString(10, null);
+            preparedStatement.setString(11, documentation.getId());
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"add document");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while adding entry to AM_API_DOC_META_DATA table ", e);
+            }
+            throw new DocumentationPersistenceException("Error while persisting entry to AM_API_DOC_META_DATA table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        return documentation;
     }
 
     @Override
@@ -1676,7 +1707,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         DocumentContent documentContent = null;
-        String getDocumentContentQuery = "SELECT RESOURCE_BINARY_VALUE,DATA_TYPE FROM AM_API_RESOURCES WHERE API_ID=? AND UUID=?;";
+        String getDocumentContentQuery = "SELECT ar.RESOURCE_BINARY_VALUE,ar.DATA_TYPE,am.SOURCE_URL,am.FILE_NAME FROM AM_API_RESOURCES ar, AM_API_DOC_META_DATA am  WHERE ar.API_ID=? AND ar.UUID=am.RESOURCE_UUID AND am.UUID=?;";
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -1696,6 +1727,7 @@ public class ApiDAOImpl implements ApiDAO {
                 if (StringUtils.equals(docSourceType,Documentation.DocumentSourceType.FILE.toString())) {
                     if (doc != null) {
                         ResourceFile resourceFile = new ResourceFile(docBlob, "PDF");
+                        resourceFile.setName(resultSet.getString("FILE_NAME"));
                         documentContent.setResourceFile(resourceFile);
                         documentContent
                                 .setSourceType(DocumentContent.ContentSourceType.valueOf(docSourceType));
@@ -1709,13 +1741,13 @@ public class ApiDAOImpl implements ApiDAO {
                     }
 
                 }
-//                else if (StringUtils.equals(docSourceType,Documentation.DocumentSourceType.URL.toString())) {
-//
-//                    String sourceUrl = resultSet.getString("docSourceUrl");
-//                    documentContent.setTextContent(sourceUrl);
-//                    documentContent
-//                            .setSourceType(DocumentContent.ContentSourceType.valueOf(docSourceType));
-//                }
+                else if (StringUtils.equals(docSourceType,Documentation.DocumentSourceType.URL.toString())) {
+
+                    String sourceUrl = resultSet.getString("SOURCE_URL");
+                    documentContent.setTextContent(sourceUrl);
+                    documentContent
+                            .setSourceType(DocumentContent.ContentSourceType.valueOf(docSourceType));
+                }
             }
         } catch (SQLException e) {
             if (log.isDebugEnabled()) {
@@ -1733,8 +1765,8 @@ public class ApiDAOImpl implements ApiDAO {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        final String addDocumentContentQuery = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, RESOURCE_CONTENT=TO_TSVECTOR(?), DATA_TYPE = ?, UPDATED_BY = ?, "
-                + "LAST_UPDATED_TIME = ? WHERE UUID = ?";
+        final String addDocumentContentQuery = "UPDATE AM_API_RESOURCES AS ar SET RESOURCE_BINARY_VALUE = ?, RESOURCE_CONTENT=TO_TSVECTOR(?), DATA_TYPE = ?, UPDATED_BY = ?, "
+                + "LAST_UPDATED_TIME = ? FROM AM_API_DOC_META_DATA am WHERE am.UUID = ? AND am.RESOURCE_UUID=ar.UUID";
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -1742,6 +1774,8 @@ public class ApiDAOImpl implements ApiDAO {
             preparedStatement = connection.prepareStatement(addDocumentContentQuery);
             if (documentContent.getResourceFile() != null && documentContent.getResourceFile().getContent() != null) {
                 byte[] docByte = documentContent.getResourceFile().getContent().toString().getBytes();
+                String stringContent = APIMgtDBUtil.getStringFromInputStream(documentContent.getResourceFile().getContent());
+                stringContent.replaceAll("\u0000", "");
                 preparedStatement.setBinaryStream(1, new ByteArrayInputStream(docByte));
                 preparedStatement.setString(2, documentContent.getResourceFile().getContent().toString());
                 preparedStatement.setString(3, documentContent.getSourceType().toString());
@@ -1783,7 +1817,7 @@ public class ApiDAOImpl implements ApiDAO {
                 ".SUMMARY, AM_API_DOC_META_DATA.TYPE, AM_API_DOC_META_DATA.OTHER_TYPE_NAME, AM_API_DOC_META_DATA" +
                 ".SOURCE_URL, AM_API_DOC_META_DATA.FILE_NAME, AM_API_DOC_META_DATA.SOURCE_TYPE, AM_API_DOC_META_DATA" +
                 ".VISIBILITY, AM_API_DOC_META_DATA.CREATED_TIME, AM_API_DOC_META_DATA.LAST_UPDATED_TIME " +
-                "FROM AM_API_DOC_META_DATA, AM_API_RESOURCES WHERE AM_API_DOC_META_DATA.UUID=AM_API_RESOURCES.UUID AND AM_API_RESOURCES.API_ID=?;";
+                "FROM AM_API_DOC_META_DATA, AM_API_RESOURCES WHERE AM_API_DOC_META_DATA.RESOURCE_UUID=AM_API_RESOURCES.UUID AND AM_API_RESOURCES.API_ID=?;";
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -1875,8 +1909,33 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
-    public void deleteDocumentation(Organization organization, String s, String s1) throws DocumentationPersistenceException {
+    public void deleteDocumentation(Organization organization, String apiId, String docId) throws DocumentationPersistenceException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatement2 = null;
+        final String deleteMetaDataQuery = "DELETE FROM AM_API_DOC_META_DATA WHERE UUID=?";
+        final String deleteResourceQuery = "DELETE FROM AM_API_RESOURCES WHERE API_ID = ? AND UUID = (SELECT RESOURCE_UUID FROM AM_API_DOC_META_DATA WHERE UUID=?)";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(deleteResourceQuery);
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setString(2, docId);
+            preparedStatement.executeUpdate();
 
+            preparedStatement2 = connection.prepareStatement(deleteMetaDataQuery);
+            preparedStatement2.setString(1, docId);
+            preparedStatement2.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            APIMgtDBUtil.rollbackConnection(connection,"delete document");
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while deleting entry in AM_API_DOC_META_DATA table ", e);
+            }
+            throw new DocumentationPersistenceException("Error while while deleting entry in AM_API_DOC_META_DATA table ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
     }
 
     private void initResourceCategories() throws APIManagementException {
@@ -1940,7 +1999,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
 
             // Adding doc search
-            String docSearchQuery = "SELECT ad.API_ID, ad.UUID, ar.API_NAME, ar.API_VERSION, ar.API_PROVIDER, ar.API_TYPE, adm.NAME, adm.TYPE, adm.SOURCE_TYPE, adm.VISIBILITY FROM AM_API_RESOURCES ad, AM_API ar, AM_API_DOC_META_DATA adm WHERE ar.ORGANIZATION=? AND ad.RESOURCE_CONTENT @@ to_tsquery(?) AND ad.API_ID=ar.API_UUID AND ad.UUID=adm.UUID;";
+            String docSearchQuery = "SELECT ad.API_ID, adm.UUID, ar.API_NAME, ar.API_VERSION, ar.API_PROVIDER, ar.API_TYPE, adm.NAME, adm.TYPE, adm.SOURCE_TYPE, adm.VISIBILITY FROM AM_API_RESOURCES ad, AM_API ar, AM_API_DOC_META_DATA adm WHERE ar.ORGANIZATION=? AND ad.RESOURCE_CONTENT @@ to_tsquery(?) AND ad.API_ID=ar.API_UUID AND ad.UUID=adm.RESOURCE_UUID;";
             String modifiedDocQuery = "";
             if (searchQuery.substring(8).split(" ").length <= 1) {
                 modifiedDocQuery = searchQuery.substring(8);
