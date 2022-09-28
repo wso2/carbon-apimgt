@@ -37,7 +37,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiDAO;
 import org.wso2.carbon.apimgt.impl.dao.ResourceCategoryDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dao.constants.PostgreSQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -109,7 +109,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         int apiId = -1;
-        String query = SQLConstants.ADD_API_SQL;
+        String query = PostgreSQLConstants.ADD_API_SQL;
 
         String uuid = UUID.nameUUIDFromBytes(api.getId().getApiName().getBytes()).toString();
         api.setUuid(uuid);
@@ -212,7 +212,7 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIManagementException(msg);
         }
 
-        String sqlQuery = SQLConstants.ADD_API_LIFECYCLE_EVENT_SQL;
+        String sqlQuery = PostgreSQLConstants.ADD_API_LIFECYCLE_EVENT_SQL;
 
         try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setInt(1, apiId);
@@ -234,7 +234,7 @@ public class ApiDAOImpl implements ApiDAO {
     private int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
 
         int id = -1;
-        String getAPIQuery = SQLConstants.GET_API_ID_SQL_BY_UUID;
+        String getAPIQuery = PostgreSQLConstants.GET_API_ID_SQL_BY_UUID;
 
         try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
             prepStmt.setString(1, uuid);
@@ -262,7 +262,7 @@ public class ApiDAOImpl implements ApiDAO {
         removeAPIFromDefaultVersion(apiIdList, connection);
 
         PreparedStatement prepStmtDefVersionAdd = null;
-        String queryDefaultVersionAdd = SQLConstants.ADD_API_DEFAULT_VERSION_SQL;
+        String queryDefaultVersionAdd = PostgreSQLConstants.ADD_API_DEFAULT_VERSION_SQL;
         try {
             prepStmtDefVersionAdd = connection.prepareStatement(queryDefaultVersionAdd);
             prepStmtDefVersionAdd.setString(1, api.getId().getApiName());
@@ -292,7 +292,7 @@ public class ApiDAOImpl implements ApiDAO {
         ResultSet rs = null;
         String publishedDefaultVersion = null;
 
-        String query = SQLConstants.GET_PUBLISHED_DEFAULT_VERSION_SQL;
+        String query = PostgreSQLConstants.GET_PUBLISHED_DEFAULT_VERSION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
@@ -321,7 +321,7 @@ public class ApiDAOImpl implements ApiDAO {
     private boolean isDeploymentAvailableByAPIUUID(Connection connection, String apiUUID) throws APIManagementException {
 
         try (PreparedStatement statement =
-                     connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.CHECK_API_REVISION_DEPLOYMENT_AVAILABILITY_BY_API_UUID)) {
+                     connection.prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.CHECK_API_REVISION_DEPLOYMENT_AVAILABILITY_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -349,7 +349,7 @@ public class ApiDAOImpl implements ApiDAO {
             APIManagementException {
         // TODO: check list empty
         try (PreparedStatement prepStmtDefVersionDelete =
-                     connection.prepareStatement(SQLConstants.REMOVE_API_DEFAULT_VERSION_SQL)) {
+                     connection.prepareStatement(PostgreSQLConstants.REMOVE_API_DEFAULT_VERSION_SQL)) {
 
             for (APIIdentifier apiId : apiIdList) {
                 prepStmtDefVersionDelete.setString(1, apiId.getApiName());
@@ -373,7 +373,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void addAPIServiceMapping(int apiId, String serviceKey, String md5sum, int tenantId,
                                       Connection connection) throws SQLException {
 
-        String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
+        String addAPIServiceMappingSQL = PostgreSQLConstants.ADD_API_SERVICE_MAPPING_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
             preparedStatement.setInt(1, apiId);
             preparedStatement.setString(2, serviceKey);
@@ -385,7 +385,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addAPIDefinition(String org, API api,
                                       Connection connection) throws SQLException {
-        String addAPIDefinition = SQLConstants.ADD_API_DEFINITION_SQL;
+        String addAPIDefinition = PostgreSQLConstants.ADD_API_DEFINITION_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIDefinition)) {
             preparedStatement.setString(1, org);
             preparedStatement.setString(2, api.getUuid());
@@ -418,9 +418,9 @@ public class ApiDAOImpl implements ApiDAO {
         String getAPIArtefactQuery;
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
         if (apiRevision != null && apiRevision.getApiUUID() != null) {
-            getAPIArtefactQuery = SQLConstants.GET_REVISION_API_ARTIFACT_SQL;
+            getAPIArtefactQuery = PostgreSQLConstants.GET_REVISION_API_ARTIFACT_SQL;
         } else {
-            getAPIArtefactQuery = SQLConstants.GET_API_ARTIFACT_SQL;
+            getAPIArtefactQuery = PostgreSQLConstants.GET_API_ARTIFACT_SQL;
         }
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -460,13 +460,12 @@ public class ApiDAOImpl implements ApiDAO {
         return publisherAPI;
     }
 
-
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization organization, String searchQuery, int start,
                                                            int offset, UserContext ctx, String sortBy, String sortOrder)
             throws APIManagementException {
         PublisherAPISearchResult result = null;
-        String searchAllQuery = SQLConstants.SEARCH_ALL_APIS_SQL;
+        String searchAllQuery = PostgreSQLConstants.SEARCH_ALL_APIS_SQL;
 
         if (StringUtils.isEmpty(searchQuery)) {
             result = searchPaginatedPublisherAPIs(organization.getName(), searchAllQuery, start, offset);
@@ -542,8 +541,8 @@ public class ApiDAOImpl implements ApiDAO {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         PreparedStatement preparedStatementUpdate = null;
-        String saveWSDLQuery = SQLConstants.UPDATE_API_DEFINITION_SQL;
-        String updateArtifactQuery = "UPDATE AM_API SET ARTIFACT[?] = TO_JSONB(?) WHERE ORGANIZATION=? AND API_UUID=?;";
+        String saveWSDLQuery = PostgreSQLConstants.UPDATE_API_DEFINITION_SQL;
+        String updateArtifactQuery = PostgreSQLConstants.UPDATE_API_ARTIFACT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -583,7 +582,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         ResourceFile returnResource = null;
-        String getWSDLQuery = SQLConstants.GET_API_DEFINITION_SQL;
+        String getWSDLQuery = PostgreSQLConstants.GET_API_DEFINITION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -620,7 +619,7 @@ public class ApiDAOImpl implements ApiDAO {
     public void saveOASDefinition(Organization organization, String apiId, String apiDefinition) throws OASPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String saveOASQuery = SQLConstants.UPDATE_API_DEFINITION_SQL;
+        String saveOASQuery = PostgreSQLConstants.UPDATE_API_DEFINITION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -651,7 +650,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         String oasDefinition = null;
-        String getOASDefinitionQuery = SQLConstants.GET_API_DEFINITION_SQL;
+        String getOASDefinitionQuery = PostgreSQLConstants.GET_API_DEFINITION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -682,7 +681,7 @@ public class ApiDAOImpl implements ApiDAO {
     public void saveAsyncDefinition(Organization organization, String apiId, String apiDefinition) throws AsyncSpecPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String saveOASQuery = SQLConstants.UPDATE_API_DEFINITION_SQL;
+        String saveOASQuery = PostgreSQLConstants.UPDATE_API_DEFINITION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -713,7 +712,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         String asyncDefinition = null;
-        String getAsyncDefinitionQuery = SQLConstants.GET_API_DEFINITION_SQL;
+        String getAsyncDefinitionQuery = PostgreSQLConstants.GET_API_DEFINITION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -744,7 +743,7 @@ public class ApiDAOImpl implements ApiDAO {
     public void saveGraphQLSchemaDefinition(Organization organization, String apiId, String schemaDefinition) throws GraphQLPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String saveOASQuery = SQLConstants.UPDATE_API_DEFINITION_SQL;
+        String saveOASQuery = PostgreSQLConstants.UPDATE_API_DEFINITION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -775,7 +774,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         String graphQLDefinition = null;
-        String getGraphQLDefinitionQuery = SQLConstants.GET_API_DEFINITION_SQL;
+        String getGraphQLDefinitionQuery = PostgreSQLConstants.GET_API_DEFINITION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -816,7 +815,7 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.setAutoCommit(false);
                 // Adding to AM_REVISION table
                 PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.ADD_API_REVISION);
                 statement.setInt(1, apiRevision.getId());
                 statement.setString(2, apiRevision.getApiUUID());
                 statement.setString(3, apiRevision.getRevisionUUID());
@@ -833,7 +832,7 @@ public class ApiDAOImpl implements ApiDAO {
 
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID);
                 getURLMappingsStatement.setInt(1, apiId);
                 List<URITemplate> urlMappingList = new ArrayList<>();
                 try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
@@ -893,7 +892,7 @@ public class ApiDAOImpl implements ApiDAO {
                 setOperationPoliciesToURITemplatesMap(apiRevision.getApiUUID(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     insertURLMappingsStatement.setInt(1, apiId);
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -907,13 +906,13 @@ public class ApiDAOImpl implements ApiDAO {
 
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getRevisionedURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
                 PreparedStatement insertScopeResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
                 PreparedStatement insertOperationPolicyMappingStatement = connection
-                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
+                        .prepareStatement(PostgreSQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
 
                 Map<String, String> clonedPolicyMap = new HashMap<>();
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
@@ -973,7 +972,7 @@ public class ApiDAOImpl implements ApiDAO {
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
                 PreparedStatement getClientCertificatesStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
                 getClientCertificatesStatement.setInt(1, apiId);
                 List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
                 try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
@@ -986,7 +985,7 @@ public class ApiDAOImpl implements ApiDAO {
                     }
                 }
                 PreparedStatement insertClientCertificateStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
                 for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
                     insertClientCertificateStatement.setInt(1, tenantId);
                     insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
@@ -1002,7 +1001,7 @@ public class ApiDAOImpl implements ApiDAO {
 
                 // Adding to AM_GRAPHQL_COMPLEXITY table
                 PreparedStatement getGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY);
                 List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
                 getGraphQLComplexityStatement.setInt(1, apiId);
                 try (ResultSet rs1 = getGraphQLComplexityStatement.executeQuery()) {
@@ -1016,7 +1015,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
 
                 PreparedStatement insertGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY);
                 for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
                     insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
                     insertGraphQLComplexityStatement.setInt(2, apiId);
@@ -1046,7 +1045,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void updateLatestRevisionNumber(Connection connection, String apiUUID, int revisionId) throws SQLException {
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement(SQLConstants.UPDATE_REVISION_CREATED_BY_API_SQL)) {
+                     connection.prepareStatement(PostgreSQLConstants.UPDATE_REVISION_CREATED_BY_API_SQL)) {
             preparedStatement.setInt(1, revisionId);
             preparedStatement.setString(2, apiUUID);
             preparedStatement.executeUpdate();
@@ -1056,7 +1055,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void addAPIRevisionMetaData(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement(SQLConstants.ADD_API_REVISION_METADATA)) {
+                     connection.prepareStatement(PostgreSQLConstants.ADD_API_REVISION_METADATA)) {
             preparedStatement.setString(1, apiUUID);
             preparedStatement.setString(2, revisionUUID);
             preparedStatement.setString(3, apiUUID);
@@ -1067,7 +1066,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void addAPIRevisionDefinition(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement(SQLConstants.ADD_REVISION_API_ARTIFACTS)) {
+                     connection.prepareStatement(PostgreSQLConstants.ADD_REVISION_API_ARTIFACTS)) {
             preparedStatement.setString(1, revisionUUID);
             preparedStatement.setString(2, apiUUID);
             preparedStatement.executeUpdate();
@@ -1104,10 +1103,10 @@ public class ApiDAOImpl implements ApiDAO {
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
         if (apiRevision != null && apiRevision.getApiUUID() != null) {
             currentApiUuid = apiRevision.getApiUUID();
-            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_FOR_API_REVISION_SQL;
+            query = PostgreSQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_FOR_API_REVISION_SQL;
             isRevision = true;
         } else {
-            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_OF_API_SQL;
+            query = PostgreSQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_OF_API_SQL;
             currentApiUuid = uuid;
         }
 
@@ -1172,7 +1171,7 @@ public class ApiDAOImpl implements ApiDAO {
             throws SQLException {
 
         OperationPolicySpecification policySpecification = policyData.getSpecification();
-        String dbQuery = SQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY;
+        String dbQuery = PostgreSQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY;
         String policyUUID = UUID.randomUUID().toString();
 
         PreparedStatement statement = connection.prepareStatement(dbQuery);
@@ -1206,7 +1205,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void addOperationPolicyDefinition (Connection connection, String policyId,
                                                OperationPolicyDefinition policyDefinition) throws SQLException {
 
-        String dbQuery = SQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY_DEFINITION;
+        String dbQuery = PostgreSQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY_DEFINITION;
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyId);
         statement.setString(2, policyDefinition.getGatewayType().toString());
@@ -1224,9 +1223,9 @@ public class ApiDAOImpl implements ApiDAO {
 
         String dbQuery;
         if (revisionUUID != null) {
-            dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY_WITH_REVISION;
+            dbQuery = PostgreSQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY_WITH_REVISION;
         } else {
-            dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY;
+            dbQuery = PostgreSQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY;
         }
 
         PreparedStatement statement = connection.prepareStatement(dbQuery);
@@ -1250,7 +1249,7 @@ public class ApiDAOImpl implements ApiDAO {
             throws SQLException {
 
         String dbQuery =
-                SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID;
+                PostgreSQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID;
         OperationPolicyData policyData = null;
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyId);
@@ -1284,7 +1283,7 @@ public class ApiDAOImpl implements ApiDAO {
 
         List<OperationPolicyDefinition> operationPolicyDefinitions = new ArrayList<>();
 
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_DEFINITION_FROM_POLICY_ID;
+        String dbQuery = PostgreSQLConstants.OperationPolicyConstants.GET_OPERATION_POLICY_DEFINITION_FROM_POLICY_ID;
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyId);
         ResultSet rs = statement.executeQuery();
@@ -1387,7 +1386,7 @@ public class ApiDAOImpl implements ApiDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
+                     .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -1456,13 +1455,13 @@ public class ApiDAOImpl implements ApiDAO {
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
                 // Removing related Current API entries from AM_API_URL_MAPPING table
-                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(PostgreSQLConstants
                         .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID);
                 removeURLMappingsStatement.setInt(1, apiId);
                 removeURLMappingsStatement.executeUpdate();
 
                 // Restoring to AM_API_URL_MAPPING table
-                PreparedStatement getURLMappingsStatement = connection.prepareStatement(SQLConstants
+                PreparedStatement getURLMappingsStatement = connection.prepareStatement(PostgreSQLConstants
                         .APIRevisionSqlConstants.GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_REVISION_UUID);
                 getURLMappingsStatement.setInt(1, apiId);
                 getURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
@@ -1518,7 +1517,7 @@ public class ApiDAOImpl implements ApiDAO {
                 setOperationPoliciesToURITemplatesMap(apiRevision.getRevisionUUID(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     insertURLMappingsStatement.setInt(1, apiId);
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -1531,15 +1530,15 @@ public class ApiDAOImpl implements ApiDAO {
 
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getCurrentAPIURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CURRENT_API_URL_MAPPINGS_ID);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.GET_CURRENT_API_URL_MAPPINGS_ID);
                 PreparedStatement insertScopeResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
                 PreparedStatement insertOperationPolicyMappingStatement = connection
-                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
+                        .prepareStatement(PostgreSQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
                 PreparedStatement deleteOutdatedOperationPolicyStatement = connection
-                        .prepareStatement(SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_POLICY_ID);
+                        .prepareStatement(PostgreSQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_POLICY_ID);
 
                 Map<String, String> restoredPolicyMap = new HashMap<>();
                 Set<String> usedClonedPolicies = new HashSet<String>();
@@ -1614,13 +1613,13 @@ public class ApiDAOImpl implements ApiDAO {
                 cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, apiRevision.getApiUUID());
 
                 // Restoring AM_API_CLIENT_CERTIFICATE table entries
-                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(PostgreSQLConstants
                         .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
                 removeClientCertificatesStatement.setInt(1, apiId);
                 removeClientCertificatesStatement.executeUpdate();
 
                 PreparedStatement getClientCertificatesStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID);
                 getClientCertificatesStatement.setInt(1, apiId);
                 getClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
                 List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
@@ -1634,7 +1633,7 @@ public class ApiDAOImpl implements ApiDAO {
                     }
                 }
                 PreparedStatement insertClientCertificateStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
                 for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
                     insertClientCertificateStatement.setInt(1, tenantId);
                     insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
@@ -1649,13 +1648,13 @@ public class ApiDAOImpl implements ApiDAO {
                 insertClientCertificateStatement.executeBatch();
 
                 // Restoring AM_GRAPHQL_COMPLEXITY table
-                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(PostgreSQLConstants
                         .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID);
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.executeUpdate();
 
                 PreparedStatement getGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
                 List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
                 getGraphQLComplexityStatement.setInt(1, apiId);
                 getGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
@@ -1670,7 +1669,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
 
                 PreparedStatement insertGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
+                        .prepareStatement(PostgreSQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
                 for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
                     insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
                     insertGraphQLComplexityStatement.setInt(2, apiId);
@@ -1720,7 +1719,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void deleteOperationPolicyByPolicyId(Connection connection, String policyId) throws SQLException {
 
-        String dbQuery = SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_ID;
+        String dbQuery = PostgreSQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_ID;
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyId);
         statement.execute();
@@ -1738,7 +1737,7 @@ public class ApiDAOImpl implements ApiDAO {
     private Set<String> getAllClonedPolicyIdsForAPI(Connection connection, String apiUUID)
             throws SQLException {
 
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_ALL_CLONED_POLICIES_FOR_API;
+        String dbQuery = PostgreSQLConstants.OperationPolicyConstants.GET_ALL_CLONED_POLICIES_FOR_API;
         Set<String> policyIds = new HashSet<>();
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, apiUUID);
@@ -1876,7 +1875,7 @@ public class ApiDAOImpl implements ApiDAO {
             throws SQLException {
 
         String dbQuery =
-                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_WITH_OUT_DEFINITION_FROM_POLICY_ID;
+                PostgreSQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_WITH_OUT_DEFINITION_FROM_POLICY_ID;
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyId);
         statement.setString(2, organization);
@@ -1915,7 +1914,7 @@ public class ApiDAOImpl implements ApiDAO {
 
         if (policyData.getClonedCommonPolicyId() != null) {
             PreparedStatement statement = connection.prepareStatement(
-                    SQLConstants.OperationPolicyConstants.UPDATE_API_OPERATION_POLICY_BY_POLICY_ID);
+                    PostgreSQLConstants.OperationPolicyConstants.UPDATE_API_OPERATION_POLICY_BY_POLICY_ID);
             statement.setString(1, policyData.getClonedCommonPolicyId());
             statement.executeUpdate();
             statement.close();
@@ -1936,7 +1935,7 @@ public class ApiDAOImpl implements ApiDAO {
 
         OperationPolicySpecification policySpecification = policyData.getSpecification();
         PreparedStatement statement = connection.prepareStatement(
-                SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_CONTENT);
+                PostgreSQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_CONTENT);
 
         statement.setString(1, policySpecification.getName());
         statement.setString(2, policySpecification.getVersion());
@@ -1966,7 +1965,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void updateOperationPolicyDefinition(Connection connection, String policyId,
                                                  OperationPolicyDefinition policyDefinition) throws SQLException {
 
-        String dbQuery = SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_DEFINITION;
+        String dbQuery = PostgreSQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_DEFINITION;
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, policyDefinition.getMd5Hash());
         statement.setBinaryStream(2, new ByteArrayInputStream(policyDefinition.getContent().getBytes()));
@@ -1983,7 +1982,7 @@ public class ApiDAOImpl implements ApiDAO {
                                                                           boolean isWithPolicyDefinition)
             throws SQLException {
 
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_NAME;
+        String dbQuery = PostgreSQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_NAME;
         if (revisionUUID != null) {
             dbQuery += " AND AOP.REVISION_UUID = ?";
         } else {
@@ -2032,7 +2031,7 @@ public class ApiDAOImpl implements ApiDAO {
     private String getClonedPolicyIdForCommonPolicyId(Connection connection, String commonPolicyId, String apiUUID)
             throws SQLException {
 
-        String dbQuery = SQLConstants.OperationPolicyConstants.GET_CLONED_POLICY_ID_FOR_COMMON_POLICY_ID;
+        String dbQuery = PostgreSQLConstants.OperationPolicyConstants.GET_CLONED_POLICY_ID_FOR_COMMON_POLICY_ID;
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, commonPolicyId);
         statement.setString(2, apiUUID);
@@ -2062,28 +2061,28 @@ public class ApiDAOImpl implements ApiDAO {
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
 
                 // Removing related revision entries from AM_REVISION table
-                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(SQLConstants
+                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(PostgreSQLConstants
                         .APIRevisionSqlConstants.DELETE_API_REVISION);
                 removeAMRevisionStatement.setString(1, apiRevision.getRevisionUUID());
                 removeAMRevisionStatement.executeUpdate();
 
                 // Removing related revision entries from AM_API_URL_MAPPING table
                 // This will cascade remove entries from AM_API_RESOURCE_SCOPE_MAPPING and AM_API_PRODUCT_MAPPING tables
-                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(PostgreSQLConstants
                         .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID);
                 removeURLMappingsStatement.setInt(1, apiId);
                 removeURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
                 removeURLMappingsStatement.executeUpdate();
 
                 // Removing related revision entries from AM_API_CLIENT_CERTIFICATE table
-                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(PostgreSQLConstants
                         .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
                 removeClientCertificatesStatement.setInt(1, apiId);
                 removeClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
                 removeClientCertificatesStatement.executeUpdate();
 
                 // Removing related revision entries from AM_GRAPHQL_COMPLEXITY table
-                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(PostgreSQLConstants
                         .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
@@ -2110,9 +2109,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void restoreAPIDefinition(Connection connection, String apiUUID, String revisionUUID)
             throws APIManagementException {;
         PreparedStatement preparedStatement = null;
-        String restoreAPIRevisionQuery = "UPDATE AM_API_ARTIFACT SET (API_DEFINITION, MEDIA_TYPE) =" +
-                " (SELECT API_DEFINITION, MEDIA_TYPE FROM AM_API_ARTIFACT " +
-                " WHERE API_UUID=?) WHERE API_UUID=?";
+        String restoreAPIRevisionQuery = PostgreSQLConstants.APIRevisionSqlConstants.RESTORE_API_REVISION_DEFINITION;
         try {
             preparedStatement = connection.prepareStatement(restoreAPIRevisionQuery);
             preparedStatement.setString(1, revisionUUID);
@@ -2132,7 +2129,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void deleteAPIRevisionArtifacts(Connection connection, String revisionUUID)
             throws APIManagementException {
         PreparedStatement preparedStatement = null;
-        String deleteAPIRevisionQuery = "DELETE FROM AM_API_ARTIFACT WHERE API_UUID=?;";
+        String deleteAPIRevisionQuery = PostgreSQLConstants.APIRevisionSqlConstants.DELETE_API_REVISION_DEFINITION;
         try {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(deleteAPIRevisionQuery);
@@ -2153,7 +2150,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void deleteAPIRevisionMetaData(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement(SQLConstants.DELETE_API_REVISION_METADATA)) {
+                     connection.prepareStatement(PostgreSQLConstants.DELETE_API_REVISION_METADATA)) {
             preparedStatement.setString(1, apiUUID);
             preparedStatement.setString(2, revisionUUID);
             preparedStatement.executeUpdate();
@@ -2163,7 +2160,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void restoreAPIRevisionMetaDataToWorkingCopy(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement(SQLConstants.RESTORE_API_REVISION_METADATA)) {
+                     connection.prepareStatement(PostgreSQLConstants.RESTORE_API_REVISION_METADATA)) {
             preparedStatement.setString(1, apiUUID);
             preparedStatement.setString(2, revisionUUID);
             preparedStatement.setString(3, apiUUID);
@@ -2189,9 +2186,9 @@ public class ApiDAOImpl implements ApiDAO {
 
         String dbQuery;
         if (revisionUUID != null) {
-            dbQuery = SQLConstants.OperationPolicyConstants.GET_ALL_API_SPECIFIC_POLICIES_FOR_REVISION_UUID;
+            dbQuery = PostgreSQLConstants.OperationPolicyConstants.GET_ALL_API_SPECIFIC_POLICIES_FOR_REVISION_UUID;
         } else {
-            dbQuery = SQLConstants.OperationPolicyConstants.GET_ALL_API_SPECIFIC_POLICIES_FOR_API_ID;
+            dbQuery = PostgreSQLConstants.OperationPolicyConstants.GET_ALL_API_SPECIFIC_POLICIES_FOR_API_ID;
         }
         PreparedStatement statement = connection.prepareStatement(dbQuery);
         statement.setString(1, apiUUID);
@@ -2200,7 +2197,7 @@ public class ApiDAOImpl implements ApiDAO {
         }
         ResultSet rs = statement.executeQuery();
         while (rs.next()) {
-            String deleteQuery = SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_ID;
+            String deleteQuery = PostgreSQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_ID;
             PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
             deleteStatement.setString(1, rs.getString("POLICY_UUID"));
             deleteStatement.execute();
@@ -2215,7 +2212,7 @@ public class ApiDAOImpl implements ApiDAO {
     public PublisherAPI updateAPI(Organization organization, PublisherAPI publisherAPI) throws APIManagementException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String updateAPIQuery = SQLConstants.UPDATE_API_ARTIFACT_SQL;
+        String updateAPIQuery = PostgreSQLConstants.UPDATE_FULL_API_ARTIFACT_SQL;
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         String uuid = api.getUuid();
         String json = "";
@@ -2251,7 +2248,7 @@ public class ApiDAOImpl implements ApiDAO {
     public void deleteAPI(Organization organization, String apiUUID) throws APIManagementException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String deleteAPIQuery = SQLConstants.DELETE_API_DEFINITION_SQL;
+        String deleteAPIQuery = PostgreSQLConstants.DELETE_API_DEFINITION_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2275,8 +2272,7 @@ public class ApiDAOImpl implements ApiDAO {
     public Documentation addDocumentation(Organization organization, String apiUUID, Documentation documentation) throws DocumentationPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        final String addDocumentQuery = "INSERT INTO AM_API_DOC_META_DATA (UUID, RESOURCE_UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, " +
-                "SOURCE_URL, FILE_NAME, SOURCE_TYPE, VISIBILITY, CREATED_BY, UPDATED_BY) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+        final String addDocumentQuery = PostgreSQLConstants.APIDocumentConstants.ADD_DOCUMENT_SQL;
         String docUUID = UUID.nameUUIDFromBytes((documentation.getName() + apiUUID).getBytes()).toString();
         String resourceUUID = UUID.randomUUID().toString();
         try {
@@ -2315,7 +2311,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addResourceWithoutValue(Connection connection, String apiID, String resourceID,
                                         ResourceCategory category) throws SQLException {
-        final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID) VALUES (?,?,?)";
+        final String query = PostgreSQLConstants.APIResourceConstants.ADD_API_RESOURCES_SQL;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceID);
             statement.setString(2, apiID);
@@ -2329,8 +2325,7 @@ public class ApiDAOImpl implements ApiDAO {
             throws DocumentationPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        final String updateDocumentQuery = "UPDATE AM_API_DOC_META_DATA SET NAME=?, SUMMARY=?, TYPE=?, OTHER_TYPE_NAME=?, " +
-                "SOURCE_URL=?, FILE_NAME=?, SOURCE_TYPE=?, VISIBILITY=?, CREATED_BY=?, UPDATED_BY=? WHERE UUID=?";
+        final String updateDocumentQuery = PostgreSQLConstants.APIDocumentConstants.UPDATE_DOCUMENT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2366,10 +2361,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         Documentation documentation = null;
-        final String getDocumentQuery = "SELECT AM_API_DOC_META_DATA.UUID, AM_API_DOC_META_DATA.NAME, AM_API_DOC_META_DATA" +
-                ".SUMMARY, AM_API_DOC_META_DATA.TYPE, AM_API_DOC_META_DATA.OTHER_TYPE_NAME, AM_API_DOC_META_DATA" +
-                ".SOURCE_URL, AM_API_DOC_META_DATA.FILE_NAME, AM_API_DOC_META_DATA.SOURCE_TYPE, AM_API_DOC_META_DATA" +
-                ".VISIBILITY, AM_API_DOC_META_DATA.CREATED_TIME, AM_API_DOC_META_DATA.LAST_UPDATED_TIME FROM AM_API_DOC_META_DATA WHERE AM_API_DOC_META_DATA.UUID = ?";
+        final String getDocumentQuery = PostgreSQLConstants.APIDocumentConstants.GET_DOCUMENT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2452,7 +2444,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         DocumentContent documentContent = null;
-        String getDocumentContentQuery = "SELECT ar.RESOURCE_BINARY_VALUE,ar.DATA_TYPE,am.SOURCE_URL,am.FILE_NAME FROM AM_API_RESOURCES ar, AM_API_DOC_META_DATA am  WHERE ar.API_ID=? AND ar.UUID=am.RESOURCE_UUID AND am.UUID=?;";
+        String getDocumentContentQuery = PostgreSQLConstants.APIDocumentConstants.GET_DOCUMENT_CONTENT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2510,8 +2502,7 @@ public class ApiDAOImpl implements ApiDAO {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        final String addDocumentContentQuery = "UPDATE AM_API_RESOURCES AS ar SET RESOURCE_BINARY_VALUE = ?, RESOURCE_CONTENT=TO_TSVECTOR(?), DATA_TYPE = ?, UPDATED_BY = ?, "
-                + "LAST_UPDATED_TIME = ? FROM AM_API_DOC_META_DATA am WHERE am.UUID = ? AND am.RESOURCE_UUID=ar.UUID";
+        final String addDocumentContentQuery = PostgreSQLConstants.APIDocumentConstants.ADD_DOCUMENT_CONTENT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2558,11 +2549,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
-        String searchAllQuery = "SELECT AM_API_DOC_META_DATA.UUID, AM_API_DOC_META_DATA.NAME, AM_API_DOC_META_DATA" +
-                ".SUMMARY, AM_API_DOC_META_DATA.TYPE, AM_API_DOC_META_DATA.OTHER_TYPE_NAME, AM_API_DOC_META_DATA" +
-                ".SOURCE_URL, AM_API_DOC_META_DATA.FILE_NAME, AM_API_DOC_META_DATA.SOURCE_TYPE, AM_API_DOC_META_DATA" +
-                ".VISIBILITY, AM_API_DOC_META_DATA.CREATED_TIME, AM_API_DOC_META_DATA.LAST_UPDATED_TIME " +
-                "FROM AM_API_DOC_META_DATA, AM_API_RESOURCES WHERE AM_API_DOC_META_DATA.RESOURCE_UUID=AM_API_RESOURCES.UUID AND AM_API_RESOURCES.API_ID=?;";
+        String searchAllQuery = PostgreSQLConstants.APIDocumentConstants.SEARCH_ALL_DOC_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -2658,8 +2645,8 @@ public class ApiDAOImpl implements ApiDAO {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         PreparedStatement preparedStatement2 = null;
-        final String deleteMetaDataQuery = "DELETE FROM AM_API_DOC_META_DATA WHERE UUID=?";
-        final String deleteResourceQuery = "DELETE FROM AM_API_RESOURCES WHERE API_ID = ? AND UUID = (SELECT RESOURCE_UUID FROM AM_API_DOC_META_DATA WHERE UUID=?)";
+        final String deleteMetaDataQuery = PostgreSQLConstants.APIDocumentConstants.DELETE_DOC_META_DATA_SQL;
+        final String deleteResourceQuery = PostgreSQLConstants.APIDocumentConstants.DELETE_DOC_RESOURCE_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2711,8 +2698,7 @@ public class ApiDAOImpl implements ApiDAO {
         ResultSet resultSet = null;
         ResultSet resultSetDoc = null;
 
-        String searchContentQuery = "SELECT DISTINCT ARTIFACT,API_UUID FROM AM_API JOIN JSONB_EACH_TEXT(ARTIFACT) e ON TRUE \n" +
-                " WHERE ORGANIZATION=? AND e.value LIKE ?;";
+        String searchContentQuery = PostgreSQLConstants.SEARCH_API_CONTENT_SQL;
 
         String modifiedSearchQuery = "%" + searchQuery.substring(8) +"%";
 
@@ -2744,7 +2730,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
 
             // Adding doc search
-            String docSearchQuery = "SELECT ad.API_ID, adm.UUID, ar.API_NAME, ar.API_VERSION, ar.API_PROVIDER, ar.API_TYPE, adm.NAME, adm.TYPE, adm.SOURCE_TYPE, adm.VISIBILITY FROM AM_API_RESOURCES ad, AM_API ar, AM_API_DOC_META_DATA adm WHERE ar.ORGANIZATION=? AND ad.RESOURCE_CONTENT @@ to_tsquery(?) AND ad.API_ID=ar.API_UUID AND ad.UUID=adm.RESOURCE_UUID;";
+            String docSearchQuery = PostgreSQLConstants.SEARCH_DOC_CONTENT_SQL;
             String modifiedDocQuery = "";
             if (searchQuery.substring(8).split(" ").length <= 1) {
                 modifiedDocQuery = searchQuery.substring(8);
@@ -2843,7 +2829,7 @@ public class ApiDAOImpl implements ApiDAO {
     public void saveThumbnail(Organization organization, String apiId, ResourceFile resourceFile) throws ThumbnailPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String saveThumbnailQuery = "UPDATE AM_API SET ARTIFACT[?] = TO_JSONB(?) WHERE ORGANIZATION=? AND API_UUID=?;";
+        String saveThumbnailQuery = PostgreSQLConstants.UPDATE_API_ARTIFACT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2875,9 +2861,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addBinaryResource(Connection connection, String apiID, String resourceID, ResourceCategory category,
                                   String dataType, InputStream binaryValue, String createdBy) throws SQLException {
-        final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID, " +
-                "DATA_TYPE, RESOURCE_BINARY_VALUE, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME) "
-                + "VALUES (?,?,?,?,?,?,?,?,?)";
+        final String query = PostgreSQLConstants.APIResourceConstants.ADD_BINARY_RESOURCES_SQL;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceID);
@@ -2899,8 +2883,7 @@ public class ApiDAOImpl implements ApiDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         ResourceFile returnResource = null;
-        final String getThumbnailQuery = "SELECT DATA_TYPE,RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES " +
-                "WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+        final String getThumbnailQuery = PostgreSQLConstants.APIResourceConstants.GET_THUMBNAIL_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2935,8 +2918,7 @@ public class ApiDAOImpl implements ApiDAO {
     private InputStream getBinaryValueForCategory(Connection connection, String apiID,
                                                  ResourceCategory category)
             throws SQLException, IOException {
-        final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES " +
-                "WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?)";
+        final String query = PostgreSQLConstants.APIResourceConstants.GET_BINARY_VALUE_BY_CATEGORY_SQL;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
@@ -2958,7 +2940,7 @@ public class ApiDAOImpl implements ApiDAO {
     public void deleteThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String deleteThumbnailQuery = "UPDATE AM_API SET ARTIFACT[?] = TO_JSONB(?) WHERE ORGANIZATION=? AND API_UUID=?;";
+        String deleteThumbnailQuery = PostgreSQLConstants.UPDATE_API_ARTIFACT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -2983,7 +2965,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private boolean isResourceExistsForCategory(Connection connection, String apiID,
                                                ResourceCategory category) throws SQLException {
-        final String query = "SELECT 1 FROM AM_API_RESOURCES WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+        final String query = PostgreSQLConstants.APIResourceConstants.RESOURCE_EXIST_CHECK_SQL;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
@@ -3003,8 +2985,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void updateBinaryResourceForCategory(Connection connection, String apiID, ResourceCategory category,
                                                 InputStream resourceValue, String updatedBy)
             throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, UPDATED_BY = ?, "
-                + "LAST_UPDATED_TIME = ? WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+        final String query = PostgreSQLConstants.APIResourceConstants.UPDATE_BINARY_RESOURCE_SQL;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBinaryStream(1, resourceValue);
@@ -3019,7 +3000,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     static void deleteUniqueResourceForCategory(Connection connection, String apiID, ResourceCategory resourceCategory)
             throws SQLException {
-        final String query = "DELETE FROM AM_API_RESOURCES WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+        final String query = PostgreSQLConstants.APIResourceConstants.DELETE_UNIQUE_RESOURCE_BY_CATEGORY_SQL;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
             statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, resourceCategory));
@@ -3035,7 +3016,7 @@ public class ApiDAOImpl implements ApiDAO {
         ResultSet resultSet = null;
         PublisherAPI api = null;
         DevPortalAPI devPortalAPI = null;
-        String getAPIArtefactQuery = SQLConstants.GET_DEVPORTAL_API_ARTIFACT_SQL;
+        String getAPIArtefactQuery = PostgreSQLConstants.GET_DEVPORTAL_API_ARTIFACT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -3078,7 +3059,7 @@ public class ApiDAOImpl implements ApiDAO {
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization organization, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         DevPortalAPISearchResult result = null;
-        String searchAllQuery = "SELECT ARTIFACT, API_UUID FROM AM_API WHERE ORGANIZATION=? AND ARTIFACT @> '{\"status\": \"PUBLISHED\"}';";
+        String searchAllQuery = PostgreSQLConstants.SEARCH_ALL_DEVPORTAL_SQL;
         if (StringUtils.isEmpty(searchQuery)) {
             result = searchPaginatedDevportalAPIs(organization.getName(), searchAllQuery, start, offset);
         }
@@ -3155,8 +3136,7 @@ public class ApiDAOImpl implements ApiDAO {
         ResultSet resultSet = null;
         ResultSet resultSetDoc = null;
 
-        String searchContentQuery = "SELECT DISTINCT ARTIFACT,API_UUID FROM AM_API JOIN JSONB_EACH_TEXT(ARTIFACT) e ON TRUE \n" +
-                " WHERE ORGANIZATION=? AND e.value LIKE ? AND ARTIFACT @> '{\"status\": \"PUBLISHED\"}';";
+        String searchContentQuery = PostgreSQLConstants.SEARCH_ALL_CONTENT_DEVPORTAL_SQL;
 
         String modifiedSearchQuery = "%" + searchQuery.substring(8) +"%";
 
@@ -3188,7 +3168,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
 
             // Adding doc search
-            String docSearchQuery = "SELECT ad.API_ID, adm.UUID, ar.API_NAME, ar.API_VERSION, ar.API_PROVIDER, ar.API_TYPE, adm.NAME, adm.TYPE, adm.SOURCE_TYPE, adm.VISIBILITY FROM AM_API_RESOURCES ad, AM_API ar, AM_API_DOC_META_DATA adm WHERE ar.ORGANIZATION=? AND ad.RESOURCE_CONTENT @@ to_tsquery(?) AND ad.API_ID=ar.API_UUID AND ad.UUID=adm.RESOURCE_UUID  AND ar.ARTIFACT @> '{\"status\": \"PUBLISHED\"}';";
+            String docSearchQuery = PostgreSQLConstants.SEARCH_ALL_DOC_DEVPORTAL_SQL;
             String modifiedDocQuery = "";
             if (searchQuery.substring(8).split(" ").length <= 1) {
                 modifiedDocQuery = searchQuery.substring(8);
