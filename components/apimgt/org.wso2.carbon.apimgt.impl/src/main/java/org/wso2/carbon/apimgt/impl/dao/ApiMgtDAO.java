@@ -5329,6 +5329,7 @@ public class ApiMgtDAO {
             prepStmt.setString(12, organization);
             prepStmt.setString(13, api.getGatewayVendor());
             prepStmt.setString(14, api.getVersionTimestamp());
+            prepStmt.setString(15, api.getScopePrefix());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -6773,6 +6774,7 @@ public class ApiMgtDAO {
             prepStmt.setString(7, api.getType());
             prepStmt.setString(8, api.getGatewayVendor());
             prepStmt.setString(9, api.getUuid());
+            prepStmt.setString(10, api.getScopePrefix());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
@@ -16582,6 +16584,7 @@ public class ApiMgtDAO {
                     apiRevision.setApiUUID(rs.getString("API_UUID"));
                     apiRevision.setId(rs.getInt("ID"));
                     apiRevision.setRevisionUUID(apiUUID);
+                    apiRevision.setScopePrefix(rs.getString("SCOPE_PREFIX"));
                     return apiRevision;
                 }
             }
@@ -17896,6 +17899,32 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieve Scope Prefix and Set it to API
+     *
+     * @param api   API Object
+     * @throws APIManagementException
+     */
+    public void setScopePrefixToAPI(String id, API api) throws APIManagementException{
+        String scopePrefix = null;
+        String query = SQLConstants.GET_SCOPE_PREFIX;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+              PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            prepStmt.setString(1, id);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    scopePrefix = resultSet.getString(1);
+                }
+                api.setScopePrefix(scopePrefix);
+            }
+        }
+        catch (SQLException e) {
+            handleException("Error while retrieving the scope info associated with the API - "
+                    + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
+        }
+    }
+
+    /**
      * Retrieve Service Info and Set it to API
      *
      * @param api   API Object
@@ -18040,6 +18069,7 @@ public class ApiMgtDAO {
             preparedStatement.setString(1, apiUUID);
             preparedStatement.setString(2, revisionUUID);
             preparedStatement.setString(3, apiUUID);
+            preparedStatement.setString(4, apiUUID);
             preparedStatement.executeUpdate();
         }
     }

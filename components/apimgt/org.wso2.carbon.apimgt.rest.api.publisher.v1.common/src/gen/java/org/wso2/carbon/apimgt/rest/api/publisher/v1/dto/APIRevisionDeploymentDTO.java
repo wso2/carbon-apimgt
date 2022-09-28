@@ -52,7 +52,7 @@ public class APIRevisionDeploymentDTO   {
   }
 
   
-  @ApiModelProperty(example = "default", value = "")
+  @ApiModelProperty(example = "Default", value = "")
   @JsonProperty("name")
  @Size(min=1,max=255)  public String getName() {
     return name;

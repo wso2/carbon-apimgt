@@ -248,6 +248,9 @@ public class APIMappingUtil {
             model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
 
+        String scopePrefix = dto.getScopePrefix();
+        model.setScopePrefix(scopePrefix);
+
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
@@ -869,6 +872,8 @@ public class APIMappingUtil {
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         }
         APIDTO dto = new APIDTO();
+
+        dto.setScopePrefix(model.getScopePrefix());
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
@@ -1087,7 +1092,7 @@ public class APIMappingUtil {
             setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
 
             dto.setOperations(apiOperationsDTO);
-            List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
+            List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition, model.getScopePrefix());
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
         } else {
             // Get from asyncapi definition
@@ -1539,7 +1544,10 @@ public class APIMappingUtil {
             if (scopeList != null) {
                 for (String scopeKey : scopeList) {
                     for (Scope definedScope : model.getScopes()) {
-                        if (definedScope.getKey().equalsIgnoreCase(scopeKey)) {
+                        // At this point, scopes in model are already prefixed with the scopePrefix
+                        // prepend the scopes of operations before comparing.
+                        String prependedOperationScope = APIUtil.prependScopePrefix(model.getScopePrefix(), scopeKey);
+                        if (definedScope.getKey().equalsIgnoreCase(prependedOperationScope)) {
                             template.setScopes(definedScope);
                             template.setScope(definedScope);
                             break;
@@ -1663,7 +1671,7 @@ public class APIMappingUtil {
         for (APIScopeDTO apiScopeDTO : apiDTO.getScopes()) {
             Scope scope = new Scope();
             ScopeDTO scopeDTO = apiScopeDTO.getScope();
-            scope.setKey(scopeDTO.getName());
+            scope.setKey(APIUtil.prependScopePrefix(apiDTO.getScopePrefix(), scopeDTO.getName()));
             scope.setName(scopeDTO.getDisplayName());
             scope.setDescription(scopeDTO.getDescription());
             scope.setRoles(String.join(",", scopeDTO.getBindings()));
@@ -1982,7 +1990,7 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         for (URITemplate uriTemplate : uriTemplates) {
-            APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+            APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate, api.getScopePrefix());
 
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
                 Map<String, String> wsUriMappings = api.getWsUriMapping();
@@ -2021,7 +2029,7 @@ public class APIMappingUtil {
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
             for (URITemplate uriTemplate : uriTemplates) {
-                APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+                APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate, api.getScopePrefix());
                 operationsDTOList.add(operationsDTO);
             }
         }
@@ -2054,12 +2062,14 @@ public class APIMappingUtil {
     }
 
     /**
-     * Converts a URI template object to a REST API DTO.
+     * Converts a URI template object to a REST API DTO. If the scopePrefix is present, the provided scopePrefix
+     * will be removed from the scopes of the URITemplate
      *
      * @param uriTemplate URI Template object
+     * @param scopePrefix Scope Prefix. This can be null.
      * @return REST API DTO representing URI template object
      */
-    private static APIOperationsDTO getOperationFromURITemplate(URITemplate uriTemplate) {
+    private static APIOperationsDTO getOperationFromURITemplate(URITemplate uriTemplate, String scopePrefix) {
 
         APIOperationsDTO operationsDTO = new APIOperationsDTO();
         operationsDTO.setId(""); //todo: Set ID properly
@@ -2076,8 +2086,16 @@ public class APIMappingUtil {
         }
         operationsDTO.setVerb(uriTemplate.getHTTPVerb());
         operationsDTO.setTarget(uriTemplate.getUriTemplate());
-        operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey).collect(
-                Collectors.toList()));
+
+        // Remove scope prefix from the scopes if the prefix is not null. Otherwise, updating the scope prefix from the
+        //  PUT /apis/:id is difficult and its possible to prepend earlier prefix with the new one.
+        if (StringUtils.isNotBlank(scopePrefix)) {
+            operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(scope ->
+                    APIUtil.removeScopePrefix(scopePrefix, scope.getKey())).collect(Collectors.toList()));
+        } else {
+            operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey)
+                    .collect(Collectors.toList()));
+        }
         operationsDTO.setOperationPolicies(
                 OperationPolicyMappingUtil.fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
@@ -2228,7 +2246,7 @@ public class APIMappingUtil {
                 ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
                 URITemplate template = apiProductResource.getUriTemplate();
                 List<APIOperationsDTO> operations = productAPI.getOperations();
-                APIOperationsDTO operation = getOperationFromURITemplate(template);
+                APIOperationsDTO operation = getOperationFromURITemplate(template, null);
                 operations.add(operation);
             } else {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
@@ -2238,7 +2256,7 @@ public class APIMappingUtil {
                 List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 
-                APIOperationsDTO operation = getOperationFromURITemplate(template);
+                APIOperationsDTO operation = getOperationFromURITemplate(template, null);
                 operations.add(operation);
 
                 productAPI.setOperations(operations);
@@ -2249,7 +2267,7 @@ public class APIMappingUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId()
                 .getProviderName()));
         String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getUuid(), tenantDomain);
-        List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
+        List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition, null);
         productDto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
 
         String subscriptionAvailability = product.getSubscriptionAvailability();
@@ -2750,15 +2768,15 @@ public class APIMappingUtil {
      * @return list of scopes
      * @throws APIManagementException throw if parsing exception occur
      */
-    private static List<ScopeDTO> getScopesFromSwagger(String swagger) throws APIManagementException {
-
+    private static List<ScopeDTO> getScopesFromSwagger(String swagger, String scopePrefix)
+            throws APIManagementException {
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swagger);
         Set<Scope> scopes = apiDefinition.getScopes(swagger);
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
         for (Scope aScope : scopes) {
             ScopeDTO scopeDTO = new ScopeDTO();
-            scopeDTO.setName(aScope.getKey());
-            scopeDTO.setDisplayName(aScope.getName());
+            scopeDTO.setName(APIUtil.removeScopePrefix(scopePrefix, aScope.getKey()));
+            scopeDTO.setDisplayName(scopeDTO.getName());
             scopeDTO.setDescription(aScope.getDescription());
             String roles = aScope.getRoles();
             if (roles == null || roles.isEmpty()) {
@@ -2770,7 +2788,6 @@ public class APIMappingUtil {
         }
         return scopeDTOS;
     }
-
     /**
      * Convert ScopeDTO List to APIScopesDTO List adding the attribute 'isShared'.
      *
