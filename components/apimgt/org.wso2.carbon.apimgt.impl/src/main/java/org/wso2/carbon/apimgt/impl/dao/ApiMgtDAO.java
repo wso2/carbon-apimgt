@@ -18382,26 +18382,32 @@ public class ApiMgtDAO {
 
     private String addAPISpecificOperationPolicy(Connection connection, String apiUUID, String revisionUUID,
                                                  OperationPolicyData policyData, String clonedPolicyId)
-            throws SQLException {
-
-        String policyUUID = addOperationPolicyContent(connection, policyData);
+            throws SQLException, APIManagementException {
 
         String dbQuery;
+        String policyUUID = "";
         if (revisionUUID != null) {
             dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY_WITH_REVISION;
         } else {
             dbQuery = SQLConstants.OperationPolicyConstants.ADD_API_SPECIFIC_OPERATION_POLICY;
         }
-
-        PreparedStatement statement = connection.prepareStatement(dbQuery);
-        statement.setString(1, policyUUID);
-        statement.setString(2, apiUUID);
-        statement.setString(3, clonedPolicyId);
-        if (revisionUUID != null) {
-            statement.setString(4, revisionUUID);
+        try {
+            connection.setAutoCommit(false);
+            policyUUID = addOperationPolicyContent(connection, policyData);
+            PreparedStatement statement = connection.prepareStatement(dbQuery);
+            statement.setString(1, policyUUID);
+            statement.setString(2, apiUUID);
+            statement.setString(3, clonedPolicyId);
+            if (revisionUUID != null) {
+                statement.setString(4, revisionUUID);
+            }
+            statement.executeUpdate();
+            statement.close();
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            handleException("Failed to add specific Operation policy ", e);
         }
-        statement.executeUpdate();
-        statement.close();
         return policyUUID;
     }
 
