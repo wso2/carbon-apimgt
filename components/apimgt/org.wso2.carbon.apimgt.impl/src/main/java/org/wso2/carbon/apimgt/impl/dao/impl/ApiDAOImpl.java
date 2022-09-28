@@ -104,7 +104,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
-    public int addAPI(API api, int tenantId, String organization) throws APIManagementException {
+    public int addAPI(Organization organization,API api) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -155,7 +155,7 @@ public class ApiDAOImpl implements ApiDAO {
             prepStmt.setString(9, api.getType());
             prepStmt.setString(10, api.getUuid());
             prepStmt.setString(11, APIConstants.CREATED);
-            prepStmt.setString(12, organization);
+            prepStmt.setString(12, organization.getName());
             prepStmt.setString(13, api.getGatewayVendor());
             prepStmt.setString(14, api.getVersionTimestamp());
             prepStmt.setString(15, jsonArtifact);
@@ -170,6 +170,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             String tenantUserName = MultitenantUtils
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            int tenantId = APIUtil.getInternalOrganizationId(organization.getName());
             recordAPILifeCycleEvent(apiId, null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
                     connection);
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
@@ -180,7 +181,7 @@ public class ApiDAOImpl implements ApiDAO {
             if (StringUtils.isNotEmpty(serviceKey)) {
                 addAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantId, connection);
             }
-            addAPIDefinition(organization, api,connection);
+            addAPIDefinition(organization.getName(), api,connection);
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -196,24 +197,6 @@ public class ApiDAOImpl implements ApiDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return apiId;
-    }
-
-    public void recordAPILifeCycleEvent(String uuid, String oldStatus, String newStatus, String userId,
-                                        int tenantId) throws APIManagementException {
-
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            int apiId = getAPIID(uuid, conn);
-            conn.setAutoCommit(false);
-            try {
-                recordAPILifeCycleEvent(apiId, oldStatus, newStatus, userId, tenantId, conn);
-                changeAPILifeCycleStatus(conn, apiId, newStatus);
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to record API state change", e);
-        }
     }
 
     private void recordAPILifeCycleEvent(int apiId, String oldStatus, String newStatus, String userId,
@@ -248,17 +231,7 @@ public class ApiDAOImpl implements ApiDAO {
         // finally commit transaction
     }
 
-    private void changeAPILifeCycleStatus(Connection connection, int apiId, String updatedStatus) throws SQLException {
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.UPDATE_API_STATUS)) {
-            preparedStatement.setString(1, updatedStatus);
-            preparedStatement.setInt(2, apiId);
-            preparedStatement.executeUpdate();
-            connection.commit();
-        }
-    }
-
-    public int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
+    private int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
 
         int id = -1;
         String getAPIQuery = SQLConstants.GET_API_ID_SQL_BY_UUID;
@@ -279,8 +252,7 @@ public class ApiDAOImpl implements ApiDAO {
         return id;
     }
 
-
-    public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws APIManagementException {
+    private void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws APIManagementException {
 
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
         boolean deploymentAvailable = isDeploymentAvailableByAPIUUID(connection, api.getUuid());
@@ -313,7 +285,7 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    public String getPublishedDefaultVersion(APIIdentifier apiId) throws APIManagementException {
+    private String getPublishedDefaultVersion(APIIdentifier apiId) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -1411,8 +1383,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @return String apiUUID
      * @throws APIManagementException if an error occurs while checking revision table
      */
-    @Override
-    public APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
+    private APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -1433,7 +1404,7 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
-    public int getAPIID(String uuid) throws APIManagementException {
+    private int getAPIID(String uuid) throws APIManagementException {
         int id = -1;
         try {
             try (Connection connection = APIMgtDBUtil.getConnection()) {

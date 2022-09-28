@@ -467,7 +467,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while adding the API
      */
     private void addAPI(API api, int tenantId) throws APIManagementException {
-        int apiId = apiDAOImpl.addAPI(api, tenantId, api.getOrganization());
+        Organization org = new Organization(api.getOrganization());
+        int apiId = apiDAOImpl.addAPI(org, api);
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));

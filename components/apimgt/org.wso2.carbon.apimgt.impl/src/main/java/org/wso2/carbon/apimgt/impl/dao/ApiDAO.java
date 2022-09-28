@@ -25,28 +25,65 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Provides access to API data layer
  */
 public interface ApiDAO {
 
-    int addAPI(API api, int tenantId, String organization) throws APIManagementException;
+    /**
+     * Add API metadata.
+     *
+     * @param organization Organization the API Owned
+     * @param api      API to add
+     * @return API Id of the successfully added API
+     * @throws APIManagementException if fails to add API
+     */
+    int addAPI(Organization organization, API api) throws APIManagementException;
 
-    void recordAPILifeCycleEvent(String uuid, String oldStatus, String newStatus, String userId,
-                                 int tenantId) throws APIManagementException;
+    /**
+     * Update API metadata.
+     *
+     * @param organization Organization the API Owned
+     * @param publisherAPI      API to be updated
+     * @return API Object of the successfully added API
+     * @throws APIManagementException if fails to add API
+     */
+    PublisherAPI updateAPI(Organization organization, PublisherAPI publisherAPI) throws APIManagementException;
 
-    int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException;
+    /**
+     * Delete API.
+     *
+     * @param organization Organization the API Owned
+     * @param apiUUID      API UUID of the API to be deleted
+     * @throws APIManagementException if fails to add API
+     */
+    void deleteAPI(Organization organization, String apiUUID) throws APIManagementException;
 
-    void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws APIManagementException;
-
+    /**
+     * Get the API information stored in database which is used for publisher operations
+     *
+     * @param organization   Organization the API is owned by
+     * @param apiUUID API ID
+     * @return API information
+     * @throws APIManagementException
+     */
     PublisherAPI getPublisherAPI(Organization organization, String apiUUID) throws APIManagementException;
 
+    /**
+     * Search APIs to be displayed on Publisher API listing
+     *
+     * @param organization         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      offset to search
+     * @param sortBy      sort criteria
+     * @param sortOrder       sort order
+     * @return Publisher API Search Result
+     * @throws APIManagementException
+     */
     PublisherAPISearchResult searchAPIsForPublisher(Organization organization, String searchQuery, int start,
                                                     int offset, UserContext ctx, String sortBy, String sortOrder) throws APIManagementException;
-
 
     /**
      * Save the passed WSDL schema definition of the API.  This includes initial creation operation and later
@@ -69,9 +106,6 @@ public interface ApiDAO {
      */
     ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException;
 
-    /* ==== OAS API Schema Definition ====
-     ================================== */
-
     /**
      * Save OAS Schema definition
      *
@@ -90,9 +124,6 @@ public interface ApiDAO {
      * @throws OASPersistenceException
      */
     String getOASDefinition(Organization org, String apiId) throws OASPersistenceException;
-
-    /* ==== Async API Definition ==========
-    ============================================= */
 
     /**
      * Save Async API definition
@@ -113,9 +144,6 @@ public interface ApiDAO {
      * @throws AsyncSpecPersistenceException
      */
     String getAsyncDefinition(Organization org, String apiId) throws AsyncSpecPersistenceException;
-
-    /* ==== GraphQL API Schema Definition ==========
-    ============================================= */
 
     /**
      * Save GraphQL schema definition. This includes initial creation operation and later update operations.
@@ -138,46 +166,187 @@ public interface ApiDAO {
      */
     String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException;
 
+    /**
+     * Add API Revision
+     *
+     * @param apiRevision API Revision Object to be added
+     * @throws APIManagementException
+     */
     void addAPIRevision(APIRevision apiRevision) throws APIManagementException;
 
+    /**
+     * Restore API Revision
+     *
+     * @param apiRevision API Revision Object to be restored
+     * @throws APIManagementException
+     */
     void restoreAPIRevision(APIRevision apiRevision) throws APIManagementException;
 
+    /**
+     * Delete API Revision
+     *
+     * @param apiRevision API Revision Object to be deleted
+     * @throws APIManagementException
+     */
     void deleteAPIRevision(APIRevision apiRevision) throws APIManagementException;
 
-    APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException;
+    /**
+     * Add documentation to API
+     *
+     * @param organization           Organization the documentation is owned by
+     * @param apiUUID         API ID
+     * @param documentation Documentation
+     * @return ID of the documentation added
+     * @throws DocumentationPersistenceException
+     */
+    Documentation addDocumentation(Organization organization, String apiUUID, Documentation documentation)
+            throws DocumentationPersistenceException;
 
-    int getAPIID(String uuid) throws APIManagementException;
+    /**
+     * Update API documentation
+     *
+     * @param organization           Organization the documentation is owned by
+     * @param apiUUID         API ID
+     * @param documentation Documentation to update
+     * @throws DocumentationPersistenceException
+     */
+    Documentation updateDocumentation(Organization organization, String apiUUID, Documentation documentation)
+            throws DocumentationPersistenceException;
 
-    PublisherAPI updateAPI(Organization organization, PublisherAPI publisherAPI) throws APIManagementException;
+    /**
+     * Get API Documentation
+     *
+     * @param organization   Organization the documentation is owned by
+     * @param apiUUID API ID
+     * @param docUUID Documentation ID
+     * @return Documentation
+     * @throws DocumentationPersistenceException
+     */
+    Documentation getDocumentation(Organization organization, String apiUUID, String docUUID)
+            throws DocumentationPersistenceException;
 
-    void deleteAPI(Organization organization, String apiUUID) throws APIManagementException;
-    Documentation addDocumentation(Organization organization, String apiUUID, Documentation documentation) throws DocumentationPersistenceException;
+    /**
+     * Get the content (Inline text/Markdown content text/ Resource file) of API documentation
+     *
+     * @param organization   Organization the documentation is owned by
+     * @param apiUUID API ID
+     * @param docUUID Documentation ID
+     * @return Documentation Content
+     * @throws DocumentationPersistenceException
+     */
+    DocumentContent getDocumentationContent(Organization organization, String apiUUID, String docUUID)
+            throws DocumentationPersistenceException;
 
-    Documentation updateDocumentation(Organization organization, String s, Documentation documentation) throws DocumentationPersistenceException;
-
-    Documentation getDocumentation(Organization organization, String apiUUID, String docUUID) throws DocumentationPersistenceException;
-
-    DocumentContent getDocumentationContent(Organization organization, String apiUUID, String docUUID) throws DocumentationPersistenceException;
-
-    DocumentSearchResult searchDocumentation(Organization org, String apiUUID, int start, int offset,
+    /**
+     * Search documentation of the given API
+     *
+     * @param organization   Organization the documentations are owned by
+     * @param apiUUID API ID
+     * @return Documentation search result
+     * @throws DocumentationPersistenceException
+     */
+    DocumentSearchResult searchDocumentation(Organization organization, String apiUUID, int start, int offset,
                                              String searchQuery, UserContext ctx) throws DocumentationPersistenceException;
-    DocumentContent addDocumentationContent(Organization organization, String apiUUID, String docUUID, DocumentContent documentContent) throws DocumentationPersistenceException;
-    void deleteDocumentation(Organization organization, String s, String s1) throws DocumentationPersistenceException;
 
-    PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int i, int i1, UserContext userContext) throws APIPersistenceException;
+    /**
+     * Add the content (Inline text/Markdown content text/ Resource file) of API documentation
+     *
+     * @param organization       Organization the documentation is owned by
+     * @param apiUUID     API ID
+     * @param docUUID     Documentation ID
+     * @param documentContent   Content
+     * @return Documentation Content
+     * @throws DocumentationPersistenceException
+     */
+    DocumentContent addDocumentationContent(Organization organization, String apiUUID, String docUUID, DocumentContent documentContent)
+            throws DocumentationPersistenceException;
 
-    void saveThumbnail(Organization organization, String apiId, ResourceFile resourceFile) throws ThumbnailPersistenceException;
+    /**
+     * Delete API documentation
+     *
+     * @param organization   Organization the documentation is owned by
+     * @param apiUUID API ID
+     * @param docUUID Documentation ID
+     * @throws DocumentationPersistenceException
+     */
+    void deleteDocumentation(Organization organization, String apiUUID, String docUUID) throws DocumentationPersistenceException;
 
+    /**
+     * Search based on content to display on publisher
+     *
+     * @param organization         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      offset to search
+     * @return Publisher  Search Result
+     * @throws APIPersistenceException
+     */
+    PublisherContentSearchResult searchContentForPublisher(Organization organization, String searchQuery, int start, int offset,
+                                                           UserContext userContext) throws APIPersistenceException;
+
+    /**
+     * Save Thumbnail icon of the API. This includes both the initial creation and later update operations.
+     *
+     * @param organization          Organization the thumbnail icon is owned by
+     * @param apiUUID        API ID
+     * @param resourceFile
+     * @throws ThumbnailPersistenceException
+     */
+    void saveThumbnail(Organization organization, String apiUUID, ResourceFile resourceFile) throws ThumbnailPersistenceException;
+
+    /**
+     * Get thumbnail icon of the API
+     *
+     * @param organization   Organization the thumbnail icon is owned by
+     * @param apiId API ID
+     * @return Thumbnail icon resource file
+     * @throws ThumbnailPersistenceException
+     */
     ResourceFile getThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException;
 
+    /**
+     * Delete thumbnail icon of the API
+     *
+     * @param organization   Organization the thumbnail icon is owned by
+     * @param apiId API ID
+     * @throws ThumbnailPersistenceException
+     */
     void deleteThumbnail(Organization organization, String apiId) throws ThumbnailPersistenceException;
 
-    DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
+    /**
+     * Search APIs to be displayed on Dev Portal API listing
+     *
+     * @param organization         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      search offset
+     * @return Dev Portal API Search Result
+     * @throws APIPersistenceException
+     */
+    DevPortalAPISearchResult searchAPIsForDevPortal(Organization organization, String searchQuery, int start, int offset,
                                                     UserContext ctx) throws APIPersistenceException;
-    DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
+
+    /**
+     * Search based on content to display on publisher
+     *
+     * @param organization         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      offset to search
+     * @return Publisher  Search Result
+     * @throws APIPersistenceException
+     */
+    DevPortalContentSearchResult searchContentForDevPortal(Organization organization, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException;
 
-    DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException;
-
+    /**
+     * Get the API information stored which is used for DevPortal operations
+     *
+     * @param organization   Organization the API is owned by
+     * @param apiId API ID
+     * @return
+     * @throws APIPersistenceException
+     */
+    DevPortalAPI getDevPortalAPI(Organization organization, String apiId) throws APIPersistenceException;
 
 }
