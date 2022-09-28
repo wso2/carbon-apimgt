@@ -20,8 +20,11 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttlin
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.RestApiAdminUtils;
@@ -44,12 +47,11 @@ public class CommonThrottleMappingUtil {
      *
      * @param conditionalGroupDTOs a list of Conditional Group DTOs
      * @return Derived list of Pipelines from list of Conditional Group DTOs
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws APIManagementException
      */
     public static List<Pipeline> fromConditionalGroupDTOListToPipelineList(
             List<ConditionalGroupDTO> conditionalGroupDTOs)
-            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
         List<Pipeline> pipelines = new ArrayList<>();
         for (ConditionalGroupDTO dto : conditionalGroupDTOs) {
             pipelines.add(fromConditionalGroupDTOToPipeline(dto));
@@ -62,12 +64,10 @@ public class CommonThrottleMappingUtil {
      *
      * @param pipelines A list of pipeline objects
      * @return Derived list of DTO objects from Pipeline list
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws APIManagementException When an internal error occurs
      */
     public static List<ConditionalGroupDTO> fromPipelineListToConditionalGroupDTOList(
-            List<Pipeline> pipelines)
-            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+            List<Pipeline> pipelines) throws APIManagementException {
         List<ConditionalGroupDTO> groupDTOs = new ArrayList<>();
         if (pipelines != null) {
             for (Pipeline pipeline : pipelines) {
@@ -82,11 +82,10 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Conditional Group DTO
      * @return Derived Pipeline object from Conditional Group DTO
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws APIManagementException
      */
     public static Pipeline fromConditionalGroupDTOToPipeline(ConditionalGroupDTO dto)
-            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
         Pipeline pipeline = new Pipeline();
         pipeline.setDescription(dto.getDescription());
         pipeline.setEnabled(true);
@@ -106,7 +105,7 @@ public class CommonThrottleMappingUtil {
      * @throws UnsupportedThrottleConditionTypeException
      */
     public static ConditionalGroupDTO fromPipelineToConditionalGroupDTO(Pipeline pipeline)
-            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
         ConditionalGroupDTO groupDTO = new ConditionalGroupDTO();
         groupDTO.setDescription(pipeline.getDescription());
         groupDTO.setLimit(fromQuotaPolicyToDTO(pipeline.getQuotaPolicy()));
@@ -124,7 +123,7 @@ public class CommonThrottleMappingUtil {
      * @throws UnsupportedThrottleConditionTypeException
      */
     public static List<Condition> fromDTOListToConditionList(List<ThrottleConditionDTO> throttleConditionDTOs)
-            throws UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
 
         List<Condition> conditions = new ArrayList<>();
         String errorMessage;
@@ -142,7 +141,8 @@ public class CommonThrottleMappingUtil {
                                 errorMessage =
                                         RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
                                                 ThrottleConditionDTO.TypeEnum.HEADERCONDITION) + dto.toString();
-                                throw new UnsupportedThrottleConditionTypeException(errorMessage);
+                                throw new APIManagementException(errorMessage,
+                                        ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
                             }
                             break;
                         }
@@ -153,7 +153,8 @@ public class CommonThrottleMappingUtil {
                                 errorMessage =
                                         RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
                                                 ThrottleConditionDTO.TypeEnum.IPCONDITION) + dto.toString();
-                                throw new UnsupportedThrottleConditionTypeException(errorMessage);
+                                throw new APIManagementException(errorMessage,
+                                        ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
                             }
                             break;
                         }
@@ -165,7 +166,8 @@ public class CommonThrottleMappingUtil {
                                 errorMessage =
                                         RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
                                                 ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION) + dto.toString();
-                                throw new UnsupportedThrottleConditionTypeException(errorMessage);
+                                throw new APIManagementException(errorMessage,
+                                        ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
                             }
                             break;
                         }
@@ -177,7 +179,8 @@ public class CommonThrottleMappingUtil {
                                 errorMessage =
                                         RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
                                                 ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION) + dto.toString();
-                                throw new UnsupportedThrottleConditionTypeException(errorMessage);
+                                throw new APIManagementException(errorMessage,
+                                        ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
                             }
                             break;
                         }
@@ -186,7 +189,7 @@ public class CommonThrottleMappingUtil {
                     }
                 } else {
                     errorMessage = "Condition item 'type' property has not been specified\n" + dto.toString();
-                    throw new UnsupportedThrottleConditionTypeException(errorMessage);
+                    throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
                 }
             }
         }
@@ -198,10 +201,10 @@ public class CommonThrottleMappingUtil {
      *
      * @param conditions List of Condition objects
      * @return a list of Throttle Condition Type DTO objects derived from a list of model Condition objects
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws APIManagementException When throttle condition is not supported
      */
     public static List<ThrottleConditionDTO> fromConditionListToDTOList(List<Condition> conditions)
-            throws UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
         List<ThrottleConditionDTO> dtoList = new ArrayList<>();
         if (conditions != null) {
             for (Condition condition : conditions) {
@@ -219,7 +222,7 @@ public class CommonThrottleMappingUtil {
      * @throws UnsupportedThrottleConditionTypeException
      */
     public static ThrottleConditionDTO fromConditionToDTO(Condition condition)   //.................
-            throws UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
 
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setInvertCondition(condition.isInvertCondition());
@@ -238,7 +241,7 @@ public class CommonThrottleMappingUtil {
             throttleConditionDTO.setJwtClaimsCondition(fromJWTClaimsConditionToDTO((JWTClaimsCondition) condition));
         } else {
             String msg = "Throttle Condition type " + condition.getClass().getName() + " is not supported";
-            throw new UnsupportedThrottleConditionTypeException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
         }
         return throttleConditionDTO;
     }
@@ -248,10 +251,10 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Throttle limit DTO object
      * @return Derived Quota policy object from DTO
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws APIManagementException
      */
     public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitDTO dto)
-            throws UnsupportedThrottleLimitTypeException {
+            throws APIManagementException {
 
         String errorMessage;
         QuotaPolicy quotaPolicy = new QuotaPolicy();
@@ -266,7 +269,7 @@ public class CommonThrottleMappingUtil {
                         errorMessage =
                                 RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
                                         ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT) + dto.toString();
-                        throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                        throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
                     }
                     break;
                 }
@@ -277,7 +280,7 @@ public class CommonThrottleMappingUtil {
                         errorMessage =
                                 RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
                                         ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT) + dto.toString();
-                        throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                        throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
                     }
                     break;
                 }
@@ -288,7 +291,7 @@ public class CommonThrottleMappingUtil {
                        errorMessage =
                                RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
                                        ThrottleLimitDTO.TypeEnum.EVENTCOUNTLIMIT) + dto.toString();
-                       throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                       throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
                    }
                    break;
                 }
@@ -296,7 +299,7 @@ public class CommonThrottleMappingUtil {
             quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(dto.getType()));
         } else {
             errorMessage = "defaultLimit 'type' property has not been specified\n" + dto.toString();
-            throw new UnsupportedThrottleLimitTypeException(errorMessage);
+            throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
         }
         return quotaPolicy;
     }
@@ -309,7 +312,7 @@ public class CommonThrottleMappingUtil {
      * @throws UnsupportedThrottleLimitTypeException
      */
     public static ThrottleLimitDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
-            throws UnsupportedThrottleLimitTypeException {
+            throws APIManagementException {
 
         ThrottleLimitDTO defaultLimitType = new ThrottleLimitDTO();
         if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
@@ -326,7 +329,7 @@ public class CommonThrottleMappingUtil {
             defaultLimitType.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
         } else {
             String msg = "Throttle limit type " + quotaPolicy.getType() + " is not supported";
-            throw new UnsupportedThrottleLimitTypeException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
         }
         return defaultLimitType;
     }
@@ -539,10 +542,8 @@ public class CommonThrottleMappingUtil {
      * @param dto Throttle Policy DTO
      * @param <T> Type of Throttle policy
      * @return Throttle Policy DTO with updated mandatory/default parameters
-     * @throws UnsupportedThrottleLimitTypeException
      */
-    public static <T extends ThrottlePolicyDTO> T updateDefaultMandatoryFieldsOfThrottleDTO(T dto)
-            throws UnsupportedThrottleLimitTypeException {
+    public static <T extends ThrottlePolicyDTO> T updateDefaultMandatoryFieldsOfThrottleDTO(T dto) {
         //nothing to do
         return dto;
     }
@@ -554,10 +555,8 @@ public class CommonThrottleMappingUtil {
      * @param policy Policy model object
      * @param <T>    Type of Policy model
      * @return Updated Policy object with common fields
-     * @throws UnsupportedThrottleLimitTypeException
      */
-    public static <T extends Policy> T updateFieldsFromDTOToPolicy(ThrottlePolicyDTO dto, T policy)
-            throws UnsupportedThrottleLimitTypeException {
+    public static <T extends Policy> T updateFieldsFromDTOToPolicy(ThrottlePolicyDTO dto, T policy) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         policy.setTenantDomain(tenantDomain);
 
@@ -575,10 +574,8 @@ public class CommonThrottleMappingUtil {
      * @param policy Policy model object
      * @param <T>    Type of Throttle Policy DTO object model
      * @return Updated Throttle Policy DTO object with common fields
-     * @throws UnsupportedThrottleLimitTypeException
      */
-    public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO(Policy policy, T dto)
-            throws UnsupportedThrottleLimitTypeException {
+    public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO(Policy policy, T dto) {
 
         dto.setPolicyId(policy.getUUID());
         dto.setDisplayName(policy.getDisplayName());

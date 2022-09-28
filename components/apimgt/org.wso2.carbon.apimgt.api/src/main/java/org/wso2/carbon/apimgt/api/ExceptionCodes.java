@@ -147,6 +147,9 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OPERATION_TYPE(900406, "Unsupported '%s' operation", 400, "The '%s' operation type '%s' is invalid"),
     VERB_NOT_FOUND(900407, "Missing '%s' type", 400, "Missing '%s type in URI templates"),
     YAML_PARSE_ERROR(900408, "Yaml parse error", 500, "Yaml parse error"),
+    AUTHORIZATION_ERROR(900409, "Forbidden", 403, "You don't have permission to access the '%s' with Id '%s'"),
+    FORBIDDEN_ERROR(900409, "Forbidden", 403, "You don't have permission to access this resource"),
+    RESOURCE_NOT_FOUND_WITH_DESC(900401, "Resource not found", 404, "Requested '%s' with Id '%s' not found"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -372,6 +375,22 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot delete the advanced policy with the name %s because it is already assigned to an API/Resource"),
 
     //Throttle related codes
+    ADVANCED_POLICY_EXISTS(902900, "Advanced policy already exists", 409, "Advanced Policy with name '%s' already exists"),
+    APPLICATION_POLICY_EXISTS(902901, "Application policy already exists", 409, "Application Policy with name '%s' already exists"),
+    SUBSCRIPTION_POLICY_EXISTS(902902, "Subscription policy already exists", 409, "Subscription Policy with name '%s' already exists"),
+    GLOBAL_POLICY_EXISTS(902903, "Policy already exists", 409, "Policy already exists"),
+    ADVANCED_POLICY_ADD_FAILED(902904, "Error while adding an Advanced level policy: '%s'", 500, "'%s'"),
+    ADVANCED_POLICY_GET_FAILED(902905, "Error while retrieving Advanced level policy : '%s'", 500, "'%s'"),
+    ADVANCED_POLICY_UPDATE_FAILED(902906, "Error while updating Advanced level policy : '%s'", 500, "'%s'"),
+    SUBSCRIPTION_POLICY_GET_ALL_FAILED(902907, "Error while retrieving Subscription level policies", 500, "Server Error Occurred"),
+    SUBSCRIPTION_POLICY_ADD_FAILED(902908, "Error while adding Subscription level policies", 500, "Server Error Occurred"),
+    SUBSCRIPTION_POLICY_GET_FAILED(902909, "Error while retrieving Subscription level policy : '%s'", 500, "Server Error Occurred"),
+    BAD_POLICY_OBJECT(902010, "Policy object doesn't contain mandatory parameters", 500, "Policy object doesn't contain mandatory parameters."),
+    SUBSCRIPTION_POLICY_UPDATE_FAILED(902911, "Error while updating Subscription level policy : '%s'", 500, "Server Error Occurred"),
+    CUSTOM_RULE_EXISTS(902914, "Custom rule already exists", 409, "Custom rule with name %s already exists"),
+    ALREADY_ASSIGNED_APP_POLICY_DELETE_ERROR(902912, "Cannot delete the application throttling policy", 409, "Policy %s is already attached to an Application"),
+    ALREADY_ASSIGNED_SUB_POLICY_DELETE_ERROR(902913, "Cannot delete the subscription throttling policy", 409, "Policy %s already has subscriptions"),
+
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
             "Configuration"),

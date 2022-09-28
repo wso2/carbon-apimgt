@@ -23,6 +23,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -44,11 +45,11 @@ public class SubscriptionThrottlePolicyMappingUtil {
      *
      * @param subscriptionPolicies Array of Subscription Policies
      * @return A List DTO of converted Subscription Policies
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws APIManagementException
      * @throws ParseException
      */
     public static SubscriptionThrottlePolicyListDTO fromSubscriptionPolicyArrayToListDTO(
-            SubscriptionPolicy[] subscriptionPolicies) throws UnsupportedThrottleLimitTypeException, ParseException {
+            SubscriptionPolicy[] subscriptionPolicies) throws APIManagementException, ParseException {
         SubscriptionThrottlePolicyListDTO listDTO = new SubscriptionThrottlePolicyListDTO();
         List<SubscriptionThrottlePolicyDTO> subscriptionPolicyDTOList = new ArrayList<>();
         if (subscriptionPolicies != null) {
@@ -71,7 +72,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
      * @throws ParseException
      */
     public static SubscriptionThrottlePolicyDTO fromSubscriptionThrottlePolicyToDTO(
-            SubscriptionPolicy subscriptionPolicy) throws UnsupportedThrottleLimitTypeException, ParseException {
+            SubscriptionPolicy subscriptionPolicy) throws APIManagementException, ParseException {
         SubscriptionThrottlePolicyDTO policyDTO = new SubscriptionThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(subscriptionPolicy, policyDTO);
         policyDTO.setBillingPlan(subscriptionPolicy.getBillingPlan());
@@ -119,11 +120,11 @@ public class SubscriptionThrottlePolicyMappingUtil {
      *
      * @param dto Subscription policy DTO object
      * @return Converted Subscription policy model object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws APIManagementException
      */
     @SuppressWarnings("unchecked")
     public static SubscriptionPolicy fromSubscriptionThrottlePolicyDTOToModel(SubscriptionThrottlePolicyDTO dto)
-            throws UnsupportedThrottleLimitTypeException {
+            throws APIManagementException {
 
         //update mandatory fields such as tenantDomain etc.
         dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);

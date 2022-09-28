@@ -60,10 +60,8 @@ public class GlobalThrottlePolicyMappingUtil {
      *
      * @param globalPolicy Global Policy model object
      * @return DTO object derived from the Policy model object
-     * @throws UnsupportedThrottleLimitTypeException
      */
-    public static CustomRuleDTO fromGlobalThrottlePolicyToDTO(
-            GlobalPolicy globalPolicy) throws UnsupportedThrottleLimitTypeException {
+    public static CustomRuleDTO fromGlobalThrottlePolicyToDTO(GlobalPolicy globalPolicy) {
         CustomRuleDTO policyDTO = new CustomRuleDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(globalPolicy, policyDTO);
         policyDTO.setKeyTemplate(globalPolicy.getKeyTemplate());
@@ -77,10 +75,8 @@ public class GlobalThrottlePolicyMappingUtil {
      *
      * @param dto Global policy DTO object
      * @return Model object derived from DTO
-     * @throws UnsupportedThrottleLimitTypeException
      */
-    public static GlobalPolicy fromGlobalThrottlePolicyDTOToModel(CustomRuleDTO dto)
-            throws UnsupportedThrottleLimitTypeException {
+    public static GlobalPolicy fromGlobalThrottlePolicyDTOToModel(CustomRuleDTO dto) {
 
         //update mandatory fields such as tenantDomain etc.
         dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);

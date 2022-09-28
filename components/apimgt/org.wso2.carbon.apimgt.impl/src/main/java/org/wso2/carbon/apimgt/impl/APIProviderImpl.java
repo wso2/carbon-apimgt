@@ -2983,7 +2983,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //Check if there's a policy exists before adding the new policy
             Policy existingPolicy = getAPIPolicy(userNameWithoutChange, apiPolicy.getPolicyName());
             if (existingPolicy != null) {
-                handleException("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists");
+                String error ="Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists";
+                throw new APIManagementException(error,
+                        ExceptionCodes.from(ExceptionCodes.ADVANCED_POLICY_EXISTS, apiPolicy.getPolicyName()));
             }
             apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
             apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
@@ -3001,7 +3003,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //Check if there's a policy exists before adding the new policy
             Policy existingPolicy = getApplicationPolicy(userNameWithoutChange, appPolicy.getPolicyName());
             if (existingPolicy != null) {
-                handleException("Application Policy with name " + appPolicy.getPolicyName() + " already exists");
+                String error = "Application Policy with name " + appPolicy.getPolicyName() + " already exists";
+                throw new APIManagementException(error,
+                        ExceptionCodes.from(ExceptionCodes.APPLICATION_POLICY_EXISTS, appPolicy.getPolicyName()));
             }
             apiMgtDAO.addApplicationPolicy(appPolicy);
             //policy id is not set. retrieving policy to get the id.
@@ -3016,7 +3020,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //Check if there's a policy exists before adding the new policy
             Policy existingPolicy = getSubscriptionPolicy(userNameWithoutChange, subPolicy.getPolicyName());
             if (existingPolicy != null) {
-                handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
+                String error = "Subscription Policy with name " + subPolicy.getPolicyName() + " already exists";
+                throw new APIManagementException(error,
+                        ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_POLICY_EXISTS, subPolicy.getPolicyName()));
             }
             apiMgtDAO.addSubscriptionPolicy(subPolicy);
             String monetizationPlan = subPolicy.getMonetizationPlan();
@@ -3038,7 +3044,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // checking if policy already exist
             Policy existingPolicy = getGlobalPolicy(globalPolicy.getPolicyName());
             if (existingPolicy != null) {
-                throw new APIManagementException("Policy name already exists");
+                throw new APIManagementException("Policy name already exists", ExceptionCodes.GLOBAL_POLICY_EXISTS);
             }
 
             apiMgtDAO.addGlobalPolicy(globalPolicy);
@@ -3054,7 +3060,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             String msg = "Policy type " + policy.getClass().getName() + " is not supported";
             log.error(msg);
-            throw new UnsupportedPolicyTypeException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.UNSUPPORTED_POLICY_TYPE);
         }
     }
 
@@ -3083,7 +3089,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 return monetizationImplementation.createBillingPlan(subPolicy);
             } catch (MonetizationException e) {
-                APIUtil.handleException("Failed to create monetization plan for : " + subPolicy.getPolicyName(), e);
+                String error = "Failed to create monetization plan for : " + subPolicy.getPolicyName();
+                APIUtil.handleExceptionWithCode(error, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, error));
             }
         }
         return false;
@@ -3103,7 +3111,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 return monetizationImplementation.updateBillingPlan(subPolicy);
             } catch (MonetizationException e) {
-                APIUtil.handleException("Failed to update monetization plan for : " + subPolicy.getPolicyName(), e);
+                String error = "Failed to update monetization plan for : " + subPolicy.getPolicyName();
+                APIUtil.handleExceptionWithCode(error, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, error));
             }
         }
         return false;
@@ -3123,7 +3133,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 return monetizationImplementation.deleteBillingPlan(subPolicy);
             } catch (MonetizationException e) {
-                APIUtil.handleException("Failed to delete monetization plan of : " + subPolicy.getPolicyName(), e);
+                String error = "Failed to delete monetization plan of : " + subPolicy.getPolicyName();
+                APIUtil.handleExceptionWithCode(error, e,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, error));
             }
         }
         return false;
@@ -3260,7 +3272,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             String msg = "Policy type " + policy.getClass().getName() + " is not supported";
             log.error(msg);
-            throw new UnsupportedPolicyTypeException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.UNSUPPORTED_POLICY_TYPE);
         }
         //publishing keytemplate after update
         if (oldKeyTemplate != null && newKeyTemplate != null) {

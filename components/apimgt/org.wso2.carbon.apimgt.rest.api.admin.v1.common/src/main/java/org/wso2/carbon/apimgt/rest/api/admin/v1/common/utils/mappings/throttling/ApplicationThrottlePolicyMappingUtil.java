@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttling;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO;
@@ -39,10 +40,10 @@ public class ApplicationThrottlePolicyMappingUtil {
      *
      * @param appPolicies Array of Application Policies
      * @return A List DTO of converted Application Policies
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws APIManagementException
      */
     public static ApplicationThrottlePolicyListDTO fromApplicationPolicyArrayToListDTO(
-            ApplicationPolicy[] appPolicies) throws UnsupportedThrottleLimitTypeException {
+            ApplicationPolicy[] appPolicies) throws APIManagementException {
         ApplicationThrottlePolicyListDTO listDTO = new ApplicationThrottlePolicyListDTO();
         List<ApplicationThrottlePolicyDTO> appPolicyDTOList = new ArrayList<>();
         if (appPolicies != null) {
@@ -61,10 +62,10 @@ public class ApplicationThrottlePolicyMappingUtil {
      *
      * @param appPolicy An Application Policy model object
      * @return Converted Application policy REST API DTO object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws APIManagementException
      */
     public static ApplicationThrottlePolicyDTO fromApplicationThrottlePolicyToDTO(ApplicationPolicy appPolicy)
-            throws UnsupportedThrottleLimitTypeException {
+            throws APIManagementException {
         ApplicationThrottlePolicyDTO policyDTO = new ApplicationThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(appPolicy, policyDTO);
         if (appPolicy.getDefaultQuotaPolicy() != null) {
@@ -79,10 +80,10 @@ public class ApplicationThrottlePolicyMappingUtil {
      *
      * @param dto Application Policy DTO Object
      * @return Converted Application Policy Model object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws APIManagementException
      */
     public static ApplicationPolicy fromApplicationThrottlePolicyDTOToModel(ApplicationThrottlePolicyDTO dto)
-            throws UnsupportedThrottleLimitTypeException {
+            throws APIManagementException {
         //update mandatory fields such as tenantDomain etc.
         dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);
 

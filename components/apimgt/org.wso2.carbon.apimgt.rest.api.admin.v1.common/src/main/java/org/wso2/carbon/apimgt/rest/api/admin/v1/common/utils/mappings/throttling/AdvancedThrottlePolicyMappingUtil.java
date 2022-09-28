@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttling;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -47,7 +48,7 @@ public class AdvancedThrottlePolicyMappingUtil {
      * @throws UnsupportedThrottleConditionTypeException
      */
     public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(APIPolicy[] apiPolicies)
-            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
         AdvancedThrottlePolicyListDTO listDTO = new AdvancedThrottlePolicyListDTO();
         List<AdvancedThrottlePolicyInfoDTO> advancedPolicyDTOs = new ArrayList<>();
         if (apiPolicies != null) {
@@ -65,11 +66,10 @@ public class AdvancedThrottlePolicyMappingUtil {
      *
      * @param dto Advanced policy DTO object
      * @return Converted Advanced policy model object
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws APIManagementException
      */
     public static APIPolicy fromAdvancedPolicyDTOToPolicy(AdvancedThrottlePolicyDTO dto)
-            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
 
         //update mandatory fields such as tenantDomain etc.
         dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);
@@ -92,11 +92,10 @@ public class AdvancedThrottlePolicyMappingUtil {
      *
      * @param apiPolicy Advanced Policy model object
      * @return Converted Advanced policy REST API DTO object
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws APIManagementException
      */
     public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToDTO(APIPolicy apiPolicy)
-            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
         AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
         List<ConditionalGroupDTO> groupDTOs = CommonThrottleMappingUtil.fromPipelineListToConditionalGroupDTOList(
@@ -116,10 +115,9 @@ public class AdvancedThrottlePolicyMappingUtil {
      * @param apiPolicy Advanced Policy model object
      * @return Converted Advanced policy REST API DTO object
      * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
      */
     public static AdvancedThrottlePolicyInfoDTO fromAdvancedPolicyToInfoDTO(APIPolicy apiPolicy)
-            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+            throws APIManagementException {
         AdvancedThrottlePolicyInfoDTO policyDTO = new AdvancedThrottlePolicyInfoDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
         if (apiPolicy.getDefaultQuotaPolicy() != null) {

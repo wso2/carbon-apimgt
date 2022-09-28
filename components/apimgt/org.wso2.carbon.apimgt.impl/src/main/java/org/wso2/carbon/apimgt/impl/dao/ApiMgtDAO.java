@@ -1870,7 +1870,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get Tier permission information for Tier " + tierName, e);
+            handleExceptionWithCode("Failed to get Tier permission information for Tier " + tierName, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -1919,7 +1920,8 @@ public class ApiMgtDAO {
             }
             conn.commit();
         } catch (SQLException e) {
-            handleException("Error in updating tier permissions: " + e.getMessage(), e);
+            handleExceptionWithCode("Error in updating tier permissions: " + e.getMessage(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
             APIMgtDBUtil.closeAllConnections(insertOrUpdatePS, null, null);
@@ -1946,7 +1948,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error in deleting tier permissions: " + e.getMessage(), e);
+            handleExceptionWithCode("Error in deleting tier permissions: " + e.getMessage(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -10815,7 +10818,8 @@ public class ApiMgtDAO {
                         "Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
                                 + " is already persisted");
             } else {
-                handleException("Failed to add Application Policy: " + policy, e);
+                handleExceptionWithCode("Failed to add Application Policy: " + policy, e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
             if (conn != null) {
@@ -10836,7 +10840,8 @@ public class ApiMgtDAO {
                             + " is already persisted");
                 }
             } else {
-                handleException("Failed to add Application Policy: " + policy, e);
+                handleExceptionWithCode("Failed to add Application Policy: " + policy, e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } finally {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
@@ -10909,7 +10914,8 @@ public class ApiMgtDAO {
                         "Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
                                 + " is already persisted");
             } else {
-                handleException("Failed to add Subscription Policy: " + policy, e);
+                handleExceptionWithCode("Failed to add Subscription Policy: " + policy, e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
             if (conn != null) {
@@ -10931,7 +10937,8 @@ public class ApiMgtDAO {
                             + " is already persisted");
                 }
             } else {
-                handleException("Failed to add Subscription Policy: " + policy, e);
+                handleExceptionWithCode("Failed to add Subscription Policy: " + policy, e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } finally {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
@@ -10964,7 +10971,7 @@ public class ApiMgtDAO {
                         "API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
                                 + " is already persisted");
             } else {
-                handleException("Failed to add API Policy: " + policy, e);
+                handleExceptionWithCode("Failed to add API Policy: " + policy, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
             if (connection != null) {
@@ -10986,7 +10993,7 @@ public class ApiMgtDAO {
                             + " is already persisted");
                 }
             } else {
-                handleException("Failed to add Api Policy: " + policy, e);
+                handleExceptionWithCode("Failed to add Api Policy: " + policy, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
@@ -11068,12 +11075,12 @@ public class ApiMgtDAO {
                         + " should be provided. Name: " + policy.getPolicyName()
                         + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
             }
         } else {
             String errorMsg = "Provided Policy to update is null";
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.INTERNAL_ERROR);
         }
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -11141,11 +11148,13 @@ public class ApiMgtDAO {
                     // rollback failed. exception will be thrown later for upper exception
                     log.error("Failed to rollback the add Global Policy: " + policy.toString(), ex);
                 }
-                handleException("Failed to update API policy: " + policy.getPolicyName() + '-' + policy.getTenantId()
-                        , e);
+                handleExceptionWithCode("Failed to update API policy: "
+                                + policy.getPolicyName() + '-' + policy.getTenantId()
+                        , e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to update API policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
+            handleExceptionWithCode("Failed to update API policy: "
+                    + policy.getPolicyName() + '-' + policy.getTenantId(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return policy;
     }
@@ -11361,7 +11370,7 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Global Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to add Global Policy: " + policy, e);
+            handleExceptionWithCode("Failed to add Global Policy: " + policy, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
         }
@@ -11481,7 +11490,8 @@ public class ApiMgtDAO {
             }
             connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e);
+            handleExceptionWithCode("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
         }
@@ -11736,7 +11746,7 @@ public class ApiMgtDAO {
                 policies.add(globalPolicy);
             }
         } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
+            handleExceptionWithCode("Error while executing SQL", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -11781,7 +11791,7 @@ public class ApiMgtDAO {
                 globalPolicy.setSiddhiQuery(siddhiQuery);
             }
         } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
+            handleExceptionWithCode("Error while executing SQL", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -11869,7 +11879,8 @@ public class ApiMgtDAO {
                 policy.setPipelines(getPipelines(policy.getPolicyId()));
             }
         } catch (SQLException e) {
-            handleException("Failed to get api policy: " + policyName + '-' + tenantId, e);
+            handleExceptionWithCode("Failed to get api policy: " + policyName + '-' + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -11910,7 +11921,7 @@ public class ApiMgtDAO {
                 policy.setPipelines(getPipelines(policy.getPolicyId()));
             }
         } catch (SQLException e) {
-            handleException("Failed to get api policy: " + uuid, e);
+            handleExceptionWithCode("Failed to get api policy: " + uuid, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -11950,7 +11961,8 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(policy, resultSet);
             }
         } catch (SQLException e) {
-            handleException("Failed to get application policy: " + policyName + '-' + tenantId, e);
+            handleExceptionWithCode("Failed to get application policy: " + policyName + '-' + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -11988,7 +12000,8 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(policy, resultSet);
             }
         } catch (SQLException e) {
-            handleException("Failed to get application policy: " + uuid, e);
+            handleExceptionWithCode("Failed to get application policy: " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -12040,9 +12053,12 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get subscription policy: " + policyName + '-' + tenantId, e);
+            handleExceptionWithCode("Failed to get subscription policy: " + policyName + '-' + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (IOException e) {
-            handleException("Error while converting input stream to byte array", e);
+            String error = "Error while converting input stream to byte array";
+            handleExceptionWithCode(error, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, error));
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -12106,9 +12122,11 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get subscription policy: " + uuid, e);
+            handleExceptionWithCode("Failed to get subscription policy: " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (IOException e) {
-            handleException("Error while converting input stream to byte array", e);
+            handleExceptionWithCode("Error while converting input stream to byte array", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -12175,7 +12193,8 @@ public class ApiMgtDAO {
                 pipelines.add(pipeline);
             }
         } catch (SQLException e) {
-            handleException("Failed to get pipelines for policyId: " + policyId, e);
+            handleExceptionWithCode("Failed to get pipelines for policyId: " + policyId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(pipelinesStatement, connection, resultSet);
         }
@@ -12233,7 +12252,8 @@ public class ApiMgtDAO {
             setQueryParameterConditions(pipelineId, conditions);
             setJWTClaimConditions(pipelineId, conditions);
         } catch (SQLException e) {
-            handleException("Failed to get conditions for pipelineId: " + pipelineId, e);
+            handleExceptionWithCode("Failed to get conditions for pipelineId: " + pipelineId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
         }
@@ -12269,7 +12289,8 @@ public class ApiMgtDAO {
                 conditions.add(headerCondition);
             }
         } catch (SQLException e) {
-            handleException("Failed to get header conditions for pipelineId: " + pipelineId, e);
+            handleExceptionWithCode("Failed to get header conditions for pipelineId: " + pipelineId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
         }
@@ -12306,7 +12327,8 @@ public class ApiMgtDAO {
                 conditions.add(queryParameterCondition);
             }
         } catch (SQLException e) {
-            handleException("Failed to get query parameter conditions for pipelineId: " + pipelineId, e);
+            handleExceptionWithCode("Failed to get query parameter conditions for pipelineId: " + pipelineId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
         }
@@ -12341,7 +12363,8 @@ public class ApiMgtDAO {
                 conditions.add(jwtClaimsCondition);
             }
         } catch (SQLException e) {
-            handleException("Failed to get jwt claim conditions for pipelineId: " + pipelineId, e);
+            handleExceptionWithCode("Failed to get jwt claim conditions for pipelineId: " + pipelineId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
         }
@@ -12365,7 +12388,7 @@ public class ApiMgtDAO {
             String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
                     ", Tenant Id: " + policy.getTenantId();
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
         }
 
         try {
@@ -12390,7 +12413,7 @@ public class ApiMgtDAO {
                                 + " should be provided. Name: " + policy.getPolicyName()
                                 + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
             }
 
             updateStatement = connection.prepareStatement(updateQuery);
@@ -12442,8 +12465,9 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the update Application Policy: " + policy.toString(), ex);
                 }
             }
-            handleException(
-                    "Failed to update application policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
+            handleExceptionWithCode(
+                    "Failed to update application policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
@@ -12484,7 +12508,7 @@ public class ApiMgtDAO {
                                 + " should be provided. Name: " + policy.getPolicyName()
                                 + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
             }
 
             connection = APIMgtDBUtil.getConnection();
@@ -12591,8 +12615,9 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the update Subscription Policy: " + policy.toString(), ex);
                 }
             }
-            handleException(
-                    "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
+            handleExceptionWithCode(
+                    "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
@@ -12626,7 +12651,7 @@ public class ApiMgtDAO {
                                 + " should be provided. Name: " + policy.getPolicyName()
                                 + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.BAD_POLICY_OBJECT);
             }
 
             updateStatement.setString(1, policy.getDescription());
@@ -12650,8 +12675,9 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the update Global Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to update global policy: " + policy.getPolicyName() + '-' + policy.getTenantId(),
-                    e);
+            handleExceptionWithCode("Failed to update global policy: "
+                            + policy.getPolicyName() + '-' + policy.getTenantId(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
@@ -12889,7 +12915,8 @@ public class ApiMgtDAO {
                 isExist = true;
             }
         } catch (SQLException e) {
-            handleException("Failed to check is exist: " + policyName + '-' + tenantId, e);
+            handleExceptionWithCode("Failed to check is exist: " + policyName + '-' + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(isExistStatement, connection, null);
         }
@@ -18246,7 +18273,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while checking existence of Policy " + policyName + "Attached to Application.", e);
+            handleExceptionWithCode("Error while checking existence of Policy "
+                    + policyName + "Attached to Application.", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
         return false;
@@ -18266,7 +18294,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while checking existence of Policy " + policyName + "Attached to Subscription.", e);
+            handleExceptionWithCode("Error while checking existence of Policy "
+                    + policyName + "Attached to Subscription.", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
         return false;
@@ -18286,7 +18315,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while checking existence of Policy " + policyName + "Attached to API/Resouce.", e);
+            handleExceptionWithCode("Error while checking existence of Policy "
+                    + policyName + "Attached to API/Resouce.", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
         return false;
