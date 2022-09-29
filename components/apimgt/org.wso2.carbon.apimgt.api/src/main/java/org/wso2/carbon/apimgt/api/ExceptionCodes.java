@@ -150,6 +150,7 @@ public enum ExceptionCodes implements ErrorHandler {
     AUTHORIZATION_ERROR(900409, "Forbidden", 403, "You don't have permission to access the '%s' with Id '%s'"),
     FORBIDDEN_ERROR(900409, "Forbidden", 403, "You don't have permission to access this resource"),
     RESOURCE_NOT_FOUND_WITH_DESC(900401, "Resource not found", 404, "Requested '%s' with Id '%s' not found"),
+    UNAUTHORIZED(900410, "Unauthorized", 401, "User is unauthorized"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),

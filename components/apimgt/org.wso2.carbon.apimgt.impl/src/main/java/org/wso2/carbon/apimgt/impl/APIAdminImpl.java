@@ -1160,7 +1160,7 @@ public class APIAdminImpl implements APIAdmin {
 
         if (workflow == null) {
             String msg = "External workflow Reference: " + externelWorkflowRef + " was not found.";
-            throw new APIMgtResourceNotFoundException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.WORKFLOW_NOT_FOUND);
         }
         return workflow;
     }

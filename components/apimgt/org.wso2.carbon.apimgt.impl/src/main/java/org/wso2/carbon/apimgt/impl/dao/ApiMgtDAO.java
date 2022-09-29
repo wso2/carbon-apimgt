@@ -2293,7 +2293,8 @@ public class ApiMgtDAO {
                 keyManagerWiseApprovalState.put(keyManagerName, state);
             }
         } catch (SQLException e) {
-            handleException("Error while getting Application Registration State.", e);
+            handleExceptionWithCode("Error while getting Application Registration State.", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -5477,8 +5478,8 @@ public class ApiMgtDAO {
 
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while updating Workflow Status of workflow " + workflowDTO
-                    .getExternalWorkflowReference(), e);
+            handleExceptionWithCode("Error while updating Workflow Status of workflow " + workflowDTO
+                    .getExternalWorkflowReference(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
@@ -5527,7 +5528,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving workflow details for " + workflowReference, e);
+            handleExceptionWithCode("Error while retrieving workflow details for " + workflowReference, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -8497,8 +8499,8 @@ public class ApiMgtDAO {
                 workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
             }
         } catch (SQLException e) {
-            handleException("Error occurred while getting workflow entry for " +
-                    "Internal Ref : " + internalRef, e);
+            handleExceptionWithCode("Error occurred while getting workflow entry for " +
+                    "Internal Ref : " + internalRef, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -8752,8 +8754,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error occurred while getting subscription entries for " +
-                    "Application : " + applicationId, e);
+            handleExceptionWithCode("Error occurred while getting subscription entries for " +
+                    "Application : " + applicationId, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -15643,12 +15645,14 @@ public class ApiMgtDAO {
                 }
                 workflows = workflowsList.toArray(new Workflow[workflowsList.size()]);
             } catch (SQLException e) {
-                handleException("Error when retrieve all the workflow details. ", e);
+                handleExceptionWithCode("Error when retrieve all the workflow details. ", e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             } finally {
                 APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
             }
         } catch (SQLException e) {
-            handleException("Error when retrieve all the workflow details. ", e);
+            handleExceptionWithCode("Error when retrieve all the workflow details. ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return workflows;
     }
@@ -15711,12 +15715,14 @@ public class ApiMgtDAO {
                     }
                 }
             } catch (SQLException e) {
-                handleException("Error when retriving the workflow details. ", e);
+                handleExceptionWithCode("Error when retriving the workflow details. ", e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             } finally {
                 APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
             }
         } catch (SQLException e) {
-            handleException("Error when retriving the workflow details. ", e);
+            handleExceptionWithCode("Error when retriving the workflow details. ", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return workflow;
     }
