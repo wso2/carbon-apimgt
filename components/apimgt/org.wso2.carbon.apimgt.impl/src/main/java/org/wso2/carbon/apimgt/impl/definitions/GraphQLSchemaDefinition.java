@@ -26,6 +26,7 @@ import graphql.language.SchemaDefinition;
 import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
 import io.swagger.models.Swagger;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -104,17 +105,10 @@ public class GraphQLSchemaDefinition {
      * @return the boolean value of subscription operation availability
      */
     public boolean isSubscriptionAvailable(String schema) {
-        boolean isSubscriptionAvailable = false;
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-        Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
-        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
-            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
-                isSubscriptionAvailable = true;
-                break;
-            }
-        }
-        return isSubscriptionAvailable;
+        return UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry).getSubscriptionType() != null ?
+                true : false;
     }
 
     /**
