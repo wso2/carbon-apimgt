@@ -23,4 +23,9 @@ public class UserContextConstants {
     public static final String ATTRIB_ORGANIZATION = "organization";
     public static final String ATTRIB_ROLES = "roles";
     public static final String DOT = ".";
+    public static final String ATTRIB_CLAIMS = "claims";
+
+    public static final String JWT_CLAIM_USERNAME = "username";
+    public static final String JWT_CLAIM_ORGANIZATION = "organization";
+    public static final String JWT_CLAIM_ROLES = "roles";
 }

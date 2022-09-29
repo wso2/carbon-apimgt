@@ -18,18 +18,56 @@
 
 package org.wso2.carbon.apimgt.user.ctx.builder.impl;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.wso2.carbon.apimgt.user.ctx.builder.UserContextBuilder;
+import org.wso2.carbon.apimgt.user.ctx.util.UserContextConstants;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 
+import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class OAuthJWTUserContextBuilderImpl implements UserContextBuilder {
-    @Override
-    public Map<String, Object> getProperties() {
-        return null;
+    private final String accessToken;
+
+    public OAuthJWTUserContextBuilderImpl(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     @Override
-    public String getClaim(String claimUri) {
-        return null;
+    public Map<String, Object> getProperties() throws UserException {
+        Map<String, Object> props = new HashMap<>();
+        JWTClaimsSet claimsSet;
+        try {
+            SignedJWT jwt = SignedJWT.parse(accessToken);
+            claimsSet = jwt.getJWTClaimsSet();
+        } catch (ParseException e) {
+            throw new UserException("Cannot parse the JWT token", e);
+        }
+
+        if (claimsSet == null) {
+            throw new UserException("Cannot parse the JWT token");
+        }
+
+        Map<String, Object> claims = new HashMap<>();
+        for (Map.Entry<String, Object> claim : claimsSet.getClaims().entrySet()) {
+            switch (claim.getKey()) {
+                case UserContextConstants.JWT_CLAIM_USERNAME:
+                    props.put(UserContextConstants.ATTRIB_USERNAME, claim.getValue());
+                    break;
+                case UserContextConstants.JWT_CLAIM_ORGANIZATION:
+                    props.put(UserContextConstants.ATTRIB_ORGANIZATION, claim.getValue());
+                    break;
+                case UserContextConstants.JWT_CLAIM_ROLES:
+                    props.put(UserContextConstants.ATTRIB_ROLES, claim.getValue());
+                    break;
+                default:
+                    claims.put(claim.getKey(), claim.getValue());
+                    break;
+            }
+        }
+        props.put(UserContextConstants.ATTRIB_CLAIMS, claims);
+        return props;
     }
 }

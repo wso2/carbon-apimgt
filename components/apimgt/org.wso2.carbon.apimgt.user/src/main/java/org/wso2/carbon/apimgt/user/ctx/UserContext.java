@@ -18,28 +18,41 @@
 
 package org.wso2.carbon.apimgt.user.ctx;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.user.ctx.builder.UserContextBuilder;
+import org.wso2.carbon.apimgt.user.ctx.builder.impl.OAuthOpaqueUserContextBuilderImpl;
 import org.wso2.carbon.apimgt.user.ctx.util.UserContextConstants;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 
 import java.util.Arrays;
 import java.util.Map;
 
 public class UserContext {
+    private static final Log logger = LogFactory.getLog(OAuthOpaqueUserContextBuilderImpl.class);
     private static final ThreadLocal<UserContext> currentUserContext = ThreadLocal.withInitial(UserContext::new);
 
     private String username;
     private String organization;
     private String[] roles;
-    private UserContextBuilder builder;
+    private Map<String, String> claims;
 
     private UserContext() {
     }
 
     private UserContext(UserContextBuilder builder) {
-        this.builder = builder;
+        Map<String, Object> properties = null;
+        try {
+            properties = builder.getProperties();
+        } catch (UserException e) {
+            logger.error("Error occurred while reading user claims via the UserContextBuilder.", e);
+        }
 
-        // build the UserContext object
-        Map<String, Object> properties = builder.getProperties();
+        if (properties == null) {
+            logger.error("No user claims retrieved via the UserContextBuilder.");
+            return;
+        }
+
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             switch (entry.getKey()) {
                 case UserContextConstants.ATTRIB_USERNAME:
@@ -51,11 +64,14 @@ public class UserContext {
                 case UserContextConstants.ATTRIB_ROLES:
                     this.roles = (String[]) properties.get(UserContextConstants.ATTRIB_ROLES);
                     break;
+                case UserContextConstants.ATTRIB_CLAIMS:
+                    this.claims = (Map<String, String>) properties.get(UserContextConstants.ATTRIB_CLAIMS);
             }
         }
     }
 
     public static void initThreadLocalUserContext(UserContextBuilder builder) {
+        logger.debug("Initializing the UserContext");
         currentUserContext.set(new UserContext(builder));
     }
 
@@ -76,7 +92,7 @@ public class UserContext {
     }
 
     public String getClaim(String claimUri) {
-        return this.builder.getClaim(claimUri);
+        return claims.get(claimUri);
     }
 
     public boolean hasRole(String roleName) {
@@ -89,6 +105,7 @@ public class UserContext {
                 "username='" + username + '\'' +
                 ", organization='" + organization + '\'' +
                 ", roles=" + Arrays.toString(roles) +
+                ", claims=" + claims +
                 '}';
     }
 }

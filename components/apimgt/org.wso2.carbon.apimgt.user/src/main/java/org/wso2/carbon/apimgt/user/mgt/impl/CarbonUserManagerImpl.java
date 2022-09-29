@@ -186,13 +186,6 @@ public class CarbonUserManagerImpl implements UserManager {
     }
 
     @Override
-    public void changePasswordByUser(String userNameWithoutChange, String currentPassword, String newPassword)
-            throws UserException {
-//        UserAdmin userAdmin = new UserAdmin();
-//        userAdmin.changePasswordByUser(userNameWithoutChange, currentPassword, newPassword);
-    }
-
-    @Override
     public boolean isExistingRole(int tenantId, String role) throws UserException {
         try {
             return ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)

@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.user.ctx.util.UserContextConstants;
 public class UserContextBuilderFactory {
     public static UserContextBuilder createUserContextBuilder(String accessToken) {
         if (accessToken.contains(UserContextConstants.DOT)) {
-            return new OAuthJWTUserContextBuilderImpl();
+            return new OAuthJWTUserContextBuilderImpl(accessToken);
         }
         return new OAuthOpaqueUserContextBuilderImpl(accessToken);
     }

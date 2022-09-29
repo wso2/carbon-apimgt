@@ -18,10 +18,10 @@
 
 package org.wso2.carbon.apimgt.user.ctx.builder;
 
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
+
 import java.util.Map;
 
 public interface UserContextBuilder {
-    Map<String, Object> getProperties();
-
-    String getClaim(String claimUri);
+    Map<String, Object> getProperties() throws UserException;
 }

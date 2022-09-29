@@ -55,8 +55,6 @@ public interface UserManager {
 
     String extractDomainFromName(String userId);
 
-    void changePasswordByUser(String userNameWithoutChange, String currentPassword, String newPassword) throws UserException;
-
     boolean isExistingRole(int tenantId, String role) throws UserException;
 
     void updateRoleListOfUser(int tenantId, String username, String[] deletedRoles, String[] newRoles) throws UserException;

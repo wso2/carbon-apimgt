@@ -18,16 +18,20 @@
 
 package org.wso2.carbon.apimgt.user.ctx.builder.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.user.ctx.builder.UserContextBuilder;
 import org.wso2.carbon.apimgt.user.ctx.util.UserContextConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class OAuthOpaqueUserContextBuilderImpl implements UserContextBuilder {
+    private static final Log logger = LogFactory.getLog(OAuthOpaqueUserContextBuilderImpl.class);
     private final String accessToken;
 
     public OAuthOpaqueUserContextBuilderImpl(String accessToken) {
@@ -36,6 +40,7 @@ public class OAuthOpaqueUserContextBuilderImpl implements UserContextBuilder {
 
     @Override
     public Map<String, Object> getProperties() {
+        // todo: introspect the idp and get user claims such as username, organization, and the roles
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
 
         Map<String, Object> props = new HashMap<>();
@@ -49,20 +54,15 @@ public class OAuthOpaqueUserContextBuilderImpl implements UserContextBuilder {
         } catch (UserStoreException e) {
             e.printStackTrace();
         }
-        return props;
-    }
 
-    @Override
-    public String getClaim(String claimUri) {
         try {
-            Claim claim = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getClaimManager()
-                    .getClaim(claimUri);
-            if (claim != null) {
-                return claim.getValue();
-            }
+            ClaimMapping[] claimMappings = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                    .getClaimManager().getAllClaimMappings();
+            // todo
         } catch (UserStoreException e) {
             e.printStackTrace();
         }
-        return null;
+
+        return props;
     }
 }
