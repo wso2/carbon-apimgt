@@ -2432,7 +2432,7 @@ public class APIMappingUtil {
         if (null != product.getCreatedTime()) {
             Date createdTime = product.getCreatedTime();
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
-            productDto.setCreatedTime(String.valueOf(timeStamp));
+            productDto.setCreatedTime(String.valueOf(timeStamp.getTime()));
         }
 
         return productDto;
