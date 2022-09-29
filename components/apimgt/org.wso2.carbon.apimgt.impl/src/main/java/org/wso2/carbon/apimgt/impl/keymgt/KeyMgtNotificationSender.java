@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.impl.keymgt;
 import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -32,7 +33,10 @@ public class KeyMgtNotificationSender {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getEventHubConfigurationDto();
 
-        if (eventHubConfigurationDto.isEnabled()) {
+        // if the Token Type is EXCHANGED, there is no need to send the key manager event to the gateway
+        if (eventHubConfigurationDto.isEnabled()
+                && !KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(
+                keyManagerConfigurationDTO.getTokenType())) {
             EventPublisherEvent notificationEvent =
                     new EventPublisherEvent(APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_STREAM_ID,
                     System.currentTimeMillis(), objects, keyManagerEvent.toString());
