@@ -2937,8 +2937,8 @@ public final class APIConstants {
     }
 
     public static class ApiManagerConfigurationConstants {
-        public static final String PROPERTIES = "Property";
-        public static final String PROPERTY = "Properties";
+        public static final String PROPERTIES = "Properties";
+        public static final String PROPERTY = "Property";
         public static final String OPERATION_POLICY_CONFIGS = "OperationPolicyConfigs";
     }
 
