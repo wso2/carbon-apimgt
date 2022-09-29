@@ -26,6 +26,7 @@ import graphql.language.SchemaDefinition;
 import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 
 import java.util.ArrayList;
@@ -82,17 +83,10 @@ public class GraphQLSchemaDefinitionUtil {
      * @return the boolean value of subscription operation availability
      */
     public static boolean isSubscriptionAvailable(String schema) {
-        boolean isSubscriptionAvailable = false;
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-        Map<String, TypeDefinition> operationList = typeRegistry.types();
-        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
-            if (entry.getValue().getName().equals(GraphQLConstants.GRAPHQL_SUBSCRIPTION)) {
-                isSubscriptionAvailable = true;
-                break;
-            }
-        }
-        return isSubscriptionAvailable;
+        return UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry).getSubscriptionType() != null ?
+                true : false;
     }
 
     /**
