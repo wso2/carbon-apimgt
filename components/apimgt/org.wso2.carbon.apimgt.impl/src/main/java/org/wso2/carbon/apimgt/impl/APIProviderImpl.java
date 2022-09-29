@@ -4900,7 +4900,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.put("isMore", false);
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching the api ", e);
+            String errorMsg = (e.getMessage() == null || e.getMessage().isEmpty()) ? "Error while searching the api" : e.getMessage();
+            throw new APIManagementException(errorMsg, e);
         }
         return result ;
     }
