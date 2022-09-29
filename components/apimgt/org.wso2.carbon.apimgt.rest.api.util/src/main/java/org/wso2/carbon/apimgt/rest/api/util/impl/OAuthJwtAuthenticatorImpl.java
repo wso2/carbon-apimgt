@@ -145,9 +145,6 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
             String[] scopes = scopeClaim.split(JwtTokenConstants.SCOPE_DELIMITER);
-            scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
-                    .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
-                    .toArray(size -> new String[size]);
             oauthTokenInfo.setScopes(scopes);
             Map<String, Object> authContext = RestApiUtil.addToJWTAuthenticationContext(message);
             String basePath = (String) message.get(RestApiConstants.BASE_PATH);
