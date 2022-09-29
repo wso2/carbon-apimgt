@@ -2283,6 +2283,11 @@ public final class APIConstants {
         PRODUCT_API
     }
 
+    public enum ResourceCategory {
+        IMAGE,
+        DOC
+    }
+
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
     public static final String TENANT_STATE_INACTIVE = "INACTIVE";
 
