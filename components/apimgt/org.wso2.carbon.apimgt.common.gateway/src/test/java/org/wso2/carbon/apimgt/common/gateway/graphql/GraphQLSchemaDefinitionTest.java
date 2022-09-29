@@ -16,29 +16,26 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.common.gateway.graphql;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Test;
-import org.testng.Assert;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 public class GraphQLSchemaDefinitionTest {
-
-    private final GraphQLSchemaDefinition graphQLSchemaDefinition = new GraphQLSchemaDefinition();
-
     @Test
     public void testSubscriptionAvailability() throws Exception {
         String graphqlDirPath = "definitions" + File.separator + "graphql" + File.separator;
         String relativePath = graphqlDirPath + "schema_with_subscriptions.graphql";
         String schema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
                 StandardCharsets.UTF_8);
-        Assert.assertTrue(graphQLSchemaDefinition.isSubscriptionAvailable(schema));
+        Assert.assertTrue(GraphQLSchemaDefinitionUtil.isSubscriptionAvailable(schema));
         relativePath = graphqlDirPath + "schema_without_subscriptions.graphql";
         schema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
                 StandardCharsets.UTF_8);
-        Assert.assertFalse(graphQLSchemaDefinition.isSubscriptionAvailable(schema));
+        Assert.assertFalse(GraphQLSchemaDefinitionUtil.isSubscriptionAvailable(schema));
     }
 }

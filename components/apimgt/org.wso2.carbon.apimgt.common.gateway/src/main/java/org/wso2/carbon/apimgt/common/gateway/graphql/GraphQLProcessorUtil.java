@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils;
+package org.wso2.carbon.apimgt.common.gateway.graphql;
 
 import graphql.language.Field;
 import graphql.language.OperationDefinition;
@@ -23,8 +23,6 @@ import graphql.language.Selection;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,19 +41,26 @@ public class GraphQLProcessorUtil {
      * @param typeDefinitionRegistry TypeDefinitionRegistry
      * @return operationList
      */
-    public static String getOperationList(OperationDefinition operation,
-                                          TypeDefinitionRegistry typeDefinitionRegistry) {
-        String operationList;
-        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+    public static ArrayList<String> getOperationList(OperationDefinition operation,
+                                                     TypeDefinitionRegistry typeDefinitionRegistry) {
         ArrayList<String> operationArray = new ArrayList<>();
-
-        List<URITemplate> list = graphql.extractGraphQLOperationList(typeDefinitionRegistry,
+        ArrayList<String> supportedFields = GraphQLSchemaDefinitionUtil.getSupportedFields(typeDefinitionRegistry,
                 operation.getOperation().toString());
-        ArrayList<String> supportedFields = getSupportedFields(list);
-
         getNestedLevelOperations(operation.getSelectionSet().getSelections(), supportedFields, operationArray);
-        operationList = String.join(",", operationArray);
-        return operationList;
+        return operationArray;
+    }
+
+    /**
+     * This method used to extract operation List as a comma seperated string.
+     *
+     * @param operation              operation
+     * @param typeDefinitionRegistry TypeDefinitionRegistry
+     * @return operationList
+     */
+    public static String getOperationListAsString(OperationDefinition operation,
+                                                  TypeDefinitionRegistry typeDefinitionRegistry) {
+        ArrayList<String> operationArray = getOperationList(operation, typeDefinitionRegistry);
+        return String.join(",", operationArray);
     }
 
     /**
@@ -83,19 +88,5 @@ public class GraphQLProcessorUtil {
                 getNestedLevelOperations(levelField.getSelectionSet().getSelections(), supportedFields, operationArray);
             }
         }
-    }
-
-    /**
-     * This method helps to extract only supported operation names.
-     *
-     * @param list URITemplates
-     * @return supported Fields
-     */
-    private static ArrayList<String> getSupportedFields(List<URITemplate> list) {
-        ArrayList<String> supportedFields = new ArrayList<>();
-        for (URITemplate template : list) {
-            supportedFields.add(template.getUriTemplate());
-        }
-        return supportedFields;
     }
 }

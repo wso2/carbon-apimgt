@@ -50,6 +50,7 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -718,11 +719,11 @@ public class GatewayUtils {
                     ;
                 }
                 if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_DEPTH);
+                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_DEPTH);
                     Integer graphQLMaxComplexity =
-                            (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_COMPLEXITY);
-                    synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
-                    synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, graphQLMaxComplexity);
+                            (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_COMPLEXITY);
+                    synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
+                    synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY, graphQLMaxComplexity);
                 }
             }
         }

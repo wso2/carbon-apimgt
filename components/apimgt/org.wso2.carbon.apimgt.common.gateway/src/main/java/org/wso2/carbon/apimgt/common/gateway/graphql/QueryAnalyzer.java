@@ -27,6 +27,7 @@ import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.schema.GraphQLSchema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 import java.util.List;
 
@@ -135,6 +136,19 @@ public class QueryAnalyzer {
 
         queryAnalyzerResponseDTO.setSuccess(true);
         return queryAnalyzerResponseDTO;
+    }
+
+    /**
+     * This method analyses the query complexity
+     *
+     * @param payload            payload of the request
+     * @param complexityInfoJson gql complexity info in json string format
+     * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
+     */
+    public QueryAnalyzerResponseDTO analyseQueryMutationComplexity(String payload, int maxQueryComplexity,
+                                                                   String complexityInfoJson) throws ParseException {
+        FieldComplexityCalculator fieldComplexityCalculator = new FieldComplexityCalculatorImpl(complexityInfoJson);
+        return analyseQueryComplexity(maxQueryComplexity, payload, fieldComplexityCalculator);
     }
 
     public GraphQLSchema getSchema() {

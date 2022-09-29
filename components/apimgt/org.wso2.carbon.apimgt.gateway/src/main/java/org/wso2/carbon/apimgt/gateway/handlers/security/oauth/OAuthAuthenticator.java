@@ -28,6 +28,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
@@ -365,8 +366,8 @@ public class OAuthAuthenticator implements Authenticator {
 
             /* GraphQL Query Analysis Information */
             if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, info.getGraphQLMaxDepth());
-                synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, info.getGraphQLMaxComplexity());
+                synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH, info.getGraphQLMaxDepth());
+                synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY, info.getGraphQLMaxComplexity());
             }
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");

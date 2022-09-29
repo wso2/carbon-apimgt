@@ -21,18 +21,25 @@ import graphql.language.Definition;
 import graphql.language.Document;
 import graphql.language.OperationDefinition;
 import graphql.parser.Parser;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
 import graphql.validation.Validator;
+import java.util.Base64;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
+import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer.SubscriptionAnalyzer;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
+import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -86,7 +93,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                         responseDTO = validateQueryPayload(inboundMessageContext, document, operationId);
                         if (!responseDTO.isError()) {
                             // subscription operation name
-                            String subscriptionOperation = GraphQLProcessorUtil.getOperationList(operation,
+                            String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation,
                                     inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
                             WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
                                     APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);
@@ -100,10 +107,10 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                         .validateScopes(inboundMessageContext, subscriptionOperation, operationId);
                             }
                             if (!responseDTO.isError()) {
-                                SubscriptionAnalyzer subscriptionAnalyzer = new SubscriptionAnalyzer(
+                                QueryAnalyzer queryAnalyzer = new QueryAnalyzer(
                                         inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema());
                                 // analyze query depth and complexity
-                                responseDTO = validateQueryDepthAndComplexity(subscriptionAnalyzer,
+                                responseDTO = validateQueryDepthAndComplexity(queryAnalyzer,
                                         inboundMessageContext, graphQLSubscriptionPayload, operationId);
                                 if (!responseDTO.isError()) {
                                     //throttle for matching resource
@@ -226,20 +233,20 @@ public class GraphQLRequestProcessor extends RequestProcessor {
     /**
      * Validate query depth and complexity of graphql subscription payload.
      *
-     * @param subscriptionAnalyzer  Query complexity and depth analyzer for subscription operations
+     * @param queryAnalyzer         Query complexity and depth analyzer for subscription operations
      * @param inboundMessageContext InboundMessageContext
      * @param payload               GraphQL payload
      * @param operationId           Graphql message id
      * @return GraphQLProcessorResponseDTO
      */
-    private GraphQLProcessorResponseDTO validateQueryDepthAndComplexity(SubscriptionAnalyzer subscriptionAnalyzer,
+    private GraphQLProcessorResponseDTO validateQueryDepthAndComplexity(QueryAnalyzer queryAnalyzer,
                                                                         InboundMessageContext inboundMessageContext,
                                                                         String payload, String operationId) {
 
-        GraphQLProcessorResponseDTO responseDTO = validateQueryDepth(subscriptionAnalyzer, inboundMessageContext,
+        GraphQLProcessorResponseDTO responseDTO = validateQueryDepth(queryAnalyzer, inboundMessageContext,
                 payload, operationId);
         if (!responseDTO.isError()) {
-            return validateQueryComplexity(subscriptionAnalyzer, inboundMessageContext, payload, operationId);
+            return validateQueryComplexity(queryAnalyzer, inboundMessageContext, payload, operationId);
         }
         return responseDTO;
     }
@@ -247,22 +254,25 @@ public class GraphQLRequestProcessor extends RequestProcessor {
     /**
      * Validate query complexity of graphql subscription payload.
      *
-     * @param subscriptionAnalyzer  Query complexity and depth analyzer for subscription operations
+     * @param queryAnalyzer         Query complexity and depth analyzer for subscription operations
      * @param inboundMessageContext InboundMessageContext
      * @param payload               GraphQL payload
      * @param operationId           Graphql message id
      * @return GraphQLProcessorResponseDTO
      */
-    private GraphQLProcessorResponseDTO validateQueryComplexity(SubscriptionAnalyzer subscriptionAnalyzer,
+    private GraphQLProcessorResponseDTO validateQueryComplexity(QueryAnalyzer queryAnalyzer,
                                                                 InboundMessageContext inboundMessageContext,
                                                                 String payload, String operationId) {
 
         GraphQLProcessorResponseDTO responseDTO = new GraphQLProcessorResponseDTO();
         responseDTO.setId(operationId);
         try {
+            //get access control policy
+            String accessControlInfo = getGraphQLAccessControlInfo(inboundMessageContext.getGraphQLSchemaDTO()
+                    .getGraphQLSchema());
             QueryAnalyzerResponseDTO queryAnalyzerResponseDTO =
-                    subscriptionAnalyzer.analyseSubscriptionQueryComplexity(payload,
-                            inboundMessageContext.getInfoDTO().getGraphQLMaxComplexity());
+                    queryAnalyzer.analyseQueryMutationComplexity(payload,
+                            inboundMessageContext.getInfoDTO().getGraphQLMaxComplexity(), accessControlInfo);
             if (!queryAnalyzerResponseDTO.isSuccess() && !queryAnalyzerResponseDTO.getErrorList().isEmpty()) {
                 List<String> errorList = queryAnalyzerResponseDTO.getErrorList();
                 log.error("Query complexity validation failed for: " + payload + " errors: " + errorList.toString());
@@ -272,10 +282,15 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                         + " : " + queryAnalyzerResponseDTO.getErrorList().toString());
                 return responseDTO;
             }
-        } catch (APIManagementException e) {
+        } catch (ParseException e) {
             log.error("Error while validating query complexity for: " + payload, e);
             responseDTO.setError(true);
             responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.INTERNAL_SERVER_ERROR);
+        } catch (APIManagementException e) {
+            log.error("Error while validating query complexity for: " + payload, e);
+            responseDTO.setError(true);
+            responseDTO.setErrorMessage(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY + " not found in schema");
             responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.INTERNAL_SERVER_ERROR);
         }
         return responseDTO;
@@ -284,20 +299,20 @@ public class GraphQLRequestProcessor extends RequestProcessor {
     /**
      * Validate query depth of graphql subscription payload.
      *
-     * @param subscriptionAnalyzer  Query complexity and depth analyzer for subscription operations
+     * @param queryAnalyzer         Query complexity and depth analyzer for subscription operations
      * @param inboundMessageContext InboundMessageContext
      * @param payload               GraphQL payload
      * @param operationId           GraphQL message Id
      * @return GraphQLProcessorResponseDTO
      */
-    private GraphQLProcessorResponseDTO validateQueryDepth(SubscriptionAnalyzer subscriptionAnalyzer,
+    private GraphQLProcessorResponseDTO validateQueryDepth(QueryAnalyzer queryAnalyzer,
                                                            InboundMessageContext inboundMessageContext,
                                                            String payload, String operationId) {
 
         GraphQLProcessorResponseDTO responseDTO = new GraphQLProcessorResponseDTO();
         responseDTO.setId(operationId);
         QueryAnalyzerResponseDTO queryAnalyzerResponseDTO =
-                subscriptionAnalyzer.analyseSubscriptionQueryDepth(inboundMessageContext.getInfoDTO().
+                queryAnalyzer.analyseQueryDepth(inboundMessageContext.getInfoDTO().
                         getGraphQLMaxDepth(), payload);
         if (!queryAnalyzerResponseDTO.isSuccess() && !queryAnalyzerResponseDTO.getErrorList().isEmpty()) {
             List<String> errorList = queryAnalyzerResponseDTO.getErrorList();
@@ -309,5 +324,27 @@ public class GraphQLRequestProcessor extends RequestProcessor {
             return responseDTO;
         }
         return responseDTO;
+    }
+
+    /**
+     * Get GraphQL complexity access control information from schema.
+     *
+     * @return Access Control policy
+     * @throws APIManagementException if an error occurs
+     */
+    private String getGraphQLAccessControlInfo(GraphQLSchema schema) throws APIManagementException {
+        String graphQLAccessControlPolicy;
+        Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
+        for (GraphQLType additionalType : additionalTypes) {
+            String additionalTypeName = ((GraphQLObjectType) additionalType).getName();
+            if (additionalTypeName.startsWith(APIConstants.GRAPHQL_ADDITIONAL_TYPE_PREFIX) &&
+                    additionalTypeName.contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                for (GraphQLFieldDefinition type : ((GraphQLObjectType) additionalType).getFieldDefinitions()) {
+                    graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
+                    return graphQLAccessControlPolicy;
+                }
+            }
+        }
+        throw new APIManagementException(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY + " not found in schema");
     }
 }
