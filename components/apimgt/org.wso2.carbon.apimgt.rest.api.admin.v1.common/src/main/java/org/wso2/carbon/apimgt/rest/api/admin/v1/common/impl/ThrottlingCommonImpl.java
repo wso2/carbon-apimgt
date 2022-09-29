@@ -30,6 +30,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -39,10 +40,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.RestApiAdminUtils;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttling.AdvancedThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttling.ApplicationThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttling.GlobalThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttling.SubscriptionThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.mappings.throttling.*;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -53,6 +51,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +60,9 @@ public class ThrottlingCommonImpl {
     private static final Log log = LogFactory.getLog(ThrottlingCommonImpl.class);
     private static final String ALL_TYPES = "all";
     private static final String EXISTS_CONSTANT = " already exists";
+
+    private static final String DTO = "dto";
+    private static final String MESSAGE = "message";
 
     private ThrottlingCommonImpl() {
     }
@@ -848,6 +850,172 @@ public class ThrottlingCommonImpl {
                 policyName, type));
     }
 
+    public static Map<String, Object> importThrottlingPolicy(InputStream fileInputStream, String fileName,
+                                                             boolean overwrite)
+            throws APIManagementException {
+        ExportThrottlePolicyDTO exportThrottlePolicyDTO = null;
+        String policyType = "";
+        try {
+            exportThrottlePolicyDTO = getImportedPolicy(fileInputStream, fileName);
+        } catch (APIImportExportException | IOException | ParseException e) {
+            String errorMessage = "Error retrieving Throttling policy";
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
+        }
+        if (exportThrottlePolicyDTO != null) {
+            policyType = exportThrottlePolicyDTO.getSubtype();
+        } else {
+            String errorMessage = "Error resolving ExportThrottlePolicyDTO";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
+        }
+
+        return resolveUpdateThrottlingPolicy(policyType, overwrite, exportThrottlePolicyDTO);
+    }
+
+    /**
+     * Get all deny policies
+     *
+     * @return Block condition DTO
+     * @throws APIManagementException When an internal error occurs
+     */
+    public static BlockingConditionListDTO getAllDenyPolicies() throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            List<BlockConditionsDTO> blockConditions = apiProvider.getBlockConditions();
+            return BlockingConditionMappingUtil.fromBlockConditionListToListDTO(blockConditions);
+        } catch (ParseException e) {
+            String errorMessage = "Error while retrieving Block Conditions";
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
+        }
+    }
+
+    /**
+     * Create new deny policy
+     *
+     * @param body Block condition DTO
+     * @return Block condition DTO
+     * @throws APIManagementException When an internal error occurs
+     */
+    public static BlockingConditionDTO addDenyPolicy(BlockingConditionDTO body) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
+        //  exists in the system
+        String uuid = null;
+        try {
+            if (BlockingConditionDTO.ConditionTypeEnum.API.equals(body.getConditionType()) ||
+                    BlockingConditionDTO.ConditionTypeEnum.APPLICATION.equals(body.getConditionType()) ||
+                    BlockingConditionDTO.ConditionTypeEnum.USER.equals(body.getConditionType())) {
+                uuid = apiProvider.addBlockCondition(body.getConditionType().toString(),
+                        (String) body.getConditionValue(), body.isConditionStatus());
+            } else if ((BlockingConditionDTO.ConditionTypeEnum.IP.equals(body.getConditionType())
+                    || BlockingConditionDTO.ConditionTypeEnum.IPRANGE.equals(body.getConditionType()))
+                    && body.getConditionValue() instanceof Map) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.putAll((Map) body.getConditionValue());
+
+                if (BlockingConditionDTO.ConditionTypeEnum.IP.equals(body.getConditionType())) {
+                    RestApiAdminUtils.validateIPAddress(jsonObject.get("fixedIp").toString());
+                }
+                if (BlockingConditionDTO.ConditionTypeEnum.IPRANGE.equals(body.getConditionType())) {
+                    RestApiAdminUtils.validateIPAddress(jsonObject.get("startingIp").toString());
+                    RestApiAdminUtils.validateIPAddress(jsonObject.get("endingIp").toString());
+                }
+                uuid = apiProvider.addBlockCondition(body.getConditionType().toString(),
+                        jsonObject.toJSONString(), body.isConditionStatus());
+            }
+        } catch (BlockConditionAlreadyExistsException e) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.BLOCK_CONDITION_ALREADY_EXISTS,
+                    body.getConditionType().toString(), body.getConditionValue().toString()));
+        }
+
+        try {
+            //retrieve the new blocking condition and send back as the response
+            BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(uuid);
+            return BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
+        } catch (ParseException e) {
+            String errorMessage = "Error while adding Blocking Condition. Condition type: "
+                    + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
+        }
+    }
+
+    public static BlockingConditionDTO getDenyPolicyById(String conditionId) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+
+        try {
+            //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
+            BlockConditionsDTO blockCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(username, blockCondition)) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
+                        RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
+            }
+            return BlockingConditionMappingUtil.fromBlockingConditionToDTO(blockCondition);
+        } catch (BlockConditionAlreadyExistsException e) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
+                    RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
+        } catch (ParseException e) {
+            String errorMessage = "Error while retrieving Blocking Conditions";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
+        }
+    }
+
+    /**
+     * Remove deny policy
+     *
+     * @param conditionId Deny policy ID
+     * @throws APIManagementException When an internal error occurs
+     */
+    public static void removeDenyPolicy(String conditionId) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+
+        try {
+            //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
+            BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(username, existingCondition)) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
+                        RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
+            }
+            apiProvider.deleteBlockConditionByUUID(conditionId);
+        } catch (BlockConditionNotFoundException e) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
+                    RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
+        }
+    }
+
+    public static BlockingConditionDTO updateDenyPolicy(String conditionId, BlockingConditionStatusDTO body)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+
+        try {
+            //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
+            BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(username, existingCondition)) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.AUTHORIZATION_ERROR,
+                        RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
+            }
+
+            //update the status
+            apiProvider.updateBlockConditionByUUID(conditionId, String.valueOf(body.isConditionStatus()));
+
+            //retrieve the new blocking condition and send back as the response
+            BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            return BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
+        } catch (BlockConditionNotFoundException e) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.RESOURCE_NOT_FOUND_WITH_DESC,
+                    RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId));
+        } catch (ParseException e) {
+            String errorMessage = "Error while updating Block Condition Status. Id : " + conditionId;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
+        }
+    }
 
 
     /**
@@ -1048,5 +1216,211 @@ public class ThrottlingCommonImpl {
             importPolicy = mapper.convertValue(jsonObject, ExportThrottlePolicyDTO.class);
         }
         return importPolicy;
+    }
+
+    /**
+     * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
+     *
+     * @param policyType              Throttling policy type
+     * @param overwrite               User can either update an existing throttling policy with the same name or let the conflict happen
+     * @param exportThrottlePolicyDTO the policy to be imported
+     * @return Response with  message indicating the status of the importation and the imported/updated policy name
+     */
+    private static Map<String, Object> resolveUpdateThrottlingPolicy(String policyType, boolean overwrite,
+                                                                     ExportThrottlePolicyDTO exportThrottlePolicyDTO)
+            throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Map<String, Object> responseObject;
+
+        if (RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY.equals(policyType)) {
+            responseObject = resolveUpdateSubscriptionPolicy(mapper, apiProvider, overwrite, username,
+                    exportThrottlePolicyDTO);
+        } else if (RestApiConstants.RESOURCE_APP_POLICY.equals(policyType)) {
+            responseObject = resolveUpdateApplicationPolicy(mapper, apiProvider, overwrite, username,
+                    exportThrottlePolicyDTO);
+        } else if (RestApiConstants.RESOURCE_CUSTOM_RULE.equals(policyType)) {
+            responseObject = resolveUpdateCustomRule(mapper, apiProvider, overwrite, exportThrottlePolicyDTO);
+        } else if (RestApiConstants.RESOURCE_ADVANCED_POLICY.equals(policyType)) {
+            responseObject = resolveUpdateAdvancedPolicy(mapper, apiProvider, overwrite, username,
+                    exportThrottlePolicyDTO);
+        } else {
+            String errorMessage = "Error with Throttling Policy Type : " + policyType;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
+        }
+        return responseObject;
+    }
+
+    /**
+     * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
+     *
+     * @param mapper                  Object mapper
+     * @param apiProvider             API Provider
+     * @param overwrite               Override the existing policy
+     * @param username                Username
+     * @param exportThrottlePolicyDTO Throttle policy DTO
+     * @return Map of policy DTO and message
+     * @throws APIManagementException When an internal error occurs
+     */
+    private static Map<String, Object> resolveUpdateSubscriptionPolicy(ObjectMapper mapper, APIProvider apiProvider,
+                                                                       boolean overwrite, String username,
+                                                                       ExportThrottlePolicyDTO exportThrottlePolicyDTO)
+            throws APIManagementException {
+        Map<String, Object> responseObject = new HashMap<>();
+        SubscriptionThrottlePolicyDTO subscriptionPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
+                SubscriptionThrottlePolicyDTO.class);
+        Policy policyIfExists = apiProvider.getSubscriptionPolicy(username, subscriptionPolicy.getPolicyName());
+        if (policyIfExists != null) {
+            if (overwrite) {
+                String uuid = policyIfExists.getUUID();
+                SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO
+                        = updateSubscriptionThrottlePolicy(uuid, subscriptionPolicy);
+                String message = "Successfully updated Subscription Throttling Policy : "
+                        + subscriptionPolicy.getPolicyName();
+                responseObject.put(DTO, subscriptionThrottlePolicyDTO);
+                responseObject.put(MESSAGE, message);
+                return responseObject;
+            } else {
+                String errorMessage = "Subscription Policy with name " + subscriptionPolicy.getPolicyName()
+                        + EXISTS_CONSTANT;
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_POLICY_EXISTS,
+                                subscriptionPolicy.getPolicyName()));
+            }
+        } else {
+            SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO
+                    = addSubscriptionThrottlePolicy(subscriptionPolicy);
+            String message =
+                    "Successfully imported Subscription Throttling Policy : " + subscriptionPolicy.getPolicyName();
+            responseObject.put(DTO, subscriptionThrottlePolicyDTO);
+            responseObject.put(MESSAGE, message);
+            return responseObject;
+        }
+    }
+
+    /**
+     * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
+     *
+     * @param mapper                  Object mapper
+     * @param apiProvider             API Provider
+     * @param overwrite               Override the existing policy
+     * @param username                Username
+     * @param exportThrottlePolicyDTO Throttle policy DTO
+     * @return Map of policy DTO and message
+     * @throws APIManagementException When an internal error occurs
+     */
+    private static Map<String, Object> resolveUpdateApplicationPolicy(ObjectMapper mapper, APIProvider apiProvider,
+                                                                      boolean overwrite, String username,
+                                                                      ExportThrottlePolicyDTO exportThrottlePolicyDTO)
+            throws APIManagementException {
+        Map<String, Object> responseObject = new HashMap<>();
+        ApplicationThrottlePolicyDTO applicationPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
+                ApplicationThrottlePolicyDTO.class);
+        Policy policyIfExists = apiProvider.getApplicationPolicy(username, applicationPolicy.getPolicyName());
+        if (policyIfExists != null) {
+            if (overwrite) {
+                String uuid = policyIfExists.getUUID();
+                ApplicationThrottlePolicyDTO applicationThrottlePolicyDTO
+                        = updateApplicationThrottlePolicy(uuid, applicationPolicy);
+                String message = "Successfully updated Application Throttling Policy : "
+                        + applicationPolicy.getPolicyName();
+                responseObject.put(DTO, applicationThrottlePolicyDTO);
+                responseObject.put(MESSAGE, message);
+            } else {
+                String errorMessage = "Application Policy with name " + applicationPolicy.getPolicyName()
+                        + EXISTS_CONSTANT;
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.APPLICATION_POLICY_EXISTS,
+                                applicationPolicy.getPolicyName()));
+            }
+        } else {
+            ApplicationThrottlePolicyDTO applicationThrottlePolicyDTO = addApplicationThrottlePolicy(applicationPolicy);
+            String message =
+                    "Successfully imported Application Throttling Policy : " + applicationPolicy.getPolicyName();
+            responseObject.put(DTO, applicationThrottlePolicyDTO);
+            responseObject.put(MESSAGE, message);
+        }
+        return responseObject;
+    }
+
+    /**
+     * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
+     *
+     * @param mapper                  Object mapper
+     * @param apiProvider             API Provider
+     * @param overwrite               Override the existing policy
+     * @param exportThrottlePolicyDTO Throttle policy DTO
+     * @return Map of policy DTO and message
+     * @throws APIManagementException When an internal error occurs
+     */
+    private static Map<String, Object> resolveUpdateCustomRule(ObjectMapper mapper, APIProvider apiProvider,
+                                                               boolean overwrite,
+                                                               ExportThrottlePolicyDTO exportThrottlePolicyDTO)
+            throws APIManagementException {
+        Map<String, Object> responseObject = new HashMap<>();
+        CustomRuleDTO customPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(), CustomRuleDTO.class);
+        Policy policyIfExists = apiProvider.getGlobalPolicy(customPolicy.getPolicyName());
+        if (policyIfExists != null) {
+            if (overwrite) {
+                String uuid = policyIfExists.getUUID();
+                CustomRuleDTO customRuleDTO = updateCustomRule(uuid, customPolicy);
+                String message = "Successfully updated Custom Throttling Policy : " + customPolicy.getPolicyName();
+                responseObject.put(DTO, customRuleDTO);
+                responseObject.put(MESSAGE, message);
+            } else {
+                String errorMessage = "Custom Policy with name " + customPolicy.getPolicyName() + EXISTS_CONSTANT;
+                throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.CUSTOM_RULE_EXISTS,
+                        customPolicy.getPolicyName()));
+            }
+        } else {
+            CustomRuleDTO customRuleDTO = addCustomRule(customPolicy);
+            String message = "Successfully imported Custom Throttling Policy : " + customPolicy.getPolicyName();
+            responseObject.put(DTO, customRuleDTO);
+            responseObject.put(MESSAGE, message);
+        }
+        return responseObject;
+    }
+
+    /**
+     * Checks if the policy exists to either update the policy or indicate the conflict or import a new policy
+     *
+     * @param mapper                  Object mapper
+     * @param apiProvider             API Provider
+     * @param overwrite               Override the existing policy
+     * @param username                Username
+     * @param exportThrottlePolicyDTO Throttle policy DTO
+     * @return Map of policy DTO and message
+     * @throws APIManagementException When an internal error occurs
+     */
+    private static Map<String, Object> resolveUpdateAdvancedPolicy(ObjectMapper mapper, APIProvider apiProvider,
+                                                                   boolean overwrite, String username,
+                                                                   ExportThrottlePolicyDTO exportThrottlePolicyDTO)
+            throws APIManagementException {
+        Map<String, Object> responseObject = new HashMap<>();
+        AdvancedThrottlePolicyDTO advancedPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(),
+                AdvancedThrottlePolicyDTO.class);
+        Policy policyIfExists = apiProvider.getAPIPolicy(username, advancedPolicy.getPolicyName());
+        if (policyIfExists != null) {
+            if (overwrite) {
+                String uuid = policyIfExists.getUUID();
+                AdvancedThrottlePolicyDTO advancedThrottlePolicyDTO = updateAdvancedPolicy(uuid, advancedPolicy);
+                String message =
+                        "Successfully updated Advanced Throttling Policy : " + advancedPolicy.getPolicyName();
+                responseObject.put(DTO, advancedThrottlePolicyDTO);
+                responseObject.put(MESSAGE, message);
+            } else {
+                String errorMessage = "Advanced Policy with name " + advancedPolicy.getPolicyName() + EXISTS_CONSTANT;
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.ADVANCED_POLICY_EXISTS, advancedPolicy.getPolicyName()));
+            }
+        } else {
+            AdvancedThrottlePolicyDTO advancedThrottlePolicyDTO = addAdvancedPolicy(advancedPolicy);
+            String message = "Successfully imported Advanced Throttling Policy : " + advancedPolicy.getPolicyName();
+            responseObject.put(DTO, advancedThrottlePolicyDTO);
+            responseObject.put(MESSAGE, message);
+        }
+        return responseObject;
     }
 }

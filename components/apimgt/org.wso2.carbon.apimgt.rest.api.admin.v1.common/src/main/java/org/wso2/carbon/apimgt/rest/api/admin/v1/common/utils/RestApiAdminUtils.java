@@ -157,7 +157,8 @@ public class RestApiAdminUtils {
         Matcher ip6Matcher = ip6Pattern.matcher(ipAddress);
         boolean result = !ip4Matcher.find() && !ip6Matcher.find();
         if (result) {
-            throw new APIManagementException(ipAddress + " is an invalid ip address format");
+            throw new APIManagementException(ipAddress + " is an invalid ip address format",
+                    ExceptionCodes.INVALID_IP_ADDRESS_FORMAT);
         }
     }
 

@@ -350,7 +350,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
-    INTERNAL_ERROR_WITH_SPECIFIC_DESC(903007, "Server Error Occurred", 500, "'%s'"),
+    INTERNAL_ERROR_WITH_SPECIFIC_DESC(903007, "Internal Server Error", 500, "'%s'"),
 
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
@@ -388,6 +388,8 @@ public enum ExceptionCodes implements ErrorHandler {
     BAD_POLICY_OBJECT(902010, "Policy object doesn't contain mandatory parameters", 500, "Policy object doesn't contain mandatory parameters."),
     SUBSCRIPTION_POLICY_UPDATE_FAILED(902911, "Error while updating Subscription level policy : '%s'", 500, "Server Error Occurred"),
     CUSTOM_RULE_EXISTS(902914, "Custom rule already exists", 409, "Custom rule with name %s already exists"),
+    INVALID_IP_ADDRESS_FORMAT(902915, "Invalid IP address format", 400, "Invalid IP address format"),
+    BLOCK_CONDITION_ALREADY_EXISTS(902916, "Block condition already exists", 409, "A block condition with type: %s, value: %s already exists"),
     ALREADY_ASSIGNED_APP_POLICY_DELETE_ERROR(902912, "Cannot delete the application throttling policy", 409, "Policy %s is already attached to an Application"),
     ALREADY_ASSIGNED_SUB_POLICY_DELETE_ERROR(902913, "Cannot delete the subscription throttling policy", 409, "Policy %s already has subscriptions"),
 
@@ -401,7 +403,6 @@ public enum ExceptionCodes implements ErrorHandler {
     BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT(900977, "Block Condition Error", 400, "API Context does not exist"),
     BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME(900978, "Block Condition Error", 400, "Application ID or Name does not " +
             "exist"),
-    BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists"),
     SYSTEM_APP_NOT_FOUND(900980, "System Application not found", 409, "System Application not found"),
 
     SHARED_SCOPE_NOT_FOUND(900981, "Shared Scope not found", 404,

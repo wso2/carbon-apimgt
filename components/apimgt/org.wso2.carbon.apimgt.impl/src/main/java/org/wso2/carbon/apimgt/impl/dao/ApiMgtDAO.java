@@ -12989,7 +12989,7 @@ public class ApiMgtDAO {
                     valid = true;
                 } else {
                     throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
-                            conditionValue);
+                            conditionValue, ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT);
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(conditionType)) {
                 String appArray[] = conditionValue.split(":");
@@ -13003,14 +13003,15 @@ public class ApiMgtDAO {
                     } else {
                         throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
                                 "name " + appName + " from Application " +
-                                "Owner " + appOwner);
+                                "Owner " + appOwner, ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME);
                     }
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
                 if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
                     valid = true;
                 } else {
-                    throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
+                    throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain,
+                            ExceptionCodes.INTERNAL_ERROR);
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
                     APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
@@ -13038,7 +13039,7 @@ public class ApiMgtDAO {
                     } else {
                         throw new APIManagementException(
                                 "Couldn't Save Subscription Block Condition Due to Invalid API Context "
-                                        + apiContext);
+                                        + apiContext, ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT);
                     }
 
                     // Check whether the given application is valid
@@ -13048,11 +13049,13 @@ public class ApiMgtDAO {
                     } else {
                         throw new APIManagementException(
                                 "Couldn't Save Subscription Block Condition Due to Invalid Application " + "name "
-                                        + appName + " from Application " + "Owner " + appOwner);
+                                        + appName + " from Application " + "Owner " + appOwner,
+                                ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME);
                     }
                 } else {
                     throw new APIManagementException(
-                            "Invalid subscription block condition with insufficient data : " + conditionValue);
+                            "Invalid subscription block condition with insufficient data : " + conditionValue,
+                            ExceptionCodes.INTERNAL_ERROR);
                 }
             }
             if (valid) {
@@ -13084,12 +13087,13 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException(
+                    handleExceptionWithCode(
                             "Failed to rollback adding Block condition : " + conditionType + " and " + conditionValue,
-                            ex);
+                            ex, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             }
-            handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
+            handleExceptionWithCode("Failed to add Block condition : " + conditionType + " and " + conditionValue, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
         }
@@ -13178,10 +13182,12 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to rollback getting Block condition by uuid " + uuid, ex);
+                    handleExceptionWithCode("Failed to rollback getting Block condition by uuid " + uuid, ex,
+                            ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             }
-            handleException("Failed to get Block condition by uuid " + uuid, e);
+            handleExceptionWithCode("Failed to get Block condition by uuid " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
@@ -13216,10 +13222,11 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to rollback getting Block conditions ", ex);
+                    handleExceptionWithCode("Failed to rollback getting Block conditions ", ex,
+                            ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             }
-            handleException("Failed to get Block conditions", e);
+            handleExceptionWithCode("Failed to get Block conditions", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
@@ -13292,10 +13299,12 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to rollback updating Block condition with condition UUID " + uuid, ex);
+                    handleExceptionWithCode("Failed to rollback updating Block condition with condition UUID " + uuid,
+                            ex, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             }
-            handleException("Failed to update Block condition with condition UUID " + uuid, e);
+            handleExceptionWithCode("Failed to update Block condition with condition UUID " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
         }
@@ -13328,10 +13337,12 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to rollback deleting Block condition with condition id " + conditionId, ex);
+                    handleExceptionWithCode("Failed to rollback deleting Block condition with condition id "
+                            + conditionId, ex, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             }
-            handleException("Failed to delete Block condition with condition id " + conditionId, e);
+            handleExceptionWithCode("Failed to delete Block condition with condition id " + conditionId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
         }
@@ -13396,10 +13407,12 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to rollback checking Block condition with context " + context, ex);
+                    handleExceptionWithCode("Failed to rollback checking Block condition with context " + context, ex,
+                            ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             }
-            handleException("Failed to check Block condition with context " + context, e);
+            handleExceptionWithCode("Failed to check Block condition with context " + context, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
         }
@@ -13430,13 +13443,13 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException(
+                    handleExceptionWithCode(
                             "Failed to rollback checking Block condition with Application Name " + appName + " with "
-                                    + "Application Owner" + appOwner, ex);
+                                    + "Application Owner" + appOwner, ex, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             }
-            handleException("Failed to check Block condition with Application Name " + appName + " with " +
-                    "Application Owner" + appOwner, e);
+            handleExceptionWithCode("Failed to check Block condition with Application Name " + appName + " with " +
+                    "Application Owner" + appOwner, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
         }
@@ -13519,7 +13532,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             String msg = "Couldn't check the Block Condition Exist";
             log.error(msg, e);
-            handleException(msg, e);
+            handleExceptionWithCode(msg, e,ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, null, checkIsResultSet);
         }
