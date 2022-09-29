@@ -133,6 +133,8 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.mgt.UserAdmin;
+import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -3510,9 +3512,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Password change operation is disabled in the system",
                     ExceptionCodes.PASSWORD_CHANGE_DISABLED);
         }
+        UserAdmin userAdmin = new UserAdmin();
         try {
-            UserManagerHolder.getUserManager().changePasswordByUser(userNameWithoutChange, currentPassword, newPassword);
-        } catch (UserException e) {
+            userAdmin.changePasswordByUser(userNameWithoutChange, currentPassword, newPassword);
+        } catch (UserAdminException e) {
             String genericErrorMessage = "Error occurred while changing the user password";
             if (log.isDebugEnabled()) {
                 log.debug(genericErrorMessage, e);

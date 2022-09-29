@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.impl.wsdl;
 
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,7 +29,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtilTest;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
