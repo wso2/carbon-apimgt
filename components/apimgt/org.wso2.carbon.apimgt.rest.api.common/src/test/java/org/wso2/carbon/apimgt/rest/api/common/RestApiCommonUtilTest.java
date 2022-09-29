@@ -64,21 +64,6 @@ public class RestApiCommonUtilTest {
     }
 
     @Test
-    public void testGetLoggedInUserTenantDomain() {
-
-        String defaultTenantDomain = "wso2.com";
-        System.setProperty(CarbonBaseConstants.CARBON_HOME, "");
-
-        PowerMockito.mockStatic(CarbonContext.class);
-        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
-        when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
-        when(carbonContext.getTenantDomain()).thenReturn(defaultTenantDomain);
-
-        String loggedInUsername = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        Assert.assertEquals(defaultTenantDomain, loggedInUsername);
-    }
-
-    @Test
     public void testGetConsumer() throws APIManagementException {
 
         String userName = "TEST_USER";

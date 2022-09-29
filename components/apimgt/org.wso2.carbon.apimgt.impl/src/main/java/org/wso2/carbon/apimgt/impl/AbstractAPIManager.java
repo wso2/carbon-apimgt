@@ -294,8 +294,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
-
-        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String username = org.wso2.carbon.apimgt.user.ctx.UserContext.getThreadLocalUserContext().getUsername();
 
         Organization org = new Organization(organization);
         UserContext ctx = new UserContext(username, org, null, null);

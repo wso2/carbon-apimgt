@@ -88,6 +88,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.apimgt.user.mgt.UserConstants;
 import org.wso2.carbon.apimgt.user.mgt.internal.UserManagerHolder;
@@ -501,7 +502,7 @@ public class APIManagerComponent {
         String permissionResourcePath = CarbonConstants.UI_PERMISSION_NAME + RegistryConstants.PATH_SEPARATOR + APPLICATION_ROOT_PERMISSION;
         try {
             if (!tenantGovReg.resourceExists(permissionResourcePath)) {
-                String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+                String loggedInUser = UserContext.getThreadLocalUserContext().getUsername();
                 // Logged in user is not authorized to create the permission.
                 // Temporarily change the user to the admin for creating the permission
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(UserManagerHolder.getUserManager().getAdminUsername());

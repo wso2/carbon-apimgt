@@ -62,21 +62,6 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 public class RestApiUtilTest {
 
     @Test
-    public void testGetLoggedInUsername() {
-
-        System.setProperty(CARBON_HOME, "");
-        String defaultUsername = "default@user.com";
-
-        mockStatic(CarbonContext.class);
-        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
-        Mockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
-        Mockito.when(carbonContext.getUsername()).thenReturn(defaultUsername);
-
-        String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
-        Assert.assertEquals(defaultUsername, loggedInUsername);
-    }
-
-    @Test
     public void testHandleBadRequest() {
 
         String errorMessage = "Application name or owner should not be empty or null.";

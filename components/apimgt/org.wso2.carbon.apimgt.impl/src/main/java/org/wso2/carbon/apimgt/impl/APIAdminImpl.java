@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -974,7 +975,7 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public List<APICategory> getAPICategoriesOfOrganization(String organization) throws APIManagementException {
-        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String username = UserContext.getThreadLocalUserContext().getUsername();
         List<APICategory> categories = getAllAPICategoriesOfOrganization(organization);
         if (categories.size() > 0) {
             for (APICategory category : categories) {

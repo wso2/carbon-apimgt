@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.user.ctx.UserContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
@@ -334,13 +334,11 @@ public class RestApiCommonUtil {
     }
 
     public static String getLoggedInUsername() {
-
-        return CarbonContext.getThreadLocalCarbonContext().getUsername();
+        return UserContext.getThreadLocalUserContext().getUsername();
     }
 
     public static String getLoggedInUserTenantDomain() {
-
-        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        return UserContext.getThreadLocalUserContext().getOrganization();
     }
 
     /**
