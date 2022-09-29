@@ -142,6 +142,7 @@ public class API implements Serializable {
     //Custom authorization header specific to the API
     private String authorizationHeader;
     private Set<Scope> scopes;
+    private String scopePrefix;
 
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
@@ -930,6 +931,14 @@ public class API implements Serializable {
 
     public void setScopes(Set<Scope> scopes) {
         this.scopes = scopes;
+    }
+
+    public String getScopePrefix() {
+        return scopePrefix;
+    }
+
+    public void setScopePrefix(String scopePrefix) {
+        this.scopePrefix = scopePrefix;
     }
 
     @Deprecated

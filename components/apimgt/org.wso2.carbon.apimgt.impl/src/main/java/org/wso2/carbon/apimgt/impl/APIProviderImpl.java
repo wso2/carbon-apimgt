@@ -7951,6 +7951,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setRevision(true);
             api.setRevisionedApiId(apiRevision.getApiUUID());
             api.setRevisionId(apiRevision.getId());
+            api.setScopePrefix(apiRevision.getScopePrefix());
         }
     }
     private void populateRevisionInformation(APIProduct apiProduct, String revisionUUID) throws APIManagementException {

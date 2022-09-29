@@ -303,6 +303,7 @@ return null;
     }
     private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
+    private String scopePrefix = null;
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
     @Scope(name = "apim:api_publish", description="", value ="")
@@ -1124,6 +1125,24 @@ return null;
   }
 
   /**
+   * Unique scope identifier of an API
+   **/
+  public APIDTO scopePrefix(String scopePrefix) {
+    this.scopePrefix = scopePrefix;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "urn:APIID", value = "Unique scope identifier of an API")
+  @JsonProperty("scopePrefix")
+  public String getScopePrefix() {
+    return scopePrefix;
+  }
+  public void setScopePrefix(String scopePrefix) {
+    this.scopePrefix = scopePrefix;
+  }
+
+  /**
    **/
   public APIDTO operations(List<APIOperationsDTO> operations) {
     this.operations = operations;
@@ -1288,6 +1307,7 @@ return null;
         Objects.equals(endpointConfig, API.endpointConfig) &&
         Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
         Objects.equals(scopes, API.scopes) &&
+        Objects.equals(scopePrefix, API.scopePrefix) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
         Objects.equals(categories, API.categories) &&
@@ -1298,7 +1318,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, scopePrefix, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
   }
 
   @Override
@@ -1352,6 +1372,7 @@ return null;
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    scopePrefix: ").append(toIndentedString(scopePrefix)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");

@@ -1,0 +1,205 @@
+#   Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+################################################################################
+openapi: 3.0.1
+info:
+  title: WSO2 API Manager - DCR API
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager** - **DCR**.
+  contact:
+    name: WSO2
+    url: http://wso2.com/products/api-manager/
+    email: architecture@wso2.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: v2
+servers:
+  - url: https://apis.wso2.com/client-registration/v0.17
+  
+paths:
+
+  /register:
+    post:
+      summary: |
+        Dynamic client registration
+      description: |
+        This operation provides dynamic client registration to access APIM rest apis
+      requestBody:
+        description: Request parameters
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/DCR'
+        required: true  
+      responses:
+        200:
+          description: |
+            Created.
+            Successful response with the newly created application details as entity in the body.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DCRResult'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+      security:
+        - OAuth2Security:
+            - apim:dcr:app_manage
+            
+components:
+  schemas:
+    DCR:
+      title: DCR
+      type: object
+      properties:
+        callbackUrl:
+          type: string
+          readOnly: true
+          example: www.example.com
+        clientName:
+          type: string
+          readOnly: true
+          example: rest_api_publisher
+        owner:
+          type: string
+          readOnly: true
+          example: admin
+        grantType:
+          type: string
+          readOnly: true
+          example: client_credentials password refresh_token
+        saasApp:
+          type: string
+          readOnly: true
+          example: true
+        tokenType:
+          type: string
+          readOnly: true
+          example: JWT
+    DCRResult:
+      title: DCRResult
+      type: object
+      properties:
+        callbackUrl:
+          type: string
+          readOnly: true
+          example: www.example.com
+        clientName:
+          type: string
+          readOnly: true
+          example: rest_api_publisher
+        clientId:
+          type: string
+          readOnly: true
+          example: fosJTsHQyluahdppkJMFUm6cm3ca
+        clientSecret:
+          type: string
+          readOnly: true
+          example: aSF_ljQZ1e7qxiJ9YraG_NGJ9Iwa
+        isSaasApplication:
+          type: string
+          readOnly: true
+          example: true
+        appOwner:
+          type: string
+          readOnly: true
+          example: admin
+        jsonString:
+          type: string
+          readOnly: true
+        jsonAppAttribute:
+          type: string
+          readOnly: true
+        applicationUUID:
+          type: string
+          readOnly: true
+        tokenType:
+          type: string
+          readOnly: true
+          example: JWT
+    Error:
+      title: Error object returned with 4XX HTTP Status
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+          description: Error message.
+        description:
+          type: string
+          description: |
+            A detail description about the error message.
+        moreInfo:
+          type: string
+          description: |
+            Preferably an url with more details about the error.
+        error:
+          type: array
+          description: |
+            If there are more than one error list them out.
+            For example, list out validation errors by each field.
+          items:
+            $ref: '#/components/schemas/ErrorListItem'
+    ErrorListItem:
+      title: Description of individual errors that may have occurred during a request.
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: |
+            Description about individual errors occurred
+        description:
+          type: string
+          description: |
+            A detail description about the error message.          
+  responses:
+    Unauthorized:
+      description: Unauthorized. The user is not authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Unauthorized
+            description: The user is not authorized
+            moreInfo: ""
+            error: []
+  securitySchemes:
+    OAuth2Security:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: https://localhost:9443/oauth2/token
+          scopes:
+            openid: Authorize access to user details
+            apim:dcr:app_manage: create oauth app using dcr
+

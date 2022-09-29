@@ -3662,7 +3662,9 @@ public abstract class AbstractAPIManager implements APIManager {
         String apiLevelTier;
         if (api.isRevision()) {
             apiLevelTier = apiMgtDAO.getAPILevelTier(api.getRevisionedApiId(), api.getUuid());
+            //scope prefix is not set when API is a revision because it is already set at this level
         } else {
+            apiMgtDAO.setScopePrefixToAPI(currentApiUuid, api);
             apiLevelTier = apiMgtDAO.getAPILevelTier(internalId);
         }
         api.setApiLevelPolicy(apiLevelTier);

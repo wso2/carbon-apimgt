@@ -5563,6 +5563,7 @@ public class ApiMgtDAO {
             prepStmt.setString(10, api.getUUID());
             prepStmt.setString(11, APIConstants.CREATED);
             prepStmt.setString(12, organization);
+            prepStmt.setString(13, api.getScopePrefix());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -6936,7 +6937,8 @@ public class ApiMgtDAO {
             prepStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(6, api.getApiLevelPolicy());
             prepStmt.setString(7, api.getType());
-            prepStmt.setString(8, api.getUuid());
+            prepStmt.setString(8, api.getScopePrefix());
+            prepStmt.setString(9, api.getUuid());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
@@ -10240,7 +10242,7 @@ public class ApiMgtDAO {
      * Check whether the given scope key is already assigned locally to another API which are different from the given
      * API or its versioned APIs under given tenant.
      *
-     * @param uuid API uuid
+     * @param apiName       candidate api name
      * @param scopeKey      candidate scope key
      * @param tenantId      tenant id
      * @param organization identifier of the organization
@@ -16492,6 +16494,7 @@ public class ApiMgtDAO {
                     apiRevision.setApiUUID(rs.getString("API_UUID"));
                     apiRevision.setId(rs.getInt("ID"));
                     apiRevision.setRevisionUUID(apiUUID);
+                    apiRevision.setScopePrefix(rs.getString("SCOPE_PREFIX"));
                     return apiRevision;
                 }
             }
@@ -17679,6 +17682,32 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieve Scope Prefix and Set it to API
+     *
+     * @param api   API Object
+     * @throws APIManagementException
+     */
+    public void setScopePrefixToAPI(String id, API api) throws APIManagementException{
+        String scopePrefix = null;
+        String query = SQLConstants.GET_SCOPE_PREFIX;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+              PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            prepStmt.setString(1, id);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    scopePrefix = resultSet.getString(1);
+                }
+                api.setScopePrefix(scopePrefix);
+            }
+        }
+        catch (SQLException e) {
+            handleException("Error while retrieving the scope info associated with the API - "
+                    + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
+        }
+    }
+
+    /**
      * Retrieve Service Info and Set it to API
      *
      * @param api   API Object
@@ -17714,7 +17743,6 @@ public class ApiMgtDAO {
                     + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
         }
     }
-
     private void addAPIServiceMapping(int apiId, String serviceKey, String md5sum, int tenantId,
                                       Connection connection) throws SQLException {
 
@@ -17791,6 +17819,7 @@ public class ApiMgtDAO {
             preparedStatement.setString(1, apiUUID);
             preparedStatement.setString(2, revisionUUID);
             preparedStatement.setString(3, apiUUID);
+            preparedStatement.setString(4, apiUUID);
             preparedStatement.executeUpdate();
         }
     }
