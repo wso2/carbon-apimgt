@@ -19,14 +19,14 @@
 package org.wso2.carbon.apimgt.user.ctx.builder;
 
 import org.wso2.carbon.apimgt.user.ctx.builder.impl.OAuthJWTUserContextBuilderImpl;
-import org.wso2.carbon.apimgt.user.ctx.builder.impl.OAuthOpaqueUserContextBuilderImpl;
 import org.wso2.carbon.apimgt.user.ctx.util.UserContextConstants;
+import org.wso2.carbon.apimgt.user.exceptions.UserException;
 
 public class UserContextBuilderFactory {
-    public static UserContextBuilder createUserContextBuilder(String accessToken) {
+    public static UserContextBuilder createUserContextBuilder(String accessToken) throws UserException {
         if (accessToken.contains(UserContextConstants.DOT)) {
             return new OAuthJWTUserContextBuilderImpl(accessToken);
         }
-        return new OAuthOpaqueUserContextBuilderImpl(accessToken);
+        throw new UserException("Error locating matching user context builder");
     }
 }

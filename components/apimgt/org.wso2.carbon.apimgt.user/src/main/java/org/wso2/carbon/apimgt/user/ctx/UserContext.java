@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.user.ctx;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.user.ctx.builder.UserContextBuilder;
-import org.wso2.carbon.apimgt.user.ctx.builder.impl.OAuthOpaqueUserContextBuilderImpl;
 import org.wso2.carbon.apimgt.user.ctx.util.UserContextConstants;
 import org.wso2.carbon.apimgt.user.exceptions.UserException;
 
@@ -29,7 +28,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class UserContext {
-    private static final Log logger = LogFactory.getLog(OAuthOpaqueUserContextBuilderImpl.class);
+    private static final Log logger = LogFactory.getLog(UserContext.class);
     private static final ThreadLocal<UserContext> currentUserContext = ThreadLocal.withInitial(UserContext::new);
 
     private String username;
