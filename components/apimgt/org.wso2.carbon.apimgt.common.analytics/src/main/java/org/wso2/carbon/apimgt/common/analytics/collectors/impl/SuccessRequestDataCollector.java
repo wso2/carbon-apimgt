@@ -75,6 +75,9 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         if (userIp == null) {
             userIp = Constants.UNKNOWN_VALUE;
         }
+        if (userAgent == null) {
+            userAgent = Constants.UNKNOWN_VALUE;
+        }
 
         event.setApi(api);
         event.setOperation(operation);
