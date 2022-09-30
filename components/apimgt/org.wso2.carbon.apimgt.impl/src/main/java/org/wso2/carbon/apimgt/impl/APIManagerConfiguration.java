@@ -51,12 +51,15 @@ import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,9 +71,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Global API Manager configuration. This is generally populated from a special XML descriptor
@@ -117,7 +117,7 @@ public class APIManagerConfiguration {
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
-    private static Map<String, String> operationPolicyProperties = new HashMap<String, String>();
+    private static Map<String, String> operationPolicyProperties = new HashMap<>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
@@ -371,18 +371,18 @@ public class APIManagerConfiguration {
                 
                 persistenceProperties = persistenceProps;
             } else if (APIConstants.ApiManagerConfigurationConstants.OPERATION_POLICY_CONFIGS.equals(localName)) {
-                    OMElement properties = element
-                            .getFirstChildWithName(new QName(APIConstants.ApiManagerConfigurationConstants.PROPERTIES));
-                    Iterator analyticsPropertiesIterator = properties
-                            .getChildrenWithLocalName(APIConstants.ApiManagerConfigurationConstants.PROPERTY);
-                    Map<String, String> operationPolicyProps = new HashMap<>();
-                    while (analyticsPropertiesIterator.hasNext()) {
-                        OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
-                        String name = propertyElem.getAttributeValue(new QName("name"));
-                        String value = propertyElem.getText();
-                        operationPolicyProps.put(name, value);
-                    }
-                operationPolicyProperties = operationPolicyProps;
+                OMElement properties = element
+                        .getFirstChildWithName(new QName(APIConstants.ApiManagerConfigurationConstants.PROPERTIES));
+                Iterator policyProviderPropertiesIterator = properties
+                        .getChildrenWithLocalName(APIConstants.ApiManagerConfigurationConstants.PROPERTY);
+                Map<String, String> operationPolicyProps = new HashMap<>();
+                while (policyProviderPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) policyProviderPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName(APIConstants.ApiManagerConfigurationConstants.NAME));
+                    String value = propertyElem.getText();
+                    operationPolicyProps.put(name, value);
+                }
+                operationPolicyProperties = Collections.unmodifiableMap(operationPolicyProps);
             } else if (APIConstants.REDIS_CONFIG.equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_HOST));
                 OMElement redisPort = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PORT));
