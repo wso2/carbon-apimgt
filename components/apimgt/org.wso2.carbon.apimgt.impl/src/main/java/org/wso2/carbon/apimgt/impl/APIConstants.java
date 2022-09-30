@@ -2938,6 +2938,7 @@ public final class APIConstants {
         public static final String PROPERTIES = "Properties";
         public static final String PROPERTY = "Property";
         public static final String OPERATION_POLICY_CONFIGS = "OperationPolicyConfigs";
+        public static final String NAME = "name";
     }
 
     // Constants related to basic health check APIs
