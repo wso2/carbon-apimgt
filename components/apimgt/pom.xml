@@ -61,6 +61,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.service.catalog</module>
         <module>org.wso2.carbon.apimgt.rest.api.common</module>
         <module>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</module>
+        <module>org.wso2.carbon.apimgt.rest.api.store.v1.common</module>
         <module>org.wso2.carbon.apimgt.rest.api.admin.v1.common</module>
         <module>org.wso2.carbon.apimgt.common.gateway</module>
         <module>org.wso2.carbon.apimgt.common.jms</module>

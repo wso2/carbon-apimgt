@@ -40,7 +40,7 @@ RedeployApiApiService delegate = new RedeployApiApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Re Deploy the API in the gateway", notes = "This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = DeployResponseDTO.class, tags={  })
+    @ApiOperation(value = "Redeploy the API in the gateway", notes = "This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = DeployResponseDTO.class, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API successfully deployed in the Gateway. ", response = DeployResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
