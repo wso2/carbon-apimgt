@@ -4,6 +4,7 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -67,11 +68,14 @@ public class GlobalMediationPolicyImpl {
             Resource resource = registry.get(resourcePath);
             if (resource instanceof Collection) {
                 Collection typeCollection = (Collection) resource;
+                String[] mediationTypes = {"in","out","fault"};
                 String[] typeArray = typeCollection.getChildren();
                 for (String type : typeArray) {
                     //Resource : in / out / fault
                     Resource typeResource = registry.get(type);
-                    if (typeResource instanceof Collection) {
+                    //Extract sequence type from the registry resource path
+                    String resourceType = type.substring(type.lastIndexOf("/") + 1);
+                    if (typeResource instanceof Collection && ArrayUtils.contains(mediationTypes, resourceType)) {
                         String[] sequenceArray = ((Collection) typeResource).getChildren();
                         if (sequenceArray.length > 0) {
                             for (String sequence : sequenceArray) {
@@ -89,8 +93,6 @@ public class GlobalMediationPolicyImpl {
                                     mediation = new Mediation();
                                     mediation.setUuid(resourceId);
                                     mediation.setName(mediationPolicyName);
-                                    //Extract sequence type from the registry resource path
-                                    String resourceType = type.substring(type.lastIndexOf("/") + 1);
                                     mediation.setType(resourceType);
                                     //Add mediation to the mediation list
                                     mediationList.add(mediation);
