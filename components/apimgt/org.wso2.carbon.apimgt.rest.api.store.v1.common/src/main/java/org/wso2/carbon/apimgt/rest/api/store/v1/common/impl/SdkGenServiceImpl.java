@@ -21,8 +21,9 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.common.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +43,7 @@ public class SdkGenServiceImpl {
     /**
      * Rest API implementation to get the supported sdk languages
      */
-    public static List<String> getSdkGenLanguageList() {
+    public static List<String> getSdkGenLanguageList() throws APIManagementException {
 
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         String supportedLanguages = apiClientGenerationManager.getSupportedSDKLanguages();
@@ -52,7 +53,6 @@ public class SdkGenServiceImpl {
             return Arrays.stream(supportedLanguages.split(",")).collect(Collectors.toList());
         }
         String message = "Could not find the supported sdk languages";
-        RestApiUtil.handleInternalServerError(message, log);
-        return null;
+        throw new APIManagementException(message, ExceptionCodes.SDK_NOT_GENERATED);
     }
 }

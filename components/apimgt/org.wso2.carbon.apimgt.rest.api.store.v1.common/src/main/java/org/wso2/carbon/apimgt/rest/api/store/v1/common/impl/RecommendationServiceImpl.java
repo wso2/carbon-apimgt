@@ -44,7 +44,7 @@ public class RecommendationServiceImpl {
     private RecommendationServiceImpl() {
     }
 
-    public static String getRecommendationList(String organization) throws APIManagementException {
+    public static String getRecommendationList(String organization) {
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         List<JSONObject> recommendedApis = new ArrayList<>();

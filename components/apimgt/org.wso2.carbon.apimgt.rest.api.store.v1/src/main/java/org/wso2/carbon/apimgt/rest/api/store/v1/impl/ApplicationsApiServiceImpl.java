@@ -68,7 +68,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder,
             Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext)
-            throws APIMgtResourceNotFoundException {
+            throws APIManagementException {
 
         ApplicationListDTO applicationListDTO;
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -219,7 +219,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType,
-            String ifMatch, APIKeyRevokeRequestDTO body, MessageContext messageContext) {
+            String ifMatch, APIKeyRevokeRequestDTO body, MessageContext messageContext) throws APIManagementException {
         ApplicationServiceImpl.revokeAPIKey(applicationId, body);
         return Response.ok().build();
     }
@@ -232,7 +232,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return 200 Response if successfully deleted the application
      */
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
 
         int deletedApplicationId = ApplicationServiceImpl.deleteApplication(applicationId);
         if (deletedApplicationId == -1) {
@@ -264,7 +265,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Application Key Information list
      */
     @Override
-    public Response applicationsApplicationIdKeysGet(String applicationId, MessageContext messageContext) {
+    public Response applicationsApplicationIdKeysGet(String applicationId, MessageContext messageContext)
+            throws APIManagementException {
 
         ApplicationKeyListDTO applicationKeyListDTO = ApplicationServiceImpl.getApplicationKeysByApplicationId(
                 applicationId);
@@ -306,7 +308,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType, String groupId,
-            MessageContext messageContext) {
+            MessageContext messageContext) throws APIManagementException {
         return Response.ok()
                 .entity(ApplicationServiceImpl.getApplicationKeyByAppIDAndKeyType(applicationId, keyType))
                 .build();
@@ -322,7 +324,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType,
-            ApplicationKeyDTO body, MessageContext messageContext) {
+            ApplicationKeyDTO body, MessageContext messageContext) throws APIManagementException {
 
         ApplicationKeyDTO applicationKeyDTO = ApplicationServiceImpl.updateApplicationKeysKeyType(
                 applicationId, keyType, body);
@@ -338,7 +340,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId, String keyType,
-            MessageContext messageContext) {
+            MessageContext messageContext) throws APIManagementException {
 
         ApplicationKeyDTO applicationKeyDTO = ApplicationServiceImpl.renewConsumerSecret(applicationId,
                 keyType);

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -25,6 +26,7 @@ import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -240,7 +242,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant,
-            String ifModifiedSince, MessageContext messageContext) throws APIMgtResourceNotFoundException {
+            String ifModifiedSince, MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         DocumentDTO documentDTO = ApisServiceImpl.getDocumentation(apiId, documentId, organization);
         return Response.ok().entity(documentDTO).build();
@@ -248,7 +250,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
-            String ifNoneMatch, MessageContext messageContext) throws APIMgtResourceNotFoundException {
+            String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         DocumentListDTO documentListDTO = ApisServiceImpl.getDocumentationList(apiId, offset, limit,
                 organization);
@@ -276,6 +278,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
+            String message = "Error generating the SDK. API id or language should not be empty";
+            throw new APIManagementException(message, ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
+        }
         Map<String, String> sdkArtifacts = ApisServiceImpl.getSdkArtifacts(apiId, language, organization);
         File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
         return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE)
@@ -320,8 +326,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext)
             throws APIManagementException {
+        TopicListDTO topicListDTO = null;
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        TopicListDTO topicListDTO = ApisServiceImpl.getAPITopicList(apiId, organization);
+        if (StringUtils.isNotEmpty(apiId)) {
+            topicListDTO = ApisServiceImpl.getAPITopicList(apiId, organization);
+        } else {
+            throw new APIManagementException(ExceptionCodes.INVALID_PARAMETERS_PROVIDED);
+        }
         return Response.ok().entity(topicListDTO).build();
     }
 

@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
@@ -164,6 +163,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Cache;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.KEY_MANAGER;
+
 /**
  * This class provides the core API store functionality. It is implemented in a very
  * self-contained and 'pure' manner, without taking requirements like security into account,
@@ -285,7 +286,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyManagerName = keyManagerConfigurationDTO.getName();
             } else {
                 log.error("Key Manager: " + keyManagerName + " not found in database.");
-                throw new APIManagementException("Key Manager " + keyManagerName + " not found in database.",
+                throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " not found in database.",
                         ExceptionCodes.KEY_MANAGER_NOT_FOUND);
             }
         }
@@ -334,7 +335,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyManagerConfiguration =
                         apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
                 if (keyManagerConfiguration == null) {
-                    throw new APIManagementException("Key Manager " + keyManagerName + " couldn't found.",
+                    throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " couldn't found.",
                             ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 }
             }
@@ -348,7 +349,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
                 if (keyManager == null) {
-                    throw new APIManagementException("Key Manager " + keyManagerName + " not initialized",
+                    throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " not initialized",
                             ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
                 }
                 tokenRequest = ApplicationUtils.populateTokenRequest(keyManager, jsonInput, tokenRequest);
@@ -360,7 +361,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 return keyManager.getNewApplicationAccessToken(tokenRequest);
             } else {
-                throw new APIManagementException("Key Manager " + keyManagerName + " not enabled",
+                throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " not enabled",
                         ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
             }
         } catch (APIManagementException e) {
@@ -613,11 +614,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
             throw new APIManagementException(
-                    "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
+                    KEY_MANAGER + " " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
                     ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
         if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
-            throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+            throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " doesn't support to generate" +
                     " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
         }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
@@ -631,7 +632,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         if (keyManager == null) {
             throw new APIManagementException(
-                    "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
+                    KEY_MANAGER + " " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
                     ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
 
@@ -1539,47 +1540,93 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public void addComment(APIIdentifier identifier, String commentText, String user) throws APIManagementException {
-        apiMgtDAO.addComment(identifier, commentText, user);
+        try {
+            apiMgtDAO.addComment(identifier, commentText, user);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while adding a comment.", ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     @Override
     public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
-        return apiMgtDAO.addComment(uuid, comment, user);
+        try {
+            return apiMgtDAO.addComment(uuid, comment, user);
+        } catch (APIManagementException e){
+            throw new APIManagementException("Error while adding a comment.", ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     @Override
     public org.wso2.carbon.apimgt.api.model.Comment[] getComments(String uuid, String parentCommentID)
             throws APIManagementException {
-        return apiMgtDAO.getComments(uuid, parentCommentID);
+        try {
+            return apiMgtDAO.getComments(uuid, parentCommentID);
+        } catch (APIManagementException e){
+            throw new APIManagementException("Error while adding retrieving comments of API " + uuid,
+                    ExceptionCodes.from(ExceptionCodes.COMMENT_CANNOT_RETRIEVE,
+                            "comments.", "comments for API " + uuid));
+        }
     }
 
     @Override
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
-            APIManagementException {
-        return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset)
+            throws APIManagementException {
+        try {
+            return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while retrieving comment " + commentId
+                    + " of API " + apiTypeWrapper.getApi().getId(),
+                    ExceptionCodes.from(ExceptionCodes.COMMENT_CANNOT_RETRIEVE, "comment.",
+                            "comment of API " + apiTypeWrapper.getApi().getId()));
+        }
     }
 
     @Override
     public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset)
             throws APIManagementException {
-        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
+        try {
+            return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while retrieving comments of API " +
+                    apiTypeWrapper.getApi().getId().getUUID(),
+                    ExceptionCodes.from(ExceptionCodes.COMMENT_CANNOT_RETRIEVE, "comments."
+                            , "comments of API " + apiTypeWrapper.getApi().getId()));
+        }
     }
 
     @Override
     public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
             APIManagementException {
-        return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
+        try {
+            return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Cannot update comment " + commentId + " of API "
+                    + apiTypeWrapper.getApi().getId(), ExceptionCodes.COULD_NOT_UPDATE_COMMENT);
+        }
     }
 
     @Override
     public void deleteComment(String uuid, String commentId) throws APIManagementException {
-        apiMgtDAO.deleteComment(uuid, commentId);
+        try {
+            apiMgtDAO.deleteComment(uuid, commentId);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Cannot delete comment.",
+                    ExceptionCodes.from(ExceptionCodes.COMMENT_CANNOT_DELETE,
+                            " API: " + uuid + " commentId:" + commentId));
+        }
     }
 
     @Override
     public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
-        return apiMgtDAO.deleteComment(apiTypeWrapper, commentId);
+        try {
+            return apiMgtDAO.deleteComment(apiTypeWrapper, commentId);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Cannot delete comment.",
+                    ExceptionCodes.from(ExceptionCodes.COMMENT_CANNOT_DELETE, " API " +
+                            apiTypeWrapper.getApi().getId(), " commentId:" + commentId));
+        }
     }
+
     /**
      * Add a new Application from the store.
      * @param application - {@link org.wso2.carbon.apimgt.api.model.Application}
@@ -1669,8 +1716,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         application.setUUID(UUID.randomUUID().toString());
         if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId(), organization)) {
-            handleResourceAlreadyExistsException(
-                    "A duplicate application already exists by the name - " + application.getName());
+            throw new APIManagementException(
+                    "A duplicate application already exists by the name - " + application.getName(),
+                    ExceptionCodes.from(ExceptionCodes.APPLICATION_ALREADY_EXISTS, application.getName()));
         }
         //check whether callback url is empty and set null
         if (StringUtils.isBlank(application.getCallbackUrl())) {
@@ -1815,8 +1863,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (application.getGroupId() != null && APIUtil.isApplicationGroupCombinationExist(
                 application.getSubscriber().getName(), application.getName(), processedIds)) {
-            handleResourceAlreadyExistsException(
-                    "A duplicate application already exists by the name - " + application.getName());
+            throw new APIManagementException(
+                    "A duplicate application already exists by the name - " + application.getName(),
+                    ExceptionCodes.from(ExceptionCodes.APPLICATION_ALREADY_EXISTS, application.getName()));
         }
 
         // Retain the 'DEFAULT' token type of migrated applications unless the token type is changed to 'JWT'.
@@ -2270,11 +2319,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException(
-                        "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
+                        KEY_MANAGER + " " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
                         ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             }
             if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
-                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " doesn't support to generate" +
                         " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
             }
             Object enableOauthAppCreation =
@@ -2287,7 +2336,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return mapExistingOAuthClient(jsonString, userId, null, application.getName(), tokenType,
                             APIConstants.DEFAULT_TOKEN_TYPE, keyManagerName, tenantDomain);
                 } else {
-                    throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                    throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " doesn't support to generate" +
                             " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
                 }
             }
@@ -2818,7 +2867,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyManagerConfiguration =
                         apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerID);
                 if (keyManagerConfiguration == null) {
-                    throw new APIManagementException("Key Manager " + keyManagerID + " couldn't found.",
+                    throw new APIManagementException(KEY_MANAGER + " " + keyManagerID + " couldn't found.",
                             ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 } else {
                     keyManagerName = keyManagerID;
@@ -2828,11 +2877,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             if (!keyManagerConfiguration.isEnabled()) {
-                throw new APIManagementException("Key Manager " + keyManagerName + " not activated in the requested " +
+                throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " not activated in the requested " +
                         "Tenant", ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
             }
             if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
-                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                throw new APIManagementException(KEY_MANAGER + " " + keyManagerName + " doesn't support to generate" +
                         " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
             }
             //Create OauthAppRequest object by passing json String.
@@ -2848,7 +2897,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
             if (keyManager == null) {
                 throw new APIManagementException(
-                        "Key Manager " + keyManagerName + " not initialized in the requested" + "Tenant",
+                        KEY_MANAGER + " " + keyManagerName + " not initialized in the requested" + "Tenant",
                         ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
             }
             // set application attributes
@@ -3305,7 +3354,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if(api.getSwaggerDefinition() != null) {
             definition = api.getSwaggerDefinition();
         } else {
-            throw new APIManagementException("Missing API definition in the api " + api.getUuid());
+            throw new APIManagementException("Missing API definition in the api " + api.getUuid(),
+                    ExceptionCodes.API_DEFINITION_MALFORMED);
         }
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         api.setScopes(oasParser.getScopes(definition));
@@ -3462,7 +3512,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
-                handleResourceNotFoundException("Could not find provided environment '" + environmentName + "'");
+                throw new APIManagementException("Could not find provided environment '" + environmentName + "'",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT,
+                                String.format("name '%s'", environmentName)));
             }
 
             List<APIRevisionDeployment> deploymentList = getAPIRevisionDeploymentListOfAPI(api.getUuid());
@@ -3572,7 +3624,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public Set<Topic> getTopics(String apiId) throws APIManagementException {
-        return apiMgtDAO.getAPITopics(apiId);
+        try {
+            return apiMgtDAO.getAPITopics(apiId);
+        } catch (APIManagementException e){
+            throw new APIManagementException("Failed to get topics of Async API " + apiId);
+        }
     }
 
     @Override
@@ -3878,7 +3934,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         } catch (APIPersistenceException e) {
             String msg = "Failed to get API with uuid " + uuid;
-            throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_RETRIEVE_EXCEPTION, "API with " + uuid));
+            throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_RETRIEVE_EXCEPTION,
+                    "API with " + uuid));
         }
     }
 
@@ -4186,7 +4243,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
-                handleResourceNotFoundException("Could not find provided environment '" + environmentName + "'");
+                throw new APIManagementException("Could not find provided environment '" + environmentName + "'",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT,
+                                String.format("name '%s'", environmentName)));
             }
 
             assert environment != null;

@@ -46,7 +46,7 @@ public enum ExceptionCodes implements ErrorHandler {
     SEARCH_API_EXCEPTION(900306, "Internal server error.", 500, "Error occurred while searching APIs"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
     API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
-    APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
+    APPLICATION_DELETE_FAILED(900309, "Error has occurred. Could not delete the application", 500, "Error has occurred. Could not delete the application '%s'"),
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 409, "Document already exists"),
@@ -340,7 +340,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Please provide the Authorization : Bearer <> token to proceed."),
     MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
             "Please provide the Authorization : Basic <> token to proceed."),
-    INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the resource."),
+    INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the '%s'."),
     OPENID_CONFIG(900916, "Missing OpenID configurations", 500, "Error in fetching Open ID configuration"),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
@@ -350,13 +350,15 @@ public enum ExceptionCodes implements ErrorHandler {
     ),
     APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
+    APPLICATION_CONSUMER_KEY_NOT_FOUND(900958, "Keymanagement Error", 403, "Requested consumer key with application '%s' not found"),
     UNSUPPORTED_THROTTLE_LIMIT_TYPE(900960, "Throttle Policy Error", 400, "Throttle Limit type is not supported"),
     POLICY_NOT_FOUND(900961, "Policy Not found", 404, "Failed to retrieve Policy Definition"),
     OAUTH2_APP_MAP_FAILED(900962, "Key Management Error", 500, "Error while mapping an existing consumer application."),
     TOKEN_INTROSPECTION_FAILED(900963, "Key Management Error", 500, "Error while introspecting the access token."),
     ACCESS_TOKEN_GENERATION_FAILED(900964, "Key Management Error", 500, "Error while generating a new access token."),
     INVALID_TOKEN_REQUEST(900965, "Key Management Error", 400, "Invalid access token request."),
-    ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
+    ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the '%s'."),
+
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
     INTERNAL_ERROR_WITH_SPECIFIC_DESC(903007, "Internal Server Error", 500, "'%s'"),
@@ -428,6 +430,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Shared Scope display name not specified"),
     SCOPE_ALREADY_ASSIGNED(900988, "Scope already assigned locally by another API", 400,
             "Scope already assigned locally by another API"),
+    TOKEN_VALIDATION_FAILED(900989, "Validation failed for the given token", 500, "Validation failed for the given token"),
 
     //Dedicated container based gateway related Codes
     NO_RESOURCE_LOADED_FROM_DEFINITION(900990, "Container based resource Not Found", 404, "No resource loaded from " +
@@ -456,10 +459,14 @@ public enum ExceptionCodes implements ErrorHandler {
             "This user is not a comment moderator"),
     COULD_NOT_UPDATE_COMMENT(901101, "Error has occurred. Could not update the Comment", 500,
             "Error has occurred. Could not update the Comment"),
-    COMMENT_NOT_FOUND(901102, "Comment not found", 404, "Couldn't retrieve comment"),
+    COMMENT_NOT_FOUND(901102, "Comment not found", 404, "Failed to retrieve comment"),
     COMMENT_LENGTH_EXCEEDED(901103, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
     COMMENT_NO_PERMISSION(901104, "Insufficient permission", 403, "User '%s' doesn't have permission to access the comment with id '%s'"),
+    COMMENT_CANNOT_RETRIEVE(901105, "Failed to get '%s'", 500, "Failed to get '%s"),
+
+    COMMENT_CANNOT_DELETE(901106, "Failed to delete the Comment", 500, "Failed to delete the Comment of '%s'"),
+
     NEED_ADMIN_PERMISSION(901100, "Admin permission needed", 403,
             "This user is not an admin"),
 
@@ -647,10 +654,11 @@ public enum ExceptionCodes implements ErrorHandler {
 
     INVALID_KEY_TYPE(904013, "Bad Request", 400, "Invalid keyType. KeyType should be either PRODUCTION or SANDBOX"),
 
-    ERROR_DELETING_APPLICATION_REGISTRATION(904014, "Can not delete application registration", 400, "Failed to delete Application registration of : %s "),
+    ERROR_DELETING_APPLICATION_REGISTRATION(904014, "Can not delete application registration", 400, "Failed to delete Application registration of : '%s'"),
 
-    ERROR_DELETING_APPLICATION_KEY_MAPPING(904015, "Can not delete application key mapping", 400, "Failed to delete Application key mapping  of : %s ");
+    ERROR_DELETING_APPLICATION_KEY_MAPPING(904015, "Can not delete application key mapping", 500, "Failed to delete Application key mapping  of : '%s'"),
 
+    ERROR_RETRIEVE_APPLICATION_KEYS(904016, "Failed to retrieve application keys", 500, "Failed to retrieve application keys for '%s' ");
 
     private final long errorCode;
     private final String errorMessage;

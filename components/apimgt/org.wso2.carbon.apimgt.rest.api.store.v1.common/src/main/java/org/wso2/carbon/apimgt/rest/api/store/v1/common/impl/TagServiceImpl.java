@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings.TagMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TagListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +49,7 @@ public class TagServiceImpl {
      * @param organization
      * @return
      */
-    public static TagListDTO tagsGet(Integer limit, Integer offset, String organization) {
+    public static TagListDTO tagsGet(Integer limit, Integer offset, String organization) throws APIManagementException {
         //pre-processing
         limit = limit != null ? limit : RestApiConstants.TAG_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.TAG_OFFSET_DEFAULT;
@@ -68,9 +67,9 @@ public class TagServiceImpl {
             TagMappingUtil.setPaginationParams(tagListDTO, limit, offset, tagList.size());
             return tagListDTO;
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving tags", e, log);
-        } 
-        return null;
+            String errorMessage = "Error while retrieving tags";
+            throw new APIManagementException(errorMessage, e.getErrorHandler());
+        }
     }
 
 }

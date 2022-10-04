@@ -72,9 +72,8 @@ public class SettingsServiceImpl {
             return settingsDTO;
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, e.getErrorHandler());
         }
-        return null;
     }
 
     /**

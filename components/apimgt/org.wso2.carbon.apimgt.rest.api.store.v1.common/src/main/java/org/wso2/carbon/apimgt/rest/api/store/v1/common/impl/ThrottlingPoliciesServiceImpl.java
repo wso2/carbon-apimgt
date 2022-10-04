@@ -35,7 +35,7 @@ public class ThrottlingPoliciesServiceImpl {
      * @return
      */
     public static ThrottlingPolicyListDTO throttlingPoliciesPolicyLevelGet(
-            String policyLevel, Integer limit, Integer offset, String organization) {
+            String policyLevel, Integer limit, Integer offset, String organization) throws APIManagementException {
         //pre-processing
         //setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -56,7 +56,7 @@ public class ThrottlingPoliciesServiceImpl {
      * @return
      */
     public static ThrottlingPolicyDTO throttlingPoliciesPolicyLevelPolicyIdGet(String policyId, String policyLevel,
-            String organization) {
+            String organization) throws APIManagementException {
 
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -89,7 +89,7 @@ public class ThrottlingPoliciesServiceImpl {
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving the tier with name " + policyId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, e.getErrorHandler());
         }
         return null;
     }
@@ -99,7 +99,8 @@ public class ThrottlingPoliciesServiceImpl {
      * @param policyLevel
      * @return list of throttling policies
      */
-    public static List<Tier> getThrottlingPolicyList(String policyLevel, String organization) {
+    public static List<Tier> getThrottlingPolicyList(String policyLevel, String organization)
+            throws APIManagementException {
 
         List<Tier> throttlingPolicyList = new ArrayList<>();
         int tierLevel = -1;
@@ -123,7 +124,7 @@ public class ThrottlingPoliciesServiceImpl {
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, e.getErrorHandler());
         }
         return throttlingPolicyList;
     }

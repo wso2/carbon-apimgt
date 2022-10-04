@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings.SearchResultMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +47,8 @@ public class SearchServiceImpl {
     private SearchServiceImpl() {
     }
 
-    public static SearchResultListDTO search(Integer limit, Integer offset, String query, String organization) {
+    public static SearchResultListDTO search(Integer limit, Integer offset, String query, String organization)
+            throws APIManagementException {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
 
@@ -96,9 +96,8 @@ public class SearchServiceImpl {
                     allmatchedResults.add(apiResult);
                 } else if (searchResult instanceof Map.Entry) {
                     Map.Entry pair = (Map.Entry) searchResult;
-                    SearchResultDTO docResult =
-                            SearchResultMappingUtil.fromDocumentationToDocumentResultDTO((Documentation) pair.getKey(),
-                                    (API) pair.getValue());
+                    SearchResultDTO docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO(
+                            (Documentation) pair.getKey(), (API) pair.getValue());
                     allmatchedResults.add(docResult);
                 } else if (searchResult instanceof APIProduct) {
                     APIProduct apiProduct = (APIProduct) searchResult;
@@ -120,7 +119,7 @@ public class SearchServiceImpl {
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving search results";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, e.getErrorHandler());
         }
 
         return resultListDTO;

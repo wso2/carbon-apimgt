@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings.KeyManagerMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class KeyManagerServiceImpl {
      * @param organization
      * @return
      */
-    public static KeyManagerListDTO getKeyManagers(String organization) {
+    public static KeyManagerListDTO getKeyManagers(String organization) throws APIManagementException  {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
@@ -52,9 +51,8 @@ public class KeyManagerServiceImpl {
                     apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
             return KeyManagerMappingUtil.toKeyManagerListDto(keyManagerConfigurations);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while retrieving keyManager Details for organization " + organization, log);
+            String message = "Error while retrieving keyManager Details for organization " + organization;
+            throw new APIManagementException(message, e.getErrorHandler());
         }
-        return null;
     }
 }

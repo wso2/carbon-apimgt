@@ -114,7 +114,7 @@ public class ApplicationServiceImpl {
      * @return Response object containing resulted applications
      */
     public static ApplicationListDTO applicationsGet(String groupId, String query, String sortBy, String sortOrder,
-            Integer limit, Integer offset, String organization) {
+            Integer limit, Integer offset, String organization) throws APIManagementException {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -170,18 +170,20 @@ public class ApplicationServiceImpl {
 
             return applicationListDTO;
         } catch (APIManagementException e) {
-            if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
+            if (RestApiUtil.rootCauseMessageMatches(e,
+                    "start index seems to be greater than the limit count")) {
                 //this is not an error of the user as he does not know the total number of applications available.
                 // Thus sends an empty response
                 applicationListDTO.setCount(0);
                 applicationListDTO.setPagination(new PaginationDTO());
                 return applicationListDTO;
             } else {
-                String errorMessage = "Error while retrieving Applications";
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                String errorMessage = "Error while retrieving applications of " + organization;
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.APPLICATION_RETRIEVE_EXCEPTION,
+                                "applications of " + organization));
             }
         }
-        return null;
     }
 
     /**
@@ -288,14 +290,9 @@ public class ApplicationServiceImpl {
             createdApplicationDto = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "An application already exists with name " + body.getName(), e, log);
-            } else if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
-                RestApiUtil.handleBadRequest("Application name cannot contain leading or trailing white spaces", log);
-            } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
-                RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
-            } else {
-                throw e;
+                throw new APIManagementException(
+                        "A duplicate application already exists by the name - " + body.getName(),
+                        ExceptionCodes.from(ExceptionCodes.APPLICATION_ALREADY_EXISTS, body.getName()));
             }
         }
         return createdApplicationDto;
@@ -345,7 +342,8 @@ public class ApplicationServiceImpl {
      * @param applicationId application identifier
      * @return response containing the required application object
      */
-    public static ApplicationDTO getApplicationById(String applicationId, String organization) {
+    public static ApplicationDTO getApplicationById(String applicationId, String organization)
+            throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -366,15 +364,21 @@ public class ApplicationServiceImpl {
                     applicationDTO.setSubscriptionScopes(scopeInfoList);
                     return applicationDTO;
                 } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    String message = "You don't have permission to access the application with Id " + applicationId;
+                    throw new APIManagementException(message,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                    + applicationId));
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                throw new APIManagementException("Request application is " + (applicationId != null ?
+                        "with id " + applicationId :
+                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
+            throw new APIManagementException("Failed to get application " + applicationId,
+                    ExceptionCodes.from(ExceptionCodes.APPLICATION_RETRIEVE_EXCEPTION, "application "
+                            + applicationId));
         }
-        return null;
     }
 
     /**
@@ -387,35 +391,23 @@ public class ApplicationServiceImpl {
     public static ApplicationDTO updateApplication(String applicationId, ApplicationDTO body)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
 
-            if (oldApplication == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-            }
-
-            if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-            }
-
-            Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
-                    applicationId);
-            return ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
-
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
-                RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
-            } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
-                RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
-            } else if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "An application already exists with name " + body.getName(), e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
-            }
+        if (oldApplication == null) {
+            throw new APIManagementException("Request application is " + (applicationId != null ?
+                    "with id " + applicationId :
+                    " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
         }
-        return null;
+
+        if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
+            String message = "You don't have permission to access the application with Id " + applicationId;
+            throw new APIManagementException(message,
+                    ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application " + applicationId));
+        }
+
+        Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication, applicationId);
+        return ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
     }
 
     /**
@@ -513,7 +505,10 @@ public class ApplicationServiceImpl {
                         " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             } else {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    String message = "You don't have permission to access the application with Id " + applicationId;
+                    throw new APIManagementException(message,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                    + applicationId));
                 } else {
                     Object additionalProperties = null;
                     if (body != null && body.getAdditionalProperties() != null) {
@@ -542,7 +537,7 @@ public class ApplicationServiceImpl {
      * @param applicationId applicationId
      * @param body          APIKeyRevokeRequest
      */
-    public static void revokeAPIKey(String applicationId, APIKeyRevokeRequestDTO body) {
+    public static void revokeAPIKey(String applicationId, APIKeyRevokeRequestDTO body) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String apiKey = body.getApikey();
         if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
@@ -566,10 +561,9 @@ public class ApplicationServiceImpl {
                             } else {
                                 if (log.isDebugEnabled()) {
                                     log.debug(
-                                            "Application uuid " + applicationId + " isn't matched with the " +
-                                                    "application in the token " + appUuid + " of API Key " +
-                                                    APIUtil.getMaskedToken(
-                                                    apiKey));
+                                            "Application uuid " + applicationId + " isn't matched with the "
+                                                    + "application in the token " + appUuid + " of API Key "
+                                                    + APIUtil.getMaskedToken(apiKey));
                                 }
                                 RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
                             }
@@ -579,8 +573,11 @@ public class ApplicationServiceImpl {
                                         "Logged in user " + username + " isn't the owner of the application "
                                                 + applicationId);
                             }
-                            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId,
-                                    log);
+                            String message = "You don't have permission to access the application with Id "
+                                    + applicationId;
+                            throw new APIManagementException(message,
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION,
+                                            "application " + applicationId));
                         }
                     } else {
                         if (log.isDebugEnabled()) {
@@ -601,7 +598,8 @@ public class ApplicationServiceImpl {
                         log.debug("Signature verification of given token " + APIUtil.getMaskedToken(
                                 apiKey) + " is failed");
                     }
-                    RestApiUtil.handleInternalServerError("Validation failed for the given token", log);
+                    throw new APIManagementException("Validation failed for the given token",
+                            ExceptionCodes.from(ExceptionCodes.TOKEN_VALIDATION_FAILED));
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while revoking API Key of application " + applicationId;
@@ -611,7 +609,8 @@ public class ApplicationServiceImpl {
                                     + APIUtil.getMaskedToken(apiKey));
                 }
                 log.error(msg, e);
-                RestApiUtil.handleInternalServerError(msg, e, log);
+                throw new APIManagementException(msg, e, ExceptionCodes.from(ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED,
+                        "API Key of application" + applicationId));
             }
         } else {
             log.debug("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
@@ -625,7 +624,7 @@ public class ApplicationServiceImpl {
      * @param applicationId application identifier
      * @return 200 Response if successfully deleted the application
      */
-    public static int deleteApplication(String applicationId) {
+    public static int deleteApplication(String applicationId) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -637,13 +636,19 @@ public class ApplicationServiceImpl {
                         return application.getId();
                     }
                 } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    String message = "You don't have permission to access the application with Id " + applicationId;
+                    throw new APIManagementException(message,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                    + applicationId));
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                throw new APIManagementException("Request application is " + (applicationId != null ?
+                        "with id " + applicationId :
+                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while deleting application " + applicationId, e, log);
+            throw new APIManagementException("Error while deleting application " + applicationId,
+                    ExceptionCodes.from(ExceptionCodes.APPLICATION_DELETE_FAILED, applicationId));
         }
         return 0;
     }
@@ -676,10 +681,15 @@ public class ApplicationServiceImpl {
                     applicationKeyDTO.setKeyManager(keyManagerName);
                     return applicationKeyDTO;
                 } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    String message = "You don't have permission to access the application with Id " + applicationId;
+                    throw new APIManagementException(message,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                    + applicationId));
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                throw new APIManagementException("Request application is " + (applicationId != null ?
+                        "with id " + applicationId :
+                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (EmptyCallbackURLForCodeGrantsException e) {
             RestApiUtil.handleBadRequest(e.getMessage(), log);
@@ -693,7 +703,8 @@ public class ApplicationServiceImpl {
      * @param applicationId Application Id
      * @return Application Key Information list
      */
-    public static ApplicationKeyListDTO getApplicationKeysByApplicationId(String applicationId) {
+    public static ApplicationKeyListDTO getApplicationKeysByApplicationId(String applicationId)
+            throws APIManagementException {
 
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
@@ -718,16 +729,12 @@ public class ApplicationServiceImpl {
      * @param keyType       Key Type whether PRODUCTION or SANDBOX
      * @return
      */
-    public static void cleanupApplicationRegistration(String applicationId, String keyType) {
-
+    public static void cleanupApplicationRegistration(String applicationId, String keyType)
+            throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
-            apiConsumer.cleanUpApplicationRegistrationByApplicationId(application.getId(), keyType);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while application key cleanup process", e, log);
-        }
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+        apiConsumer.cleanUpApplicationRegistrationByApplicationId(application.getId(), keyType);
     }
 
     /**
@@ -736,7 +743,8 @@ public class ApplicationServiceImpl {
      * @param applicationUUID Id of the application
      * @return List of application keys
      */
-    private static Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain) {
+    private static Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain)
+            throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -746,15 +754,22 @@ public class ApplicationServiceImpl {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     return apiConsumer.getApplicationKeysOfApplication(application.getId(), tenantDomain);
                 } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUID, log);
+                    String message = "You don't have permission to access the application with Id " + applicationUUID;
+                    throw new APIManagementException(message,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                    + applicationUUID));
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationUUID, log);
+                throw new APIManagementException("Request application is " + (applicationUUID != null ?
+                        "with id " + applicationUUID :
+                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationUUID, e, log);
+            throw new APIManagementException(
+                    "Error while retrieving application keys for application " + applicationUUID,
+                    ExceptionCodes.from(ExceptionCodes.ERROR_RETRIEVE_APPLICATION_KEYS,
+                            "application" + applicationUUID));
         }
-        return null;
     }
 
     /**
@@ -763,13 +778,13 @@ public class ApplicationServiceImpl {
      * @param applicationUUID Id of the application
      * @return List of application keys
      */
-    private static Set<APIKey> getApplicationKeys(String applicationUUID) {
+    private static Set<APIKey> getApplicationKeys(String applicationUUID) throws APIManagementException {
 
         return getApplicationKeys(applicationUUID, null);
     }
 
     public static ApplicationTokenDTO generateToken(String applicationId, String keyType,
-            ApplicationTokenGenerateRequestDTO body) {
+            ApplicationTokenGenerateRequestDTO body) throws APIManagementException {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
@@ -803,22 +818,27 @@ public class ApplicationServiceImpl {
                         appToken.setValidityTime(response.getValidityPeriod());
                         return appToken;
                     } else {
-                        RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyType,
-                                log);
+                        String message = "Requested consumer key with application " + applicationId + " not found";
+                        throw new APIManagementException(message,
+                                ExceptionCodes.from(ExceptionCodes.APPLICATION_CONSUMER_KEY_NOT_FOUND,
+                                        "application " + applicationId));
                     }
                 } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    String message = "You don't have permission to access the application with Id " + applicationId;
+                    throw new APIManagementException(message,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                    + applicationId));
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                throw new APIManagementException("Request application is " + (applicationId != null ?
+                        "with id " + applicationId :
+                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    RestApiConstants.GENERIC_ERROR_STRING + " " + keyType + " token for application "
-                            + applicationId,
-                    e, log);
+            throw new APIManagementException(
+                    RestApiConstants.GENERIC_ERROR_STRING + " " + keyType + " token for application " + applicationId,
+                    ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED);
         }
-        return null;
     }
 
     /**
@@ -828,7 +848,8 @@ public class ApplicationServiceImpl {
      * @param keyType       Key Type (Production | Sandbox)
      * @return Application Key Information
      */
-    public static ApplicationKeyDTO getApplicationKeyByAppIDAndKeyType(String applicationId, String keyType) {
+    public static ApplicationKeyDTO getApplicationKeyByAppIDAndKeyType(String applicationId, String keyType)
+            throws APIManagementException {
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
         if (applicationKeys != null) {
             for (APIKey apiKey : applicationKeys) {
@@ -877,7 +898,7 @@ public class ApplicationServiceImpl {
      * @return Updated Key Information
      */
     public static ApplicationKeyDTO updateApplicationKeysKeyType(String applicationId, String keyType,
-            ApplicationKeyDTO body) {
+            ApplicationKeyDTO body) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -890,8 +911,8 @@ public class ApplicationServiceImpl {
                     applicationKeyDTO.setCallbackUrl(updatedData.getCallBackURL());
                     JsonObject json = new Gson().fromJson(updatedData.getJsonString(), JsonObject.class);
                     if (json.get(APIConstants.JSON_GRANT_TYPES) != null) {
-                        String[] updatedGrantTypes = json.get(APIConstants.JSON_GRANT_TYPES)
-                                .getAsString().split(" ");
+                        String[] updatedGrantTypes = json.get(APIConstants.JSON_GRANT_TYPES).getAsString()
+                                .split(" ");
                         applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(updatedGrantTypes));
                     }
                     applicationKeyDTO.setConsumerKey(updatedData.getClientId());
@@ -903,15 +924,20 @@ public class ApplicationServiceImpl {
                     }
                     return applicationKeyDTO;
                 } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    String message = "You don't have permission to access the application with Id " + applicationId;
+                    throw new APIManagementException(message,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                    + applicationId));
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                throw new APIManagementException("Request application is " + (applicationId != null ?
+                        "with id " + applicationId :
+                        " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
+            throw new APIManagementException("Error while updating application keys for " + applicationId,
+                    ExceptionCodes.from(ExceptionCodes.OAUTH2_APP_UPDATE_FAILED, applicationId));
         }
-        return null;
     }
 
     /**
@@ -921,32 +947,27 @@ public class ApplicationServiceImpl {
      * @param keyType       Key Type (Production | Sandbox)
      * @return A response object containing application keys.
      */
-    public static ApplicationKeyDTO renewConsumerSecret(String applicationId, String keyType) {
+    public static ApplicationKeyDTO renewConsumerSecret(String applicationId, String keyType)
+            throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        try {
-            Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
-            if (applicationKeys == null) {
-                return null;
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        for (APIKey apiKey : applicationKeys) {
+            if (keyType != null && keyType.equals(
+                    apiKey.getType()) && APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(apiKey.getKeyManager())) {
+                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                String clientId = apiKey.getConsumerKey();
+                String clientSecret = apiConsumer.renewConsumerSecret(clientId,
+                        APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+
+                ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
+                applicationKeyDTO.setConsumerKey(clientId);
+                applicationKeyDTO.setConsumerSecret(clientSecret);
+
+                return applicationKeyDTO;
             }
-            for (APIKey apiKey : applicationKeys) {
-                if (keyType != null && keyType.equals(
-                        apiKey.getType()) && APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(
-                        apiKey.getKeyManager())) {
-                    APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-                    String clientId = apiKey.getConsumerKey();
-                    String clientSecret = apiConsumer.renewConsumerSecret(clientId,
-                            APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
-
-                    ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
-                    applicationKeyDTO.setConsumerKey(clientId);
-                    applicationKeyDTO.setConsumerSecret(clientSecret);
-
-                    return applicationKeyDTO;
-                }
-            }
-
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while re generating the consumer secret ", e, log);
         }
         return null;
     }
@@ -983,12 +1004,16 @@ public class ApplicationServiceImpl {
                 applicationKeyDTO.setKeyManager(keyManagerName);
                 return applicationKeyDTO;
             } else {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                String message = "You don't have permission to access the application with Id " + applicationId;
+                throw new APIManagementException(message,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                + applicationId));
             }
         } else {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            throw new APIManagementException("Request application is " + (applicationId != null ?
+                    "with id " + applicationId :
+                    " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
         }
-        return null;
     }
 
     /**
@@ -1024,13 +1049,9 @@ public class ApplicationServiceImpl {
             String keyMappingId) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
-            apiConsumer.cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(application.getId(), keyMappingId);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while application key cleanup process", e, log);
-        }
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+        apiConsumer.cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(application.getId(), keyMappingId);
     }
 
     /***
@@ -1086,17 +1107,21 @@ public class ApplicationServiceImpl {
                         RestApiUtil.handleBadRequest(e.getMessage(), errorCode, log);
                     }
                 } else {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId,
-                            log);
+                    String errorMessage = "Cannot find application keys for application : " + applicationId;
+                    throw new APIManagementException(errorMessage, ExceptionCodes.APPLICATION_KEY_MAPPING_NOT_FOUND);
                 }
             } else {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                String message = "You don't have permission to access the application with Id " + applicationId;
+                throw new APIManagementException(message,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application "
+                                + applicationId));
             }
         } else {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            throw new APIManagementException("Request application is " + (applicationId != null ?
+                    "with id " + applicationId :
+                    " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
         }
         return null;
-
     }
 
     /**
@@ -1150,12 +1175,15 @@ public class ApplicationServiceImpl {
                 applicationKeyDTO.setKeyManager(body.getKeyManager());
                 return applicationKeyDTO;
             } else {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                String message = "You don't have permission to access the application with Id " + applicationId;
+                throw new APIManagementException(message,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "application " + applicationId));
             }
         } else {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            throw new APIManagementException("Request application is " + (applicationId != null ?
+                    "with id " + applicationId :
+                    " " + "not found"), ExceptionCodes.APPLICATION_NOT_FOUND);
         }
-        return null;
     }
 
     /**
@@ -1201,8 +1229,8 @@ public class ApplicationServiceImpl {
                 if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(grantType) && json.get(
                         APIConstants.OAuthConstants.SUBJECT_TOKEN) == null) {
                     RestApiUtil.handleBadRequest(
-                            "Missing required parameter " + APIConstants.OAuthConstants.SUBJECT_TOKEN +
-                                    " is not provided to generate token using Token Exchange grant",
+                            "Missing required parameter " + APIConstants.OAuthConstants.SUBJECT_TOKEN
+                                    + " is not provided to generate token using Token Exchange grant",
                             log);
                 }
             }
@@ -1431,5 +1459,4 @@ public class ApplicationServiceImpl {
         return apiConsumer.updateAuthClient(username, application, keyType, body.getCallbackUrl(), null,
                 null, null, body.getKeyMappingId(), new Gson().toJson(jsonParams), keyManagerName);
     }
-
 }

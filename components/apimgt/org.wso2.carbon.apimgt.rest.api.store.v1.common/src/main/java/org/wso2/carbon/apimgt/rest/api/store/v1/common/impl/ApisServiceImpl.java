@@ -162,14 +162,6 @@ public class ApisServiceImpl {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
             }
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String msg = "Error while retrieving complexity details of API " + apiId;
-                throw new APIManagementException(msg, e.getErrorHandler());
-            }
             String msg = "Error while retrieving complexity details of API " + apiId;
             throw new APIManagementException(msg, e.getErrorHandler());
         }
@@ -195,16 +187,9 @@ public class ApisServiceImpl {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
             }
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String msg = "Error while retrieving types and fields of the schema of API " + apiId;
-                throw new APIManagementException(msg, e.getErrorHandler());
-            }
+            String msg = "Error while retrieving types and fields of the schema of API " + apiId;
+            throw new APIManagementException(msg, e.getErrorHandler());
         }
-        return null;
     }
 
     /**
@@ -219,14 +204,9 @@ public class ApisServiceImpl {
             apiConsumer.getLightweightAPIByUUID(apiId, organization);
             return apiConsumer.getGraphqlSchemaDefinition(apiId, organization);
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                throw new APIManagementException(errorMessage, e.getErrorHandler());
-            }
+            String errorMessage = "Error while retrieving API : " + apiId;
+            throw new APIManagementException(errorMessage, e.getErrorHandler());
         }
-        return null;
     }
 
     /**
@@ -241,23 +221,13 @@ public class ApisServiceImpl {
             String organization) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-            Comment comment = createComment(postRequestBodyDTO.getContent(), postRequestBodyDTO.getCategory(), replyTo,
-                    username, apiId);
-
-            String createdCommentId = apiConsumer.addComment(apiId, comment, username);
-            Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
-            return CommentMappingUtil.fromCommentToDTO(createdComment);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
-            }
-        }
-        return null;
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+        Comment comment = createComment(postRequestBodyDTO.getContent(), postRequestBodyDTO.getCategory(), replyTo,
+                username, apiId);
+        String createdCommentId = apiConsumer.addComment(apiId, comment, username);
+        Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
+        return CommentMappingUtil.fromCommentToDTO(createdComment);
     }
 
     /**
@@ -269,21 +239,13 @@ public class ApisServiceImpl {
      * @return
      */
     public static CommentListDTO getAllCommentsOfAPI(String apiId, String organization, Integer limit, Integer offset,
-            Boolean includeCommenterInfo) {
-        try {
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-            String parentCommentID = null;
-            CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
-            return CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to get comments of API " + apiId, e, log);
-            }
-        }
-        return null;
+            Boolean includeCommenterInfo) throws APIManagementException {
+
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+        String parentCommentID = null;
+        CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
+        return CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
     }
 
     /**
@@ -296,39 +258,26 @@ public class ApisServiceImpl {
      * @return
      */
     public static CommentDTO getCommentOfAPI(String commentId, String organization, String apiId,
-            Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset) {
+            Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset) throws APIManagementException {
 
-        try {
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+        Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
 
-            if (comment != null) {
-                CommentDTO commentDTO;
-                if (Boolean.TRUE.equals(includeCommenterInfo)) {
-                    Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil.retrieveUserClaims(
-                            comment.getUser(), new HashMap<>());
-                    commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
-                } else {
-                    commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
-                }
-                return commentDTO;
+        if (comment != null) {
+            CommentDTO commentDTO;
+            if (Boolean.TRUE.equals(includeCommenterInfo)) {
+                Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil.retrieveUserClaims(
+                        comment.getUser(), new HashMap<>());
+                commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId),
-                        log);
+                commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
             }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving comment for API : " + apiId + "with comment ID " +
-                        commentId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            return commentDTO;
+        } else {
+            String errorMessage = "Failed to retrieve comments for API " +  apiId;
+            throw new APIManagementException(errorMessage, ExceptionCodes.COMMENT_NOT_FOUND);
         }
-        return null;
     }
 
     /**
@@ -341,21 +290,13 @@ public class ApisServiceImpl {
      * @return
      */
     public static CommentListDTO getRepliesOfComment(String commentId, String apiId, Integer limit, String organization,
-            Integer offset, Boolean includeCommenterInfo) {
+            Integer offset, Boolean includeCommenterInfo) throws APIManagementException {
 
-        try {
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-            CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
-            return CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to get comments of API " + apiId, e, log);
-            }
-        }
-        return null;
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+        CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
+        return CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
+
     }
 
     /**
@@ -383,11 +324,12 @@ public class ApisServiceImpl {
                     return CommentMappingUtil.fromCommentToDTO(editedComment);
                 }
             } else {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId),
-                        log);
+                throw new APIManagementException(ExceptionCodes
+                        .from(ExceptionCodes.COMMENT_NO_PERMISSION, username, comment.getId()));
             }
         } else {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId), log);
+            String errorMessage = "Failed to retrieve comment" + commentId + " of API " +  apiId;
+            throw new APIManagementException(errorMessage, ExceptionCodes.COMMENT_NOT_FOUND);
         }
         return null;
     }
@@ -399,37 +341,25 @@ public class ApisServiceImpl {
      * @param tokenScopes
      * @return
      */
-    public static JSONObject deleteComment(String commentId, String apiId, String organization, String[] tokenScopes) {
+    public static JSONObject deleteComment(String commentId, String apiId, String organization, String[] tokenScopes)
+            throws APIManagementException {
 
-        try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
-            if (comment != null) {
-                if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
-                    if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
-                        return generateMessageForDeletedComment(commentId);
-                    } else {
-                        //return Response.status(405, "Method Not Allowed").type(MediaType
-                        //       .APPLICATION_JSON).build();
-                    }
-                } else {
-                    // return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+        Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+        if (comment != null) {
+            if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
+                if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
+                    return generateMessageForDeletedComment(commentId);
                 }
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId),
-                        log);
+                throw new APIManagementException(ExceptionCodes
+                        .from(ExceptionCodes.COMMENT_NO_PERMISSION, username, comment.getId()));
             }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while deleting comment " + commentId + "for API " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+        } else {
+            String errorMessage = "Failed to retrieve comment" + commentId + " of API " + apiId;
+            throw new APIManagementException(errorMessage, ExceptionCodes.COMMENT_NOT_FOUND);
         }
         return null;
     }
@@ -447,7 +377,9 @@ public class ApisServiceImpl {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         DocumentationContent docContent = apiConsumer.getDocumentationContent(apiId, documentId, organization);
         if (docContent == null) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+            String msg = "Failed to get the document. Artifact corresponding to document id " + documentId
+                    + " does not exist";
+            throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_NOT_FOUND);
         }
         return docContent;
     }
@@ -458,31 +390,28 @@ public class ApisServiceImpl {
      * @param organization
      * @return
      */
-    public static DocumentDTO getDocumentation(String apiId, String documentId, String organization) {
+    public static DocumentDTO getDocumentation(String apiId, String documentId, String organization)
+            throws APIManagementException {
         Documentation documentation;
-        try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
-            }
-
-            documentation = apiConsumer.getDocumentation(apiId, documentId, organization);
-            if (null != documentation) {
-                return DocumentationMappingUtil.fromDocumentationToDTO(documentation);
-            } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-            }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
-            }
+        if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
+            throw new APIManagementException(
+                    "User " + username + " does not have permission to access API with Id : " + apiId,
+                    ExceptionCodes.NO_READ_PERMISSIONS);
         }
-        return null;
+
+        documentation = apiConsumer.getDocumentation(apiId, documentId, organization);
+        if (null != documentation) {
+            return DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+        } else {
+            String msg = "Failed to get the document. Artifact corresponding to document id " + documentId
+                    + " does not exist";
+            throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_NOT_FOUND);
+        }
     }
+
 
     /**
      * @param apiId
@@ -492,33 +421,20 @@ public class ApisServiceImpl {
      * @return
      */
     public static DocumentListDTO getDocumentationList(String apiId, Integer limit, Integer offset,
-            String organization) {
+            String organization) throws APIManagementException {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-        try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, organization);
-            DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(documentationList,
-                    offset, limit);
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, organization);
+        DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(documentationList, offset,
+                limit);
+        DocumentationMappingUtil.setPaginationParams(documentListDTO, apiId, offset, limit, documentationList.size());
+        return documentListDTO;
 
-            //todo : set total count properly
-            DocumentationMappingUtil.setPaginationParams(documentListDTO, apiId, offset, limit,
-                    documentationList.size());
-            return documentListDTO;
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
-            }
-        }
-        return null;
     }
 
     /**
@@ -570,10 +486,6 @@ public class ApisServiceImpl {
     public static Map<String, String> getSdkArtifacts(String apiId, String language, String organization)
             throws APIManagementException {
 
-        if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
-            String message = "Error generating the SDK. API id or language should not be empty";
-            RestApiUtil.handleBadRequest(message, log);
-        }
         APIDTO api = getAPIByAPIId(apiId, organization);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
@@ -585,12 +497,11 @@ public class ApisServiceImpl {
                 return sdkArtifacts;
             } catch (APIClientGenerationException e) {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
-                RestApiUtil.handleInternalServerError(message, e, log);
+                throw new APIManagementException(message, ExceptionCodes.SDK_NOT_GENERATED);
             }
         }
         String message = "Could not find an API for ID " + apiId;
-        RestApiUtil.handleResourceNotFoundError(message, log);
-        return null;
+        throw new APIManagementException(message, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
     }
 
     /**
@@ -601,51 +512,30 @@ public class ApisServiceImpl {
      * @return Swagger document of the API for the given cluster or gateway environment
      */
 
-    public static String getOpenAPIDefinitionForEnvironment(String apiId, String environmentName, String organization) {
-        try {
-            String apiSwagger;
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
-            removeInterceptorsFromSwagger(apiConsumer, apiId, organization, api);
+    public static String getOpenAPIDefinitionForEnvironment(String apiId, String environmentName, String organization)
+            throws APIManagementException {
+        String apiSwagger;
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
+        removeInterceptorsFromSwagger(apiConsumer, apiId, organization, api);
 
-            if (StringUtils.isEmpty(environmentName)) {
-                environmentName = retrieveAvailableEnvironment(organization, api.getEnvironmentList());
-            }
-
-            if (StringUtils.isNotEmpty(environmentName)) {
-                apiSwagger = getSwaggerForEnvironment(apiConsumer, api, organization);
-            } else {
-                apiSwagger = api.getSwaggerDefinition();
-            }
-
-            return apiSwagger;
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving swagger of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+        if (StringUtils.isEmpty(environmentName)) {
+            environmentName = retrieveAvailableEnvironment(organization, api.getEnvironmentList());
         }
-        return null;
+
+        if (StringUtils.isNotEmpty(environmentName)) {
+            apiSwagger = getSwaggerForEnvironment(apiConsumer, api, organization);
+        } else {
+            apiSwagger = api.getSwaggerDefinition();
+        }
+
+        return apiSwagger;
     }
 
     private static String getSwaggerForEnvironment(APIConsumer apiConsumer, API api, String environmentName)
             throws APIManagementException {
         String apiSwagger;
-        try {
-            apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
-        } catch (APIManagementException e) {
-            // handle gateway not found exception otherwise pass it
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError("Gateway environment '" + environmentName + "' not found", e,
-                        log);
-                return null;
-            }
-            throw e;
-        }
+        apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
         return apiSwagger;
     }
 
@@ -656,24 +546,10 @@ public class ApisServiceImpl {
      * @param organization organization
      * @return ResourceFile
      */
-    public static ResourceFile getThumbnail(String apiId, String organization) {
-        try {
-
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            //this will fail if user does not have access to the API or the API does not exist
-            apiConsumer.getLightweightAPIByUUID(apiId, organization);
-            return apiConsumer.getIcon(apiId, organization);
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
+    public static ResourceFile getThumbnail(String apiId, String organization) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        apiConsumer.getLightweightAPIByUUID(apiId, organization);
+        return apiConsumer.getIcon(apiId, organization);
     }
 
     /**
@@ -685,24 +561,11 @@ public class ApisServiceImpl {
      * @throws APIManagementException
      */
     public static TopicListDTO getAPITopicList(String apiId, String organization) throws APIManagementException {
-        if (StringUtils.isNotEmpty(apiId)) {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            try {
-                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-                TopicListDTO topicListDTO;
-                topicListDTO = AsyncAPIMappingUtil.fromTopicListToDTO(getTopics(apiConsumer, apiId, organization));
-                return topicListDTO;
-            } catch (APIManagementException e) {
-                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-                } else {
-                    RestApiUtil.handleInternalServerError("Failed to get topics of Async API " + apiId, e, log);
-                }
-            }
-        } else {
-            RestApiUtil.handleBadRequest("API Id is missing in request", log);
-        }
-        return null;
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        TopicListDTO topicListDTO;
+        topicListDTO = AsyncAPIMappingUtil.fromTopicListToDTO(getTopics(apiConsumer, apiId, organization));
+        return topicListDTO;
     }
 
     /**
@@ -713,42 +576,29 @@ public class ApisServiceImpl {
      * @param organization organization
      * @return
      */
-    public static RatingDTO updateUserRating(String id, RatingDTO body, String organization) {
-        try {
-            int rating = 0;
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            //this will fail if user doesn't have access to the API or the API does not exist
-            apiConsumer.checkAPIVisibility(id, organization);
-            if (body != null) {
-                rating = body.getRating();
-            }
-
-            JSONObject obj = getRating(apiConsumer, rating, id, username);
-            if (obj == null) {
-                RestApiUtil.handleBadRequest("Provided API Rating is not in the range from 1 to 5", log);
-            }
-
-            RatingDTO ratingDTO = new RatingDTO();
-            if (obj != null && !obj.isEmpty()) {
-                ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
-                ratingDTO.setApiId(id);
-            }
-            return ratingDTO;
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        RestApiConstants.RESOURCE_RATING + RestApiConstants.RATING_FOR + RestApiConstants.RESOURCE_API,
-                        id, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + RestApiConstants.RATING_FOR + RestApiConstants.RESOURCE_API,
-                        id, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while adding/updating user rating for API " + id, e, log);
-            }
+    public static RatingDTO updateUserRating(String id, RatingDTO body, String organization)
+            throws APIManagementException {
+        int rating = 0;
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        //this will fail if user doesn't have access to the API or the API does not exist
+        apiConsumer.checkAPIVisibility(id, organization);
+        if (body != null) {
+            rating = body.getRating();
         }
-        return null;
+
+        JSONObject obj = getRating(apiConsumer, rating, id, username);
+        if (obj == null) {
+            String message = "Provided API Rating is not in the range from 1 to 5";
+            throw new APIManagementException(message, ExceptionCodes.RATING_VALUE_INVALID);
+        }
+
+        RatingDTO ratingDTO = new RatingDTO();
+        if (obj != null && !obj.isEmpty()) {
+            ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
+            ratingDTO.setApiId(id);
+        }
+        return ratingDTO;
     }
 
     /**
@@ -758,34 +608,18 @@ public class ApisServiceImpl {
      * @param organization organization
      * @return
      */
-    public static RatingDTO getUserRating(String id, String organization) {
-        try {
-
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            //this will fail if user doesn't have access to the API or the API does not exist
-            apiConsumer.checkAPIVisibility(id, organization);
-            JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
-            RatingDTO ratingDTO = new RatingDTO();
-            if (obj != null && !obj.isEmpty()) {
-                ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
-                ratingDTO.setApiId(id);
-            }
-            return ratingDTO;
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        RestApiConstants.RESOURCE_RATING + RestApiConstants.RATING_FOR + RestApiConstants.RESOURCE_API,
-                        id, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + RestApiConstants.RATING_FOR + RestApiConstants.RESOURCE_API,
-                        id, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while retrieving user rating for API " + id, e, log);
-            }
+    public static RatingDTO getUserRating(String id, String organization) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        //this will fail if user doesn't have access to the API or the API does not exist
+        apiConsumer.checkAPIVisibility(id, organization);
+        JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
+        RatingDTO ratingDTO = new RatingDTO();
+        if (obj != null && !obj.isEmpty()) {
+            ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
+            ratingDTO.setApiId(id);
         }
-        return null;
+        return ratingDTO;
     }
 
     /**
@@ -794,26 +628,12 @@ public class ApisServiceImpl {
      * @param apiId        apiId
      * @param organization organization
      */
-    public static void deleteAPIUserRating(String apiId, String organization) {
-        try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            //this will fail if user doesn't have access to the API or the API does not exist
-            apiConsumer.checkAPIVisibility(apiId, organization);
-            apiConsumer.removeAPIRating(apiId, username);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        RestApiConstants.RESOURCE_RATING + RestApiConstants.RATING_FOR + RestApiConstants.RESOURCE_API,
-                        apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + RestApiConstants.RATING_FOR + RestApiConstants.RESOURCE_API,
-                        apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while deleting user rating for API " + apiId, e, log);
-            }
-        }
+    public static void deleteAPIUserRating(String apiId, String organization) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        //this will fail if user doesn't have access to the API or the API does not exist
+        apiConsumer.checkAPIVisibility(apiId, organization);
+        apiConsumer.removeAPIRating(apiId, username);
     }
 
     /**
@@ -871,34 +691,24 @@ public class ApisServiceImpl {
      * @param organization organization
      * @return
      */
-    public static APIDTO getAPIByAPIId(String apiId, String organization) {
-        try {
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-            String status = api.getStatus();
+    public static APIDTO getAPIByAPIId(String apiId, String organization) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+        String status = api.getStatus();
 
-            // Extracting clicked API name by the user, for the recommendation system
-            String userName = RestApiCommonUtil.getLoggedInUsername();
-            apiConsumer.publishClickedAPI(api, userName, organization);
+        // Extracting clicked API name by the user, for the recommendation system
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        apiConsumer.publishClickedAPI(api, userName, organization);
 
-            if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(
-                    status) || APIConstants.DEPRECATED.equals(status)) {
+        if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(
+                status) || APIConstants.DEPRECATED.equals(status)) {
 
-                return APIMappingUtil.fromAPItoDTO(api, organization);
-            } else {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
-            }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            return APIMappingUtil.fromAPItoDTO(api, organization);
+        } else {
+            throw new APIManagementException(
+                    "User " + userName + " does not have permission to access API with Id : " + apiId,
+                    ExceptionCodes.NO_READ_PERMISSIONS);
         }
-        return null;
     }
 
     private static Comment createComment(String content, String category, String replyTo, String username,
@@ -950,16 +760,14 @@ public class ApisServiceImpl {
         }
     }
 
-    private static String retrieveAvailableEnvironment(String organization, Set<String> environmentList) {
+    private static String retrieveAvailableEnvironment(String organization, Set<String> environmentList)
+            throws APIManagementException {
 
         String environmentName = "";
         Map<String, Environment> existingEnvironments = new HashMap<>();
 
-        try {
-            existingEnvironments = APIUtil.getEnvironments(organization);
-        } catch (APIManagementException e) {
-            //new APIManagementException()
-        }
+        existingEnvironments = APIUtil.getEnvironments(organization);
+
 
         // find a valid environment name from API
         // gateway environment may be invalid due to inconsistent state of the API
@@ -1004,7 +812,7 @@ public class ApisServiceImpl {
      * @return
      * @throws APIManagementException
      */
-    public static JSONObject getRating(APIConsumer apiConsumer, int rating, String id, String username)
+    public static JSONObject  getRating(APIConsumer apiConsumer, int rating, String id, String username)
             throws APIManagementException {
         switch (rating) {
         //Below case 0[Rate 0] - is to remove ratings from a user

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ThrottlingPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.impl.ThrottlingPoliciesServiceImpl;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
@@ -34,7 +35,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
     @Override
     public Response throttlingPoliciesPolicyLevelGet(
             String policyLevel, Integer limit, Integer offset, String ifNoneMatch, String xWSO2Tenant,
-            MessageContext messageContext) {
+            MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getOrganization(messageContext);
         ThrottlingPolicyListDTO tierListDTO = ThrottlingPoliciesServiceImpl.
                 throttlingPoliciesPolicyLevelGet(policyLevel, limit, offset, organization);
@@ -43,7 +44,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
 
     @Override
     public Response throttlingPoliciesPolicyLevelPolicyIdGet(String policyId, String policyLevel, String xWSO2Tenant,
-            String ifNoneMatch, MessageContext messageContext) {
+            String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getOrganization(messageContext);
 
         if (StringUtils.isBlank(policyLevel)) {

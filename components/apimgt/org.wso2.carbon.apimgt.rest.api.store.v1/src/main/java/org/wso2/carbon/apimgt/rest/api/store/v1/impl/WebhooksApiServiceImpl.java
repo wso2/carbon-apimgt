@@ -17,21 +17,33 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.store.v1.WebhooksApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.impl.WebhookServiceImpl;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WebhookSubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 
 
 public class WebhooksApiServiceImpl implements WebhooksApiService {
 
-    public Response webhooksSubscriptionsGet(String applicationId, String apiId, String xWSO2Tenant,
-            MessageContext messageContext) {
+    private static final Log log = LogFactory.getLog(WebhooksApiServiceImpl.class);
 
-        WebhookSubscriptionListDTO webhookSubscriptionListDTO = WebhookServiceImpl.getWebhooksSubscriptions(
-                applicationId, apiId);
-        return Response.ok().entity(webhookSubscriptionListDTO).build();
+    public Response webhooksSubscriptionsGet(String applicationId, String apiId, String xWSO2Tenant,
+            MessageContext messageContext) throws APIManagementException {
+        if (StringUtils.isNotEmpty(applicationId)) {
+            WebhookSubscriptionListDTO webhookSubscriptionListDTO = WebhookServiceImpl.getWebhooksSubscriptions(
+                    applicationId, apiId);
+            return Response.ok().entity(webhookSubscriptionListDTO).build();
+        } else {
+            throw new APIManagementException("Application Id cannot be empty",
+                    ExceptionCodes.from(ExceptionCodes.CERT_BAD_REQUEST, "Application Id cannot be empty"));
+        }
     }
 }

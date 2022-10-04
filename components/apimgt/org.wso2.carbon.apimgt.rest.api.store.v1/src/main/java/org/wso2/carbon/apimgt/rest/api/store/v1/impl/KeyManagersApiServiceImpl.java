@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.store.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.impl.KeyManagerServiceImpl;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerListDTO;
@@ -27,7 +28,7 @@ import javax.ws.rs.core.Response;
 
 public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
-    public Response keyManagersGet(String xWSO2Tenant, MessageContext messageContext) {
+    public Response keyManagersGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getOrganization(messageContext);
         KeyManagerListDTO keyManagerConfigurations = KeyManagerServiceImpl.getKeyManagers(organization);
         return Response.ok(keyManagerConfigurations).build();

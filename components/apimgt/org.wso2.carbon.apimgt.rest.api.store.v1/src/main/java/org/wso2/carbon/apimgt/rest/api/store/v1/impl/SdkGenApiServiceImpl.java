@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.common.impl.SdkGenServiceImpl;
 
@@ -35,7 +36,7 @@ public class SdkGenApiServiceImpl implements SdkGenApiService {
      * Rest API implementation to get the supported sdk languages
      */
     @Override
-    public Response sdkGenLanguagesGet(MessageContext messageContext) {
+    public Response sdkGenLanguagesGet(MessageContext messageContext) throws APIManagementException {
 
         List<String> languageList = SdkGenServiceImpl.getSdkGenLanguageList();
         return Response.ok().entity(languageList).build();
