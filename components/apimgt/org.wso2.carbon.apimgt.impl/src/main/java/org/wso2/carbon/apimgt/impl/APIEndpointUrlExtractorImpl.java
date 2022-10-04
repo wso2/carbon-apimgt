@@ -66,8 +66,16 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
         return endpointUrls;
     }
 
-    @Override
-    public List<HostInfo> getHostInfoForEnv(ApiTypeWrapper apiTypeWrapper, String tenantDomainOrOrganization,
+    /**
+     * Get the list of host information specific to the given tenantDomain/organization and environment.
+     *
+     * @param apiTypeWrapper The API or APIProduct wrapper
+     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param environmentName The name of the environment
+     * @return List of host information specific to the given tenantDomain/organization and environment
+     * @throws APIManagementException
+     */
+    protected List<HostInfo> getHostInfoForEnv(ApiTypeWrapper apiTypeWrapper, String tenantDomainOrOrganization,
                                             String environmentName) throws APIManagementException {
         List<HostInfo> hostInfos = new ArrayList<>();
 
@@ -117,8 +125,16 @@ public class APIEndpointUrlExtractorImpl implements APIEndpointUrlExtractor {
         return hostInfos;
     }
 
-    @Override
-    public List<EndpointUrl> getEndpointUrlsForHost(ApiTypeWrapper apiTypeWrapper, String tenantDomainOrOrganization,
+    /**
+     * Get the API endpoint URLs specific to the given tenantDomain/organization and host information.
+     *
+     * @param apiTypeWrapper The API or APIProduct wrapper
+     * @param tenantDomainOrOrganization The tenant domain or the organization
+     * @param hostInfo The host information
+     * @return List of endpoint URLs specific to the given tenantDomain/organization and host information
+     * @throws APIManagementException
+     */
+    protected List<EndpointUrl> getEndpointUrlsForHost(ApiTypeWrapper apiTypeWrapper, String tenantDomainOrOrganization,
                                                     HostInfo hostInfo) throws APIManagementException {
         List<EndpointUrl> endpointUrls = new ArrayList<>();
 
