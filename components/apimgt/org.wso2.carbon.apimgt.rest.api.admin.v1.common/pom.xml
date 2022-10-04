@@ -59,7 +59,6 @@
             <artifactId>spring-context</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
@@ -79,6 +78,56 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.validation</groupId>
+                    <artifactId>validation-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jboss.logging</groupId>
+                    <artifactId>jboss-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.uri.template</groupId>
+            <artifactId>wso2-uri-templates</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.foundation</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
@@ -164,8 +213,9 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;version="${carbon.apimgt.version}"
-                            org.wso2.carbon.apimgt.rest.api.admin.v1.common.mappings.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.rest.api.admin.v1.common.impl.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.rest.api.admin.v1.common.utils.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

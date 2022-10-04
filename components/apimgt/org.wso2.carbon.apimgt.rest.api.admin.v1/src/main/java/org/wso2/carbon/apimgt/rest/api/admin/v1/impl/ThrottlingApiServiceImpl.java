@@ -309,11 +309,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response addCustomRule(String contentType, CustomRuleDTO body, MessageContext messageContext)
             throws APIManagementException {
 
-        RestApiAdminUtils
-                .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
-
         try {
-            CustomRuleDTO policyDTO = ThrottlingCommonImpl.addCustomRule(body);
+            CustomRuleDTO policyDTO = ThrottlingCommonImpl.addCustomRule(body,
+                    (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL
                             + RestApiConstants.PATH_DELIMITER + policyDTO.getPolicyId()))
                     .entity(policyDTO).build();
@@ -395,7 +393,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                            Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         String fileName = fileDetail.getContentDisposition().getFilename();
         Map<String, Object> policyResponse = ThrottlingCommonImpl
-                .importThrottlingPolicy(fileInputStream, fileName, overwrite);
+                .importThrottlingPolicy(fileInputStream, fileName, overwrite,
+                        (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
         return Response.ok().entity(policyResponse.get("message")).build();
 
     }

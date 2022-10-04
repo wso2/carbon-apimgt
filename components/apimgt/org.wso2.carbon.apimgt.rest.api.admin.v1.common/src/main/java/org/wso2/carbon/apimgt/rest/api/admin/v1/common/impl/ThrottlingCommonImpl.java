@@ -625,7 +625,9 @@ public class ThrottlingCommonImpl {
      * @return Custom rule DTO
      * @throws APIManagementException When an internal error occurs
      */
-    public static CustomRuleDTO addCustomRule(CustomRuleDTO body) throws APIManagementException {
+    public static CustomRuleDTO addCustomRule(CustomRuleDTO body, String httpMethod) throws APIManagementException {
+        RestApiAdminUtils
+                .validateCustomRuleRequiredProperties(body, httpMethod);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         //only super tenant is allowed to access global policies/custom rules
@@ -851,7 +853,7 @@ public class ThrottlingCommonImpl {
     }
 
     public static Map<String, Object> importThrottlingPolicy(InputStream fileInputStream, String fileName,
-                                                             boolean overwrite)
+                                                             boolean overwrite, String httpMethod)
             throws APIManagementException {
         ExportThrottlePolicyDTO exportThrottlePolicyDTO = null;
         String policyType = "";
@@ -870,7 +872,7 @@ public class ThrottlingCommonImpl {
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, errorMessage));
         }
 
-        return resolveUpdateThrottlingPolicy(policyType, overwrite, exportThrottlePolicyDTO);
+        return resolveUpdateThrottlingPolicy(policyType, overwrite, exportThrottlePolicyDTO, httpMethod);
     }
 
     /**
@@ -1224,10 +1226,12 @@ public class ThrottlingCommonImpl {
      * @param policyType              Throttling policy type
      * @param overwrite               User can either update an existing throttling policy with the same name or let the conflict happen
      * @param exportThrottlePolicyDTO the policy to be imported
+     * @param httpMethod              HTTP Method
      * @return Response with  message indicating the status of the importation and the imported/updated policy name
      */
     private static Map<String, Object> resolveUpdateThrottlingPolicy(String policyType, boolean overwrite,
-                                                                     ExportThrottlePolicyDTO exportThrottlePolicyDTO)
+                                                                     ExportThrottlePolicyDTO exportThrottlePolicyDTO,
+                                                                     String httpMethod)
             throws APIManagementException {
         ObjectMapper mapper = new ObjectMapper();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1241,7 +1245,8 @@ public class ThrottlingCommonImpl {
             responseObject = resolveUpdateApplicationPolicy(mapper, apiProvider, overwrite, username,
                     exportThrottlePolicyDTO);
         } else if (RestApiConstants.RESOURCE_CUSTOM_RULE.equals(policyType)) {
-            responseObject = resolveUpdateCustomRule(mapper, apiProvider, overwrite, exportThrottlePolicyDTO);
+            responseObject = resolveUpdateCustomRule(mapper, apiProvider, overwrite, exportThrottlePolicyDTO,
+                    httpMethod);
         } else if (RestApiConstants.RESOURCE_ADVANCED_POLICY.equals(policyType)) {
             responseObject = resolveUpdateAdvancedPolicy(mapper, apiProvider, overwrite, username,
                     exportThrottlePolicyDTO);
@@ -1352,12 +1357,14 @@ public class ThrottlingCommonImpl {
      * @param apiProvider             API Provider
      * @param overwrite               Override the existing policy
      * @param exportThrottlePolicyDTO Throttle policy DTO
+     * @param httpMethod              HTTP Method
      * @return Map of policy DTO and message
      * @throws APIManagementException When an internal error occurs
      */
     private static Map<String, Object> resolveUpdateCustomRule(ObjectMapper mapper, APIProvider apiProvider,
                                                                boolean overwrite,
-                                                               ExportThrottlePolicyDTO exportThrottlePolicyDTO)
+                                                               ExportThrottlePolicyDTO exportThrottlePolicyDTO,
+                                                               String httpMethod)
             throws APIManagementException {
         Map<String, Object> responseObject = new HashMap<>();
         CustomRuleDTO customPolicy = mapper.convertValue(exportThrottlePolicyDTO.getData(), CustomRuleDTO.class);
@@ -1375,7 +1382,7 @@ public class ThrottlingCommonImpl {
                         customPolicy.getPolicyName()));
             }
         } else {
-            CustomRuleDTO customRuleDTO = addCustomRule(customPolicy);
+            CustomRuleDTO customRuleDTO = addCustomRule(customPolicy, httpMethod);
             String message = "Successfully imported Custom Throttling Policy : " + customPolicy.getPolicyName();
             responseObject.put(DTO, customRuleDTO);
             responseObject.put(MESSAGE, message);
