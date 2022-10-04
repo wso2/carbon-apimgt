@@ -1220,6 +1220,8 @@ public class PublisherCommonUtils {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
+        // update the API's scopes with scope prefix (if it is available)
+        APIUtil.updateAPIScopesWithPrefix(existingAPI);
         PublisherCommonUtils.validateScopes(existingAPI);
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
