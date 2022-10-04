@@ -16,52 +16,20 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.CustomUrlsApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.impl.CustomUrlsCommonImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDevPortalDTO;
-
-import java.util.Map;
-
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.Response;
 
 public class CustomUrlsApiServiceImpl implements CustomUrlsApiService {
 
-    private static final Log log = LogFactory.getLog(CustomUrlsApiServiceImpl.class);
-
     @Override
-    public Response getCustomUrlInfoByTenantDomain(String tenantDomain, MessageContext messageContext) {
-
-        try {
-            boolean isTenantAvailable = APIUtil.isTenantAvailable(tenantDomain);
-            if (!isTenantAvailable) {
-                return Response.status(Response.Status.NOT_FOUND).build(); // tenant does not exist
-            }
-            CustomUrlInfoDTO customUrlInfoDTO = new CustomUrlInfoDTO();
-            boolean perTenantServiceProviderEnabled = APIUtil.isPerTenantServiceProviderEnabled(tenantDomain);
-            if (perTenantServiceProviderEnabled) {
-                Map tenantBasedStoreDomainMapping = APIUtil.getTenantBasedStoreDomainMapping(tenantDomain);
-                if (tenantBasedStoreDomainMapping != null) {
-                    CustomUrlInfoDevPortalDTO customUrlInfoDevPortalDTO = new CustomUrlInfoDevPortalDTO();
-                    customUrlInfoDevPortalDTO.setUrl((String) tenantBasedStoreDomainMapping.get("customUrl"));
-                    customUrlInfoDTO.setDevPortal(customUrlInfoDevPortalDTO);
-                }
-            }
-            customUrlInfoDTO.setTenantAdminUsername(APIUtil.getTenantAdminUserName(tenantDomain));
-            customUrlInfoDTO.setEnabled(perTenantServiceProviderEnabled);
-            customUrlInfoDTO.setTenantDomain(tenantDomain);
-            return Response.ok().entity(customUrlInfoDTO).build();
-        } catch (UserStoreException | APIManagementException | RegistryException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving custom url info for tenant : " + tenantDomain, log);
-        }
-        return null;
+    public Response getCustomUrlInfoByTenantDomain(String tenantDomain, MessageContext messageContext)
+            throws APIManagementException {
+        CustomUrlInfoDTO customUrlInfoDTO = CustomUrlsCommonImpl.getCustomUrlInfoByTenantDomain(tenantDomain);
+        return Response.ok().entity(customUrlInfoDTO).build();
     }
 }

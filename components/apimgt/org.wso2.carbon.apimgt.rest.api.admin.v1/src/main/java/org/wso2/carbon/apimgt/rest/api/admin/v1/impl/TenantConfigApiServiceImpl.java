@@ -17,44 +17,29 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import org.wso2.carbon.apimgt.api.APIAdmin;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
-
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.impl.TenantConfigCommonImpl;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
-import java.util.List;
-
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Used to retrieve and update tenant-config in deployment.
  */
 public class TenantConfigApiServiceImpl implements TenantConfigApiService {
 
+    @Override
     public Response exportTenantConfig(MessageContext messageContext) throws APIManagementException {
-        APIAdmin apiAdmin = new APIAdminImpl();
-        String tenantConfig = apiAdmin.getTenantConfig(RestApiCommonUtil.getLoggedInUserTenantDomain());
+        String tenantConfig = TenantConfigCommonImpl.exportTenantConfig();
         return Response.ok().entity(tenantConfig)
                 .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
     }
 
+    @Override
     public Response updateTenantConfig(String body, MessageContext messageContext) throws APIManagementException {
-        APIAdmin apiAdmin = new APIAdminImpl();
-        apiAdmin.updateTenantConfig(RestApiCommonUtil.getLoggedInUserTenantDomain(), body);
+        TenantConfigCommonImpl.updateTenantConfig(body);
         return Response.ok().entity(body)
                 .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
     }

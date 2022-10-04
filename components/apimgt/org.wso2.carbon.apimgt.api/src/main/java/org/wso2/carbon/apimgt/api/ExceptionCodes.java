@@ -123,6 +123,12 @@ public enum ExceptionCodes implements ErrorHandler {
     PERSISTENCE_ERROR(900363, "Error occurred in registry transaction", 500, "'%s'"),
     NO_VIEW_UPDATE_PERMISSIONS(900365, "Insufficient permission to view or update the API", 403, "Insufficient permission to view or update the API"),
     API_DELETE_FAILED_SUBSCRIPTIONS(900366, "Failed to delete the API", 409, "Cannot remove the API as active subscriptions exist"),
+    CATEGORY_NAME_CONTAINS_SPECIAL_CHARS(900368, "Name field contains special characters", 400, "API Category name contains special characters"),
+    CATEGORY_NAME_TOO_LONG(900369, "API Category name is too long", 400, "API Category name exceeds 255 characters"),
+    CATEGORY_ALREADY_EXISTS(900370, "API Category name already exists", 409, "Category with name '%s' already exists"),
+    CATEGORY_NOT_FOUND(900371, "Category not found", 404, "No API Category with the given category ID '%s' exists"),
+    CATEGORY_USED(900372, "Category has usages", 409, "Category is attached to one or more APIs"),
+    ERROR_CHANGING_APP_OWNER(900373, "Failed to change the application owner", 500, "Error while changing the application owner"),
 
 
     //Lifecycle related codes
@@ -141,6 +147,10 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OPERATION_TYPE(900406, "Unsupported '%s' operation", 400, "The '%s' operation type '%s' is invalid"),
     VERB_NOT_FOUND(900407, "Missing '%s' type", 400, "Missing '%s type in URI templates"),
     YAML_PARSE_ERROR(900408, "Yaml parse error", 500, "Yaml parse error"),
+    AUTHORIZATION_ERROR(900409, "Forbidden", 403, "You don't have permission to access the '%s' with Id '%s'"),
+    FORBIDDEN_ERROR(900409, "Forbidden", 403, "You don't have permission to access this resource"),
+    RESOURCE_NOT_FOUND_WITH_DESC(900401, "Resource not found", 404, "Requested '%s' with Id '%s' not found"),
+    UNAUTHORIZED(900410, "Unauthorized", 401, "User is unauthorized"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -341,6 +351,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
+    INTERNAL_ERROR_WITH_SPECIFIC_DESC(903007, "Internal Server Error", 500, "'%s'"),
 
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
@@ -365,6 +376,24 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot delete the advanced policy with the name %s because it is already assigned to an API/Resource"),
 
     //Throttle related codes
+    ADVANCED_POLICY_EXISTS(902900, "Advanced policy already exists", 409, "Advanced Policy with name '%s' already exists"),
+    APPLICATION_POLICY_EXISTS(902901, "Application policy already exists", 409, "Application Policy with name '%s' already exists"),
+    SUBSCRIPTION_POLICY_EXISTS(902902, "Subscription policy already exists", 409, "Subscription Policy with name '%s' already exists"),
+    GLOBAL_POLICY_EXISTS(902903, "Policy already exists", 409, "Policy already exists"),
+    ADVANCED_POLICY_ADD_FAILED(902904, "Error while adding an Advanced level policy: '%s'", 500, "'%s'"),
+    ADVANCED_POLICY_GET_FAILED(902905, "Error while retrieving Advanced level policy : '%s'", 500, "'%s'"),
+    ADVANCED_POLICY_UPDATE_FAILED(902906, "Error while updating Advanced level policy : '%s'", 500, "'%s'"),
+    SUBSCRIPTION_POLICY_GET_ALL_FAILED(902907, "Error while retrieving Subscription level policies", 500, "Server Error Occurred"),
+    SUBSCRIPTION_POLICY_ADD_FAILED(902908, "Error while adding Subscription level policies", 500, "Server Error Occurred"),
+    SUBSCRIPTION_POLICY_GET_FAILED(902909, "Error while retrieving Subscription level policy : '%s'", 500, "Server Error Occurred"),
+    BAD_POLICY_OBJECT(902010, "Policy object doesn't contain mandatory parameters", 500, "Policy object doesn't contain mandatory parameters."),
+    SUBSCRIPTION_POLICY_UPDATE_FAILED(902911, "Error while updating Subscription level policy : '%s'", 500, "Server Error Occurred"),
+    CUSTOM_RULE_EXISTS(902914, "Custom rule already exists", 409, "Custom rule with name %s already exists"),
+    INVALID_IP_ADDRESS_FORMAT(902915, "Invalid IP address format", 400, "Invalid IP address format"),
+    BLOCK_CONDITION_ALREADY_EXISTS(902916, "Block condition already exists", 409, "A block condition with type: %s, value: %s already exists"),
+    ALREADY_ASSIGNED_APP_POLICY_DELETE_ERROR(902912, "Cannot delete the application throttling policy", 409, "Policy %s is already attached to an Application"),
+    ALREADY_ASSIGNED_SUB_POLICY_DELETE_ERROR(902913, "Cannot delete the subscription throttling policy", 409, "Policy %s already has subscriptions"),
+
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
             "Configuration"),
@@ -375,7 +404,6 @@ public enum ExceptionCodes implements ErrorHandler {
     BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT(900977, "Block Condition Error", 400, "API Context does not exist"),
     BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME(900978, "Block Condition Error", 400, "Application ID or Name does not " +
             "exist"),
-    BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists"),
     SYSTEM_APP_NOT_FOUND(900980, "System Application not found", 409, "System Application not found"),
 
     SHARED_SCOPE_NOT_FOUND(900981, "Shared Scope not found", 404,
@@ -442,8 +470,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
 
     // Tenant related
-    INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    INVALID_TENANT(901300,"Tenant Not Found", 404, "Tenant Not Found"),
     CONFIG_NOT_FOUND(901301, "Config not found", 404, "Config not found in tenant-config"),
+    ERROR_GETTING_CUSTOM_URLS(901302, "Failed to get custom url info", 500, "Error while retrieving custom url info for tenant : '%s'"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
@@ -477,6 +506,11 @@ public enum ExceptionCodes implements ErrorHandler {
     //Analytics related codes
     ANALYTICS_NOT_ENABLED(901600, "%s not accessible", 404,
             "Analytics should be enabled to access %s"),
+    UNSUPPORTED_ALERT_TYPE(901601, "Unsupported alert type", 400, "Unsupported alert type: '%s' is provided"),
+    MALFORMED_SP_URL(901602, "Malformed URL", 500, "Error while parsing the stream processor url"),
+    ERROR_INVOKING_SP_REST_API(901603, "Error while invoking steam processor REST API", 500, "'%s'"),
+    ALREADY_SUBSCRIBED_FOR_BOT_ALERTS(901604, "Subscription already exists", 409, "Email: '%s' has already been subscribed for bot detection alerts"),
+    BOT_DETECTION_SUBSCRIPTION_NOT_FOUND(901605, "Subscription does not exist", 404, "Bot detection alert subscription with uuid: '%s' uuid does not exist"),
 
     // Password change related
     PASSWORD_CHANGE_DISABLED(901450, "Password change disabled", 400, "Password change operation is disabled in the system"),
@@ -492,6 +526,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s"),
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
+    TENANT_THEME_NOT_FOUND(901703, "Tenant theme does not exist", 404, "Tenant theme for tenant: '%s' does not exist"),
 
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),

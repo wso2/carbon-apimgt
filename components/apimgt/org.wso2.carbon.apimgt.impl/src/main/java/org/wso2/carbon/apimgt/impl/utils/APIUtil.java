@@ -2240,7 +2240,8 @@ public final class APIUtil {
     public static boolean isUserExist(String username) throws APIManagementException {
 
         if (username == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as the anonymous user");
+            throw new APIManagementException("Attempt to execute privileged operation as the anonymous user",
+                    ExceptionCodes.ANON_USER_ACTION);
         }
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
@@ -2252,7 +2253,8 @@ public final class APIUtil {
                             .getUserStoreManager();
             return manager.isExistingUser(tenantAwareUserName);
         } catch (UserStoreException e) {
-            throw new APIManagementException("UserStoreException while trying the user existence " + username, e);
+            throw new APIManagementException("UserStoreException while trying the user existence " + username, e,
+                    ExceptionCodes.USERSTORE_INITIALIZATION_FAILED);
         }
     }
 
@@ -5114,7 +5116,7 @@ public final class APIUtil {
             restAPIConfigJSON = getRESTAPIScopesFromTenantConfig(tenantConfJson);
             if (restAPIConfigJSON == null) {
                 throw new APIManagementException("RESTAPIScopes config does not exist for tenant "
-                        + tenantDomain);
+                        + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
             }
         }
         return restAPIConfigJSON;
@@ -5169,7 +5171,7 @@ public final class APIUtil {
                     tenantConfigCache.put(cacheName, jsonObject);
                     return jsonObject;
                 } catch (ParseException e) {
-                    throw new APIManagementException("Error occurred while converting to json", e,
+                    throw new APIManagementException("Error occurred while converting tenant-conf to json", e,
                             ExceptionCodes.JSON_PARSE_ERROR);
                 }
             }
@@ -7316,7 +7318,8 @@ public final class APIUtil {
                     String error = "Error while invoking SP rest api :  " + response.getStatusLine().getStatusCode()
                             + " " + response.getStatusLine().getReasonPhrase();
                     log.error(error);
-                    throw new APIManagementException(error);
+                    throw new APIManagementException(error,
+                            ExceptionCodes.from(ExceptionCodes.ERROR_INVOKING_SP_REST_API, error));
                 }
                 String responseStr = EntityUtils.toString(entity);
                 if (log.isDebugEnabled()) {
@@ -7326,17 +7329,22 @@ public final class APIUtil {
                 return (JSONObject) parser.parse(responseStr);
 
             } catch (ClientProtocolException e) {
-                handleException("Error while connecting to the server ", e);
+                String error = "Error while connecting to the server";
+                handleExceptionWithCode(error, e, ExceptionCodes
+                        .from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC,error));
             } catch (IOException e) {
-                handleException("Error while connecting to the server ", e);
+                String error = "Error while parsing the response";
+                handleExceptionWithCode(error, e, ExceptionCodes
+                        .from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_DESC, error));
             } catch (ParseException e) {
-                handleException("Error while parsing the response ", e);
+                handleExceptionWithCode("Error while parsing the response ", e, ExceptionCodes.JSON_PARSE_ERROR);
             } finally {
                 httpPost.reset();
             }
 
         } catch (MalformedURLException e) {
-            handleException("Error while parsing the stream processor url", e);
+            handleExceptionWithCode("Error while parsing the stream processor url", e,
+                    ExceptionCodes.MALFORMED_SP_URL);
         }
 
         return null;
@@ -8447,8 +8455,7 @@ public final class APIUtil {
         return context;
     }
 
-    public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
-            RegistryException {
+    public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException {
 
         JSONObject tenantConfig = getTenantConfig(tenantDomain);
         if (tenantConfig.containsKey(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION)) {

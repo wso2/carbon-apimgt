@@ -18,39 +18,22 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.alertmgt.AdminAlertConfigurator;
-import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.common.impl.AlertSubscriptionCommonImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertTypeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertsSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.AlertsMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.BotDetectionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.Response;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiService {
-
-    private static final Log log = LogFactory.getLog(AlertSubscriptionsApiServiceImpl.class);
 
     /**
      * Retrieves all the admin alert subscriptions of the logged in user
@@ -58,35 +41,13 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * @param messageContext
      * @return
      */
-    public Response getSubscribedAlertTypes(MessageContext messageContext) {
-
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
+    public Response getSubscribedAlertTypes(MessageContext messageContext) throws APIManagementException {
         try {
-            AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
-                    .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
-            List<Integer> subscribedAlertTypes = adminAlertConfigurator.getSubscribedAlerts(fullyQualifiedUsername);
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypeDTOS = adminAlertConfigurator
-                    .getSupportedAlertTypes();
-
-            //Filter out the subscribed alerts
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> subscribedAlertsList = supportedAlertTypeDTOS.stream()
-                    .filter(supportedAlertTypes -> subscribedAlertTypes.stream()
-                            .anyMatch(subscribedAlerts -> supportedAlertTypes.getId().equals(subscribedAlerts)))
-                    .collect(Collectors.toList());
-
-            //Retrieve the list of subscribed emails
-            List<String> subscribedEmails = adminAlertConfigurator.getSubscribedEmailAddresses(fullyQualifiedUsername);
-            AlertsSubscriptionDTO alertsSubscriptionDTO = new AlertsSubscriptionDTO();
-            alertsSubscriptionDTO
-                    .setAlerts(AlertsMappingUtil.fromAlertTypesListToAlertTypeDTOList(subscribedAlertsList));
-            alertsSubscriptionDTO.setEmailList(subscribedEmails);
+            AlertsSubscriptionDTO alertsSubscriptionDTO = AlertSubscriptionCommonImpl.getSubscribedAlertTypes();
             return Response.status(Response.Status.OK).entity(alertsSubscriptionDTO).build();
         } catch (AlertManagementException e) {
             return Response.status(Response.Status.NO_CONTENT).entity("API Manager analytics is not enabled").build();
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Internal Error occurred", e, log);
         }
-        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     /**
@@ -96,53 +57,28 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * @param messageContext
      * @return
      */
-    @Override public Response subscribeToAlerts(AlertsSubscriptionDTO body, MessageContext messageContext) {
+    @Override
+    public Response subscribeToAlerts(AlertsSubscriptionDTO body, MessageContext messageContext)
+            throws APIManagementException {
 
         //Validate for empty list of emails
         List<String> emailsList = body.getEmailList();
-        if (emailsList == null || emailsList.size() == 0) {
-            RestApiUtil.handleBadRequest("Email list cannot be empty", log);
+        if (emailsList == null || emailsList.isEmpty()) {
+            throw new APIManagementException("Email list cannot be empty", ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
         //Validate for empty list of alerts
         List<AlertTypeDTO> subscribingAlertDTOs = body.getAlerts();
-        if (subscribingAlertDTOs == null || subscribingAlertDTOs.size() == 0) {
-            RestApiUtil.handleBadRequest("Alert list should not be empty", log);
+        if (subscribingAlertDTOs == null || subscribingAlertDTOs.isEmpty()) {
+            throw new APIManagementException("Alert list should not be empty", ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
 
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
         try {
-
-            AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
-                    .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
-            //Retrieve the supported alert types
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypes = adminAlertConfigurator
-                    .getSupportedAlertTypes();
-            Map<String, org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypesMap = supportedAlertTypes
-                    .stream().collect(Collectors
-                            .toMap(org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO::getName, alertType -> alertType));
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypesToSubscribe = new ArrayList<>();
-
-            //Validate the request alerts against supported alert types
-            for (AlertTypeDTO subscribingAlertDTO : subscribingAlertDTOs) {
-                if (supportedAlertTypesMap.containsKey(subscribingAlertDTO.getName())) {
-                    alertTypesToSubscribe.add(supportedAlertTypesMap.get(subscribingAlertDTO.getName()));
-                } else {
-                    RestApiUtil.handleBadRequest(
-                            "Unsupported alert type : " + subscribingAlertDTO.getName() + " is provided.", log);
-                    return null;
-                }
-            }
-            adminAlertConfigurator.subscribe(fullyQualifiedUsername, emailsList, alertTypesToSubscribe);
-            AlertsSubscriptionDTO subscribedAlerts = new AlertsSubscriptionDTO();
-            subscribedAlerts.setAlerts(AlertsMappingUtil.fromAlertTypesListToAlertTypeDTOList(alertTypesToSubscribe));
-            subscribedAlerts.setEmailList(emailsList);
+            AlertsSubscriptionDTO subscribedAlerts = AlertSubscriptionCommonImpl
+                    .subscribeToAlerts(subscribingAlertDTOs, emailsList);
             return Response.status(Response.Status.OK).entity(subscribedAlerts).build();
         } catch (AlertManagementException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("API Manager analytics is not Enabled").build();
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while subscribing to alert types", e, log);
         }
-        return null;
     }
 
     /**
@@ -151,16 +87,11 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * @param messageContext
      * @return
      */
-    @Override public Response unsubscribeAllAlerts(MessageContext messageContext) {
+    @Override
+    public Response unsubscribeAllAlerts(MessageContext messageContext) throws APIManagementException {
 
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
         try {
-            AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
-                    .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
-            adminAlertConfigurator.unsubscribe(fullyQualifiedUsername);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Internal Server Error occurred while un subscribing from alerts", e,
-                    log);
+            AlertSubscriptionCommonImpl.unsubscribeAllAlerts();
         } catch (AlertManagementException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Analytics not Enabled").build();
         }
@@ -176,11 +107,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      */
     @Override
     public Response getBotDetectionAlertSubscriptions(MessageContext messageContext) throws APIManagementException {
-
-        APIAdmin apiAdmin = new APIAdminImpl();
-        List<BotDetectionData> botDetectionDataList = apiAdmin.getBotDetectionAlertSubscriptions();
-        BotDetectionAlertSubscriptionListDTO listDTO =
-                BotDetectionMappingUtil.fromAlertSubscriptionListToListDTO(botDetectionDataList);
+        BotDetectionAlertSubscriptionListDTO listDTO = AlertSubscriptionCommonImpl.getBotDetectionAlertSubscriptions();
         return Response.ok().entity(listDTO).build();
     }
 
@@ -202,18 +129,8 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
             throw new APIManagementException(propertyName + " property value of payload cannot be blank",
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
-        APIAdmin apiAdmin = new APIAdminImpl();
-        BotDetectionData alertSubscription =
-                apiAdmin.getBotDetectionAlertSubscription(AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD, email);
-        if (alertSubscription != null) {
-            RestApiUtil.handleResourceAlreadyExistsError(
-                    "Email: " + email + " has already been subscribed for bot detection alerts", log);
-        }
-        apiAdmin.addBotDetectionAlertSubscription(email);
-        BotDetectionData newAlertSubscription =
-                apiAdmin.getBotDetectionAlertSubscription(AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD, email);
-        BotDetectionAlertSubscriptionDTO alertSubscriptionDTO =
-                BotDetectionMappingUtil.fromAlertSubscriptionToDTO(newAlertSubscription);
+        BotDetectionAlertSubscriptionDTO alertSubscriptionDTO = AlertSubscriptionCommonImpl
+                .subscribeForBotDetectionAlerts(email);
         return Response.ok(alertSubscriptionDTO).build();
     }
 
@@ -229,26 +146,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     public Response unsubscribeFromBotDetectionAlerts(String uuid, MessageContext messageContext)
             throws APIManagementException {
 
-        APIAdmin apiAdmin = new APIAdminImpl();
-        BotDetectionData alertSubscription = apiAdmin.getBotDetectionAlertSubscription("uuid", uuid);
-        if (alertSubscription == null) {
-            RestApiUtil.handleResourceNotFoundError(
-                    "Bot detection alert subscription with uuid: " + uuid + " does not exist.", log);
-        }
-        apiAdmin.deleteBotDetectionAlertSubscription(uuid);
+        AlertSubscriptionCommonImpl.unsubscribeFromBotDetectionAlerts(uuid);
         return Response.ok().build();
-    }
-
-    /**
-     *
-     * Obtain the fully qualified username of the given user
-     * @param username  tenant aware username
-     * @return
-     */
-    private String getFullyQualifiedUsername(String username) {
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(RestApiCommonUtil.getLoggedInUserTenantDomain())) {
-            return username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        return username;
     }
 }
