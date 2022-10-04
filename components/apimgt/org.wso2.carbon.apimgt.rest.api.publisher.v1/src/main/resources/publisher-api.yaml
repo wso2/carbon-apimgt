@@ -8710,6 +8710,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/APIScope'
+        scopePrefix:
+          type: string
+          description: Unique scope identifier of an API
+          example: 'urn:APIID'
         operations:
           type: array
           example:

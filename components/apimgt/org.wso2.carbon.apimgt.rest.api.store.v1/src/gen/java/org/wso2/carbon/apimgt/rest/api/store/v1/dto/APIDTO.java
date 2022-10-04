@@ -257,7 +257,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(example = "WS", value = "This describes the transport type of the API")
+  @ApiModelProperty(example = "HTTP", value = "This describes the transport type of the API")
   @JsonProperty("type")
   public String getType() {
     return type;
@@ -580,7 +580,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "API Key Managers ")
+  @ApiModelProperty(example = "[\"all\"]", value = "API Key Managers ")
       @Valid
   @JsonProperty("keyManagers")
   public Object getKeyManagers() {

@@ -98,12 +98,10 @@ public class SwaggerData {
         }
 
         public List<Scope> getScopes() {
-
             return scopes;
         }
 
         public void setScopes(List<Scope> scopes) {
-
             this.scopes = scopes;
         }
 

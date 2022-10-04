@@ -97,7 +97,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -4740,6 +4739,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
         apiToAdd.setUriTemplates(uriTemplates);
         apiToAdd.setScopes(scopes);
+        // update the API's scopes with scope prefix (if it is available)
+        apiToAdd.setScopePrefix(apiDTOFromProperties.getScopePrefix());
+        APIUtil.updateAPIScopesWithPrefix(apiToAdd);
         //Set extensions from API definition to API object
         apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
         if (!syncOperations) {
