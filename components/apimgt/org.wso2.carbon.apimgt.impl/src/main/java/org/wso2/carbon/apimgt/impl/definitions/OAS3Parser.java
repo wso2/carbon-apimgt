@@ -59,6 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
+import org.wso2.carbon.apimgt.api.APIEndpointUrlExtractor;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -72,7 +73,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.endpointurlextractor.EndpointUrl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorImpl;
+import org.wso2.carbon.apimgt.impl.APIEndpointUrlExtractorManager;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1246,7 +1247,7 @@ public class OAS3Parser extends APIDefinition {
             throws APIManagementException {
 
         String authUrl = "";
-        APIEndpointUrlExtractorImpl apiEndpointUrlExtractor = new APIEndpointUrlExtractorImpl();
+        APIEndpointUrlExtractor apiEndpointUrlExtractor = APIEndpointUrlExtractorManager.getApiEndpointUrlExtractor();
         List<EndpointUrl> endpointUrls = apiEndpointUrlExtractor.getApiEndpointUrlsForEnv(apiTypeWrapper,
                 organization, environmentName);
         for (EndpointUrl endpointUrl : endpointUrls) {
@@ -1275,7 +1276,7 @@ public class OAS3Parser extends APIDefinition {
     private void updateEndpoints(APIProduct product, String organization, String environmentName,
                                  OpenAPI openAPI) throws APIManagementException {
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(product);
-        APIEndpointUrlExtractorImpl apiEndpointUrlExtractor = new APIEndpointUrlExtractorImpl();
+        APIEndpointUrlExtractor apiEndpointUrlExtractor = APIEndpointUrlExtractorManager.getApiEndpointUrlExtractor();
         List<EndpointUrl> endpointUrls = apiEndpointUrlExtractor.getApiEndpointUrlsForEnv(apiTypeWrapper,
                 organization, environmentName);
         updateEndpoints(openAPI, endpointUrls);
@@ -1292,7 +1293,7 @@ public class OAS3Parser extends APIDefinition {
     private void updateEndpoints(API api, String organization, String environmentName, OpenAPI openAPI)
             throws APIManagementException {
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        APIEndpointUrlExtractorImpl apiEndpointUrlExtractor = new APIEndpointUrlExtractorImpl();
+        APIEndpointUrlExtractor apiEndpointUrlExtractor = APIEndpointUrlExtractorManager.getApiEndpointUrlExtractor();
         List<EndpointUrl> endpointUrls = apiEndpointUrlExtractor.getApiEndpointUrlsForEnv(apiTypeWrapper,
                 organization, environmentName);
         updateEndpoints(openAPI, endpointUrls);
