@@ -246,6 +246,9 @@
                         <Export-Package>
                             org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.rest.api.store.v1.common.mappings.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.rest.api.store.v1.common.models.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.rest.api.store.v1.common.utils.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.rest.api.store.v1.common.impl.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

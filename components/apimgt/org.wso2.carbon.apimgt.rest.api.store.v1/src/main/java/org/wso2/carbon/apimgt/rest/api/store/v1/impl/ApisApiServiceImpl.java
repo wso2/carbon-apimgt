@@ -25,7 +25,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
@@ -107,17 +106,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         CommentDTO commentDTO = ApisServiceImpl.addCommentToAPI(apiId, postRequestBodyDTO, replyTo,
                 organization);
-
-        if (commentDTO != null) {
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentDTO.getId();
-            try {
-                uri = new URI(uriString);
-            } catch (URISyntaxException e) {
-                throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
-            }
-            return Response.created(uri).entity(commentDTO).build();
+        String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.RESOURCE_PATH_COMMENTS
+                + "/" + commentDTO.getId();
+        try {
+            uri = new URI(uriString);
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
         }
-        return null;
+        return Response.created(uri).entity(commentDTO).build();
     }
 
     @Override
@@ -326,7 +322,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext)
             throws APIManagementException {
-        TopicListDTO topicListDTO = null;
+        TopicListDTO topicListDTO;
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         if (StringUtils.isNotEmpty(apiId)) {
             topicListDTO = ApisServiceImpl.getAPITopicList(apiId, organization);
