@@ -63,10 +63,8 @@
 /components/apimgt/org.wso2.carbon.apimgt.notification/ @tharindu1st @chamilaadhi
 /components/apimgt/org.wso2.carbon.apimgt.common.jms/   @tharindu1st @chamilaadhi
 /components/apimgt/org.wso2.carbon.apimgt.jms.listener/   @tharindu1st @chamilaadhi
-/components/apimgt/org.wso2.carbon.apimgt.common.jms/   @tharindu1st @chamilaadhi
 /components/apimgt/org.wso2.carbon.apimgt.broker.lifecycle/ @tharindu1st @chamilaadhi
 /components/apimgt/org.wso2.carbon.apimgt.cache.invalidation/ @tharindu1st @chamilaadhi
-/components/apimgt/org.wso2.carbon.apimgt.common.gateway/ @tharindu1st @chamilaadhi
 
 # Area : DevOps REST API
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.devops/ @binodmx
@@ -74,9 +72,9 @@
 
 # Area : Analytics
 /components/apimgt/org.wso2.carbon.apimgt.common.analytics/ @AnuGayan
-/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/GoogleAnalyticsConfigDeployer.java @AnuGayan
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/analytics/  @AnuGayan
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/DataPublisherUtil.java  @AnuGayan
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/GoogleAnalyticsConfigDeployer.java @AnuGayan
 
 # Area : Websockets
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/websocket/ @Arshardh @arunans23 @SajinieKavindya @senthuran16
