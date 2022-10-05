@@ -46,8 +46,8 @@
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/opa/ @tharindu1st @chamilaadhi 
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/EndpointCertificateDeployer.java @tharindu1st @chamilaadhi 
 /components/apimgt/org.wso2.carbon.apimgt.keymgt/ @tharindu1st @chamilaadhi
-/components/apimgt/org.wso2.carbon.apimgt.common.gateway/src/main/java/org/wso2/carbon/apimgt/common/gateway/jwtgenerator @tharindu1st @chamilaadhi
-/components/apimgt/org.wso2.carbon.apimgt.common.gateway/src/main/java/org/wso2/carbon/apimgt/common/gateway/jwttransformer @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.common.gateway/src/main/java/org/wso2/carbon/apimgt/common/gateway/jwtgenerator/ @tharindu1st @chamilaadhi
+/components/apimgt/org.wso2.carbon.apimgt.common.gateway/src/main/java/org/wso2/carbon/apimgt/common/gateway/jwttransformer/ @tharindu1st @chamilaadhi
 
 # Area : Traffic Management
 /components/apimgt/org.wso2.carbon.apimgt.throttle.policy.deployer/ @tharindu1st
@@ -93,7 +93,7 @@
 /components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/webhooks/  @senthuran16  @chanikag
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/webhooks/  @senthuran16  @chanikag
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/mediators/webhooks/  @senthuran16  @chanikag
-/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/webhook @senthuran16  @chanikag
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/webhook/ @senthuran16  @chanikag
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/sse/  @senthuran16  @chanikag
 
 # Area : GraphQL, GraphQL Complexity
