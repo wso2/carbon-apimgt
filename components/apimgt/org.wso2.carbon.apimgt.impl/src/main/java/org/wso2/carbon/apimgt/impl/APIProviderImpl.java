@@ -532,15 +532,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // This value is determined considering the gateway type comes with the request.
         api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
                 api.getGatewayVendor(), api.getGatewayType()));
-        try {
-            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
-                    APIMapper.INSTANCE.toPublisherApi(api));
-            api.setUuid(addedAPI.getId());
-            api.setCreatedTime(addedAPI.getCreatedTime());
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while persisting API " + e.getMessage(), e,
-                    ExceptionCodes.PERSISTENCE_ERROR);
-        }
 
         if (log.isDebugEnabled()) {
             log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
@@ -594,7 +585,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while adding the API
      */
     private void addAPI(API api, int tenantId) throws APIManagementException {
-        int apiId = apiMgtDAO.addAPI(api, tenantId, api.getOrganization());
+        Organization org = new Organization(api.getOrganization());
+        int apiId = apiDAOImpl.addAPI(org, api);
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -711,7 +703,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addURITemplates(int apiId, API api, int tenantId) throws APIManagementException {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        apiMgtDAO.addURITemplates(apiId, api, tenantId);
+        apiDAOImpl.addURITemplates(tenantId, apiId, api);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
@@ -821,7 +813,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to fetch the context for api uuid
      */
     public String getAPIContext(String uuid) throws APIManagementException {
-        return apiMgtDAO.getAPIContext(uuid);
+        return apiDAOImpl.getAPIContext(uuid);
     }
 
     /**
@@ -851,7 +843,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         String defaultVersion = null;
         try {
-            defaultVersion = apiMgtDAO.getDefaultVersion(apiid);
+            defaultVersion = apiDAOImpl.getDefaultVersion(apiid);
         } catch (APIManagementException e) {
             String errorMessage = "Error while getting default version :" + apiid.getApiName();
             handleExceptionWithCode(errorMessage, e,
@@ -865,7 +857,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         String defaultVersion = null;
         try {
-            defaultVersion = apiMgtDAO.getPublishedDefaultVersion(apiid);
+            defaultVersion = apiDAOImpl.getPublishedDefaultVersion(apiid);
         } catch (APIManagementException e) {
             String errorMessage = "Error while getting published default version :" + apiid.getApiName();
             handleExceptionWithCode(errorMessage, e,
@@ -876,7 +868,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
-        API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier, organization);
+        API api = apiDAOImpl.getLightWeightAPIInfoByAPIIdentifier(organization,apiIdentifier);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -956,30 +948,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
         apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
-        try {
-            api.setCreatedTime(existingAPI.getCreatedTime());
-            apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
-        }
+
+        api.setCreatedTime(existingAPI.getCreatedTime());
+        apiDAOImpl.updateAPIArtifact(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
+
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
-        try {
-            api.setCreatedTime(existingAPI.getCreatedTime());
-            apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
-        }
+
+        api.setCreatedTime(existingAPI.getCreatedTime());
+        apiDAOImpl.updateAPIArtifact(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
 
 
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-        int apiId = apiMgtDAO.getAPIID(api.getUuid());
+        int apiId = apiDAOImpl.getAPIID(api.getUuid());
         if (publishedDefaultVersion != null) {
             if (api.isPublishedDefaultVersion() && !api.getId().getVersion().equals(publishedDefaultVersion)) {
                 APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
@@ -1046,7 +1033,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
 
-        apiMgtDAO.updateAPI(api, username);
+        apiDAOImpl.updateAPI(api, username);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
@@ -2006,12 +1993,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             existingAPI.setDefaultVersion(isExsitingAPIdefaultVersion);
         }
 
-        try {
-            apiPersistenceInstance.updateAPI(new Organization(organization),
-                    APIMapper.INSTANCE.toPublisherApi(existingAPI));
-        } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
-        }
+        apiDAOImpl.updateAPIArtifact(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(existingAPI));
         return getAPIbyUUID(newAPIId, organization);
     }
 
@@ -2054,7 +2036,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void removeDocumentation(String apiId, String docId, String organization) throws APIManagementException {
         try {
-            apiPersistenceInstance.deleteDocumentation(new Organization(organization), apiId, docId);
+            apiDAOImpl.deleteDocumentation(new Organization(organization), apiId, docId);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while deleting the document " + docId,
                     ExceptionCodes.INTERNAL_ERROR);
@@ -2077,7 +2059,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
-                org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
+                org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiDAOImpl
                         .updateDocumentation(new Organization(organization), apiId, mappedDoc);
                 if (updatedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
@@ -2096,7 +2078,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
-                org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance.addDocumentation(
+                org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiDAOImpl.addDocumentation(
                         new Organization(organization), uuid, mappedDoc);
                 if (addedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
@@ -2113,7 +2095,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean exist = false;
         UserContext ctx = null;
         try {
-            DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(new Organization(organization), uuid, 0, 0,
+            DocumentSearchResult result = apiDAOImpl.searchDocumentation(new Organization(organization), uuid, 0, 0,
                     "name:" + docName, ctx);
             if (result != null && result.getDocumentationList() != null && !result.getDocumentationList().isEmpty()) {
                 String returnDocName = result.getDocumentationList().get(0).getName();
@@ -2256,10 +2238,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            apiPersistenceInstance.deleteAPI(new Organization(organization), apiUuid);
+            apiDAOImpl.deleteAPI(new Organization(organization), apiUuid);
             log.debug("API " + apiUuid + " on organization " + organization +
                     " has successfully removed from the persistence instance.");
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             log.error("Error while executing API delete operation on persistence instance for API "
                     + apiUuid + " on organization " + organization, e);
             isError = true;
@@ -2831,7 +2813,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void saveSwaggerDefinition(String apiId, String jsonText, String organization) throws APIManagementException {
         try {
-            apiPersistenceInstance.saveOASDefinition(new Organization(organization), apiId, jsonText);
+            apiDAOImpl.saveOASDefinition(new Organization(organization), apiId, jsonText);
         } catch (OASPersistenceException e) {
             String errorMessage = "Error while persisting OAS definition ";
             throw new APIManagementException(errorMessage, e,
@@ -3198,8 +3180,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Organization org = new Organization(api.getOrganization());
         try {
-            apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
-        } catch (APIPersistenceException e) {
+            apiDAOImpl.updateAPIArtifact(org, APIMapper.INSTANCE.toPublisherApi(api));
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
@@ -4819,7 +4801,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            apiPersistenceInstance.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
+            apiDAOImpl.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
         } catch (AsyncSpecPersistenceException e) {
             String errorMessage = "Error while persisting Async API definition ";
             throw new APIManagementException(errorMessage, e,
@@ -4944,7 +4926,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Organization org = new Organization(organization);
         String msg = "";
         try {
-            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            PublisherAPI publisherAPI = apiDAOImpl.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 APIIdentifier apiIdentifier = api.getId();
@@ -4968,7 +4950,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIManagementException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             msg = "Failed to get API";
             throw new APIManagementException(msg, e,
                     ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
@@ -5011,7 +4993,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         UserContext userCtx = new UserContext(adminUser, org, properties, roles);
 
         try {
-            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
+            PublisherAPISearchResult searchAPIs = apiDAOImpl.searchAPIsForPublisher(org, query,
                     offset, limit, userCtx, "createdTime", "desc");
             if (log.isDebugEnabled()) {
                 log.debug("Running Solr query : " + query);
@@ -5028,7 +5010,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.setApis(apiList);
                 result.setApiCount(searchAPIs.getTotalAPIsCount());
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while searching for APIs with Solr query: " + query, e,
                     ExceptionCodes.from(ExceptionCodes.PERSISTENCE_ERROR, e.getMessage()));
         }
@@ -5117,7 +5099,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
-            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
+            PublisherAPISearchResult searchAPIs = apiDAOImpl.searchAPIsForPublisher(org, searchQuery,
                     start, end, userCtx, sortBy, sortOrder);
             if (log.isDebugEnabled()) {
                 log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
@@ -5141,7 +5123,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.put("length", 0);
                 result.put("isMore", false);
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while searching the api ", e, ExceptionCodes.INTERNAL_ERROR);
         }
         return result ;
@@ -5193,7 +5175,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);
-            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            PublisherAPI publisherAPI = apiDAOImpl.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
@@ -5227,7 +5209,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             String msg = "Failed to get API with uuid " + uuid;
             throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
@@ -5254,7 +5236,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         DocumentContent mappedContent = null;
         try {
             mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
-            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organization), uuid, docId,
+            DocumentContent doc = apiDAOImpl.addDocumentationContent(new Organization(organization), uuid, docId,
                     mappedContent);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId,
@@ -5280,7 +5262,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     wsdlContent, null);
             try {
-                apiPersistenceInstance.saveWSDL(
+                apiDAOImpl.saveWSDL(
                         new Organization(organization), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
@@ -5291,7 +5273,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
             try {
-                apiPersistenceInstance.saveWSDL(
+                apiDAOImpl.saveWSDL(
                         new Organization(organization), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
@@ -5318,7 +5300,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         try {
-            PublisherContentSearchResult results = apiPersistenceInstance.searchContentForPublisher(org, searchQuery,
+            PublisherContentSearchResult results = apiDAOImpl.searchContentForPublisher(org, searchQuery,
                     start, end, ctx);
             if (results != null) {
                 List<SearchContent> resultList = results.getResults();
@@ -5387,7 +5369,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
-            apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
+            apiDAOImpl.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
         } catch (ThumbnailPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
@@ -5443,7 +5425,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         try {
-            apiPersistenceInstance.saveGraphQLSchemaDefinition(new Organization(organization), apiId, definition);
+            apiDAOImpl.saveGraphQLSchemaDefinition(new Organization(organization), apiId, definition);
 
         } catch (GraphQLPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
@@ -5539,22 +5521,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiRevision.getApiUUID()));
         }
         apiId.setUuid(apiRevision.getApiUUID());
-        String revisionUUID;
-        try {
-            revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(organization),
-                    apiId.getUUID(), revisionId);
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to add revision registry artifacts";
-            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
-        }
-        if (StringUtils.isEmpty(revisionUUID)) {
-            String errorMessage = "Failed to retrieve revision uuid";
-            throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
-        }
+        String revisionUUID = UUID.nameUUIDFromBytes((apiRevision.getApiUUID()+revisionId).getBytes()).toString();
         apiRevision.setRevisionUUID(revisionUUID);
-        apiMgtDAO.addAPIRevision(apiRevision);
+        apiDAOImpl.addAPIRevision(apiRevision);
         if (importExportAPI != null) {
             try {
                 File artifact = importExportAPI
@@ -5907,15 +5876,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         apiIdentifier.setUuid(apiId);
-        try {
-            apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
-                    apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to restore registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
-        }
-        apiMgtDAO.restoreAPIRevision(apiRevision);
+        apiDAOImpl.restoreAPIRevision(apiRevision);
     }
 
     /**
@@ -5949,15 +5910,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
         }
         apiIdentifier.setUuid(apiId);
-        try {
-            apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
-                    apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
-        } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to delete registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
-        }
-        apiMgtDAO.deleteAPIRevision(apiRevision);
+        apiDAOImpl.deleteAPIRevision(apiRevision);
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {
