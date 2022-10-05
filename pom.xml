@@ -27,6 +27,7 @@
     <modules>
         <module>service-stubs/apimgt</module>
         <module>components/apimgt</module>
+        <module>apk</module>
         <module>features/apimgt</module>
     </modules>
 
