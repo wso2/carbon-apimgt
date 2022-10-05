@@ -1490,14 +1490,14 @@ public class ApisApiCommonImpl {
     }
 
     public static String updateAPISwagger(String apiId, String apiDefinition, String url, InputStream fileInputStream,
-                                          String organization, String filename) throws APIManagementException {
+                                          String organization, String fileName) throws APIManagementException {
 
         String updatedSwagger;
         //Handle URL and file based definition imports
         if (url != null || fileInputStream != null) {
             // Validate and retrieve the OpenAPI definition
-            Map<String, Object> validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, filename, null,
-                    true, false);
+            Map<String, Object> validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileName,
+                    null, true, false);
             APIDefinitionValidationResponse validationResponse =
                     (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
             if (!validationResponse.isValid()) {
@@ -1613,10 +1613,10 @@ public class ApisApiCommonImpl {
     public static OpenAPIDefinitionValidationResponseDTO validateOpenAPIDefinition(Boolean returnContent, String url,
                                                                                    InputStream fileInputStream,
                                                                                    String inlineApiDefinition,
-                                                                                   String filename)
+                                                                                   String fileName)
             throws APIManagementException {
         // Validate and retrieve the OpenAPI definition
-        Map<String, Object> validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, filename,
+        Map<String, Object> validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileName,
                 inlineApiDefinition, returnContent, false);
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
@@ -1632,9 +1632,9 @@ public class ApisApiCommonImpl {
     }
 
     public static WSDLValidationResponseDTO validateWSDLDefinition(String url, InputStream fileInputStream,
-                                                                   String filename) throws APIManagementException {
+                                                                   String fileName) throws APIManagementException {
 
-        Map<String, Object> validationResponseMap = validateWSDL(url, fileInputStream, filename, false);
+        Map<String, Object> validationResponseMap = validateWSDL(url, fileInputStream, fileName, false);
         return (WSDLValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
     }
 
@@ -1861,7 +1861,7 @@ public class ApisApiCommonImpl {
     }
 
     public static APIDTO importOpenAPIDefinition(InputStream fileInputStream, String url, String additionalProperties,
-                                                 String inlineApiDefinition, String organization, String filename)
+                                                 String inlineApiDefinition, String organization, String fileName)
             throws APIManagementException {
 
         // validate 'additionalProperties' json
@@ -1894,7 +1894,7 @@ public class ApisApiCommonImpl {
                         StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
 
         // Import the API and Definition
-        return importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition, apiDTOFromProperties, filename,
+        return importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition, apiDTOFromProperties, fileName,
                 null, organization);
     }
 
