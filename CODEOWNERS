@@ -99,3 +99,15 @@
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/mediators/webhooks/  @senthuran16  @chanikag
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/webhook @senthuran16  @chanikag
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/streaming/sse/  @senthuran16  @chanikag
+
+# Area : GraphQL, GraphQL Complexity
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/handlers/graphQL/ @HiranyaKavishani @ashera96
+/components/apimgt/org.wso2.carbon.apimgt.common.gateway/src/main/java/org/wso2/carbon/apimgt/common/gateway/graphql/ @HiranyaKavishani @ashera96
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/model/graphql/ @HiranyaKavishani @ashera96
+/components/apimgt/org.wso2.carbon.apimgt.api/src/main/java/org/wso2/carbon/apimgt/api/gateway/GraphQLSchemaDTO.java  @HiranyaKavishani @ashera96
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/definitions/GraphQLSchemaDefinition.java @HiranyaKavishani @ashera96
+
+# Area : GraphQL Subscriptions
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/inbound/websocket/GraphQLProcessorResponseDTO.java @wasuradananjith @dushaniw
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/inbound/websocket/response/GraphQLResponseProcessor.java @wasuradananjith @dushaniw
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/inbound/websocket/request/GraphQLRequestProcessor.java @wasuradananjith @dushaniw
