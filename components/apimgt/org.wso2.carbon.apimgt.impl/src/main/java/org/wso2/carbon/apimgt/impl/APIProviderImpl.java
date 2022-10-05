@@ -3713,8 +3713,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
-        return certificateManager.getCertificateInformation(alias);
+    public CertificateInformationDTO getCertificateStatus(String tenantDomain, String alias) throws APIManagementException {
+        int tenantId = -1;
+        try {
+            tenantId = getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return certificateManager.getCertificateInformation(tenantId, alias);
     }
 
     @Override
@@ -3754,8 +3760,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
-        return certificateManager.getCertificateContent(alias);
+    public ByteArrayInputStream getCertificateContent(String tenantDomain, String alias) throws APIManagementException {
+        int tenantId = -1;
+        try {
+            tenantId = getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return certificateManager.getCertificateContent(tenantId, alias);
     }
 
     /**
