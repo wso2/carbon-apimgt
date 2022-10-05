@@ -43,9 +43,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, "The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, "The tier name is invalid"),
+    SEARCH_API_EXCEPTION(900306, "Internal server error.", 500, "Error occurred while searching APIs"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
     API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
-    APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
+    APPLICATION_DELETE_FAILED(900309, "Error has occurred. Could not delete the application", 500, "Error has occurred. Could not delete the application '%s'"),
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 409, "Document already exists"),
@@ -60,10 +61,13 @@ public enum ExceptionCodes implements ErrorHandler {
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
-    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, "Error occurred while retrieving data"),
-    GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
-    STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, "Status cannot be null"),
-    RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
+    API_RETRIEVE_EXCEPTION(900319, "Internal server error.", 500, "Error occurred while retrieving %s"),
+    APPLICATION_RETRIEVE_EXCEPTION(900320, "Internal server error.", 500, "Error occurred while retrieving %s"),
+    SUBSCRIPTION_RETRIEVE_EXCEPTION(900321, "Internal server error.", 500, "Error occurred while retrieving %s"),
+
+    GATEWAY_LABELS_CANNOT_BE_NULL(900322, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
+    ERROR_RETRIEVING_RATING(900323, "Cannot retrieve rating", 500, "Error while retrieving ratings for API '%s'"),
+    RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating for API '%s'"),
     RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
             + "values"),
     DOCUMENT_INVALID_VISIBILITY(900326, "Invalid document visibility type", 500, "Visibility type of the document '%s' is invalid"),
@@ -130,6 +134,10 @@ public enum ExceptionCodes implements ErrorHandler {
     CATEGORY_USED(900372, "Category has usages", 409, "Category is attached to one or more APIs"),
     ERROR_CHANGING_APP_OWNER(900373, "Failed to change the application owner", 500, "Error while changing the application owner"),
 
+    USER_SUBSCRIPTION_EXISTS_CHECK_FAILED(900374, "Failed to check if user subscribed to API", 500, "Failed to check if user '%s' with an application '%s' is subscribed to API %s"),
+
+    USER_ACCESSIBLE_APPLICATION_CHECK_FAILED(900375, "Failed to check if user subscribed to API", 500, "Error occurred while checking whether the application '%s' is accessible to user '%s'" ),
+    API_TAGS_NOT_FOUND(900376, "API Tags Not Found", 404, "API Tags not found for organization '%s'"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -332,7 +340,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Please provide the Authorization : Bearer <> token to proceed."),
     MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
             "Please provide the Authorization : Basic <> token to proceed."),
-    INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the resource."),
+    INVALID_PERMISSION(900915, "Invalid Permission", 403, " You are not authorized to access the '%s'."),
     OPENID_CONFIG(900916, "Missing OpenID configurations", 500, "Error in fetching Open ID configuration"),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
@@ -342,13 +350,15 @@ public enum ExceptionCodes implements ErrorHandler {
     ),
     APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
+    APPLICATION_CONSUMER_KEY_NOT_FOUND(900958, "Keymanagement Error", 403, "Requested consumer key with application '%s' not found"),
     UNSUPPORTED_THROTTLE_LIMIT_TYPE(900960, "Throttle Policy Error", 400, "Throttle Limit type is not supported"),
     POLICY_NOT_FOUND(900961, "Policy Not found", 404, "Failed to retrieve Policy Definition"),
     OAUTH2_APP_MAP_FAILED(900962, "Key Management Error", 500, "Error while mapping an existing consumer application."),
     TOKEN_INTROSPECTION_FAILED(900963, "Key Management Error", 500, "Error while introspecting the access token."),
     ACCESS_TOKEN_GENERATION_FAILED(900964, "Key Management Error", 500, "Error while generating a new access token."),
     INVALID_TOKEN_REQUEST(900965, "Key Management Error", 400, "Invalid access token request."),
-    ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
+    ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the '%s'."),
+
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
     INTERNAL_ERROR_WITH_SPECIFIC_DESC(903007, "Internal Server Error", 500, "'%s'"),
@@ -420,6 +430,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Shared Scope display name not specified"),
     SCOPE_ALREADY_ASSIGNED(900988, "Scope already assigned locally by another API", 400,
             "Scope already assigned locally by another API"),
+    TOKEN_VALIDATION_FAILED(900989, "Validation failed for the given token", 500, "Validation failed for the given token"),
 
     //Dedicated container based gateway related Codes
     NO_RESOURCE_LOADED_FROM_DEFINITION(900990, "Container based resource Not Found", 404, "No resource loaded from " +
@@ -448,10 +459,14 @@ public enum ExceptionCodes implements ErrorHandler {
             "This user is not a comment moderator"),
     COULD_NOT_UPDATE_COMMENT(901101, "Error has occurred. Could not update the Comment", 500,
             "Error has occurred. Could not update the Comment"),
-    COMMENT_NOT_FOUND(901102, "Comment not found", 404, "Couldn't retrieve comment"),
+    COMMENT_NOT_FOUND(901102, "Comment not found", 404, "Failed to retrieve comment"),
     COMMENT_LENGTH_EXCEEDED(901103, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
     COMMENT_NO_PERMISSION(901104, "Insufficient permission", 403, "User '%s' doesn't have permission to access the comment with id '%s'"),
+    COMMENT_CANNOT_RETRIEVE(901105, "Failed to get '%s'", 500, "Failed to get '%s"),
+
+    COMMENT_CANNOT_DELETE(901106, "Failed to delete the Comment", 500, "Failed to delete the Comment of '%s'"),
+
     NEED_ADMIN_PERMISSION(901100, "Admin permission needed", 403,
             "This user is not an admin"),
 
@@ -541,7 +556,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_READING_META_DATA(900907, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
     ERROR_READING_PARAMS_FILE(900908, "Error while reading meta information from the params file", 400,
-            "Error while reading meta information from the params file"),
+            "%s"),
     ERROR_FETCHING_DEFINITION_FILE(900909, "Cannot find the definition file of the project", 400,
             "Cannot find the yaml/json file with the project definition."),
     NO_API_ARTIFACT_FOUND(900910, "No Api artifacts found for given criteria", 404,
@@ -574,7 +589,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
 
     //Operation Policies related error codes
-    INVALID_OPERATION_POLICY(902005, "Cannot find the selected operation policy", 400,
+    INVALID_OPERATION_POLICY(902005, "%s. Cannot find the selected operation policy", 400,
             "Selected operation policy is not found"),
     INVALID_OPERATION_POLICY_SPECIFICATION(902006, "Invalid operation policy specification found", 400,
             "Invalid operation policy specification. %s", false),
@@ -612,6 +627,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_API_STATE_MONETIZATION(904300, "Invalid API state", 400, "Invalid API state to configure monetization"),
     MONETIZATION_STATE_CHANGE_FAILED(904301, "Could not change the monetization state", 500, "Monetization state change to '%s' failed"),
 
+    MONETIZATION_IMPLEMENTATION_LOADING_FAILED(904302, "Could not load the monetization implementation", 500, "Failed to load the monetization implementation"),
+
     // audit related codes
 
     AUDIT_SEND_FAILED(904200, "Error sending audit data", 500, "Sending audit data failed. Response code: '%s'"),
@@ -633,7 +650,15 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_SERVER_CERT(904009, "Internal server error", 500, "'%s'"),
     EXPIRED_CERT(904010, "Certificate expired", 400, "'%s'"),
     CERT_ALREADY_EXIST(904011, "Certificate alias already exists", 409, "The alias '%s' already exists in the truststore"),
-    DECODE_CERT(904012, "Error occurred while decoding the certificate", 500, "'%s'");
+    DECODE_CERT(904012, "Error occurred while decoding the certificate", 500, "'%s'"),
+
+    INVALID_KEY_TYPE(904013, "Bad Request", 400, "Invalid keyType. KeyType should be either PRODUCTION or SANDBOX"),
+
+    ERROR_DELETING_APPLICATION_REGISTRATION(904014, "Can not delete application registration", 400, "Failed to delete Application registration of : '%s'"),
+
+    ERROR_DELETING_APPLICATION_KEY_MAPPING(904015, "Can not delete application key mapping", 500, "Failed to delete Application key mapping  of : '%s'"),
+
+    ERROR_RETRIEVE_APPLICATION_KEYS(904016, "Failed to retrieve application keys", 500, "Failed to retrieve application keys for '%s' ");
 
     private final long errorCode;
     private final String errorMessage;

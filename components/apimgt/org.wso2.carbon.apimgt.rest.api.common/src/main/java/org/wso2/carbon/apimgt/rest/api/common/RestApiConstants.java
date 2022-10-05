@@ -30,6 +30,7 @@ public final class RestApiConstants {
 
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
     public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+    public static final String FILE_HEADER_CONTENT_DISPOSITION =  "attachment; filename=\"";
     public static final String CONTENT_DISPOSITION_FILENAME = "filename";
     public static final String CONTENT_DISPOSITION_ATTACHMENT_FILENAME = "attachment; filename=";
     public static final String APPLICATION_JSON = "application/json";
@@ -68,6 +69,9 @@ public final class RestApiConstants {
     public static final String RESOURCE_API_PRODUCT = "API Product";
     public static final String RESOURCE_PRODUCT_DOCUMENTATION = "product documentation";
     public static final String RESOURCE_RATING = "Rating";
+
+    public static final String RATING_FOR = " for ";
+
     public static final String RESOURCE_APPLICATION = "application";
     public static final String RESOURCE_SUBSCRIPTION = "subscription";
     public static final String RESOURCE_DOCUMENTATION = "documentation";
@@ -89,6 +93,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_API_CATEGORY = "API Category";
 
     public static final String API_ID_DELIMITER = "-";
+
     public static final String QUERY_PARAM = "{query}";
     public static final String ALIAS_PARAM = "{alias}";
     public static final String LIMIT_PARAM = "{limit}";
@@ -274,10 +279,15 @@ public final class RestApiConstants {
     public static final String STATUS_METHOD_NOT_ALLOWED_MESSAGE_DEFAULT = "Method Not Allowed";
     public static final String STATUS_BAD_REQUEST_MESSAGE_DEFAULT = "Bad Request";
     public static final String STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS = "Resource Already Exists";
+
+    public static final String STATUS_CONFLICT_MESSAGE_SUBSCRIPTION_ALREADY_EXISTS =
+            "Specified subscription already exists for API";
     public static final String STATUS_CONFLICT_MESSAGE_DEFAULT = "Conflict";
 
     public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered "
             + "an internal error. Please contact administrator.";
+
+    public static final String GENERIC_ERROR_STRING = "Error while generating" ;
 
     // common attributes
     public static final String PRODUCTION_ENDPOINTS = "production_endpoints";

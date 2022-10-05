@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -74,7 +73,6 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -1193,14 +1191,16 @@ public class RestApiUtil {
      * @return organization
      */
 
-    public static String getValidatedOrganization(MessageContext ctx) throws APIManagementException{
+    public static String getValidatedOrganization(MessageContext ctx) throws APIMgtResourceNotFoundException {
         String organization = (String) ctx.get(RestApiConstants.ORGANIZATION);
         if (organization == null) {
-            throw new APIManagementException(
-                    "Organization is not found in the request", ExceptionCodes.ORGANIZATION_NOT_FOUND);
+            throw new APIMgtResourceNotFoundException("Organization is not found in the request",
+                    ExceptionCodes.from(ExceptionCodes.ORGANIZATION_NOT_FOUND));
         }
         return organization;
     }
+
+
 
 
     /**

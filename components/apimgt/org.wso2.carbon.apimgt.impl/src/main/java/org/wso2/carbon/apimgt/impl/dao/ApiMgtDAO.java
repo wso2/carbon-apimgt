@@ -19323,7 +19323,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleExceptionWithCode("Failed to get common operation policy for name " + policyName + "for organization "
                             + organization, e,
-                    ExceptionCodes.APIM_DAO_EXCEPTION);
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return null;
     }

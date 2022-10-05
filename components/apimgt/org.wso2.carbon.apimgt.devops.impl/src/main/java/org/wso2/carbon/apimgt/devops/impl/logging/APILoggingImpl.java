@@ -47,7 +47,7 @@ public class APILoggingImpl {
         }
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), PER_API_LOGGING_PERMISSION_PATH)) {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
-                    ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
+                    ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION,"resource"));
         }
         LoggingMgtDAO.getInstance().addAPILogger(tenantId, apiId, logLevel);
         publishLogAPIData(tenantId, apiId, logLevel);
@@ -62,7 +62,7 @@ public class APILoggingImpl {
     public List<APILogInfoDTO> getAPILoggerList(String tenantId, String logLevel) throws APIManagementException {
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), PER_API_LOGGING_PERMISSION_PATH)) {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
-                    ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
+                    ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "resource"));
         }
         return LoggingMgtDAO.getInstance().retrieveAPILoggerList(tenantId, logLevel);
     }
@@ -74,7 +74,7 @@ public class APILoggingImpl {
         }
         if (!APIUtil.hasPermission(RestApiCommonUtil.getLoggedInUsername(), PER_API_LOGGING_PERMISSION_PATH)) {
             throw new APIManagementException(INVALID_LOGGING_PERMISSION,
-                    ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION));
+                    ExceptionCodes.from(ExceptionCodes.INVALID_PERMISSION, "resource"));
         }
         return LoggingMgtDAO.getInstance().retrieveAPILoggerByAPIID(tenantId, apiId);
     }

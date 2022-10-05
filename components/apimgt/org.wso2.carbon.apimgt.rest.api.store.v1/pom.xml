@@ -89,6 +89,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.store.v1.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <exclusions>
@@ -155,6 +160,7 @@
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>generate-server-stubs</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -169,6 +175,7 @@
                                 <useBeanValidation>true</useBeanValidation>
                                 <performBeanValidation>true</performBeanValidation>
                             </configOptions>
+                            <generateModels>false</generateModels>
                             <generateAliasAsModel>true</generateAliasAsModel>
                             <output>.</output>
                             <templateDirectory>
@@ -179,18 +186,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>*</exclude>
-                        <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/dto/**/*</exclude>
-                        <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/**Api.**</exclude>
-                        <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/**Service.**</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -233,6 +228,17 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/**Api.**</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/**Service.**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

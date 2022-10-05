@@ -4848,8 +4848,9 @@ public final class APIUtil {
             if (value != null) {
                 return Boolean.parseBoolean(value.toString());
             } else {
-                throw new APIManagementException(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID
-                        + " config does not exist for tenant " + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
+                throw new APIManagementException(
+                        APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID + " config does not exist for tenant "
+                                + tenantDomain, ExceptionCodes.CONFIG_NOT_FOUND);
             }
         }
 
