@@ -35,28 +35,22 @@
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.api</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.user.api</artifactId>
-            <version>4.5.2</version>
-            <scope>compile</scope>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
     <build>
