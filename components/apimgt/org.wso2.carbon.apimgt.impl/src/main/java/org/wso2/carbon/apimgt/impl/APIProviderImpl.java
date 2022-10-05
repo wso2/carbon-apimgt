@@ -703,7 +703,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addURITemplates(int apiId, API api, int tenantId) throws APIManagementException {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        apiMgtDAO.addURITemplates(apiId, api, tenantId);
+        apiDAOImpl.addURITemplates(tenantId, apiId, api);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
@@ -813,7 +813,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to fetch the context for api uuid
      */
     public String getAPIContext(String uuid) throws APIManagementException {
-        return apiMgtDAO.getAPIContext(uuid);
+        return apiDAOImpl.getAPIContext(uuid);
     }
 
     /**
@@ -843,7 +843,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         String defaultVersion = null;
         try {
-            defaultVersion = apiMgtDAO.getDefaultVersion(apiid);
+            defaultVersion = apiDAOImpl.getDefaultVersion(apiid);
         } catch (APIManagementException e) {
             String errorMessage = "Error while getting default version :" + apiid.getApiName();
             handleExceptionWithCode(errorMessage, e,
@@ -857,7 +857,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         String defaultVersion = null;
         try {
-            defaultVersion = apiMgtDAO.getPublishedDefaultVersion(apiid);
+            defaultVersion = apiDAOImpl.getPublishedDefaultVersion(apiid);
         } catch (APIManagementException e) {
             String errorMessage = "Error while getting published default version :" + apiid.getApiName();
             handleExceptionWithCode(errorMessage, e,
@@ -868,7 +868,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
-        API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier, organization);
+        API api = apiDAOImpl.getLightWeightAPIInfoByAPIIdentifier(organization,apiIdentifier);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -950,7 +950,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
         api.setCreatedTime(existingAPI.getCreatedTime());
-        apiDAOImpl.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
+        apiDAOImpl.updateAPIArtifact(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
@@ -960,13 +960,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetAPISecurity(api);
 
         api.setCreatedTime(existingAPI.getCreatedTime());
-        apiDAOImpl.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
+        apiDAOImpl.updateAPIArtifact(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
 
 
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-        int apiId = apiMgtDAO.getAPIID(api.getUuid());
+        int apiId = apiDAOImpl.getAPIID(api.getUuid());
         if (publishedDefaultVersion != null) {
             if (api.isPublishedDefaultVersion() && !api.getId().getVersion().equals(publishedDefaultVersion)) {
                 APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
@@ -1033,7 +1033,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
 
-        apiMgtDAO.updateAPI(api, username);
+        apiDAOImpl.updateAPI(api, username);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
@@ -1993,7 +1993,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             existingAPI.setDefaultVersion(isExsitingAPIdefaultVersion);
         }
 
-        apiDAOImpl.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(existingAPI));
+        apiDAOImpl.updateAPIArtifact(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(existingAPI));
         return getAPIbyUUID(newAPIId, organization);
     }
 
@@ -3180,7 +3180,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Organization org = new Organization(api.getOrganization());
         try {
-            apiDAOImpl.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
+            apiDAOImpl.updateAPIArtifact(org, APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while updating API details", e, ExceptionCodes.INTERNAL_ERROR);
         }

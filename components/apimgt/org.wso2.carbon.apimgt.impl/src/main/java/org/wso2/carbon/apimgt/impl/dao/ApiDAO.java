@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
@@ -44,12 +45,21 @@ public interface ApiDAO {
     /**
      * Update API metadata.
      *
+     * @param api API Object to be updated
+     * @param username  User who is updating API
+     * @throws APIManagementException if fails to update API Metadata
+     */
+    void updateAPI(API api, String username) throws APIManagementException;
+
+    /**
+     * Update API Artifact.
+     *
      * @param organization Organization the API Owned
      * @param publisherAPI      API to be updated
      * @return API Object of the successfully added API
-     * @throws APIManagementException if fails to add API
+     * @throws APIManagementException if fails to update API Artifact
      */
-    PublisherAPI updateAPI(Organization organization, PublisherAPI publisherAPI) throws APIManagementException;
+    PublisherAPI updateAPIArtifact(Organization organization, PublisherAPI publisherAPI) throws APIManagementException;
 
     /**
      * Delete API.
@@ -348,5 +358,62 @@ public interface ApiDAO {
      * @throws APIPersistenceException
      */
     DevPortalAPI getDevPortalAPI(Organization organization, String apiId) throws APIPersistenceException;
+
+    /**
+     * Add URI Templates to database with resource scope mappings.
+     *
+     * @param apiId    API Id
+     * @param api      API to add URI templates of
+     * @param tenantId Tenant ID
+     * @throws APIManagementException If an error occurs while adding URI templates.
+     */
+    void addURITemplates(int tenantId, int apiId, API api) throws APIManagementException;
+
+    /**
+     * Get API Context using a new DB connection.
+     *
+     * @param uuid API uuid
+     * @return API Context
+     * @throws APIManagementException if an error occurs
+     */
+    String getAPIContext(String uuid) throws APIManagementException;
+
+    /**
+     * Get API Default Version using a new DB connection.
+     *
+     * @param apiId API Identifier
+     * @return API Default Version
+     * @throws APIManagementException if an error occurs
+     */
+    String getDefaultVersion(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Get Published API Default Version using a new DB connection.
+     *
+     * @param apiId API Identifier
+     * @return API Default Version
+     * @throws APIManagementException if an error occurs
+     */
+    String getPublishedDefaultVersion(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Get Lightweight API Information.
+     *
+     * @param organization Organization of the API
+     * @param apiIdentifier API Identifier
+     * @return API Object
+     * @throws APIManagementException if an error occurs
+     */
+    API getLightWeightAPIInfoByAPIIdentifier(String organization, APIIdentifier apiIdentifier)
+            throws APIManagementException;
+
+    /**
+     * Get API ID by API UUID.
+     *
+     * @param uuid API UUID
+     * @return API ID
+     * @throws APIManagementException if an error occurs
+     */
+    int getAPIID(String uuid) throws APIManagementException;
 
 }

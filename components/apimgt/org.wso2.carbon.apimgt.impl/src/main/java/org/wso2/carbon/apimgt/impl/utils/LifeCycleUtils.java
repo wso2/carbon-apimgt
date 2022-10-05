@@ -557,7 +557,7 @@ public class LifeCycleUtils {
                 api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
                         api.getGatewayVendor(), api.getGatewayType()));
                 PublisherAPI publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
-                apiDaoImpl.updateAPI(new Organization(api.getOrganization()), publisherAPI);
+                apiDaoImpl.updateAPIArtifact(new Organization(api.getOrganization()), publisherAPI);
 
             }
             isSuccess = true;
