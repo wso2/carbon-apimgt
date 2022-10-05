@@ -4,7 +4,6 @@
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/ @hisanhunais @Krishanx92
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/  @hisanhunais @Krishanx92
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/  @hisanhunais @Krishanx92
-/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1.common/ @hisanhunais @Krishanx92
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.util/  @hisanhunais @Krishanx92
 /components/apimgt/org.wso2.carbon.apimgt.rest.api.common/  @hisanhunais @Krishanx92
 
@@ -61,7 +60,6 @@
 # Area : Gateway Runtime
 /components/apimgt/org.wso2.carbon.apimgt.gateway/  @tharindu1st @chamilaadhi
 /components/apimgt/org.wso2.carbon.apimgt.common.gateway/ @tharindu1st @chamilaadhi
-/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway/ @tharindu1st @chamilaadhi
 /components/apimgt/org.wso2.carbon.apimgt.notification/ @tharindu1st @chamilaadhi
 /components/apimgt/org.wso2.carbon.apimgt.common.jms/   @tharindu1st @chamilaadhi
 /components/apimgt/org.wso2.carbon.apimgt.jms.listener/   @tharindu1st @chamilaadhi
@@ -111,3 +109,10 @@
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/inbound/websocket/GraphQLProcessorResponseDTO.java @wasuradananjith @dushaniw
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/inbound/websocket/response/GraphQLResponseProcessor.java @wasuradananjith @dushaniw
 /components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/inbound/websocket/request/GraphQLRequestProcessor.java @wasuradananjith @dushaniw
+
+# Area : Gateway Artifact Management/Synchronization
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/gatewayartifactsynchronizer/ @1akshitha @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1.common/src/main/java/org/wso2/carbon/apimgt/rest/api/publisher/v1/common/ @1akshitha @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway/ @1akshitha @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.gateway/src/main/java/org/wso2/carbon/apimgt/gateway/InMemoryAPIDeployer.java @1akshitha @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/java/org/wso2/carbon/apimgt/impl/APIGatewayManager.java @1akshitha @Krishanx92
