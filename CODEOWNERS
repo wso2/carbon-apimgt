@@ -1,1 +1,9 @@
 # Code Owners
+
+# Area : Publisher, Devloper Portal, Admin REST APIs
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/ @hisanhunais @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/  @hisanhunais @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/  @hisanhunais @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1.common/ @hisanhunais @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/  @hisanhunais @Krishanx92
+/components/apimgt/org.wso2.carbon.apimgt.rest.api.common/  @hisanhunais @Krishanx92
