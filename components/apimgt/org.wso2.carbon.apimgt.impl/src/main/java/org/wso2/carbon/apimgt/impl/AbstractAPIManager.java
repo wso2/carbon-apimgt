@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
+import org.wso2.carbon.apimgt.impl.dao.impl.ApiDAOImpl;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -84,6 +85,7 @@ public abstract class AbstractAPIManager implements APIManager {
     // API definitions from swagger v2.0
     protected Log log = LogFactory.getLog(getClass());
     protected ApiMgtDAO apiMgtDAO;
+    protected ApiDAOImpl apiDAOImpl;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
@@ -104,7 +106,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username, String organization) throws APIManagementException {
-
+        apiDAOImpl = ApiDAOImpl.getInstance();
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
@@ -143,7 +145,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Map<String, Object> properties = APIUtil.getUserProperties(username);
         UserContext userCtx = new UserContext(username, org, properties, roles);
         try {
-            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, "", 0,
+            PublisherAPISearchResult searchAPIs = apiDAOImpl.searchAPIsForPublisher(org, "", 0,
                     Integer.MAX_VALUE, userCtx, null, null);
 
             if (searchAPIs != null) {
@@ -153,7 +155,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     apiSortedList.add(mappedAPI);
                 }
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
 
@@ -241,7 +243,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource =
-                    apiPersistenceInstance.getWSDL(new Organization(organization), apiId);
+                    apiDAOImpl.getWSDL(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile resourceFile = new ResourceFile(resource.getContent(), resource.getContentType());
                 resourceFile.setName(resource.getName());
@@ -262,7 +264,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String definition;
         try {
-            definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
+            definition = apiDAOImpl.getGraphQLSchema(new Organization(tenantDomain), apiId);
         } catch (GraphQLPersistenceException e) {
             throw new APIManagementException("Error while retrieving graphql definition from the persistence location",
                     e, ExceptionCodes.INTERNAL_ERROR);
@@ -275,7 +277,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(organization), apiId);
+            definition = apiDAOImpl.getOASDefinition(new Organization(organization), apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistence location", e,
                     ExceptionCodes.INTERNAL_ERROR);
@@ -288,7 +290,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getAsyncDefinition(new Organization(organization), apiId);
+            definition = apiDAOImpl.getAsyncDefinition(new Organization(organization), apiId);
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving Async definition from the persistence location", e,
                     ExceptionCodes.INTERNAL_ERROR);
@@ -305,7 +307,7 @@ public abstract class AbstractAPIManager implements APIManager {
         List<Documentation> convertedList = null;
         try {
             DocumentSearchResult list =
-                    apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);
+                    apiDAOImpl.searchDocumentation(org, uuid, 0, 0, null, ctx);
             if (list != null) {
                 convertedList = new ArrayList<Documentation>();
                 List<org.wso2.carbon.apimgt.persistence.dto.Documentation> docList = list.getDocumentationList();
@@ -338,7 +340,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Documentation documentation = null;
         try {
-            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
+            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiDAOImpl
                     .getDocumentation(new Organization(organization), apiId, docId);
             if (doc != null) {
                 if (log.isDebugEnabled()) {
@@ -362,7 +364,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throws APIManagementException {
 
         try {
-            DocumentContent content = apiPersistenceInstance
+            DocumentContent content = apiDAOImpl
                     .getDocumentationContent(new Organization(organization), apiId, docId);
             DocumentationContent docContent = null;
             if (content != null) {
@@ -1136,7 +1138,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getSwaggerDefinition() != null) {
             resourceConfigsString = api.getSwaggerDefinition();
         } else {
-            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
         }
         api.setSwaggerDefinition(resourceConfigsString);
 
@@ -1144,7 +1146,7 @@ public abstract class AbstractAPIManager implements APIManager {
             if (api.getAsyncApiDefinition() != null) {
                 resourceConfigsString = api.getAsyncApiDefinition();
             } else {
-                resourceConfigsString = apiPersistenceInstance.getAsyncDefinition(org, uuid);
+                resourceConfigsString = apiDAOImpl.getAsyncDefinition(org, uuid);
             }
             api.setAsyncApiDefinition(resourceConfigsString);
         }
@@ -1285,7 +1287,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getSwaggerDefinition() != null) {
             resourceConfigsString = api.getSwaggerDefinition();
         } else {
-            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
         }
         api.setSwaggerDefinition(resourceConfigsString);
 
@@ -1403,7 +1405,7 @@ public abstract class AbstractAPIManager implements APIManager {
             String resourceAPIUUID = resource.getApiIdentifier().getUUID();
             resource.setApiId(resourceAPIUUID);
             try {
-                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, resourceAPIUUID);
+                PublisherAPI publisherAPI = apiDAOImpl.getPublisherAPI(org, resourceAPIUUID);
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 if (api.isAdvertiseOnly()) {
                     resource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
@@ -1411,7 +1413,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     resource.setEndpointConfig(api.getEndpointConfig());
                 }
                 resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
-            } catch (APIPersistenceException e) {
+            } catch (APIManagementException e) {
                 throw new APIManagementException("Error while retrieving the api for api product " + e,
                         ExceptionCodes.INTERNAL_ERROR);
             }
@@ -1467,7 +1469,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiProduct.getDefinition() != null) {
             resourceConfigsString = apiProduct.getDefinition();
         } else {
-            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            resourceConfigsString = apiDAOImpl.getOASDefinition(org, uuid);
             apiProduct.setDefinition(resourceConfigsString);
         }
         //CORS . if null is returned, set default config from the configuration
@@ -1508,7 +1510,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public ResourceFile getIcon(String apiId, String organization) throws APIManagementException {
 
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiDAOImpl
                     .getThumbnail(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());

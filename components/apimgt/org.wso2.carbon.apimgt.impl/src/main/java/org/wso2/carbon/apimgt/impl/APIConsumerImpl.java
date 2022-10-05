@@ -3720,7 +3720,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
-            DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
+            DevPortalAPISearchResult searchAPIs = apiDAOImpl.searchAPIsForDevPortal(org, searchQuery,
                     start, end, userCtx);
             if (log.isDebugEnabled()) {
                 log.debug("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
@@ -3765,7 +3765,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
+            DevPortalAPI devPortalApi = apiDAOImpl.getDevPortalAPI(org ,
                     uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
@@ -3896,7 +3896,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
+            DevPortalAPI devPortalApi = apiDAOImpl.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
                         devPortalApi.getVisibleRoles());
@@ -3950,7 +3950,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         try {
             Organization org = new Organization(organization);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
+            DevPortalAPI devPortalApi = apiDAOImpl.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
@@ -3996,7 +3996,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 uuid = apiMgtDAO.getUUIDFromIdentifier(identifier.getProviderName(), identifier.getApiName(),
                         identifier.getVersion(), orgId);
             }
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid );
+            DevPortalAPI devPortalApi = apiDAOImpl.getDevPortalAPI(org, uuid );
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
                 api.setOrganization(orgId);
@@ -4042,7 +4042,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         UserContext ctx = new UserContext(userame, org, properties, roles);
 
         try {
-            DevPortalContentSearchResult sResults = apiPersistenceInstance.searchContentForDevPortal(org, searchQuery,
+            DevPortalContentSearchResult sResults = apiDAOImpl.searchContentForDevPortal(org, searchQuery,
                     start, end, ctx);
             if (sResults != null) {
                 List<SearchContent> resultList = sResults.getResults();
@@ -4087,7 +4087,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     protected void checkAPIVisibilityRestriction(String apiId, String organization) throws APIManagementException {
         try {
-            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(organization), apiId);
+            DevPortalAPI api = apiDAOImpl.getDevPortalAPI(new Organization(organization), apiId);
             if (api != null) {
                 checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
             }
