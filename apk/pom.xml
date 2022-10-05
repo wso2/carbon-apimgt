@@ -26,7 +26,7 @@
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
         <version>9.26.10-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>apk</artifactId>
@@ -41,8 +41,13 @@
 
     <modules>
         <module>org.wso2.apk.apimgt.api</module>
-<!--        <module>org.wso2.apk.apimgt.rest.api.admin.v1.common</module>-->
-<!--        <module>org.wso2.apk.apimgt.rest.api.common</module>-->
+        <module>org.wso2.apk.apimgt.impl</module>
+        <module>org.wso2.apk.apimgt.rest.api.admin.v1.common</module>
+        <module>org.wso2.apk.apimgt.rest.api.publisher.v1.common</module>
+        <module>org.wso2.apk.apimgt.rest.api.store.v1.common</module>
+        <module>org.wso2.apk.apimgt.rest.api.common</module>
+        <module>org.wso2.apk.apimgt.rest.api.util</module>
+        <module>org.wso2.apk.apimgt.user</module>
     </modules>
     
 </project>
