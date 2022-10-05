@@ -93,7 +93,17 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.LoginPostExecutor;
+import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -168,7 +178,6 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -234,6 +243,7 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -319,6 +329,10 @@ public final class APIUtil {
     private static final Log log = LogFactory.getLog(APIUtil.class);
 
     private static final Log audit = CarbonConstants.AUDIT_LOG;
+    public static final String ERROR_RETRIEVING_GATEWAY_DOMAIN_MAPPINGS_FROM_REGISTRY = "Error while retrieving gateway domain mappings from registry";
+    public static final String INVALID_JSON_IN_GATEWAY_TENANT_DOMAIN_MAPPINGS = "Invalid JSON found in the gateway tenant domain mappings";
+    public static final String MALFORMED_JSON_IN_GATEWAY_TENANT_DOMAIN_MAPPINGS = "Malformed JSON found in the gateway tenant domain mappings";
+    public static final String ATTEMPT_TO_EXECUTE_PRIVILEGED_OPERATION_AS_THE_ANONYMOUS_USER = "Attempt to execute privileged operation as the anonymous user";
 
     private static boolean isContextCacheInitialized = false;
 
@@ -1780,9 +1794,8 @@ public final class APIUtil {
             apiStoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
 
         } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the External Stores Configuration resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException("Malformed XML found in the External Stores Configuration resource", e,
+                    ExceptionCodes.MALFORMED_XML_IN_EXTERNAL_STORE_CONFIG);
         }
         return apiStoreIterator;
     }
@@ -4409,17 +4422,14 @@ public final class APIUtil {
                 }
             }
         } catch (RegistryException e) {
-            String msg = "Error while retrieving gateway domain mappings from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(ERROR_RETRIEVING_GATEWAY_DOMAIN_MAPPINGS_FROM_REGISTRY, e,
+                    ExceptionCodes.GATEWAY_DOMAIN_MAPPING_RETRIEVE_ERROR);
         } catch (ClassCastException e) {
-            String msg = "Invalid JSON found in the gateway tenant domain mappings";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(INVALID_JSON_IN_GATEWAY_TENANT_DOMAIN_MAPPINGS, e,
+                    ExceptionCodes.INVALID_GATEWAY_DOMAIN_MAPPING_JSON);
         } catch (ParseException e) {
-            String msg = "Malformed JSON found in the gateway tenant domain mappings";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(MALFORMED_JSON_IN_GATEWAY_TENANT_DOMAIN_MAPPINGS, e,
+                    ExceptionCodes.MALFORMED_GATEWAY_DOMAIN_MAPPING_JSON);
         }
         return domains;
     }
@@ -5077,8 +5087,7 @@ public final class APIUtil {
      * @throws InstantiationException
      */
 
-    public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException,
-            InstantiationException {
+    public static Class<?> getClassForName(String className) throws ClassNotFoundException {
 
         return Class.forName(className);
     }
@@ -6274,7 +6283,8 @@ public final class APIUtil {
         } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
             policy = apiMgtDAO.getApplicationPolicy(policyName, tenantId);
         } else {
-            throw new APIManagementException("No such a policy type : " + policyLevel);
+            throw new APIManagementException("No such a policy type : " + policyLevel,
+                    ExceptionCodes.UNSUPPORTED_POLICY_TYPE);
         }
         if (policy != null) {
             if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
@@ -7536,7 +7546,7 @@ public final class APIUtil {
                 replace(REVOKE, TOKEN);
     }
 
-    public static String getStoreUrl() throws APIManagementException {
+    public static String getStoreUrl() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_URL);
@@ -7584,11 +7594,11 @@ public final class APIUtil {
         Map<String, Environment> readOnlyEnvironments = getReadOnlyEnvironments();
         if (readOnlyEnvironments.get(environmentName) == null) {
             throw new APIManagementException("Configured read only environment not found: "
-                    + environmentName);
+                    + environmentName, ExceptionCodes.from(ExceptionCodes.READ_ONLY_ENVIRONMENT_NOT_FOUND, environmentName));
         }
         if (readOnlyEnvironments.get(environmentName).getVhosts().isEmpty()) {
             throw new APIManagementException("VHosts not found for the environment: "
-                    + environmentName);
+                    + environmentName, ExceptionCodes.from(ExceptionCodes.VHOST_FOR_ENVIRONMENT_NOT_FOUND, environmentName));
         }
         return readOnlyEnvironments.get(environmentName).getVhosts().get(0);
     }
@@ -8716,7 +8726,8 @@ public final class APIUtil {
                     getTenantUserRealm(tenantId).getClaimManager();
             displayName = claimManager.getClaim(claimURI).getDisplayTag();
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while retrieving claim values from user store", e);
+            throw new APIManagementException("Error while retrieving claim values from user store", e,
+                    ExceptionCodes.ERROR_RETRIEVING_CLAIM_VALUES);
         }
         return displayName;
     }

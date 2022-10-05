@@ -27,7 +27,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
+import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
+import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -855,7 +861,7 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback remove all subscription ", e1);
                 }
             }
-            handleException("Failed to remove all subscriptions data ", e);
+            handleExceptionWithCode("Failed to remove all subscriptions data ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
@@ -1004,7 +1010,9 @@ public class ApiMgtDAO {
             }
             return subscribedAPI;
         } catch (SQLException e) {
-            handleException("Failed to retrieve subscription from subscription id", e);
+            handleExceptionWithCode("Failed to retrieve subscription from subscription id", e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            "Failed to retrieve subscription from subscription id"));
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -2193,7 +2201,8 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the update subscription ", e1);
                 }
             }
-            handleException("Failed to update subscription data ", e);
+            handleExceptionWithCode("Failed to update subscription data ", e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, "Subscription update failed"));
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
@@ -2566,7 +2575,8 @@ public class ApiMgtDAO {
             }
             return userApplicationUsages.values().toArray(new UserApplicationAPIUsage[userApplicationUsages.size()]);
         } catch (SQLException e) {
-            handleException("Failed to find API Usage for :" + providerName, e);
+            handleExceptionWithCode("Failed to find API Usage for :" + providerName, e,
+                    ExceptionCodes.from(ExceptionCodes.FAILED_FIND_API_USAGE, providerName));
             return null;
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
@@ -4876,7 +4886,7 @@ public class ApiMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            handleException("Failed to record API state change", e);
+            handleExceptionWithCode("Failed to record API state change", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -4903,11 +4913,11 @@ public class ApiMgtDAO {
         if (oldStatus == null && !newStatus.equals(APIConstants.CREATED)) {
             String msg = "Invalid old and new state combination";
             log.error(msg);
-            throw new APIManagementException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.INTERNAL_ERROR);
         } else if (oldStatus != null && oldStatus.equals(newStatus)) {
             String msg = "No measurable differences in API state";
             log.error(msg);
-            throw new APIManagementException(msg);
+            throw new APIManagementException(msg, ExceptionCodes.INTERNAL_ERROR);
         }
 
         String sqlQuery = SQLConstants.ADD_API_LIFECYCLE_EVENT_SQL;
@@ -4956,7 +4966,8 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Failed to update published default API state change", e);
+            handleExceptionWithCode("Failed to update published default API state change", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -5060,7 +5071,8 @@ public class ApiMgtDAO {
                                                     "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
                                                             ":v" + apiIdentifier.getVersion();
                                             log.error(msg);
-                                            throw new APIManagementException(msg);
+                                            throw new APIManagementException(msg,
+                                                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
                                         }
                                         SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionUUID);
                                         subscribedAPI.setApplication(application);
@@ -5090,7 +5102,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error when executing the SQL queries", e);
+            handleExceptionWithCode("Error when executing the SQL queries", e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return subscribedAPISet;
     }
@@ -5245,7 +5257,8 @@ public class ApiMgtDAO {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
-            handleException("Failed to get API versions matches API name" + apiName, e);
+            handleExceptionWithCode("Failed to get API versions matches API name" + apiName, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return versionList;
     }
@@ -5280,8 +5293,8 @@ public class ApiMgtDAO {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
-            handleException("Failed to count contexts which match " + contextTemplate + " for the organization : "
-                    + organization, e);
+            handleExceptionWithCode("Failed to count contexts which match " + contextTemplate + " for the organization : "
+                    + organization, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return false;
     }
@@ -5317,7 +5330,7 @@ public class ApiMgtDAO {
             String invalidContext = "/" + APIConstants.VERSION_PLACEHOLDER;
             if (invalidContext.equals(contextTemplate)) {
                 throw new APIManagementException("Cannot add API : " + api.getId() + " with unsupported context : "
-                        + contextTemplate);
+                        + contextTemplate, ExceptionCodes.INVALID_CONTEXT);
             }
             //If the context template ends with {version} this means that the version will be at the end of the context.
             if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
@@ -5371,7 +5384,8 @@ public class ApiMgtDAO {
                 // Rollback failed. Exception will be thrown later for upper exception
                 log.error("Failed to rollback the add API: " + api.getId(), ex);
             }
-            handleException("Error while adding the API: " + api.getId() + " to the database", e);
+            handleExceptionWithCode("Error while adding the API: " + api.getId() + " to the database", e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -6354,7 +6368,8 @@ public class ApiMgtDAO {
                 application.setApplicationAttributes(applicationAttributes);
             }
         } catch (SQLException e) {
-            handleException("Error while obtaining details of the Application : " + uuid, e);
+            handleExceptionWithCode("Error while obtaining details of the Application : " + uuid, e,
+                    ExceptionCodes.from(ExceptionCodes.ERROR_RETRIEVE_APPLICATION_DETAILS, uuid));
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -6383,10 +6398,12 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Error while deleting URL template(s) for API : " + api.getId(), e);
+                handleExceptionWithCode("Error while deleting URL template(s) for API : " + api.getId(), e,
+                        ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Error while deleting URL template(s) for API : " + api.getId(), e);
+            handleExceptionWithCode("Error while deleting URL template(s) for API : " + api.getId(), e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -8084,7 +8101,8 @@ public class ApiMgtDAO {
                         " of the API", e);
             }
         } catch (SQLException e) {
-            handleException("Error occurred while fetching gateway vendor of the API with ID " + apiId, e);
+            handleExceptionWithCode("Error occurred while fetching gateway vendor of the API with ID " + apiId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         gatewayVendor = APIUtil.handleGatewayVendorRetrieval(gatewayVendor);
         return gatewayVendor;
@@ -8789,7 +8807,8 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Error occurred while retrieving subscription entries for API with UUID: " + uuid, e);
+            handleExceptionWithCode("Error occurred while retrieving subscription entries for API with UUID: " + uuid, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return pendingSubscriptions;
     }
@@ -10095,8 +10114,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed while getting versioned local scopes for API with UUID:" + uuid + " tenant: "
-                    + tenantId, e);
+            handleExceptionWithCode("Failed while getting versioned local scopes for API with UUID:" + uuid + " tenant: "
+                    + tenantId, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return localScopes;
     }
@@ -10127,7 +10146,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed while getting local scopes for API:" + uuid + " tenant: " + tenantId, e);
+            handleExceptionWithCode("Failed while getting local scopes for API:" + uuid + " tenant: " + tenantId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return localScopes;
     }
@@ -10283,7 +10303,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to check scope key availability for: " + scopeKey, e);
+            handleExceptionWithCode("Failed to check scope key availability for: " + scopeKey, e,
+                    ExceptionCodes.from(ExceptionCodes.FAILED_CHECKING_SCOPE_KEY_AVAILABILITY, scopeKey));
         }
         return false;
     }
@@ -14731,8 +14752,8 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving api product id for product " + identifier.getName() + " by " +
-                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e);
+            handleExceptionWithCode("Error while retrieving api product id for product " + identifier.getName() + " by " +
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, conn, rs);
         }
@@ -15805,7 +15826,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get Shared Scope : " + uuid, e);
+            handleExceptionWithCode("Failed to get Shared Scope : " + uuid, e,
+                    ExceptionCodes.FAILED_RETRIEVE_SHARED_SCOPE);
         }
         return scopeKey;
     }
@@ -16146,8 +16168,9 @@ public class ApiMgtDAO {
                 apiVersions.add(api);
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
-                    e);
+            String errorMessage = "Error while retrieving versions for api " + apiName + " for the provider " + apiProvider;
+            handleExceptionWithCode(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         }
         return apiVersions;
     }
@@ -16491,7 +16514,9 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             return getRevisionByRevisionUUID(connection, revisionUUID);
         } catch (SQLException e) {
-            handleException("Failed to get revision details for revision UUID: " + revisionUUID, e);
+            handleExceptionWithCode("Failed to get revision details for revision UUID: " + revisionUUID, e,
+                    ExceptionCodes.from(ExceptionCodes.ERROR_RETRIEVING_REVISION_FOR_UUID, revisionUUID));
+
         }
         return null;
     }
@@ -16518,7 +16543,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get revision UUID for Revision " + revisionNum, e);
+            handleExceptionWithCode("Failed to get revision UUID for Revision " + revisionNum, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return revisionUUID;
     }
@@ -16613,7 +16638,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get revision details for API UUID: " + apiUUID, e);
+            handleExceptionWithCode("Failed to get revision details for API UUID: " + apiUUID, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
         // adding deployment info to revision objects
@@ -16690,12 +16716,12 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to add API Revision Deployment Mapping entry for Revision UUID "
-                        + apiRevisionId, e);
+                handleExceptionWithCode("Failed to add API Revision Deployment Mapping entry for Revision UUID "
+                        + apiRevisionId, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to add API Revision Deployment Mapping entry for Revision UUID " + apiRevisionId,
-                    e);
+            handleExceptionWithCode("Failed to add API Revision Deployment Mapping entry for Revision UUID " +
+                            apiRevisionId, e, ExceptionCodes.API_IMPORT_ERROR);
         }
     }
 
@@ -16774,7 +16800,9 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get API Revision deployment mapping details for deployment name: " + name, e);
+            handleExceptionWithCode("Failed to get API Revision deployment mapping details for deployment name: " +
+                    name, e, ExceptionCodes.from(ExceptionCodes.ERROR_RETRIEVING_REVISION_DEPLOYMENT_MAPPING,
+                    "deployment name", name));
         }
         return apiRevisionDeployment;
     }
@@ -16807,8 +16835,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get API Revision deployment mapping details for revision uuid: " +
-                    revisionUUID, e);
+            handleExceptionWithCode("Failed to get API Revision deployment mapping details for revision uuid: " +
+                    revisionUUID, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiRevisionDeploymentList;
     }
@@ -16837,8 +16865,8 @@ public class ApiMgtDAO {
                 return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs);
             }
         } catch (SQLException e) {
-            handleException("Failed to get API Revision deployment mapping details for api uuid: " +
-                    apiUUID, e);
+            handleExceptionWithCode("Failed to get API Revision deployment mapping details for api uuid: " +
+                    apiUUID, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return new ArrayList<>();
     }
@@ -16894,8 +16922,9 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get API Revision deployment mapping details for api uuid: " +
-                    apiUUID, e);
+            handleExceptionWithCode("Failed to get API Revision deployment mapping details for api uuid: " +
+                    apiUUID, e, ExceptionCodes.from(ExceptionCodes.ERROR_RETRIEVING_REVISION_DEPLOYMENT_MAPPING,
+                    "API UUID", apiUUID));
         }
         return apiRevisionDeploymentList;
     }
@@ -16959,12 +16988,12 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
-                        + apiRevisionId, e);
+                handleExceptionWithCode("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
+                        + apiRevisionId, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
-                    + apiRevisionId, e);
+            handleExceptionWithCode("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
+                    + apiRevisionId, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -16996,8 +17025,8 @@ public class ApiMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            handleException("Failed to remove API Revision Deployment Mapping entry for API UUID "
-                    + apiUUID, e);
+            handleExceptionWithCode("Failed to remove API Revision Deployment Mapping entry for API UUID "
+                    + apiUUID, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -17097,8 +17126,8 @@ public class ApiMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            handleException("Failed to update Deployment Mapping entry for API UUID "
-                    + apiUUID, e);
+            handleExceptionWithCode("Failed to update Deployment Mapping entry for API UUID "
+                    + apiUUID, e, ExceptionCodes.from(ExceptionCodes.ERROR_UPDATING_REVISION_DEPLOYMENT_MAPPING, apiUUID));
         }
     }
 
@@ -17348,12 +17377,12 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to restore API Revision entry of API UUID "
-                        + apiRevision.getApiUUID(), e);
+                handleExceptionWithCode("Failed to restore API Revision entry of API UUID "
+                        + apiRevision.getApiUUID(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to restore API Revision entry of API UUID "
-                    + apiRevision.getApiUUID(), e);
+            handleExceptionWithCode("Failed to restore API Revision entry of API UUID " + apiRevision.getApiUUID(),
+                    e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -17408,12 +17437,12 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to delete API Revision entry of API UUID "
-                        + apiRevision.getApiUUID(), e);
+                handleExceptionWithCode("Failed to delete API Revision entry of API UUID "
+                        + apiRevision.getApiUUID(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            handleException("Failed to delete API Revision entry of API UUID "
-                    + apiRevision.getApiUUID(), e);
+            handleExceptionWithCode("Failed to delete API Revision entry of API UUID "
+                    + apiRevision.getApiUUID(), e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -18036,7 +18065,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving the Service Key associated with API " + apiId, e);
+            handleExceptionWithCode("Error while retrieving the Service Key associated with API " + apiId, e,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return serviceKey;
     }
@@ -19072,7 +19102,8 @@ public class ApiMgtDAO {
                 }
             }
         } else {
-            throw new APIManagementException("A revisioned operation policy not found for " + policyId);
+            throw new APIManagementException("A revisioned operation policy not found for " + policyId,
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, policyId));
         }
         return restoredPolicyId;
     }

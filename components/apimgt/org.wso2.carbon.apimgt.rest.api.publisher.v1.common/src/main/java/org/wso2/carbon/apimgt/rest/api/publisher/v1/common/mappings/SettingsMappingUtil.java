@@ -17,8 +17,6 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -43,8 +41,6 @@ import java.util.Map;
  */
 public class SettingsMappingUtil {
 
-    private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
-
     /**
      * This method feeds data into the settingsDTO.
      *
@@ -52,8 +48,7 @@ public class SettingsMappingUtil {
      * @return SettingsDTO
      * @throws APIManagementException,IOException
      */
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, String organization) throws APIManagementException,
-            IOException {
+    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, String organization) throws APIManagementException {
 
         SettingsDTO settingsDTO = new SettingsDTO();
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();

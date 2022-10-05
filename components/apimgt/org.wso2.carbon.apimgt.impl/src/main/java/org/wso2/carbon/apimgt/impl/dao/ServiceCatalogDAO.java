@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -70,6 +71,11 @@ public class ServiceCatalogDAO {
     private void handleException(String msg, Throwable t) throws APIManagementException {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
+    }
+
+    private void handleExceptionWithCode(String msg, Throwable t, ErrorHandler errorHandler) throws APIManagementException {
+        log.error(msg, t);
+        throw new APIManagementException(msg, t, errorHandler);
     }
 
     /**
@@ -338,7 +344,8 @@ public class ServiceCatalogDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while executing SQL for getting service information", e);
+            handleExceptionWithCode("Error while executing SQL for getting service information", e,
+                    ExceptionCodes.ERROR_RETRIEVE_SERVICE_INFORMATION);
         }
         return null;
     }

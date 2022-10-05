@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -29,17 +27,13 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
-import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
-import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.OperationPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.OperationPolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl.OperationPoliciesApiCommonImpl;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
@@ -50,14 +44,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
-import java.util.List;
-import java.util.Map;
-
 import javax.ws.rs.core.Response;
 
 public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiService {
-
-    private static final Log log = LogFactory.getLog(OperationPoliciesApiServiceImpl.class);
 
     /**
      * Add a common operation policy that can be used by all the APIs
@@ -94,10 +83,10 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();
                 }
-                policySpecification = OperationPoliciesApiServiceImplUtils
+                policySpecification = OperationPoliciesApiCommonImpl
                         .getPolicySpecification(fileContentType, jsonContent);
 
-                OperationPolicyData operationPolicyData = OperationPoliciesApiServiceImplUtils
+                OperationPolicyData operationPolicyData = OperationPoliciesApiCommonImpl
                         .prepareOperationPolicyData(policySpecification, organization);
 
                 if (synapsePolicyDefinitionFileInputStream != null) {
@@ -105,7 +94,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                             RestApiPublisherUtils.readInputStream(synapsePolicyDefinitionFileInputStream,
                                     synapsePolicyDefinitionFileDetail);
                     synapseDefinition = new OperationPolicyDefinition();
-                    OperationPoliciesApiServiceImplUtils
+                    OperationPoliciesApiCommonImpl
                             .preparePolicyDefinition(operationPolicyData, synapseDefinition,
                                     synapsePolicyDefinition, OperationPolicyDefinition.GatewayType.Synapse);
                 }
@@ -114,13 +103,13 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                     String choreoConnectPolicyDefinition = RestApiPublisherUtils
                             .readInputStream(ccPolicyDefinitionFileInputStream, ccPolicyDefinitionFileDetail);
                     ccPolicyDefinition = new OperationPolicyDefinition();
-                    OperationPoliciesApiServiceImplUtils
+                    OperationPoliciesApiCommonImpl
                             .preparePolicyDefinition(operationPolicyData, ccPolicyDefinition,
                                     choreoConnectPolicyDefinition, OperationPolicyDefinition.GatewayType.ChoreoConnect);
                 }
 
                 if (policySpecification != null) {
-                    String policyID = OperationPoliciesApiServiceImplUtils.addCommonOperationPolicy(policySpecification,
+                    String policyID = OperationPoliciesApiCommonImpl.addCommonOperationPolicy(policySpecification,
                             operationPolicyData, organization);
                     operationPolicyData.setPolicyId(policyID);
                     OperationPolicyDataDTO createdPolicy = OperationPolicyMappingUtil
@@ -150,12 +139,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-
-        if (OperationPoliciesApiServiceImplUtils
-                .deleteCommonOperationPolicyByPolicyId(operationPolicyId, organization)) {
-            return Response.ok().build();
-        }
-        return null;
+        OperationPoliciesApiCommonImpl.deleteCommonOperationPolicyByPolicyId(operationPolicyId, organization);
+        return Response.ok().build();
     }
 
     /**
@@ -169,34 +154,10 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
     @Override
     public Response getAllCommonOperationPolicies(Integer limit, Integer offset, String query,
                                                   MessageContext messageContext) throws APIManagementException {
-        OperationPolicyDataListDTO policyListDTO = null;
-        List<OperationPolicyData> commonOperationPolicyList;
-        String name = null;
-        String version = null;
+
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-
-        // If name & version are given, it returns the policy data
-        if (query != null) {
-            Map<String, String> queryParamMap = OperationPoliciesApiServiceImplUtils.getQueryParams(query);
-            name = queryParamMap.get(ImportExportConstants.POLICY_NAME);
-            version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
-
-            commonOperationPolicyList = OperationPoliciesApiServiceImplUtils
-                    .getAllCommonOperationPolicies(name, version, organization);
-            policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(
-                    commonOperationPolicyList, 0, 1);
-        } else {
-            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
-            // Since policy definition is bit bulky, we don't query the definition unnecessarily.
-            commonOperationPolicyList = OperationPoliciesApiServiceImplUtils
-                    .getAllCommonOperationPolicies(organization);
-
-            // Set limit to the query param value or the count of all policies
-            limit = limit != null ? limit : commonOperationPolicyList.size();
-            policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(commonOperationPolicyList,
-                    offset, limit);
-        }
+        OperationPolicyDataListDTO policyListDTO = OperationPoliciesApiCommonImpl.getAllCommonOperationPolicies(limit,
+                offset, query, organization);
         return Response.ok().entity(policyListDTO).build();
     }
 
@@ -213,10 +174,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        OperationPolicyData existingPolicy = OperationPoliciesApiServiceImplUtils
-                .getCommonOperationPolicyByPolicyId(operationPolicyId, organization, false);
-        OperationPolicyDataDTO policyDataDTO =
-                OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
+        OperationPolicyDataDTO policyDataDTO = OperationPoliciesApiCommonImpl.
+                getCommonOperationPolicyByPolicyId(operationPolicyId, organization);
         return Response.ok().entity(policyDataDTO).build();
     }
 
@@ -233,8 +192,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        OperationPolicyData policyData = OperationPoliciesApiServiceImplUtils
-                .getCommonOperationPolicyByPolicyId(operationPolicyId, organization, true);
+        OperationPolicyData policyData = OperationPoliciesApiCommonImpl
+                .getCommonOperationPolicyContentByPolicyId(operationPolicyId, organization);
         File file = RestApiPublisherUtils.exportOperationPolicyData(policyData, ExportFormat.YAML.name());
         return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getName() + "\"").build();
@@ -256,8 +215,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        OperationPolicyData policyData = OperationPoliciesApiServiceImplUtils
-                .exportOperationPolicy(name, version, organization);
+        OperationPolicyData policyData = OperationPoliciesApiCommonImpl.exportOperationPolicy(name, version,
+                organization);
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
                 ExportFormat.valueOf(format.toUpperCase()) :
                 ExportFormat.YAML;

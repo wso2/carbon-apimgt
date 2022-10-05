@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.restapi.publisher.MeApiServiceImplUtils;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.MeApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.MeApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl.MeApiCommonImpl;
+
 import javax.ws.rs.core.Response;
 
 /**
@@ -38,16 +38,7 @@ public class MeApiServiceImpl implements MeApiService {
      */
     public Response validateUserRole(String roleId, MessageContext messageContext) throws APIManagementException {
 
-        String userName = RestApiCommonUtil.getLoggedInUsername();
-        boolean isUserInRole = false;
-
-        if (roleId != null) {
-            isUserInRole = MeApiServiceImplUtils.checkUserInRole(roleId, userName);
-        }
-        if (isUserInRole) {
-            return Response.status(Response.Status.OK).build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+        MeApiCommonImpl.validateUserRole(roleId);
+        return Response.status(Response.Status.OK).build();
     }
 }

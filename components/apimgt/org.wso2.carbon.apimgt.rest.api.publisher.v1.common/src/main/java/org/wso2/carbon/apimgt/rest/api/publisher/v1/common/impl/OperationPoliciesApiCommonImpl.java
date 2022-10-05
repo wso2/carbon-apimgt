@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.restapi.publisher;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,9 +28,14 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.OperationPolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,11 +43,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OperationPoliciesApiServiceImplUtils {
+/**
+ * Utility class for operations related to OperationPoliciesApiService
+ */
+public class OperationPoliciesApiCommonImpl {
 
-    private static final Log log = LogFactory.getLog(OperationPoliciesApiServiceImplUtils.class);
+    private static final Log log = LogFactory.getLog(OperationPoliciesApiCommonImpl.class);
 
-    private OperationPoliciesApiServiceImplUtils() {
+    private OperationPoliciesApiCommonImpl() {
+
     }
 
     /**
@@ -52,6 +61,7 @@ public class OperationPoliciesApiServiceImplUtils {
      */
     public static OperationPolicyData prepareOperationPolicyData(OperationPolicySpecification policySpecification,
                                                                  String organization) {
+
         OperationPolicyData operationPolicyData = new OperationPolicyData();
         operationPolicyData.setOrganization(organization);
         operationPolicyData.setSpecification(policySpecification);
@@ -67,6 +77,7 @@ public class OperationPoliciesApiServiceImplUtils {
      */
     public static OperationPolicyData prepareOperationPolicyData(OperationPolicySpecification policySpecification,
                                                                  String organization, String apiId) {
+
         OperationPolicyData operationPolicyData = new OperationPolicyData();
         operationPolicyData.setOrganization(organization);
         operationPolicyData.setApiUUID(apiId);
@@ -77,6 +88,7 @@ public class OperationPoliciesApiServiceImplUtils {
 
     public static OperationPolicySpecification getPolicySpecification(String fileContentType, String jsonContent)
             throws APIManagementException {
+
         try {
             if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
                 jsonContent = CommonUtil.yamlToJson(jsonContent);
@@ -98,6 +110,7 @@ public class OperationPoliciesApiServiceImplUtils {
     public static void preparePolicyDefinition(
             OperationPolicyData policyData, OperationPolicyDefinition policyDefinition,
             String definition, OperationPolicyDefinition.GatewayType gatewayType) {
+
         policyDefinition.setContent(definition);
         policyDefinition.setGatewayType(gatewayType);
         policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
@@ -121,6 +134,7 @@ public class OperationPoliciesApiServiceImplUtils {
     public static String addCommonOperationPolicy(OperationPolicySpecification policySpecification,
                                                   OperationPolicyData operationPolicyData, String organization)
             throws APIManagementException {
+
         String policyId;
         APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
         OperationPolicyData existingPolicy =
@@ -142,25 +156,63 @@ public class OperationPoliciesApiServiceImplUtils {
     /**
      * @param policyId     Operation policy ID
      * @param organization Organization
-     * @return True if policy was deleted successfully
      * @throws APIManagementException when an internal error occurs
      */
-    public static boolean deleteCommonOperationPolicyByPolicyId(String policyId, String organization)
+    public static void deleteCommonOperationPolicyByPolicyId(String policyId, String organization)
             throws APIManagementException {
+
         APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
         OperationPolicyData existingPolicy =
                 apiProvider.getCommonOperationPolicyByPolicyId(policyId, organization, false);
-        if (existingPolicy != null) {
-            apiProvider.deleteOperationPolicyById(policyId, organization);
-            if (log.isDebugEnabled()) {
-                log.debug("The common operation policy " + policyId + " has been deleted");
-            }
-            return true;
-        } else {
-            throw new APIManagementException("Couldn't retrieve an existing API policy with ID: "
-                    + policyId, ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND,
-                    policyId));
+        if (existingPolicy == null) {
+            throw new APIManagementException("Couldn't retrieve an existing API policy with ID: " + policyId,
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND, policyId));
         }
+        apiProvider.deleteOperationPolicyById(policyId, organization);
+        if (log.isDebugEnabled()) {
+            log.debug("The common operation policy " + policyId + " has been deleted");
+        }
+    }
+
+    public static OperationPolicyDataListDTO getAllCommonOperationPolicies(Integer limit, Integer offset, String query,
+                                                                           String organization)
+            throws APIManagementException {
+
+        OperationPolicyDataListDTO policyListDTO;
+        List<OperationPolicyData> commonOperationPolicyList;
+        String name;
+        String version;
+
+        // If name & version are given, it returns the policy data
+        if (query != null) {
+            Map<String, String> queryParamMap = getQueryParams(query);
+            name = queryParamMap.get(ImportExportConstants.POLICY_NAME);
+            version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
+
+            commonOperationPolicyList = getAllCommonOperationPolicyData(name, version, organization);
+            policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(
+                    commonOperationPolicyList, 0, 1);
+        } else {
+            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+            // Since policy definition is bit bulky, we don't query the definition unnecessarily.
+            commonOperationPolicyList = getAllCommonOperationPolicyData(organization);
+
+            // Set limit to the query param value or the count of all policies
+            limit = limit != null ? limit : commonOperationPolicyList.size();
+            policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(commonOperationPolicyList,
+                    offset, limit);
+        }
+        return policyListDTO;
+    }
+
+    public static OperationPolicyDataDTO getCommonOperationPolicyByPolicyId(String operationPolicyId,
+                                                                            String organization)
+            throws APIManagementException {
+
+        OperationPolicyData existingPolicy = getCommonOperationPolicyDataByPolicyId(operationPolicyId, organization,
+                false);
+        return OperationPolicyMappingUtil.fromOperationPolicyDataToDTO(existingPolicy);
     }
 
     /**
@@ -170,9 +222,10 @@ public class OperationPoliciesApiServiceImplUtils {
      * @return List of operation policies
      * @throws APIManagementException when an internal error occurs
      */
-    public static List<OperationPolicyData> getAllCommonOperationPolicies(String name, String version,
-                                                                          String organization)
+    public static List<OperationPolicyData> getAllCommonOperationPolicyData(String name, String version,
+                                                                            String organization)
             throws APIManagementException {
+
         APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
         OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version,
                 organization, false);
@@ -195,8 +248,9 @@ public class OperationPoliciesApiServiceImplUtils {
      * @return List of operation policies
      * @throws APIManagementException when an internal error occurs
      */
-    public static List<OperationPolicyData> getAllCommonOperationPolicies(String organization)
+    public static List<OperationPolicyData> getAllCommonOperationPolicyData(String organization)
             throws APIManagementException {
+
         APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
         return apiProvider.getAllCommonOperationPolicies(organization);
     }
@@ -208,9 +262,11 @@ public class OperationPoliciesApiServiceImplUtils {
      * @return Operation policy
      * @throws APIManagementException when an internal error occurs
      */
-    public static OperationPolicyData getCommonOperationPolicyByPolicyId(String operationPolicyId, String organization,
-                                                                         boolean isWithPolicyDefinition)
+    public static OperationPolicyData getCommonOperationPolicyDataByPolicyId(String operationPolicyId,
+                                                                             String organization,
+                                                                             boolean isWithPolicyDefinition)
             throws APIManagementException {
+
         APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
         OperationPolicyData existingPolicy =
                 apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, isWithPolicyDefinition);
@@ -223,6 +279,13 @@ public class OperationPoliciesApiServiceImplUtils {
         }
     }
 
+    public static OperationPolicyData getCommonOperationPolicyContentByPolicyId(String operationPolicyId,
+                                                                                String organization)
+            throws APIManagementException {
+
+        return getCommonOperationPolicyDataByPolicyId(operationPolicyId, organization, true);
+    }
+
     /**
      * @param name         Operation policy name
      * @param version      Operation policy version
@@ -232,6 +295,7 @@ public class OperationPoliciesApiServiceImplUtils {
      */
     public static OperationPolicyData exportOperationPolicy(String name, String version, String organization)
             throws APIManagementException {
+
         APIProvider apiProvider = CommonUtils.getLoggedInUserProvider();
         OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version, organization,
                 true);
@@ -240,7 +304,8 @@ public class OperationPoliciesApiServiceImplUtils {
         } else {
             throw new APIManagementException(
                     "Couldn't retrieve an existing common policy with Name: " + name + " and Version: " + version,
-                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name, version));
+                    ExceptionCodes.from(
+                            ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name, version));
         }
     }
 
@@ -249,6 +314,7 @@ public class OperationPoliciesApiServiceImplUtils {
      * @return Map of query params
      */
     public static Map<String, String> getQueryParams(String query) {
+
         Map<String, String> queryParamMap = new HashMap<>();
         String[] queryParams = query.split(" ");
         for (String param : queryParams) {

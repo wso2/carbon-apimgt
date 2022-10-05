@@ -36,16 +36,32 @@ import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.impl.wsdl.WSDL11SOAPOperationExtractor;
-import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL11SOAPOperationExtractor;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL20ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import javax.wsdl.Definition;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
@@ -59,22 +75,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * This class is used to read the WSDL file using WSDL4J library.
@@ -83,7 +83,8 @@ import java.util.UUID;
 
 public class APIMWSDLReader {
 
-	private static WSDLFactory wsdlFactoryInstance;
+    public static final String ERROR_WHILE_INSTANTIATING_WSDL_PROCESSOR_CLASS = "Error while instantiating wsdl processor class";
+    private static WSDLFactory wsdlFactoryInstance;
 
 	private String baseURI; //WSDL Original URL
 
@@ -258,7 +259,7 @@ public class APIMWSDLReader {
                         ExceptionCodes.CONTENT_NOT_RECOGNIZED_AS_WSDL);
             }
         } catch (APIMgtWSDLException e) {
-            throw new APIManagementException("Error while instantiating wsdl processor class", e);
+            throw new APIManagementException(ERROR_WHILE_INSTANTIATING_WSDL_PROCESSOR_CLASS, e);
         }
     }
 
@@ -292,7 +293,7 @@ public class APIMWSDLReader {
                             ExceptionCodes.CONTENT_NOT_RECOGNIZED_AS_WSDL);
                 }
             } catch (APIMgtWSDLException e) {
-                throw new APIManagementException("Error while instantiating wsdl processor class", e);
+                throw new APIManagementException(ERROR_WHILE_INSTANTIATING_WSDL_PROCESSOR_CLASS, e);
             }
         }
     }
@@ -345,7 +346,9 @@ public class APIMWSDLReader {
                         ExceptionCodes.URL_NOT_RECOGNIZED_AS_WSDL);
             }
         } catch (APIMgtWSDLException e) {
-            throw new APIManagementException("Error while instantiating wsdl processor class", e);
+            throw new APIManagementException(ERROR_WHILE_INSTANTIATING_WSDL_PROCESSOR_CLASS, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            ERROR_WHILE_INSTANTIATING_WSDL_PROCESSOR_CLASS));
         }
     }
 
@@ -479,7 +482,8 @@ public class APIMWSDLReader {
             return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
             String msg = "Error occurs when change the address URL of the WSDL";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, msg));
         }
     }
 

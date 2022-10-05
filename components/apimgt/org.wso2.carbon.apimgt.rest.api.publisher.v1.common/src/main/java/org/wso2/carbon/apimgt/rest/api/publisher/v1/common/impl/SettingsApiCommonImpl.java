@@ -16,21 +16,36 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.restapi.publisher;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl;
 
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SettingsMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.ArrayList;
 
-public class SettingsApiServiceImplUtil {
+/**
+ * Util class for SettingsApiService related operations
+ */
+public class SettingsApiCommonImpl {
 
-    private SettingsApiServiceImplUtil(){
+    private SettingsApiCommonImpl() {
         //To hide default constructor
+    }
+
+    public static SettingsDTO getSettings(String organization) throws APIManagementException {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        boolean isUserAvailable = !APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username);
+        SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
+        return settingsMappingUtil.fromSettingstoDTO(isUserAvailable, organization);
     }
 
     /**

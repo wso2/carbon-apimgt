@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -54,6 +55,7 @@ import java.util.Iterator;
 public class APIMConfigServiceImpl implements APIMConfigService {
 
     private static final Log log = LogFactory.getLog(APIMConfigServiceImpl.class);
+    public static final String ERROR_WHILE_RETRIEVING_EXTERNAL_STORES_CONFIGURATION = "Error while retrieving External Stores Configuration from registry";
     protected SystemConfigurationsDAO systemConfigurationsDAO;
 
     public APIMConfigServiceImpl() {
@@ -153,9 +155,8 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             }
 
         } catch (RegistryException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(ERROR_WHILE_RETRIEVING_EXTERNAL_STORES_CONFIGURATION, e,
+                    ExceptionCodes.ERROR_RETRIEVE_EXTERNAL_STORE_CONFIG);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

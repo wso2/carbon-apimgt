@@ -17,18 +17,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
-
 import org.apache.cxf.jaxrs.ext.MessageContext;
-
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiCategoriesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl.ApiCategoriesApiCommonImpl;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICategoryListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APICategoryMappingUtil;
-
-import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -36,10 +29,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
 
     public Response getAllAPICategories(MessageContext messageContext) throws APIManagementException {
 
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfOrganization(tenantDomain);
-        APICategoryListDTO categoryListDTO =
-                APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
+        APICategoryListDTO categoryListDTO = ApiCategoriesApiCommonImpl.getAllAPICategories();
         return Response.ok().entity(categoryListDTO).build();
     }
 }

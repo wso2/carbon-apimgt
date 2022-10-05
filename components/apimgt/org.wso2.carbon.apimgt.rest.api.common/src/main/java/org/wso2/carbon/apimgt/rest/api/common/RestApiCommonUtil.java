@@ -21,10 +21,15 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.restapi.Constants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -157,6 +162,63 @@ public class RestApiCommonUtil {
             }
         }
         return false;
+    }
+
+    public static void validateScopes(API api, APIProvider apiProvider, String username) throws APIManagementException {
+
+        int tenantId = APIUtil.getInternalOrganizationId(api.getOrganization());
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        Set<Scope> sharedAPIScopes = new HashSet<>();
+
+        for (org.wso2.carbon.apimgt.api.model.Scope scope : api.getScopes()) {
+            String scopeName = scope.getKey();
+            if (!(APIUtil.isAllowedScope(scopeName))) {
+                // Check if each scope key is already assigned as a local scope to a different API which is also not a
+                // different version of the same API. If true, return error.
+                // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
+                // other scope attributes (description, role bindings) in the request payload, replace them with
+                // already defined values for the existing shared scope.
+                if (apiProvider.isScopeKeyAssignedLocally(api.getId().getApiName(), scopeName, api.getOrganization())) {
+                    throw new APIManagementException(
+                            "Scope " + scopeName + " is already assigned locally by another API",
+                            ExceptionCodes.SCOPE_ALREADY_ASSIGNED);
+                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantId)) {
+                    sharedAPIScopes.add(scope);
+                    continue;
+                }
+            }
+
+            //set display name as empty if it is not provided
+            if (StringUtils.isBlank(scope.getName())) {
+                scope.setName(scopeName);
+            }
+
+            //set description as empty if it is not provided
+            if (StringUtils.isBlank(scope.getDescription())) {
+                scope.setDescription("");
+            }
+            validateScopeRoles(scope, username);
+        }
+
+        apiProvider.validateSharedScopes(sharedAPIScopes, tenantDomain);
+    }
+
+    /**
+     * @param scope    Scope whose roles should be validated
+     * @param username Username
+     * @throws APIManagementException when role validation fails
+     */
+    private static void validateScopeRoles(Scope scope, String username) throws APIManagementException {
+        if (scope.getRoles() != null) {
+            for (String aRole : scope.getRoles().split(",")) {
+                boolean isValidRole = APIUtil.isRoleNameExist(username, aRole);
+                if (!isValidRole) {
+                    throw new APIManagementException("Role '" + aRole + "' does not exist.",
+                            ExceptionCodes.ROLE_DOES_NOT_EXIST);
+                }
+            }
+        }
+
     }
 
     /**
@@ -814,6 +876,85 @@ public class RestApiCommonUtil {
         openAPI.addExtension(X_WSO2_BASEPATH, context + "/" + version);
         openAPI.addExtension(X_WSO2_DISABLE_SECURITY, true);
         return Json.mapper().writeValueAsString(openAPI);
+    }
+
+    /**
+     * @param apiId UUID of the API
+     * @return API details
+     * @throws APIManagementException when API does not exist in the DB
+     */
+    public static APIInfo validateAPIExistence(String apiId) throws APIManagementException {
+        APIProvider apiProvider = getLoggedInUserProvider();
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+        if (apiInfo == null) {
+            throw new APIManagementException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiId));
+        }
+        return apiInfo;
+    }
+
+    public static String getErrorDescriptionFromErrorHandlers(List<ErrorHandler> errorHandlerList) {
+        String errorDescription = "";
+        if (!errorHandlerList.isEmpty()) {
+            for (ErrorHandler errorHandler : errorHandlerList) {
+                if (StringUtils.isNotBlank(errorDescription)) {
+                    errorDescription = errorDescription.concat(". ");
+                }
+                errorDescription = errorDescription.concat(errorHandler.getErrorDescription());
+            }
+        }
+        return errorDescription;
+    }
+
+    /**
+     * @param apiTypeConst Expected API type
+     * @param apiType      Type of the API
+     * @throws APIManagementException when API type is not the expected type
+     */
+    public static void checkAPIType(String apiTypeConst, String apiType) throws APIManagementException {
+        boolean isExpectedType = apiTypeConst.equals(apiType);
+        if (org.wso2.carbon.apimgt.impl.APIConstants.GRAPHQL_API.equals(apiTypeConst) && !isExpectedType) {
+            throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+        }
+        if (APIConstants.API_TYPE_SOAPTOREST.equals(apiTypeConst) && !isExpectedType) {
+            throw new APIManagementException(ExceptionCodes.API_NOT_SOAPTOREST);
+        }
+    }
+
+    public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
+
+        StringBuilder sb = new StringBuilder();
+        String endpointType = Constants.TypeEnum.HTTP.value().toLowerCase();
+        if (StringUtils.isNotEmpty(protocol) && (Constants.TypeEnum.SSE.toString().equals(protocol.toUpperCase())
+                || Constants.TypeEnum.WS.toString().equals(protocol.toUpperCase()))) {
+            endpointType = "ws";
+        }
+        if (StringUtils.isNotEmpty(serviceUrl)) {
+            sb.append("{\"endpoint_type\": \"")
+                    .append(endpointType)
+                    .append("\",")
+                    .append("\"production_endpoints\": {\"url\": \"")
+                    .append(serviceUrl)
+                    .append("\"}}");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * @param apiId API UUID
+     * @return API or API revision UUID
+     * @throws APIManagementException when an internal error occurs
+     */
+    public static String getAPIUUID(String apiId) throws APIManagementException {
+        String uuid;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            uuid = apiRevision.getApiUUID();
+        } else {
+            uuid = apiId;
+        }
+        return uuid;
     }
 
 }

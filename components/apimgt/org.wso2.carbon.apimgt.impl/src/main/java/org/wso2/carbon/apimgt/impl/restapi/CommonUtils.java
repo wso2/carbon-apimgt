@@ -196,4 +196,8 @@ public class CommonUtils {
         }
         return errorDescription;
     }
+
+    public static String getLoggedInUserTenantDomain() {
+        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
 }

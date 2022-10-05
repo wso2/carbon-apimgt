@@ -103,6 +103,7 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 public class RegistryPersistenceImpl implements APIPersistence {
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
+    public static final String ERROR_WHILE_PERFORMING_REGISTRY_TRANSACTION_OPERATION = "Error while performing registry transaction operation";
     private Properties properties;
 
     public RegistryPersistenceImpl() {
@@ -148,14 +149,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (artifactManager == null) {
                 String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
                 log.error(errorMessage);
-                throw new APIPersistenceException(errorMessage);
+                throw new APIPersistenceException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
             GenericArtifact genericArtifact =
                     artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
             if (genericArtifact == null) {
                 String errorMessage = "Generic artifact is null when creating API " + api.getId().getApiName();
                 log.error(errorMessage);
-                throw new APIPersistenceException(errorMessage);
+                throw new APIPersistenceException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
             }
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
@@ -252,7 +255,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 // Throwing an error here would mask the original exception
                 log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
             }
-            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+            throw new APIPersistenceException(ERROR_WHILE_PERFORMING_REGISTRY_TRANSACTION_OPERATION, e);
         } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while creating API", e);
         } finally {
@@ -317,9 +320,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error("Error while rolling back the transaction for API Revision create for API: "
                         + apiUUID, re);
             }
-            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+            throw new APIPersistenceException(ERROR_WHILE_PERFORMING_REGISTRY_TRANSACTION_OPERATION, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE,
+                            ERROR_WHILE_PERFORMING_REGISTRY_TRANSACTION_OPERATION));
         } catch (APIManagementException e) {
-            throw new APIPersistenceException("Error while creating API Revision", e);
+            String errorMessage = "Error while creating API Revision";
+            throw new APIPersistenceException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMessage));
         } finally {
             try {
                 if (tenantFlowStarted) {
@@ -388,7 +395,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error("Error while rolling back the transaction for API Revision restore for API: "
                         + apiUUID, re);
             }
-            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+            throw new APIPersistenceException(ERROR_WHILE_PERFORMING_REGISTRY_TRANSACTION_OPERATION, e);
         } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while restoring revision", e);
         } finally {
@@ -435,7 +442,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error("Error while rolling back the transaction for API Revision delete for API: "
                         + apiUUID, re);
             }
-            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+            throw new APIPersistenceException(ERROR_WHILE_PERFORMING_REGISTRY_TRANSACTION_OPERATION, e);
         } finally {
             try {
                 if (tenantFlowStarted) {
@@ -3155,7 +3162,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error("Error while rolling back the transaction for API Product : "
                         + publisherAPIProduct.getApiProductName(), re);
             }
-            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+            throw new APIPersistenceException(ERROR_WHILE_PERFORMING_REGISTRY_TRANSACTION_OPERATION, e);
         } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while creating API Product", e);
         } finally {
@@ -3364,7 +3371,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error("Error while rolling back the transaction for API Product: "
                         + publisherAPIProduct.getApiProductName(), re);
             }
-            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+            throw new APIPersistenceException(ERROR_WHILE_PERFORMING_REGISTRY_TRANSACTION_OPERATION, e);
         } finally {
             try {
                 if (registry != null && !transactionCommitted) {

@@ -67,7 +67,8 @@ public class APIFileUtil {
             APIFileUtil.deleteDirectory(extractLocation);
             String errorMsg = "Error in accessing uploaded API archive";
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.INTERNAL_ERROR);
+            throw new APIManagementException(errorMsg, e,
+                    ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE, errorMsg));
         }
         return archiveExtractLocation;
     }

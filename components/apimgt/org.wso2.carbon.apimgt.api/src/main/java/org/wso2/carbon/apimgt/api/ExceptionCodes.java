@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.ExceptionConstants;
 import java.util.Arrays;
 
 /**
@@ -33,6 +32,8 @@ public enum ExceptionCodes implements ErrorHandler {
     API_NAME_ALREADY_EXISTS(900250, "The API name already exists.", 409, "An API with name '%s' already exists"),
     API_CONTEXT_ALREADY_EXISTS(900251, "The API context already exists.", 409, "An API with context '%s' already exists"),
     API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version '%s' already exists for API '%s'"),
+    API_EMPTY_PASSWORD_FOR_SECURED_ENDPOINT(900253, "Empty password is given for endpointSecurity when creating API: %s",
+            400, "An empty password is given for endpointSecurity when creating API: %s"),
 
     API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
 
@@ -59,7 +60,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
-    SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
+    API_PRODUCT_IMPORT_ERROR(900318, "API product import Error", 500,
+            "Error while importing the given API Products"),
+    SUBSCRIPTION_STATE_INVALID(900320, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
     API_RETRIEVE_EXCEPTION(900319, "Internal server error.", 500, "Error occurred while retrieving %s"),
     APPLICATION_RETRIEVE_EXCEPTION(900320, "Internal server error.", 500, "Error occurred while retrieving %s"),
@@ -105,6 +108,19 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
     USER_ROLES_CANNOT_BE_NULL(900610, "User roles cannot be found", 400, "User roles cannot be found"),
+
+    ERROR_RETRIEVING_REVISION_FOR_UUID(900410, "Failed to get revision details for revision UUID: %s",
+            500, "Failed to get revision details"),
+
+    ERROR_RETRIEVING_REVISION_DEPLOYMENT_MAPPING(900411,
+            "Failed to get API Revision deployment mapping details for %s: %s", 500,
+            "Failed to get API Revision deployment mapping details"),
+
+    ERROR_UPDATING_REVISION_DEPLOYMENT_MAPPING(900412,
+            "Failed to update Deployment Mapping entry for API UUID: ", 500,
+            "Failed to update Deployment Mapping entry"),
+
+    METHOD_NOT_ALLOWED(900420, "Not allowed", 405, "Method not allowed"),
     API_REVISION_NOT_FOUND(900347, "API Revision Not Found", 404, "Requested API Revision with id %s not found"),
     EXISTING_API_REVISION_DEPLOYMENT_FOUND(900348, "Can not delete API Revision ", 400, "Couldn't delete API revision since API revision is currently deployed to a gateway. " +
             "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: %s "),
@@ -150,11 +166,13 @@ public enum ExceptionCodes implements ErrorHandler {
     RESOURCE_NOT_FOUND(900401, "Resource not found", 404, "Requested resource not found"),
     RESOURCE_RETRIEVAL_FAILED(900402, "Resource retrieval failed", 400, "Resource retrieval failed"),
     USER_MAPPING_RETRIEVAL_FAILED(900404, "User mapping retrieval failed", 404, "User mapping retrieval failed"),
-    MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
+    MALFORMED_URL(900403, "Malformed URL", 400, "Invalid or Malformed URL"),
     URI_PARSE_ERROR(900405, "Error constructing the URI", 500, "'%s'"),
     INVALID_OPERATION_TYPE(900406, "Unsupported '%s' operation", 400, "The '%s' operation type '%s' is invalid"),
     VERB_NOT_FOUND(900407, "Missing '%s' type", 400, "Missing '%s type in URI templates"),
     YAML_PARSE_ERROR(900408, "Yaml parse error", 500, "Yaml parse error"),
+    RESOURCE_NOT_FOUND_WITH_TYPE_AND_ID(900409, "Requested %s with Id %s not found", 404,
+            "Requested %s with Id %s not found"),
     AUTHORIZATION_ERROR(900409, "Forbidden", 403, "You don't have permission to access the '%s' with Id '%s'"),
     FORBIDDEN_ERROR(900409, "Forbidden", 403, "You don't have permission to access this resource"),
     RESOURCE_NOT_FOUND_WITH_DESC(900401, "Resource not found", 404, "Requested '%s' with Id '%s' not found"),
@@ -197,6 +215,22 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "Name of the gateway is read only"),
     GATEWAY_ENVIRONMENT_VHOST_NOT_PROVIDED(900511, "Gateway Environment virtual hosts name not provided",
             400, "Gateway Environment VHOST name not provided"),
+
+    FAILED_GET_ENVIRONMENT_LIST_OF_VHOST(900512, "Failed to get gateway environments list of VHost",
+            500, "Failed to get gateway environments list of VHost"),
+    FAILED_GET_ENVIRONMENT_LIST_OF_TENANT_DOMAIN(900513, "Failed to get Environments in tenant domain",
+            500, "Failed to get Environments in tenant domain: %s"),
+    FAILED_GET_ENVIRONMENT_FOR_TENANT_DOMAIN(900514, "Failed to get Environment in tenant domain: %s",
+            500, "Failed to get Environment in tenant domain: %s"),
+    TENANT_NOT_FOUND(900515, "Tenant does not exist", 404,
+            "Tenant does not exist"),
+    INVALID_TENANT_STATE(900516, "Invalid tenant state", 400,
+            "Invalid tenant state provided"),
+    FAILED_GET_ENVIRONMENT_SPECIFIC_PROPERTIES(900517,
+            "Error occurred when getting environment specific api properties", 500,
+            "Error occurred when getting environment specific api properties"),
+    VHOST_FOR_ENVIRONMENT_NOT_FOUND(900518, "VHosts not found for the environment: %s", 404,
+            "VHosts not found for the environment: %s"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -245,7 +279,8 @@ public enum ExceptionCodes implements ErrorHandler {
     USERSTORE_INITIALIZATION_FAILED(900615, "Unable to get the user store manager", 500,
             "Error while getting the user store manager from the realm"),
     ANON_USER_ACTION(900616, "Operation not permitted", 401, "Attempt to execute privileged operation as the anonymous user"),
-
+    ROLE_ID_EMPTY(900617, "Role Id cannot be empty", 400,
+            "Role Id cannot be empty"),
 
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
@@ -273,6 +308,8 @@ public enum ExceptionCodes implements ErrorHandler {
     CORRUPTED_STORED_WSDL(900685, "Corrupted Stored WSDL", 500, "The WSDL of the API %s is corrupted."),
     UNSUPPORTED_WSDL_FILE_EXTENSION(900686, "Unsupported WSDL File Extension", 400, "Unsupported extension. Only supported extensions are .wsdl and .zip"),
     API_NOT_SOAPTOREST(900687, "Provided API is not a SOAP to REST converted API", 400, "Provided API is not a SOAP to REST converted API"),
+    ERROR_ADDING_WSDL_TO_API(900687, "Error while adding WSDL to API: %s", 500,
+            "Error while saving WSDL"),
 
 
     //OpenAPI/Swagger related codes [900750 900???)
@@ -316,6 +353,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s property value of payload cannot contain invalid characters"),
     INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
     INVALID_PARAMETERS_PROVIDED(900708, "Invalid parameter(s) provided", 400, "Bad Request. Mandatory parameters are invalid/missing"),
+
+    INVALID_PARAMETERS_PROVIDED_WITH_MESSAGE(900708, "'%s'", 400, "Bad Request. Parameters are invalid/missing"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
@@ -365,6 +404,10 @@ public enum ExceptionCodes implements ErrorHandler {
 
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+    POLICY_LEVEL_EMPTY(900973, "Policy Level can not be empty", 400,
+            "Throttle policy level can not be empty"),
+    POLICY_LEVEL_NOT_FOUND(900974, "Policy Level %s not found", 404,
+            "Throttle policy level %s not found"),
     UNSUPPORTED_POLICY_TYPE(901001, "Policy type error", 400, "Unsupported policy type"),
     UNSUPPORTED_TIER_TYPE(901002, "Policy tier error", 400, "Unsupported policy tier"),
     INVALID_THROTTLE_TIER(901003, "Invalid throttle tier", 400, "Invalid x-throttling tier"),
@@ -373,6 +416,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Requested throttling policy with name '%s' and type '%s' not found"),
     INVALID_APPLICATION_ADDITIONAL_PROPERTIES(900970, "Invalid application additional properties", 400,
             "Invalid additional properties. %s"),
+    ERROR_RETRIEVE_APPLICATION_DETAILS(900972, "Error while obtaining details of the Application : %s",
+            500, "Error while obtaining details of the Application : %s"),
     JWT_PARSING_FAILED(900986, "Key Management Error", 500, "Error while parsing JWT. Invalid Jwt."),
     TOKEN_SCOPES_NOT_SET(
             900987, "The token information has not been correctly set internally", 400,
@@ -431,6 +476,14 @@ public enum ExceptionCodes implements ErrorHandler {
     SCOPE_ALREADY_ASSIGNED(900988, "Scope already assigned locally by another API", 400,
             "Scope already assigned locally by another API"),
     TOKEN_VALIDATION_FAILED(900989, "Validation failed for the given token", 500, "Validation failed for the given token"),
+    ERROR_CHECKING_SCOPE_NAME(901000, "Error while checking scope name", 500,
+            "Error occurred while checking scope name %s"),
+    ERROR_CREATING_URI_FOR_SHARED_SCOPE(901004, "Error while creating shared scope URI", 500,
+            "Error while creating URI for shared scope: %s"),
+    FAILED_RETRIEVE_SHARED_SCOPE(901005, "Error while retrieving shared scope", 500,
+            "Error while retrieving shared scope"),
+    FAILED_CHECKING_SCOPE_KEY_AVAILABILITY(901006, "Failed to check scope key availability for: %s" ,
+            500, "Error while checking scope key availability"),
 
     //Dedicated container based gateway related Codes
     NO_RESOURCE_LOADED_FROM_DEFINITION(900990, "Container based resource Not Found", 404, "No resource loaded from " +
@@ -482,13 +535,18 @@ public enum ExceptionCodes implements ErrorHandler {
     EXTERNAL_STORE_CLASS_NOT_ACCESSIBLE(901203,
             ExceptionConstants.EXTERNAL_STORE_ERROR_MSG, 500,
             "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be accessed"),
-
+    ERROR_RETRIEVE_EXTERNAL_STORE_CONFIG(901204, "External Store Config Retrieve Error", 500,
+            "Error while retrieving External Stores Configuration from registry"),
+    MALFORMED_XML_IN_EXTERNAL_STORE_CONFIG(901205, "Malformed XML in External Stores Configuration",
+            500, "Malformed XML found in the External Stores Configuration resource"),
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 404, "Tenant Not Found"),
     CONFIG_NOT_FOUND(901301, "Config not found", 404, "Config not found in tenant-config"),
     ERROR_GETTING_CUSTOM_URLS(901302, "Failed to get custom url info", 500, "Error while retrieving custom url info for tenant : '%s'"),
     // Key Manager Related
+    INVALID_KEY_MANAGERS_VALUE(901350, "Key Managers value need to be an array", 400,
+            "Invalid Key Managers value"),
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
             "required configuration"),
@@ -584,6 +642,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
     //Service Catalog related error codes
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
+    ERROR_RETRIEVE_SERVICE_INFORMATION(901901, "Error while getting service information",
+            500, "Error while executing SQL for getting service information"),
+
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
@@ -620,7 +681,35 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_SERVER_ERROR_FROM_KEY_MANAGER(902004, "Internal Server Error from Key Manager", 500, "Internal Server Error from Key Manager.Error from Backend : %s", true),
     REVISION_ALREADY_DEPLOYED(902005, "Revision deployment state conflicted", 409,
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
-    INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false),
+    INVALID_API_ID(902006, "Invalid API ID", 404,
+            "The provided API ID is not found %s", false),
+    GATEWAY_DOMAIN_MAPPING_RETRIEVE_ERROR(902100, "Error retrieving gateway domain mappings from registry",
+            500, "Error while retrieving gateway domain mappings from registry"),
+    INVALID_GATEWAY_DOMAIN_MAPPING_JSON(902101, "Invalid JSON in gateway tenant domain mappings",
+            500, "Invalid JSON found in the gateway tenant domain mappings"),
+    MALFORMED_GATEWAY_DOMAIN_MAPPING_JSON(902102, "Malformed JSON in gateway tenant domain mappings",
+            500, "Malformed JSON found in the gateway tenant domain mappings"),
+    ERROR_PARSING_TENANT_CONFIG_JSON(902103, "Error occurred while converting to json",
+            500, "Error occurred while converting tenantConfig to json"),
+    FAILED_RETRIEVE_CONFIGURATION_FOR_ORGANIZATION(902150, "Failed to retrieve configuration",
+            500, "Failed to retrieve %s Configuration for org: %s"),
+    INVALID_QUERY(902200, "Failed to retrieve configuration",
+            500, "Failed to retrieve %s Configuration for org: %s"),
+    ERROR_RETRIEVING_CLAIM_VALUES(902300, "Error while retrieving claim values from user store",
+            500, "Error while retrieving claim values from user store"),
+    FAILED_FIND_API_USAGE(902350, "Failed to find API Usage for : %s", 500,
+            "Failed to find API Usage for : %s"),
+    BAD_REQUEST_SUBSCRIPTION_ID(902351, "Invalid Subscription ID", 400,
+            "Invalid Subscription ID"),
+    FAILED_GET_SUBSCRIPTION_POLICY(902352, "Failed to get subscription policy: %s", 500,
+            "Failed to retrieve subscription policy: %s data"),
+    FAILED_GET_API_POLICY(902353, "Failed to get API policy: %s", 500,
+            "Failed to retrieve API policy: %s data"),
+    FAILED_GET_APPLICATION_POLICY(902354, "Failed to get application policy: %s", 500,
+            "Failed to retrieve application policy: %s data"),
+
+    READ_ONLY_ENVIRONMENT_NOT_FOUND(902400, "Configured read only environment not found: %s",
+            404, "Configured read only environment not found: %s"),
 
     // monetization related codes
 

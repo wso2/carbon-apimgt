@@ -23,6 +23,8 @@ import com.google.gson.JsonObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.dao.constants.EnvironmentSpecificAPIPropertyConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecificproperty.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -125,7 +127,8 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 }
             }
         } catch (SQLException | IOException e) {
-            handleException("Error occurred when getting environment specific api properties", e);
+            handleExceptionWithCode("Error occurred when getting environment specific api properties", e,
+                    ExceptionCodes.FAILED_GET_ENVIRONMENT_SPECIFIC_PROPERTIES);
         }
         return null;
     }
@@ -272,5 +275,11 @@ public class EnvironmentSpecificAPIPropertyDAO {
 
         log.error(msg, t);
         throw new APIManagementException(msg, t);
+    }
+
+    private void handleExceptionWithCode(String msg, Throwable t, ErrorHandler errorHandler) throws APIManagementException {
+
+        log.error(msg, t);
+        throw new APIManagementException(msg, t, errorHandler);
     }
 }

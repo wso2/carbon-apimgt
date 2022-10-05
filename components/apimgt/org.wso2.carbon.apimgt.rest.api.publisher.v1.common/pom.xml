@@ -121,6 +121,11 @@
             <artifactId>jinjava</artifactId>
             <version>${jinjava.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.amazonaws</groupId>
+            <artifactId>awslambda</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -220,7 +225,8 @@
                         </Import-Package>
                         <Export-Package>
                             org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.rest.api.publisher.v1.common.impl.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
