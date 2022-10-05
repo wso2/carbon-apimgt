@@ -49,6 +49,10 @@
             <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.store.v1.common</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
         </dependency>
@@ -271,6 +275,7 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.common:${carbon.apimgt.version}
                                 </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.store.v1.common:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>javax.validation:validation-api</bundleDef>
                                 <bundleDef>com.google.guava:guava:${google.guava.version}</bundleDef>
                                 <bundleDef>io.swagger:swagger-core</bundleDef>

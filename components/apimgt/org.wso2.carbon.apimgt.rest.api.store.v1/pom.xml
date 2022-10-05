@@ -176,7 +176,6 @@
                                 <performBeanValidation>true</performBeanValidation>
                             </configOptions>
                             <generateModels>false</generateModels>
-                            <generateAliasAsModel>true</generateAliasAsModel>
                             <output>.</output>
                             <templateDirectory>
                                 ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
